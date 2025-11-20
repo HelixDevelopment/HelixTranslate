@@ -1,8 +1,6 @@
-# E-book formats
-*.fb2
-*.b2
-*.epub
-*.pdf
+Books
+Books/*
+Books/*.*
 
 # Python temporary files
 *.pyc

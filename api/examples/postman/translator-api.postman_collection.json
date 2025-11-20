@@ -1,0 +1,253 @@
+{
+  "info": {
+    "name": "Russian-Serbian FB2 Translator API",
+    "description": "Complete API collection for the Russian-Serbian FB2 Translator service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:8443",
+      "type": "string"
+    },
+    {
+      "key": "apiUrl",
+      "value": "{{baseUrl}}/api/v1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check if the API is healthy and running"
+          }
+        },
+        {
+          "name": "API Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            },
+            "description": "Get API information and available endpoints"
+          }
+        },
+        {
+          "name": "List Providers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/providers",
+              "host": ["{{apiUrl}}"],
+              "path": ["providers"]
+            },
+            "description": "Get list of all available translation providers"
+          }
+        },
+        {
+          "name": "Get Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/stats",
+              "host": ["{{apiUrl}}"],
+              "path": ["stats"]
+            },
+            "description": "Get API statistics"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Translation",
+      "item": [
+        {
+          "name": "Translate Text (Dictionary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Привет, мир! Это тестовое сообщение.\",\n  \"provider\": \"dictionary\",\n  \"script\": \"cyrillic\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/translate",
+              "host": ["{{apiUrl}}"],
+              "path": ["translate"]
+            },
+            "description": "Translate Russian text to Serbian using dictionary"
+          }
+        },
+        {
+          "name": "Translate Text (OpenAI)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"В темном лесу жил отважный герой.\",\n  \"provider\": \"openai\",\n  \"model\": \"gpt-4\",\n  \"context\": \"Fantasy literature\",\n  \"script\": \"cyrillic\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/translate",
+              "host": ["{{apiUrl}}"],
+              "path": ["translate"]
+            },
+            "description": "Translate Russian text using OpenAI GPT-4"
+          }
+        },
+        {
+          "name": "Translate Text (Latin Script)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"герой мира\",\n  \"provider\": \"dictionary\",\n  \"script\": \"latin\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/translate",
+              "host": ["{{apiUrl}}"],
+              "path": ["translate"]
+            },
+            "description": "Translate to Latin script Serbian"
+          }
+        },
+        {
+          "name": "Batch Translate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texts\": [\n    \"герой\",\n    \"мир\",\n    \"человек\",\n    \"любовь\"\n  ],\n  \"provider\": \"dictionary\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/translate/batch",
+              "host": ["{{apiUrl}}"],
+              "path": ["translate", "batch"]
+            },
+            "description": "Batch translate multiple texts"
+          }
+        },
+        {
+          "name": "Translate FB2 File",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "book.fb2"
+                },
+                {
+                  "key": "provider",
+                  "value": "dictionary",
+                  "type": "text"
+                },
+                {
+                  "key": "script",
+                  "value": "cyrillic",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{apiUrl}}/translate/fb2",
+              "host": ["{{apiUrl}}"],
+              "path": ["translate", "fb2"]
+            },
+            "description": "Translate complete FB2 file"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Script Conversion",
+      "item": [
+        {
+          "name": "Convert to Latin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Ратибор је јунак\",\n  \"target\": \"latin\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/convert/script",
+              "host": ["{{apiUrl}}"],
+              "path": ["convert", "script"]
+            },
+            "description": "Convert Cyrillic to Latin script"
+          }
+        },
+        {
+          "name": "Convert to Cyrillic",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Ratibor je junak\",\n  \"target\": \"cyrillic\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/convert/script",
+              "host": ["{{apiUrl}}"],
+              "path": ["convert", "script"]
+            },
+            "description": "Convert Latin to Cyrillic script"
+          }
+        }
+      ]
+    }
+  ]
+}

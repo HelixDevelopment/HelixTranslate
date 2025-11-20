@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test - Translator API</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        #status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .connected {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .disconnected {
+            background-color: #f44336;
+            color: white;
+        }
+        .connecting {
+            background-color: #FF9800;
+            color: white;
+        }
+        #messages {
+            border: 1px solid #ddd;
+            height: 400px;
+            overflow-y: scroll;
+            padding: 10px;
+            margin: 20px 0;
+            background-color: #fafafa;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .event {
+            padding: 8px;
+            margin: 5px 0;
+            border-left: 4px solid #2196F3;
+            background-color: white;
+        }
+        .event-type {
+            font-weight: bold;
+            color: #2196F3;
+        }
+        .event-time {
+            color: #999;
+            font-size: 10px;
+        }
+        .buttons {
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .primary {
+            background-color: #2196F3;
+            color: white;
+        }
+        .danger {
+            background-color: #f44336;
+            color: white;
+        }
+        .secondary {
+            background-color: #9E9E9E;
+            color: white;
+        }
+        input {
+            width: 300px;
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Translator API - WebSocket Test</h1>
+
+        <div id="status" class="disconnected">Disconnected</div>
+
+        <div class="buttons">
+            <input type="text" id="sessionId" placeholder="Session ID (optional)" />
+            <button class="primary" onclick="connect()">Connect</button>
+            <button class="danger" onclick="disconnect()">Disconnect</button>
+            <button class="secondary" onclick="clearMessages()">Clear Messages</button>
+        </div>
+
+        <h2>Events</h2>
+        <div id="messages"></div>
+    </div>
+
+    <script>
+        let ws = null;
+        const statusDiv = document.getElementById('status');
+        const messagesDiv = document.getElementById('messages');
+
+        function connect() {
+            const sessionId = document.getElementById('sessionId').value;
+            const url = sessionId
+                ? `wss://localhost:8443/ws?session_id=${sessionId}`
+                : 'wss://localhost:8443/ws';
+
+            statusDiv.textContent = 'Connecting...';
+            statusDiv.className = 'connecting';
+
+            ws = new WebSocket(url);
+
+            ws.onopen = () => {
+                statusDiv.textContent = 'Connected';
+                statusDiv.className = 'connected';
+                addMessage('INFO', 'WebSocket connection established', {});
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    addMessage(data.type, data.message, data);
+                } catch (e) {
+                    addMessage('ERROR', 'Failed to parse message', { error: e.message });
+                }
+            };
+
+            ws.onerror = (error) => {
+                addMessage('ERROR', 'WebSocket error', { error: error.message });
+            };
+
+            ws.onclose = () => {
+                statusDiv.textContent = 'Disconnected';
+                statusDiv.className = 'disconnected';
+                addMessage('INFO', 'WebSocket connection closed', {});
+            };
+        }
+
+        function disconnect() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+        }
+
+        function clearMessages() {
+            messagesDiv.innerHTML = '';
+        }
+
+        function addMessage(type, message, data) {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'event';
+
+            const time = new Date().toLocaleTimeString();
+
+            eventDiv.innerHTML = `
+                <div class="event-time">${time}</div>
+                <div class="event-type">${type}</div>
+                <div>${message}</div>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+
+            messagesDiv.appendChild(eventDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>

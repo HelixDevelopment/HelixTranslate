@@ -1,0 +1,352 @@
+openapi: 3.0.3
+info:
+  title: Russian-Serbian FB2 Translator API
+  description: High-quality Russian to Serbian translation service with multiple LLM providers and WebSocket support
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@translator.vasic.digital
+
+servers:
+  - url: https://localhost:8443/api/v1
+    description: Local development server (HTTP/3)
+  - url: http://localhost:8443/api/v1
+    description: Local development server (HTTP/2)
+
+tags:
+  - name: Translation
+    description: Translation operations
+  - name: Conversion
+    description: Script conversion operations
+  - name: System
+    description: System and status endpoints
+  - name: Authentication
+    description: Authentication endpoints
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check if the API is healthy and running
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  version:
+                    type: string
+                    example: 1.0.0
+                  time:
+                    type: string
+                    format: date-time
+
+  /translate:
+    post:
+      tags:
+        - Translation
+      summary: Translate text
+      description: Translate Russian text to Serbian using specified provider
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: Russian text to translate
+                  example: "Привет, мир!"
+                provider:
+                  type: string
+                  description: Translation provider
+                  enum: [dictionary, openai, anthropic, zhipu, deepseek, ollama]
+                  default: dictionary
+                model:
+                  type: string
+                  description: LLM model name (for LLM providers)
+                  example: "gpt-4"
+                context:
+                  type: string
+                  description: Additional context for translation
+                  example: "Literary text"
+                script:
+                  type: string
+                  description: Output script type
+                  enum: [cyrillic, latin]
+                  default: cyrillic
+      responses:
+        '200':
+          description: Translation successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  original:
+                    type: string
+                  translated:
+                    type: string
+                  provider:
+                    type: string
+                  session_id:
+                    type: string
+                  stats:
+                    $ref: '#/components/schemas/TranslationStats'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+  /translate/fb2:
+    post:
+      tags:
+        - Translation
+      summary: Translate FB2 file
+      description: Translate a complete FB2 e-book file from Russian to Serbian
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: FB2 file to translate
+                provider:
+                  type: string
+                  enum: [dictionary, openai, anthropic, zhipu, deepseek, ollama]
+                  default: dictionary
+                model:
+                  type: string
+                  description: LLM model name
+                script:
+                  type: string
+                  enum: [cyrillic, latin]
+                  default: cyrillic
+      responses:
+        '200':
+          description: Translated FB2 file
+          content:
+            application/xml:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+  /translate/batch:
+    post:
+      tags:
+        - Translation
+      summary: Batch translate multiple texts
+      description: Translate multiple Russian texts in a single request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - texts
+              properties:
+                texts:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of Russian texts to translate
+                provider:
+                  type: string
+                  enum: [dictionary, openai, anthropic, zhipu, deepseek, ollama]
+                model:
+                  type: string
+                context:
+                  type: string
+      responses:
+        '200':
+          description: Batch translation successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  originals:
+                    type: array
+                    items:
+                      type: string
+                  translated:
+                    type: array
+                    items:
+                      type: string
+                  provider:
+                    type: string
+                  session_id:
+                    type: string
+                  stats:
+                    $ref: '#/components/schemas/TranslationStats'
+
+  /convert/script:
+    post:
+      tags:
+        - Conversion
+      summary: Convert between Cyrillic and Latin scripts
+      description: Convert Serbian text between Cyrillic and Latin scripts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+                - target
+              properties:
+                text:
+                  type: string
+                  description: Text to convert
+                target:
+                  type: string
+                  enum: [cyrillic, latin]
+                  description: Target script
+      responses:
+        '200':
+          description: Conversion successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  original:
+                    type: string
+                  converted:
+                    type: string
+                  target:
+                    type: string
+
+  /status/{session_id}:
+    get:
+      tags:
+        - System
+      summary: Get translation status
+      description: Get the status of a translation session
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Session ID from translation request
+      responses:
+        '200':
+          description: Status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [pending, in_progress, completed, error]
+
+  /providers:
+    get:
+      tags:
+        - System
+      summary: List available providers
+      description: Get list of all available translation providers and their capabilities
+      responses:
+        '200':
+          description: Providers list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  providers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Provider'
+
+  /stats:
+    get:
+      tags:
+        - System
+      summary: Get API statistics
+      description: Get current API statistics including cache and websocket info
+      responses:
+        '200':
+          description: Statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cache:
+                    type: object
+                  websocket:
+                    type: object
+                    properties:
+                      connected_clients:
+                        type: integer
+
+components:
+  schemas:
+    TranslationStats:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total translations attempted
+        translated:
+          type: integer
+          description: Successfully translated
+        cached:
+          type: integer
+          description: Retrieved from cache
+        errors:
+          type: integer
+          description: Translation errors
+
+    Provider:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        requires_api_key:
+          type: boolean
+        models:
+          type: array
+          items:
+            type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+security:
+  - bearerAuth: []
+  - apiKeyAuth: []
