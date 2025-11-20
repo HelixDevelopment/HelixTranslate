@@ -156,8 +156,19 @@ func (c *MarkdownToEPUBConverter) parseFrontmatterLine(line string, metadata *eb
 		for i := range metadata.Authors {
 			metadata.Authors[i] = strings.TrimSpace(metadata.Authors[i])
 		}
+	case "description":
+		metadata.Description = value
+	case "publisher":
+		metadata.Publisher = value
 	case "language":
 		metadata.Language = value
+	case "isbn":
+		metadata.ISBN = value
+	case "date":
+		metadata.Date = value
+	case "has_cover":
+		// Cover presence is tracked but binary data is preserved separately
+		// This flag just indicates the original had a cover
 	}
 }
 

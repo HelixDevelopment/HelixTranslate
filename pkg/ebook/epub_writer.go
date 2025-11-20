@@ -48,6 +48,13 @@ func (w *EPUBWriter) Write(book *Book, filename string) error {
 		return err
 	}
 
+	// Write cover image if present
+	if len(book.Metadata.Cover) > 0 {
+		if err := w.writeCover(zipWriter, book.Metadata.Cover); err != nil {
+			return err
+		}
+	}
+
 	// Write chapters
 	if err := w.writeChapters(zipWriter, book); err != nil {
 		return err
@@ -99,6 +106,12 @@ func (w *EPUBWriter) writeContentOPF(zw *zip.Writer, book *Book) error {
 	var manifest strings.Builder
 	var spine strings.Builder
 
+	// Add cover to manifest if present
+	hasCover := len(book.Metadata.Cover) > 0
+	if hasCover {
+		manifest.WriteString(`    <item id="cover-image" href="cover.jpg" media-type="image/jpeg" properties="cover-image"/>` + "\n")
+	}
+
 	for i := range book.Chapters {
 		id := fmt.Sprintf("chapter%d", i+1)
 		href := fmt.Sprintf("chapter%d.xhtml", i+1)
@@ -122,25 +135,51 @@ func (w *EPUBWriter) writeContentOPF(zw *zip.Writer, book *Book) error {
 		language = "en"
 	}
 
+	// Use book date if available, otherwise current date
+	date := book.Metadata.Date
+	if date == "" {
+		date = time.Now().Format("2006-01-02")
+	}
+
+	// Use book ISBN if available, otherwise generate UUID
+	identifier := book.Metadata.ISBN
+	if identifier == "" {
+		identifier = "urn:uuid:" + generateUUID()
+	}
+
+	// Build metadata section
+	var metadataSection strings.Builder
+	metadataSection.WriteString(fmt.Sprintf("    <dc:title>%s</dc:title>\n", escapeXML(book.Metadata.Title)))
+	metadataSection.WriteString(fmt.Sprintf("    <dc:creator>%s</dc:creator>\n", escapeXML(authors)))
+	metadataSection.WriteString(fmt.Sprintf("    <dc:language>%s</dc:language>\n", language))
+	metadataSection.WriteString(fmt.Sprintf("    <dc:identifier id=\"BookID\">%s</dc:identifier>\n", escapeXML(identifier)))
+	metadataSection.WriteString(fmt.Sprintf("    <dc:date>%s</dc:date>\n", date))
+
+	// Add description if available
+	if book.Metadata.Description != "" {
+		metadataSection.WriteString(fmt.Sprintf("    <dc:description>%s</dc:description>\n", escapeXML(book.Metadata.Description)))
+	}
+
+	// Add publisher if available
+	if book.Metadata.Publisher != "" {
+		metadataSection.WriteString(fmt.Sprintf("    <dc:publisher>%s</dc:publisher>\n", escapeXML(book.Metadata.Publisher)))
+	}
+
+	// Add cover meta tag if present
+	if hasCover {
+		metadataSection.WriteString(`    <meta name="cover" content="cover-image"/>` + "\n")
+	}
+
 	opf := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="2.0" unique-identifier="BookID">
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
-    <dc:title>%s</dc:title>
-    <dc:creator>%s</dc:creator>
-    <dc:language>%s</dc:language>
-    <dc:identifier id="BookID">urn:uuid:%s</dc:identifier>
-    <dc:date>%s</dc:date>
-  </metadata>
+%s  </metadata>
   <manifest>
 %s  </manifest>
   <spine toc="ncx">
 %s  </spine>
 </package>`,
-		escapeXML(book.Metadata.Title),
-		escapeXML(authors),
-		language,
-		generateUUID(),
-		time.Now().Format("2006-01-02"),
+		metadataSection.String(),
 		manifest.String(),
 		spine.String())
 
@@ -259,6 +298,17 @@ func (w *EPUBWriter) formatSection(section *Section) string {
 	}
 
 	return sb.String()
+}
+
+// writeCover writes the cover image file
+func (w *EPUBWriter) writeCover(zw *zip.Writer, coverData []byte) error {
+	writer, err := zw.Create("OEBPS/cover.jpg")
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write(coverData)
+	return err
 }
 
 // escapeXML escapes XML special characters

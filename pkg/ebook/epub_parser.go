@@ -49,9 +49,10 @@ func (p *EPUBParser) Parse(filename string) (*Book, error) {
 
 	// Parse content.opf for metadata and spine
 	var contentFiles []string
+	var coverHref string
 	for _, f := range r.File {
 		if f.Name == opfPath {
-			contentFiles, err = p.parseOPF(f, book)
+			contentFiles, coverHref, err = p.parseOPF(f, book)
 			if err != nil {
 				return nil, err
 			}
@@ -73,6 +74,17 @@ func (p *EPUBParser) Parse(filename string) (*Book, error) {
 				if err == nil && chapter != nil {
 					book.Chapters = append(book.Chapters, *chapter)
 				}
+				break
+			}
+		}
+	}
+
+	// Extract cover image if found
+	if coverHref != "" {
+		coverPath := opfDir + coverHref
+		for _, f := range r.File {
+			if f.Name == coverPath {
+				book.Metadata.Cover, _ = p.extractCoverImage(f)
 				break
 			}
 		}
@@ -110,18 +122,26 @@ func (p *EPUBParser) parseContainer(f *zip.File) (string, error) {
 }
 
 // parseOPF parses content.opf for metadata and content files
-func (p *EPUBParser) parseOPF(f *zip.File, book *Book) ([]string, error) {
+func (p *EPUBParser) parseOPF(f *zip.File, book *Book) ([]string, string, error) {
 	rc, err := f.Open()
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer rc.Close()
 
 	type Package struct {
 		Metadata struct {
-			Title   []string `xml:"title"`
-			Creator []string `xml:"creator"`
-			Language string  `xml:"language"`
+			Title       []string `xml:"title"`
+			Creator     []string `xml:"creator"`
+			Language    string   `xml:"language"`
+			Description []string `xml:"description"`
+			Publisher   []string `xml:"publisher"`
+			Date        []string `xml:"date"`
+			Identifier  []string `xml:"identifier"`
+			Meta        []struct {
+				Name    string `xml:"name,attr"`
+				Content string `xml:"content,attr"`
+			} `xml:"meta"`
 		} `xml:"metadata"`
 		Spine struct {
 			Itemref []struct {
@@ -130,28 +150,74 @@ func (p *EPUBParser) parseOPF(f *zip.File, book *Book) ([]string, error) {
 		} `xml:"spine"`
 		Manifest struct {
 			Item []struct {
-				ID   string `xml:"id,attr"`
-				Href string `xml:"href,attr"`
+				ID         string `xml:"id,attr"`
+				Href       string `xml:"href,attr"`
+				MediaType  string `xml:"media-type,attr"`
+				Properties string `xml:"properties,attr"`
 			} `xml:"item"`
 		} `xml:"manifest"`
 	}
 
 	var pkg Package
 	if err := xml.NewDecoder(rc).Decode(&pkg); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	// Extract metadata
+	// Extract all metadata fields
 	if len(pkg.Metadata.Title) > 0 {
 		book.Metadata.Title = pkg.Metadata.Title[0]
 	}
 	book.Metadata.Authors = pkg.Metadata.Creator
 	book.Metadata.Language = pkg.Metadata.Language
 
+	// Extract Description
+	if len(pkg.Metadata.Description) > 0 {
+		book.Metadata.Description = pkg.Metadata.Description[0]
+	}
+
+	// Extract Publisher
+	if len(pkg.Metadata.Publisher) > 0 {
+		book.Metadata.Publisher = pkg.Metadata.Publisher[0]
+	}
+
+	// Extract Date
+	if len(pkg.Metadata.Date) > 0 {
+		book.Metadata.Date = pkg.Metadata.Date[0]
+	}
+
+	// Extract ISBN from identifier
+	for _, id := range pkg.Metadata.Identifier {
+		if strings.Contains(strings.ToLower(id), "isbn") || len(id) >= 10 {
+			book.Metadata.ISBN = id
+			break
+		}
+	}
+
 	// Build ID to href mapping
 	idToHref := make(map[string]string)
+	var coverHref string
 	for _, item := range pkg.Manifest.Item {
 		idToHref[item.ID] = item.Href
+
+		// Detect cover image
+		if strings.ToLower(item.ID) == "cover" ||
+		   strings.ToLower(item.ID) == "cover-image" ||
+		   strings.Contains(strings.ToLower(item.Properties), "cover-image") ||
+		   strings.Contains(strings.ToLower(item.Href), "cover") {
+			if strings.HasPrefix(item.MediaType, "image/") {
+				coverHref = item.Href
+			}
+		}
+	}
+
+	// Also check for cover in meta tags
+	for _, meta := range pkg.Metadata.Meta {
+		if meta.Name == "cover" {
+			if href, ok := idToHref[meta.Content]; ok {
+				coverHref = href
+				break
+			}
+		}
 	}
 
 	// Get content files in spine order
@@ -162,7 +228,7 @@ func (p *EPUBParser) parseOPF(f *zip.File, book *Book) ([]string, error) {
 		}
 	}
 
-	return contentFiles, nil
+	return contentFiles, coverHref, nil
 }
 
 // parseContentFile parses an HTML/XHTML content file
@@ -219,6 +285,17 @@ func removeHTMLTags(s string) string {
 	}
 
 	return result.String()
+}
+
+// extractCoverImage extracts cover image bytes from a zip file
+func (p *EPUBParser) extractCoverImage(f *zip.File) ([]byte, error) {
+	rc, err := f.Open()
+	if err != nil {
+		return nil, err
+	}
+	defer rc.Close()
+
+	return io.ReadAll(rc)
 }
 
 // GetFormat returns the format

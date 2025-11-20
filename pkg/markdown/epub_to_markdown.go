@@ -45,13 +45,31 @@ func (c *EPUBToMarkdownConverter) ConvertEPUBToMarkdown(epubPath, outputMDPath s
 	// Create markdown content
 	var mdContent strings.Builder
 
-	// Add title and metadata
+	// Add title and metadata (YAML frontmatter)
 	mdContent.WriteString("---\n")
 	mdContent.WriteString(fmt.Sprintf("title: %s\n", metadata.Title))
 	if len(metadata.Authors) > 0 {
 		mdContent.WriteString(fmt.Sprintf("authors: %s\n", strings.Join(metadata.Authors, ", ")))
 	}
+	if metadata.Description != "" {
+		// Escape multi-line descriptions
+		desc := strings.ReplaceAll(metadata.Description, "\n", " ")
+		mdContent.WriteString(fmt.Sprintf("description: %s\n", desc))
+	}
+	if metadata.Publisher != "" {
+		mdContent.WriteString(fmt.Sprintf("publisher: %s\n", metadata.Publisher))
+	}
 	mdContent.WriteString(fmt.Sprintf("language: %s\n", metadata.Language))
+	if metadata.ISBN != "" {
+		mdContent.WriteString(fmt.Sprintf("isbn: %s\n", metadata.ISBN))
+	}
+	if metadata.Date != "" {
+		mdContent.WriteString(fmt.Sprintf("date: %s\n", metadata.Date))
+	}
+	if len(metadata.Cover) > 0 {
+		mdContent.WriteString("has_cover: true\n")
+		// Note: Cover binary data is not stored in markdown but preserved in the metadata structure
+	}
 	mdContent.WriteString("---\n\n")
 
 	// Add main title
@@ -164,9 +182,13 @@ func (c *EPUBToMarkdownConverter) parseOPF(f *zip.File) (ebook.Metadata, []strin
 
 	type Package struct {
 		Metadata struct {
-			Title    []string `xml:"title"`
-			Creator  []string `xml:"creator"`
-			Language string   `xml:"language"`
+			Title       []string `xml:"title"`
+			Creator     []string `xml:"creator"`
+			Language    string   `xml:"language"`
+			Description []string `xml:"description"`
+			Publisher   []string `xml:"publisher"`
+			Date        []string `xml:"date"`
+			Identifier  []string `xml:"identifier"`
 		} `xml:"metadata"`
 		Spine struct {
 			Itemref []struct {
@@ -192,6 +214,22 @@ func (c *EPUBToMarkdownConverter) parseOPF(f *zip.File) (ebook.Metadata, []strin
 	}
 	if len(pkg.Metadata.Title) > 0 {
 		metadata.Title = pkg.Metadata.Title[0]
+	}
+	if len(pkg.Metadata.Description) > 0 {
+		metadata.Description = pkg.Metadata.Description[0]
+	}
+	if len(pkg.Metadata.Publisher) > 0 {
+		metadata.Publisher = pkg.Metadata.Publisher[0]
+	}
+	if len(pkg.Metadata.Date) > 0 {
+		metadata.Date = pkg.Metadata.Date[0]
+	}
+	// Extract ISBN from identifier
+	for _, id := range pkg.Metadata.Identifier {
+		if strings.Contains(strings.ToLower(id), "isbn") || len(id) >= 10 {
+			metadata.ISBN = id
+			break
+		}
 	}
 
 	// Build ID to href mapping
