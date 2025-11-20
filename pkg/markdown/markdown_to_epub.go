@@ -6,6 +6,7 @@ import (
 	"digital.vasic.translator/pkg/ebook"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -31,9 +32,17 @@ func (c *MarkdownToEPUBConverter) ConvertMarkdownToEPUB(mdPath, epubPath string)
 	}
 
 	// Parse markdown into chapters
-	chapters, metadata, err := c.parseMarkdown(string(content))
+	chapters, metadata, coverPath, err := c.parseMarkdown(string(content), filepath.Dir(mdPath))
 	if err != nil {
 		return fmt.Errorf("failed to parse markdown: %w", err)
+	}
+
+	// Load cover image if specified
+	if coverPath != "" {
+		coverData, err := os.ReadFile(coverPath)
+		if err == nil {
+			metadata.Cover = coverData
+		}
 	}
 
 	c.metadata = metadata
@@ -47,45 +56,55 @@ func (c *MarkdownToEPUBConverter) ConvertMarkdownToEPUB(mdPath, epubPath string)
 }
 
 // parseMarkdown parses markdown content into chapters
-func (c *MarkdownToEPUBConverter) parseMarkdown(content string) ([]ebook.Chapter, ebook.Metadata, error) {
+func (c *MarkdownToEPUBConverter) parseMarkdown(content string, mdDir string) ([]ebook.Chapter, ebook.Metadata, string, error) {
 	var metadata ebook.Metadata
 	var chapters []ebook.Chapter
 	var currentChapter *ebook.Chapter
 	var currentContent strings.Builder
+	var coverPath string
 
 	scanner := bufio.NewScanner(strings.NewReader(content))
 	inFrontmatter := false
+	frontmatterDone := false
 	frontmatterCount := 0
+	skipNextLines := 0
 
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		// Handle frontmatter
-		if line == "---" {
+		// Handle frontmatter (only before it's done)
+		if !frontmatterDone && line == "---" {
 			frontmatterCount++
 			if frontmatterCount == 1 {
 				inFrontmatter = true
 				continue
 			} else if frontmatterCount >= 2 {
 				inFrontmatter = false
+				frontmatterDone = true
+				// Skip next 5 lines (title, author, separator after frontmatter)
+				skipNextLines = 5
 				continue
 			}
 		}
 
 		if inFrontmatter {
 			// Parse metadata
-			c.parseFrontmatterLine(line, &metadata)
+			if cover := c.parseFrontmatterLine(line, &metadata); cover != "" {
+				// Resolve cover path relative to markdown file
+				coverPath = filepath.Join(mdDir, cover)
+			}
 			continue
 		}
 
-		// Skip the main title and initial content before first chapter
-		if strings.HasPrefix(line, "# ") && len(chapters) == 0 && currentChapter == nil {
-			metadata.Title = strings.TrimPrefix(line, "# ")
+		// Skip lines after frontmatter (title, author, separator)
+		if skipNextLines > 0 {
+			skipNextLines--
 			continue
 		}
 
-		// Chapter marker (## Chapter)
-		if strings.HasPrefix(line, "## ") {
+		// Chapter marker (# or ## followed by text)
+		if (strings.HasPrefix(line, "# ") || strings.HasPrefix(line, "## ")) &&
+		   strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(line, "##"), "#")) != "" {
 			// Save previous chapter
 			if currentChapter != nil {
 				currentChapter.Sections = []ebook.Section{
@@ -96,7 +115,7 @@ func (c *MarkdownToEPUBConverter) parseMarkdown(content string) ([]ebook.Chapter
 			}
 
 			// Start new chapter
-			chapterTitle := strings.TrimPrefix(line, "## ")
+			chapterTitle := strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(line, "##"), "#"))
 			currentChapter = &ebook.Chapter{
 				Title:    chapterTitle,
 				Sections: []ebook.Section{},
@@ -132,17 +151,17 @@ func (c *MarkdownToEPUBConverter) parseMarkdown(content string) ([]ebook.Chapter
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, metadata, fmt.Errorf("error reading markdown: %w", err)
+		return nil, metadata, "", fmt.Errorf("error reading markdown: %w", err)
 	}
 
-	return chapters, metadata, nil
+	return chapters, metadata, coverPath, nil
 }
 
-// parseFrontmatterLine parses a frontmatter YAML line
-func (c *MarkdownToEPUBConverter) parseFrontmatterLine(line string, metadata *ebook.Metadata) {
+// parseFrontmatterLine parses a frontmatter YAML line and returns cover path if present
+func (c *MarkdownToEPUBConverter) parseFrontmatterLine(line string, metadata *ebook.Metadata) string {
 	parts := strings.SplitN(line, ":", 2)
 	if len(parts) != 2 {
-		return
+		return ""
 	}
 
 	key := strings.TrimSpace(parts[0])
@@ -166,10 +185,14 @@ func (c *MarkdownToEPUBConverter) parseFrontmatterLine(line string, metadata *eb
 		metadata.ISBN = value
 	case "date":
 		metadata.Date = value
+	case "cover":
+		// Return the cover path for loading the cover image
+		return value
 	case "has_cover":
 		// Cover presence is tracked but binary data is preserved separately
 		// This flag just indicates the original had a cover
 	}
+	return ""
 }
 
 // createEPUB creates an EPUB file from chapters using the enhanced EPUBWriter

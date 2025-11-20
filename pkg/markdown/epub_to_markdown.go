@@ -29,17 +29,51 @@ func NewEPUBToMarkdownConverter(preserveImages bool, imagesDir string) *EPUBToMa
 
 // ConvertEPUBToMarkdown converts an EPUB file to Markdown
 func (c *EPUBToMarkdownConverter) ConvertEPUBToMarkdown(epubPath, outputMDPath string) error {
-	// Parse EPUB
+	// Set up images directory next to markdown file
+	if c.imagesDir == "" {
+		mdDir := filepath.Dir(outputMDPath)
+		c.imagesDir = filepath.Join(mdDir, "Images")
+	}
+
+	// Create Images directory
+	if err := os.MkdirAll(c.imagesDir, 0755); err != nil {
+		return fmt.Errorf("failed to create images directory: %w", err)
+	}
+
+	// Parse EPUB using universal parser to get metadata including cover
+	parser := ebook.NewUniversalParser()
+	book, err := parser.Parse(epubPath)
+	if err != nil {
+		return fmt.Errorf("failed to parse EPUB: %w", err)
+	}
+	metadata := book.Metadata
+
+	// Open EPUB again to get content files structure
 	r, err := zip.OpenReader(epubPath)
 	if err != nil {
 		return fmt.Errorf("failed to open EPUB: %w", err)
 	}
 	defer r.Close()
 
-	// Get metadata and content files
-	metadata, contentFiles, opfDir, err := c.parseEPUBStructure(r)
+	// Get content files structure
+	_, contentFiles, opfDir, err := c.parseEPUBStructure(r)
 	if err != nil {
 		return fmt.Errorf("failed to parse EPUB structure: %w", err)
+	}
+
+	// Extract cover image if present
+	var coverFilename string
+	if len(metadata.Cover) > 0 {
+		coverFilename = "cover.jpg"
+		coverPath := filepath.Join(c.imagesDir, coverFilename)
+		if err := os.WriteFile(coverPath, metadata.Cover, 0644); err != nil {
+			return fmt.Errorf("failed to write cover image: %w", err)
+		}
+	}
+
+	// Extract all images from EPUB
+	if err := c.extractImages(r, opfDir); err != nil {
+		return fmt.Errorf("failed to extract images: %w", err)
 	}
 
 	// Create markdown content
@@ -66,9 +100,8 @@ func (c *EPUBToMarkdownConverter) ConvertEPUBToMarkdown(epubPath, outputMDPath s
 	if metadata.Date != "" {
 		mdContent.WriteString(fmt.Sprintf("date: %s\n", metadata.Date))
 	}
-	if len(metadata.Cover) > 0 {
-		mdContent.WriteString("has_cover: true\n")
-		// Note: Cover binary data is not stored in markdown but preserved in the metadata structure
+	if coverFilename != "" {
+		mdContent.WriteString(fmt.Sprintf("cover: Images/%s\n", coverFilename))
 	}
 	mdContent.WriteString("---\n\n")
 
@@ -268,9 +301,15 @@ func (c *EPUBToMarkdownConverter) convertHTMLToMarkdown(f *zip.File, chapterNum 
 		return "", fmt.Errorf("failed to parse HTML: %w", err)
 	}
 
-	// Convert to markdown
+	// Find the body element
+	body := c.findBody(doc)
+	if body == nil {
+		return "", nil
+	}
+
+	// Convert body content to markdown
 	var mdBuilder strings.Builder
-	c.convertNode(doc, &mdBuilder, 0)
+	c.convertChildren(body, &mdBuilder, 0)
 
 	content := mdBuilder.String()
 	content = strings.TrimSpace(content)
@@ -280,6 +319,19 @@ func (c *EPUBToMarkdownConverter) convertHTMLToMarkdown(f *zip.File, chapterNum 
 	}
 
 	return content, nil
+}
+
+// findBody recursively searches for the body element
+func (c *EPUBToMarkdownConverter) findBody(n *html.Node) *html.Node {
+	if n.Type == html.ElementNode && n.Data == "body" {
+		return n
+	}
+	for child := n.FirstChild; child != nil; child = child.NextSibling {
+		if body := c.findBody(child); body != nil {
+			return body
+		}
+	}
+	return nil
 }
 
 // convertNode recursively converts HTML nodes to Markdown
@@ -369,7 +421,9 @@ func (c *EPUBToMarkdownConverter) convertNode(n *html.Node, md *strings.Builder,
 		case "img":
 			src := c.getAttribute(n, "src")
 			alt := c.getAttribute(n, "alt")
-			md.WriteString(fmt.Sprintf("![%s](%s)", alt, src))
+			// Convert image src to Images/ reference
+			imgFilename := filepath.Base(src)
+			md.WriteString(fmt.Sprintf("![%s](Images/%s)", alt, imgFilename))
 		case "hr":
 			md.WriteString("\n\n---\n\n")
 		default:
@@ -377,11 +431,7 @@ func (c *EPUBToMarkdownConverter) convertNode(n *html.Node, md *strings.Builder,
 			c.convertChildren(n, md, depth)
 		}
 	}
-
-	// Process siblings
-	if n.NextSibling != nil {
-		c.convertNode(n.NextSibling, md, depth)
-	}
+	// Note: Sibling processing is handled by convertChildren loop
 }
 
 // convertChildren converts all child nodes
@@ -399,6 +449,47 @@ func (c *EPUBToMarkdownConverter) getAttribute(n *html.Node, key string) string 
 		}
 	}
 	return ""
+}
+
+// extractImages extracts all images from EPUB to Images directory
+func (c *EPUBToMarkdownConverter) extractImages(r *zip.ReadCloser, opfDir string) error {
+	for _, f := range r.File {
+		// Check if file is an image
+		if strings.HasPrefix(f.Name, opfDir) && isImageFile(f.Name) {
+			// Extract filename from path
+			filename := filepath.Base(f.Name)
+
+			// Skip cover.jpg (already extracted separately)
+			if filename == "cover.jpg" {
+				continue
+			}
+
+			// Read image data
+			rc, err := f.Open()
+			if err != nil {
+				continue
+			}
+
+			imgData, err := io.ReadAll(rc)
+			rc.Close()
+			if err != nil {
+				continue
+			}
+
+			// Write to Images directory
+			imgPath := filepath.Join(c.imagesDir, filename)
+			if err := os.WriteFile(imgPath, imgData, 0644); err != nil {
+				return fmt.Errorf("failed to write image %s: %w", filename, err)
+			}
+		}
+	}
+	return nil
+}
+
+// isImageFile checks if filename has an image extension
+func isImageFile(filename string) bool {
+	ext := strings.ToLower(filepath.Ext(filename))
+	return ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif" || ext == ".svg" || ext == ".webp"
 }
 
 // ConvertBookToMarkdown converts a Book struct to markdown and saves it
