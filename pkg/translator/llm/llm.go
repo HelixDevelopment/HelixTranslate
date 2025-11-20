@@ -5,6 +5,7 @@ import (
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/translator"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -123,6 +124,9 @@ func (lt *LLMTranslator) TranslateWithProgress(
 	result, err := lt.Translate(ctx, text, contextStr)
 
 	if err != nil {
+		// Log detailed error to stdout for debugging
+		fmt.Fprintf(os.Stderr, "[LLM_ERROR] Translation failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "[LLM_ERROR] Text length: %d bytes, Context: %s\n", len(text), contextStr)
 		translator.EmitError(eventBus, sessionID, "LLM translation failed", err)
 		return "", err
 	}
