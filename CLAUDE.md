@@ -267,6 +267,11 @@ The advanced translator (`high_quality_fb2_translator.py`) implements:
 - Graceful fallback when Google Translate unavailable
 - Log translation errors and statistics
 - Provide helpful error messages with context
+- **Automatic retry with text splitting** for size-related errors (See `Documentation/RETRY_MECHANISM.md`)
+  - Detects when text exceeds API limits
+  - Automatically splits large sections at paragraph/sentence boundaries
+  - Translates chunks separately and recombines seamlessly
+  - Maximum chunk size: 20KB (well under all API limits)
 
 ### FB2-Specific Requirements
 - Always register FB2 namespaces before parsing

@@ -35,6 +35,7 @@ A high-performance, enterprise-grade universal ebook translation toolkit support
 - Translation caching
 - Concurrent processing
 - 5-10x faster than Python implementation
+- **Automatic retry & text splitting** for large sections (See [RETRY_MECHANISM.md](Documentation/RETRY_MECHANISM.md))
 
 ## 📦 Installation
 

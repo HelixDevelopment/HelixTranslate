@@ -74,7 +74,7 @@ func (lt *LLMTranslator) GetName() string {
 	return fmt.Sprintf("llm-%s", lt.provider)
 }
 
-// Translate translates text using LLM
+// Translate translates text using LLM with automatic retry and text splitting
 func (lt *LLMTranslator) Translate(ctx context.Context, text string, contextStr string) (string, error) {
 	if text == "" || strings.TrimSpace(text) == "" {
 		return text, nil
@@ -89,8 +89,8 @@ func (lt *LLMTranslator) Translate(ctx context.Context, text string, contextStr 
 	// Create translation prompt
 	prompt := lt.createTranslationPrompt(text, contextStr)
 
-	// Translate using LLM
-	result, err := lt.client.Translate(ctx, text, prompt)
+	// Translate using LLM with smart retry
+	result, err := lt.translateWithRetry(ctx, text, prompt, contextStr)
 	if err != nil {
 		lt.UpdateStats(false)
 		return "", fmt.Errorf("LLM translation failed: %w", err)
@@ -106,6 +106,156 @@ func (lt *LLMTranslator) Translate(ctx context.Context, text string, contextStr 
 	lt.AddToCache(cacheKey, result)
 
 	return result, nil
+}
+
+// translateWithRetry attempts translation with automatic splitting on size errors
+func (lt *LLMTranslator) translateWithRetry(ctx context.Context, text, prompt, contextStr string) (string, error) {
+	// First attempt - try with full text
+	result, err := lt.client.Translate(ctx, text, prompt)
+	if err == nil {
+		return result, nil
+	}
+
+	// Check if error is due to text size
+	if !isTextSizeError(err) {
+		return "", err
+	}
+
+	// Text is too large - split and translate in chunks
+	fmt.Fprintf(os.Stderr, "[LLM_RETRY] Text too large (%d bytes), splitting into chunks\n", len(text))
+
+	chunks := lt.splitText(text)
+	if len(chunks) == 1 {
+		// Cannot split further - text is too large even for one sentence
+		return "", fmt.Errorf("text too large to translate even after splitting (min chunk: %d bytes): %w", len(chunks[0]), err)
+	}
+
+	fmt.Fprintf(os.Stderr, "[LLM_RETRY] Split into %d chunks, translating separately\n", len(chunks))
+
+	// Translate each chunk
+	var translatedChunks []string
+	for i, chunk := range chunks {
+		chunkPrompt := lt.createTranslationPrompt(chunk, fmt.Sprintf("%s (part %d/%d)", contextStr, i+1, len(chunks)))
+
+		chunkResult, chunkErr := lt.client.Translate(ctx, chunk, chunkPrompt)
+		if chunkErr != nil {
+			return "", fmt.Errorf("failed to translate chunk %d/%d: %w", i+1, len(chunks), chunkErr)
+		}
+
+		translatedChunks = append(translatedChunks, chunkResult)
+	}
+
+	// Combine translated chunks
+	result = strings.Join(translatedChunks, "")
+	fmt.Fprintf(os.Stderr, "[LLM_RETRY] Successfully translated %d chunks\n", len(chunks))
+
+	return result, nil
+}
+
+// isTextSizeError checks if error is due to text being too large
+func isTextSizeError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errStr := strings.ToLower(err.Error())
+
+	// Common size-related error patterns
+	sizeErrorPatterns := []string{
+		"max_tokens",
+		"token limit",
+		"too large",
+		"too long",
+		"maximum length",
+		"context length",
+		"exceeds",
+		"invalid request",
+	}
+
+	for _, pattern := range sizeErrorPatterns {
+		if strings.Contains(errStr, pattern) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// splitText splits text into smaller chunks at sentence boundaries
+func (lt *LLMTranslator) splitText(text string) []string {
+	// Target chunk size (roughly 20KB to stay well under limits)
+	const maxChunkSize = 20000
+
+	// If text is small enough, return as-is
+	if len(text) <= maxChunkSize {
+		return []string{text}
+	}
+
+	var chunks []string
+	var currentChunk strings.Builder
+
+	// Split by paragraphs first
+	paragraphs := strings.Split(text, "\n\n")
+
+	for _, para := range paragraphs {
+		// If single paragraph is too large, split by sentences
+		if len(para) > maxChunkSize {
+			sentences := lt.splitBySentences(para)
+			for _, sentence := range sentences {
+				if currentChunk.Len()+len(sentence) > maxChunkSize && currentChunk.Len() > 0 {
+					// Current chunk is full, start new chunk
+					chunks = append(chunks, currentChunk.String())
+					currentChunk.Reset()
+				}
+				currentChunk.WriteString(sentence)
+			}
+		} else {
+			// Add paragraph to current chunk
+			if currentChunk.Len()+len(para)+2 > maxChunkSize && currentChunk.Len() > 0 {
+				// Current chunk is full, start new chunk
+				chunks = append(chunks, currentChunk.String())
+				currentChunk.Reset()
+			}
+			if currentChunk.Len() > 0 {
+				currentChunk.WriteString("\n\n")
+			}
+			currentChunk.WriteString(para)
+		}
+	}
+
+	// Add final chunk
+	if currentChunk.Len() > 0 {
+		chunks = append(chunks, currentChunk.String())
+	}
+
+	return chunks
+}
+
+// splitBySentences splits text into sentences
+func (lt *LLMTranslator) splitBySentences(text string) []string {
+	var sentences []string
+	var currentSentence strings.Builder
+
+	runes := []rune(text)
+	for i := 0; i < len(runes); i++ {
+		currentSentence.WriteRune(runes[i])
+
+		// Check for sentence endings
+		if runes[i] == '.' || runes[i] == '!' || runes[i] == '?' || runes[i] == '…' {
+			// Check if followed by space or end of text
+			if i+1 >= len(runes) || runes[i+1] == ' ' || runes[i+1] == '\n' {
+				sentences = append(sentences, currentSentence.String())
+				currentSentence.Reset()
+			}
+		}
+	}
+
+	// Add remaining text
+	if currentSentence.Len() > 0 {
+		sentences = append(sentences, currentSentence.String())
+	}
+
+	return sentences
 }
 
 // TranslateWithProgress translates and reports progress
