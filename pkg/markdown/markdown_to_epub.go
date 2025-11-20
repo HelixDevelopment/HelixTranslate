@@ -172,51 +172,17 @@ func (c *MarkdownToEPUBConverter) parseFrontmatterLine(line string, metadata *eb
 	}
 }
 
-// createEPUB creates an EPUB file from chapters
+// createEPUB creates an EPUB file from chapters using the enhanced EPUBWriter
 func (c *MarkdownToEPUBConverter) createEPUB(chapters []ebook.Chapter, outputPath string) error {
-	// Create EPUB file
-	file, err := os.Create(outputPath)
-	if err != nil {
-		return fmt.Errorf("failed to create EPUB file: %w", err)
-	}
-	defer file.Close()
-
-	zipWriter := zip.NewWriter(file)
-	defer zipWriter.Close()
-
-	// Write mimetype (uncompressed, first file)
-	mimetypeWriter, err := zipWriter.CreateHeader(&zip.FileHeader{
-		Name:   "mimetype",
-		Method: zip.Store,
-	})
-	if err != nil {
-		return err
-	}
-	mimetypeWriter.Write([]byte("application/epub+zip"))
-
-	// Write META-INF/container.xml
-	if err := c.writeContainer(zipWriter); err != nil {
-		return err
+	// Create Book structure with all metadata
+	book := &ebook.Book{
+		Metadata: c.metadata,
+		Chapters: chapters,
 	}
 
-	// Write content.opf
-	if err := c.writeContentOPF(zipWriter, chapters); err != nil {
-		return err
-	}
-
-	// Write toc.ncx
-	if err := c.writeTOC(zipWriter, chapters); err != nil {
-		return err
-	}
-
-	// Write chapter HTML files
-	for idx, chapter := range chapters {
-		if err := c.writeChapterHTML(zipWriter, chapter, idx+1); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	// Use the enhanced EPUBWriter which handles all metadata properly
+	writer := ebook.NewEPUBWriter()
+	return writer.Write(book, outputPath)
 }
 
 // writeContainer writes META-INF/container.xml
