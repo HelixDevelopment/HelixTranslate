@@ -43,7 +43,7 @@ func NewOllamaClient(config translator.TranslationConfig) (*OllamaClient, error)
 	return &OllamaClient{
 		config: config,
 		httpClient: &http.Client{
-			Timeout: 120 * time.Second, // Ollama can be slower
+			Timeout: 180 * time.Second, // Increased for large text translations
 		},
 		baseURL: baseURL,
 	}, nil

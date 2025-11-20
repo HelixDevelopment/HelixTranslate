@@ -86,7 +86,7 @@ func NewQwenClient(config translator.TranslationConfig) (*QwenClient, error) {
 
 	client := &QwenClient{
 		config:       config,
-		httpClient:   &http.Client{Timeout: 60 * time.Second},
+		httpClient:   &http.Client{Timeout: 180 * time.Second}, // Increased for large text translations
 		baseURL:      baseURL,
 		credFilePath: credFile,
 	}

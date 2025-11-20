@@ -70,7 +70,7 @@ func NewOpenAIClient(config translator.TranslationConfig) (*OpenAIClient, error)
 	return &OpenAIClient{
 		config: config,
 		httpClient: &http.Client{
-			Timeout: 60 * time.Second,
+			Timeout: 180 * time.Second, // Increased for large text translations
 		},
 		baseURL: baseURL,
 	}, nil
