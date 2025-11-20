@@ -93,7 +93,9 @@ func (c *OpenAIClient) Translate(ctx context.Context, text string, prompt string
 		temperature = 0.3
 	}
 
-	maxTokens := 4000
+	// Increase max_tokens for large translations (book sections can be very long)
+	// DeepSeek/OpenAI compatible models support up to 8192 max_tokens
+	maxTokens := 8192 // Increased from 4000 to handle book chapters (DeepSeek max)
 	if c.config.Options["max_tokens"] != nil {
 		if mt, ok := c.config.Options["max_tokens"].(int); ok {
 			maxTokens = mt
