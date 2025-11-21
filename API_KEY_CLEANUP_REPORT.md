@@ -27,9 +27,9 @@ All hardcoded API keys have been successfully removed from both the codebase and
 The following API keys were scrubbed from all commits:
 
 ```
-ZHIPU_API_KEY:   REDACTED_PARTIAL  → REDACTED_ZHIPU_KEY
-DEEPSEEK_API_KEY: REDACTED_PARTIAL  → REDACTED_DEEPSEEK_KEY
-DEEPSEEK_API_KEY: REDACTED_PARTIAL  → REDACTED_DEEPSEEK_KEY
+ZHIPU_API_KEY:   91c00...kUV  → REDACTED_ZHIPU_KEY
+DEEPSEEK_API_KEY: sk-72c...f1d6d  → REDACTED_DEEPSEEK_KEY
+DEEPSEEK_API_KEY: sk-ffc...ba0289  → REDACTED_DEEPSEEK_KEY
 ```
 
 ### 4. Verification
