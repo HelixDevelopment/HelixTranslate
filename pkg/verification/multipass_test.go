@@ -1,6 +1,7 @@
 package verification
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -151,11 +152,11 @@ func TestFormatNotesForContext(t *testing.T) {
 		t.Error("Formatted notes should not be empty")
 	}
 
-	if !contains([]string{formatted}, "Protagonist") {
+	if !strings.Contains(formatted, "Protagonist") {
 		t.Error("Formatted notes should contain title")
 	}
 
-	if !contains([]string{formatted}, "Strong character arc") {
+	if !strings.Contains(formatted, "Strong character arc") {
 		t.Error("Formatted notes should contain content")
 	}
 }

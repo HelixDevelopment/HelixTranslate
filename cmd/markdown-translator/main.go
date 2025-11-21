@@ -143,7 +143,7 @@ func main() {
 			os.Remove(sourceMD)
 		}
 		os.Remove(translatedMD)
-		fmt.Println("✓ Cleanup complete\n")
+		fmt.Println("✓ Cleanup complete")
 	}
 
 	fmt.Println("✅ Translation complete!")

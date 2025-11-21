@@ -26,12 +26,12 @@ func TestRegisteredModels(t *testing.T) {
 		"hunyuan-mt-7b-q4",
 		"hunyuan-mt-7b-q8",
 		"aya-23-8b-q4",
-		"qwen2.5-7b-q4",
-		"qwen2.5-14b-q4",
-		"qwen2.5-27b-q4",
-		"mistral-7b-q4",
-		"phi-3-mini-q4",
-		"gemma-2-9b-q4",
+		"qwen2.5-7b-instruct-q4",
+		"qwen2.5-14b-instruct-q4",
+		"qwen2.5-27b-instruct-q4",
+		"mistral-7b-instruct-q4",
+		"phi-3-mini-4k-q4",
+		"gemma-2-9b-it-q4",
 	}
 
 	for _, modelID := range expectedModels {
@@ -392,10 +392,10 @@ func TestModelScoring(t *testing.T) {
 	hunyuan, _ := registry.Get("hunyuan-mt-7b-q8")
 
 	// Get Qwen2.5-7B Q4 (general purpose)
-	qwen, _ := registry.Get("qwen2.5-7b-q4")
+	qwen, _ := registry.Get("qwen2.5-7b-instruct-q4")
 
 	// Get Phi-3-Mini (small model)
-	phi, _ := registry.Get("phi-3-mini-q4")
+	phi, _ := registry.Get("phi-3-mini-4k-q4")
 
 	if hunyuan == nil || qwen == nil || phi == nil {
 		t.Fatal("Failed to get test models")

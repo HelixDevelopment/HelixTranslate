@@ -206,8 +206,8 @@ func (c *MultiLLMCoordinator) discoverProviders() map[string]map[string]interfac
 			"model":    getEnvOrDefault("QWEN_MODEL", "qwen-plus"),
 			"priority": 10, // API key = high priority
 		}
-	} else {
-		// Check for OAuth credentials
+	} else if os.Getenv("SKIP_QWEN_OAUTH") == "" {
+		// Check for OAuth credentials (skip in test environments)
 		homeDir := os.Getenv("HOME")
 		if homeDir != "" {
 			qwenOAuthPaths := []string{

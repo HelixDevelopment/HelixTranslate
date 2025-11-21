@@ -457,12 +457,21 @@ func getRedisTestConfig(t *testing.T) *Config {
 		return nil
 	}
 
-	return &Config{
+	config := &Config{
 		Type:     "redis",
 		Host:     host,
 		Port:     6379,
 		Password: os.Getenv("REDIS_TEST_PASSWORD"),
 	}
+
+	// Test if Redis is actually reachable
+	_, err := NewRedisStorage(config, 24*time.Hour)
+	if err != nil {
+		// Redis not available, return nil to skip tests
+		return nil
+	}
+
+	return config
 }
 
 // BenchmarkRedisStorage_CreateSession benchmarks session creation

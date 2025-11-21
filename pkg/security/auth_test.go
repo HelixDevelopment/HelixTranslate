@@ -266,22 +266,19 @@ func TestAuthService_TokenClaims(t *testing.T) {
 	beforeGeneration := time.Now()
 	token, err := auth.GenerateToken("user123", "testuser", []string{"user"})
 	require.NoError(t, err)
-	afterGeneration := time.Now()
 
 	claims, err := auth.ValidateToken(token)
 	require.NoError(t, err)
 
-	// Check IssuedAt is recent
-	assert.True(t, claims.IssuedAt.Time.After(beforeGeneration))
-	assert.True(t, claims.IssuedAt.Time.Before(afterGeneration))
+	// Check IssuedAt is recent (within reasonable time window)
+	assert.WithinDuration(t, beforeGeneration, claims.IssuedAt.Time, time.Second*2)
 
-	// Check ExpiresAt is ~1 hour from now
-	expectedExpiry := time.Now().Add(time.Hour)
-	assert.WithinDuration(t, expectedExpiry, claims.ExpiresAt.Time, time.Second*5)
+	// Check ExpiresAt is ~1 hour from IssuedAt (using IssuedAt as base to avoid race condition)
+	expectedExpiry := claims.IssuedAt.Time.Add(time.Hour)
+	assert.WithinDuration(t, expectedExpiry, claims.ExpiresAt.Time, time.Second*2)
 
-	// Check NotBefore is now
-	assert.True(t, claims.NotBefore.Time.After(beforeGeneration))
-	assert.True(t, claims.NotBefore.Time.Before(afterGeneration))
+	// Check NotBefore is recent (within reasonable time window)
+	assert.WithinDuration(t, beforeGeneration, claims.NotBefore.Time, time.Second*2)
 }
 
 // TestAPIKeyStore_MultipleKeys tests managing multiple keys

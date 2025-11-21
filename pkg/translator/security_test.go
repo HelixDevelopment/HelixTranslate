@@ -3,7 +3,6 @@ package translator_test
 import (
 	"context"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -179,11 +178,13 @@ func TestResourceLeaks(t *testing.T) {
 		defer os.RemoveAll(tmpDir)
 
 		// Create and verify many models
-		downloader := models.NewDownloader(tmpDir)
+		downloader := models.NewDownloader()
+		testModel := &models.ModelInfo{
+			ID: "test-model",
+		}
 
 		for i := 0; i < 100; i++ {
-			modelID := "test-model"
-			_ = downloader.GetModelPath(modelID)
+			_, _ = downloader.GetModelPath(testModel)
 		}
 
 		// Should not exhaust file handles
@@ -288,8 +289,14 @@ func TestPrivilegeEscalation(t *testing.T) {
 		}
 		defer os.RemoveAll(tmpDir)
 
-		downloader := models.NewDownloader(tmpDir)
-		modelPath := downloader.GetModelPath("test-model")
+		downloader := models.NewDownloader()
+		testModel := &models.ModelInfo{
+			ID: "test-model",
+		}
+		modelPath, err := downloader.GetModelPath(testModel)
+		if err != nil {
+			t.Fatalf("Failed to get model path: %v", err)
+		}
 
 		// Create a test file
 		err = os.WriteFile(modelPath, []byte("test"), 0644)

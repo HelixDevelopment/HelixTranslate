@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-	fmt.Println("🧪 End-to-End Markdown Translation Pipeline Test\n")
-	fmt.Println("=" + strings.Repeat("=", 60) + "\n")
+	fmt.Println("🧪 End-to-End Markdown Translation Pipeline Test")
+	fmt.Println("=" + strings.Repeat("=", 60))
 
 	// Test files
 	inputEPUB := "Books/Stepanova_T._Detektivtriller1._Son_Nad_Bezdnoyi.epub"

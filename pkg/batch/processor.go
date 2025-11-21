@@ -261,6 +261,7 @@ func (bp *BatchProcessor) findSupportedFiles(dir string, recursive bool) ([]stri
 
 		// Check if file is supported
 		ext := strings.ToLower(filepath.Ext(path))
+		ext = strings.TrimPrefix(ext, ".")
 		if detector.IsSupported(format.ParseFormat(ext)) {
 			files = append(files, path)
 		}

@@ -110,23 +110,31 @@ func TestEkavicaDialectRequirements(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			passed := true
+			lowerTranslation := strings.ToLower(tt.translation)
 
-			// Check that required Ekavica forms are present
+			// Check that required Ekavica forms are present (case-insensitive)
 			for _, required := range tt.shouldContain {
-				if !strings.Contains(tt.translation, required) {
-					t.Errorf("Translation should contain Ekavica form %q but doesn't", required)
+				if !strings.Contains(lowerTranslation, strings.ToLower(required)) {
+					// Only log error if we expect this test to pass
+					if tt.expectPass {
+						t.Errorf("Translation should contain Ekavica form %q but doesn't", required)
+					}
 					passed = false
 				}
 			}
 
-			// Check that Ijekavica forms are NOT present
+			// Check that Ijekavica forms are NOT present (case-insensitive)
 			for _, forbidden := range tt.shouldNotContain {
-				if strings.Contains(tt.translation, forbidden) {
-					t.Errorf("Translation should NOT contain Ijekavica form %q but does", forbidden)
+				if strings.Contains(lowerTranslation, strings.ToLower(forbidden)) {
+					// Only log error if we expect this test to pass
+					if tt.expectPass {
+						t.Errorf("Translation should NOT contain Ijekavica form %q but does", forbidden)
+					}
 					passed = false
 				}
 			}
 
+			// Final check: did we get the expected pass/fail result?
 			if passed != tt.expectPass {
 				if tt.expectPass {
 					t.Error("Test expected to pass but failed")
@@ -150,8 +158,8 @@ func TestEkavicaRegexPatterns(t *testing.T) {
 		{"Ekavica dete", "дете", false, "дијет"},
 		{"Ijekavica mleko", "мљеко", true, "мљек"},
 		{"Ekavica mleko", "млеко", false, "мљек"},
-		{"Ijekavica lepo", "лијепо", true, "љеп"},
-		{"Ekavica lepo", "лепо", false, "љеп"},
+		{"Ijekavica lepo", "лијепо", true, "ије"},
+		{"Ekavica lepo", "лепо", false, "ије"},
 		{"Ijekavica pattern ije", "пијем", true, "ије"},
 		{"Ekavica no ije", "пе вам", false, "ије"},
 	}
@@ -222,29 +230,37 @@ func TestEkavicaVerificationLogic(t *testing.T) {
 			violations:   make([]string, 0),
 		}
 
-		// Check for common Ijekavica patterns
+		// Make comparison case-insensitive
+		lowerText := strings.ToLower(text)
+
+		// Check for common Ijekavica words
+		// Focus on core noun/adjective dialect markers, not verb conjugations
 		ijekavicaWords := []string{
 			"мљеко", "мљека", // mleko variants
 			"дијете", "дијета", "дјеца", // dete variants
-			"пјесма", "пјесме", // pesma variants
-			"лијепо", "лијеп", "љеп", // lepo variants
+			"пјесма", "пјесме", "пјесму", // pesma variants
+			"лијепо", "лијепу", // lepo variants
 			"хтио", "хтјео", // hteo variants
 			"ријека", "ријеке", // reka variants
+			// Note: Verb forms like пјева, пије, пијем, пијемо are excluded
+			// as they may cause false positives or substring matches
 		}
+
+		// Track which violations we've already found to avoid duplicates
+		foundViolations := make(map[string]bool)
 
 		for _, word := range ijekavicaWords {
-			if strings.Contains(text, word) {
+			if strings.Contains(lowerText, word) && !foundViolations[word] {
 				result.hasIjekavica = true
 				result.violations = append(result.violations, word)
+				foundViolations[word] = true
 			}
 		}
 
-		// Also check for the core pattern "ије"
-		if strings.Contains(text, "ије") {
+		// Only check for generic "ије" pattern if no specific words found
+		if len(result.violations) == 0 && strings.Contains(lowerText, "ије") {
 			result.hasIjekavica = true
-			if len(result.violations) == 0 {
-				result.violations = append(result.violations, "contains 'ије' pattern")
-			}
+			result.violations = append(result.violations, "contains 'ије' pattern")
 		}
 
 		return result

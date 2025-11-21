@@ -21,7 +21,12 @@ func TestMultiLLMCoordinator(t *testing.T) {
 		os.Unsetenv("ANTHROPIC_API_KEY")
 		os.Unsetenv("ZHIPU_API_KEY")
 		os.Unsetenv("DEEPSEEK_API_KEY")
+		os.Unsetenv("QWEN_API_KEY")
 		os.Unsetenv("OLLAMA_ENABLED")
+
+		// Disable Qwen OAuth discovery in tests
+		os.Setenv("SKIP_QWEN_OAUTH", "1")
+		defer os.Unsetenv("SKIP_QWEN_OAUTH")
 
 		coordinator := coordination.NewMultiLLMCoordinator(coordination.CoordinatorConfig{
 			SessionID: "test-session",
@@ -118,6 +123,18 @@ func TestMultiLLMCoordinator(t *testing.T) {
 	})
 
 	t.Run("TranslateWithRetry_NoInstances", func(t *testing.T) {
+		// Clear all API keys
+		os.Unsetenv("OPENAI_API_KEY")
+		os.Unsetenv("ANTHROPIC_API_KEY")
+		os.Unsetenv("ZHIPU_API_KEY")
+		os.Unsetenv("DEEPSEEK_API_KEY")
+		os.Unsetenv("QWEN_API_KEY")
+		os.Unsetenv("OLLAMA_ENABLED")
+
+		// Disable Qwen OAuth discovery in tests
+		os.Setenv("SKIP_QWEN_OAUTH", "1")
+		defer os.Unsetenv("SKIP_QWEN_OAUTH")
+
 		coordinator := coordination.NewMultiLLMCoordinator(coordination.CoordinatorConfig{
 			SessionID: "test-session",
 		})
@@ -133,6 +150,18 @@ func TestMultiLLMCoordinator(t *testing.T) {
 	})
 
 	t.Run("TranslateWithConsensus_NoInstances", func(t *testing.T) {
+		// Clear all API keys
+		os.Unsetenv("OPENAI_API_KEY")
+		os.Unsetenv("ANTHROPIC_API_KEY")
+		os.Unsetenv("ZHIPU_API_KEY")
+		os.Unsetenv("DEEPSEEK_API_KEY")
+		os.Unsetenv("QWEN_API_KEY")
+		os.Unsetenv("OLLAMA_ENABLED")
+
+		// Disable Qwen OAuth discovery in tests
+		os.Setenv("SKIP_QWEN_OAUTH", "1")
+		defer os.Unsetenv("SKIP_QWEN_OAUTH")
+
 		coordinator := coordination.NewMultiLLMCoordinator(coordination.CoordinatorConfig{
 			SessionID: "test-session",
 		})

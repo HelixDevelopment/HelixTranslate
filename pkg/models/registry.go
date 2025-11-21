@@ -288,8 +288,13 @@ func (r *ModelRegistry) scoreModel(model *ModelInfo, preferredLangs []string, ma
 	}
 
 	// Translation optimization bonus
-	if strings.Contains(strings.ToLower(model.OptimizedFor), "translation") {
-		score += 5.0
+	optimizedLower := strings.ToLower(model.OptimizedFor)
+	if strings.Contains(optimizedLower, "professional translation") || strings.Contains(optimizedLower, "multilingual translation") {
+		// Specialized translation models get higher bonus
+		score += 8.0
+	} else if strings.Contains(optimizedLower, "translation") {
+		// General models with translation get smaller bonus
+		score += 4.0
 	}
 
 	// Language support bonus

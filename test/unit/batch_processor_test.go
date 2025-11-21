@@ -220,7 +220,7 @@ func TestBatchProcessor(t *testing.T) {
 		os.MkdirAll(testDir, 0755)
 
 		for i := 0; i < 5; i++ {
-			filename := filepath.Join(testDir, filepath.Join(testDir, "book"+string(rune('0'+i))+".txt"))
+			filename := filepath.Join(testDir, "book"+string(rune('0'+i))+".txt")
 			os.WriteFile(filename, []byte("test content"), 0644)
 		}
 
