@@ -19,6 +19,7 @@ const (
 	ProviderDeepSeek  Provider = "deepseek"
 	ProviderQwen      Provider = "qwen"
 	ProviderOllama    Provider = "ollama"
+	ProviderLlamaCpp  Provider = "llamacpp"
 )
 
 // LLMTranslator implements LLM-based translation
@@ -54,6 +55,8 @@ func NewLLMTranslator(config translator.TranslationConfig) (*LLMTranslator, erro
 		client, err = NewQwenClient(config)
 	case ProviderOllama:
 		client, err = NewOllamaClient(config)
+	case ProviderLlamaCpp:
+		client, err = NewLlamaCppClient(config)
 	default:
 		return nil, fmt.Errorf("unsupported LLM provider: %s", provider)
 	}
