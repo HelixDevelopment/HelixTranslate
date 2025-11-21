@@ -336,11 +336,42 @@ func (c *MarkdownToEPUBConverter) markdownToHTML(markdown string) string {
 	scanner := bufio.NewScanner(strings.NewReader(markdown))
 
 	inParagraph := false
+	inCodeBlock := false
 	var currentParagraph strings.Builder
+	var codeBlock strings.Builder
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		trimmed := strings.TrimSpace(line)
+
+		// Code block delimiter
+		if strings.HasPrefix(trimmed, "```") {
+			if inParagraph {
+				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
+				currentParagraph.Reset()
+				inParagraph = false
+			}
+
+			if inCodeBlock {
+				// End code block
+				html.WriteString("  <pre><code>" + c.escapeXML(codeBlock.String()) + "</code></pre>\n")
+				codeBlock.Reset()
+				inCodeBlock = false
+			} else {
+				// Start code block
+				inCodeBlock = true
+			}
+			continue
+		}
+
+		// Inside code block
+		if inCodeBlock {
+			if codeBlock.Len() > 0 {
+				codeBlock.WriteString("\n")
+			}
+			codeBlock.WriteString(line)
+			continue
+		}
 
 		// Empty line ends paragraph
 		if trimmed == "" {
@@ -352,16 +383,71 @@ func (c *MarkdownToEPUBConverter) markdownToHTML(markdown string) string {
 			continue
 		}
 
-		// Headers
-		if strings.HasPrefix(trimmed, "###") {
+		// Horizontal rule
+		if matched, _ := regexp.MatchString(`^[-*_]{3,}$`, trimmed); matched {
 			if inParagraph {
 				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
 				currentParagraph.Reset()
 				inParagraph = false
 			}
-			text := strings.TrimPrefix(trimmed, "###")
-			text = strings.TrimSpace(text)
+			html.WriteString("  <hr/>\n")
+			continue
+		}
+
+		// Headers (h1 through h6)
+		if strings.HasPrefix(trimmed, "######") {
+			if inParagraph {
+				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
+				currentParagraph.Reset()
+				inParagraph = false
+			}
+			text := strings.TrimSpace(strings.TrimPrefix(trimmed, "######"))
+			html.WriteString(fmt.Sprintf("  <h6>%s</h6>\n", c.escapeXML(text)))
+			continue
+		} else if strings.HasPrefix(trimmed, "#####") {
+			if inParagraph {
+				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
+				currentParagraph.Reset()
+				inParagraph = false
+			}
+			text := strings.TrimSpace(strings.TrimPrefix(trimmed, "#####"))
+			html.WriteString(fmt.Sprintf("  <h5>%s</h5>\n", c.escapeXML(text)))
+			continue
+		} else if strings.HasPrefix(trimmed, "####") {
+			if inParagraph {
+				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
+				currentParagraph.Reset()
+				inParagraph = false
+			}
+			text := strings.TrimSpace(strings.TrimPrefix(trimmed, "####"))
+			html.WriteString(fmt.Sprintf("  <h4>%s</h4>\n", c.escapeXML(text)))
+			continue
+		} else if strings.HasPrefix(trimmed, "###") {
+			if inParagraph {
+				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
+				currentParagraph.Reset()
+				inParagraph = false
+			}
+			text := strings.TrimSpace(strings.TrimPrefix(trimmed, "###"))
 			html.WriteString(fmt.Sprintf("  <h3>%s</h3>\n", c.escapeXML(text)))
+			continue
+		} else if strings.HasPrefix(trimmed, "##") {
+			if inParagraph {
+				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
+				currentParagraph.Reset()
+				inParagraph = false
+			}
+			text := strings.TrimSpace(strings.TrimPrefix(trimmed, "##"))
+			html.WriteString(fmt.Sprintf("  <h2>%s</h2>\n", c.escapeXML(text)))
+			continue
+		} else if strings.HasPrefix(trimmed, "#") && len(trimmed) > 1 && trimmed[1] == ' ' {
+			if inParagraph {
+				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
+				currentParagraph.Reset()
+				inParagraph = false
+			}
+			text := strings.TrimSpace(strings.TrimPrefix(trimmed, "#"))
+			html.WriteString(fmt.Sprintf("  <h1>%s</h1>\n", c.escapeXML(text)))
 			continue
 		}
 
@@ -379,11 +465,20 @@ func (c *MarkdownToEPUBConverter) markdownToHTML(markdown string) string {
 		html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
 	}
 
+	// Close unclosed code block
+	if inCodeBlock {
+		html.WriteString("  <pre><code>" + c.escapeXML(codeBlock.String()) + "</code></pre>\n")
+	}
+
 	return html.String()
 }
 
 // convertInlineMarkdown converts inline markdown formatting to HTML
 func (c *MarkdownToEPUBConverter) convertInlineMarkdown(text string) string {
+	// First escape XML special characters in the raw text
+	text = c.escapeXML(text)
+
+	// Now convert markdown to HTML (HTML tags won't be escaped)
 	// Bold: **text** or __text__ (process first to avoid conflicts)
 	text = regexp.MustCompile(`\*\*(.+?)\*\*`).ReplaceAllString(text, "<strong>$1</strong>")
 	text = regexp.MustCompile(`__(.+?)__`).ReplaceAllString(text, "<strong>$1</strong>")
@@ -396,7 +491,7 @@ func (c *MarkdownToEPUBConverter) convertInlineMarkdown(text string) string {
 	// Code: `text`
 	text = regexp.MustCompile("`([^`]+)`").ReplaceAllString(text, "<code>$1</code>")
 
-	return c.escapeXML(text)
+	return text
 }
 
 // escapeXML escapes special XML characters

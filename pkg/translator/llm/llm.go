@@ -310,13 +310,20 @@ Guidelines:
 4. Keep names of people and places unchanged unless they have standard Serbian equivalents
 5. Preserve formatting, punctuation, and paragraph structure
 6. Use Serbian Cyrillic script (ћирилица)
+7. **CRITICAL**: Use ONLY Ekavica dialect (екавица) - the standard Serbian dialect used in Serbia
+   - Use "е" instead of "ије/је": mleko (not mlijeko), dete (not dijete), pesma (not pjesma)
+   - Ekavica examples: hteo (not htio), lepo (not lijepo), reka (not rijeka)
+   - This is MANDATORY for all translations to Serbian
+8. **CRITICAL**: Use ONLY pure Serbian vocabulary - avoid Croatian, Bosnian, or Montenegrin words
+   - Use standard Serbian words preferred in Serbia, not regional variants
+   - Example: use "avion" (not Croatian "zrakoplov"), "pozorište" (not Croatian "kazalište")
 
 Context: %s
 
 Russian text:
 %s
 
-Serbian translation:`, context, text)
+Serbian translation (Ekavica only):`, context, text)
 }
 
 // enhanceTranslation post-processes the translation

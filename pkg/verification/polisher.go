@@ -474,11 +474,25 @@ func (bp *BookPolisher) createVerificationPrompt(originalText, translatedText st
 **Verification Dimensions:**
 %s
 
+**CRITICAL REQUIREMENT - Ekavica Dialect:**
+All Serbian translations MUST use ONLY Ekavica dialect (екавица), the standard dialect of Serbia.
+- Use "е" instead of "ије/је": mleko (not mlijeko), dete (not dijete), pesma (not pjesma)
+- Use hteo (not htio), lepo (not lijepo), reka (not rijeka)
+- ANY use of Ijekavica forms (ије/је) is a CRITICAL ERROR that must be corrected
+
+**CRITICAL REQUIREMENT - Pure Serbian Vocabulary:**
+When translating to Serbian, ONLY use pure Serbian vocabulary. Replace any Croatian, Bosnian, or Montenegrin word choices with standard Serbian equivalents.
+- Use standard Serbian words preferred in Serbia, not regional variants from other countries
+- Avoid Croatianisms, Bosnianisms, or Montenegrin-specific vocabulary
+- This ensures the translation is natural and idiomatic for Serbian readers in Serbia
+- Example differences to avoid: Croatian "zrakoplov" → Serbian "avion", Croatian "kazalište" → Serbian "pozorište"
+
 **Your Task:**
 1. Evaluate the translation on each dimension listed above
 2. Score each dimension from 0.0 to 1.0 (where 1.0 is perfect)
-3. Identify any issues or improvements needed
-4. Provide a polished version if improvements are needed
+3. **CRITICAL**: Check for Ijekavica dialect usage - this is mandatory verification
+4. Identify any issues or improvements needed
+5. Provide a polished version if improvements are needed (always use Ekavica)
 
 **Response Format:**
 SPIRIT_SCORE: [0.0-1.0]
@@ -488,12 +502,14 @@ VOCABULARY_SCORE: [0.0-1.0]
 
 ISSUES:
 [List any issues found, one per line with format "TYPE: description"]
+[MUST include "DIALECT: Uses Ijekavica instead of Ekavica" if any Ijekavica forms detected]
+[MUST include "VOCABULARY: Uses Croatian/Bosnian/Montenegrin words" if any regional vocabulary detected]
 
 POLISHED_TEXT:
-[Your improved version, or UNCHANGED if translation is perfect]
+[Your improved version in Ekavica dialect, or UNCHANGED if translation is perfect]
 
 EXPLANATION:
-[Brief explanation of changes made and why]`,
+[Brief explanation of changes made and why, especially any dialect corrections]`,
 		originalText,
 		translatedText,
 		dimensionsList)

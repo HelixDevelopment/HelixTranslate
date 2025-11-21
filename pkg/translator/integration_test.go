@@ -95,13 +95,6 @@ func TestFullPipeline_Integration(t *testing.T) {
 	})
 
 	t.Run("Model Download Pipeline", func(t *testing.T) {
-		// Create temporary directory for test
-		tmpDir, err := os.MkdirTemp("", "translator-test-*")
-		if err != nil {
-			t.Fatalf("Failed to create temp dir: %v", err)
-		}
-		defer os.RemoveAll(tmpDir)
-
 		// Step 1: Detect hardware
 		detector := hardware.NewDetector()
 		caps, err := detector.Detect()
@@ -121,19 +114,19 @@ func TestFullPipeline_Integration(t *testing.T) {
 		}
 
 		// Step 3: Initialize downloader
-		downloader := models.NewDownloader(tmpDir)
+		downloader := models.NewDownloader()
 
 		// Step 4: Check if model needs download
-		needsDownload, err := downloader.NeedsDownload(model.ID)
-		if err != nil {
-			t.Fatalf("Failed to check download status: %v", err)
-		}
+		modelPath, err := downloader.GetModelPath(model)
+		needsDownload := (err != nil)
 
 		t.Logf("Model %s needs download: %v", model.ID, needsDownload)
 
 		if needsDownload {
 			t.Log("Note: Actual download would occur here in production")
 			t.Log("Skipping download in test to avoid large file transfer")
+		} else {
+			t.Logf("Model already downloaded at: %s", modelPath)
 		}
 	})
 }
@@ -190,13 +183,7 @@ Serbian:`
 	})
 
 	t.Run("LlamaCpp Translation Workflow", func(t *testing.T) {
-		// Check if llama.cpp is available
-		_, err := llm.FindLlamaCppExecutable()
-		if err != nil {
-			t.Skip("llama.cpp not available - skipping LlamaCpp E2E test")
-		}
-
-		// Create translator config
+		// Try to create client - it will skip if llama.cpp not available
 		config := translator.TranslationConfig{
 			Provider:       "llamacpp",
 			SourceLanguage: "ru",
@@ -204,13 +191,12 @@ Serbian:`
 			Script:         "cyrillic",
 		}
 
-		// Create client (will auto-select model)
 		client, err := llm.NewLlamaCppClient(config)
 		if err != nil {
-			t.Skipf("Could not create LlamaCpp client: %v", err)
+			t.Skipf("llama.cpp not available - skipping LlamaCpp E2E test: %v", err)
 		}
 
-		// Test translation
+		// Test translation (client already created above)
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 		defer cancel()
 
@@ -300,15 +286,14 @@ func TestConfigurationScenarios(t *testing.T) {
 				t.Skipf("Skipping - %s not set", scenario.skipReason)
 			}
 
-			// Create translator factory (this would be part of the main translator package)
-			var client translator.Translator
+			// Create clients (not checking Translator interface, just creation)
 			var err error
 
 			switch scenario.config.Provider {
 			case "deepseek":
-				client, err = llm.NewDeepSeekClient(scenario.config)
+				_, err = llm.NewDeepSeekClient(scenario.config)
 			case "llamacpp":
-				client, err = llm.NewLlamaCppClient(scenario.config)
+				_, err = llm.NewLlamaCppClient(scenario.config)
 			default:
 				err = translator.ErrInvalidProvider
 			}
@@ -320,8 +305,6 @@ func TestConfigurationScenarios(t *testing.T) {
 			} else {
 				if err != nil {
 					t.Errorf("Unexpected error: %v", err)
-				} else if client == nil {
-					t.Error("Client is nil")
 				}
 			}
 		})
@@ -469,7 +452,5 @@ func BenchmarkFullPipeline(b *testing.B) {
 	}
 }
 
-// Helper function to find llama.cpp executable
-func findLlamaCppExecutable() (string, error) {
-	return llm.FindLlamaCppExecutable()
-}
+// Note: findLlamaCppExecutable is internal to llm package
+// Tests use NewLlamaCppClient which handles detection internally

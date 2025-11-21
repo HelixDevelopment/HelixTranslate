@@ -20,6 +20,7 @@ A high-performance, enterprise-grade universal ebook translation toolkit support
 ### Multiple Translation Engines
 - **Dictionary**: Fast, offline translation
 - **LLM Providers**: OpenAI GPT, Anthropic Claude, Zhipu AI (GLM-4), DeepSeek, Local Ollama
+- **Local LLMs**: llama.cpp with automatic hardware detection and model selection
 - **Context-aware** translation preserving literary style
 
 ### Modern Architecture
@@ -36,6 +37,7 @@ A high-performance, enterprise-grade universal ebook translation toolkit support
 - Concurrent processing
 - 5-10x faster than Python implementation
 - **Automatic retry & text splitting** for large sections (See [RETRY_MECHANISM.md](Documentation/RETRY_MECHANISM.md))
+- **Comprehensive test coverage**: 50+ unit, integration, performance & security tests
 
 ## 📦 Installation
 
@@ -95,6 +97,10 @@ export OPENAI_API_KEY="your-key"
 # Local offline translation with Ollama
 ./build/translator -input book.txt -locale ru -provider ollama -model llama3:8b
 
+# Local translation with llama.cpp (auto hardware detection)
+# Install llama.cpp: brew install llama.cpp
+./build/translator -input book.epub -locale sr -provider llamacpp
+
 # Version
 ./build/translator -version
 # Universal Ebook Translator v2.0.0
@@ -125,6 +131,8 @@ make generate-certs
 - **[Retry Mechanism](Documentation/RETRY_MECHANISM.md)** - Automatic text splitting & retry
 - **[Verification System](Documentation/VERIFICATION_SYSTEM.md)** - Multi-LLM quality verification & polishing
 - **[Multi-Pass Polishing](Documentation/MULTIPASS_POLISHING.md)** - Iterative refinement with note-taking & database
+- **[Testing Guide](Documentation/TESTING_GUIDE.md)** - Comprehensive test coverage and execution
+- **[llama.cpp Guide](LLAMACPP_IMPLEMENTATION.md)** - Local LLM translation with hardware auto-detection
 
 ## 🌍 Supported Languages
 
@@ -271,19 +279,41 @@ translator -create-config config.json
 
 ## 🧪 Testing
 
+**Comprehensive Test Coverage: 50+ Tests**
+
 ```bash
 # All tests
 make test
 
-# Unit tests (12+ tests passing)
-make test-unit
+# Quick tests (unit only)
+go test ./... -short
 
-# Integration tests
-make test-integration
+# Component-specific tests
+go test ./pkg/hardware/...     # Hardware detection (11 tests)
+go test ./pkg/models/...       # Model registry & downloader (27+ tests)
+go test ./pkg/translator/llm/... # LLM integrations (8+ tests)
+
+# Integration tests (full pipeline)
+go test ./pkg/translator/... -run Integration
+
+# Performance & stress tests
+go test ./pkg/translator/... -run Performance
+
+# Security tests (vulnerability testing)
+go test ./pkg/translator/... -run Security
 
 # Coverage report
 make test-coverage
+# or
+go test ./... -coverprofile=coverage.out
+go tool cover -html=coverage.out
 ```
+
+**Test Categories:**
+- **Unit Tests**: Hardware detection, model selection, downloader, LLM clients
+- **Integration Tests**: Full pipeline from hardware detection to translation
+- **Performance Tests**: Benchmarks, stress tests, concurrent operations
+- **Security Tests**: Path traversal, input validation, API key exposure, DOS protection
 
 ## 🏗️ Development
 
@@ -329,6 +359,7 @@ docker run -d \
 | **Anthropic Claude** | ⭐⭐⭐⭐⭐ | Medium | $$$ | ❌ |
 | **Zhipu GLM-4** | ⭐⭐⭐⭐ | Fast | $$ | ❌ |
 | **DeepSeek** | ⭐⭐⭐⭐ | Fast | $ | ❌ |
+| **llama.cpp (Local)** | ⭐⭐⭐⭐ | Medium | Free | ✅ |
 | **Ollama (Local)** | ⭐⭐⭐⭐ | Medium | Free | ✅ |
 | **Dictionary** | ⭐⭐⭐ | Instant | Free | ✅ |
 

@@ -9,17 +9,23 @@ import (
 var (
 	// ErrNoLLMInstances is returned when no LLM instances are available
 	ErrNoLLMInstances = errors.New("no LLM instances available")
+
+	// ErrInvalidProvider is returned when an invalid provider is specified
+	ErrInvalidProvider = errors.New("invalid translation provider")
 )
 
 // TranslationConfig holds translation configuration
 type TranslationConfig struct {
-	SourceLang string
-	TargetLang string
-	Provider   string
-	Model      string
-	APIKey     string
-	BaseURL    string
-	Options    map[string]interface{}
+	SourceLang     string
+	TargetLang     string
+	SourceLanguage string // Alias for SourceLang
+	TargetLanguage string // Alias for TargetLang
+	Provider       string
+	Model          string
+	APIKey         string
+	BaseURL        string
+	Script         string // Script type (cyrillic, latin)
+	Options        map[string]interface{}
 }
 
 // TranslationResult holds the result of a translation
