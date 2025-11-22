@@ -8,6 +8,7 @@ import (
 	"digital.vasic.translator/pkg/translator"
 	"fmt"
 	"log"
+	"strings"
 )
 
 // PreparationAwareTranslator wraps a translator with preparation phase capabilities
@@ -69,9 +70,9 @@ func (pat *PreparationAwareTranslator) runPreparation(
 	translator.EmitProgress(eventBus, sessionID,
 		fmt.Sprintf("🔍 Starting preparation phase (%d passes)", pat.preparationConfig.PassCount),
 		map[string]interface{}{
-			"phase":       "preparation",
-			"pass_count":  pat.preparationConfig.PassCount,
-			"providers":   pat.preparationConfig.Providers,
+			"phase":      "preparation",
+			"pass_count": pat.preparationConfig.PassCount,
+			"providers":  pat.preparationConfig.Providers,
 		})
 
 	// Create preparation coordinator
@@ -192,12 +193,12 @@ func (pat *PreparationAwareTranslator) translateMetadata(
 	eventBus *events.EventBus,
 	sessionID string,
 ) error {
-	// Translate title
-	if metadata.Title != "" {
+	// Translate title (if not in untranslatable terms)
+	if metadata.Title != "" && !pat.isUntranslatable(metadata.Title) {
 		translated, err := pat.baseTranslator.TranslateWithProgress(
 			ctx,
 			metadata.Title,
-			"Book title",
+			"Book title - translate to Serbian while preserving literary style",
 			eventBus,
 			sessionID,
 		)
@@ -207,12 +208,19 @@ func (pat *PreparationAwareTranslator) translateMetadata(
 		metadata.Title = translated
 	}
 
-	// Translate description
+	// Translate description/annotation
 	if metadata.Description != "" {
+		context := "Book description/annotation - translate to Serbian, maintain literary tone"
+		if pat.preparationResult != nil {
+			// Add preparation context about tone and style
+			analysis := pat.preparationResult.FinalAnalysis
+			context += fmt.Sprintf("\n\nBook style: %s, %s", analysis.ContentType, analysis.Tone)
+		}
+
 		translated, err := pat.baseTranslator.TranslateWithProgress(
 			ctx,
 			metadata.Description,
-			"Book description",
+			context,
 			eventBus,
 			sessionID,
 		)
@@ -223,7 +231,26 @@ func (pat *PreparationAwareTranslator) translateMetadata(
 		}
 	}
 
+	// Note: Authors, Publisher, ISBN, Date, and Cover are intentionally kept in original form
+	// as they are proper nouns, identifiers, or binary data that shouldn't be translated
+
 	return nil
+}
+
+// isUntranslatable checks if a term should not be translated based on preparation analysis
+func (pat *PreparationAwareTranslator) isUntranslatable(term string) bool {
+	if pat.preparationResult == nil {
+		return false
+	}
+
+	// Check untranslatable terms
+	for _, ut := range pat.preparationResult.FinalAnalysis.UntranslatableTerms {
+		if strings.Contains(strings.ToLower(term), strings.ToLower(ut.Term)) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // translateChapter translates a chapter with preparation context

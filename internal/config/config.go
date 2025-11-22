@@ -11,6 +11,7 @@ type Config struct {
 	Server      ServerConfig      `json:"server"`
 	Security    SecurityConfig    `json:"security"`
 	Translation TranslationConfig `json:"translation"`
+	Preparation PreparationConfig `json:"preparation"`
 	Distributed DistributedConfig `json:"distributed"`
 	Logging     LoggingConfig     `json:"logging"`
 }
@@ -85,6 +86,19 @@ type LoggingConfig struct {
 	OutputFile string `json:"output_file"`
 }
 
+// PreparationConfig represents preparation phase configuration
+type PreparationConfig struct {
+	Enabled            bool     `json:"enabled"`
+	PassCount          int      `json:"pass_count"`
+	Providers          []string `json:"providers"`
+	AnalyzeContentType bool     `json:"analyze_content_type"`
+	AnalyzeCharacters  bool     `json:"analyze_characters"`
+	AnalyzeTerminology bool     `json:"analyze_terminology"`
+	AnalyzeCulture     bool     `json:"analyze_culture"`
+	AnalyzeChapters    bool     `json:"analyze_chapters"`
+	DetailLevel        string   `json:"detail_level"`
+}
+
 // DefaultConfig returns default configuration
 func DefaultConfig() *Config {
 	return &Config{
@@ -113,6 +127,17 @@ func DefaultConfig() *Config {
 			CacheTTL:        3600,
 			MaxConcurrent:   5,
 			Providers:       make(map[string]ProviderConfig),
+		},
+		Preparation: PreparationConfig{
+			Enabled:            true,
+			PassCount:          2,
+			Providers:          []string{"deepseek", "anthropic"},
+			AnalyzeContentType: true,
+			AnalyzeCharacters:  true,
+			AnalyzeTerminology: true,
+			AnalyzeCulture:     true,
+			AnalyzeChapters:    true,
+			DetailLevel:        "standard",
 		},
 		Distributed: DistributedConfig{
 			Enabled:             false,

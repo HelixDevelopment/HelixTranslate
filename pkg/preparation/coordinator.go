@@ -59,8 +59,10 @@ func NewPreparationCoordinator(config PreparationConfig) (*PreparationCoordinato
 func (pc *PreparationCoordinator) PrepareBook(ctx context.Context, book *ebook.Book) (*PreparationResult, error) {
 	startTime := time.Now()
 
-	log.Printf("🔍 Starting preparation phase: %d passes with %d providers",
-		pc.config.PassCount, len(pc.providers))
+	log.Printf("🔍 Starting preparation phase: %d passes with %d providers", pc.config.PassCount, len(pc.providers))
+	log.Printf("   Analysis scope: content_type=%t, characters=%t, terminology=%t, culture=%t, chapters=%t",
+		pc.config.AnalyzeContentType, pc.config.AnalyzeCharacters, pc.config.AnalyzeTerminology,
+		pc.config.AnalyzeCulture, pc.config.AnalyzeChapters)
 
 	result := &PreparationResult{
 		SourceLanguage: pc.config.SourceLanguage,
@@ -130,8 +132,11 @@ func (pc *PreparationCoordinator) PrepareBook(ctx context.Context, book *ebook.B
 	result.CompletedAt = time.Now()
 	result.TotalDuration = result.CompletedAt.Sub(startTime)
 
-	log.Printf("✅ Preparation complete: %d passes in %.2fs",
-		len(result.Passes), result.TotalDuration.Seconds())
+	log.Printf("✅ Preparation complete: %d passes in %.2fs", len(result.Passes), result.TotalDuration.Seconds())
+	log.Printf("   Final analysis: %s (%s) - %d untranslatable terms, %d footnotes, %d characters, %d cultural refs",
+		result.FinalAnalysis.ContentType, result.FinalAnalysis.Genre,
+		len(result.FinalAnalysis.UntranslatableTerms), len(result.FinalAnalysis.FootnoteGuidance),
+		len(result.FinalAnalysis.Characters), len(result.FinalAnalysis.CulturalReferences))
 
 	return result, nil
 }

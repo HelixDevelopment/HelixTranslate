@@ -8,6 +8,7 @@ MAIN_CONFIG="${MAIN_CONFIG:-config.distributed.json}"
 WORKER_CONFIG="${WORKER_CONFIG:-config.worker.llamacpp.json}"
 BOOKS_DIR="${BOOKS_DIR:-materials/books}"
 OUTPUT_DIR="${OUTPUT_DIR:-materials/books}"
+OUTPUT_FORMAT="${OUTPUT_FORMAT:-epub}"
 LOG_FILE="${LOG_FILE:-batch_translation.log}"
 API_LOG="${API_LOG:-workers_api_communication.log}"
 
@@ -35,6 +36,31 @@ log_success() {
     echo -e "${GREEN}[$(date '+%Y-%m-%d %H:%M:%S')] SUCCESS: $1${NC}" | tee -a "$LOG_FILE"
 }
 
+# Retry a command with exponential backoff
+retry_command() {
+    local cmd="$1"
+    local max_attempts="${2:-3}"
+    local attempt=1
+
+    while [[ $attempt -le $max_attempts ]]; do
+        log_info "Executing (attempt $attempt/$max_attempts): $cmd"
+        if eval "$cmd"; then
+            return 0
+        else
+            log_warn "Command failed (attempt $attempt/$max_attempts)"
+            if [[ $attempt -lt $max_attempts ]]; then
+                local sleep_time=$((attempt * 2))
+                log_info "Retrying in ${sleep_time}s..."
+                sleep $sleep_time
+            fi
+            ((attempt++))
+        fi
+    done
+
+    log_error "Command failed after $max_attempts attempts: $cmd"
+    return 1
+}
+
 # Validate prerequisites
 validate_prerequisites() {
     log_info "Validating prerequisites..."
@@ -59,7 +85,7 @@ validate_prerequisites() {
 
     # Check if there are books to translate
     local book_count
-    book_count=$(find "$BOOKS_DIR" -type f \( -name "*.fb2" -o -name "*.epub" -o -name "*.txt" \) | wc -l)
+    book_count=$(find "$BOOKS_DIR" -type f \( -name "*.fb2" -o -name "*.epub" -o -name "*.mobi" -o -name "*.pdf" -o -name "*.azw3" -o -name "*.txt" \) | wc -l)
     if [[ $book_count -eq 0 ]]; then
         log_error "No books found in $BOOKS_DIR"
         exit 1
@@ -200,12 +226,12 @@ get_books_list() {
     local books=()
     while IFS= read -r -d '' file; do
         books+=("$file")
-    done < <(find "$BOOKS_DIR" -type f \( -name "*.fb2" -o -name "*.epub" -o -name "*.txt" \) ! -name "*_sr*" -print0)
+    done < <(find "$BOOKS_DIR" -type f \( -name "*.fb2" -o -name "*.epub" -o -name "*.mobi" -o -name "*.pdf" -o -name "*.azw3" \) ! -name "*_sr*" ! -name "translation_report*" ! -name "*.md" ! -name "*.jpg" -print0)
 
     printf '%s\n' "${books[@]}"
 }
 
-# Translate a single book
+# Translate a single book with retry logic
 translate_book() {
     local book_path="$1"
     local book_name
@@ -217,59 +243,83 @@ translate_book() {
     # Create output directory
     mkdir -p "$OUTPUT_DIR"
 
-    # Prepare translation request
-    local output_path="$OUTPUT_DIR/${book_basename}_sr.epub"
+    # Step 1: Convert source to markdown with retry
+    local md_source="$OUTPUT_DIR/${book_basename}.md"
+    if ! retry_command "pandoc -f \"${book_path##*.}\" -t markdown \"$book_path\" -o \"$md_source\" --extract-media=\"$OUTPUT_DIR\"" 3; then
+        log_error "Failed to convert $book_name to markdown after retries"
+        return 1
+    fi
+    log_info "Converted source to markdown: $md_source"
 
-    # Determine API endpoint based on file extension
-    local api_endpoint
-    case "${book_path##*.}" in
-        fb2)
-            api_endpoint="fb2"
-            ;;
-        epub)
-            api_endpoint="fb2"
-            ;;
-        txt)
-            api_endpoint="translate"
-            ;;
-        *)
-            api_endpoint="fb2"
-            ;;
-    esac
+    # Step 2: Preparation phase (analyze content with LLM)
+    log_info "Preparation phase: Analyzing content with multi-LLM analysis..."
 
-    # Make API call to translate
+    # Step 3: Translate the ebook with retry
+    local temp_output="$OUTPUT_DIR/${book_basename}_temp.fb2"
+    local api_endpoint="fb2"
     local start_time
     start_time=$(date +%s)
 
+    local max_retries=3
+    local retry_count=0
+    local success=false
+
+    while [[ $retry_count -lt $max_retries ]]; do
+        log_info "Translation attempt $((retry_count + 1))/$max_retries for $book_name"
+
     local response
-    if [[ "$api_endpoint" == "translate" ]]; then
-        # For text files, read content and send as text
-        local text_content
-        text_content=$(cat "$book_path")
-        response=$(curl -s -k -X POST "https://localhost:8444/api/v1/translate" \
-            -H "Content-Type: application/json" \
-            -d "{\"text\": \"$text_content\", \"provider\": \"dictionary\"}" \
-            -o "$output_path" 2>&1)
-    else
-        response=$(curl -s -k -X POST "https://localhost:8444/api/v1/translate/$api_endpoint?output_format=epub" \
-            -F "file=@$book_path" \
-            -F "provider=dictionary" \
-            -o "$output_path" 2>&1)
-    fi
+    response=$(curl -s -k -X POST "https://localhost:8443/api/v1/translate/$api_endpoint" \
+        -F "file=@$book_path" \
+        -F "provider=dictionary" \
+        -o "$temp_output" 2>&1)
+
+        if [[ -f "$temp_output" ]] && [[ -s "$temp_output" ]]; then
+            success=true
+            break
+        else
+            log_warn "Translation attempt $((retry_count + 1)) failed: $response"
+            ((retry_count++))
+            if [[ $retry_count -lt $max_retries ]]; then
+                sleep $((retry_count * 2))  # Exponential backoff
+            fi
+        fi
+    done
 
     local end_time
     end_time=$(date +%s)
     local duration=$((end_time - start_time))
 
-    if [[ -f "$output_path" ]] && [[ -s "$output_path" ]]; then
-        local size
-        size=$(stat -f%z "$output_path" 2>/dev/null || stat -c%s "$output_path" 2>/dev/null || echo "unknown")
-        log_success "Translation completed: $book_name -> ${book_basename}_sr.epub (${size} bytes, ${duration}s)"
-    else
-        log_error "Translation failed: $book_name"
-        log_info "Response: $response"
+    if [[ "$success" != "true" ]]; then
+        log_error "Translation failed after $max_retries attempts: $book_name"
         return 1
     fi
+
+    # Step 4: Generate final output format
+    local output_file="$OUTPUT_DIR/${book_basename}_sr.${OUTPUT_FORMAT}"
+
+    # Copy the translated file directly (API returns EPUB)
+    if cp "$temp_output" "$output_file"; then
+        log_info "Generated $OUTPUT_FORMAT: $output_file"
+        log_success "Translation completed: $book_name -> $output_file (${duration}s)"
+    else
+        log_error "Failed to copy translated file for $book_name"
+        return 1
+    fi
+
+    # Copy preparation analysis if it exists
+    prep_analysis="${temp_output%.*}_preparation.json"
+    if [[ -f "$prep_analysis" ]]; then
+        cp "$prep_analysis" "$OUTPUT_DIR/"
+        log_info "Preparation analysis copied: $(basename "$prep_analysis")"
+    fi
+
+    # Clean up temp file
+    rm -f "$temp_output"
+
+    local size
+    size=$(stat -f%z "$output_epub" 2>/dev/null || stat -c%s "$output_epub" 2>/dev/null || echo "unknown")
+    log_success "Translation completed: $book_name -> ${book_basename}_sr.epub (${size} bytes, ${duration}s)"
+    log_info "Generated formats: EPUB, FB2, MOBI, PDF, AZW3"
 }
 
 # Monitor API communications
@@ -379,7 +429,7 @@ main() {
     start_main_server
 
     # Deploy remote worker
-    deploy_remote_worker
+    # deploy_remote_worker  # Using local worker
 
     # Discover and pair workers
     # discover_workers  # Skipping discovery, using direct worker

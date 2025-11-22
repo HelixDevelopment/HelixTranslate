@@ -25,13 +25,24 @@
     "max_concurrent": 5,
     "providers": {}
   },
+  "preparation": {
+    "enabled": false,
+    "pass_count": 1,
+    "providers": ["dictionary"],
+    "analyze_content_type": true,
+    "analyze_characters": true,
+    "analyze_terminology": true,
+    "analyze_culture": true,
+    "analyze_chapters": true,
+    "detail_level": "standard"
+  },
    "distributed": {
     "enabled": true,
     "workers": {
       "thinker-worker": {
-        "name": "Remote Llama.cpp Worker",
-        "host": "thinker.local",
-        "port": 22,
+        "name": "Local Llama.cpp Worker",
+        "host": "localhost",
+        "port": 8444,
         "user": "milosvasic",
         "password": "WhiteSnake8587",
         "max_capacity": 10,

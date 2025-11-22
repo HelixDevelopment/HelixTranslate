@@ -7,6 +7,8 @@ import (
 	"digital.vasic.translator/pkg/distributed"
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
+	"digital.vasic.translator/pkg/language"
+	"digital.vasic.translator/pkg/preparation"
 	"digital.vasic.translator/pkg/script"
 	"digital.vasic.translator/pkg/security"
 	"digital.vasic.translator/pkg/translator"
@@ -15,6 +17,7 @@ import (
 	"digital.vasic.translator/pkg/websocket"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -301,7 +304,7 @@ func (h *Handler) translateFB2(c *gin.Context) {
 	}
 
 	// Create translator
-	trans, err := h.createTranslator(provider, model)
+	baseTrans, err := h.createTranslator(provider, model)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -309,9 +312,55 @@ func (h *Handler) translateFB2(c *gin.Context) {
 
 	// Translate
 	ctx := context.Background()
-	if err := h.translateBook(ctx, book, trans, sessionID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+
+	if h.config.Preparation.Enabled {
+		// Use preparation-aware translation
+		langDetector := language.NewDetector(nil) // Use heuristic detection
+
+		// Create preparation config
+		prepConfig := preparation.PreparationConfig{
+			PassCount:          h.config.Preparation.PassCount,
+			Providers:          h.config.Preparation.Providers,
+			AnalyzeContentType: h.config.Preparation.AnalyzeContentType,
+			AnalyzeCharacters:  h.config.Preparation.AnalyzeCharacters,
+			AnalyzeTerminology: h.config.Preparation.AnalyzeTerminology,
+			AnalyzeCulture:     h.config.Preparation.AnalyzeCulture,
+			AnalyzeChapters:    h.config.Preparation.AnalyzeChapters,
+			DetailLevel:        h.config.Preparation.DetailLevel,
+			SourceLanguage:     "ru",
+			TargetLanguage:     "sr",
+		}
+
+		// Create preparation-aware translator
+		sourceLang := language.Language{Code: "ru", Name: "Russian"}
+		targetLang := language.Language{Code: "sr", Name: "Serbian"}
+		prepTrans := preparation.NewPreparationAwareTranslator(
+			baseTrans,
+			langDetector,
+			sourceLang,
+			targetLang,
+			&prepConfig,
+		)
+
+		if err := prepTrans.TranslateBook(ctx, book, h.eventBus, sessionID); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Save preparation analysis
+		bookBasename := strings.TrimSuffix(header.Filename, filepath.Ext(header.Filename))
+		prepAnalysisPath := filepath.Join(filepath.Dir(tempFile.Name()), bookBasename+"_preparation.json")
+		if err := prepTrans.SavePreparationAnalysis(prepAnalysisPath); err != nil {
+			log.Printf("Warning: Failed to save preparation analysis: %v", err)
+		} else {
+			log.Printf("Preparation analysis saved to: %s", prepAnalysisPath)
+		}
+	} else {
+		// Use standard translation
+		if err := h.translateBook(ctx, book, baseTrans, sessionID); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	}
 
 	// Convert script if needed
@@ -364,7 +413,7 @@ func (h *Handler) translateFB2(c *gin.Context) {
 		"FB2 translation completed",
 		map[string]interface{}{
 			"filename": outputFilename,
-			"stats":    trans.GetStats(),
+			"stats":    baseTrans.GetStats(),
 		},
 	)
 	completeEvent.SessionID = sessionID
