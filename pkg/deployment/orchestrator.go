@@ -403,6 +403,185 @@ func (do *DeploymentOrchestrator) emitEvent(event events.Event) {
 	}
 }
 
+// UpdateService updates a specific service to a new image version
+func (do *DeploymentOrchestrator) UpdateService(ctx context.Context, serviceName, newImage string) error {
+	do.logger.Printf("Updating service %s to image %s...", serviceName, newImage)
+
+	do.mu.RLock()
+	instance, exists := do.deployed[serviceName]
+	do.mu.RUnlock()
+
+	if !exists {
+		return fmt.Errorf("service %s not found in deployed instances", serviceName)
+	}
+
+	// Update the instance configuration with new image
+	instance.Config.DockerImage = newImage
+
+	// Redeploy the instance
+	containerID, err := do.deployer.UpdateInstance(ctx, instance.Config)
+	if err != nil {
+		return fmt.Errorf("failed to update service %s: %w", serviceName, err)
+	}
+
+	// Update instance information
+	instance.mu.Lock()
+	instance.ContainerID = containerID
+	instance.Status = "updating"
+	instance.LastSeen = time.Now()
+	instance.mu.Unlock()
+
+	// Wait for the instance to become healthy
+	if err := do.waitForInstanceHealth(ctx, instance, 5*time.Minute); err != nil {
+		return fmt.Errorf("service %s failed health check after update: %w", serviceName, err)
+	}
+
+	instance.mu.Lock()
+	instance.Status = "healthy"
+	instance.LastSeen = time.Now()
+	instance.mu.Unlock()
+
+	do.emitEvent(events.Event{
+		Type:      "service_updated",
+		SessionID: "system",
+		Message:   fmt.Sprintf("Service %s updated to %s", serviceName, newImage),
+		Data: map[string]interface{}{
+			"service":      serviceName,
+			"image":        newImage,
+			"container_id": containerID,
+		},
+	})
+
+	do.logger.Printf("Service %s updated successfully to %s", serviceName, newImage)
+	return nil
+}
+
+// UpdateAllServices updates all deployed services to their latest images
+func (do *DeploymentOrchestrator) UpdateAllServices(ctx context.Context) error {
+	do.logger.Println("Updating all services...")
+
+	do.mu.RLock()
+	instances := make([]*DeployedInstance, 0, len(do.deployed))
+	for _, instance := range do.deployed {
+		instances = append(instances, instance)
+	}
+	do.mu.RUnlock()
+
+	for _, instance := range instances {
+		if err := do.UpdateService(ctx, instance.ID, instance.Config.DockerImage+":latest"); err != nil {
+			return fmt.Errorf("failed to update service %s: %w", instance.ID, err)
+		}
+	}
+
+	do.emitEvent(events.Event{
+		Type:      "all_services_updated",
+		SessionID: "system",
+		Message:   "All services updated successfully",
+	})
+
+	do.logger.Println("All services updated successfully")
+	return nil
+}
+
+// RestartService restarts a specific service
+func (do *DeploymentOrchestrator) RestartService(ctx context.Context, serviceName string) error {
+	do.logger.Printf("Restarting service %s...", serviceName)
+
+	do.mu.RLock()
+	instance, exists := do.deployed[serviceName]
+	do.mu.RUnlock()
+
+	if !exists {
+		return fmt.Errorf("service %s not found in deployed instances", serviceName)
+	}
+
+	// Restart the instance
+	if err := do.deployer.RestartInstance(ctx, instance.Config); err != nil {
+		return fmt.Errorf("failed to restart service %s: %w", serviceName, err)
+	}
+
+	// Update instance status
+	instance.mu.Lock()
+	instance.Status = "restarting"
+	instance.LastSeen = time.Now()
+	instance.mu.Unlock()
+
+	// Wait for the instance to become healthy
+	if err := do.waitForInstanceHealth(ctx, instance, 2*time.Minute); err != nil {
+		return fmt.Errorf("service %s failed health check after restart: %w", serviceName, err)
+	}
+
+	instance.mu.Lock()
+	instance.Status = "healthy"
+	instance.LastSeen = time.Now()
+	instance.mu.Unlock()
+
+	do.emitEvent(events.Event{
+		Type:      "service_restarted",
+		SessionID: "system",
+		Message:   fmt.Sprintf("Service %s restarted", serviceName),
+		Data: map[string]interface{}{
+			"service": serviceName,
+		},
+	})
+
+	do.logger.Printf("Service %s restarted successfully", serviceName)
+	return nil
+}
+
+// RestartAllServices restarts all deployed services
+func (do *DeploymentOrchestrator) RestartAllServices(ctx context.Context) error {
+	do.logger.Println("Restarting all services...")
+
+	do.mu.RLock()
+	instances := make([]*DeployedInstance, 0, len(do.deployed))
+	for _, instance := range do.deployed {
+		instances = append(instances, instance)
+	}
+	do.mu.RUnlock()
+
+	for _, instance := range instances {
+		if err := do.RestartService(ctx, instance.ID); err != nil {
+			return fmt.Errorf("failed to restart service %s: %w", instance.ID, err)
+		}
+	}
+
+	do.emitEvent(events.Event{
+		Type:      "all_services_restarted",
+		SessionID: "system",
+		Message:   "All services restarted successfully",
+	})
+
+	do.logger.Println("All services restarted successfully")
+	return nil
+}
+
+// waitForInstanceHealth waits for a specific instance to become healthy
+func (do *DeploymentOrchestrator) waitForInstanceHealth(ctx context.Context, instance *DeployedInstance, timeout time.Duration) error {
+	timeoutChan := time.After(timeout)
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-timeoutChan:
+			return fmt.Errorf("timeout waiting for instance %s to become healthy", instance.ID)
+		case <-ticker.C:
+			healthy, err := do.checkInstanceHealth(ctx, instance)
+			if err != nil {
+				do.logger.Printf("Health check error for %s: %v", instance.ID, err)
+				continue
+			}
+
+			if healthy {
+				return nil
+			}
+		}
+	}
+}
+
 // Close shuts down the deployment orchestrator
 func (do *DeploymentOrchestrator) Close() error {
 	do.logger.Println("Shutting down deployment orchestrator...")

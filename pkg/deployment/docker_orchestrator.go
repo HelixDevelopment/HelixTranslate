@@ -371,6 +371,174 @@ func (do *DockerOrchestrator) StopDeployment(ctx context.Context) error {
 	return nil
 }
 
+// UpdateService updates a service to a new image version
+func (do *DockerOrchestrator) UpdateService(ctx context.Context, serviceName, newImage string) error {
+	do.logger.Printf("Updating service %s to image %s...", serviceName, newImage)
+
+	// Pull the new image
+	if err := do.runComposeCommand(ctx, "pull", serviceName); err != nil {
+		return fmt.Errorf("failed to pull new image for service %s: %w", serviceName, err)
+	}
+
+	// Update the service
+	if err := do.runComposeCommand(ctx, "up", "-d", serviceName); err != nil {
+		return fmt.Errorf("failed to update service %s: %w", serviceName, err)
+	}
+
+	// Wait for the service to be healthy
+	if err := do.waitForServiceHealthy(ctx, serviceName); err != nil {
+		return fmt.Errorf("service %s failed health check after update: %w", serviceName, err)
+	}
+
+	do.emitEvent(events.Event{
+		Type:      "service_updated",
+		SessionID: "system",
+		Message:   fmt.Sprintf("Service %s updated to %s", serviceName, newImage),
+		Data: map[string]interface{}{
+			"service": serviceName,
+			"image":   newImage,
+		},
+	})
+
+	do.logger.Printf("Service %s updated successfully", serviceName)
+	return nil
+}
+
+// RestartService restarts a specific service
+func (do *DockerOrchestrator) RestartService(ctx context.Context, serviceName string) error {
+	do.logger.Printf("Restarting service %s...", serviceName)
+
+	if err := do.runComposeCommand(ctx, "restart", serviceName); err != nil {
+		return fmt.Errorf("failed to restart service %s: %w", serviceName, err)
+	}
+
+	// Wait for the service to be healthy
+	if err := do.waitForServiceHealthy(ctx, serviceName); err != nil {
+		return fmt.Errorf("service %s failed health check after restart: %w", serviceName, err)
+	}
+
+	do.emitEvent(events.Event{
+		Type:      "service_restarted",
+		SessionID: "system",
+		Message:   fmt.Sprintf("Service %s restarted", serviceName),
+		Data: map[string]interface{}{
+			"service": serviceName,
+		},
+	})
+
+	do.logger.Printf("Service %s restarted successfully", serviceName)
+	return nil
+}
+
+// UpdateAllServices updates all services to their latest images
+func (do *DockerOrchestrator) UpdateAllServices(ctx context.Context) error {
+	do.logger.Println("Updating all services...")
+
+	// Pull all images
+	if err := do.runComposeCommand(ctx, "pull"); err != nil {
+		return fmt.Errorf("failed to pull all images: %w", err)
+	}
+
+	// Restart all services
+	if err := do.runComposeCommand(ctx, "up", "-d"); err != nil {
+		return fmt.Errorf("failed to restart all services: %w", err)
+	}
+
+	// Wait for all services to be healthy
+	if err := do.waitForServicesHealthy(ctx, do.composeDir); err != nil {
+		return fmt.Errorf("services failed health checks after update: %w", err)
+	}
+
+	do.emitEvent(events.Event{
+		Type:      "all_services_updated",
+		SessionID: "system",
+		Message:   "All services updated successfully",
+	})
+
+	do.logger.Println("All services updated successfully")
+	return nil
+}
+
+// RestartAllServices restarts all services
+func (do *DockerOrchestrator) RestartAllServices(ctx context.Context) error {
+	do.logger.Println("Restarting all services...")
+
+	if err := do.runComposeCommand(ctx, "restart"); err != nil {
+		return fmt.Errorf("failed to restart all services: %w", err)
+	}
+
+	// Wait for all services to be healthy
+	if err := do.waitForServicesHealthy(ctx, do.composeDir); err != nil {
+		return fmt.Errorf("services failed health checks after restart: %w", err)
+	}
+
+	do.emitEvent(events.Event{
+		Type:      "all_services_restarted",
+		SessionID: "system",
+		Message:   "All services restarted successfully",
+	})
+
+	do.logger.Println("All services restarted successfully")
+	return nil
+}
+
+// waitForServiceHealthy waits for a specific service to become healthy
+func (do *DockerOrchestrator) waitForServiceHealthy(ctx context.Context, serviceName string) error {
+	do.logger.Printf("Waiting for service %s to become healthy...", serviceName)
+
+	timeout := time.After(5 * time.Minute)
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-timeout:
+			return fmt.Errorf("timeout waiting for service %s to become healthy", serviceName)
+		case <-ticker.C:
+			if healthy, err := do.checkServiceHealth(ctx, serviceName); err != nil {
+				do.logger.Printf("Health check error for %s: %v", serviceName, err)
+			} else if healthy {
+				do.logger.Printf("Service %s is healthy!", serviceName)
+				return nil
+			}
+		}
+	}
+}
+
+// checkServiceHealth checks if a specific service is healthy
+func (do *DockerOrchestrator) checkServiceHealth(ctx context.Context, serviceName string) (bool, error) {
+	cmd := exec.CommandContext(ctx, "docker-compose", "ps", serviceName, "--format", "json")
+	cmd.Dir = do.composeDir
+
+	output, err := cmd.Output()
+	if err != nil {
+		return false, err
+	}
+
+	// Parse the JSON output to check service state
+	outputStr := string(output)
+	if strings.Contains(outputStr, "healthy") || strings.Contains(outputStr, "running") {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+// GetServiceStatus returns the status of a specific service
+func (do *DockerOrchestrator) GetServiceStatus(ctx context.Context, serviceName string) (string, error) {
+	cmd := exec.CommandContext(ctx, "docker-compose", "ps", serviceName, "--format", "{{.State}}")
+	cmd.Dir = do.composeDir
+
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get service status: %w", err)
+	}
+
+	return strings.TrimSpace(string(output)), nil
+}
+
 // Cleanup removes the generated compose files and temporary data
 func (do *DockerOrchestrator) Cleanup() error {
 	do.logger.Println("Cleaning up deployment files...")

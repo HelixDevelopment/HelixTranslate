@@ -17,7 +17,9 @@ import (
 func main() {
 	var (
 		configFile = flag.String("config", "config.distributed.json", "Configuration file")
-		action     = flag.String("action", "deploy", "Action: deploy, status, stop, cleanup")
+		action     = flag.String("action", "deploy", "Action: deploy, status, stop, cleanup, update, restart, generate-plan")
+		service    = flag.String("service", "", "Service name for update/restart actions")
+		image      = flag.String("image", "", "New image for update action")
 		planFile   = flag.String("plan", "", "Deployment plan JSON file")
 		verbose    = flag.Bool("verbose", false, "Enable verbose logging")
 	)
@@ -57,6 +59,12 @@ func main() {
 
 	case "cleanup":
 		handleCleanup(orchestrator)
+
+	case "update":
+		handleUpdate(orchestrator, *service, *image)
+
+	case "restart":
+		handleRestart(orchestrator, *service)
 
 	case "generate-plan":
 		handleGeneratePlan(cfg)
@@ -118,6 +126,52 @@ func handleCleanup(orchestrator *deployment.DeploymentOrchestrator) {
 	// orchestrator.Cleanup()
 
 	log.Println("Cleanup completed")
+}
+
+func handleUpdate(orchestrator *deployment.DeploymentOrchestrator, service, image string) {
+	if service == "" {
+		log.Fatal("Service name is required for update action")
+	}
+
+	log.Printf("Updating service %s...", service)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+
+	if image != "" {
+		// Update specific service to new image
+		if err := orchestrator.UpdateService(ctx, service, image); err != nil {
+			log.Fatalf("Update failed: %v", err)
+		}
+	} else {
+		// Update all services
+		if err := orchestrator.UpdateAllServices(ctx); err != nil {
+			log.Fatalf("Update failed: %v", err)
+		}
+	}
+
+	log.Println("Update completed successfully!")
+}
+
+func handleRestart(orchestrator *deployment.DeploymentOrchestrator, service string) {
+	log.Printf("Restarting service %s...", service)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+
+	if service != "" {
+		// Restart specific service
+		if err := orchestrator.RestartService(ctx, service); err != nil {
+			log.Fatalf("Restart failed: %v", err)
+		}
+	} else {
+		// Restart all services
+		if err := orchestrator.RestartAllServices(ctx); err != nil {
+			log.Fatalf("Restart failed: %v", err)
+		}
+	}
+
+	log.Println("Restart completed successfully!")
 }
 
 func handleGeneratePlan(cfg *config.Config) {

@@ -358,6 +358,87 @@ func (sd *SSHDeployer) RemoveInstance(ctx context.Context, config *DeploymentCon
 	return session.Run(cmd)
 }
 
+// UpdateInstance updates a deployed instance to a new image version
+func (sd *SSHDeployer) UpdateInstance(ctx context.Context, config *DeploymentConfig) (string, error) {
+	sd.logger.Printf("Updating instance %s to image %s...", config.ContainerName, config.DockerImage)
+
+	client, err := sd.connectSSH(config)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+
+	session, err := client.NewSession()
+	if err != nil {
+		return "", err
+	}
+	defer session.Close()
+
+	// Stop the existing container
+	stopCmd := fmt.Sprintf("docker stop %s", config.ContainerName)
+	if err := session.Run(stopCmd); err != nil {
+		return "", fmt.Errorf("failed to stop container: %w", err)
+	}
+
+	// Remove the existing container
+	removeCmd := fmt.Sprintf("docker rm %s", config.ContainerName)
+	if err := session.Run(removeCmd); err != nil {
+		return "", fmt.Errorf("failed to remove container: %w", err)
+	}
+
+	// Pull the new image
+	pullCmd := fmt.Sprintf("docker pull %s", config.DockerImage)
+	session2, err := client.NewSession()
+	if err != nil {
+		return "", err
+	}
+	defer session2.Close()
+
+	if err := session2.Run(pullCmd); err != nil {
+		return "", fmt.Errorf("failed to pull image: %w", err)
+	}
+
+	// Start the new container
+	runCmd := sd.buildDockerRunCommand(config)
+	session3, err := client.NewSession()
+	if err != nil {
+		return "", err
+	}
+	defer session3.Close()
+
+	var output strings.Builder
+	session3.Stdout = &output
+
+	if err := session3.Run(runCmd); err != nil {
+		return "", fmt.Errorf("failed to start updated container: %w", err)
+	}
+
+	containerID := strings.TrimSpace(output.String())
+	sd.logger.Printf("Instance %s updated successfully: %s", config.ContainerName, containerID[:12])
+
+	return containerID, nil
+}
+
+// RestartInstance restarts a deployed instance
+func (sd *SSHDeployer) RestartInstance(ctx context.Context, config *DeploymentConfig) error {
+	sd.logger.Printf("Restarting instance %s...", config.ContainerName)
+
+	client, err := sd.connectSSH(config)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	session, err := client.NewSession()
+	if err != nil {
+		return err
+	}
+	defer session.Close()
+
+	cmd := fmt.Sprintf("docker restart %s", config.ContainerName)
+	return session.Run(cmd)
+}
+
 // Close closes the SSH deployer
 func (sd *SSHDeployer) Close() error {
 	// No persistent connections to close

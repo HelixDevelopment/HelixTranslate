@@ -1,7 +1,7 @@
 {
   "server": {
     "host": "0.0.0.0",
-    "port": 8443,
+    "port": 8444,
     "enable_http3": true,
     "tls_cert_file": "certs/server.crt",
     "tls_key_file": "certs/server.key",
