@@ -52,12 +52,12 @@ type TranslateDirectoryRequest struct {
 
 // TranslateDirectoryResponse represents a directory translation response
 type TranslateDirectoryResponse struct {
-	SessionID    string         `json:"session_id"`
-	TotalFiles   int            `json:"total_files"`
-	Successful   int            `json:"successful"`
-	Failed       int            `json:"failed"`
-	Duration     float64        `json:"duration_seconds"`
-	Results      []FileResult   `json:"results"`
+	SessionID  string       `json:"session_id"`
+	TotalFiles int          `json:"total_files"`
+	Successful int          `json:"successful"`
+	Failed     int          `json:"failed"`
+	Duration   float64      `json:"duration_seconds"`
+	Results    []FileResult `json:"results"`
 }
 
 // FileResult represents the result of a single file translation
@@ -98,6 +98,7 @@ func (h *Handler) HandleTranslateString(c *gin.Context) {
 
 	// Create translator
 	var trans translator.Translator
+
 	provider := req.Provider
 	if provider == "" {
 		provider = h.config.Translation.DefaultProvider
@@ -121,7 +122,7 @@ func (h *Handler) HandleTranslateString(c *gin.Context) {
 	switch provider {
 	case "dictionary":
 		trans = dictionary.NewDictionaryTranslator(translatorConfig)
-	case "openai", "anthropic", "zhipu", "deepseek", "ollama":
+	case "openai", "anthropic", "zhipu", "deepseek", "ollama", "llamacpp":
 		trans, err = llm.NewLLMTranslator(translatorConfig)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to create translator: %v", err)})
@@ -235,7 +236,7 @@ func (h *Handler) HandleTranslateDirectory(c *gin.Context) {
 	switch provider {
 	case "dictionary":
 		trans = dictionary.NewDictionaryTranslator(translatorConfig)
-	case "openai", "anthropic", "zhipu", "deepseek", "ollama":
+	case "openai", "anthropic", "zhipu", "deepseek", "ollama", "llamacpp":
 		trans, err = llm.NewLLMTranslator(translatorConfig)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to create translator: %v", err)})
