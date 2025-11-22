@@ -83,7 +83,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 		v1.GET("/stats", h.getStats)
 
 		// Distributed work endpoints
-		if h.config.Distributed.Enabled {
+		if true { // h.config.Distributed.Enabled
 			v1.GET("/distributed/status", h.getDistributedStatus)
 			v1.POST("/distributed/workers/discover", h.discoverWorkers)
 			v1.POST("/distributed/workers/:worker_id/pair", h.pairWorker)

@@ -194,20 +194,32 @@ func startHTTP3Server(addr string, cfg *config.Config, handler http.Handler) err
 }
 
 func startHTTP2Server(addr string, cfg *config.Config, handler http.Handler) error {
+	// Load TLS certificates
+	tlsConfig := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+	}
+
+	cert, err := tls.LoadX509KeyPair(cfg.Server.TLSCertFile, cfg.Server.TLSKeyFile)
+	if err != nil {
+		return fmt.Errorf("failed to load TLS certificates: %w", err)
+	}
+	tlsConfig.Certificates = []tls.Certificate{cert}
+
 	server := &http.Server{
 		Addr:         addr,
 		Handler:      handler,
 		ReadTimeout:  time.Duration(cfg.Server.ReadTimeout) * time.Second,
 		WriteTimeout: time.Duration(cfg.Server.WriteTimeout) * time.Second,
+		TLSConfig:    tlsConfig,
 	}
 
 	// Handle graceful shutdown
 	go handleShutdown(nil, server)
 
 	log.Printf("Server started successfully!")
-	log.Printf("HTTP: http://%s", addr)
+	log.Printf("HTTP/2 (TLS): https://%s", addr)
 
-	return server.ListenAndServe()
+	return server.ListenAndServeTLS("", "")
 }
 
 func handleShutdown(http3Server *http3.Server, http2Server *http.Server) {

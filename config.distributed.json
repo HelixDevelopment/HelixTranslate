@@ -1,8 +1,8 @@
 {
-  "server": {
-    "host": "0.0.0.0",
-    "port": 8443,
-    "enable_http3": true,
+    "server": {
+        "host": "0.0.0.0",
+        "port": 8443,
+        "enable_http3": false,
     "tls_cert_file": "certs/server.crt",
     "tls_key_file": "certs/server.key",
     "read_timeout": 30,
