@@ -32,6 +32,8 @@ var magicBytes = map[Format][]byte{
 	FormatPDF:  []byte("%PDF"),
 	FormatEPUB: []byte("PK"), // EPUB is a ZIP file (DOCX also uses PK but is handled by disambiguation)
 	FormatMOBI: []byte("BOOKMOBI"),
+	FormatAZW:  []byte("TPZ0"),
+	FormatAZW3: []byte("PK"), // AZW3 is also a ZIP file, handled by disambiguation
 }
 
 // Detector handles ebook format detection
@@ -123,7 +125,7 @@ func (d *Detector) detectByMagicBytes(data []byte) Format {
 	return FormatUnknown
 }
 
-// disambiguateZipFormat distinguishes between EPUB, DOCX, and other ZIP formats
+// disambiguateZipFormat distinguishes between EPUB, DOCX, AZW3, and other ZIP formats
 func (d *Detector) disambiguateZipFormat(filename string, ext string) (Format, error) {
 	// Check extension first
 	switch strings.ToLower(ext) {
@@ -131,6 +133,8 @@ func (d *Detector) disambiguateZipFormat(filename string, ext string) (Format, e
 		return FormatEPUB, nil
 	case ".docx":
 		return FormatDOCX, nil
+	case ".azw3":
+		return FormatAZW3, nil
 	}
 
 	// Check mimetype file inside ZIP
@@ -141,7 +145,14 @@ func (d *Detector) disambiguateZipFormat(filename string, ext string) (Format, e
 			return FormatEPUB, nil
 		case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
 			return FormatDOCX, nil
+		case "application/x-mobipocket-ebook":
+			return FormatAZW3, nil
 		}
+	}
+
+	// Check for AZW3 specific structure
+	if d.isAZW3File(filename) {
+		return FormatAZW3, nil
 	}
 
 	// Default to EPUB for unknown ZIP formats
@@ -176,6 +187,35 @@ func (d *Detector) getZipMimetype(filename string) (string, error) {
 	return "", fmt.Errorf("mimetype file not found")
 }
 
+// isAZW3File checks if the ZIP file has AZW3 specific structure
+func (d *Detector) isAZW3File(filename string) bool {
+	r, err := zip.OpenReader(filename)
+	if err != nil {
+		return false
+	}
+	defer r.Close()
+
+	// Look for AZW3 specific files
+	azw3Indicators := []string{
+		"mimetype",
+		"OEBPS",
+		"META-INF",
+	}
+
+	hasIndicators := 0
+	for _, f := range r.File {
+		for _, indicator := range azw3Indicators {
+			if strings.Contains(f.Name, indicator) {
+				hasIndicators++
+				break
+			}
+		}
+	}
+
+	// If we have multiple indicators, likely AZW3
+	return hasIndicators >= 2
+}
+
 // detectByContent detects format by analyzing content
 func (d *Detector) detectByContent(data []byte) Format {
 	content := string(data)
@@ -198,6 +238,21 @@ func (d *Detector) detectByContent(data []byte) Format {
 	// Check for RTF
 	if strings.HasPrefix(content, "{\\rtf") {
 		return FormatRTF
+	}
+
+	// Check for PDF content (if magic bytes were missed)
+	if strings.Contains(content, "%PDF") {
+		return FormatPDF
+	}
+
+	// Check for MOBI content (if magic bytes were missed)
+	if strings.Contains(content, "BOOKMOBI") {
+		return FormatMOBI
+	}
+
+	// Check for AZW content (if magic bytes were missed)
+	if strings.Contains(content, "TPZ0") {
+		return FormatAZW
 	}
 
 	// Default to plain text if mostly readable
@@ -229,7 +284,10 @@ func (d *Detector) IsSupported(format Format) bool {
 		FormatEPUB,
 		FormatTXT,
 		FormatHTML,
-		// PDF, MOBI, etc. would require additional libraries
+		FormatPDF,
+		FormatMOBI,
+		FormatAZW,
+		FormatAZW3,
 	}
 
 	for _, f := range supported {
@@ -247,6 +305,10 @@ func (d *Detector) GetSupportedFormats() []Format {
 		FormatEPUB,
 		FormatTXT,
 		FormatHTML,
+		FormatPDF,
+		FormatMOBI,
+		FormatAZW,
+		FormatAZW3,
 	}
 }
 

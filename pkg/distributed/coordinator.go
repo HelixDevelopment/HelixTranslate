@@ -224,10 +224,8 @@ func (dc *DistributedCoordinator) getPriorityForProvider(provider string) int {
 	switch provider {
 	case "openai", "anthropic", "zhipu", "deepseek":
 		return 10 // API key providers - highest priority
-	case "ollama":
+	case "ollama", "llamacpp":
 		return 5 // Local LLM providers - medium priority
-	case "dictionary":
-		return 1 // Basic providers - lowest priority
 	default:
 		return 1 // Default priority
 	}

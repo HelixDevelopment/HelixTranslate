@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"digital.vasic.translator/internal/config"
 	"digital.vasic.translator/pkg/coordination"
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
@@ -9,7 +10,6 @@ import (
 	"digital.vasic.translator/pkg/language"
 	"digital.vasic.translator/pkg/script"
 	"digital.vasic.translator/pkg/translator"
-	"digital.vasic.translator/pkg/translator/dictionary"
 	"digital.vasic.translator/pkg/translator/llm"
 	"flag"
 	"fmt"
@@ -34,6 +34,7 @@ func main() {
 		locale            string
 		targetLanguage    string
 		sourceLanguage    string
+		configFile        string
 		showVersion       bool
 		showHelp          bool
 		createConfig      string
@@ -48,8 +49,8 @@ func main() {
 	flag.StringVar(&outputFile, "o", "", "Output file (shorthand)")
 	flag.StringVar(&outputFormat, "format", "epub", "Output format (epub, fb2, txt)")
 	flag.StringVar(&outputFormat, "f", "epub", "Output format (shorthand)")
-	flag.StringVar(&provider, "provider", "dictionary", "Translation provider")
-	flag.StringVar(&provider, "p", "dictionary", "Translation provider (shorthand)")
+	flag.StringVar(&provider, "provider", "openai", "Translation provider")
+	flag.StringVar(&provider, "p", "openai", "Translation provider (shorthand)")
 	flag.StringVar(&model, "model", "", "LLM model name")
 	flag.StringVar(&apiKey, "api-key", "", "API key for LLM provider")
 	flag.StringVar(&baseURL, "base-url", "", "Base URL for LLM provider")
@@ -65,6 +66,8 @@ func main() {
 	flag.StringVar(&createConfig, "create-config", "", "Create config file template")
 	flag.BoolVar(&disableLocalLLMs, "disable-local-llms", false, "Disable local LLM providers, use only distributed workers")
 	flag.BoolVar(&preferDistributed, "prefer-distributed", false, "Prefer distributed workers over local LLMs when available")
+	flag.StringVar(&configFile, "config", "", "Configuration file path")
+	flag.StringVar(&configFile, "c", "", "Configuration file path (shorthand)")
 
 	flag.Parse()
 
@@ -128,6 +131,18 @@ func main() {
 		apiKey = getAPIKeyFromEnv(provider)
 	}
 
+	// Load configuration if specified
+	var appConfig *config.Config
+	if configFile != "" {
+		var err error
+		appConfig, err = config.LoadConfig(configFile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to load configuration: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Loaded configuration from: %s\n", configFile)
+	}
+
 	// Create event bus
 	eventBus := events.NewEventBus()
 
@@ -186,6 +201,7 @@ func main() {
 		apiKey,
 		baseURL,
 		scriptType,
+		appConfig,
 		sourceLang,
 		targetLang,
 		eventBus,
@@ -204,11 +220,38 @@ func main() {
 func translateEbook(
 	book *ebook.Book,
 	outputFile, outputFormat, providerName, model, apiKey, baseURL, scriptType string,
+	appConfig *config.Config,
 	sourceLang, targetLang language.Language,
 	eventBus *events.EventBus,
 	disableLocalLLMs, preferDistributed bool,
 ) error {
 	ctx := context.Background()
+
+	// Load configuration if specified
+	if appConfig != nil {
+		fmt.Printf("Using loaded configuration\n")
+
+		// Override CLI parameters with config values if not explicitly set
+		if providerName == "openai" && appConfig.Translation.DefaultProvider != "" {
+			providerName = appConfig.Translation.DefaultProvider
+		}
+		if model == "" && appConfig.Translation.DefaultModel != "" {
+			model = appConfig.Translation.DefaultModel
+		}
+
+		// Load provider-specific config
+		if providerConfig, ok := appConfig.Translation.Providers[providerName]; ok {
+			if apiKey == "" && providerConfig.APIKey != "" {
+				apiKey = providerConfig.APIKey
+			}
+			if baseURL == "" && providerConfig.BaseURL != "" {
+				baseURL = providerConfig.BaseURL
+			}
+			if model == "" && providerConfig.Model != "" {
+				model = providerConfig.Model
+			}
+		}
+	}
 
 	// Create translator
 	config := translator.TranslationConfig{
@@ -227,6 +270,12 @@ func translateEbook(
 
 	// Try multi-LLM first if provider is "multi-llm", "distributed" or not specified
 	if providerName == "multi-llm" || providerName == "distributed" || providerName == "" {
+		// For distributed provider, prefer distributed workers if enabled
+		if providerName == "distributed" && appConfig != nil && appConfig.Distributed.Enabled {
+			preferDistributed = true
+			fmt.Printf("Distributed translation enabled, preferring remote workers\n")
+		}
+
 		multiTrans, multiErr := coordination.NewMultiLLMTranslatorWrapperWithConfig(config, eventBus, sessionID, disableLocalLLMs, preferDistributed)
 		if multiErr == nil {
 			trans = multiTrans
@@ -240,13 +289,9 @@ func translateEbook(
 
 	// Fall back to single translator
 	if trans == nil {
-		if providerName == "dictionary" {
-			trans = dictionary.NewDictionaryTranslator(config)
-		} else {
-			trans, err = llm.NewLLMTranslator(config)
-			if err != nil {
-				return fmt.Errorf("failed to create translator: %w", err)
-			}
+		trans, err = llm.NewLLMTranslator(config)
+		if err != nil {
+			return fmt.Errorf("failed to create translator: %w", err)
 		}
 		fmt.Printf("Using translator: %s\n\n", trans.GetName())
 	}
@@ -426,8 +471,8 @@ Options:
   -source <lang>          Source language (optional, auto-detected)
   -detect                 Detect source language and exit
 
-  -p, -provider <name>    Translation provider (dictionary, openai, anthropic,
-                          zhipu, deepseek, qwen, ollama, llamacpp) [default: dictionary]
+  -p, -provider <name>    Translation provider (openai, anthropic,
+                          zhipu, deepseek, qwen, ollama, llamacpp) [default: openai]
   -model <name>           LLM model name (e.g., gpt-4, claude-3-sonnet)
   -api-key <key>          API key for LLM provider
   -base-url <url>         Base URL for LLM provider
@@ -435,6 +480,7 @@ Options:
   -script <type>          Output script for Serbian (cyrillic, latin)
                           [default: cyrillic]
 
+   -c, -config <file>      Configuration file path
    -create-config <file>   Create a config file template
    -disable-local-llms     Disable local LLM providers (Ollama), use only API providers
    -prefer-distributed     Prefer distributed workers over local LLMs (when available)

@@ -10,7 +10,6 @@ import (
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/language"
 	"digital.vasic.translator/pkg/translator"
-	"digital.vasic.translator/pkg/translator/dictionary"
 	"digital.vasic.translator/pkg/translator/llm"
 
 	"github.com/gin-gonic/gin"
@@ -103,7 +102,7 @@ func (h *Handler) HandleTranslateString(c *gin.Context) {
 	if provider == "" {
 		provider = h.config.Translation.DefaultProvider
 		if provider == "" {
-			provider = "dictionary"
+			provider = "openai"
 		}
 	}
 
@@ -120,8 +119,6 @@ func (h *Handler) HandleTranslateString(c *gin.Context) {
 	}
 
 	switch provider {
-	case "dictionary":
-		trans = dictionary.NewDictionaryTranslator(translatorConfig)
 	case "openai", "anthropic", "zhipu", "deepseek", "ollama", "llamacpp":
 		trans, err = llm.NewLLMTranslator(translatorConfig)
 		if err != nil {
@@ -217,7 +214,7 @@ func (h *Handler) HandleTranslateDirectory(c *gin.Context) {
 	if provider == "" {
 		provider = h.config.Translation.DefaultProvider
 		if provider == "" {
-			provider = "dictionary"
+			provider = "openai"
 		}
 	}
 
@@ -234,8 +231,6 @@ func (h *Handler) HandleTranslateDirectory(c *gin.Context) {
 	}
 
 	switch provider {
-	case "dictionary":
-		trans = dictionary.NewDictionaryTranslator(translatorConfig)
 	case "openai", "anthropic", "zhipu", "deepseek", "ollama", "llamacpp":
 		trans, err = llm.NewLLMTranslator(translatorConfig)
 		if err != nil {

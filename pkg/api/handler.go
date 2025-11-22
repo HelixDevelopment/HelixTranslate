@@ -12,7 +12,6 @@ import (
 	"digital.vasic.translator/pkg/script"
 	"digital.vasic.translator/pkg/security"
 	"digital.vasic.translator/pkg/translator"
-	"digital.vasic.translator/pkg/translator/dictionary"
 	"digital.vasic.translator/pkg/translator/llm"
 	"digital.vasic.translator/pkg/websocket"
 	"fmt"
@@ -255,7 +254,7 @@ func (h *Handler) translateFB2(c *gin.Context) {
 
 	provider := c.PostForm("provider")
 	if provider == "" {
-		provider = "dictionary"
+		provider = "openai"
 	}
 
 	model := c.PostForm("model")
@@ -512,11 +511,6 @@ func (h *Handler) getStatus(c *gin.Context) {
 func (h *Handler) listProviders(c *gin.Context) {
 	providers := []gin.H{
 		{
-			"name":             "dictionary",
-			"description":      "Simple dictionary-based translation",
-			"requires_api_key": false,
-		},
-		{
 			"name":             "openai",
 			"description":      "OpenAI GPT models",
 			"requires_api_key": true,
@@ -719,10 +713,6 @@ func (h *Handler) createTranslator(providerName, model string) (translator.Trans
 			config.Model = providerCfg.Model
 		}
 		config.Options = providerCfg.Options
-	}
-
-	if providerName == "dictionary" {
-		return dictionary.NewDictionaryTranslator(config), nil
 	}
 
 	return llm.NewLLMTranslator(config)

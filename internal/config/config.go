@@ -121,7 +121,7 @@ func DefaultConfig() *Config {
 			CORSOrigins:    []string{"*"},
 		},
 		Translation: TranslationConfig{
-			DefaultProvider: "dictionary",
+			DefaultProvider: "openai",
 			DefaultModel:    "",
 			CacheEnabled:    true,
 			CacheTTL:        3600,
