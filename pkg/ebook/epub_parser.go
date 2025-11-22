@@ -101,6 +101,12 @@ func (p *EPUBParser) parseContainer(f *zip.File) (string, error) {
 	}
 	defer rc.Close()
 
+	data, err := io.ReadAll(rc)
+	if err != nil {
+		return "", err
+	}
+
+	// Try to parse with standard XML decoder
 	type Container struct {
 		Rootfiles struct {
 			Rootfile []struct {
@@ -110,8 +116,12 @@ func (p *EPUBParser) parseContainer(f *zip.File) (string, error) {
 	}
 
 	var container Container
-	if err := xml.NewDecoder(rc).Decode(&container); err != nil {
-		return "", err
+	if err := xml.Unmarshal(data, &container); err != nil {
+		// If standard parsing fails, try to clean up the XML
+		cleanData := p.CleanXMLData(data)
+		if err := xml.Unmarshal(cleanData, &container); err != nil {
+			return "", fmt.Errorf("failed to parse container.xml: %w", err)
+		}
 	}
 
 	if len(container.Rootfiles.Rootfile) > 0 {
@@ -121,6 +131,38 @@ func (p *EPUBParser) parseContainer(f *zip.File) (string, error) {
 	return "", fmt.Errorf("no rootfile found in container.xml")
 }
 
+// CleanXMLData attempts to clean up malformed XML data
+func (p *EPUBParser) CleanXMLData(data []byte) []byte {
+	content := string(data)
+
+	// Remove invalid characters that might cause XML parsing issues
+	// Keep only valid XML characters (excluding control characters except \t, \n, \r)
+	var cleaned strings.Builder
+	for _, r := range content {
+		if (r == 0x9) || (r == 0xA) || (r == 0xD) ||
+			(r >= 0x20 && r <= 0xD7FF) ||
+			(r >= 0xE000 && r <= 0xFFFD) ||
+			(r >= 0x10000 && r <= 0x10FFFF) {
+			cleaned.WriteRune(r)
+		}
+	}
+
+	// Fix common XML issues
+	cleanedStr := cleaned.String()
+
+	// Ensure proper XML declaration
+	if !strings.Contains(cleanedStr, "<?xml") {
+		cleanedStr = `<?xml version="1.0" encoding="UTF-8"?>` + "\n" + cleanedStr
+	}
+
+	// Fix unescaped ampersands (simple approach - may need refinement)
+	cleanedStr = strings.ReplaceAll(cleanedStr, "& ", "&amp; ")
+	cleanedStr = strings.ReplaceAll(cleanedStr, "&<", "&lt;")
+	cleanedStr = strings.ReplaceAll(cleanedStr, "&>", "&gt;")
+
+	return []byte(cleanedStr)
+}
+
 // parseOPF parses content.opf for metadata and content files
 func (p *EPUBParser) parseOPF(f *zip.File, book *Book) ([]string, string, error) {
 	rc, err := f.Open()
@@ -128,6 +170,11 @@ func (p *EPUBParser) parseOPF(f *zip.File, book *Book) ([]string, string, error)
 		return nil, "", err
 	}
 	defer rc.Close()
+
+	data, err := io.ReadAll(rc)
+	if err != nil {
+		return nil, "", err
+	}
 
 	type Package struct {
 		Metadata struct {
@@ -159,8 +206,12 @@ func (p *EPUBParser) parseOPF(f *zip.File, book *Book) ([]string, string, error)
 	}
 
 	var pkg Package
-	if err := xml.NewDecoder(rc).Decode(&pkg); err != nil {
-		return nil, "", err
+	if err := xml.Unmarshal(data, &pkg); err != nil {
+		// If standard parsing fails, try to clean up the XML
+		cleanData := p.CleanXMLData(data)
+		if err := xml.Unmarshal(cleanData, &pkg); err != nil {
+			return nil, "", fmt.Errorf("failed to parse content.opf: %w", err)
+		}
 	}
 
 	// Extract all metadata fields
@@ -201,9 +252,9 @@ func (p *EPUBParser) parseOPF(f *zip.File, book *Book) ([]string, string, error)
 
 		// Detect cover image
 		if strings.ToLower(item.ID) == "cover" ||
-		   strings.ToLower(item.ID) == "cover-image" ||
-		   strings.Contains(strings.ToLower(item.Properties), "cover-image") ||
-		   strings.Contains(strings.ToLower(item.Href), "cover") {
+			strings.ToLower(item.ID) == "cover-image" ||
+			strings.Contains(strings.ToLower(item.Properties), "cover-image") ||
+			strings.Contains(strings.ToLower(item.Href), "cover") {
 			if strings.HasPrefix(item.MediaType, "image/") {
 				coverHref = item.Href
 			}

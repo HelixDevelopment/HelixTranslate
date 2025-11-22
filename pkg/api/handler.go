@@ -14,6 +14,7 @@ import (
 	"digital.vasic.translator/pkg/translator/llm"
 	"digital.vasic.translator/pkg/websocket"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -275,11 +276,27 @@ func (h *Handler) translateFB2(c *gin.Context) {
 	startEvent.SessionID = sessionID
 	h.eventBus.Publish(startEvent)
 
-	// Parse ebook
-	parser := ebook.NewParser()
-	book, err := parser.ParseReader(file)
+	// Save file to temp location for parsing
+	tempFile, err := os.CreateTemp("", "ebook-*")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to parse FB2: %v", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create temp file: %v", err)})
+		return
+	}
+	defer os.Remove(tempFile.Name())
+	defer tempFile.Close()
+
+	_, err = io.Copy(tempFile, file)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to save temp file: %v", err)})
+		return
+	}
+	tempFile.Close()
+
+	// Parse ebook
+	parser := ebook.NewUniversalParser()
+	book, err := parser.Parse(tempFile.Name())
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to parse ebook: %v", err)})
 		return
 	}
 
@@ -298,27 +315,48 @@ func (h *Handler) translateFB2(c *gin.Context) {
 	}
 
 	// Convert script if needed
-	if scriptType == "latin" {
-		converter := script.NewConverter()
-		h.convertBookToLatin(book, converter)
-	}
+	// if scriptType == "latin" {
+	// 	converter := script.NewConverter()
+	// 	h.convertBookToLatin(book, converter)
+	// }
 
 	// Update metadata
-	book.SetLanguage("sr")
+	book.Language = "sr"
 
 	// Generate output filename
 	outputFilename := generateOutputFilename(header.Filename, provider)
 
+	// Create temp file for output
+	tempOutput, err := os.CreateTemp("", "output-*")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create temp output: %v", err)})
+		return
+	}
+	defer os.Remove(tempOutput.Name())
+	defer tempOutput.Close()
+
+	// Write ebook to temp file
+	writer := ebook.NewEPUBWriter()
+	if err := writer.Write(book, tempOutput.Name()); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to write ebook: %v", err)})
+		return
+	}
+
+	// Read the temp file
+	tempOutput.Seek(0, 0)
+	data, err := io.ReadAll(tempOutput)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to read output: %v", err)})
+		return
+	}
+
 	// Set headers for file download
 	c.Header("Content-Description", "File Transfer")
 	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", outputFilename))
-	c.Header("Content-Type", "application/xml")
+	c.Header("Content-Type", "application/epub+zip")
 
-	// Write FB2 to response
-	if err := parser.WriteToWriter(c.Writer, book); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to write FB2: %v", err)})
-		return
-	}
+	// Write data to response
+	c.Data(http.StatusOK, "application/epub+zip", data)
 
 	// Emit completion event
 	completeEvent := events.NewEvent(
@@ -664,25 +702,40 @@ func (dt *distributedTranslator) GetName() string {
 	return "distributed"
 }
 
-func (h *Handler) translateBook(ctx context.Context, book *fb2.FictionBook, trans translator.Translator, sessionID string) error {
+func (h *Handler) translateBook(ctx context.Context, book *ebook.Book, trans translator.Translator, sessionID string) error {
 	// Translate title
-	if book.Description.TitleInfo.BookTitle != "" {
+	if book.Metadata.Title != "" {
 		translated, err := trans.TranslateWithProgress(
 			ctx,
-			book.Description.TitleInfo.BookTitle,
+			book.Metadata.Title,
 			"Book title",
 			h.eventBus,
 			sessionID,
 		)
 		if err == nil {
-			book.Description.TitleInfo.BookTitle = translated
+			book.Metadata.Title = translated
 		}
 	}
 
-	// Translate body sections
-	for i := range book.Body {
-		for j := range book.Body[i].Section {
-			if err := h.translateSection(ctx, &book.Body[i].Section[j], trans, sessionID); err != nil {
+	// Translate chapters
+	for i := range book.Chapters {
+		// Translate chapter title
+		if book.Chapters[i].Title != "" {
+			translated, err := trans.TranslateWithProgress(
+				ctx,
+				book.Chapters[i].Title,
+				"Chapter title",
+				h.eventBus,
+				sessionID,
+			)
+			if err == nil {
+				book.Chapters[i].Title = translated
+			}
+		}
+
+		// Translate sections
+		for j := range book.Chapters[i].Sections {
+			if err := h.translateEbookSection(ctx, &book.Chapters[i].Sections[j], trans, sessionID); err != nil {
 				return err
 			}
 		}
@@ -691,67 +744,43 @@ func (h *Handler) translateBook(ctx context.Context, book *fb2.FictionBook, tran
 	return nil
 }
 
-func (h *Handler) translateSection(ctx context.Context, section *fb2.Section, trans translator.Translator, sessionID string) error {
+func (h *Handler) translateEbookSection(ctx context.Context, section *ebook.Section, trans translator.Translator, sessionID string) error {
 	// Translate title
-	for i := range section.Title.Paragraphs {
-		if section.Title.Paragraphs[i].Text != "" {
-			translated, _ := trans.TranslateWithProgress(
-				ctx,
-				section.Title.Paragraphs[i].Text,
-				"Section title",
-				h.eventBus,
-				sessionID,
-			)
-			section.Title.Paragraphs[i].Text = translated
+	if section.Title != "" {
+		translated, err := trans.TranslateWithProgress(
+			ctx,
+			section.Title,
+			"Section title",
+			h.eventBus,
+			sessionID,
+		)
+		if err == nil {
+			section.Title = translated
 		}
 	}
 
-	// Translate paragraphs
-	for i := range section.Paragraph {
-		if section.Paragraph[i].Text != "" {
-			translated, _ := trans.TranslateWithProgress(
-				ctx,
-				section.Paragraph[i].Text,
-				"Paragraph",
-				h.eventBus,
-				sessionID,
-			)
-			section.Paragraph[i].Text = translated
+	// Translate content
+	if section.Content != "" {
+		translated, err := trans.TranslateWithProgress(
+			ctx,
+			section.Content,
+			"Section content",
+			h.eventBus,
+			sessionID,
+		)
+		if err == nil {
+			section.Content = translated
 		}
 	}
 
-	// Recursively translate subsections
-	for i := range section.Section {
-		if err := h.translateSection(ctx, &section.Section[i], trans, sessionID); err != nil {
+	// Translate subsections recursively
+	for i := range section.Subsections {
+		if err := h.translateEbookSection(ctx, &section.Subsections[i], trans, sessionID); err != nil {
 			return err
 		}
 	}
 
 	return nil
-}
-
-func (h *Handler) convertBookToLatin(book *fb2.FictionBook, converter *script.Converter) {
-	book.Description.TitleInfo.BookTitle = converter.ToLatin(book.Description.TitleInfo.BookTitle)
-
-	for i := range book.Body {
-		for j := range book.Body[i].Section {
-			h.convertSectionToLatin(&book.Body[i].Section[j], converter)
-		}
-	}
-}
-
-func (h *Handler) convertSectionToLatin(section *fb2.Section, converter *script.Converter) {
-	for i := range section.Title.Paragraphs {
-		section.Title.Paragraphs[i].Text = converter.ToLatin(section.Title.Paragraphs[i].Text)
-	}
-
-	for i := range section.Paragraph {
-		section.Paragraph[i].Text = converter.ToLatin(section.Paragraph[i].Text)
-	}
-
-	for i := range section.Section {
-		h.convertSectionToLatin(&section.Section[i], converter)
-	}
 }
 
 func generateOutputFilename(inputFilename, provider string) string {

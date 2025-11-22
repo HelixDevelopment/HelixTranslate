@@ -220,12 +220,15 @@ translate_book() {
     # Prepare translation request
     local output_path="$OUTPUT_DIR/${book_basename}_sr.epub"
 
-    # Use CLI for translation
+    # Make API call to translate
     local start_time
     start_time=$(date +%s)
 
     local response
-    response=$(./cli -input "$book_path" -output "$output_path" -target_language sr -provider distributed 2>&1)
+    response=$(curl -s -X POST "http://localhost:8443/api/v1/translate/fb2" \
+        -F "file=@$book_path" \
+        -F "provider=distributed" \
+        -o "$output_path" 2>&1)
 
     local end_time
     end_time=$(date +%s)
