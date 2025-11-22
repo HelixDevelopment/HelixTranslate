@@ -24,7 +24,7 @@ import (
 	"digital.vasic.translator/pkg/language"
 	"digital.vasic.translator/pkg/security"
 	"digital.vasic.translator/pkg/translator"
-	"digital.vasic.translator/pkg/translator/dictionary"
+	"digital.vasic.translator/pkg/translator/llm"
 	"digital.vasic.translator/pkg/websocket"
 
 	"github.com/gin-gonic/gin"
@@ -34,7 +34,7 @@ func setupTestAPI() (*gin.Engine, *api.Handler, *events.EventBus) {
 	gin.SetMode(gin.TestMode)
 
 	cfg := config.DefaultConfig()
-	cfg.Translation.DefaultProvider = "dictionary"
+	cfg.Translation.DefaultProvider = "openai"
 	cfg.Translation.DefaultModel = "default"
 
 	eventBus := events.NewEventBus()
