@@ -109,6 +109,9 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			v1.GET("/monitoring/version/dashboard.html", h.serveDashboard)
 		}
 
+		// Register batch processing routes
+		h.RegisterBatchRoutes(v1)
+
 		// Authentication (if enabled)
 		if h.config.Security.EnableAuth {
 			v1.POST("/auth/login", h.login)
