@@ -6,8 +6,8 @@ set -e
 # Configuration
 MAIN_CONFIG="${MAIN_CONFIG:-config.distributed.json}"
 WORKER_CONFIG="${WORKER_CONFIG:-config.worker.llamacpp.json}"
-BOOKS_DIR="${BOOKS_DIR:-./Books}"
-OUTPUT_DIR="${OUTPUT_DIR:-./Books/translated}"
+BOOKS_DIR="${BOOKS_DIR:-materials/books}"
+OUTPUT_DIR="${OUTPUT_DIR:-materials/books}"
 LOG_FILE="${LOG_FILE:-batch_translation.log}"
 API_LOG="${API_LOG:-workers_api_communication.log}"
 
@@ -196,11 +196,11 @@ discover_workers() {
 
 # Get list of books to translate
 get_books_list() {
-    # Find all supported book formats
+    # Find all supported book formats, excluding already translated files
     local books=()
     while IFS= read -r -d '' file; do
         books+=("$file")
-    done < <(find "$BOOKS_DIR" -type f \( -name "*.fb2" -o -name "*.epub" -o -name "*.txt" \) -print0)
+    done < <(find "$BOOKS_DIR" -type f \( -name "*.fb2" -o -name "*.epub" -o -name "*.txt" \) ! -name "*_sr*" -print0)
 
     printf '%s\n' "${books[@]}"
 }
@@ -220,15 +220,42 @@ translate_book() {
     # Prepare translation request
     local output_path="$OUTPUT_DIR/${book_basename}_sr.epub"
 
+    # Determine API endpoint based on file extension
+    local api_endpoint
+    case "${book_path##*.}" in
+        fb2)
+            api_endpoint="fb2"
+            ;;
+        epub)
+            api_endpoint="fb2"
+            ;;
+        txt)
+            api_endpoint="translate"
+            ;;
+        *)
+            api_endpoint="fb2"
+            ;;
+    esac
+
     # Make API call to translate
     local start_time
     start_time=$(date +%s)
 
     local response
-    response=$(curl -s -k -X POST "https://localhost:8443/api/v1/translate/fb2" \
-        -F "file=@$book_path" \
-        -F "provider=distributed" \
-        -o "$output_path" 2>&1)
+    if [[ "$api_endpoint" == "translate" ]]; then
+        # For text files, read content and send as text
+        local text_content
+        text_content=$(cat "$book_path")
+        response=$(curl -s -k -X POST "https://localhost:8444/api/v1/translate" \
+            -H "Content-Type: application/json" \
+            -d "{\"text\": \"$text_content\", \"provider\": \"dictionary\"}" \
+            -o "$output_path" 2>&1)
+    else
+        response=$(curl -s -k -X POST "https://localhost:8444/api/v1/translate/$api_endpoint" \
+            -F "file=@$book_path" \
+            -F "provider=dictionary" \
+            -o "$output_path" 2>&1)
+    fi
 
     local end_time
     end_time=$(date +%s)
@@ -352,10 +379,10 @@ main() {
     start_main_server
 
     # Deploy remote worker
-    # deploy_remote_worker  # Using local worker
+    # deploy_remote_worker  # Assuming worker is already running
 
     # Discover and pair workers
-    discover_workers
+    # discover_workers  # Skipping discovery, using direct worker
 
     # Start API monitoring
     monitor_api_communications

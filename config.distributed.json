@@ -29,7 +29,7 @@
     "enabled": true,
     "workers": {
       "thinker-worker": {
-        "name": "Local Llama.cpp Worker",
+        "name": "Local Dictionary Worker",
         "host": "localhost",
         "port": 8444,
         "user": "milosvasic",

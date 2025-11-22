@@ -1,7 +1,7 @@
 {
   "server": {
     "host": "0.0.0.0",
-    "port": 8444,
+    "port": 8443,
     "enable_http3": true,
     "tls_cert_file": "certs/server.crt",
     "tls_key_file": "certs/server.key",
@@ -17,24 +17,16 @@
     "rate_limit_burst": 100,
     "cors_origins": ["*"]
   },
-    "translation": {
-      "default_provider": "llamacpp",
-      "default_model": "Llama-3.2-3B-Instruct-Q4_K_M",
-      "cache_enabled": true,
-      "cache_ttl": 3600,
-      "max_concurrent": 5,
-      "providers": {
-        "llamacpp": {
-          "model_path": "/home/milosvasic/llama.cpp/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
-          "n_gpu_layers": 35,
-          "n_ctx": 4096,
-          "n_threads": 8,
-          "temperature": 0.1,
-          "top_p": 0.9,
-          "max_tokens": 4096
-        }
-      }
-    },
+     "translation": {
+       "default_provider": "dictionary",
+       "default_model": "",
+       "cache_enabled": true,
+       "cache_ttl": 3600,
+       "max_concurrent": 5,
+       "providers": {
+         "dictionary": {}
+       }
+     },
   "distributed": {
     "enabled": false,
     "workers": {},
