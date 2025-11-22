@@ -121,18 +121,153 @@ func (sc *SecurityConfig) createHostKeyCallback() (ssh.HostKeyCallback, error) {
 	if strings.HasPrefix(knownHostsFile, "~/") {
 		homeDir := os.Getenv("HOME")
 		if homeDir == "" {
-			return nil, fmt.Errorf("HOME environment variable not set")
+			homeDir = os.Getenv("USERPROFILE") // Windows fallback
+		}
+		if homeDir == "" {
+			return nil, fmt.Errorf("HOME/USERPROFILE environment variable not set")
 		}
 		knownHostsFile = strings.Replace(knownHostsFile, "~/", homeDir+"/", 1)
 	}
 
-	// For now, return a callback that accepts any key (in production, implement proper known hosts checking)
-	// TODO: Implement proper known hosts file parsing and verification
+	// Load and parse known hosts file
+	hostKeyCallback, err := sc.loadKnownHosts(knownHostsFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load known hosts: %w", err)
+	}
+
+	return hostKeyCallback, nil
+}
+
+// loadKnownHosts loads and parses the known hosts file
+func (sc *SecurityConfig) loadKnownHosts(filename string) (ssh.HostKeyCallback, error) {
+	// Check if file exists
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		// File doesn't exist, create an empty callback that will reject all connections
+		return func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			return fmt.Errorf("known hosts file %s does not exist, cannot verify host key for %s", filename, hostname)
+		}, nil
+	}
+
+	// Read the known hosts file
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read known hosts file: %w", err)
+	}
+
+	// Parse the known hosts file
+	knownHosts := make(map[string]map[string]ssh.PublicKey)
+
+	lines := strings.Split(string(content), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		// Parse host key line: "hostname keytype keydata [comment]"
+		parts := strings.Fields(line)
+		if len(parts) < 3 {
+			continue // Invalid line
+		}
+
+		hostnames := strings.Split(parts[0], ",")
+		keyType := parts[1]
+		keyData := parts[2]
+
+		// Parse the public key
+		publicKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(keyType + " " + keyData))
+		if err != nil {
+			continue // Invalid key
+		}
+
+		// Store for each hostname pattern
+		for _, hostname := range hostnames {
+			if knownHosts[hostname] == nil {
+				knownHosts[hostname] = make(map[string]ssh.PublicKey)
+			}
+			knownHosts[hostname][keyType] = publicKey
+		}
+	}
+
+	// Return callback function
 	return func(hostname string, remote net.Addr, key ssh.PublicKey) error {
-		// In a production system, this should verify against a known hosts file
-		// For now, we'll accept the key but log it for security auditing
-		return nil
+		// Check for exact hostname match
+		if hostKeys, exists := knownHosts[hostname]; exists {
+			if storedKey, keyExists := hostKeys[key.Type()]; keyExists {
+				if keysEqual(key, storedKey) {
+					return nil // Key matches
+				} else {
+					return fmt.Errorf("host key verification failed: key mismatch for %s", hostname)
+				}
+			}
+		}
+
+		// Check for hashed hostnames (not implemented yet)
+		// TODO: Support hashed hostnames in known_hosts
+
+		// Check for IP address if hostname is not found
+		if tcpAddr, ok := remote.(*net.TCPAddr); ok {
+			remoteIP := tcpAddr.IP.String()
+			if remoteIP != hostname {
+				if hostKeys, exists := knownHosts[remoteIP]; exists {
+					if storedKey, keyExists := hostKeys[key.Type()]; keyExists {
+						if keysEqual(key, storedKey) {
+							return nil // Key matches
+						}
+					}
+				}
+			}
+		}
+
+		// Check for wildcard patterns
+		for pattern, hostKeys := range knownHosts {
+			if strings.Contains(pattern, "*") || strings.Contains(pattern, "?") {
+				// Simple wildcard matching (could be improved)
+				if sc.matchesPattern(hostname, pattern) {
+					if storedKey, keyExists := hostKeys[key.Type()]; keyExists {
+						if keysEqual(key, storedKey) {
+							return nil // Key matches
+						}
+					}
+				}
+			}
+		}
+
+		return fmt.Errorf("host key verification failed: no matching key found for %s", hostname)
 	}, nil
+}
+
+// matchesPattern performs simple wildcard matching for hostnames
+func (sc *SecurityConfig) matchesPattern(hostname, pattern string) bool {
+	// Simple implementation - could be enhanced with proper glob matching
+	if pattern == "*" {
+		return true
+	}
+
+	// For now, just check if pattern contains hostname or vice versa
+	return strings.Contains(pattern, hostname) || strings.Contains(hostname, pattern)
+}
+
+// keysEqual compares two SSH public keys for equality
+func keysEqual(a, b ssh.PublicKey) bool {
+	if a.Type() != b.Type() {
+		return false
+	}
+
+	aBytes := a.Marshal()
+	bBytes := b.Marshal()
+
+	if len(aBytes) != len(bBytes) {
+		return false
+	}
+
+	for i := range aBytes {
+		if aBytes[i] != bBytes[i] {
+			return false
+		}
+	}
+
+	return true
 }
 
 // SecureTLSConfig creates a hardened TLS configuration

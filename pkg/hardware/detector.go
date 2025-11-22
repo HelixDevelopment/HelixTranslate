@@ -10,14 +10,14 @@ import (
 
 // Capabilities represents system hardware capabilities
 type Capabilities struct {
-	Architecture string  // arm64, amd64, etc.
-	TotalRAM     uint64  // in bytes
-	AvailableRAM uint64  // in bytes
-	CPUModel     string  // e.g., "Apple M3 Pro"
-	CPUCores     int     // physical cores
-	HasGPU       bool    // GPU acceleration available
-	GPUType      string  // metal, cuda, rocm, vulkan, or empty
-	MaxModelSize uint64  // estimated max model size in parameters (7B, 13B, etc.)
+	Architecture string // arm64, amd64, etc.
+	TotalRAM     uint64 // in bytes
+	AvailableRAM uint64 // in bytes
+	CPUModel     string // e.g., "Apple M3 Pro"
+	CPUCores     int    // physical cores
+	HasGPU       bool   // GPU acceleration available
+	GPUType      string // metal, cuda, rocm, vulkan, or empty
+	MaxModelSize uint64 // estimated max model size in parameters (7B, 13B, etc.)
 }
 
 // Detector provides hardware detection functionality
@@ -210,6 +210,22 @@ func (d *Detector) getAvailableRAM() (uint64, error) {
 
 		return availKB * 1024, nil
 
+	case "windows":
+		// Use PowerShell to get available memory (more reliable than wmic)
+		cmd := exec.Command("powershell", "-Command",
+			"(Get-CimInstance -ClassName Win32_OperatingSystem).FreePhysicalMemory * 1024")
+		output, err := cmd.Output()
+		if err != nil {
+			return 0, err
+		}
+
+		availBytes, err := strconv.ParseUint(strings.TrimSpace(string(output)), 10, 64)
+		if err != nil {
+			return 0, err
+		}
+
+		return availBytes, nil
+
 	default:
 		return 0, fmt.Errorf("not implemented for %s", runtime.GOOS)
 	}
@@ -237,6 +253,16 @@ func (d *Detector) getCPUModel() (string, error) {
 			return "", fmt.Errorf("unexpected cpuinfo format")
 		}
 		return strings.TrimSpace(parts[1]), nil
+
+	case "windows":
+		// Use PowerShell to get CPU name
+		cmd := exec.Command("powershell", "-Command",
+			"(Get-CimInstance -ClassName Win32_Processor).Name")
+		output, err := cmd.Output()
+		if err != nil {
+			return "", err
+		}
+		return strings.TrimSpace(string(output)), nil
 
 	default:
 		return "", fmt.Errorf("not implemented for %s", runtime.GOOS)
@@ -278,6 +304,20 @@ func (d *Detector) getCPUCores() (int, error) {
 		}
 		return 0, fmt.Errorf("could not parse core count")
 
+	case "windows":
+		// Use PowerShell to get physical cores
+		cmd := exec.Command("powershell", "-Command",
+			"(Get-CimInstance -ClassName Win32_Processor).NumberOfCores")
+		output, err := cmd.Output()
+		if err != nil {
+			return 0, err
+		}
+		cores, err := strconv.Atoi(strings.TrimSpace(string(output)))
+		if err != nil {
+			return 0, err
+		}
+		return cores, nil
+
 	default:
 		return 0, fmt.Errorf("not implemented for %s", runtime.GOOS)
 	}
@@ -300,9 +340,20 @@ func (d *Detector) detectGPU() (bool, string) {
 		return true, "rocm"
 	}
 
-	// Check for Vulkan
+	// Check for Vulkan (cross-platform)
 	if _, err := exec.LookPath("vulkaninfo"); err == nil {
 		return true, "vulkan"
+	}
+
+	// Windows-specific GPU detection
+	if runtime.GOOS == "windows" {
+		// Check for DirectX/Vulkan capable GPUs via PowerShell
+		cmd := exec.Command("powershell", "-Command",
+			"Get-CimInstance -ClassName Win32_VideoController | Where-Object { $_.AdapterRAM -gt 0 } | Select-Object -First 1")
+		if err := cmd.Run(); err == nil {
+			// If we have a video controller, assume Vulkan support
+			return true, "vulkan"
+		}
 	}
 
 	return false, ""

@@ -7,20 +7,20 @@ import (
 
 // ModelInfo contains metadata about an LLM model
 type ModelInfo struct {
-	ID              string   // Unique identifier (e.g., "hunyuan-mt-7b")
-	Name            string   // Human-readable name
-	Description     string   // Description of model capabilities
-	Parameters      uint64   // Number of parameters (e.g., 7_000_000_000 for 7B)
-	MinRAM          uint64   // Minimum RAM in bytes (for Q4 quantization)
-	RecommendedRAM  uint64   // Recommended RAM in bytes (for Q8 quantization)
-	QuantType       string   // Quantization type (Q4, Q8, F16, etc.)
-	SourceURL       string   // HuggingFace or other source URL
-	Languages       []string // Supported languages
-	OptimizedFor    string   // What this model is optimized for
-	Quality         string   // Quality rating: excellent, good, moderate
-	LicenseType     string   // License (Apache-2.0, MIT, etc.)
-	RequiresGPU     bool     // Whether GPU is required
-	ContextLength   int      // Maximum context length in tokens
+	ID             string   // Unique identifier (e.g., "hunyuan-mt-7b")
+	Name           string   // Human-readable name
+	Description    string   // Description of model capabilities
+	Parameters     uint64   // Number of parameters (e.g., 7_000_000_000 for 7B)
+	MinRAM         uint64   // Minimum RAM in bytes (for Q4 quantization)
+	RecommendedRAM uint64   // Recommended RAM in bytes (for Q8 quantization)
+	QuantType      string   // Quantization type (Q4, Q8, F16, etc.)
+	SourceURL      string   // HuggingFace or other source URL
+	Languages      []string // Supported languages
+	OptimizedFor   string   // What this model is optimized for
+	Quality        string   // Quality rating: excellent, good, moderate
+	LicenseType    string   // License (Apache-2.0, MIT, etc.)
+	RequiresGPU    bool     // Whether GPU is required
+	ContextLength  int      // Maximum context length in tokens
 }
 
 // ModelRegistry manages available translation models
@@ -42,59 +42,58 @@ func NewRegistry() *ModelRegistry {
 func (r *ModelRegistry) registerDefaultModels() {
 	// PRIORITY 1: Translation-Specialized Models
 
-	// TODO: Fix Hunyuan-MT and Aya URLs - currently commented out due to download issues
-	// Hunyuan-MT-7B: Best 7B translation model (REQUIRES HF TOKEN - COMMENTED OUT)
-	// r.Register(&ModelInfo{
-	// 	ID:             "hunyuan-mt-7b-q4",
-	// 	Name:           "Hunyuan-MT 7B (Q4)",
-	// 	Description:    "Translation-optimized 7B model with commercial-grade quality for 33 languages",
-	// 	Parameters:     7_000_000_000,
-	// 	MinRAM:         6 * 1024 * 1024 * 1024,   // 6GB
-	// 	RecommendedRAM: 8 * 1024 * 1024 * 1024,   // 8GB
-	// 	QuantType:      "Q4_K_M",
-	// 	SourceURL:      "https://huggingface.co/Tencent/Hunyuan-MT-7B-GGUF",
-	// 	Languages:      []string{"en", "ru", "sr", "zh", "es", "fr", "de", "ja", "ko"},
-	// 	OptimizedFor:   "Professional Translation",
-	// 	Quality:        "excellent",
-	// 	LicenseType:    "Apache-2.0",
-	// 	RequiresGPU:    false,
-	// 	ContextLength:  8192,
-	// })
+	// Hunyuan-MT-7B: Best 7B translation model (using bartowski GGUF)
+	r.Register(&ModelInfo{
+		ID:             "hunyuan-mt-7b-q4",
+		Name:           "Hunyuan-MT 7B (Q4)",
+		Description:    "Translation-optimized 7B model with commercial-grade quality for 33 languages",
+		Parameters:     7_000_000_000,
+		MinRAM:         6 * 1024 * 1024 * 1024, // 6GB
+		RecommendedRAM: 8 * 1024 * 1024 * 1024, // 8GB
+		QuantType:      "Q4_K_M",
+		SourceURL:      "https://huggingface.co/bartowski/Hunyuan-MT-7B-GGUF/resolve/main/Hunyuan-MT-7B-Q4_K_M.gguf",
+		Languages:      []string{"en", "ru", "sr", "zh", "es", "fr", "de", "ja", "ko"},
+		OptimizedFor:   "Professional Translation",
+		Quality:        "excellent",
+		LicenseType:    "Apache-2.0",
+		RequiresGPU:    false,
+		ContextLength:  8192,
+	})
 
-	// r.Register(&ModelInfo{
-	// 	ID:             "hunyuan-mt-7b-q8",
-	// 	Name:           "Hunyuan-MT 7B (Q8)",
-	// 	Description:    "High-quality translation with Q8 quantization for better accuracy",
-	// 	Parameters:     7_000_000_000,
-	// 	MinRAM:         9 * 1024 * 1024 * 1024,   // 9GB
-	// 	RecommendedRAM: 12 * 1024 * 1024 * 1024,  // 12GB
-	// 	QuantType:      "Q8_0",
-	// 	SourceURL:      "https://huggingface.co/Tencent/Hunyuan-MT-7B-GGUF",
-	// 	Languages:      []string{"en", "ru", "sr", "zh", "es", "fr", "de", "ja", "ko"},
-	// 	OptimizedFor:   "Professional Translation",
-	// 	Quality:        "excellent",
-	// 	LicenseType:    "Apache-2.0",
-	// 	RequiresGPU:    false,
-	// 	ContextLength:  8192,
-	// })
+	r.Register(&ModelInfo{
+		ID:             "hunyuan-mt-7b-q8",
+		Name:           "Hunyuan-MT 7B (Q8)",
+		Description:    "High-quality translation with Q8 quantization for better accuracy",
+		Parameters:     7_000_000_000,
+		MinRAM:         9 * 1024 * 1024 * 1024,  // 9GB
+		RecommendedRAM: 12 * 1024 * 1024 * 1024, // 12GB
+		QuantType:      "Q8_0",
+		SourceURL:      "https://huggingface.co/bartowski/Hunyuan-MT-7B-GGUF/resolve/main/Hunyuan-MT-7B-Q8_0.gguf",
+		Languages:      []string{"en", "ru", "sr", "zh", "es", "fr", "de", "ja", "ko"},
+		OptimizedFor:   "Professional Translation",
+		Quality:        "excellent",
+		LicenseType:    "Apache-2.0",
+		RequiresGPU:    false,
+		ContextLength:  8192,
+	})
 
-	// Aya-23: Multilingual translation model (COMMENTED OUT - BROKEN URL)
-	// r.Register(&ModelInfo{
-	// 	ID:             "aya-23-8b-q4",
-	// 	Name:           "Aya 23 8B (Q4)",
-	// 	Description:    "Multilingual model supporting 23 languages with strong translation",
-	// 	Parameters:     8_000_000_000,
-	// 	MinRAM:         7 * 1024 * 1024 * 1024,   // 7GB
-	// 	RecommendedRAM: 10 * 1024 * 1024 * 1024,  // 10GB
-	// 	QuantType:      "Q4_K_M",
-	// 	SourceURL:      "https://huggingface.co/CohereForAI/aya-23-8B-GGUF",
-	// 	Languages:      []string{"en", "ru", "sr", "ar", "zh", "cs", "de", "es", "fr", "hi"},
-	// 	OptimizedFor:   "Multilingual Translation",
-	// 	Quality:        "excellent",
-	// 	LicenseType:    "Apache-2.0",
-	// 	RequiresGPU:    false,
-	// 	ContextLength:  8192,
-	// })
+	// Aya-23: Multilingual translation model
+	r.Register(&ModelInfo{
+		ID:             "aya-23-8b-q4",
+		Name:           "Aya 23 8B (Q4)",
+		Description:    "Multilingual model supporting 23 languages with strong translation",
+		Parameters:     8_000_000_000,
+		MinRAM:         7 * 1024 * 1024 * 1024,  // 7GB
+		RecommendedRAM: 10 * 1024 * 1024 * 1024, // 10GB
+		QuantType:      "Q4_K_M",
+		SourceURL:      "https://huggingface.co/bartowski/aya-23-8B-GGUF/resolve/main/aya-23-8B-Q4_K_M.gguf",
+		Languages:      []string{"en", "ru", "sr", "ar", "zh", "cs", "de", "es", "fr", "hi"},
+		OptimizedFor:   "Multilingual Translation",
+		Quality:        "excellent",
+		LicenseType:    "Apache-2.0",
+		RequiresGPU:    false,
+		ContextLength:  8192,
+	})
 
 	// PRIORITY 2: General-Purpose Models with Strong Translation (NOW PRIORITY 1)
 
@@ -104,8 +103,8 @@ func (r *ModelRegistry) registerDefaultModels() {
 		Name:           "Qwen 2.5 7B Instruct (Q4)",
 		Description:    "Multilingual model with strong Russian and Serbian support",
 		Parameters:     7_000_000_000,
-		MinRAM:         6 * 1024 * 1024 * 1024,   // 6GB
-		RecommendedRAM: 8 * 1024 * 1024 * 1024,   // 8GB
+		MinRAM:         6 * 1024 * 1024 * 1024, // 6GB
+		RecommendedRAM: 8 * 1024 * 1024 * 1024, // 8GB
 		QuantType:      "Q4_K_M",
 		SourceURL:      "https://huggingface.co/bartowski/Qwen2.5-7B-Instruct-GGUF/resolve/main/Qwen2.5-7B-Instruct-Q4_K_M.gguf",
 		Languages:      []string{"en", "ru", "sr", "zh", "ja", "ko", "de", "es", "fr"},
@@ -122,10 +121,10 @@ func (r *ModelRegistry) registerDefaultModels() {
 		Name:           "Mistral 7B Instruct v0.3 (Q4)",
 		Description:    "High-quality general-purpose model with good translation",
 		Parameters:     7_000_000_000,
-		MinRAM:         6 * 1024 * 1024 * 1024,   // 6GB
-		RecommendedRAM: 8 * 1024 * 1024 * 1024,   // 8GB
+		MinRAM:         6 * 1024 * 1024 * 1024, // 6GB
+		RecommendedRAM: 8 * 1024 * 1024 * 1024, // 8GB
 		QuantType:      "Q4_K_M",
-		SourceURL:      "https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3-GGUF",
+		SourceURL:      "https://huggingface.co/bartowski/Mistral-7B-Instruct-v0.3-GGUF/resolve/main/Mistral-7B-Instruct-v0.3-Q4_K_M.gguf",
 		Languages:      []string{"en", "ru", "de", "es", "fr", "it"},
 		OptimizedFor:   "General + Translation",
 		Quality:        "good",
@@ -142,10 +141,10 @@ func (r *ModelRegistry) registerDefaultModels() {
 		Name:           "Qwen 2.5 14B Instruct (Q4)",
 		Description:    "Larger model for high-quality translation on capable systems",
 		Parameters:     14_000_000_000,
-		MinRAM:         12 * 1024 * 1024 * 1024,  // 12GB
-		RecommendedRAM: 16 * 1024 * 1024 * 1024,  // 16GB
+		MinRAM:         12 * 1024 * 1024 * 1024, // 12GB
+		RecommendedRAM: 16 * 1024 * 1024 * 1024, // 16GB
 		QuantType:      "Q4_K_M",
-		SourceURL:      "https://huggingface.co/Qwen/Qwen2.5-14B-Instruct-GGUF",
+		SourceURL:      "https://huggingface.co/bartowski/Qwen2.5-14B-Instruct-GGUF/resolve/main/Qwen2.5-14B-Instruct-Q4_K_M.gguf",
 		Languages:      []string{"en", "ru", "sr", "zh", "ja", "ko", "de", "es", "fr"},
 		OptimizedFor:   "High-Quality Translation",
 		Quality:        "excellent",
@@ -160,10 +159,10 @@ func (r *ModelRegistry) registerDefaultModels() {
 		Name:           "Qwen 2.5 27B Instruct (Q4)",
 		Description:    "Professional-grade translation for systems with 32GB+ RAM",
 		Parameters:     27_000_000_000,
-		MinRAM:         24 * 1024 * 1024 * 1024,  // 24GB
-		RecommendedRAM: 32 * 1024 * 1024 * 1024,  // 32GB
+		MinRAM:         24 * 1024 * 1024 * 1024, // 24GB
+		RecommendedRAM: 32 * 1024 * 1024 * 1024, // 32GB
 		QuantType:      "Q4_K_M",
-		SourceURL:      "https://huggingface.co/Qwen/Qwen2.5-27B-Instruct-GGUF",
+		SourceURL:      "https://huggingface.co/bartowski/Qwen2.5-27B-Instruct-GGUF/resolve/main/Qwen2.5-27B-Instruct-Q4_K_M.gguf",
 		Languages:      []string{"en", "ru", "sr", "zh", "ja", "ko", "de", "es", "fr"},
 		OptimizedFor:   "Professional Translation",
 		Quality:        "excellent",
@@ -180,10 +179,10 @@ func (r *ModelRegistry) registerDefaultModels() {
 		Name:           "Phi-3 Mini 3.8B (Q4)",
 		Description:    "Compact model for resource-constrained systems",
 		Parameters:     3_800_000_000,
-		MinRAM:         4 * 1024 * 1024 * 1024,   // 4GB
-		RecommendedRAM: 6 * 1024 * 1024 * 1024,   // 6GB
+		MinRAM:         4 * 1024 * 1024 * 1024, // 4GB
+		RecommendedRAM: 6 * 1024 * 1024 * 1024, // 6GB
 		QuantType:      "Q4_K_M",
-		SourceURL:      "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf",
+		SourceURL:      "https://huggingface.co/bartowski/Phi-3-mini-4k-instruct-GGUF/resolve/main/Phi-3-mini-4k-instruct-Q4_K_M.gguf",
 		Languages:      []string{"en", "ru", "de", "es", "fr"},
 		OptimizedFor:   "Low-Resource Translation",
 		Quality:        "moderate",
@@ -198,10 +197,10 @@ func (r *ModelRegistry) registerDefaultModels() {
 		Name:           "Gemma 2 9B Instruct (Q4)",
 		Description:    "Google's efficient multilingual model",
 		Parameters:     9_000_000_000,
-		MinRAM:         8 * 1024 * 1024 * 1024,   // 8GB
-		RecommendedRAM: 12 * 1024 * 1024 * 1024,  // 12GB
+		MinRAM:         8 * 1024 * 1024 * 1024,  // 8GB
+		RecommendedRAM: 12 * 1024 * 1024 * 1024, // 12GB
 		QuantType:      "Q4_K_M",
-		SourceURL:      "https://huggingface.co/google/gemma-2-9b-it-GGUF",
+		SourceURL:      "https://huggingface.co/bartowski/gemma-2-9B-it-GGUF/resolve/main/gemma-2-9b-it-Q4_K_M.gguf",
 		Languages:      []string{"en", "ru", "de", "es", "fr", "it", "pt", "zh", "ja", "ko"},
 		OptimizedFor:   "Balanced Translation",
 		Quality:        "good",

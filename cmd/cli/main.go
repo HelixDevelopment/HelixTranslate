@@ -251,8 +251,12 @@ func translateEbook(
 		fmt.Printf("Using translator: %s\n\n", trans.GetName())
 	}
 
-	// Create language detector
-	langDetector := language.NewDetector(nil)
+	// Create language detector with LLM support if API key available
+	var llmDetector language.LLMDetector
+	if apiKey != "" {
+		llmDetector = language.NewSimpleLLMDetector(providerName, apiKey)
+	}
+	langDetector := language.NewDetector(llmDetector)
 
 	// Create universal translator
 	universalTrans := translator.NewUniversalTranslator(
