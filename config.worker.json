@@ -18,12 +18,22 @@
     "cors_origins": ["*"]
   },
   "translation": {
-    "default_provider": "dictionary",
-    "default_model": "",
+    "default_provider": "ollama",
+    "default_model": "llama3.1:8b-instruct-q4_K_M",
     "cache_enabled": true,
     "cache_ttl": 3600,
     "max_concurrent": 10,
-    "providers": {}
+    "providers": {
+      "ollama": {
+        "base_url": "http://localhost:11434",
+        "model": "llama3.1:8b-instruct-q4_K_M",
+        "options": {
+          "temperature": 0.1,
+          "top_p": 0.9,
+          "max_tokens": 4096
+        }
+      }
+    }
   },
   "distributed": {
     "enabled": false,
