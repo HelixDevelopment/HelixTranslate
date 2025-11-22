@@ -1095,3 +1095,370 @@ func TestVersionManager_KeyGeneration(t *testing.T) {
 		t.Errorf("Public key file does not contain valid PEM header")
 	}
 }
+
+// TestVersionManager_IntegrationTest performs comprehensive integration testing
+func TestVersionManager_IntegrationTest(t *testing.T) {
+	// Create temporary directory for test files
+	tempDir, err := os.MkdirTemp("", "version-integration-test")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	// Create test server that simulates a worker
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/v1/version":
+			// Initially return outdated version
+			version := VersionInfo{
+				CodebaseVersion: "v1.0.0",
+				BuildTime:       "2024-01-01T00:00:00Z",
+				GitCommit:       "abc123",
+				GoVersion:       "go1.21.0",
+				Components: map[string]string{
+					"translator":  "v1.0.0",
+					"api":         "1.0.0",
+					"distributed": "1.0.0",
+				},
+				LastUpdated: time.Now(),
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(version)
+
+		case "/health":
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"status":"healthy"}`))
+
+		case "/api/v1/update/upload":
+			if r.Method == "POST" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"message":"uploaded"}`))
+			}
+
+		case "/api/v1/update/apply":
+			if r.Method == "POST" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"message":"applied"}`))
+			}
+
+		case "/api/v1/update/rollback":
+			if r.Method == "POST" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"message":"rolled back"}`))
+			}
+
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+
+	host, port := parseTestServerURL(server.URL)
+
+	// Setup version manager
+	eventBus := events.NewEventBus()
+	vm := NewVersionManager(eventBus)
+	vm.httpClient = server.Client()
+	vm.SetBaseURL(server.URL)
+	vm.updateDir = tempDir
+
+	// Create mock service
+	service := &RemoteService{
+		WorkerID: "integration-test-worker",
+		Host:     host,
+		Port:     port,
+		Protocol: "https",
+		Version: VersionInfo{
+			CodebaseVersion: "v1.0.0",
+			Components: map[string]string{
+				"translator":  "v1.0.0",
+				"api":         "1.0.0",
+				"distributed": "1.0.0",
+			},
+		},
+	}
+
+	// Test 1: Version checking
+	t.Run("VersionCheck", func(t *testing.T) {
+		upToDate, err := vm.CheckWorkerVersion(context.Background(), service)
+		if err != nil {
+			t.Fatalf("Version check failed: %v", err)
+		}
+		if upToDate {
+			t.Errorf("Expected worker to be outdated initially")
+		}
+	})
+
+	// Test 2: Health validation
+	t.Run("HealthValidation", func(t *testing.T) {
+		err := vm.ValidateWorkerForWork(context.Background(), service)
+		if err == nil {
+			t.Errorf("Expected validation to fail for outdated worker")
+		}
+		if !strings.Contains(err.Error(), "outdated") {
+			t.Errorf("Expected 'outdated' error, got: %s", err.Error())
+		}
+	})
+
+	// Test 3: Update package creation
+	t.Run("UpdatePackageCreation", func(t *testing.T) {
+		packagePath, err := vm.createUpdatePackage()
+		if err != nil {
+			t.Fatalf("Failed to create update package: %v", err)
+		}
+		if _, err := os.Stat(packagePath); os.IsNotExist(err) {
+			t.Errorf("Update package was not created")
+		}
+	})
+
+	// Test 4: Backup creation
+	t.Run("BackupCreation", func(t *testing.T) {
+		backup, err := vm.createWorkerBackup(context.Background(), service)
+		if err != nil {
+			t.Fatalf("Failed to create backup: %v", err)
+		}
+		if backup.WorkerID != service.WorkerID {
+			t.Errorf("Backup worker ID mismatch")
+		}
+	})
+
+	// Test 5: Metrics tracking
+	t.Run("MetricsTracking", func(t *testing.T) {
+		initialUpdates := vm.metrics.TotalUpdates
+
+		// Record some metrics
+		vm.RecordUpdateMetrics(true, 5*time.Minute)
+		vm.RecordRollbackMetrics(false, 2*time.Minute)
+
+		if vm.metrics.TotalUpdates != initialUpdates+1 {
+			t.Errorf("Update metrics not recorded correctly")
+		}
+		if vm.metrics.SuccessfulUpdates != 1 {
+			t.Errorf("Successful update not recorded")
+		}
+		if vm.metrics.FailedRollbacks != 1 {
+			t.Errorf("Failed rollback not recorded")
+		}
+	})
+
+	// Test 6: Health status calculation
+	t.Run("HealthStatus", func(t *testing.T) {
+		health := vm.GetHealthStatus()
+		if health["status"] == nil {
+			t.Errorf("Health status not calculated")
+		}
+		if score, ok := health["health_score"].(float64); !ok || score < 0 || score > 100 {
+			t.Errorf("Invalid health score: %v", score)
+		}
+	})
+
+	// Test 7: Alert system
+	t.Run("AlertSystem", func(t *testing.T) {
+		// Create a test alert
+		alert := &DriftAlert{
+			WorkerID:        "test-worker",
+			Severity:        "high",
+			Message:         "Test alert",
+			Timestamp:       time.Now(),
+			DriftDuration:   24 * time.Hour,
+			CurrentVersion:  VersionInfo{CodebaseVersion: "v1.0.0"},
+			ExpectedVersion: VersionInfo{CodebaseVersion: "v1.1.0"},
+		}
+
+		// Test alert sending (should work even without channels)
+		err := vm.alertManager.SendAlert(alert)
+		if err != nil {
+			t.Logf("Alert sending failed (expected if no channels configured): %v", err)
+		}
+
+		// Test alert history
+		history := vm.GetAlertHistory(10)
+		if len(history) == 0 {
+			t.Errorf("Alert history should contain at least one alert")
+		}
+
+		// Test alert acknowledgement
+		if alert.AlertID != "" {
+			acknowledged := vm.AcknowledgeAlert(alert.AlertID, "test-user")
+			if !acknowledged {
+				t.Errorf("Alert acknowledgement failed")
+			}
+		}
+	})
+
+	// Test 8: Version drift detection
+	t.Run("VersionDriftDetection", func(t *testing.T) {
+		services := []*RemoteService{service}
+		alerts := vm.CheckVersionDrift(context.Background(), services)
+
+		// Should generate alerts for outdated worker
+		if len(alerts) == 0 {
+			t.Errorf("Expected alerts for outdated worker")
+		}
+
+		found := false
+		for _, alert := range alerts {
+			if alert.WorkerID == service.WorkerID {
+				found = true
+				if alert.Severity == "" {
+					t.Errorf("Alert severity not set")
+				}
+				break
+			}
+		}
+		if !found {
+			t.Errorf("Alert for test worker not found")
+		}
+	})
+
+	// Test 9: Alert channel management
+	t.Run("AlertChannels", func(t *testing.T) {
+		// Test email channel (without actual sending)
+		emailChannel := &EmailAlertChannel{
+			SMTPHost:    "smtp.example.com",
+			SMTPPort:    587,
+			Username:    "test@example.com",
+			Password:    "password",
+			FromAddress: "test@example.com",
+			ToAddresses: []string{"admin@example.com"},
+		}
+
+		vm.AddAlertChannel(emailChannel)
+
+		// Verify channel was added by checking if alert sending doesn't fail due to no channels
+		alert := &DriftAlert{
+			WorkerID:  "test-worker",
+			Severity:  "medium",
+			Message:   "Channel test alert",
+			Timestamp: time.Now(),
+		}
+
+		// This should attempt to send through the channel
+		err := vm.alertManager.SendAlert(alert)
+		t.Logf("Alert channel test result: %v", err)
+	})
+
+	// Test 10: Comprehensive metrics
+	t.Run("ComprehensiveMetrics", func(t *testing.T) {
+		metrics := vm.GetMetrics()
+
+		// Verify metrics structure
+		if metrics.TotalUpdates < 0 {
+			t.Errorf("Invalid total updates count")
+		}
+		if metrics.WorkersChecked < 0 {
+			t.Errorf("Invalid workers checked count")
+		}
+
+		// Test success rate calculation
+		rate := vm.calculateSuccessRate(5, 10)
+		if rate != 50.0 {
+			t.Errorf("Expected 50%% success rate, got %.1f%%", rate)
+		}
+
+		rate = vm.calculateSuccessRate(0, 0)
+		if rate != 100.0 {
+			t.Errorf("Expected 100%% success rate for no operations, got %.1f%%", rate)
+		}
+	})
+
+	// Test 11: Caching functionality
+	t.Run("Caching", func(t *testing.T) {
+		// Set short cache TTL for testing
+		vm.SetCacheTTL(1 * time.Second)
+
+		// First call should cache the result
+		upToDate1, err := vm.CheckWorkerVersion(context.Background(), service)
+		if err != nil {
+			t.Fatalf("First version check failed: %v", err)
+		}
+
+		// Second call should use cache
+		upToDate2, err := vm.CheckWorkerVersion(context.Background(), service)
+		if err != nil {
+			t.Fatalf("Second version check failed: %v", err)
+		}
+
+		if upToDate1 != upToDate2 {
+			t.Errorf("Cached result differs from original")
+		}
+
+		// Wait for cache to expire
+		time.Sleep(1100 * time.Millisecond)
+
+		// Third call should refresh cache
+		upToDate3, err := vm.CheckWorkerVersion(context.Background(), service)
+		if err != nil {
+			t.Fatalf("Third version check failed: %v", err)
+		}
+
+		// Results should be the same since worker version doesn't change
+		if upToDate1 != upToDate3 {
+			t.Errorf("Cache refresh result differs")
+		}
+
+		// Test cache stats
+		stats := vm.GetCacheStats()
+		if stats["total_entries"].(int) != 1 {
+			t.Errorf("Expected 1 cache entry, got %d", stats["total_entries"])
+		}
+
+		// Clear cache
+		vm.ClearCache()
+		stats = vm.GetCacheStats()
+		if stats["total_entries"].(int) != 0 {
+			t.Errorf("Expected 0 cache entries after clear, got %d", stats["total_entries"])
+		}
+	})
+
+	// Test 12: Batch operations
+	t.Run("BatchOperations", func(t *testing.T) {
+		// Create multiple services
+		services := []*RemoteService{
+			service,
+			{
+				WorkerID: "batch-worker-2",
+				Host:     host,
+				Port:     port,
+				Protocol: "https",
+				Version: VersionInfo{
+					CodebaseVersion: "v1.0.0",
+					Components: map[string]string{
+						"translator": "v1.0.0",
+					},
+				},
+			},
+		}
+
+		// Perform batch update
+		result := vm.BatchUpdateWorkers(context.Background(), services, 2)
+
+		// Verify results
+		if result.TotalWorkers != 2 {
+			t.Errorf("Expected 2 total workers, got %d", result.TotalWorkers)
+		}
+
+		if result.Duration <= 0 {
+			t.Errorf("Expected positive duration")
+		}
+
+		// Since workers are outdated, they should either fail or be processed
+		totalProcessed := len(result.Successful) + len(result.Failed) + len(result.Skipped)
+		if totalProcessed != 2 {
+			t.Errorf("Expected 2 workers processed, got %d", totalProcessed)
+		}
+
+		// Test summary
+		summary := result.GetSummary()
+		if !strings.Contains(summary, "Batch update completed") {
+			t.Errorf("Summary should contain completion message")
+		}
+
+		// Test success rate
+		rate := result.GetSuccessRate()
+		if rate < 0 || rate > 100 {
+			t.Errorf("Invalid success rate: %.1f%%", rate)
+		}
+	})
+}

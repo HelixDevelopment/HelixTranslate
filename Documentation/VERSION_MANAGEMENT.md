@@ -252,6 +252,240 @@ The system continuously monitors for version drift:
 - Average update duration
 - Rollback frequency
 - Backup storage utilization
+- Alert generation rates
+- Version drift detection frequency
+
+## Alerting System
+
+### Alert Types
+
+The system generates alerts for version drift conditions:
+
+| Severity | Trigger Condition | Description |
+|----------|------------------|-------------|
+| Low | Drift > 6 hours | Minor version drift detected |
+| Medium | Drift > 12 hours | Moderate version drift requiring attention |
+| High | Drift > 24 hours | Significant version drift impacting operations |
+| Critical | Worker unreachable | Worker completely unreachable or severely outdated |
+
+### Alert Channels
+
+Multiple notification channels are supported:
+
+#### Email Alerts
+```json
+POST /api/v1/monitoring/version/alerts/channels/email
+{
+  "smtp_host": "smtp.gmail.com",
+  "smtp_port": 587,
+  "username": "alerts@example.com",
+  "password": "app-password",
+  "from_address": "alerts@example.com",
+  "to_addresses": ["admin@example.com", "ops@example.com"]
+}
+```
+
+#### Webhook Alerts
+```json
+POST /api/v1/monitoring/version/alerts/channels/webhook
+{
+  "url": "https://api.example.com/webhooks/version-alerts",
+  "method": "POST",
+  "headers": {
+    "Authorization": "Bearer token123",
+    "X-Source": "version-monitor"
+  }
+}
+```
+
+#### Slack Alerts
+```json
+POST /api/v1/monitoring/version/alerts/channels/slack
+{
+  "webhook_url": "https://hooks.slack.com/services/...",
+  "channel": "#version-alerts",
+  "username": "Version Monitor"
+}
+```
+
+### Alert Management
+
+#### View Alert History
+```bash
+GET /api/v1/monitoring/version/alerts/history?limit=50
+```
+
+#### Acknowledge Alerts
+```json
+POST /api/v1/monitoring/version/alerts/alert-123/acknowledge
+{
+  "acknowledged_by": "admin@example.com"
+}
+```
+
+### Alert Payload Structure
+
+All alerts include:
+```json
+{
+  "alert_id": "alert-1640995200000000000",
+  "worker_id": "worker01",
+  "severity": "high",
+  "drift_duration": "24h30m15s",
+  "current_version": "v1.0.0",
+  "expected_version": "v1.1.0",
+  "message": "Worker worker01 is running version v1.0.0, expected v1.1.0 (drift: 24h30m15s)",
+  "timestamp": "2024-01-01T12:00:00Z",
+  "acknowledged": false
+}
+```
+
+## Web Dashboard
+
+### Accessing the Dashboard
+
+The version management system includes a comprehensive web dashboard for monitoring:
+
+```
+GET /api/v1/monitoring/version/dashboard.html
+```
+
+### Dashboard Features
+
+- **Real-time Metrics**: Live display of worker status, update statistics, and health scores
+- **Interactive Charts**: Visual representation of worker status distribution and update success rates
+- **Worker Details**: Individual worker status, versions, and drift information
+- **Alert Management**: View active alerts with severity indicators
+- **Auto-refresh**: Automatic data updates every 30 seconds
+
+### Dashboard Data API
+
+The dashboard consumes data from the comprehensive dashboard endpoint:
+
+```bash
+GET /api/v1/monitoring/version/dashboard
+```
+
+**Response Structure:**
+```json
+{
+  "summary": {
+    "total_workers": 5,
+    "up_to_date_workers": 3,
+    "outdated_workers": 1,
+    "unhealthy_workers": 1,
+    "active_alerts": 2,
+    "health_score": 75.5,
+    "last_drift_check": "2024-01-01T12:00:00Z"
+  },
+  "metrics": { /* VersionMetrics */ },
+  "alerts": [ /* Active alerts */ ],
+  "health": { /* Health status */ },
+  "workers": [ /* Worker details */ ],
+  "status": { /* System status */ },
+  "timestamp": "2024-01-01T12:00:00Z"
+}
+```
+
+### Dashboard Screenshots
+
+The dashboard provides:
+- **Summary Cards**: Key metrics at a glance
+- **Status Charts**: Doughnut chart showing worker status distribution
+- **Update Charts**: Bar chart displaying update success/failure rates
+- **Worker Grid**: Detailed view of each worker's status
+- **Alert Feed**: Chronological list of active alerts with severity colors
+
+### Mobile Responsive
+
+The dashboard is fully responsive and works on:
+- Desktop computers
+- Tablets
+- Mobile devices
+
+### Browser Compatibility
+
+Compatible with all modern browsers:
+- Chrome 70+
+- Firefox 65+
+- Safari 12+
+- Edge 79+
+
+## Performance Optimizations
+
+### Version Check Caching
+
+The version management system implements intelligent caching to reduce network overhead:
+
+- **Cache TTL**: Version checks are cached for 5 minutes by default
+- **Automatic Expiration**: Cached entries expire based on timestamp and TTL
+- **Cache Invalidation**: Cache can be manually cleared when needed
+- **Cache Statistics**: Monitor cache hit rates and entry counts
+
+```go
+// Configure cache TTL
+vm.SetCacheTTL(10 * time.Minute)
+
+// Clear cache manually
+vm.ClearCache()
+
+// Get cache statistics
+stats := vm.GetCacheStats()
+```
+
+### Batch Operations
+
+For large-scale deployments, batch operations provide concurrent processing:
+
+- **Concurrent Updates**: Update multiple workers simultaneously
+- **Configurable Concurrency**: Control the number of parallel operations
+- **Progress Tracking**: Monitor batch operation results
+- **Error Isolation**: Individual worker failures don't stop the entire batch
+
+```go
+// Perform batch update with concurrency limit
+result := vm.BatchUpdateWorkers(ctx, services, 5)
+
+// Check results
+fmt.Printf("Success rate: %.1f%%\n", result.GetSuccessRate())
+fmt.Printf("Duration: %v\n", result.Duration)
+fmt.Printf("Successful: %d, Failed: %d, Skipped: %d\n",
+    len(result.Successful), len(result.Failed), len(result.Skipped))
+```
+
+### Performance Metrics
+
+The system tracks performance metrics for optimization:
+
+- **Cache Hit Rate**: Percentage of version checks served from cache
+- **Batch Operation Duration**: Time taken for concurrent updates
+- **Concurrent Operation Limits**: Optimal concurrency levels for your infrastructure
+- **Network Latency**: Average response times for version checks
+
+### Scaling Considerations
+
+For large deployments (100+ workers):
+
+1. **Increase Cache TTL**: Reduce network load with longer caching
+2. **Batch Operations**: Use concurrent updates with appropriate concurrency limits
+3. **Monitoring**: Track performance metrics to identify bottlenecks
+4. **Load Balancing**: Distribute update operations across multiple coordinator instances
+
+### Configuration Recommendations
+
+```yaml
+# For large deployments
+version_manager:
+  cache_ttl: 15m
+  batch_concurrency: 10
+  health_check_interval: 60s
+
+# For small deployments
+version_manager:
+  cache_ttl: 5m
+  batch_concurrency: 3
+  health_check_interval: 30s
+```
 
 ## Troubleshooting
 

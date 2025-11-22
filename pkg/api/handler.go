@@ -18,6 +18,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -93,6 +94,19 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			v1.POST("/update/upload", h.uploadUpdate)
 			v1.POST("/update/apply", h.applyUpdate)
 			v1.POST("/update/rollback", h.rollbackUpdate)
+
+			// Version management monitoring endpoints
+			v1.GET("/monitoring/version/metrics", h.getVersionMetrics)
+			v1.GET("/monitoring/version/alerts", h.getVersionAlerts)
+			v1.GET("/monitoring/version/health", h.getVersionHealth)
+			v1.GET("/monitoring/version/dashboard", h.getVersionDashboard)
+			v1.POST("/monitoring/version/drift-check", h.triggerVersionDriftCheck)
+			v1.GET("/monitoring/version/alerts/history", h.getAlertHistory)
+			v1.POST("/monitoring/version/alerts/:alert_id/acknowledge", h.acknowledgeAlert)
+			v1.POST("/monitoring/version/alerts/channels/email", h.addEmailAlertChannel)
+			v1.POST("/monitoring/version/alerts/channels/webhook", h.addWebhookAlertChannel)
+			v1.POST("/monitoring/version/alerts/channels/slack", h.addSlackAlertChannel)
+			v1.GET("/monitoring/version/dashboard.html", h.serveDashboard)
 		}
 
 		// Authentication (if enabled)
@@ -1128,4 +1142,467 @@ func (h *Handler) rollbackUpdate(c *gin.Context) {
 		"message":   "Worker rollback completed successfully",
 		"worker_id": workerID,
 	})
+}
+
+// Version Management Monitoring Handlers
+
+// getVersionMetrics returns comprehensive version management metrics
+func (h *Handler) getVersionMetrics(c *gin.Context) {
+	if h.distributedManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Distributed work not available"})
+		return
+	}
+
+	dm, ok := h.distributedManager.(*distributed.DistributedManager)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid distributed manager"})
+		return
+	}
+
+	metrics := dm.GetVersionMetrics()
+	c.JSON(http.StatusOK, metrics)
+}
+
+// getVersionAlerts returns current version drift alerts
+func (h *Handler) getVersionAlerts(c *gin.Context) {
+	if h.distributedManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Distributed work not available"})
+		return
+	}
+
+	dm, ok := h.distributedManager.(*distributed.DistributedManager)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid distributed manager"})
+		return
+	}
+
+	alerts := dm.GetVersionAlerts()
+
+	// Filter alerts by severity if requested
+	severity := c.Query("severity")
+	if severity != "" {
+		filtered := make([]*distributed.DriftAlert, 0)
+		for _, alert := range alerts {
+			if alert.Severity == severity {
+				filtered = append(filtered, alert)
+			}
+		}
+		alerts = filtered
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"alerts": alerts,
+		"count":  len(alerts),
+	})
+}
+
+// getVersionHealth returns overall version management health status
+func (h *Handler) getVersionHealth(c *gin.Context) {
+	if h.distributedManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Distributed work not available"})
+		return
+	}
+
+	dm, ok := h.distributedManager.(*distributed.DistributedManager)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid distributed manager"})
+		return
+	}
+
+	health := dm.GetVersionHealth()
+	c.JSON(http.StatusOK, health)
+}
+
+// getVersionDashboard returns dashboard data for version management visualization
+func (h *Handler) getVersionDashboard(c *gin.Context) {
+	if h.distributedManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Distributed work not available"})
+		return
+	}
+
+	dm, ok := h.distributedManager.(*distributed.DistributedManager)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid distributed manager"})
+		return
+	}
+
+	// Get all dashboard data
+	metrics := dm.GetVersionMetrics()
+	alerts := dm.GetVersionAlerts()
+	health := dm.GetVersionHealth()
+	status := dm.GetStatus()
+
+	// Get worker version details
+	workers := make([]gin.H, 0)
+	if pairedServices := dm.GetPairedServices(); pairedServices != nil {
+		for workerID, service := range pairedServices {
+			workers = append(workers, gin.H{
+				"worker_id":      workerID,
+				"host":           service.Host,
+				"port":           service.Port,
+				"protocol":       service.Protocol,
+				"status":         service.Status,
+				"version":        service.Version.CodebaseVersion,
+				"last_seen":      service.LastSeen,
+				"last_updated":   service.Version.LastUpdated,
+				"drift_duration": time.Since(service.Version.LastUpdated),
+			})
+		}
+	}
+
+	// Calculate summary statistics
+	totalWorkers := len(workers)
+	upToDateWorkers := 0
+	outdatedWorkers := 0
+	unhealthyWorkers := 0
+
+	for _, worker := range workers {
+		status := worker["status"].(string)
+		switch status {
+		case "paired":
+			upToDateWorkers++
+		case "outdated":
+			outdatedWorkers++
+		default:
+			unhealthyWorkers++
+		}
+	}
+
+	dashboard := gin.H{
+		"summary": gin.H{
+			"total_workers":      totalWorkers,
+			"up_to_date_workers": upToDateWorkers,
+			"outdated_workers":   outdatedWorkers,
+			"unhealthy_workers":  unhealthyWorkers,
+			"active_alerts":      len(alerts),
+			"health_score":       health["health_score"],
+			"last_drift_check":   metrics.LastDriftCheck,
+		},
+		"metrics":   metrics,
+		"alerts":    alerts,
+		"health":    health,
+		"workers":   workers,
+		"status":    status,
+		"timestamp": time.Now().UTC(),
+	}
+
+	c.JSON(http.StatusOK, dashboard)
+}
+
+// triggerVersionDriftCheck manually triggers a version drift check
+func (h *Handler) triggerVersionDriftCheck(c *gin.Context) {
+	if h.distributedManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Distributed work not available"})
+		return
+	}
+
+	dm, ok := h.distributedManager.(*distributed.DistributedManager)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid distributed manager"})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	alerts := dm.CheckVersionDrift(ctx)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":          "Version drift check completed",
+		"alerts_generated": len(alerts),
+		"alerts":           alerts,
+	})
+}
+
+// getAlertHistory returns alert history
+func (h *Handler) getAlertHistory(c *gin.Context) {
+	if h.distributedManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Distributed work not available"})
+		return
+	}
+
+	dm, ok := h.distributedManager.(*distributed.DistributedManager)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid distributed manager"})
+		return
+	}
+
+	limitStr := c.Query("limit")
+	limit := 50 // default limit
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+			limit = l
+		}
+	}
+
+	alerts := dm.GetAlertHistory(limit)
+
+	c.JSON(http.StatusOK, gin.H{
+		"alerts": alerts,
+		"count":  len(alerts),
+		"limit":  limit,
+	})
+}
+
+// acknowledgeAlert marks an alert as acknowledged
+func (h *Handler) acknowledgeAlert(c *gin.Context) {
+	if h.distributedManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Distributed work not available"})
+		return
+	}
+
+	alertID := c.Param("alert_id")
+	if alertID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Alert ID is required"})
+		return
+	}
+
+	var req struct {
+		AcknowledgedBy string `json:"acknowledged_by" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	dm, ok := h.distributedManager.(*distributed.DistributedManager)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid distributed manager"})
+		return
+	}
+
+	if acknowledged := dm.AcknowledgeAlert(alertID, req.AcknowledgedBy); !acknowledged {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Alert not found or already acknowledged"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":  "Alert acknowledged successfully",
+		"alert_id": alertID,
+	})
+}
+
+// addEmailAlertChannel adds an email alert channel
+func (h *Handler) addEmailAlertChannel(c *gin.Context) {
+	if h.distributedManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Distributed work not available"})
+		return
+	}
+
+	var req struct {
+		SMTPHost    string   `json:"smtp_host" binding:"required"`
+		SMTPPort    int      `json:"smtp_port" binding:"required"`
+		Username    string   `json:"username" binding:"required"`
+		Password    string   `json:"password" binding:"required"`
+		FromAddress string   `json:"from_address" binding:"required"`
+		ToAddresses []string `json:"to_addresses" binding:"required,min=1"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	channel := &distributed.EmailAlertChannel{
+		SMTPHost:    req.SMTPHost,
+		SMTPPort:    req.SMTPPort,
+		Username:    req.Username,
+		Password:    req.Password,
+		FromAddress: req.FromAddress,
+		ToAddresses: req.ToAddresses,
+	}
+
+	dm, ok := h.distributedManager.(*distributed.DistributedManager)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid distributed manager"})
+		return
+	}
+
+	dm.AddAlertChannel(channel)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":      "Email alert channel added successfully",
+		"channel_type": "email",
+		"recipients":   len(req.ToAddresses),
+	})
+}
+
+// addWebhookAlertChannel adds a webhook alert channel
+func (h *Handler) addWebhookAlertChannel(c *gin.Context) {
+	if h.distributedManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Distributed work not available"})
+		return
+	}
+
+	var req struct {
+		URL     string            `json:"url" binding:"required"`
+		Method  string            `json:"method"`
+		Headers map[string]string `json:"headers"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if req.Method == "" {
+		req.Method = "POST"
+	}
+
+	channel := &distributed.WebhookAlertChannel{
+		URL:     req.URL,
+		Method:  req.Method,
+		Headers: req.Headers,
+	}
+
+	dm, ok := h.distributedManager.(*distributed.DistributedManager)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid distributed manager"})
+		return
+	}
+
+	dm.AddAlertChannel(channel)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":      "Webhook alert channel added successfully",
+		"channel_type": "webhook",
+		"url":          req.URL,
+		"method":       req.Method,
+	})
+}
+
+// addSlackAlertChannel adds a Slack alert channel
+func (h *Handler) addSlackAlertChannel(c *gin.Context) {
+	if h.distributedManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Distributed work not available"})
+		return
+	}
+
+	var req struct {
+		WebhookURL string `json:"webhook_url" binding:"required"`
+		Channel    string `json:"channel"`
+		Username   string `json:"username"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if req.Username == "" {
+		req.Username = "Version Monitor"
+	}
+
+	channel := &distributed.SlackAlertChannel{
+		WebhookURL: req.WebhookURL,
+		Channel:    req.Channel,
+		Username:   req.Username,
+	}
+
+	dm, ok := h.distributedManager.(*distributed.DistributedManager)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid distributed manager"})
+		return
+	}
+
+	dm.AddAlertChannel(channel)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":      "Slack alert channel added successfully",
+		"channel_type": "slack",
+		"channel":      req.Channel,
+		"username":     req.Username,
+	})
+}
+
+// serveDashboard serves the HTML dashboard
+func (h *Handler) serveDashboard(c *gin.Context) {
+	dashboardPath := "pkg/api/dashboard.html"
+
+	// Read the dashboard HTML file
+	htmlContent, err := os.ReadFile(dashboardPath)
+	if err != nil {
+		// Fallback: serve embedded dashboard if file not found
+		htmlContent = []byte(h.getEmbeddedDashboardHTML())
+	}
+
+	c.Header("Content-Type", "text/html; charset=utf-8")
+	c.String(http.StatusOK, string(htmlContent))
+}
+
+// getEmbeddedDashboardHTML returns the embedded dashboard HTML
+func (h *Handler) getEmbeddedDashboardHTML() string {
+	return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Version Management Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: #007bff; color: white; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; }
+        .stat-value { font-size: 2em; font-weight: bold; }
+        .stat-label { color: #666; margin-top: 5px; }
+        .alert { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 Version Management Dashboard</h1>
+            <p>Dashboard file not found. This is a fallback version.</p>
+        </div>
+
+        <div class="alert">
+            <strong>Note:</strong> The full dashboard HTML file was not found. Please ensure the dashboard.html file is properly deployed.
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="total-workers">-</div>
+                <div class="stat-label">Total Workers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="up-to-date">-</div>
+                <div class="stat-label">Up to Date</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="outdated">-</div>
+                <div class="stat-label">Outdated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="health-score">-</div>
+                <div class="stat-label">Health Score</div>
+            </div>
+        </div>
+
+        <button onclick="loadData()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Load Data</button>
+
+        <div id="data" style="margin-top: 20px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+    </div>
+
+    <script>
+        async function loadData() {
+            try {
+                const response = await fetch('/api/v1/monitoring/version/dashboard');
+                const data = await response.json();
+
+                document.getElementById('total-workers').textContent = data.summary.total_workers;
+                document.getElementById('up-to-date').textContent = data.summary.up_to_date_workers;
+                document.getElementById('outdated').textContent = data.summary.outdated_workers;
+                document.getElementById('health-score').textContent = Math.round(data.summary.health_score);
+
+                document.getElementById('data').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('data').innerHTML = '<p style="color: red;">Error loading data: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>`
 }

@@ -1,6 +1,7 @@
 package distributed
 
 import (
+	"bytes"
 	"context"
 	"crypto"
 	"crypto/rand"
@@ -13,10 +14,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/smtp"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"digital.vasic.translator/pkg/events"
@@ -42,6 +45,377 @@ type SignedUpdatePackage struct {
 	Timestamp     time.Time
 }
 
+// VersionMetrics represents version management metrics
+type VersionMetrics struct {
+	// Update metrics
+	TotalUpdates      int64
+	SuccessfulUpdates int64
+	FailedUpdates     int64
+	UpdateDuration    time.Duration
+	LastUpdateTime    time.Time
+
+	// Rollback metrics
+	TotalRollbacks      int64
+	SuccessfulRollbacks int64
+	FailedRollbacks     int64
+	RollbackDuration    time.Duration
+	LastRollbackTime    time.Time
+
+	// Version drift metrics
+	WorkersChecked   int64
+	WorkersUpToDate  int64
+	WorkersOutdated  int64
+	WorkersUnhealthy int64
+	LastDriftCheck   time.Time
+	MaxDriftDuration time.Duration
+
+	// Security metrics
+	SignatureVerifications int64
+	SignatureSuccesses     int64
+	SignatureFailures      int64
+	KeyGenerations         int64
+
+	// Backup metrics
+	BackupsCreated     int64
+	BackupsActive      int64
+	BackupsExpired     int64
+	BackupStorageBytes int64
+}
+
+// DriftAlert represents a version drift alert
+type DriftAlert struct {
+	WorkerID        string
+	CurrentVersion  VersionInfo
+	ExpectedVersion VersionInfo
+	DriftDuration   time.Duration
+	Severity        string // "low", "medium", "high", "critical"
+	Timestamp       time.Time
+	Message         string
+	AlertID         string
+	Acknowledged    bool
+	AcknowledgedAt  *time.Time
+	AcknowledgedBy  string
+}
+
+// AlertChannel represents an alert notification channel
+type AlertChannel interface {
+	SendAlert(alert *DriftAlert) error
+	Name() string
+}
+
+// EmailAlertChannel sends alerts via email
+type EmailAlertChannel struct {
+	SMTPHost    string
+	SMTPPort    int
+	Username    string
+	Password    string
+	FromAddress string
+	ToAddresses []string
+}
+
+// WebhookAlertChannel sends alerts via HTTP webhook
+type WebhookAlertChannel struct {
+	URL        string
+	Method     string
+	Headers    map[string]string
+	HTTPClient *http.Client
+}
+
+// SlackAlertChannel sends alerts to Slack
+type SlackAlertChannel struct {
+	WebhookURL string
+	Channel    string
+	Username   string
+	HTTPClient *http.Client
+}
+
+// AlertManager manages alert notifications
+type AlertManager struct {
+	channels     []AlertChannel
+	alertHistory []*DriftAlert
+	maxHistory   int
+	mu           sync.RWMutex
+}
+
+// NewAlertManager creates a new alert manager
+func NewAlertManager(maxHistory int) *AlertManager {
+	if maxHistory <= 0 {
+		maxHistory = 1000
+	}
+
+	return &AlertManager{
+		channels:     make([]AlertChannel, 0),
+		alertHistory: make([]*DriftAlert, 0),
+		maxHistory:   maxHistory,
+	}
+}
+
+// AddChannel adds an alert channel
+func (am *AlertManager) AddChannel(channel AlertChannel) {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+	am.channels = append(am.channels, channel)
+}
+
+// SendAlert sends an alert through all configured channels
+func (am *AlertManager) SendAlert(alert *DriftAlert) error {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+
+	// Generate alert ID if not set
+	if alert.AlertID == "" {
+		alert.AlertID = fmt.Sprintf("alert-%d", time.Now().UnixNano())
+	}
+
+	// Add to history
+	am.alertHistory = append(am.alertHistory, alert)
+
+	// Trim history if needed
+	if len(am.alertHistory) > am.maxHistory {
+		am.alertHistory = am.alertHistory[len(am.alertHistory)-am.maxHistory:]
+	}
+
+	// Send through all channels
+	var lastErr error
+	for _, channel := range am.channels {
+		if err := channel.SendAlert(alert); err != nil {
+			lastErr = err
+			// Log error but continue with other channels
+		}
+	}
+
+	return lastErr
+}
+
+// GetAlertHistory returns alert history
+func (am *AlertManager) GetAlertHistory(limit int) []*DriftAlert {
+	am.mu.RLock()
+	defer am.mu.RUnlock()
+
+	if limit <= 0 || limit > len(am.alertHistory) {
+		limit = len(am.alertHistory)
+	}
+
+	// Return most recent alerts first
+	result := make([]*DriftAlert, limit)
+	copy(result, am.alertHistory[len(am.alertHistory)-limit:])
+	return result
+}
+
+// AcknowledgeAlert marks an alert as acknowledged
+func (am *AlertManager) AcknowledgeAlert(alertID, acknowledgedBy string) bool {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+
+	for _, alert := range am.alertHistory {
+		if alert.AlertID == alertID && !alert.Acknowledged {
+			now := time.Now()
+			alert.Acknowledged = true
+			alert.AcknowledgedAt = &now
+			alert.AcknowledgedBy = acknowledgedBy
+			return true
+		}
+	}
+	return false
+}
+
+// EmailAlertChannel implementation
+func (e *EmailAlertChannel) Name() string {
+	return "email"
+}
+
+func (e *EmailAlertChannel) SendAlert(alert *DriftAlert) error {
+	subject := fmt.Sprintf("[%s] Version Drift Alert: %s", strings.ToUpper(alert.Severity), alert.WorkerID)
+
+	body := fmt.Sprintf(`Version Drift Alert
+
+Worker ID: %s
+Severity: %s
+Drift Duration: %v
+
+Current Version: %s
+Expected Version: %s
+
+Message: %s
+
+Timestamp: %s
+Alert ID: %s
+
+This is an automated alert from the version management system.
+`,
+		alert.WorkerID,
+		alert.Severity,
+		alert.DriftDuration,
+		alert.CurrentVersion.CodebaseVersion,
+		alert.ExpectedVersion.CodebaseVersion,
+		alert.Message,
+		alert.Timestamp.Format(time.RFC3339),
+		alert.AlertID,
+	)
+
+	// Create email message
+	message := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s",
+		e.FromAddress,
+		strings.Join(e.ToAddresses, ","),
+		subject,
+		body,
+	)
+
+	// Send email
+	auth := smtp.PlainAuth("", e.Username, e.Password, e.SMTPHost)
+	addr := fmt.Sprintf("%s:%d", e.SMTPHost, e.SMTPPort)
+
+	return smtp.SendMail(addr, auth, e.FromAddress, e.ToAddresses, []byte(message))
+}
+
+// WebhookAlertChannel implementation
+func (w *WebhookAlertChannel) Name() string {
+	return "webhook"
+}
+
+func (w *WebhookAlertChannel) SendAlert(alert *DriftAlert) error {
+	if w.HTTPClient == nil {
+		w.HTTPClient = &http.Client{Timeout: 30 * time.Second}
+	}
+
+	if w.Method == "" {
+		w.Method = "POST"
+	}
+
+	payload := map[string]interface{}{
+		"alert_id":         alert.AlertID,
+		"worker_id":        alert.WorkerID,
+		"severity":         alert.Severity,
+		"drift_duration":   alert.DriftDuration.String(),
+		"current_version":  alert.CurrentVersion.CodebaseVersion,
+		"expected_version": alert.ExpectedVersion.CodebaseVersion,
+		"message":          alert.Message,
+		"timestamp":        alert.Timestamp.Format(time.RFC3339),
+		"acknowledged":     alert.Acknowledged,
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal alert payload: %w", err)
+	}
+
+	req, err := http.NewRequest(w.Method, w.URL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to create webhook request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	for key, value := range w.Headers {
+		req.Header.Set(key, value)
+	}
+
+	resp, err := w.HTTPClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send webhook: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("webhook returned status %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
+// SlackAlertChannel implementation
+func (s *SlackAlertChannel) Name() string {
+	return "slack"
+}
+
+func (s *SlackAlertChannel) SendAlert(alert *DriftAlert) error {
+	if s.HTTPClient == nil {
+		s.HTTPClient = &http.Client{Timeout: 30 * time.Second}
+	}
+
+	if s.Username == "" {
+		s.Username = "Version Monitor"
+	}
+
+	color := "good"
+	switch alert.Severity {
+	case "low":
+		color = "good"
+	case "medium":
+		color = "warning"
+	case "high":
+		color = "danger"
+	case "critical":
+		color = "#FF0000"
+	}
+
+	payload := map[string]interface{}{
+		"channel":  s.Channel,
+		"username": s.Username,
+		"attachments": []map[string]interface{}{
+			{
+				"color": color,
+				"title": fmt.Sprintf("Version Drift Alert - %s", strings.ToUpper(alert.Severity)),
+				"fields": []map[string]interface{}{
+					{
+						"title": "Worker ID",
+						"value": alert.WorkerID,
+						"short": true,
+					},
+					{
+						"title": "Drift Duration",
+						"value": alert.DriftDuration.String(),
+						"short": true,
+					},
+					{
+						"title": "Current Version",
+						"value": alert.CurrentVersion.CodebaseVersion,
+						"short": true,
+					},
+					{
+						"title": "Expected Version",
+						"value": alert.ExpectedVersion.CodebaseVersion,
+						"short": true,
+					},
+				},
+				"text":   alert.Message,
+				"footer": fmt.Sprintf("Alert ID: %s", alert.AlertID),
+				"ts":     alert.Timestamp.Unix(),
+			},
+		},
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal Slack payload: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", s.WebhookURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to create Slack request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := s.HTTPClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send Slack message: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Slack webhook returned status %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
+// VersionCacheEntry represents a cached version check result
+type VersionCacheEntry struct {
+	VersionInfo VersionInfo
+	Timestamp   time.Time
+	TTL         time.Duration
+}
+
 // VersionManager handles version checking, updates, and validation for remote workers
 type VersionManager struct {
 	localVersion VersionInfo
@@ -50,7 +424,12 @@ type VersionManager struct {
 	updateDir    string
 	backupDir    string
 	backups      map[string]*UpdateBackup // workerID -> backup
-	baseURL      string                   // For testing: override the URL construction
+	metrics      *VersionMetrics
+	alerts       []*DriftAlert
+	alertManager *AlertManager
+	versionCache map[string]*VersionCacheEntry // workerID -> cached version info
+	cacheTTL     time.Duration
+	baseURL      string // For testing: override the URL construction
 }
 
 // NewVersionManager creates a new version manager
@@ -73,6 +452,11 @@ func NewVersionManager(eventBus *events.EventBus) *VersionManager {
 		updateDir:    "/tmp/translator-updates",
 		backupDir:    "/tmp/translator-backups",
 		backups:      make(map[string]*UpdateBackup),
+		metrics:      &VersionMetrics{},
+		alerts:       make([]*DriftAlert, 0),
+		alertManager: NewAlertManager(1000),
+		versionCache: make(map[string]*VersionCacheEntry),
+		cacheTTL:     5 * time.Minute, // Cache version checks for 5 minutes
 	}
 }
 
@@ -169,6 +553,30 @@ func (vm *VersionManager) SetBaseURL(baseURL string) {
 
 // CheckWorkerVersion checks if a worker's version matches the local version
 func (vm *VersionManager) CheckWorkerVersion(ctx context.Context, service *RemoteService) (bool, error) {
+	// Check cache first
+	if cached, exists := vm.versionCache[service.WorkerID]; exists && time.Since(cached.Timestamp) < cached.TTL {
+		// Use cached version
+		service.Version = cached.VersionInfo
+		isUpToDate := vm.compareVersions(vm.localVersion, cached.VersionInfo)
+
+		// Emit cached event
+		event := events.Event{
+			Type:      "worker_version_checked_cached",
+			SessionID: "system",
+			Timestamp: time.Now(),
+			Data: map[string]interface{}{
+				"worker_id":      service.WorkerID,
+				"local_version":  vm.localVersion.CodebaseVersion,
+				"worker_version": cached.VersionInfo.CodebaseVersion,
+				"up_to_date":     isUpToDate,
+				"cached":         true,
+			},
+		}
+		vm.eventBus.Publish(event)
+
+		return isUpToDate, nil
+	}
+
 	// Query worker for its version
 	var versionURL string
 	if vm.baseURL != "" {
@@ -197,11 +605,25 @@ func (vm *VersionManager) CheckWorkerVersion(ctx context.Context, service *Remot
 		return false, fmt.Errorf("failed to decode worker version: %w", err)
 	}
 
+	// Update cache
+	vm.versionCache[service.WorkerID] = &VersionCacheEntry{
+		VersionInfo: workerVersion,
+		Timestamp:   time.Now(),
+		TTL:         vm.cacheTTL,
+	}
+
 	// Update service with version info
 	service.Version = workerVersion
 
 	// Compare versions
 	isUpToDate := vm.compareVersions(vm.localVersion, workerVersion)
+
+	// Record metrics
+	if isUpToDate {
+		// This will be counted in drift detection
+	} else {
+		// Could add per-worker metrics here if needed
+	}
 
 	// Emit event
 	event := events.Event{
@@ -213,6 +635,7 @@ func (vm *VersionManager) CheckWorkerVersion(ctx context.Context, service *Remot
 			"local_version":  vm.localVersion.CodebaseVersion,
 			"worker_version": workerVersion.CodebaseVersion,
 			"up_to_date":     isUpToDate,
+			"cached":         false,
 		},
 	}
 	vm.eventBus.Publish(event)
@@ -667,6 +1090,409 @@ func (vm *VersionManager) InstallWorker(ctx context.Context, workerID, host stri
 	// This would implement the full installation process
 	// For now, return not implemented
 	return fmt.Errorf("worker installation not yet implemented")
+}
+
+// GetMetrics returns current version management metrics
+func (vm *VersionManager) GetMetrics() *VersionMetrics {
+	return vm.metrics
+}
+
+// GetAlerts returns current version drift alerts
+func (vm *VersionManager) GetAlerts() []*DriftAlert {
+	return vm.alerts
+}
+
+// AddAlertChannel adds an alert notification channel
+func (vm *VersionManager) AddAlertChannel(channel AlertChannel) {
+	vm.alertManager.AddChannel(channel)
+}
+
+// BatchUpdateWorkers performs concurrent updates on multiple workers
+func (vm *VersionManager) BatchUpdateWorkers(ctx context.Context, services []*RemoteService, maxConcurrency int) *BatchUpdateResult {
+	if maxConcurrency <= 0 {
+		maxConcurrency = 3 // Default concurrency
+	}
+
+	result := &BatchUpdateResult{
+		TotalWorkers: len(services),
+		Successful:   make([]string, 0),
+		Failed:       make([]BatchUpdateError, 0),
+		Skipped:      make([]string, 0),
+		StartTime:    time.Now(),
+	}
+
+	// Use semaphore to limit concurrency
+	semaphore := make(chan struct{}, maxConcurrency)
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+
+	for _, service := range services {
+		wg.Add(1)
+		go func(svc *RemoteService) {
+			defer wg.Done()
+
+			// Acquire semaphore
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
+
+			// Check if already up to date first
+			upToDate, err := vm.CheckWorkerVersion(ctx, svc)
+			if err != nil {
+				mu.Lock()
+				result.Failed = append(result.Failed, BatchUpdateError{
+					WorkerID: svc.WorkerID,
+					Error:    fmt.Sprintf("version check failed: %v", err),
+				})
+				mu.Unlock()
+				return
+			}
+
+			if upToDate {
+				mu.Lock()
+				result.Skipped = append(result.Skipped, svc.WorkerID)
+				mu.Unlock()
+				return
+			}
+
+			// Perform update
+			if err := vm.UpdateWorker(ctx, svc); err != nil {
+				mu.Lock()
+				result.Failed = append(result.Failed, BatchUpdateError{
+					WorkerID: svc.WorkerID,
+					Error:    fmt.Sprintf("update failed: %v", err),
+				})
+				mu.Unlock()
+				return
+			}
+
+			// Success
+			mu.Lock()
+			result.Successful = append(result.Successful, svc.WorkerID)
+			mu.Unlock()
+		}(service)
+	}
+
+	wg.Wait()
+	result.EndTime = time.Now()
+	result.Duration = result.EndTime.Sub(result.StartTime)
+
+	return result
+}
+
+// BatchUpdateResult contains the results of a batch update operation
+type BatchUpdateResult struct {
+	TotalWorkers int
+	Successful   []string
+	Failed       []BatchUpdateError
+	Skipped      []string
+	StartTime    time.Time
+	EndTime      time.Time
+	Duration     time.Duration
+}
+
+// BatchUpdateError represents an error that occurred during batch update
+type BatchUpdateError struct {
+	WorkerID string
+	Error    string
+}
+
+// GetSuccessRate returns the success rate as a percentage
+func (r *BatchUpdateResult) GetSuccessRate() float64 {
+	if r.TotalWorkers == 0 {
+		return 100.0
+	}
+	return float64(len(r.Successful)) / float64(r.TotalWorkers) * 100.0
+}
+
+// GetSummary returns a summary string of the batch update results
+func (r *BatchUpdateResult) GetSummary() string {
+	return fmt.Sprintf("Batch update completed: %d/%d successful (%.1f%%), %d failed, %d skipped in %v",
+		len(r.Successful), r.TotalWorkers, r.GetSuccessRate(), len(r.Failed), len(r.Skipped), r.Duration)
+}
+
+// ClearCache clears the version check cache
+func (vm *VersionManager) ClearCache() {
+	vm.versionCache = make(map[string]*VersionCacheEntry)
+}
+
+// SetCacheTTL sets the cache TTL for version checks
+func (vm *VersionManager) SetCacheTTL(ttl time.Duration) {
+	if ttl > 0 {
+		vm.cacheTTL = ttl
+	}
+}
+
+// GetCacheStats returns cache statistics
+func (vm *VersionManager) GetCacheStats() map[string]interface{} {
+	totalEntries := len(vm.versionCache)
+	now := time.Now()
+	validEntries := 0
+	expiredEntries := 0
+
+	for _, entry := range vm.versionCache {
+		if now.Sub(entry.Timestamp) < entry.TTL {
+			validEntries++
+		} else {
+			expiredEntries++
+		}
+	}
+
+	return map[string]interface{}{
+		"total_entries":   totalEntries,
+		"valid_entries":   validEntries,
+		"expired_entries": expiredEntries,
+		"cache_ttl":       vm.cacheTTL.String(),
+		"hit_rate":        "N/A", // Would need hit/miss counters to calculate
+	}
+}
+
+// GetAlertHistory returns alert history with optional limit
+func (vm *VersionManager) GetAlertHistory(limit int) []*DriftAlert {
+	return vm.alertManager.GetAlertHistory(limit)
+}
+
+// AcknowledgeAlert marks an alert as acknowledged
+func (vm *VersionManager) AcknowledgeAlert(alertID, acknowledgedBy string) bool {
+	return vm.alertManager.AcknowledgeAlert(alertID, acknowledgedBy)
+}
+
+// CheckVersionDrift performs comprehensive version drift detection across all workers
+func (vm *VersionManager) CheckVersionDrift(ctx context.Context, services []*RemoteService) []*DriftAlert {
+	alerts := make([]*DriftAlert, 0)
+	now := time.Now()
+
+	vm.metrics.LastDriftCheck = now
+	vm.metrics.WorkersChecked = int64(len(services))
+
+	upToDateCount := int64(0)
+	outdatedCount := int64(0)
+	unhealthyCount := int64(0)
+
+	for _, service := range services {
+		// Check version
+		isUpToDate, err := vm.CheckWorkerVersion(ctx, service)
+		if err != nil {
+			unhealthyCount++
+			alert := &DriftAlert{
+				WorkerID:        service.WorkerID,
+				CurrentVersion:  service.Version,
+				ExpectedVersion: vm.localVersion,
+				DriftDuration:   time.Since(service.LastSeen),
+				Severity:        "high",
+				Timestamp:       now,
+				Message:         fmt.Sprintf("Worker %s is unreachable: %v", service.WorkerID, err),
+			}
+			alerts = append(alerts, alert)
+			continue
+		}
+
+		if isUpToDate {
+			upToDateCount++
+		} else {
+			outdatedCount++
+
+			// Calculate drift duration
+			driftDuration := now.Sub(service.Version.LastUpdated)
+			if driftDuration > vm.metrics.MaxDriftDuration {
+				vm.metrics.MaxDriftDuration = driftDuration
+			}
+
+			// Determine severity based on drift duration
+			severity := vm.calculateDriftSeverity(driftDuration)
+
+			alert := &DriftAlert{
+				WorkerID:        service.WorkerID,
+				CurrentVersion:  service.Version,
+				ExpectedVersion: vm.localVersion,
+				DriftDuration:   driftDuration,
+				Severity:        severity,
+				Timestamp:       now,
+				Message: fmt.Sprintf("Worker %s is running version %s, expected %s (drift: %v)",
+					service.WorkerID, service.Version.CodebaseVersion,
+					vm.localVersion.CodebaseVersion, driftDuration),
+			}
+			alerts = append(alerts, alert)
+
+			// Send alert through alert manager
+			if err := vm.alertManager.SendAlert(alert); err != nil {
+				// Log error but don't fail the drift check
+				fmt.Printf("Failed to send alert for worker %s: %v\n", service.WorkerID, err)
+			}
+		}
+	}
+
+	// Update metrics
+	vm.metrics.WorkersUpToDate = upToDateCount
+	vm.metrics.WorkersOutdated = outdatedCount
+	vm.metrics.WorkersUnhealthy = unhealthyCount
+
+	// Store alerts
+	vm.alerts = alerts
+
+	// Emit drift check event
+	event := events.Event{
+		Type:      "version_drift_check_completed",
+		SessionID: "system",
+		Timestamp: now,
+		Data: map[string]interface{}{
+			"workers_checked":    vm.metrics.WorkersChecked,
+			"workers_up_to_date": vm.metrics.WorkersUpToDate,
+			"workers_outdated":   vm.metrics.WorkersOutdated,
+			"workers_unhealthy":  vm.metrics.WorkersUnhealthy,
+			"alerts_generated":   len(alerts),
+		},
+	}
+	vm.eventBus.Publish(event)
+
+	return alerts
+}
+
+// calculateDriftSeverity determines alert severity based on drift duration
+func (vm *VersionManager) calculateDriftSeverity(driftDuration time.Duration) string {
+	switch {
+	case driftDuration > 24*time.Hour:
+		return "critical"
+	case driftDuration > 12*time.Hour:
+		return "high"
+	case driftDuration > 6*time.Hour:
+		return "medium"
+	default:
+		return "low"
+	}
+}
+
+// RecordUpdateMetrics records metrics for a completed update operation
+func (vm *VersionManager) RecordUpdateMetrics(success bool, duration time.Duration) {
+	vm.metrics.TotalUpdates++
+	vm.metrics.LastUpdateTime = time.Now()
+
+	if success {
+		vm.metrics.SuccessfulUpdates++
+	} else {
+		vm.metrics.FailedUpdates++
+	}
+
+	// Update average duration (simple moving average)
+	if vm.metrics.UpdateDuration == 0 {
+		vm.metrics.UpdateDuration = duration
+	} else {
+		// Weighted average favoring recent measurements
+		vm.metrics.UpdateDuration = (vm.metrics.UpdateDuration + duration) / 2
+	}
+}
+
+// RecordRollbackMetrics records metrics for a completed rollback operation
+func (vm *VersionManager) RecordRollbackMetrics(success bool, duration time.Duration) {
+	vm.metrics.TotalRollbacks++
+	vm.metrics.LastRollbackTime = time.Now()
+
+	if success {
+		vm.metrics.SuccessfulRollbacks++
+	} else {
+		vm.metrics.FailedRollbacks++
+	}
+
+	// Update average duration
+	if vm.metrics.RollbackDuration == 0 {
+		vm.metrics.RollbackDuration = duration
+	} else {
+		vm.metrics.RollbackDuration = (vm.metrics.RollbackDuration + duration) / 2
+	}
+}
+
+// RecordSignatureMetrics records metrics for signature operations
+func (vm *VersionManager) RecordSignatureMetrics(success bool) {
+	vm.metrics.SignatureVerifications++
+
+	if success {
+		vm.metrics.SignatureSuccesses++
+	} else {
+		vm.metrics.SignatureFailures++
+	}
+}
+
+// RecordBackupMetrics records metrics for backup operations
+func (vm *VersionManager) RecordBackupMetrics() {
+	vm.metrics.BackupsCreated++
+
+	// Count active backups
+	activeCount := int64(0)
+	for _, backup := range vm.backups {
+		if backup.Status == "active" {
+			activeCount++
+		}
+	}
+	vm.metrics.BackupsActive = activeCount
+}
+
+// GetHealthStatus returns overall health status of version management
+func (vm *VersionManager) GetHealthStatus() map[string]interface{} {
+	now := time.Now()
+	driftCheckAge := now.Sub(vm.metrics.LastDriftCheck)
+
+	// Calculate health score (0-100)
+	healthScore := 100.0
+
+	// Penalize for outdated workers
+	if vm.metrics.WorkersChecked > 0 {
+		outdatedRatio := float64(vm.metrics.WorkersOutdated) / float64(vm.metrics.WorkersChecked)
+		healthScore -= outdatedRatio * 50
+	}
+
+	// Penalize for unhealthy workers
+	if vm.metrics.WorkersChecked > 0 {
+		unhealthyRatio := float64(vm.metrics.WorkersUnhealthy) / float64(vm.metrics.WorkersChecked)
+		healthScore -= unhealthyRatio * 30
+	}
+
+	// Penalize for old drift checks
+	if driftCheckAge > time.Hour {
+		agePenalty := float64(driftCheckAge/time.Hour) * 5
+		if agePenalty > 20 {
+			agePenalty = 20
+		}
+		healthScore -= agePenalty
+	}
+
+	// Penalize for update failures
+	if vm.metrics.TotalUpdates > 0 {
+		failureRatio := float64(vm.metrics.FailedUpdates) / float64(vm.metrics.TotalUpdates)
+		healthScore -= failureRatio * 10
+	}
+
+	if healthScore < 0 {
+		healthScore = 0
+	}
+
+	status := "healthy"
+	if healthScore < 70 {
+		status = "warning"
+	}
+	if healthScore < 40 {
+		status = "critical"
+	}
+
+	return map[string]interface{}{
+		"status":                status,
+		"health_score":          healthScore,
+		"last_drift_check":      vm.metrics.LastDriftCheck,
+		"drift_check_age":       driftCheckAge,
+		"workers_checked":       vm.metrics.WorkersChecked,
+		"workers_up_to_date":    vm.metrics.WorkersUpToDate,
+		"workers_outdated":      vm.metrics.WorkersOutdated,
+		"workers_unhealthy":     vm.metrics.WorkersUnhealthy,
+		"active_alerts":         len(vm.alerts),
+		"update_success_rate":   vm.calculateSuccessRate(vm.metrics.SuccessfulUpdates, vm.metrics.TotalUpdates),
+		"rollback_success_rate": vm.calculateSuccessRate(vm.metrics.SuccessfulRollbacks, vm.metrics.TotalRollbacks),
+	}
+}
+
+// calculateSuccessRate calculates success rate as percentage
+func (vm *VersionManager) calculateSuccessRate(successes, total int64) float64 {
+	if total == 0 {
+		return 100.0
+	}
+	return float64(successes) / float64(total) * 100.0
 }
 
 // signUpdatePackage creates a digital signature for an update package

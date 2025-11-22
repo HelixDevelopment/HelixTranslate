@@ -410,3 +410,110 @@ func (dm *DistributedManager) RollbackWorker(ctx context.Context, service *Remot
 
 	return dm.versionManager.rollbackWorkerUpdate(ctx, service)
 }
+
+// GetVersionMetrics returns version management metrics
+func (dm *DistributedManager) GetVersionMetrics() *VersionMetrics {
+	dm.mu.RLock()
+	defer dm.mu.RUnlock()
+
+	if !dm.initialized {
+		return &VersionMetrics{}
+	}
+
+	return dm.versionManager.GetMetrics()
+}
+
+// GetVersionAlerts returns current version drift alerts
+func (dm *DistributedManager) GetVersionAlerts() []*DriftAlert {
+	dm.mu.RLock()
+	defer dm.mu.RUnlock()
+
+	if !dm.initialized {
+		return []*DriftAlert{}
+	}
+
+	return dm.versionManager.GetAlerts()
+}
+
+// GetVersionHealth returns overall version management health status
+func (dm *DistributedManager) GetVersionHealth() map[string]interface{} {
+	dm.mu.RLock()
+	defer dm.mu.RUnlock()
+
+	if !dm.initialized {
+		return map[string]interface{}{
+			"status":       "uninitialized",
+			"health_score": 0.0,
+		}
+	}
+
+	return dm.versionManager.GetHealthStatus()
+}
+
+// GetPairedServices returns the paired services map
+func (dm *DistributedManager) GetPairedServices() map[string]*RemoteService {
+	dm.mu.RLock()
+	defer dm.mu.RUnlock()
+
+	if !dm.initialized {
+		return make(map[string]*RemoteService)
+	}
+
+	return dm.pairingManager.GetPairedServices()
+}
+
+// CheckVersionDrift performs version drift detection across all workers
+func (dm *DistributedManager) CheckVersionDrift(ctx context.Context) []*DriftAlert {
+	dm.mu.RLock()
+	if !dm.initialized {
+		dm.mu.RUnlock()
+		return []*DriftAlert{}
+	}
+
+	pairedServices := dm.pairingManager.GetPairedServices()
+	dm.mu.RUnlock()
+
+	// Convert map to slice for the version manager
+	services := make([]*RemoteService, 0, len(pairedServices))
+	for _, service := range pairedServices {
+		services = append(services, service)
+	}
+
+	return dm.versionManager.CheckVersionDrift(ctx, services)
+}
+
+// GetAlertHistory returns alert history
+func (dm *DistributedManager) GetAlertHistory(limit int) []*DriftAlert {
+	dm.mu.RLock()
+	defer dm.mu.RUnlock()
+
+	if !dm.initialized {
+		return []*DriftAlert{}
+	}
+
+	return dm.versionManager.GetAlertHistory(limit)
+}
+
+// AcknowledgeAlert marks an alert as acknowledged
+func (dm *DistributedManager) AcknowledgeAlert(alertID, acknowledgedBy string) bool {
+	dm.mu.RLock()
+	defer dm.mu.RUnlock()
+
+	if !dm.initialized {
+		return false
+	}
+
+	return dm.versionManager.AcknowledgeAlert(alertID, acknowledgedBy)
+}
+
+// AddAlertChannel adds an alert notification channel
+func (dm *DistributedManager) AddAlertChannel(channel AlertChannel) {
+	dm.mu.RLock()
+	defer dm.mu.RUnlock()
+
+	if !dm.initialized {
+		return
+	}
+
+	dm.versionManager.AddAlertChannel(channel)
+}
