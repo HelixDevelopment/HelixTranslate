@@ -3,6 +3,7 @@ package distributed
 import (
 	"context"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -10,12 +11,20 @@ import (
 	"digital.vasic.translator/pkg/events"
 )
 
+// defaultLogger provides a basic logger implementation
+type defaultLogger struct{}
+
+func (l *defaultLogger) Log(level, message string, fields map[string]interface{}) {
+	log.Printf("[%s] %s %v", level, message, fields)
+}
+
 // DistributedManager manages all distributed work functionality
 type DistributedManager struct {
 	config           *config.Config
 	sshPool          *SSHPool
 	pairingManager   *PairingManager
 	distributedCoord *DistributedCoordinator
+	fallbackManager  *FallbackManager
 	eventBus         *events.EventBus
 	mu               sync.RWMutex
 	initialized      bool
@@ -26,14 +35,19 @@ func NewDistributedManager(cfg *config.Config, eventBus *events.EventBus) *Distr
 	sshPool := NewSSHPool()
 	pairingManager := NewPairingManager(sshPool, eventBus)
 
+	// Create fallback manager with default config
+	fallbackConfig := DefaultFallbackConfig()
+	fallbackManager := NewFallbackManager(fallbackConfig, nil, eventBus, &defaultLogger{})
+
 	// Create distributed coordinator (will be initialized with local coordinator later)
-	distributedCoord := NewDistributedCoordinator(nil, sshPool, pairingManager, eventBus)
+	distributedCoord := NewDistributedCoordinator(nil, sshPool, pairingManager, fallbackManager, eventBus)
 
 	return &DistributedManager{
 		config:           cfg,
 		sshPool:          sshPool,
 		pairingManager:   pairingManager,
 		distributedCoord: distributedCoord,
+		fallbackManager:  fallbackManager,
 		eventBus:         eventBus,
 		initialized:      false,
 	}

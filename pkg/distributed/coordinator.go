@@ -31,6 +31,7 @@ type DistributedCoordinator struct {
 	remoteInstances  []*RemoteLLMInstance
 	sshPool          *SSHPool
 	pairingManager   *PairingManager
+	fallbackManager  *FallbackManager
 	eventBus         *events.EventBus
 	currentIndex     int
 	maxRetries       int
@@ -43,6 +44,7 @@ func NewDistributedCoordinator(
 	localCoordinator interface{},
 	sshPool *SSHPool,
 	pairingManager *PairingManager,
+	fallbackManager *FallbackManager,
 	eventBus *events.EventBus,
 ) *DistributedCoordinator {
 	return &DistributedCoordinator{
@@ -50,6 +52,7 @@ func NewDistributedCoordinator(
 		remoteInstances:  make([]*RemoteLLMInstance, 0),
 		sshPool:          sshPool,
 		pairingManager:   pairingManager,
+		fallbackManager:  fallbackManager,
 		eventBus:         eventBus,
 		currentIndex:     0,
 		maxRetries:       3,
@@ -178,28 +181,73 @@ func (dc *DistributedCoordinator) getInstanceCountForPriority(priority int, maxC
 	return baseCount
 }
 
-// TranslateWithDistributedRetry translates using distributed instances with fallback to local
+// TranslateWithDistributedRetry translates using distributed instances with comprehensive fallback
 func (dc *DistributedCoordinator) TranslateWithDistributedRetry(
 	ctx context.Context,
 	text string,
 	contextHint string,
 ) (string, error) {
 
-	// First try remote instances
-	if result, err := dc.translateWithRemoteInstances(ctx, text, contextHint); err == nil {
-		return result, nil
+	var result string
+	var resultMu sync.Mutex
+
+	// Define fallback strategies
+	fallbacks := []FallbackStrategy{
+		{
+			Name: "remote_instances",
+			Function: func() error {
+				translated, err := dc.translateWithRemoteInstances(ctx, text, contextHint)
+				if err != nil {
+					return err
+				}
+				resultMu.Lock()
+				result = translated
+				resultMu.Unlock()
+				return nil
+			},
+			Priority: 1,
+		},
+		{
+			Name: "local_coordinator",
+			Function: func() error {
+				// This would call the local coordinator's method
+				// For now, return an error indicating local fallback not implemented
+				return fmt.Errorf("local coordinator fallback not yet implemented")
+			},
+			Priority: 2,
+		},
+		{
+			Name: "reduced_quality",
+			Function: func() error {
+				// Implement reduced quality fallback (e.g., dictionary-only translation)
+				return fmt.Errorf("reduced quality fallback not yet implemented")
+			},
+			Priority: 3,
+		},
 	}
 
-	// Fallback to local coordinator
-	dc.emitEvent(events.Event{
-		Type:      "distributed_fallback_to_local",
-		SessionID: "system",
-		Message:   "Remote translation failed, falling back to local instances",
-	})
+	// Use FallbackManager for comprehensive fallback handling
+	componentID := "distributed_translator"
+	err := dc.fallbackManager.ExecuteWithFallback(ctx, componentID, func() error {
+		translated, err := dc.translateWithRemoteInstances(ctx, text, contextHint)
+		if err != nil {
+			return err
+		}
+		resultMu.Lock()
+		result = translated
+		resultMu.Unlock()
+		return nil
+	}, fallbacks...)
 
-	// This would call the local coordinator's method
-	// For now, return an error indicating distributed-only
-	return "", fmt.Errorf("distributed translation failed and no local fallback available")
+	resultMu.Lock()
+	finalResult := result
+	resultMu.Unlock()
+
+	if err != nil {
+		return "", err
+	}
+
+	return finalResult, nil
 }
 
 // translateWithRemoteInstances attempts translation using remote instances

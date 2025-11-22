@@ -206,5 +206,78 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("JWT secret is required when authentication is enabled")
 	}
 
+	// Validate distributed configuration
+	if err := c.validateDistributedConfig(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateDistributedConfig validates distributed work configuration
+func (c *Config) validateDistributedConfig() error {
+	if !c.Distributed.Enabled {
+		return nil // Skip validation if distributed work is disabled
+	}
+
+	// Validate SSH timeout
+	if c.Distributed.SSHTimeout <= 0 {
+		return fmt.Errorf("SSH timeout must be positive")
+	}
+
+	// Validate SSH max retries
+	if c.Distributed.SSHMaxRetries < 0 {
+		return fmt.Errorf("SSH max retries cannot be negative")
+	}
+
+	// Validate workers configuration
+	if len(c.Distributed.Workers) == 0 {
+		return fmt.Errorf("at least one worker must be configured when distributed work is enabled")
+	}
+
+	// Validate each worker
+	for workerID, worker := range c.Distributed.Workers {
+		if err := c.validateWorkerConfig(workerID, worker); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// validateWorkerConfig validates a single worker configuration
+func (c *Config) validateWorkerConfig(workerID string, worker WorkerConfig) error {
+	if worker.Name == "" {
+		return fmt.Errorf("worker %s: name cannot be empty", workerID)
+	}
+
+	if worker.Host == "" {
+		return fmt.Errorf("worker %s: host cannot be empty", workerID)
+	}
+
+	if worker.Port <= 0 || worker.Port > 65535 {
+		return fmt.Errorf("worker %s: invalid port %d", workerID, worker.Port)
+	}
+
+	if worker.User == "" {
+		return fmt.Errorf("worker %s: user cannot be empty", workerID)
+	}
+
+	// Validate authentication - at least one method must be provided
+	if worker.KeyFile == "" && worker.Password == "" {
+		return fmt.Errorf("worker %s: either key file or password must be provided", workerID)
+	}
+
+	if worker.MaxCapacity <= 0 {
+		return fmt.Errorf("worker %s: max capacity must be positive", workerID)
+	}
+
+	// Validate tags (optional but if provided should be reasonable)
+	for _, tag := range worker.Tags {
+		if tag == "" {
+			return fmt.Errorf("worker %s: empty tag not allowed", workerID)
+		}
+	}
+
 	return nil
 }
