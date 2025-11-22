@@ -600,7 +600,8 @@ echo "5. Recent API Activity:"
 if [[ -f "workers_api_communication.log" ]]; then
     lines=$(wc -l < workers_api_communication.log)
     echo "✓ API log has $lines entries"
-    tail -5 workers_api_communication.log | jq -r '"\(.timestamp): \(.method) \(.url) -> \(.status_code)"' 2>/dev/null || echo "  (Log format may not be JSON)"
+    echo "Recent activity:"
+    tail -5 workers_api_communication.log | sed 's/^/  /'
 else
     echo "✗ No API activity log"
 fi

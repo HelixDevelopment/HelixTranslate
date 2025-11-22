@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"digital.vasic.translator/internal/config"
+	"digital.vasic.translator/pkg/deployment"
 	"digital.vasic.translator/pkg/events"
 )
 
@@ -31,7 +32,7 @@ type DistributedManager struct {
 }
 
 // NewDistributedManager creates a new distributed manager
-func NewDistributedManager(cfg *config.Config, eventBus *events.EventBus) *DistributedManager {
+func NewDistributedManager(cfg *config.Config, eventBus *events.EventBus, apiLogger *deployment.APICommunicationLogger) *DistributedManager {
 	sshPool := NewSSHPool()
 	pairingManager := NewPairingManager(sshPool, eventBus)
 
@@ -40,7 +41,7 @@ func NewDistributedManager(cfg *config.Config, eventBus *events.EventBus) *Distr
 	fallbackManager := NewFallbackManager(fallbackConfig, nil, eventBus, &defaultLogger{})
 
 	// Create distributed coordinator (will be initialized with local coordinator later)
-	distributedCoord := NewDistributedCoordinator(nil, sshPool, pairingManager, fallbackManager, eventBus)
+	distributedCoord := NewDistributedCoordinator(nil, sshPool, pairingManager, fallbackManager, eventBus, apiLogger)
 
 	return &DistributedManager{
 		config:           cfg,

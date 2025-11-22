@@ -202,6 +202,76 @@ alerting:
       severity: [critical]
 ```
 
+## API Communication Logging
+
+### Retrofit-Style Logging
+
+The system implements comprehensive API communication logging between distributed nodes using a Retrofit-style format for impeccable readability and debugging.
+
+#### Log Format
+
+**Outgoing Requests:**
+```
+2025/11/22 17:28:39.302 --> GET https://thinker.local:8443/api/v1/providers
+```
+
+**Incoming Responses:**
+```
+2025/11/22 17:28:39.321 <-- 200 OK https://thinker.local:8443/api/v1/providers (19ms, 811-byte body)
+```
+
+**Failed Requests:**
+```
+2025/11/22 17:28:39.302 --> GET https://thinker.local:8443/api/v1/providers
+2025/11/22 17:28:39.321 <-- HTTP FAILED: connection refused
+```
+
+#### Log File Location
+
+- **File:** `workers_api_communication.log`
+- **Location:** Project root directory
+- **Format:** Human-readable text (one line per request/response)
+
+#### Analyzing API Communications
+
+```bash
+# View recent API communications
+tail -20 workers_api_communication.log
+
+# Count requests by endpoint
+grep " --> " workers_api_communication.log | cut -d' ' -f6 | sort | uniq -c | sort -nr
+
+# Find slow requests (>1000ms)
+grep " <-- " workers_api_communication.log | grep -E "\([0-9]{4,}ms|[0-9]+s" | sort -k5 -n
+
+# Check for failed requests
+grep "HTTP FAILED" workers_api_communication.log
+
+# Monitor real-time API communications
+tail -f workers_api_communication.log
+```
+
+#### Log Fields
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| Timestamp | Request/response time | `2025/11/22 17:28:39.302` |
+| Direction | `--> ` (outgoing) or `<-- ` (incoming) | `--> ` |
+| Method | HTTP method | `GET` |
+| Status | HTTP status code and text | `200 OK` |
+| URL | Full request URL | `https://thinker.local:8443/api/v1/providers` |
+| Duration | Response time | `(19ms` |
+| Body Size | Response body size | `811-byte body)` |
+| Error | Failure reason (if applicable) | `connection refused` |
+
+#### Integration Points
+
+API logging is automatically enabled when:
+- Distributed mode is enabled in configuration
+- Worker discovery operations are performed
+- Translation requests are distributed across workers
+- Health checks and status queries occur
+
 ## Metrics Collection
 
 ### System Metrics

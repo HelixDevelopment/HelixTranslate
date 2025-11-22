@@ -235,25 +235,25 @@ Each deployed instance broadcasts its configuration every 30 seconds:
 
 ### Log Format
 
-All API communications are logged in JSON format to `workers_api_communication.log`:
+All API communications are logged in Retrofit-style format to `workers_api_communication.log` for impeccable readability and easy investigation:
 
-```json
-{
-  "timestamp": "2024-01-15T10:30:15.123Z",
-  "source_host": "192.168.1.100",
-  "source_port": 8443,
-  "target_host": "192.168.1.101",
-  "target_port": 8444,
-  "method": "POST",
-  "url": "/api/v1/translate",
-  "status_code": 200,
-  "request_size": 1024,
-  "response_size": 2048,
-  "duration": "150ms",
-  "user_agent": "translator/2.0",
-  "error": null
-}
 ```
+# Outgoing requests (send)
+2025/11/22 17:24:58.564 --> POST https://192.168.1.101:8444/api/v1/translate (1024-byte body)
+
+# Incoming responses (received)
+2025/11/22 17:24:58.714 <-- 200 OK https://192.168.1.101:8444/api/v1/translate (150ms, 2048-byte body)
+
+# Error responses
+2025/11/22 17:24:58.714 <-- HTTP FAILED: connection timeout
+```
+
+**Format Legend:**
+- `--> ` = Outgoing request (send direction)
+- `<-- ` = Incoming response (received direction)
+- Timestamp format: `YYYY/MM/DD HH:MM:SS.mmm`
+- Duration: `150ms` or `2.5s`
+- Body size: `(1024-byte body)` for requests, `(2048-byte body)` for responses
 
 ### Log Analysis
 
@@ -261,14 +261,32 @@ All API communications are logged in JSON format to `workers_api_communication.l
 # View recent communications
 tail -f workers_api_communication.log
 
-# Count requests by status code
-jq -r '.status_code' workers_api_communication.log | sort | uniq -c
+# Count requests by HTTP method
+grep " --> " workers_api_communication.log | awk '{print $4}' | sort | uniq -c
 
-# Find slow requests (>1 second)
-jq 'select(.duration | contains("s")) | select(.duration | tonumber > 1.0)' workers_api_communication.log
+# Count responses by status code
+grep " <-- " workers_api_communication.log | awk '{print $4}' | sort | uniq -c
 
-# Calculate average response time
-jq -r '.duration | sub("ms"; "") | tonumber' workers_api_communication.log | awk '{sum+=$1; count++} END {print sum/count "ms"}'
+# Find slow responses (>1 second)
+grep " <-- " workers_api_communication.log | grep -E "\([0-9]+\.[0-9]+s" | grep -v "(0\."
+
+# Find failed requests
+grep "HTTP FAILED" workers_api_communication.log
+
+# Calculate average response time (responses only)
+grep " <-- " workers_api_communication.log | grep -o -E "\([0-9]+ms|\([0-9]+\.[0-9]+s" | sed 's/[ms()]//g' | awk '
+{
+  if ($0 ~ /\./) {
+    # Convert seconds to milliseconds
+    printf "%.0f\n", $0 * 1000
+  } else {
+    print $0
+  }
+}
+' | awk '{sum+=$1; count++} END {print "Average response time: " sum/count "ms"}'
+
+# Show request/response pairs (last 10)
+tail -20 workers_api_communication.log | grep -E " --> | <-- " | tail -20
 ```
 
 ## Port Management

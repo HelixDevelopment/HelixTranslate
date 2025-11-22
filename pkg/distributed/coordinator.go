@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"digital.vasic.translator/pkg/deployment"
 	"digital.vasic.translator/pkg/events"
 )
 
@@ -34,6 +35,7 @@ type DistributedCoordinator struct {
 	pairingManager   *PairingManager
 	fallbackManager  *FallbackManager
 	eventBus         *events.EventBus
+	apiLogger        *deployment.APICommunicationLogger
 	currentIndex     int
 	maxRetries       int
 	retryDelay       time.Duration
@@ -47,6 +49,7 @@ func NewDistributedCoordinator(
 	pairingManager *PairingManager,
 	fallbackManager *FallbackManager,
 	eventBus *events.EventBus,
+	apiLogger *deployment.APICommunicationLogger,
 ) *DistributedCoordinator {
 	return &DistributedCoordinator{
 		localCoordinator: localCoordinator,
@@ -55,6 +58,7 @@ func NewDistributedCoordinator(
 		pairingManager:   pairingManager,
 		fallbackManager:  fallbackManager,
 		eventBus:         eventBus,
+		apiLogger:        apiLogger,
 		currentIndex:     0,
 		maxRetries:       3,
 		retryDelay:       2 * time.Second,
@@ -135,6 +139,12 @@ func (dc *DistributedCoordinator) queryRemoteProviders(ctx context.Context, serv
 		return nil, err
 	}
 
+	// Log outgoing request if logger is available
+	var logEntry *deployment.APICommunicationLog
+	if dc.apiLogger != nil {
+		logEntry = dc.apiLogger.LogRequest(service.Host, 8443, service.Host, service.Port, "GET", "/api/v1/providers", 0)
+	}
+
 	// Use HTTP client that accepts self-signed certificates
 	client := &http.Client{
 		Timeout: 30 * time.Second,
@@ -145,19 +155,36 @@ func (dc *DistributedCoordinator) queryRemoteProviders(ctx context.Context, serv
 		},
 	}
 
+	startTime := time.Now()
 	resp, err := client.Do(req)
+	duration := time.Since(startTime)
+
 	if err != nil {
+		// Log failed response if logger is available
+		if dc.apiLogger != nil && logEntry != nil {
+			dc.apiLogger.LogResponse(logEntry, 0, 0, duration, err)
+		}
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP %d", resp.StatusCode)
-	}
-
+	// Read response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		// Log failed response if logger is available
+		if dc.apiLogger != nil && logEntry != nil {
+			dc.apiLogger.LogResponse(logEntry, resp.StatusCode, 0, duration, err)
+		}
 		return nil, err
+	}
+
+	// Log successful response if logger is available
+	if dc.apiLogger != nil && logEntry != nil {
+		dc.apiLogger.LogResponse(logEntry, resp.StatusCode, int64(len(body)), duration, nil)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("HTTP %d", resp.StatusCode)
 	}
 
 	var response map[string]interface{}

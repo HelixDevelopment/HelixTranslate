@@ -1,7 +1,6 @@
 package deployment
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -36,13 +35,52 @@ func (acl *APICommunicationLogger) LogCommunication(logEntry *APICommunicationLo
 	acl.mu.Lock()
 	defer acl.mu.Unlock()
 
-	// Format as JSON for structured logging
-	jsonData, err := json.Marshal(logEntry)
-	if err != nil {
-		return fmt.Errorf("failed to marshal log entry: %w", err)
+	// Format like Retrofit library (Android) for impeccable readability
+	var logLine string
+
+	if logEntry.StatusCode == 0 {
+		// Outgoing request
+		timestamp := logEntry.Timestamp.Format("2006/01/02 15:04:05.000")
+		sizeInfo := ""
+		if logEntry.RequestSize > 0 {
+			sizeInfo = fmt.Sprintf(" (%d-byte body)", logEntry.RequestSize)
+		}
+		logLine = fmt.Sprintf("%s --> %s %s://%s:%d%s%s",
+			timestamp,
+			logEntry.Method,
+			acl.getProtocol(logEntry.TargetPort),
+			logEntry.TargetHost,
+			logEntry.TargetPort,
+			logEntry.URL,
+			sizeInfo)
+	} else {
+		// Incoming response
+		timestamp := logEntry.Timestamp.Format("2006/01/02 15:04:05.000")
+		duration := acl.formatDuration(logEntry.Duration)
+		sizeInfo := ""
+		if logEntry.ResponseSize > 0 {
+			sizeInfo = fmt.Sprintf(", %d-byte body", logEntry.ResponseSize)
+		}
+		statusText := acl.getStatusText(logEntry.StatusCode)
+
+		logLine = fmt.Sprintf("%s <-- %d %s %s://%s:%d%s (%s%s)",
+			timestamp,
+			logEntry.StatusCode,
+			statusText,
+			acl.getProtocol(logEntry.TargetPort),
+			logEntry.TargetHost,
+			logEntry.TargetPort,
+			logEntry.URL,
+			duration,
+			sizeInfo)
+
+		// Add error information if present
+		if logEntry.Error != "" {
+			logLine += fmt.Sprintf("\n%s <-- HTTP FAILED: %s", timestamp, logEntry.Error)
+		}
 	}
 
-	acl.logger.Println(string(jsonData))
+	acl.logger.Println(logLine)
 	return nil
 }
 
@@ -74,6 +112,7 @@ func (acl *APICommunicationLogger) LogResponse(entry *APICommunicationLog, statu
 	entry.StatusCode = statusCode
 	entry.ResponseSize = responseSize
 	entry.Duration = duration
+	entry.Timestamp = time.Now() // Update timestamp for response logging
 
 	if err != nil {
 		entry.Error = err.Error()
@@ -81,7 +120,7 @@ func (acl *APICommunicationLogger) LogResponse(entry *APICommunicationLog, statu
 
 	// Update the existing log entry
 	go func() {
-		if logErr := acl.LogCommunication(entry); err != nil {
+		if logErr := acl.LogCommunication(entry); logErr != nil {
 			log.Printf("Failed to log API response: %v", logErr)
 		}
 	}()
@@ -117,5 +156,61 @@ func (acl *APICommunicationLogger) GetStats() map[string]interface{} {
 		"total_responses": 0,
 		"error_count":     0,
 		"avg_duration":    "0s",
+	}
+}
+
+// Helper methods for Retrofit-style formatting
+
+// getProtocol returns the protocol (http/https) based on port
+func (acl *APICommunicationLogger) getProtocol(port int) string {
+	if port == 443 || port == 8443 {
+		return "https"
+	}
+	return "http"
+}
+
+// formatDuration formats duration in Retrofit style (e.g., "150ms", "2.5s")
+func (acl *APICommunicationLogger) formatDuration(d time.Duration) string {
+	if d < time.Second {
+		return fmt.Sprintf("%dms", d.Milliseconds())
+	}
+	return fmt.Sprintf("%.1fs", d.Seconds())
+}
+
+// getStatusText returns the HTTP status text for common status codes
+func (acl *APICommunicationLogger) getStatusText(statusCode int) string {
+	switch statusCode {
+	case 200:
+		return "OK"
+	case 201:
+		return "Created"
+	case 204:
+		return "No Content"
+	case 400:
+		return "Bad Request"
+	case 401:
+		return "Unauthorized"
+	case 403:
+		return "Forbidden"
+	case 404:
+		return "Not Found"
+	case 405:
+		return "Method Not Allowed"
+	case 409:
+		return "Conflict"
+	case 422:
+		return "Unprocessable Entity"
+	case 429:
+		return "Too Many Requests"
+	case 500:
+		return "Internal Server Error"
+	case 502:
+		return "Bad Gateway"
+	case 503:
+		return "Service Unavailable"
+	case 504:
+		return "Gateway Timeout"
+	default:
+		return ""
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"digital.vasic.translator/internal/config"
 	"digital.vasic.translator/pkg/api"
 	"digital.vasic.translator/pkg/coordination"
+	"digital.vasic.translator/pkg/deployment"
 	"digital.vasic.translator/pkg/distributed"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/security"
@@ -69,10 +70,20 @@ func main() {
 		EventBus: eventBus,
 	})
 
+	// Initialize API communication logger for distributed operations
+	var apiLogger *deployment.APICommunicationLogger
+	if cfg.Distributed.Enabled {
+		var err error
+		apiLogger, err = deployment.NewAPICommunicationLogger("workers_api_communication.log")
+		if err != nil {
+			log.Printf("Warning: failed to initialize API logger: %v", err)
+		}
+	}
+
 	// Initialize distributed manager if enabled
 	var distributedManager interface{}
 	if cfg.Distributed.Enabled {
-		distributedManager = distributed.NewDistributedManager(cfg, eventBus)
+		distributedManager = distributed.NewDistributedManager(cfg, eventBus, apiLogger)
 		// Initialize with local coordinator
 		if dm, ok := distributedManager.(*distributed.DistributedManager); ok {
 			if err := dm.Initialize(localCoordinator); err != nil {
