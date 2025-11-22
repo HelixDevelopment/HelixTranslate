@@ -1,0 +1,17 @@
+Translation Report
+==================
+
+Generated: Sat Nov 22 20:38:19 MSK 2025
+Total books processed: 1
+Successful translations: 1
+Failed translations: 0
+Total time: 2s
+Average time per book: 2s
+
+API Communications Summary:
+Total API calls:        2
+Status code distribution:
+
+Output directory: ./Books/translated
+API log: workers_api_communication.log
+Batch log: batch_translation.log

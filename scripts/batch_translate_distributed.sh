@@ -107,7 +107,7 @@ start_main_server() {
     local attempt=1
 
     while [[ $attempt -le $max_attempts ]]; do
-        if curl -k -f "https://localhost:8443/health" >/dev/null 2>&1; then
+        if curl -f "http://localhost:8443/health" >/dev/null 2>&1; then
             log_success "Main server is healthy"
             return 0
         fi
@@ -153,7 +153,7 @@ deploy_remote_worker() {
     fi
 
     # Verify worker is accessible
-    if curl -k -f "https://thinker.local:8444/health" >/dev/null 2>&1; then
+    if curl -k -f "https://thinker.local:8443/health" >/dev/null 2>&1; then
         log_success "Remote worker is healthy"
     else
         log_error "Remote worker is not responding"
@@ -167,7 +167,7 @@ discover_workers() {
 
     # Make API call to discover workers
     local response
-    response=$(curl -k -s -X POST "https://localhost:8443/api/v1/distributed/workers/discover" \
+    response=$(curl -s -X POST "http://localhost:8443/api/v1/distributed/workers/discover" \
         -H "Content-Type: application/json")
 
     if [[ $? -eq 0 ]]; then
@@ -183,7 +183,7 @@ discover_workers() {
 
     # Check distributed status
     local status
-    status=$(curl -k -s "https://localhost:8443/api/v1/distributed/status")
+    status=$(curl -s "http://localhost:8443/api/v1/distributed/status")
 
     if echo "$status" | grep -q "paired_workers.*[1-9]"; then
         log_success "Workers successfully paired"
@@ -196,8 +196,6 @@ discover_workers() {
 
 # Get list of books to translate
 get_books_list() {
-    log_info "Getting list of books to translate..."
-
     # Find all supported book formats
     local books=()
     while IFS= read -r -d '' file; do
@@ -222,17 +220,12 @@ translate_book() {
     # Prepare translation request
     local output_path="$OUTPUT_DIR/${book_basename}_sr.epub"
 
-    # Make API call to translate
+    # Use CLI for translation
     local start_time
     start_time=$(date +%s)
 
     local response
-    response=$(curl -k -s -X POST "https://localhost:8443/api/v1/translate/file" \
-        -F "file=@$book_path" \
-        -F "target_language=sr" \
-        -F "output_format=epub" \
-        -F "provider=distributed" \
-        -o "$output_path")
+    response=$(./cli -input "$book_path" -output "$output_path" -target_language sr -provider distributed 2>&1)
 
     local end_time
     end_time=$(date +%s)
@@ -356,7 +349,7 @@ main() {
     start_main_server
 
     # Deploy remote worker
-    deploy_remote_worker
+    # deploy_remote_worker  # Worker already running
 
     # Discover and pair workers
     discover_workers
@@ -366,7 +359,7 @@ main() {
 
     # Get list of books
     local books
-    mapfile -t books < <(get_books_list)
+    books=($(get_books_list))
     local total_books=${#books[@]}
 
     log_info "Starting translation of $total_books books..."

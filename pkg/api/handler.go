@@ -5,8 +5,8 @@ import (
 	"digital.vasic.translator/internal/cache"
 	"digital.vasic.translator/internal/config"
 	"digital.vasic.translator/pkg/distributed"
+	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
-	"digital.vasic.translator/pkg/fb2"
 	"digital.vasic.translator/pkg/script"
 	"digital.vasic.translator/pkg/security"
 	"digital.vasic.translator/pkg/translator"
@@ -275,8 +275,8 @@ func (h *Handler) translateFB2(c *gin.Context) {
 	startEvent.SessionID = sessionID
 	h.eventBus.Publish(startEvent)
 
-	// Parse FB2
-	parser := fb2.NewParser()
+	// Parse ebook
+	parser := ebook.NewParser()
 	book, err := parser.ParseReader(file)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to parse FB2: %v", err)})

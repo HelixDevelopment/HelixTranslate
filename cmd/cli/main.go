@@ -225,14 +225,14 @@ func translateEbook(
 	var err error
 	sessionID := "cli-session"
 
-	// Try multi-LLM first if provider is "multi-llm" or not specified
-	if providerName == "multi-llm" || providerName == "" {
+	// Try multi-LLM first if provider is "multi-llm", "distributed" or not specified
+	if providerName == "multi-llm" || providerName == "distributed" || providerName == "" {
 		multiTrans, multiErr := coordination.NewMultiLLMTranslatorWrapperWithConfig(config, eventBus, sessionID, disableLocalLLMs, preferDistributed)
 		if multiErr == nil {
 			trans = multiTrans
 			fmt.Printf("Using translator: multi-llm-coordinator (%d instances)\n\n", multiTrans.Coordinator.GetInstanceCount())
-		} else if providerName == "multi-llm" {
-			// User explicitly requested multi-llm but it failed
+		} else if providerName == "multi-llm" || providerName == "distributed" {
+			// User explicitly requested multi-llm or distributed but it failed
 			return fmt.Errorf("failed to create multi-LLM translator: %w", multiErr)
 		}
 		// Otherwise fall through to single translator
