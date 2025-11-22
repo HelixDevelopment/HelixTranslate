@@ -92,6 +92,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			// Update endpoints for workers
 			v1.POST("/update/upload", h.uploadUpdate)
 			v1.POST("/update/apply", h.applyUpdate)
+			v1.POST("/update/rollback", h.rollbackUpdate)
 		}
 
 		// Authentication (if enabled)
@@ -1082,4 +1083,49 @@ func applyUpdatePackage(updatePath string) error {
 	os.RemoveAll(extractDir)
 
 	return nil
+}
+
+// rollbackUpdate handles manual rollback requests
+func (h *Handler) rollbackUpdate(c *gin.Context) {
+	if h.distributedManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Distributed work not available"})
+		return
+	}
+
+	dm, ok := h.distributedManager.(*distributed.DistributedManager)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid distributed manager"})
+		return
+	}
+
+	// Get worker ID from header or query param
+	workerID := c.GetHeader("X-Worker-ID")
+	if workerID == "" {
+		workerID = c.Query("worker_id")
+	}
+	if workerID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Worker ID is required"})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	// Get the worker service
+	worker := dm.GetWorkerByID(workerID)
+	if worker == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Worker not found"})
+		return
+	}
+
+	// Perform rollback
+	if err := dm.RollbackWorker(ctx, worker); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":   "Worker rollback completed successfully",
+		"worker_id": workerID,
+	})
 }

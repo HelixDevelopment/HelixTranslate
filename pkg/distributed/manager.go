@@ -381,3 +381,32 @@ func (dm *DistributedManager) Close() error {
 
 	return nil
 }
+
+// GetWorkerByID returns a worker service by ID
+func (dm *DistributedManager) GetWorkerByID(workerID string) *RemoteService {
+	dm.mu.RLock()
+	defer dm.mu.RUnlock()
+
+	if !dm.initialized {
+		return nil
+	}
+
+	pairedServices := dm.pairingManager.GetPairedServices()
+	if service, exists := pairedServices[workerID]; exists {
+		return service
+	}
+
+	return nil
+}
+
+// RollbackWorker rolls back a worker to its previous state
+func (dm *DistributedManager) RollbackWorker(ctx context.Context, service *RemoteService) error {
+	dm.mu.RLock()
+	if !dm.initialized {
+		dm.mu.RUnlock()
+		return fmt.Errorf("distributed manager not initialized")
+	}
+	dm.mu.RUnlock()
+
+	return dm.versionManager.rollbackWorkerUpdate(ctx, service)
+}

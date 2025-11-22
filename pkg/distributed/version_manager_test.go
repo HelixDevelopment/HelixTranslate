@@ -851,3 +851,102 @@ func TestVersionManager_ValidateWorkerForWork_HealthCheckFailure(t *testing.T) {
 		t.Errorf("Expected health check failure error, got: %s", err.Error())
 	}
 }
+
+func TestVersionManager_UpdateWorker_WithRollback(t *testing.T) {
+	// Create a mock server that fails during update but allows rollback
+	callCount := 0
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/v1/version" {
+			version := VersionInfo{
+				CodebaseVersion: "dev-old123", // Initially outdated
+				Components: map[string]string{
+					"translator":  "dev-old123",
+					"api":         "1.0.0",
+					"distributed": "1.0.0",
+				},
+			}
+			// After first call (during rollback check), return updated version
+			if callCount > 0 {
+				version.CodebaseVersion = "dev-b7e4c27"
+				version.Components["translator"] = "dev-b7e4c27"
+			}
+			callCount++
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(version)
+		} else if strings.Contains(r.URL.Path, "/update/upload") {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"message":"uploaded"}`))
+		} else if strings.Contains(r.URL.Path, "/update/apply") {
+			// Simulate failure during apply
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error":"apply failed"}`))
+		} else if strings.Contains(r.URL.Path, "/update/rollback") {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"message":"rolled back"}`))
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+
+	host, port := parseTestServerURL(server.URL)
+
+	eventBus := events.NewEventBus()
+	vm := NewVersionManager(eventBus)
+	vm.httpClient = server.Client()
+	vm.SetBaseURL(server.URL)
+	vm.updateDir = "/tmp/test-updates"
+
+	service := &RemoteService{
+		WorkerID: "test-worker",
+		Host:     host,
+		Port:     port,
+		Protocol: "https",
+		Version: VersionInfo{
+			CodebaseVersion: "dev-old123",
+		},
+	}
+
+	// Update should fail and trigger rollback
+	err := vm.UpdateWorker(context.Background(), service)
+	if err == nil {
+		t.Errorf("Expected update to fail and rollback")
+	}
+
+	if !strings.Contains(err.Error(), "failed to trigger worker update") {
+		t.Errorf("Expected apply failure error, got: %s", err.Error())
+	}
+
+	// Verify service was rolled back to original version
+	if service.Version.CodebaseVersion != "dev-old123" {
+		t.Errorf("Expected service to be rolled back to dev-old123, got %s", service.Version.CodebaseVersion)
+	}
+
+	// Verify service status is paired (after successful rollback)
+	if service.Status != "paired" {
+		t.Errorf("Expected service status to be 'paired' after rollback, got '%s'", service.Status)
+	}
+}
+
+func TestVersionManager_RollbackWorkerUpdate_NoBackup(t *testing.T) {
+	eventBus := events.NewEventBus()
+	vm := NewVersionManager(eventBus)
+
+	service := &RemoteService{
+		WorkerID: "test-worker",
+		Version: VersionInfo{
+			CodebaseVersion: "dev-b7e4c27",
+		},
+	}
+
+	err := vm.rollbackWorkerUpdate(context.Background(), service)
+	if err == nil {
+		t.Errorf("Expected rollback to fail with no backup")
+	}
+
+	expectedError := "no backup found for worker test-worker"
+	if !strings.Contains(err.Error(), expectedError) {
+		t.Errorf("Expected error containing '%s', got: %s", expectedError, err.Error())
+	}
+}

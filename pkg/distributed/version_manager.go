@@ -16,13 +16,26 @@ import (
 	"digital.vasic.translator/pkg/events"
 )
 
+// UpdateBackup represents a backup of a worker's state before an update
+type UpdateBackup struct {
+	WorkerID        string
+	BackupID        string
+	Timestamp       time.Time
+	OriginalVersion VersionInfo
+	BackupPath      string
+	UpdatePackage   string
+	Status          string // "created", "active", "rolled_back", "expired"
+}
+
 // VersionManager handles version checking, updates, and validation for remote workers
 type VersionManager struct {
 	localVersion VersionInfo
 	httpClient   *http.Client
 	eventBus     *events.EventBus
 	updateDir    string
-	baseURL      string // For testing: override the URL construction
+	backupDir    string
+	backups      map[string]*UpdateBackup // workerID -> backup
+	baseURL      string                   // For testing: override the URL construction
 }
 
 // NewVersionManager creates a new version manager
@@ -43,6 +56,8 @@ func NewVersionManager(eventBus *events.EventBus) *VersionManager {
 		httpClient:   httpClient,
 		eventBus:     eventBus,
 		updateDir:    "/tmp/translator-updates",
+		backupDir:    "/tmp/translator-backups",
+		backups:      make(map[string]*UpdateBackup),
 	}
 }
 
@@ -225,38 +240,50 @@ func (vm *VersionManager) UpdateWorker(ctx context.Context, service *RemoteServi
 	}
 	vm.eventBus.Publish(event)
 
+	// Create backup before starting update
+	backup, err := vm.createWorkerBackup(ctx, service)
+	if err != nil {
+		service.Status = "outdated"
+		return fmt.Errorf("failed to create backup: %w", err)
+	}
+	backup.Status = "active"
+
 	// Create update package
 	updatePackage, err := vm.createUpdatePackage()
 	if err != nil {
-		service.Status = "outdated"
+		vm.rollbackWorkerUpdate(ctx, service) // Rollback on failure
 		return fmt.Errorf("failed to create update package: %w", err)
 	}
+	backup.UpdatePackage = updatePackage
 
 	// Upload update package to worker
 	if err := vm.uploadUpdatePackage(ctx, service, updatePackage); err != nil {
-		service.Status = "outdated"
+		vm.rollbackWorkerUpdate(ctx, service) // Rollback on failure
 		return fmt.Errorf("failed to upload update package: %w", err)
 	}
 
 	// Trigger update on worker
 	if err := vm.triggerWorkerUpdate(ctx, service); err != nil {
-		service.Status = "outdated"
+		vm.rollbackWorkerUpdate(ctx, service) // Rollback on failure
 		return fmt.Errorf("failed to trigger worker update: %w", err)
 	}
 
 	// Wait for update completion
 	if err := vm.waitForUpdateCompletion(ctx, service); err != nil {
-		service.Status = "outdated"
+		vm.rollbackWorkerUpdate(ctx, service) // Rollback on failure
 		return fmt.Errorf("update failed to complete: %w", err)
 	}
 
 	// Verify update
 	if upToDate, err := vm.CheckWorkerVersion(ctx, service); err != nil || !upToDate {
-		service.Status = "outdated"
+		vm.rollbackWorkerUpdate(ctx, service) // Rollback on failure
 		return fmt.Errorf("update verification failed")
 	}
 
 	service.Status = "paired"
+
+	// Mark backup as completed (no longer active)
+	backup.Status = "completed"
 
 	// Emit update completed event
 	event = events.Event{
@@ -419,6 +446,169 @@ func (vm *VersionManager) ValidateWorkerForWork(ctx context.Context, service *Re
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("worker health check failed with status %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
+// createWorkerBackup creates a backup of the worker's current state before update
+func (vm *VersionManager) createWorkerBackup(ctx context.Context, service *RemoteService) (*UpdateBackup, error) {
+	// Ensure backup directory exists
+	if err := os.MkdirAll(vm.backupDir, 0755); err != nil {
+		return nil, fmt.Errorf("failed to create backup directory: %w", err)
+	}
+
+	backupID := fmt.Sprintf("backup-%s-%d", service.WorkerID, time.Now().Unix())
+	backupPath := filepath.Join(vm.backupDir, backupID)
+
+	// Create backup directory
+	if err := os.MkdirAll(backupPath, 0755); err != nil {
+		return nil, fmt.Errorf("failed to create backup path: %w", err)
+	}
+
+	backup := &UpdateBackup{
+		WorkerID:        service.WorkerID,
+		BackupID:        backupID,
+		Timestamp:       time.Now(),
+		OriginalVersion: service.Version,
+		BackupPath:      backupPath,
+		Status:          "created",
+	}
+
+	// Store backup reference
+	vm.backups[service.WorkerID] = backup
+
+	// Emit backup created event
+	event := events.Event{
+		Type:      "worker_backup_created",
+		SessionID: "system",
+		Timestamp: time.Now(),
+		Data: map[string]interface{}{
+			"worker_id":        service.WorkerID,
+			"backup_id":        backupID,
+			"original_version": service.Version.CodebaseVersion,
+		},
+	}
+	vm.eventBus.Publish(event)
+
+	return backup, nil
+}
+
+// rollbackWorkerUpdate rolls back a worker to its previous state using the backup
+func (vm *VersionManager) rollbackWorkerUpdate(ctx context.Context, service *RemoteService) error {
+	backup, exists := vm.backups[service.WorkerID]
+	if !exists {
+		return fmt.Errorf("no backup found for worker %s", service.WorkerID)
+	}
+
+	if backup.Status != "active" {
+		return fmt.Errorf("backup %s is not active (status: %s)", backup.BackupID, backup.Status)
+	}
+
+	// Emit rollback started event
+	event := events.Event{
+		Type:      "worker_rollback_started",
+		SessionID: "system",
+		Timestamp: time.Now(),
+		Data: map[string]interface{}{
+			"worker_id":    service.WorkerID,
+			"backup_id":    backup.BackupID,
+			"from_version": service.Version.CodebaseVersion,
+			"to_version":   backup.OriginalVersion.CodebaseVersion,
+		},
+	}
+	vm.eventBus.Publish(event)
+
+	// Trigger rollback on worker
+	var rollbackURL string
+	if vm.baseURL != "" {
+		rollbackURL = vm.baseURL + "/api/v1/update/rollback"
+	} else {
+		rollbackURL = fmt.Sprintf("%s://%s:%d/api/v1/update/rollback", service.Protocol, service.Host, service.Port)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", rollbackURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create rollback request: %w", err)
+	}
+
+	req.Header.Set("X-Backup-ID", backup.BackupID)
+
+	resp, err := vm.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to trigger rollback: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("rollback failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	// Wait for rollback completion
+	if err := vm.waitForRollbackCompletion(ctx, service, backup); err != nil {
+		return fmt.Errorf("rollback failed to complete: %w", err)
+	}
+
+	// Restore original version info
+	service.Version = backup.OriginalVersion
+	service.Status = "paired"
+
+	// Mark backup as rolled back
+	backup.Status = "rolled_back"
+
+	// Emit rollback completed event
+	event = events.Event{
+		Type:      "worker_rollback_completed",
+		SessionID: "system",
+		Timestamp: time.Now(),
+		Data: map[string]interface{}{
+			"worker_id": service.WorkerID,
+			"backup_id": backup.BackupID,
+			"version":   backup.OriginalVersion.CodebaseVersion,
+		},
+	}
+	vm.eventBus.Publish(event)
+
+	return nil
+}
+
+// waitForRollbackCompletion waits for the worker rollback to complete
+func (vm *VersionManager) waitForRollbackCompletion(ctx context.Context, service *RemoteService, backup *UpdateBackup) error {
+	timeout := time.After(2 * time.Minute)
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-timeout:
+			return fmt.Errorf("rollback timeout")
+		case <-ticker.C:
+			// Check if worker has rolled back to original version
+			if _, err := vm.CheckWorkerVersion(ctx, service); err == nil {
+				if service.Version.CodebaseVersion == backup.OriginalVersion.CodebaseVersion {
+					return nil
+				}
+			}
+		}
+	}
+}
+
+// cleanupExpiredBackups removes old backups that are no longer needed
+func (vm *VersionManager) cleanupExpiredBackups() error {
+	// Remove backups older than 24 hours that are not active
+	cutoff := time.Now().Add(-24 * time.Hour)
+
+	for workerID, backup := range vm.backups {
+		if backup.Timestamp.Before(cutoff) && backup.Status != "active" {
+			if err := os.RemoveAll(backup.BackupPath); err != nil {
+				// Log error but continue cleanup
+				fmt.Printf("Failed to remove backup %s: %v\n", backup.BackupPath, err)
+			}
+			delete(vm.backups, workerID)
+		}
 	}
 
 	return nil
