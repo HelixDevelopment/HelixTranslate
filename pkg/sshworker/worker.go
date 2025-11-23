@@ -299,15 +299,100 @@ func (w *SSHWorker) UploadData(ctx context.Context, data []byte, remotePath stri
 
 // SyncCodebase synchronizes the codebase with remote worker
 func (w *SSHWorker) SyncCodebase(ctx context.Context, localBasePath string) error {
-	// Create temporary archive of codebase locally using os/exec
+	// Create a consistent archive using git for cross-platform compatibility
 	archivePath := filepath.Join(os.TempDir(), "codebase.tar.gz")
 	
+	// Initialize git repository if not already initialized
+	if _, err := os.Stat(filepath.Join(localBasePath, ".git")); os.IsNotExist(err) {
+		initCmd := exec.Command("git", "init")
+		initCmd.Dir = localBasePath
+		if err := initCmd.Run(); err != nil {
+			w.logger.Debug("Git init failed, falling back to tar", map[string]interface{}{
+				"error": err,
+			})
+			return w.syncCodebaseWithTar(ctx, localBasePath, archivePath)
+		}
+	
+	// Add all files and create a commit
+	addCmd := exec.Command("git", "add", ".")
+	addCmd.Dir = localBasePath
+	if err := addCmd.Run(); err != nil {
+		w.logger.Debug("Git add failed", map[string]interface{}{
+			"error": err,
+		})
+		return w.syncCodebaseWithTar(ctx, localBasePath, archivePath)
+	}
+	}
+	
+	// Create archive using git archive for consistency
+	archiveCmd := exec.Command("git", "archive", "--format=tar.gz", "HEAD", "-o", archivePath)
+	archiveCmd.Dir = localBasePath
+	if err := archiveCmd.Run(); err != nil {
+		w.logger.Debug("Git archive failed", map[string]interface{}{
+			"error": err,
+		})
+		return w.syncCodebaseWithTar(ctx, localBasePath, archivePath)
+	}
+	
+	// Verify archive was created
+	if _, err := os.Stat(archivePath); err != nil {
+		return fmt.Errorf("archive creation failed: %w", err)
+	}
+
+	// Upload archive to remote
+	remoteArchivePath := filepath.Join(w.config.RemoteDir, "codebase.tar.gz")
+	if err := w.UploadFile(ctx, archivePath, remoteArchivePath); err != nil {
+		return fmt.Errorf("failed to upload codebase archive: %w", err)
+	}
+
+	// Extract archive on remote with proper directory setup
+	extractCmd := fmt.Sprintf("cd %s && tar -xzf codebase.tar.gz && ls -la && pwd", w.config.RemoteDir)
+	result, err := w.ExecuteCommand(ctx, extractCmd)
+	if err != nil {
+		return fmt.Errorf("failed to extract archive: %w", err)
+	}
+	if result.ExitCode != 0 {
+		w.logger.Debug("Archive extraction failed", map[string]interface{}{
+			"command": extractCmd,
+			"stderr": result.Stderr,
+			"exit_code": result.ExitCode,
+		})
+		return fmt.Errorf("archive extraction failed: %s", result.Stderr)
+	}
+
+	// Verify Go modules work
+	testCmd := fmt.Sprintf("cd %s && go version", w.config.RemoteDir)
+	testResult, testErr := w.ExecuteCommand(ctx, testCmd)
+	if testErr != nil {
+		w.logger.Debug("Go test failed", map[string]interface{}{
+			"command": testCmd,
+			"error": testErr,
+		})
+	} else if testResult.ExitCode != 0 {
+		w.logger.Debug("Go version check failed", map[string]interface{}{
+			"command": testCmd,
+			"stderr": testResult.Stderr,
+		})
+	} else {
+		w.logger.Info("Go setup verified", map[string]interface{}{
+			"version": testResult.Stdout,
+		})
+	}
+
+	// Clean up local archive
+	os.Remove(archivePath)
+
+	return nil
+}
+
+// syncCodebaseWithTar falls back to tar-based synchronization
+func (w *SSHWorker) syncCodebaseWithTar(ctx context.Context, localBasePath string, archivePath string) error {
 	// Create archive locally
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	cancelCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	
 	var stdout, stderr bytes.Buffer
-	cmd := exec.CommandContext(ctx, "tar", "-czf", archivePath, "--format=ustar",
+	cmd := exec.CommandContext(cancelCtx, "tar", "-czf", archivePath, "--format=ustar",
 		"--exclude=.git", "--exclude=node_modules", "--exclude=__pycache__",
 		"--exclude=*.log", "--exclude=vendor",
 		"cmd", "pkg", "internal", "scripts", "docs",
@@ -372,7 +457,6 @@ func (w *SSHWorker) SyncCodebase(ctx context.Context, localBasePath string) erro
 	return nil
 }
 
-// GetRemoteCodebaseHash retrieves the codebase hash from remote worker
 // GetRemoteCodebaseHash retrieves the codebase hash from remote worker
 func (w *SSHWorker) GetRemoteCodebaseHash(ctx context.Context) (string, error) {
 	// Ensure we have a connection

@@ -176,10 +176,9 @@ func (h *CodebaseHasher) addFileToHash(hasher io.Writer, path string, info os.Fi
 	}
 	defer file.Close()
 
-	// Write file path and relative path to hash
+	// Write file path and size to hash (removed modtime for consistency)
 	fmt.Fprintf(hasher, "file:%s\n", path)
 	fmt.Fprintf(hasher, "size:%d\n", info.Size())
-	fmt.Fprintf(hasher, "modtime:%d\n", info.ModTime().Unix())
 
 	// Hash file content
 	if _, err := io.Copy(hasher, file); err != nil {
