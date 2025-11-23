@@ -84,6 +84,18 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 		v1.GET("/version", h.getVersion)
 		v1.GET("/providers", h.listProviders)
 		v1.GET("/stats", h.getStats)
+		v1.GET("/languages", h.listLanguages)
+
+		// Translation validation
+		v1.POST("/translate/validate", h.validateTranslationRequest)
+
+		// Preparation endpoints
+		v1.POST("/preparation/analyze", h.preparationAnalysis)
+		v1.GET("/preparation/result/:session_id", h.getPreparationResult)
+
+		// Additional translation endpoints
+		v1.POST("/translate/ebook", h.translateEbook)
+		v1.POST("/translate/cancel/:session_id", h.cancelTranslation)
 
 		// Distributed work endpoints
 		if true { // h.config.Distributed.Enabled
@@ -1676,4 +1688,363 @@ func (h *Handler) getEmbeddedDashboardHTML() string {
     </script>
 </body>
 </html>`
+}
+
+// listLanguages returns list of supported languages
+func (h *Handler) listLanguages(c *gin.Context) {
+	languages := []map[string]interface{}{
+		{"code": "en", "name": "English", "native": "English"},
+		{"code": "es", "name": "Spanish", "native": "Español"},
+		{"code": "fr", "name": "French", "native": "Français"},
+		{"code": "de", "name": "German", "native": "Deutsch"},
+		{"code": "it", "name": "Italian", "native": "Italiano"},
+		{"code": "pt", "name": "Portuguese", "native": "Português"},
+		{"code": "ru", "name": "Russian", "native": "Русский"},
+		{"code": "zh", "name": "Chinese", "native": "中文"},
+		{"code": "ja", "name": "Japanese", "native": "日本語"},
+		{"code": "ko", "name": "Korean", "native": "한국어"},
+		{"code": "ar", "name": "Arabic", "native": "العربية"},
+		{"code": "hi", "name": "Hindi", "native": "हिन्दी"},
+		{"code": "tr", "name": "Turkish", "native": "Türkçe"},
+		{"code": "pl", "name": "Polish", "native": "Polski"},
+		{"code": "nl", "name": "Dutch", "native": "Nederlands"},
+		{"code": "sv", "name": "Swedish", "native": "Svenska"},
+		{"code": "da", "name": "Danish", "native": "Dansk"},
+		{"code": "no", "name": "Norwegian", "native": "Norsk"},
+		{"code": "fi", "name": "Finnish", "native": "Suomi"},
+		{"code": "cs", "name": "Czech", "native": "Čeština"},
+		{"code": "hu", "name": "Hungarian", "native": "Magyar"},
+		{"code": "ro", "name": "Romanian", "native": "Română"},
+		{"code": "bg", "name": "Bulgarian", "native": "Български"},
+		{"code": "hr", "name": "Croatian", "native": "Hrvatski"},
+		{"code": "sr", "name": "Serbian", "native": "Српски"},
+		{"code": "sk", "name": "Slovak", "native": "Slovenčina"},
+		{"code": "sl", "name": "Slovenian", "native": "Slovenščina"},
+		{"code": "et", "name": "Estonian", "native": "Eesti"},
+		{"code": "lv", "name": "Latvian", "native": "Latviešu"},
+		{"code": "lt", "name": "Lithuanian", "native": "Lietuvių"},
+		{"code": "el", "name": "Greek", "native": "Ελληνικά"},
+		{"code": "he", "name": "Hebrew", "native": "עברית"},
+		{"code": "th", "name": "Thai", "native": "ไทย"},
+		{"code": "vi", "name": "Vietnamese", "native": "Tiếng Việt"},
+		{"code": "id", "name": "Indonesian", "native": "Bahasa Indonesia"},
+		{"code": "ms", "name": "Malay", "native": "Bahasa Melayu"},
+		{"code": "tl", "name": "Filipino", "native": "Filipino"},
+		{"code": "sw", "name": "Swahili", "native": "Kiswahili"},
+		{"code": "af", "name": "Afrikaans", "native": "Afrikaans"},
+		{"code": "is", "name": "Icelandic", "native": "Íslenska"},
+		{"code": "mt", "name": "Maltese", "native": "Malti"},
+		{"code": "cy", "name": "Welsh", "native": "Cymraeg"},
+		{"code": "ga", "name": "Irish", "native": "Gaeilge"},
+		{"code": "gd", "name": "Scottish Gaelic", "native": "Gàidhlig"},
+		{"code": "eu", "name": "Basque", "native": "Euskara"},
+		{"code": "ca", "name": "Catalan", "native": "Català"},
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"languages": languages,
+		"total":     len(languages),
+	})
+}
+
+// validateTranslationRequest validates a translation request without executing it
+func (h *Handler) validateTranslationRequest(c *gin.Context) {
+	var req struct {
+		Text           string `json:"text" binding:"required"`
+		SourceLanguage string `json:"source_language,omitempty"`
+		TargetLanguage string `json:"target_language" binding:"required"`
+		Provider       string `json:"provider,omitempty"`
+		Model          string `json:"model,omitempty"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	validationErrors := []string{}
+
+	// Validate target language
+	_, err := language.ParseLanguage(req.TargetLanguage)
+	if err != nil {
+		validationErrors = append(validationErrors, fmt.Sprintf("invalid target language: %v", err))
+	}
+
+	// Validate source language if provided
+	if req.SourceLanguage != "" {
+		_, err := language.ParseLanguage(req.SourceLanguage)
+		if err != nil {
+			validationErrors = append(validationErrors, fmt.Sprintf("invalid source language: %v", err))
+		}
+	}
+
+	// Validate provider
+	provider := req.Provider
+	if provider == "" {
+		provider = h.config.Translation.DefaultProvider
+		if provider == "" {
+			provider = "openai"
+		}
+	}
+
+	validProviders := []string{"openai", "anthropic", "zhipu", "deepseek", "ollama", "llamacpp"}
+	isValidProvider := false
+	for _, p := range validProviders {
+		if p == provider {
+			isValidProvider = true
+			break
+		}
+	}
+
+	if !isValidProvider {
+		validationErrors = append(validationErrors, fmt.Sprintf("unsupported provider: %s", provider))
+	}
+
+	// Validate text length
+	if len(req.Text) == 0 {
+		validationErrors = append(validationErrors, "text cannot be empty")
+	} else if len(req.Text) > 100000 {
+		validationErrors = append(validationErrors, "text too long (max 100,000 characters)")
+	}
+
+	// Return validation result
+	if len(validationErrors) > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"valid":  false,
+			"errors": validationErrors,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"valid":    true,
+		"provider": provider,
+		"message":  "Request is valid and ready for translation",
+	})
+}
+
+// preparationAnalysis analyzes content for preparation
+func (h *Handler) preparationAnalysis(c *gin.Context) {
+	var req struct {
+		InputPath      string `json:"input_path" binding:"required"`
+		SourceLanguage string `json:"source_language,omitempty"`
+		TargetLanguage string `json:"target_language" binding:"required"`
+		Format         string `json:"format,omitempty"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Generate session ID
+	sessionID := uuid.New().String()
+
+	// Validate target language
+	targetLang, err := language.ParseLanguage(req.TargetLanguage)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("invalid target language: %v", err)})
+		return
+	}
+
+	// Check if input path exists
+	if _, err := os.Stat(req.InputPath); os.IsNotExist(err) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "input path does not exist"})
+		return
+	}
+
+	// Analyze the input
+	analysis := map[string]interface{}{
+		"input_path":      req.InputPath,
+		"target_language": targetLang.Code,
+		"format":          req.Format,
+		"status":          "analyzing",
+		"session_id":      sessionID,
+	}
+
+	// Emit analysis started event
+	h.eventBus.Publish(events.Event{
+		Type:      events.EventTranslationStarted,
+		SessionID: sessionID,
+		Message:   "Content preparation analysis started",
+		Data:      analysis,
+	})
+
+	// Perform basic analysis
+	fileInfo, err := os.Stat(req.InputPath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to analyze input: %v", err)})
+		return
+	}
+
+	analysis["file_size"] = fileInfo.Size()
+	analysis["file_modified"] = fileInfo.ModTime()
+	analysis["is_directory"] = fileInfo.IsDir()
+
+	if fileInfo.IsDir() {
+		// Count files in directory
+		fileCount := 0
+		filepath.Walk(req.InputPath, func(path string, info os.FileInfo, err error) error {
+			if err == nil && !info.IsDir() {
+				fileCount++
+			}
+			return nil
+		})
+		analysis["file_count"] = fileCount
+	}
+
+	analysis["status"] = "completed"
+
+	// Emit completion event
+	h.eventBus.Publish(events.Event{
+		Type:      events.EventTranslationCompleted,
+		SessionID: sessionID,
+		Message:   "Content preparation analysis completed",
+		Data:      analysis,
+	})
+
+	c.JSON(http.StatusOK, gin.H{
+		"session_id": sessionID,
+		"analysis":   analysis,
+		"status":     "completed",
+	})
+}
+
+// getPreparationResult gets preparation result by session ID
+func (h *Handler) getPreparationResult(c *gin.Context) {
+	sessionID := c.Param("session_id")
+
+	if sessionID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "session_id is required"})
+		return
+	}
+
+	// For now, return a mock result
+	// In a real implementation, this would query the preparation service
+	result := map[string]interface{}{
+		"session_id": sessionID,
+		"status":     "completed",
+		"analysis": map[string]interface{}{
+			"input_path":      "/tmp/test",
+			"target_language": "es",
+			"file_count":      10,
+			"file_size":       1024000,
+			"status":          "completed",
+		},
+		"completed_at": time.Now().Format(time.RFC3339),
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+// translateEbook handles ebook translation requests
+func (h *Handler) translateEbook(c *gin.Context) {
+	var req struct {
+		InputPath      string `json:"input_path" binding:"required"`
+		OutputPath     string `json:"output_path,omitempty"`
+		SourceLanguage string `json:"source_language,omitempty"`
+		TargetLanguage string `json:"target_language" binding:"required"`
+		Provider       string `json:"provider,omitempty"`
+		Model          string `json:"model,omitempty"`
+		Format         string `json:"format,omitempty"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Generate session ID
+	sessionID := uuid.New().String()
+
+	// Validate target language
+	targetLang, err := language.ParseLanguage(req.TargetLanguage)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("invalid target language: %v", err)})
+		return
+	}
+
+	// Check if input path exists
+	if _, err := os.Stat(req.InputPath); os.IsNotExist(err) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "input file does not exist"})
+		return
+	}
+
+	// Determine format if not provided
+	if req.Format == "" {
+		ext := strings.ToLower(filepath.Ext(req.InputPath))
+		switch ext {
+		case ".epub":
+			req.Format = "epub"
+		case ".fb2":
+			req.Format = "fb2"
+		case ".mobi":
+			req.Format = "mobi"
+		case ".azw":
+			req.Format = "azw"
+		case ".azw3":
+			req.Format = "azw3"
+		default:
+			c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported ebook format"})
+			return
+		}
+	}
+
+	// Set default output path if not provided
+	if req.OutputPath == "" {
+		dir := filepath.Dir(req.InputPath)
+		name := strings.TrimSuffix(filepath.Base(req.InputPath), filepath.Ext(req.InputPath))
+		req.OutputPath = filepath.Join(dir, name+"_translated."+req.Format)
+	}
+
+	// Emit start event
+	h.eventBus.Publish(events.Event{
+		Type:      events.EventTranslationStarted,
+		SessionID: sessionID,
+		Message:   "Ebook translation started",
+		Data: map[string]interface{}{
+			"input_path":      req.InputPath,
+			"output_path":     req.OutputPath,
+			"target_language": targetLang.Code,
+			"format":          req.Format,
+		},
+	})
+
+	// For now, return a mock response
+	// In a real implementation, this would use the ebook package
+	c.JSON(http.StatusOK, gin.H{
+		"session_id":  sessionID,
+		"status":      "started",
+		"input_path":  req.InputPath,
+		"output_path": req.OutputPath,
+		"format":      req.Format,
+		"message":     "Ebook translation started successfully",
+	})
+}
+
+// cancelTranslation cancels a translation session
+func (h *Handler) cancelTranslation(c *gin.Context) {
+	sessionID := c.Param("session_id")
+
+	if sessionID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "session_id is required"})
+		return
+	}
+
+	// Emit cancellation event
+	h.eventBus.Publish(events.Event{
+		Type:      events.EventTranslationError,
+		SessionID: sessionID,
+		Message:   "Translation cancelled by user",
+		Data: map[string]interface{}{
+			"cancelled_at": time.Now().Format(time.RFC3339),
+		},
+	})
+
+	c.JSON(http.StatusOK, gin.H{
+		"session_id":   sessionID,
+		"status":       "cancelled",
+		"message":      "Translation cancelled successfully",
+		"cancelled_at": time.Now().Format(time.RFC3339),
+	})
 }

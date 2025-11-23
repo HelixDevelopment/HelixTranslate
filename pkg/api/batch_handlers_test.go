@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -17,6 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // MockTranslator for testing
@@ -180,9 +183,56 @@ func TestTranslateDirectoryHandler(t *testing.T) {
 }
 
 func TestTranslateEbookHandler(t *testing.T) {
-	// Note: This route doesn't exist in the current handler
-	// The actual route is /api/v1/translate/fb2 for FB2 files
-	t.Skip("Route /api/v1/translate/ebook not implemented - use /api/v1/translate/fb2 instead")
+	router, _ := setupTestRouter()
+
+	// Create a temporary test file
+	tmpDir := t.TempDir()
+	testFile := filepath.Join(tmpDir, "test.epub")
+	err := os.WriteFile(testFile, []byte("mock epub content"), 0644)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name           string
+		requestBody    map[string]interface{}
+		expectedStatus int
+	}{
+		{
+			name: "valid ebook request",
+			requestBody: map[string]interface{}{
+				"input_path":      testFile,
+				"target_language": "es",
+				"provider":        "openai",
+			},
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name: "missing input path",
+			requestBody: map[string]interface{}{
+				"target_language": "es",
+			},
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name: "missing target language",
+			requestBody: map[string]interface{}{
+				"input_path": testFile,
+			},
+			expectedStatus: http.StatusBadRequest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			body, _ := json.Marshal(tt.requestBody)
+			req := httptest.NewRequest(http.MethodPost, "/api/v1/translate/ebook", bytes.NewBuffer(body))
+			req.Header.Set("Content-Type", "application/json")
+
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, tt.expectedStatus, w.Code)
+		})
+	}
 }
 
 func TestBatchTranslateHandler(t *testing.T) {
@@ -265,7 +315,34 @@ func TestGetTranslationStatusHandler(t *testing.T) {
 }
 
 func TestCancelTranslationHandler(t *testing.T) {
-	t.Skip("Route /api/v1/translate/cancel/:session_id not implemented")
+	router, _ := setupTestRouter()
+
+	tests := []struct {
+		name           string
+		sessionID      string
+		expectedStatus int
+	}{
+		{
+			name:           "valid session ID",
+			sessionID:      "test-session-id",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "empty session ID",
+			sessionID:      "",
+			expectedStatus: http.StatusNotFound, // Gin returns 404 for empty params
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/api/v1/translate/cancel/"+tt.sessionID, nil)
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, tt.expectedStatus, w.Code)
+		})
+	}
 }
 
 func TestListProvidersHandler(t *testing.T) {
@@ -284,19 +361,191 @@ func TestListProvidersHandler(t *testing.T) {
 }
 
 func TestListLanguagesHandler(t *testing.T) {
-	t.Skip("Route /api/v1/languages not implemented")
+	router, _ := setupTestRouter()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/languages", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Contains(t, response, "languages")
+	assert.Contains(t, response, "total")
+
+	languages, ok := response["languages"].([]interface{})
+	assert.True(t, ok, "Languages should be an array")
+	assert.Greater(t, len(languages), 0, "Should have at least one language")
 }
 
 func TestValidateTranslationRequestHandler(t *testing.T) {
-	t.Skip("Route /api/v1/translate/validate not implemented")
+	router, _ := setupTestRouter()
+
+	tests := []struct {
+		name           string
+		requestBody    map[string]interface{}
+		expectedStatus int
+		expectedValid  bool
+	}{
+		{
+			name: "valid request",
+			requestBody: map[string]interface{}{
+				"text":            "Hello world",
+				"target_language": "es",
+				"provider":        "openai",
+			},
+			expectedStatus: http.StatusOK,
+			expectedValid:  true,
+		},
+		{
+			name: "missing target language",
+			requestBody: map[string]interface{}{
+				"text": "Hello world",
+			},
+			expectedStatus: http.StatusBadRequest,
+			expectedValid:  false,
+		},
+		{
+			name: "invalid provider",
+			requestBody: map[string]interface{}{
+				"text":            "Hello world",
+				"target_language": "es",
+				"provider":        "invalid",
+			},
+			expectedStatus: http.StatusBadRequest,
+			expectedValid:  false,
+		},
+		{
+			name: "empty text",
+			requestBody: map[string]interface{}{
+				"text":            "",
+				"target_language": "es",
+			},
+			expectedStatus: http.StatusBadRequest,
+			expectedValid:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			body, _ := json.Marshal(tt.requestBody)
+			req := httptest.NewRequest(http.MethodPost, "/api/v1/translate/validate", bytes.NewBuffer(body))
+			req.Header.Set("Content-Type", "application/json")
+
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, tt.expectedStatus, w.Code)
+
+			var response map[string]interface{}
+			err := json.Unmarshal(w.Body.Bytes(), &response)
+			assert.NoError(t, err)
+
+			if tt.expectedValid {
+				assert.Equal(t, true, response["valid"])
+			} else {
+				// For validation errors, response might be in different format
+				if _, hasValid := response["valid"]; hasValid {
+					assert.Equal(t, false, response["valid"])
+					assert.Contains(t, response, "errors")
+				} else {
+					// Gin validation error format
+					assert.Contains(t, response, "error")
+				}
+			}
+		})
+	}
 }
 
 func TestPreparationAnalysisHandler(t *testing.T) {
-	t.Skip("Route /api/v1/preparation/analyze not implemented")
+	router, _ := setupTestRouter()
+
+	// Create a temporary test directory
+	tmpDir := t.TempDir()
+
+	tests := []struct {
+		name           string
+		requestBody    map[string]interface{}
+		expectedStatus int
+	}{
+		{
+			name: "valid analysis request",
+			requestBody: map[string]interface{}{
+				"input_path":      tmpDir,
+				"target_language": "es",
+				"format":          "epub",
+			},
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name: "missing input path",
+			requestBody: map[string]interface{}{
+				"target_language": "es",
+			},
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name: "missing target language",
+			requestBody: map[string]interface{}{
+				"input_path": tmpDir,
+			},
+			expectedStatus: http.StatusBadRequest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			body, _ := json.Marshal(tt.requestBody)
+			req := httptest.NewRequest(http.MethodPost, "/api/v1/preparation/analyze", bytes.NewBuffer(body))
+			req.Header.Set("Content-Type", "application/json")
+
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, tt.expectedStatus, w.Code)
+		})
+	}
 }
 
 func TestGetPreparationResultHandler(t *testing.T) {
-	t.Skip("Route /api/v1/preparation/result/:session_id not implemented")
+	router, _ := setupTestRouter()
+
+	tests := []struct {
+		name           string
+		sessionID      string
+		expectedStatus int
+	}{
+		{
+			name:           "valid session ID",
+			sessionID:      "test-session-id",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "empty session ID",
+			sessionID:      "",
+			expectedStatus: http.StatusNotFound, // Gin returns 404 for empty params
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/preparation/result/"+tt.sessionID, nil)
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, tt.expectedStatus, w.Code)
+
+			if tt.expectedStatus == http.StatusOK {
+				var response map[string]interface{}
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.NoError(t, err)
+				assert.Contains(t, response, "session_id")
+				assert.Contains(t, response, "status")
+			}
+		})
+	}
 }
 
 func TestHealthCheckHandler(t *testing.T) {

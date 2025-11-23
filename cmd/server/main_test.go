@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -184,9 +182,8 @@ func TestAuthentication(t *testing.T) {
 func TestRateLimiting(t *testing.T) {
 	router := setupTestRouter()
 
-	// Make multiple requests quickly
-	client := &http.Client{Timeout: time.Second}
-	baseURL := "http://test.com/api/v1/translate"
+	// Make multiple requests quickly using the test router
+	baseURL := "/api/v1/translate"
 
 	for i := 0; i < 10; i++ {
 		body := strings.NewReader(`{"text": "Hello", "target": "es"}`)
@@ -194,15 +191,13 @@ func TestRateLimiting(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer test-token")
 
-		resp, err := client.Do(req)
-		if err == nil {
-			resp.Body.Close()
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
 
-			// After certain requests, should be rate limited
-			if i > 5 {
-				assert.Equal(t, http.StatusTooManyRequests, resp.StatusCode,
-					"Should be rate limited after %d requests", i+1)
-			}
+		// After certain requests, should be rate limited
+		if i > 5 {
+			assert.Equal(t, http.StatusTooManyRequests, w.Code,
+				"Should be rate limited after %d requests", i+1)
 		}
 	}
 }

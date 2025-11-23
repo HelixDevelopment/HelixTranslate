@@ -226,6 +226,28 @@ func (d *Detector) getAvailableRAM() (uint64, error) {
 
 		return availBytes, nil
 
+	case "freebsd", "openbsd", "netbsd", "dragonfly":
+		// Use sysctl for BSD systems
+		cmd := exec.Command("sysctl", "hw.usermem")
+		output, err := cmd.Output()
+		if err != nil {
+			return 0, err
+		}
+
+		// Parse sysctl output (format: hw.usermem: 12345678)
+		parts := strings.Split(strings.TrimSpace(string(output)), ":")
+		if len(parts) < 2 {
+			return 0, fmt.Errorf("unexpected sysctl format")
+		}
+
+		totalMem, err := strconv.ParseUint(strings.TrimSpace(parts[1]), 10, 64)
+		if err != nil {
+			return 0, err
+		}
+
+		// Estimate available memory (roughly 70% of total)
+		return uint64(float64(totalMem) * 0.7), nil
+
 	default:
 		return 0, fmt.Errorf("not implemented for %s", runtime.GOOS)
 	}
@@ -263,6 +285,22 @@ func (d *Detector) getCPUModel() (string, error) {
 			return "", err
 		}
 		return strings.TrimSpace(string(output)), nil
+
+	case "freebsd", "openbsd", "netbsd", "dragonfly":
+		// Use sysctl for BSD systems
+		cmd := exec.Command("sysctl", "hw.model")
+		output, err := cmd.Output()
+		if err != nil {
+			return "", err
+		}
+
+		// Parse sysctl output (format: hw.model: Intel(R) Core(TM) i7-8700K)
+		parts := strings.Split(strings.TrimSpace(string(output)), ":")
+		if len(parts) < 2 {
+			return "", fmt.Errorf("unexpected sysctl format")
+		}
+
+		return strings.TrimSpace(parts[1]), nil
 
 	default:
 		return "", fmt.Errorf("not implemented for %s", runtime.GOOS)
@@ -316,6 +354,27 @@ func (d *Detector) getCPUCores() (int, error) {
 		if err != nil {
 			return 0, err
 		}
+		return cores, nil
+
+	case "freebsd", "openbsd", "netbsd", "dragonfly":
+		// Use sysctl for BSD systems
+		cmd := exec.Command("sysctl", "hw.ncpu")
+		output, err := cmd.Output()
+		if err != nil {
+			return 0, err
+		}
+
+		// Parse sysctl output (format: hw.ncpu: 8)
+		parts := strings.Split(strings.TrimSpace(string(output)), ":")
+		if len(parts) < 2 {
+			return 0, fmt.Errorf("unexpected sysctl format")
+		}
+
+		cores, err := strconv.Atoi(strings.TrimSpace(parts[1]))
+		if err != nil {
+			return 0, err
+		}
+
 		return cores, nil
 
 	default:
