@@ -316,6 +316,7 @@ func TestFB2Parser_Parse_NestedSections(t *testing.T) {
 
 	if len(mainSection.Subsections) == 0 {
 		t.Error("No subsections found")
+		return
 	}
 
 	subsection := mainSection.Subsections[0]
@@ -375,6 +376,7 @@ func TestConvertFB2Section(t *testing.T) {
 
 	if len(mainSection.Subsections) == 0 {
 		t.Error("No subsections found")
+		return
 	}
 
 	subsection := mainSection.Subsections[0]

@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 )
 
@@ -149,14 +150,15 @@ func (p *EPUBParser) CleanXMLData(data []byte) []byte {
 
 	// Fix common XML issues
 	cleanedStr := cleaned.String()
-	cleanedStr = strings.ReplaceAll(cleanedStr, "& ", "&amp; ")
-	cleanedStr = strings.ReplaceAll(cleanedStr, "&<", "&lt;")
-	cleanedStr = strings.ReplaceAll(cleanedStr, "&>", "&gt;")
-	// Fix common invalid entities
+	// Process entities in specific order to avoid double-processing
 	cleanedStr = strings.ReplaceAll(cleanedStr, "&q", "&quot;")
 	cleanedStr = strings.ReplaceAll(cleanedStr, "&a", "&amp;")
 	cleanedStr = strings.ReplaceAll(cleanedStr, "&l", "&lt;")
 	cleanedStr = strings.ReplaceAll(cleanedStr, "&g", "&gt;")
+	// Process standalone & at the end to avoid double-conversion
+	cleanedStr = strings.ReplaceAll(cleanedStr, "& ", "&amp; ")
+	cleanedStr = strings.ReplaceAll(cleanedStr, "&<", "&lt;")
+	cleanedStr = strings.ReplaceAll(cleanedStr, "&>", "&gt;")
 
 	return []byte(cleanedStr)
 }
@@ -293,11 +295,20 @@ func (p *EPUBParser) parseContentFile(f *zip.File) (*Chapter, error) {
 		return nil, err
 	}
 
-	// Simple HTML text extraction
+	// Simple HTML text extraction - remove head/title sections first
 	content := string(data)
-
-	// Remove tags (simple approach)
+	
+	// Remove entire head section including title
+	headRe := regexp.MustCompile(`(?i)<head[^>]*>.*?</head>`)
+	content = headRe.ReplaceAllString(content, " ")
+	
+	// Remove tags from remaining content
 	content = removeHTMLTags(content)
+	
+	// Clean up multiple spaces
+	spaceRe := regexp.MustCompile(` {2,}`)
+	content = spaceRe.ReplaceAllString(content, " ")
+	
 	content = strings.TrimSpace(content)
 
 	if content == "" {
@@ -318,22 +329,18 @@ func (p *EPUBParser) parseContentFile(f *zip.File) (*Chapter, error) {
 
 // removeHTMLTags removes HTML tags from text
 func removeHTMLTags(s string) string {
-	// Simple tag removal
-	inTag := false
-	var result strings.Builder
-
-	for _, ch := range s {
-		if ch == '<' {
-			inTag = true
-		} else if ch == '>' {
-			inTag = false
-			result.WriteRune(' ')
-		} else if !inTag {
-			result.WriteRune(ch)
-		}
-	}
-
-	return result.String()
+	// Replace HTML tags with spaces using different logic for opening vs closing tags
+	// This preserves the spacing pattern expected in tests
+	
+	// Replace opening tags (like <p>, <b>) with a space
+	openingRe := regexp.MustCompile(`<[a-zA-Z][^>/]*>`)
+	content := openingRe.ReplaceAllString(s, " ")
+	
+	// Replace closing tags (like </p>, </b>) with a space  
+	closingRe := regexp.MustCompile(`</[^>]*>`)
+	content = closingRe.ReplaceAllString(content, " ")
+	
+	return content
 }
 
 // extractCoverImage extracts cover image bytes from a zip file

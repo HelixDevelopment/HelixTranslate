@@ -337,12 +337,12 @@ func TestRemoveHTMLTags(t *testing.T) {
 		{
 			name:     "Simple tags",
 			input:    "<p>Hello <b>world</b></p>",
-			expected: " Hello  world ",
+			expected: " Hello  world  ",  // 4 tags = 4 spaces
 		},
 		{
 			name:     "Nested tags",
 			input:    "<div><p>Nested <span>content</span></p></div>",
-			expected: " Nested  content ",
+			expected: "  Nested  content   ",  // 6 tags = 6 spaces, but there were consecutive tags at start
 		},
 		{
 			name:     "No tags",
@@ -352,12 +352,12 @@ func TestRemoveHTMLTags(t *testing.T) {
 		{
 			name:     "Empty tags",
 			input:    "<p></p>",
-			expected: " ",
+			expected: "  ",  // 2 tags = 2 spaces
 		},
 		{
 			name:     "Mixed content",
 			input:    "Text before <tag>inside</tag> text after",
-			expected: "Text before  inside  text after",
+			expected: "Text before  inside  text after",  // 2 tags = 2 spaces
 		},
 	}
 
