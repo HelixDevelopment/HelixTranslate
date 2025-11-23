@@ -16,17 +16,18 @@ import (
 	"digital.vasic.translator/pkg/api"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/translator"
-	"digital.vasic.translator/pkg/translator/dictionary"
+	"digital.vasic.translator/pkg/translator/llm"
 
 	"github.com/gin-gonic/gin"
 )
 
 func TestInputValidation_SQLInjectionPrevention(t *testing.T) {
 	// Test that SQL injection attempts are properly handled
-	translator := dictionary.NewDictionaryTranslator(translator.TranslationConfig{
+	translator, _ := llm.NewLLMTranslator(translator.TranslationConfig{
 		SourceLang: "en",
 		TargetLang: "sr",
-		Provider:   "dictionary",
+		Provider:   "openai",
+		Model:      "gpt-3.5-turbo",
 	})
 
 	sqlInjectionAttempts := []string{

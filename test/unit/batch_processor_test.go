@@ -8,10 +8,35 @@ import (
 	"testing"
 
 	"digital.vasic.translator/pkg/batch"
+	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/language"
 	"digital.vasic.translator/pkg/translator"
-	"digital.vasic.translator/pkg/translator/dictionary"
 )
+
+// MockTranslator implements translator.Translator for testing
+type MockTranslator struct {
+	config translator.TranslationConfig
+}
+
+func NewMockTranslator(config translator.TranslationConfig) *MockTranslator {
+	return &MockTranslator{config: config}
+}
+
+func (m *MockTranslator) Translate(ctx context.Context, text string, context string) (string, error) {
+	return "[TRANSLATED] " + text, nil
+}
+
+func (m *MockTranslator) TranslateWithProgress(ctx context.Context, text string, context string, eventBus *events.EventBus, sessionID string) (string, error) {
+	return m.Translate(ctx, text, context)
+}
+
+func (m *MockTranslator) GetStats() translator.TranslationStats {
+	return translator.TranslationStats{}
+}
+
+func (m *MockTranslator) GetName() string {
+	return "mock"
+}
 
 func TestBatchProcessor(t *testing.T) {
 	// Create temporary test directory
@@ -23,7 +48,7 @@ func TestBatchProcessor(t *testing.T) {
 			TargetLang: "sr",
 			Provider:   "dictionary",
 		}
-		trans := dictionary.NewDictionaryTranslator(translatorConfig)
+		trans := NewMockTranslator(translatorConfig)
 		options := &batch.ProcessingOptions{
 			InputType:      batch.InputTypeString,
 			InputString:    "Hello world",
@@ -53,7 +78,7 @@ func TestBatchProcessor(t *testing.T) {
 			TargetLang: "sr",
 			Provider:   "dictionary",
 		}
-		trans := dictionary.NewDictionaryTranslator(translatorConfig)
+		trans := NewMockTranslator(translatorConfig)
 		outputPath := filepath.Join(tmpDir, "output.txt")
 
 		options := &batch.ProcessingOptions{
@@ -87,7 +112,7 @@ func TestBatchProcessor(t *testing.T) {
 			TargetLang: "sr",
 			Provider:   "dictionary",
 		}
-		trans := dictionary.NewDictionaryTranslator(translatorConfig)
+		trans := NewMockTranslator(translatorConfig)
 		inputReader := strings.NewReader("stdin test input")
 
 		options := &batch.ProcessingOptions{
@@ -127,7 +152,7 @@ func TestBatchProcessor(t *testing.T) {
 			TargetLang: "sr",
 			Provider:   "dictionary",
 		}
-		trans := dictionary.NewDictionaryTranslator(translatorConfig)
+		trans := NewMockTranslator(translatorConfig)
 
 		// Test non-recursive
 		options := &batch.ProcessingOptions{
@@ -172,7 +197,7 @@ func TestBatchProcessor(t *testing.T) {
 			TargetLang: "sr",
 			Provider:   "dictionary",
 		}
-		trans := dictionary.NewDictionaryTranslator(translatorConfig)
+		trans := NewMockTranslator(translatorConfig)
 		inputDir := filepath.Join(tmpDir, "input")
 		outputDir := filepath.Join(tmpDir, "output_structured")
 		os.MkdirAll(filepath.Join(inputDir, "subdir"), 0755)
@@ -229,7 +254,7 @@ func TestBatchProcessor(t *testing.T) {
 			TargetLang: "sr",
 			Provider:   "dictionary",
 		}
-		trans := dictionary.NewDictionaryTranslator(translatorConfig)
+		trans := NewMockTranslator(translatorConfig)
 		options := &batch.ProcessingOptions{
 			InputType:      batch.InputTypeDirectory,
 			InputPath:      testDir,
@@ -271,7 +296,7 @@ func TestBatchProcessor(t *testing.T) {
 			TargetLang: "sr",
 			Provider:   "dictionary",
 		}
-		trans := dictionary.NewDictionaryTranslator(translatorConfig)
+		trans := NewMockTranslator(translatorConfig)
 		options := &batch.ProcessingOptions{
 			InputType:      batch.InputTypeDirectory,
 			InputPath:      emptyDir,
@@ -298,7 +323,7 @@ func TestBatchProcessor(t *testing.T) {
 			TargetLang: "sr",
 			Provider:   "dictionary",
 		}
-		trans := dictionary.NewDictionaryTranslator(translatorConfig)
+		trans := NewMockTranslator(translatorConfig)
 		options := &batch.ProcessingOptions{
 			InputType:      batch.InputType(999), // Invalid type
 			TargetLanguage: language.Serbian,

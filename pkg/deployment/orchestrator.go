@@ -244,7 +244,7 @@ func (do *DeploymentOrchestrator) findAvailablePort(host string, preferredPort i
 
 // isPortAvailable checks if a port is available on the given host
 func (do *DeploymentOrchestrator) isPortAvailable(host string, port int) bool {
-	address := fmt.Sprintf("%s:%d", host, port)
+	address := net.JoinHostPort(host, fmt.Sprintf("%d", port))
 	conn, err := net.DialTimeout("tcp", address, 1*time.Second)
 	if err != nil {
 		return true // Port is available if we can't connect
