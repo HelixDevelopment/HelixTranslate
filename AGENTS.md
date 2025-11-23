@@ -201,3 +201,54 @@ type LLMClient interface {
 - **Memory usage**: Monitor with large ebook translations
 - **Concurrent requests**: Balance between speed and rate limits
 - **Cache hit rates**: Monitor cache effectiveness
+
+## Advanced Features
+
+### Preparation Phase System
+- **Purpose**: Pre-translation analysis to improve quality
+- **Binary**: `./build/preparation-translator` (build with `go build ./cmd/preparation-translator`)
+- **Features**: Content analysis, character patterns, cultural references
+- **Usage**: 
+  ```bash
+  ./build/preparation-translator -input book.epub -output book_sr.epub -analysis book_analysis.json
+  ```
+
+### Multi-Pass Translation
+- **Verification**: `pkg/verification/multipass.go` implements quality checks
+- **Polishing**: Automatic post-translation improvements
+- **Reference caching**: Stores high-quality translations for reuse
+
+### Markdown Workflow
+- **EPUB to Markdown**: `pkg/markdown/epub_to_markdown.go`
+- **Markdown to EPUB**: `pkg/markdown/markdown_to_epub.go`
+- **Benefits**: Easier manual editing and review
+- **Binary**: `./build/markdown-translator`
+
+### Batch Processing
+- **Directory support**: Process multiple files automatically
+- **Scripts**: `scripts/batch_translate_*.sh` for different providers
+- **Monitoring**: `scripts/monitor_translation.sh` for progress tracking
+
+## Troubleshooting
+
+### Common Issues
+1. **TLS Certificate Errors**: Run `make generate-certs` before starting server
+2. **API Rate Limits**: Check provider-specific limits in config
+3. **Memory Leaks**: Monitor large file translations with `top` or `htop`
+4. **SSH Connection Failures**: Verify key-based auth for distributed deployment
+5. **FB2 Parsing Errors**: Ensure UTF-8 encoding and valid XML structure
+
+### Debug Mode
+- **Logging**: Set `logging.level` to `debug` in config
+- **Verbose output**: Use `-v` flag with CLI tools
+- **Event monitoring**: WebSocket events show real-time progress
+
+### Performance Monitoring
+- **Built-in metrics**: Available via `/api/v1/metrics` endpoint
+- **Health checks**: `/api/v1/health` endpoint
+- **Prometheus integration**: Metrics export available
+
+## Version Information
+- **Current version**: 2.3.0 (see `VERSION` file)
+- **API versioning**: Follows semantic versioning
+- **Backward compatibility**: Maintained within major versions
