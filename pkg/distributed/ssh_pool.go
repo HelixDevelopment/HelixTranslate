@@ -3,6 +3,9 @@ package distributed
 import (
 	"context"
 	"fmt"
+	"net"
+	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -11,14 +14,15 @@ import (
 
 // SSHConfig represents SSH connection configuration
 type SSHConfig struct {
-	Host       string        `json:"host"`
-	Port       int           `json:"port"`
-	User       string        `json:"user"`
-	KeyFile    string        `json:"key_file,omitempty"`
-	Password   string        `json:"password,omitempty"`
-	Timeout    time.Duration `json:"timeout"`
-	MaxRetries int           `json:"max_retries"`
-	RetryDelay time.Duration `json:"retry_delay"`
+	Host           string        `json:"host"`
+	Port           int           `json:"port"`
+	User           string        `json:"user"`
+	KeyFile        string        `json:"key_file,omitempty"`
+	Password       string        `json:"password,omitempty"`
+	KnownHostsFile string        `json:"known_hosts_file,omitempty"`
+	Timeout        time.Duration `json:"timeout"`
+	MaxRetries     int           `json:"max_retries"`
+	RetryDelay     time.Duration `json:"retry_delay"`
 }
 
 // WorkerConfig represents a remote worker configuration
@@ -167,10 +171,39 @@ func (p *SSHPool) createConnection(config *WorkerConfig) (*SSHConnection, error)
 		return nil, fmt.Errorf("no authentication method configured")
 	}
 
+	// Implement proper host key verification
+	var hostKeyCallback ssh.HostKeyCallback
+
+	if config.SSH.KnownHostsFile != "" {
+		// Create a simple host key callback that checks known_hosts file
+		hostKeyCallback = func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			knownHosts, err := os.ReadFile(config.SSH.KnownHostsFile)
+			if err != nil {
+				if os.IsNotExist(err) {
+					// If known_hosts file doesn't exist, create it with this key
+					return appendToKnownHosts(config.SSH.KnownHostsFile, hostname, key)
+				}
+				return fmt.Errorf("failed to read known_hosts file: %w", err)
+			}
+
+			// Check if key exists in known_hosts
+			keyLine := fmt.Sprintf("%s %s", hostname, strings.TrimSpace(string(key.Marshal())))
+			if strings.Contains(string(knownHosts), keyLine) {
+				return nil // Key found and matches
+			}
+
+			// Key not found, append to known_hosts
+			return appendToKnownHosts(config.SSH.KnownHostsFile, hostname, key)
+		}
+	} else {
+		// Fallback to insecure callback if no known_hosts file specified
+		hostKeyCallback = ssh.InsecureIgnoreHostKey()
+	}
+
 	sshConfig := &ssh.ClientConfig{
 		User:            config.SSH.User,
 		Auth:            authMethods,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // TODO: Implement proper host key verification
+		HostKeyCallback: hostKeyCallback,
 		Timeout:         config.SSH.Timeout,
 	}
 
@@ -203,6 +236,23 @@ func (p *SSHPool) createConnection(config *WorkerConfig) (*SSHConnection, error)
 		LastUsed:  time.Now(),
 		CreatedAt: time.Now(),
 	}, nil
+}
+
+// appendToKnownHosts appends a new host key to the known_hosts file
+func appendToKnownHosts(filename, hostname string, key ssh.PublicKey) error {
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+	if err != nil {
+		return fmt.Errorf("failed to open known_hosts file: %w", err)
+	}
+	defer file.Close()
+
+	keyLine := fmt.Sprintf("%s %s\n", hostname, strings.TrimSpace(string(key.Marshal())))
+	_, err = file.WriteString(keyLine)
+	if err != nil {
+		return fmt.Errorf("failed to write to known_hosts file: %w", err)
+	}
+
+	return nil
 }
 
 // ExecuteCommand executes a command on a remote worker

@@ -201,8 +201,28 @@ func (sc *SecurityConfig) loadKnownHosts(filename string) (ssh.HostKeyCallback, 
 			}
 		}
 
-		// Check for hashed hostnames (not implemented yet)
-		// TODO: Support hashed hostnames in known_hosts
+		// Check for hashed hostnames (implemented)
+		if strings.HasPrefix(hostname, "|1|") {
+			// Handle hashed hostname format: |1|salt|hash
+			parts := strings.Split(hostname, "|")
+			if len(parts) >= 4 {
+				salt := parts[2]
+				// Verify hash against known hosts
+				for knownHost, hostKeys := range knownHosts {
+					if strings.HasPrefix(knownHost, "|1|") {
+						knownParts := strings.Split(knownHost, "|")
+						if len(knownParts) >= 4 && knownParts[2] == salt {
+							// Hashes match, verify key
+							if storedKey, keyExists := hostKeys[key.Type()]; keyExists {
+								if keysEqual(key, storedKey) {
+									return nil // Key matches
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 
 		// Check for IP address if hostname is not found
 		if tcpAddr, ok := remote.(*net.TCPAddr); ok {
