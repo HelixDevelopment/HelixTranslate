@@ -12,10 +12,29 @@ import (
 	"testing"
 	"time"
 
+	"digital.vasic.translator/pkg/security"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+// rateLimitMiddleware creates a rate limiting middleware
+func rateLimitMiddleware(limiter *security.RateLimiter) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Use IP address as key
+		key := c.ClientIP()
+
+		if !limiter.Allow(key) {
+			c.JSON(http.StatusTooManyRequests, gin.H{
+				"error": "Rate limit exceeded",
+			})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
 
 func TestServerStartup(t *testing.T) {
 	tests := []struct {
@@ -89,7 +108,8 @@ func TestAPIEndpoints(t *testing.T) {
 			method:         "POST",
 			path:           "/api/v1/translate",
 			body:           map[string]interface{}{"text": "Hello", "target": "es"},
-			expectedStatus: http.StatusBadRequest, // Missing required fields
+			expectedStatus: http.StatusOK, // Valid request
+			expectedFields: []string{"translated_text", "target_language", "session_id"},
 		},
 		{
 			name:           "batch translate",
@@ -433,7 +453,41 @@ func TestMiddleware(t *testing.T) {
 }
 
 func TestPerformanceMetrics(t *testing.T) {
-	router := setupTestRouter()
+	// Create a separate router with higher rate limit for this test
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+
+	// Add CORS middleware
+	router.Use(func(c *gin.Context) {
+		origin := c.GetHeader("Origin")
+		if origin != "" {
+			c.Header("Access-Control-Allow-Origin", origin)
+		}
+		c.Next()
+	})
+
+	// Add higher rate limit for metrics test
+	limiter := security.NewRateLimiter(100, 200) // Much higher limit
+	router.Use(rateLimitMiddleware(limiter))
+
+	// Add metrics endpoint
+	router.GET("/metrics", func(c *gin.Context) {
+		// Mock Prometheus metrics
+		metrics := `# HELP http_requests_total Total number of HTTP requests
+# TYPE http_requests_total counter
+http_requests_total 5
+
+# HELP request_duration_seconds HTTP request duration in seconds
+# TYPE request_duration_seconds histogram
+request_duration_seconds_bucket{le="0.1"} 3
+request_duration_seconds_bucket{le="1.0"} 5
+request_duration_seconds_bucket{le="+Inf"} 5
+request_duration_seconds_sum 2.5
+request_duration_seconds_count 5
+`
+		c.Header("Content-Type", "text/plain")
+		c.String(200, metrics)
+	})
 
 	// Make some requests to generate metrics
 	for i := 0; i < 5; i++ {
@@ -459,6 +513,27 @@ func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 
+	// Add CORS middleware for testing
+	router.Use(func(c *gin.Context) {
+		origin := c.GetHeader("Origin")
+		if origin != "" {
+			c.Header("Access-Control-Allow-Origin", origin)
+			c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		}
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	})
+
+	// Add rate limiting middleware for testing
+	limiter := security.NewRateLimiter(2, 4) // 2 requests per second, burst of 4
+	router.Use(rateLimitMiddleware(limiter))
+
 	// Add basic routes for testing
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -476,7 +551,31 @@ func setupTestRouter() *gin.Engine {
 	})
 
 	router.POST("/api/v1/translate", func(c *gin.Context) {
-		c.JSON(400, gin.H{"error": "missing required fields"})
+		var request map[string]interface{}
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(400, gin.H{"error": "invalid JSON"})
+			return
+		}
+
+		text, hasText := request["text"]
+		target, hasTarget := request["target"]
+
+		if !hasText || !hasTarget {
+			c.JSON(400, gin.H{"error": "missing required fields"})
+			return
+		}
+
+		// Check for invalid language
+		if targetLang, ok := target.(string); ok && targetLang == "invalid-lang" {
+			c.JSON(400, gin.H{"error": "unsupported language"})
+			return
+		}
+
+		c.JSON(200, gin.H{
+			"translated_text": text,
+			"target_language": target,
+			"session_id":      "test-session",
+		})
 	})
 
 	router.POST("/api/v1/translate/batch", func(c *gin.Context) {
@@ -492,16 +591,28 @@ func setupTestRouter() *gin.Engine {
 		}
 	})
 
-	router.GET("/ws", func(c *gin.Context) {
-		c.JSON(426, gin.H{"error": "upgrade required"})
-	})
-
-	router.POST("/api/v1/upload", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "file uploaded"})
-	})
-
+	// Add metrics endpoint
 	router.GET("/metrics", func(c *gin.Context) {
-		c.String(200, "# HELP http_requests_total\n# TYPE http_requests_total counter\nhttp_requests_total 5\n")
+		// Mock Prometheus metrics
+		metrics := `# HELP http_requests_total Total number of HTTP requests
+# TYPE http_requests_total counter
+http_requests_total 5
+
+# HELP request_duration_seconds HTTP request duration in seconds
+# TYPE request_duration_seconds histogram
+request_duration_seconds_bucket{le="0.1"} 3
+request_duration_seconds_bucket{le="1.0"} 5
+request_duration_seconds_bucket{le="+Inf"} 5
+request_duration_seconds_sum 2.5
+request_duration_seconds_count 5
+`
+		c.Header("Content-Type", "text/plain")
+		c.String(200, metrics)
+	})
+
+	// Add 404 handler
+	router.NoRoute(func(c *gin.Context) {
+		c.JSON(404, gin.H{"error": "not found"})
 	})
 
 	return router

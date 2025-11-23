@@ -1863,11 +1863,15 @@ func (h *Handler) preparationAnalysis(c *gin.Context) {
 	}
 
 	// Emit analysis started event
+	startData := make(map[string]interface{})
+	for k, v := range analysis {
+		startData[k] = v
+	}
 	h.eventBus.Publish(events.Event{
 		Type:      events.EventTranslationStarted,
 		SessionID: sessionID,
 		Message:   "Content preparation analysis started",
-		Data:      analysis,
+		Data:      startData,
 	})
 
 	// Perform basic analysis
@@ -1896,11 +1900,15 @@ func (h *Handler) preparationAnalysis(c *gin.Context) {
 	analysis["status"] = "completed"
 
 	// Emit completion event
+	completionData := make(map[string]interface{})
+	for k, v := range analysis {
+		completionData[k] = v
+	}
 	h.eventBus.Publish(events.Event{
 		Type:      events.EventTranslationCompleted,
 		SessionID: sessionID,
 		Message:   "Content preparation analysis completed",
-		Data:      analysis,
+		Data:      completionData,
 	})
 
 	c.JSON(http.StatusOK, gin.H{
