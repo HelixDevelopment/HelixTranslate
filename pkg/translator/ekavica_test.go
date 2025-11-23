@@ -14,8 +14,8 @@ func TestEkavicaPromptInclusion(t *testing.T) {
 	config := translator.TranslationConfig{
 		Provider:       "deepseek",
 		Model:          "deepseek-chat",
-		SourceLanguage: "ru",
-		TargetLanguage: "sr",
+		SourceLanguage: "en",
+		TargetLanguage: "es",
 		APIKey:         "test-key",
 	}
 
@@ -36,74 +36,74 @@ func TestEkavicaPromptInclusion(t *testing.T) {
 // TestEkavicaDialectRequirements verifies Ekavica-specific word patterns
 func TestEkavicaDialectRequirements(t *testing.T) {
 	tests := []struct {
-		name           string
-		translation    string
-		shouldContain  []string // Ekavica forms that MUST be present
+		name             string
+		translation      string
+		shouldContain    []string // Ekavica forms that MUST be present
 		shouldNotContain []string // Ijekavica forms that MUST NOT be present
-		expectPass     bool
+		expectPass       bool
 	}{
 		{
-			name:        "Ekavica word 'mleko' is correct",
-			translation: "Деца пију млеко",
-			shouldContain: []string{"млеко"},
+			name:             "Ekavica word 'mleko' is correct",
+			translation:      "Деца пију млеко",
+			shouldContain:    []string{"млеко"},
 			shouldNotContain: []string{"мљеко", "мlijeko"},
-			expectPass:  true,
+			expectPass:       true,
 		},
 		{
-			name:        "Ijekavica word 'mlijeko' is incorrect",
-			translation: "Деца пију мљеко",
-			shouldContain: nil,
+			name:             "Ijekavica word 'mlijeko' is incorrect",
+			translation:      "Деца пију мљеко",
+			shouldContain:    nil,
 			shouldNotContain: []string{"мљеко"},
-			expectPass:  false,
+			expectPass:       false,
 		},
 		{
-			name:        "Ekavica word 'dete' is correct",
-			translation: "Дете игра лопту",
-			shouldContain: []string{"дете"},
+			name:             "Ekavica word 'dete' is correct",
+			translation:      "Дете игра лопту",
+			shouldContain:    []string{"дете"},
 			shouldNotContain: []string{"дијете", "dijete"},
-			expectPass:  true,
+			expectPass:       true,
 		},
 		{
-			name:        "Ekavica word 'pesma' is correct",
-			translation: "Лепа песма звучи",
-			shouldContain: []string{"песма"},
+			name:             "Ekavica word 'pesma' is correct",
+			translation:      "Лепа песма звучи",
+			shouldContain:    []string{"песма"},
 			shouldNotContain: []string{"пјесма", "pjesma"},
-			expectPass:  true,
+			expectPass:       true,
 		},
 		{
-			name:        "Ekavica word 'lepo' is correct",
-			translation: "То је лепо",
-			shouldContain: []string{"лепо"},
+			name:             "Ekavica word 'lepo' is correct",
+			translation:      "То је лепо",
+			shouldContain:    []string{"лепо"},
 			shouldNotContain: []string{"лијепо", "lijepo"},
-			expectPass:  true,
+			expectPass:       true,
 		},
 		{
-			name:        "Ekavica word 'hteo' is correct",
-			translation: "Он је хтео да дође",
-			shouldContain: []string{"хтео"},
+			name:             "Ekavica word 'hteo' is correct",
+			translation:      "Он је хтео да дође",
+			shouldContain:    []string{"хтео"},
 			shouldNotContain: []string{"хтио", "htio"},
-			expectPass:  true,
+			expectPass:       true,
 		},
 		{
-			name:        "Ekavica word 'reka' (river) is correct",
-			translation: "Река је дубока",
-			shouldContain: []string{"река"},
+			name:             "Ekavica word 'reka' (river) is correct",
+			translation:      "Река је дубока",
+			shouldContain:    []string{"река"},
 			shouldNotContain: []string{"ријека", "rijeka"},
-			expectPass:  true,
+			expectPass:       true,
 		},
 		{
-			name:        "Multiple Ekavica words are correct",
-			translation: "Лепа деца пију млеко и певају песму",
-			shouldContain: []string{"лепа", "деца", "млеко", "песму"},
+			name:             "Multiple Ekavica words are correct",
+			translation:      "Лепа деца пију млеко и певају песму",
+			shouldContain:    []string{"лепа", "деца", "млеко", "песму"},
 			shouldNotContain: []string{"лијепа", "дијеца", "мљеко", "пјесму"},
-			expectPass:  true,
+			expectPass:       true,
 		},
 		{
-			name:        "Mixed dialect is incorrect",
-			translation: "Лепа деца пију мљеко", // mixes Ekavica (лепа, деца) with Ijekavica (мљеко)
-			shouldContain: []string{"лепа", "деца"},
+			name:             "Mixed dialect is incorrect",
+			translation:      "Лепа деца пију мљеко", // mixes Ekavica (лепа, деца) with Ijekavica (мљеко)
+			shouldContain:    []string{"лепа", "деца"},
 			shouldNotContain: []string{"мљеко"},
-			expectPass:  false,
+			expectPass:       false,
 		},
 	}
 
@@ -267,33 +267,33 @@ func TestEkavicaVerificationLogic(t *testing.T) {
 	}
 
 	tests := []struct {
-		name             string
-		text             string
-		expectIjekavica  bool
+		name               string
+		text               string
+		expectIjekavica    bool
 		expectedViolations int
 	}{
 		{
-			name:            "Pure Ekavica text",
-			text:            "Деца пију млеко и певају лепу песму",
-			expectIjekavica: false,
+			name:               "Pure Ekavica text",
+			text:               "Деца пију млеко и певају лепу песму",
+			expectIjekavica:    false,
 			expectedViolations: 0,
 		},
 		{
-			name:            "Text with Ijekavica mleko",
-			text:            "Деца пију мљеко",
-			expectIjekavica: true,
+			name:               "Text with Ijekavica mleko",
+			text:               "Деца пију мљеко",
+			expectIjekavica:    true,
 			expectedViolations: 1,
 		},
 		{
-			name:            "Text with multiple Ijekavica words",
-			text:            "Дијете пије мљеко и пјева лијепу пјесму",
-			expectIjekavica: true,
+			name:               "Text with multiple Ijekavica words",
+			text:               "Дијете пије мљеко и пјева лијепу пјесму",
+			expectIjekavica:    true,
 			expectedViolations: 4,
 		},
 		{
-			name:            "Text with ије pattern",
-			text:            "Пијемо воду",
-			expectIjekavica: true,
+			name:               "Text with ије pattern",
+			text:               "Пијемо воду",
+			expectIjekavica:    true,
 			expectedViolations: 1,
 		},
 	}

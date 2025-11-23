@@ -1,4 +1,4 @@
-# AGENTS.md - Russian-Serbian FB2 Translation Project
+# AGENTS.md - Universal Multi-Format Multi-Language Ebook Translation System
 
 ## Build/Lint/Test Commands
 - **Build**: `make build` or `go build ./cmd/cli`

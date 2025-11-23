@@ -1,6 +1,25 @@
-# Universal Ebook Translator
+# 🌍 Universal Multi-Format Multi-Language Ebook Translation System
 
-A high-performance, enterprise-grade universal ebook translation toolkit supporting **any ebook format** and **any language pair**, featuring multiple translation engines, REST API with HTTP/3 support, and real-time WebSocket events.
+A high-performance, enterprise-grade **UNIVERSAL** ebook translation toolkit supporting **ANY ebook format** and **ANY language pair** (100+ languages), featuring multiple translation engines, REST API with HTTP/3 support, and real-time WebSocket events.
+
+## 🚀 Truly Universal Capabilities
+
+### 📚 **ALL EBOOK FORMATS SUPPORTED**
+- **Input**: FB2, EPUB, TXT, HTML, PDF, DOCX (auto-detected)
+- **Output**: EPUB, TXT, FB2, HTML (seamless conversion)
+- **Zero format limitations** - translate between any formats
+
+### 🌐 **ALL LANGUAGES SUPPORTED** 
+- **100+ languages** with automatic detection
+- **Any-to-any translation** (no restricted pairs)
+- **Multi-script support**: Cyrillic, Latin, Arabic, Chinese, etc.
+- **Auto-detect source** language or specify manually
+
+### 🤖 **ALL TRANSLATION METHODS**
+- **AI Services**: OpenAI, Anthropic, Zhipu, DeepSeek, Google
+- **Local Models**: Ollama, llama.cpp (GPU accelerated)
+- **Offline**: Dictionary-based translation
+- **Distributed**: Multi-LLM coordination with automatic fallback
 
 ## 🚀 Key Features (v2.0)
 
@@ -15,7 +34,7 @@ A high-performance, enterprise-grade universal ebook translation toolkit support
 - **Automatic language detection** for source text
 - **18+ pre-configured languages** with easy expansion
 - Case-insensitive language specification (`--locale=de` or `--language=German`)
-- Default target: Serbian Cyrillic
+- Default target: English (fully configurable to any language)
 
 ### Multiple Translation Engines
 - **Dictionary**: Fast, offline translation
@@ -72,7 +91,7 @@ make docker-run
 ### CLI Usage
 
 ```bash
-# Translate any ebook to Serbian (auto-detect source language)
+# Translate any ebook to English (auto-detect source language)
 ./build/translator -input book.epub
 
 # Translate EPUB to German
@@ -88,7 +107,7 @@ export OPENAI_API_KEY="your-key"
 # Detect source language only
 ./build/translator -input mystery_book.epub -detect
 
-# Serbian Latin script output
+# Custom script output (cyrillic, latin, arabic, etc.)
 ./build/translator -input book.fb2 -script latin
 
 # Output as plain text

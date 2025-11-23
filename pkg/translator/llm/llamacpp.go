@@ -71,7 +71,7 @@ func NewLlamaCppClient(config translator.TranslationConfig) (*LlamaCppClient, er
 
 		modelInfo, err = registry.FindBestModel(
 			ramForModel,
-			[]string{"ru", "sr"}, // Russian to Serbian translation
+			[]string{"en", "es"}, // English to Spanish translation (example)
 			caps.HasGPU,
 		)
 		if err != nil {
@@ -134,10 +134,10 @@ func NewLlamaCppClient(config translator.TranslationConfig) (*LlamaCppClient, er
 func findLlamaCppExecutable() (string, error) {
 	// Try common locations
 	candidates := []string{
-		"llama-cli",                           // In PATH
-		"/opt/homebrew/bin/llama-cli",        // Homebrew on Apple Silicon
-		"/usr/local/bin/llama-cli",           // Homebrew on Intel
-		"/usr/bin/llama-cli",                 // System install
+		"llama-cli",                   // In PATH
+		"/opt/homebrew/bin/llama-cli", // Homebrew on Apple Silicon
+		"/usr/local/bin/llama-cli",    // Homebrew on Intel
+		"/usr/bin/llama-cli",          // System install
 		filepath.Join(os.Getenv("HOME"), ".local/bin/llama-cli"), // Local install
 	}
 
@@ -165,14 +165,14 @@ func (c *LlamaCppClient) Translate(ctx context.Context, text string, prompt stri
 	args := []string{
 		"-m", c.modelPath,
 		"-p", prompt,
-		"-n", "4096",                    // max tokens to generate (increased for book translation)
+		"-n", "4096", // max tokens to generate (increased for book translation)
 		"-t", fmt.Sprintf("%d", c.threads),
 		"-c", fmt.Sprintf("%d", c.contextSize),
-		"--temp", "0.3",                 // low temperature for consistent, accurate translation
-		"--top-p", "0.9",                // nucleus sampling
-		"--top-k", "40",                 // top-k sampling
-		"--repeat-penalty", "1.1",       // prevent repetition
-		"--no-display-prompt",           // don't echo the prompt in output
+		"--temp", "0.3", // low temperature for consistent, accurate translation
+		"--top-p", "0.9", // nucleus sampling
+		"--top-k", "40", // top-k sampling
+		"--repeat-penalty", "1.1", // prevent repetition
+		"--no-display-prompt", // don't echo the prompt in output
 	}
 
 	// Enable GPU acceleration if available

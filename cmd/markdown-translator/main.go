@@ -21,7 +21,7 @@ func main() {
 	inputFile := flag.String("input", "", "Input file (EPUB or Markdown)")
 	outputFile := flag.String("output", "", "Output file (optional, auto-generated if not provided)")
 	outputFormat := flag.String("format", "epub", "Output format (epub, md)")
-	targetLang := flag.String("lang", "sr", "Target language code (default: Serbian)")
+	targetLang := flag.String("lang", "en", "Target language code (default: English)")
 	provider := flag.String("provider", "deepseek", "LLM provider (deepseek, openai, anthropic, llamacpp)")
 	model := flag.String("model", "", "LLM model (optional, uses provider default)")
 	keepMarkdown := flag.Bool("keep-md", true, "Keep intermediate markdown files")
@@ -132,16 +132,16 @@ func main() {
 
 		// Configure preparation with multi-LLM analysis
 		prepConfig := preparation.PreparationConfig{
-			PassCount:           *preparationPasses,
-			Providers:           []string{*provider}, // Use same provider for now
-			AnalyzeContentType:  true,
-			AnalyzeCharacters:   true,
-			AnalyzeTerminology:  true,
-			AnalyzeCulture:      true,
-			AnalyzeChapters:     true,
-			DetailLevel:         "comprehensive",
-			SourceLanguage:      "ru",
-			TargetLanguage:      *targetLang,
+			PassCount:          *preparationPasses,
+			Providers:          []string{*provider}, // Use same provider for now
+			AnalyzeContentType: true,
+			AnalyzeCharacters:  true,
+			AnalyzeTerminology: true,
+			AnalyzeCulture:     true,
+			AnalyzeChapters:    true,
+			DetailLevel:        "comprehensive",
+			SourceLanguage:     "ru",
+			TargetLanguage:     *targetLang,
 		}
 
 		prepCoordinator, err := preparation.NewPreparationCoordinator(prepConfig)

@@ -54,9 +54,9 @@ func main() {
 	flag.StringVar(&model, "model", "", "LLM model name")
 	flag.StringVar(&apiKey, "api-key", "", "API key for LLM provider")
 	flag.StringVar(&baseURL, "base-url", "", "Base URL for LLM provider")
-	flag.StringVar(&scriptType, "script", "cyrillic", "Output script (cyrillic, latin)")
+	flag.StringVar(&scriptType, "script", "default", "Output script (default, cyrillic, latin, arabic, etc.)")
 	flag.StringVar(&locale, "locale", "", "Target language locale (e.g., sr, de, DE)")
-	flag.StringVar(&targetLanguage, "language", "", "Target language name (e.g., Serbian, German)")
+	flag.StringVar(&targetLanguage, "language", "", "Target language name (e.g., English, Spanish, French)")
 	flag.StringVar(&sourceLanguage, "source", "", "Source language (optional, auto-detected if not specified)")
 	flag.BoolVar(&detectLang, "detect", false, "Detect source language and exit")
 	flag.BoolVar(&showVersion, "version", false, "Show version")
@@ -112,8 +112,8 @@ func main() {
 			os.Exit(1)
 		}
 	} else {
-		// Default to Serbian
-		targetLang = language.Serbian
+		// Default to English (widely used target language)
+		targetLang = language.English
 	}
 
 	// Parse source language if specified
@@ -466,8 +466,8 @@ Options:
   -f, -format <format>    Output format (epub, fb2, txt) [default: epub]
 
   -locale <code>          Target language locale (e.g., sr, de, fr, es)
-  -language <name>        Target language name (e.g., Serbian, German, French)
-                          (case-insensitive, default: Serbian)
+  -language <name>        Target language name (e.g., English, Spanish, French)
+                          (case-insensitive, default: English)
   -source <lang>          Source language (optional, auto-detected)
   -detect                 Detect source language and exit
 
@@ -477,8 +477,8 @@ Options:
   -api-key <key>          API key for LLM provider
   -base-url <url>         Base URL for LLM provider
 
-  -script <type>          Output script for Serbian (cyrillic, latin)
-                          [default: cyrillic]
+  -script <type>          Output script (default, cyrillic, latin, arabic, etc.)
+                          [default: default]
 
    -c, -config <file>      Configuration file path
    -create-config <file>   Create a config file template

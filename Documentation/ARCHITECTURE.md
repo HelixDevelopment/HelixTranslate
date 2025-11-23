@@ -2,12 +2,15 @@
 
 ## Overview
 
-The Russian-Serbian FB2 Translator is a high-performance, scalable translation service built with Go, featuring:
+The Universal Multi-Format Multi-Language Ebook Translation System is a high-performance, scalable translation service built with Go, featuring:
 
 - **CLI tool** - Command-line interface for batch translation
 - **REST API** - HTTP/3 enabled REST API with WebSocket support
+- **Universal format support** - FB2, EPUB, TXT, HTML, PDF, DOCX input/output
+- **Multi-language translation** - 100+ languages with auto-detection
 - **Multiple translation engines** - Dictionary, Google Translate, and LLM providers
 - **Real-time events** - WebSocket-based progress tracking
+- **Distributed processing** - Multi-LLM coordination with fallback
 - **High security** - JWT authentication, rate limiting, TLS/QUIC
 
 ## Project Structure

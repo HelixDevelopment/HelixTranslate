@@ -35,7 +35,7 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Printf("Russian-Serbian FB2 Translator Server v%s\n", version)
+		fmt.Printf("Universal Multi-Format Multi-Language Ebook Translation Server v%s\n", version)
 		os.Exit(0)
 	}
 

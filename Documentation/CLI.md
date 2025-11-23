@@ -17,7 +17,7 @@ translator [options] -input <file>
 - `-locale <code>` - Target language locale (e.g., sr, de, fr, es)
 - `-language <name>` - Target language name (e.g., Serbian, German, French) - case-insensitive
 - `-source <lang>` - Source language (optional, auto-detected if not specified)
-- `-script <type>` - Output script for Serbian (cyrillic, latin) [default: cyrillic]
+- `-script <type>` - Output script (default, cyrillic, latin, arabic, etc.) [default: default]
 
 ## Provider Options
 

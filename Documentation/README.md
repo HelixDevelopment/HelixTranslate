@@ -1,6 +1,6 @@
-# FB2 Translator - Russian to Serbian E-book Translation
+# Universal Multi-Format Multi-Language Ebook Translation System
 
-A comprehensive toolkit for translating Russian FB2 (FictionBook2) e-books to Serbian, supporting multiple translation methods from basic dictionary replacement to advanced AI-powered translation.
+A comprehensive toolkit for translating ebooks between ANY languages and ANY formats, supporting multiple translation methods from basic dictionary replacement to advanced AI-powered translation. Supports FB2, EPUB, TXT, HTML, PDF input/output formats and translation between 100+ languages.
 
 ## Features
 
@@ -14,12 +14,16 @@ A comprehensive toolkit for translating Russian FB2 (FictionBook2) e-books to Se
   - FB2 (FictionBook2) input/output
   - EPUB conversion
   - PDF conversion
+  - TXT, HTML, DOCX support
   - UTF-8 encoding support
+  - Automatic format detection
 
 - **Language Options**
-  - Russian to Serbian translation
-  - Both Cyrillic and Latin Serbian scripts
+  - 100+ languages supported (auto-detect source)
+  - Any-to-any language translation
+  - Multiple script support (Cyrillic, Latin, Arabic, etc.)
   - Context-aware literary translation
+  - Specialized domain translation (technical, medical, legal)
 
 - **Advanced Features**
   - Translation caching
@@ -57,32 +61,37 @@ export DEEPSEEK_API_KEY="your-deepseek-key"
 ```bash
 # Using OpenAI GPT-4
 export OPENAI_API_KEY="your-key"
-python3 llm_fb2_translator.py book_ru.fb2
+./translator -input book.epub -output book_translated.epub -provider openai -language Spanish
 
 # Using Zhipu AI (GLM-4)
 export ZHIPU_API_KEY="your-key"
-python3 llm_fb2_translator.py book_ru.fb2 --provider zhipu
+./translator -input book.fb2 -output book_translated.epub -provider zhipu -language French
 
 # Using DeepSeek (cost-effective)
 export DEEPSEEK_API_KEY="your-key"
-python3 llm_fb2_translator.py book_ru.fb2 --provider deepseek
+./translator -input book.txt -output book_translated.epub -provider deepseek -language German
 
 # Using Anthropic Claude
 export ANTHROPIC_API_KEY="your-key"
-python3 llm_fb2_translator.py book_ru.fb2 --provider anthropic
+./translator -input book.html -output book_translated.epub -provider anthropic -language Italian
 
 # Using local Ollama (free)
-python3 llm_fb2_translator.py book_ru.fb2 --provider ollama --model llama3:8b
+./translator -input book.pdf -output book_translated.epub -provider ollama -language Japanese -model llama3:8b
 ```
 
 **Dictionary Translation (Fast, No API):**
 ```bash
-python3 simple_fb2_translate.py input_ru.fb2 output_sr.b2
+./translator -input book.fb2 -output book_translated.epub -provider dictionary -language Spanish
 ```
 
 **Google Translate Translation:**
 ```bash
-python3 high_quality_fb2_translator.py input_ru.fb2 output_sr.b2
+./translator -input book.fb2 -output book_translated.epub -provider google -language French
+```
+
+**Distributed Translation (Multi-LLM):**
+```bash
+./translator -input book.epub -output book_translated.epub -provider distributed -language German -config config.distributed.json
 ```
 
 ## Translation Methods Comparison

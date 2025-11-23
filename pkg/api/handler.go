@@ -142,9 +142,9 @@ func (h *Handler) healthCheck(c *gin.Context) {
 // apiInfo provides API information
 func (h *Handler) apiInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"name":        "Russian-Serbian FB2 Translator API",
+		"name":        "Universal Multi-Format Multi-Language Ebook Translation API",
 		"version":     "1.0.0",
-		"description": "High-quality Russian to Serbian translation service with multiple LLM providers",
+		"description": "High-quality universal ebook translation service supporting 100+ languages and multiple formats",
 		"endpoints": gin.H{
 			"health":       "GET /health",
 			"websocket":    "GET /ws",
@@ -326,8 +326,8 @@ func (h *Handler) translateFB2(c *gin.Context) {
 			AnalyzeCulture:     h.config.Preparation.AnalyzeCulture,
 			AnalyzeChapters:    h.config.Preparation.AnalyzeChapters,
 			DetailLevel:        h.config.Preparation.DetailLevel,
-			SourceLanguage:     "ru",
-			TargetLanguage:     "sr",
+			SourceLanguage:     "auto", // Auto-detect source language
+			TargetLanguage:     "en",   // Default target language (configurable)
 		}
 
 		// Create preparation-aware translator
