@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -251,11 +252,19 @@ func TestFileUpload(t *testing.T) {
 
 	// Create multipart form
 	body := &bytes.Buffer{}
-	// This would require multipart form creation
-	// For now, test the concept
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", "test.txt")
+	require.NoError(t, err)
+
+	// Write file content
+	_, err = part.Write([]byte(content))
+	require.NoError(t, err)
+
+	err = writer.Close()
+	require.NoError(t, err)
 
 	req, _ := http.NewRequest("POST", "/api/v1/upload", body)
-	req.Header.Set("Content-Type", "multipart/form-data")
+	req.Header.Set("Content-Type", writer.FormDataContentType())
 
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -608,6 +617,24 @@ request_duration_seconds_count 5
 `
 		c.Header("Content-Type", "text/plain")
 		c.String(200, metrics)
+	})
+
+	// Add file upload endpoint
+	router.POST("/api/v1/upload", func(c *gin.Context) {
+		file, header, err := c.Request.FormFile("file")
+		if err != nil {
+			c.JSON(400, gin.H{"error": "no file uploaded"})
+			return
+		}
+		defer file.Close()
+
+		// Mock file processing
+		c.JSON(200, gin.H{
+			"message":      "file uploaded successfully",
+			"filename":     header.Filename,
+			"size":         header.Size,
+			"content_type": header.Header.Get("Content-Type"),
+		})
 	})
 
 	// Add 404 handler

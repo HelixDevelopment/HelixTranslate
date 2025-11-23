@@ -32,6 +32,10 @@ import (
 func setupTestAPI() (*gin.Engine, *api.Handler, *events.EventBus) {
 	gin.SetMode(gin.TestMode)
 
+	// Set test API keys for integration tests
+	os.Setenv("OPENAI_API_KEY", "sk-test-key-for-integration-tests")
+	os.Setenv("ANTHROPIC_API_KEY", "sk-ant-test-key-for-integration-tests")
+
 	cfg := config.DefaultConfig()
 	cfg.Translation.DefaultProvider = "openai"
 	cfg.Translation.DefaultModel = "default"

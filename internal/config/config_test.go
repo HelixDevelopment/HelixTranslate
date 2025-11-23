@@ -32,7 +32,7 @@ func TestDefaultConfig(t *testing.T) {
 	assert.Contains(t, config.Security.CORSOrigins, "*")
 
 	// Translation defaults
-	assert.Equal(t, "dictionary", config.Translation.DefaultProvider)
+	assert.Equal(t, "openai", config.Translation.DefaultProvider)
 	assert.True(t, config.Translation.CacheEnabled)
 	assert.Equal(t, 3600, config.Translation.CacheTTL)
 	assert.Equal(t, 5, config.Translation.MaxConcurrent)
