@@ -5,6 +5,7 @@ import (
 	"digital.vasic.translator/pkg/translator/llm"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/text/cases"
@@ -23,6 +24,14 @@ const (
 	NoteTypeContext    NoteType = "context"    // Historical, social context
 	NoteTypeVocabulary NoteType = "vocabulary" // Key terms, specialized vocabulary
 	NoteTypeStructure  NoteType = "structure"  // Narrative structure, pacing
+	
+	// Additional note types expected by tests
+	NoteTypeGrammar     NoteType = "grammar"
+	NoteTypeTerminology NoteType = "terminology"
+	NoteTypeConsistency NoteType = "consistency"
+	NoteTypeAccuracy    NoteType = "accuracy"
+	NoteTypeFluency     NoteType = "fluency"
+	NoteTypeCultural    NoteType = "cultural"
 )
 
 // ImportanceLevel represents the importance of a note
@@ -467,4 +476,275 @@ func contains(slice []string, item string) bool {
 		}
 	}
 	return false
+}
+
+// Additional types expected by tests
+
+// Note represents a generic note for testing
+type Note struct {
+	ID       string                 `json:"id"`
+	Type     NoteType               `json:"type"`
+	Content  string                 `json:"content"`
+	Metadata map[string]interface{} `json:"metadata"`
+}
+
+// NoteFilter filters notes based on criteria
+// NoteFilter supports filtering notes
+// DEPRECATED: Using simplified structure for basic filtering
+type NoteFilter struct {
+	Type     *NoteType `json:"type,omitempty"`
+	Content  string    `json:"content,omitempty"`
+	Severity *string   `json:"severity,omitempty"`
+	Category *string   `json:"category,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
+}
+
+// Statistics provides note statistics
+type Statistics struct {
+	Total        int                    `json:"total"`
+	TotalNotes   int                    `json:"total_notes"`   // Alias for Total
+	ByType       map[NoteType]int        `json:"by_type"`
+	ByImportance map[ImportanceLevel]int `json:"by_importance"`
+	NotesByType  map[NoteType]int        `json:"notes_by_type"`   // Alias for ByType
+	NotesBySeverity map[string]int       `json:"notes_by_severity"` // Additional severity tracking
+}
+
+// ExportedNote represents a note in export format
+type ExportedNote struct {
+	ID       string          `json:"id"`
+	Type     NoteType        `json:"type"`
+	Content  string          `json:"content"`
+	Note     *LiteraryNote   `json:"note,omitempty"`
+}
+
+// TranslationNotes provides the interface expected by tests
+type TranslationNotes struct {
+	mu         sync.RWMutex
+	notes      map[string]*Note
+	nextID     int
+	collection *NoteCollection
+}
+
+// NewTranslationNotes creates a new TranslationNotes instance
+func NewTranslationNotes() *TranslationNotes {
+	return &TranslationNotes{
+		notes:      make(map[string]*Note),
+		nextID:     1,
+		collection: NewNoteCollection(),
+	}
+}
+
+// AddNote adds a new note
+func (tn *TranslationNotes) AddNote(noteType NoteType, content string, metadata map[string]interface{}) (string, error) {
+	tn.mu.Lock()
+	defer tn.mu.Unlock()
+	
+	// Validation
+	if strings.TrimSpace(content) == "" {
+		return "", fmt.Errorf("note content cannot be empty")
+	}
+	
+	// Validate note type
+	validTypes := map[NoteType]bool{
+		NoteTypeCharacter:  true,
+		NoteTypeTone:       true,
+		NoteTypeTheme:      true,
+		NoteTypeCulture:    true,
+		NoteTypeStyle:      true,
+		NoteTypeContext:    true,
+		NoteTypeVocabulary: true,
+		NoteTypeStructure:  true,
+		NoteTypeGrammar:     true,
+		NoteTypeTerminology: true,
+		NoteTypeConsistency: true,
+		NoteTypeAccuracy:    true,
+		NoteTypeFluency:     true,
+		NoteTypeCultural:    true,
+	}
+	
+	if !validTypes[noteType] {
+		return "", fmt.Errorf("invalid note type: %s", noteType)
+	}
+	
+	id := fmt.Sprintf("note_%d", tn.nextID)
+	tn.nextID++
+	
+	note := &Note{
+		ID:       id,
+		Type:     noteType,
+		Content:  content,
+		Metadata: metadata,
+	}
+	
+	tn.notes[id] = note
+	return id, nil
+}
+
+// GetNote retrieves a note by ID
+func (tn *TranslationNotes) GetNote(noteID string) (Note, bool) {
+	tn.mu.RLock()
+	defer tn.mu.RUnlock()
+	
+	note, exists := tn.notes[noteID]
+	if !exists {
+		return Note{}, false
+	}
+	return *note, true
+}
+
+// GetNotesByType retrieves all notes of a specific type
+func (tn *TranslationNotes) GetNotesByType(noteType NoteType) []Note {
+	var result []Note
+	for _, note := range tn.notes {
+		if note.Type == noteType {
+			result = append(result, *note)
+		}
+	}
+	return result
+}
+
+// UpdateNote updates an existing note
+func (tn *TranslationNotes) UpdateNote(noteID string, content string, metadata map[string]interface{}) error {
+	tn.mu.Lock()
+	defer tn.mu.Unlock()
+	
+	// Validation
+	if strings.TrimSpace(content) == "" {
+		return fmt.Errorf("note content cannot be empty")
+	}
+	
+	note, exists := tn.notes[noteID]
+	if !exists {
+		return fmt.Errorf("note not found: %s", noteID)
+	}
+	
+	note.Content = content
+	note.Metadata = metadata
+	return nil
+}
+
+// DeleteNote removes a note
+func (tn *TranslationNotes) DeleteNote(noteID string) error {
+	tn.mu.Lock()
+	defer tn.mu.Unlock()
+	
+	if _, exists := tn.notes[noteID]; !exists {
+		return fmt.Errorf("note not found: %s", noteID)
+	}
+	
+	delete(tn.notes, noteID)
+	return nil
+}
+
+// FilterNotes returns notes matching filter criteria
+func (tn *TranslationNotes) FilterNotes(filter NoteFilter) []Note {
+	tn.mu.RLock()
+	defer tn.mu.RUnlock()
+	
+	var result []Note
+	for _, note := range tn.notes {
+		if filter.Type != nil && note.Type != *filter.Type {
+			continue
+		}
+		if filter.Content != "" && !strings.Contains(strings.ToLower(note.Content), strings.ToLower(filter.Content)) {
+			continue
+		}
+		if filter.Severity != nil {
+			if severity, exists := note.Metadata["severity"].(string); !exists || severity != *filter.Severity {
+				continue
+			}
+		}
+		if filter.Category != nil {
+			if category, exists := note.Metadata["category"].(string); !exists || category != *filter.Category {
+				continue
+			}
+		}
+		// Simple metadata filter - can be enhanced
+		if filter.Metadata != nil {
+			matches := true
+			for key, value := range filter.Metadata {
+				if noteMeta, exists := note.Metadata[key]; !exists || noteMeta != value {
+					matches = false
+					break
+				}
+			}
+			if !matches {
+				continue
+			}
+		}
+		
+		result = append(result, *note)
+	}
+	return result
+}
+
+// GetStatistics returns note statistics
+func (tn *TranslationNotes) GetStatistics() Statistics {
+	tn.mu.RLock()
+	defer tn.mu.RUnlock()
+	
+	stats := Statistics{
+		Total:         len(tn.notes),
+		TotalNotes:    len(tn.notes),
+		ByType:        make(map[NoteType]int),
+		ByImportance:  make(map[ImportanceLevel]int),
+		NotesByType:   make(map[NoteType]int),
+		NotesBySeverity: make(map[string]int),
+	}
+	
+	for _, note := range tn.notes {
+		stats.ByType[note.Type]++
+		stats.NotesByType[note.Type]++
+		
+		// Use importance from metadata if available
+		if importance, ok := note.Metadata["importance"].(ImportanceLevel); ok {
+			stats.ByImportance[importance]++
+		} else {
+			stats.ByImportance[ImportanceMedium]++
+		}
+		
+		// Track severity
+		if severity, ok := note.Metadata["severity"].(string); ok {
+			stats.NotesBySeverity[severity]++
+		} else {
+			stats.NotesBySeverity["medium"]++ // Default severity
+		}
+	}
+	
+	return stats
+}
+
+// Export exports all notes
+func (tn *TranslationNotes) Export() ([]ExportedNote, error) {
+	tn.mu.RLock()
+	defer tn.mu.RUnlock()
+	
+	var exported []ExportedNote
+	for _, note := range tn.notes {
+		exportedNote := ExportedNote{
+			ID:      note.ID,
+			Type:    note.Type,
+			Content: note.Content,
+		}
+		exported = append(exported, exportedNote)
+	}
+	return exported, nil
+}
+
+// Import imports notes from exported data
+func (tn *TranslationNotes) Import(data []ExportedNote) error {
+	for _, exported := range data {
+		id := fmt.Sprintf("note_%d", tn.nextID)
+		tn.nextID++
+		
+		note := &Note{
+			ID:       id,
+			Type:     exported.Type,
+			Content:  exported.Content,
+			Metadata: make(map[string]interface{}),
+		}
+		
+		tn.notes[id] = note
+	}
+	return nil
 }

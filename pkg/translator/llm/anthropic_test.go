@@ -2,6 +2,7 @@ package llm
 
 import (
 	"context"
+	"net/http"
 	"testing"
 	"time"
 
@@ -142,7 +143,7 @@ func TestAnthropicClient_Translate(t *testing.T) {
 }
 
 func TestAnthropicClient_RequestStructure(t *testing.T) {
-	client := &AnthropicClient{
+	_ = &AnthropicClient{
 		config: translator.TranslationConfig{
 			Provider: "anthropic",
 			Model:    "claude-3-sonnet-20240229",

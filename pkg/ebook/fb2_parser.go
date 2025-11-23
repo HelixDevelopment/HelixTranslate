@@ -80,10 +80,14 @@ func convertFB2Section(fb2Sec *fb2.Section) Chapter {
 	// Convert subsections
 	for _, subSec := range fb2Sec.Section {
 		subChapter := convertFB2Section(&subSec)
-		// Add as subsections
-		for _, subSection := range subChapter.Sections {
-			subSection.Title = subChapter.Title
-			section.Subsections = append(section.Subsections, subSection)
+		// Create subsections from the sub-chapter
+		if len(subChapter.Sections) > 0 {
+			for _, subSection := range subChapter.Sections {
+				// Use the sub-chapter's title for the subsection
+				subSection.Title = subChapter.Title
+				// Add to the first section's subsections
+				chapter.Sections[0].Subsections = append(chapter.Sections[0].Subsections, subSection)
+			}
 		}
 	}
 

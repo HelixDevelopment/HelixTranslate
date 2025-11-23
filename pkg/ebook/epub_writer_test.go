@@ -2,6 +2,7 @@ package ebook
 
 import (
 	"archive/zip"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -410,9 +411,10 @@ func verifyComplexEPUBStructure(t *testing.T, filename string, book *Book) {
 	}
 	defer rc.Close()
 
-	data, err := os.ReadFile(filename)
+	// Read the content.opf content
+	data, err := io.ReadAll(rc)
 	if err != nil {
-		t.Fatalf("Failed to read EPUB: %v", err)
+		t.Fatalf("Failed to read content.opf: %v", err)
 	}
 
 	content := string(data)

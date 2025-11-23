@@ -2,11 +2,15 @@ package verification
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
-
-	"digital.vasic.translator/pkg/translator"
 )
+
+// Helper function for creating string pointers
+func stringPtr(s string) *string {
+	return &s
+}
 
 func TestTranslationNotes_AddNote(t *testing.T) {
 	notes := NewTranslationNotes()
@@ -274,7 +278,7 @@ func TestTranslationNotes_FilterNotes(t *testing.T) {
 		{
 			name: "filter by type and severity",
 			filter: NoteFilter{
-				Type:     &NoteTypeStyle,
+				Type: func() *NoteType { t := NoteTypeStyle; return &t }(),
 				Severity: stringPtr("high"),
 			},
 			expectedCount: 1,
@@ -282,7 +286,7 @@ func TestTranslationNotes_FilterNotes(t *testing.T) {
 		{
 			name: "filter by multiple criteria",
 			filter: NoteFilter{
-				Type:     &NoteTypeStyle,
+				Type: func() *NoteType { t := NoteTypeStyle; return &t }(),
 				Severity: stringPtr("low"),
 				Category: stringPtr("style"),
 			},
@@ -487,9 +491,4 @@ func TestTranslationNotes_NoteTypes(t *testing.T) {
 			}
 		})
 	}
-}
-
-// Helper function
-func stringPtr(s string) *string {
-	return &s
 }

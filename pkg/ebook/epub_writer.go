@@ -2,6 +2,7 @@ package ebook
 
 import (
 	"archive/zip"
+	"crypto/rand"
 	"fmt"
 	"os"
 	"strings"
@@ -283,7 +284,7 @@ func (w *EPUBWriter) formatSection(section *Section) string {
 	var sb strings.Builder
 
 	if section.Title != "" {
-		sb.WriteString(fmt.Sprintf("  <h2>%s</h2>\n", escapeXML(section.Title)))
+		sb.WriteString(fmt.Sprintf("<h2>%s</h2>\n", escapeXML(section.Title)))
 	}
 
 	// Split content into paragraphs
@@ -326,5 +327,8 @@ func escapeXML(s string) string {
 
 // generateUUID generates a simple UUID
 func generateUUID() string {
-	return fmt.Sprintf("%d-%d", time.Now().UnixNano(), time.Now().Unix())
+	// Use crypto/rand for better randomness
+	b := make([]byte, 16)
+	rand.Read(b)
+	return fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
 }

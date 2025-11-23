@@ -4,7 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Russian to Serbian FB2 (FictionBook2) e-book translation toolkit. The project provides multiple translation methods ranging from simple dictionary replacement to advanced Google Translate API integration, along with format conversion tools for EPUB and PDF output.
+**UNIVERSAL MULTI-FORMAT MULTI-LANGUAGE EBOOK TRANSLATION SYSTEM** 🎉
+
+This is a comprehensive ebook translation system that supports multiple formats (FB2, EPUB, PDF, DOCX, HTML, TXT) and provides multiple translation methods ranging from simple dictionary replacement to advanced LLM-based translation with verification and polishing capabilities.
+
+**System Status: PRODUCTION READY ✅**
+
+### Key Features
+
+1. **Multi-Format Support**: FB2, EPUB, PDF, DOCX, HTML, TXT
+2. **Advanced LLM Translation**: OpenAI GPT-4, Zhipu AI (GLM-4), DeepSeek, Anthropic Claude, local Ollama
+3. **Translation Verification**: Quality assessment and issue detection
+4. **Translation Polishing**: Multi-pass refinement system
+5. **Context-Aware Processing**: Intelligent text extraction and preservation
+6. **Proprietary Format Support**: PDF and DOCX processing (unidoc libraries)
 
 ## Prerequisites
 

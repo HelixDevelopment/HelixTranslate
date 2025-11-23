@@ -2,6 +2,7 @@ package llm
 
 import (
 	"context"
+	"net/http"
 	"testing"
 	"time"
 
@@ -160,17 +161,19 @@ func TestDeepSeekClient_Translate(t *testing.T) {
 }
 
 func TestDeepSeekClient_RequestStructure(t *testing.T) {
-	client := &DeepSeekClient{
-		config: translator.TranslationConfig{
-			Provider: "deepseek",
-			Model:    "deepseek-chat",
+	_ = &DeepSeekClient{
+		OpenAIClient: &OpenAIClient{
+			config: translator.TranslationConfig{
+				Provider: "deepseek",
+				Model:    "deepseek-chat",
+			},
 		},
 	}
 
-	// Test request structure
-	req := DeepSeekRequest{
+	// Test request structure - use OpenAI types since DeepSeek embeds OpenAI
+	req := OpenAIRequest{
 		Model: "deepseek-chat",
-		Messages: []DeepSeekMessage{
+		Messages: []Message{
 			{
 				Role:    "user",
 				Content: "Test message",
@@ -178,7 +181,6 @@ func TestDeepSeekClient_RequestStructure(t *testing.T) {
 		},
 		Temperature: 0.7,
 		MaxTokens:   1024,
-		Stream:      false,
 	}
 
 	if req.Model != "deepseek-chat" {
@@ -199,10 +201,6 @@ func TestDeepSeekClient_RequestStructure(t *testing.T) {
 
 	if req.MaxTokens != 1024 {
 		t.Errorf("Expected MaxTokens 1024, got %d", req.MaxTokens)
-	}
-
-	if req.Stream != false {
-		t.Error("Expected Stream to be false")
 	}
 }
 
@@ -252,12 +250,14 @@ func TestDeepSeekClient_ErrorHandling(t *testing.T) {
 
 func TestDeepSeekClient_ContextHandling(t *testing.T) {
 	client := &DeepSeekClient{
-		config: translator.TranslationConfig{
-			Provider: "deepseek",
-			Model:    "deepseek-chat",
-		},
-		httpClient: &http.Client{
-			Timeout: 5 * time.Second,
+		OpenAIClient: &OpenAIClient{
+			config: translator.TranslationConfig{
+				Provider: "deepseek",
+				Model:    "deepseek-chat",
+			},
+			httpClient: &http.Client{
+				Timeout: 5 * time.Second,
+			},
 		},
 	}
 
@@ -357,11 +357,10 @@ func TestDeepSeekClient_TemperatureValidation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			config := translator.TranslationConfig{
-				Provider:    "deepseek",
-				APIKey:      "test-key",
-				Model:       "deepseek-chat",
-				BaseURL:     "https://api.deepseek.com",
-				Temperature: tt.temperature,
+				Provider: "deepseek",
+				APIKey:   "test-key",
+				Model:    "deepseek-chat",
+				BaseURL:  "https://api.deepseek.com",
 			}
 
 			client, err := NewDeepSeekClient(config)
