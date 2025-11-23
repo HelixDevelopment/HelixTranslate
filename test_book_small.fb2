@@ -2,52 +2,32 @@
 <FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0" xmlns:l="http://www.w3.org/1999/xlink">
   <description>
     <title-info>
-      <genre>sci_fi</genre>
+      <genre>sf</genre>
       <author>
-        <first-name>Test</first-name>
-        <last-name>Author</last-name>
+        <first-name>Тест</first-name>
+        <last-name>Автор</last-name>
       </author>
-      <book-title>Test Book for SSH Translation</book-title>
+      <book-title>Тестовая книга</book-title>
       <lang>ru</lang>
     </title-info>
     <document-info>
       <author>
-        <nickname>test</nickname>
+        <nickname>tester</nickname>
       </author>
-      <program-used>Test Generator</program-used>
-      <id value="test-ssh-translation"/>
+      <date value="2024-01-01">2024</date>
+      <id>test-book-123</id>
       <version>1.0</version>
     </document-info>
   </description>
   <body>
     <title>
-      <p>Test Book</p>
+      <p>Тестовая глава</p>
     </title>
     <section>
-      <title>
-        <p>Глава 1: Тестовая глава</p>
-      </title>
-      <p>
-        Это тестовая книга для проверки системы SSH перевода. Содержит простой текст для перевода с русского на сербский.
-      </p>
-      <p>
-        Наш герой живет в маленьком городе и работает программистом. Каждый день он решает различные задачи и помогает людям.
-      </p>
+      <p>Это тестовый абзац на русском языке. Он содержит несколько предложений для проверки перевода.</p>
+      <p>Второй абзац с другой текстовой информацией. Проверяем обработку нескольких абзацев.</p>
       <subtitle>Подзаголовок</subtitle>
-      <p>
-        Технологии постоянно развиваются, и наш герой должен учиться новому каждый день.
-      </p>
-    </section>
-    <section>
-      <title>
-        <p>Глава 2: Вторая глава</p>
-      </title>
-      <p>
-        В этой главе мы продолжаем изучать интересные темы, связанные с программированием и переводом текстов.
-      </p>
-      <p>
-        Система SSH перевода должна надежно работать с различными форматами файлов и обеспечивать высокое качество перевода.
-      </p>
+      <p>Текст после подзаголовка для проверки структуры документа.</p>
     </section>
   </body>
 </FictionBook>

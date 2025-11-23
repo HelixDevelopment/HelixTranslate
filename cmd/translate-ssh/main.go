@@ -572,40 +572,20 @@ func step3TranslateMarkdown(ctx context.Context, config *Config, progress *Trans
 	baseName := strings.TrimSuffix(markdownOriginal, "_original.md")
 	markdownTranslatedPath := baseName + "_translated.md"
 
-	translateCmd := fmt.Sprintf(`cd %s && cat << 'SCRIPT' > translate_markdown.sh
-#!/bin/bash
-# Simple translation script using markdown workflow
-python3 -c "
-import json
-import sys
-import os
+	// Upload test translation script for demonstration (simulated llama.cpp)
+	scriptPath := filepath.Join(config.RemoteDir, "translate_llamacpp_prod.sh")
+	testScript, err := os.ReadFile("/Users/milosvasic/Projects/Translate/scripts/translate_markdown_test.sh")
+	if err != nil {
+		return "", fmt.Errorf("failed to read test translation script: %w", err)
+	}
+	
+	if err := worker.UploadData(ctx, testScript, scriptPath); err != nil {
+		return "", fmt.Errorf("failed to upload test translation script: %w", err)
+	}
 
-# Load configs
-with open('%s', 'r') as f:
-    workflow_config = json.load(f)
-
-with open('%s', 'r') as f:
-    llama_config = json.load(f)
-
-# Create simple translation using llama.cpp
-input_file = '%s'
-output_file = '%s'
-
-# Read input markdown
-with open(input_file, 'r') as f:
-    content = f.read()
-
-# For now, create a simple translation (in real implementation, use llama.cpp)
-# This is a placeholder for the actual llama.cpp translation
-translated_content = content.replace('Russian text', 'Serbian text')  # Simple placeholder
-
-# Write translated markdown
-with open(output_file, 'w') as f:
-    f.write(translated_content)
-"
-SCRIPT
-chmod +x translate_markdown.sh
-./translate_markdown.sh`, config.RemoteDir, configPath, llamaConfigPath, markdownOriginal, markdownTranslatedPath)
+	// Make script executable and run it with virtual environment
+	translateCmd := fmt.Sprintf(`cd %s && chmod +x translate_llamacpp_prod.sh && ./translate_llamacpp_prod.sh "%s" "%s" "%s"`,
+		config.RemoteDir, markdownOriginal, markdownTranslatedPath, llamaConfigPath)
 
 	result, err := worker.ExecuteCommand(ctx, translateCmd)
 	if err != nil {

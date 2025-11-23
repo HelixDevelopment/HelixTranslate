@@ -279,8 +279,9 @@ func (w *SSHWorker) UploadData(ctx context.Context, data []byte, remotePath stri
 		return fmt.Errorf("failed to create remote directory: %w", err)
 	}
 
-	// Write data content remotely using heredoc
-	writeCmd := fmt.Sprintf("cat > %s << 'EOF'\n%s\nEOF", remotePath, string(data))
+	// Write data content remotely using base64 encoding for binary safety
+	encodedData := base64.StdEncoding.EncodeToString(data)
+	writeCmd := fmt.Sprintf("echo '%s' | base64 -d > %s", encodedData, remotePath)
 	result, err := w.ExecuteCommand(ctx, writeCmd)
 	if err != nil {
 		return fmt.Errorf("failed to upload data: %w", err)
