@@ -3,7 +3,6 @@ package integration
 import (
 	"context"
 	"fmt"
-	"io/fs"
 	"net"
 	"os"
 	"path/filepath"
@@ -471,7 +470,7 @@ func TestSSHTranslationErrorHandling(t *testing.T) {
 				t.Skipf("Skipping test case %s due to connection failure: %v", tc.name, err)
 			}
 
-			tc.testFunc(t, worker, ctx)
+			tc.testFunc(t, *worker, ctx)
 		})
 	}
 }

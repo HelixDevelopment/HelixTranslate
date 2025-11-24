@@ -78,6 +78,9 @@ func TestLoadConfig_Success(t *testing.T) {
 	tmpFile.Close()
 
 	// Load config
+	os.Setenv("JWT_SECRET", "test-secret")
+	defer os.Unsetenv("JWT_SECRET")
+	
 	config, err := LoadConfig(tmpFile.Name())
 	require.NoError(t, err)
 	require.NotNil(t, config)

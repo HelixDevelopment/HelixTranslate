@@ -1,6 +1,8 @@
 package version
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )

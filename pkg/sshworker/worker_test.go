@@ -7,10 +7,22 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"digital.vasic.translator/pkg/logger"
 )
 
 func TestNewSSHWorker(t *testing.T) {
-	worker := NewSSHWorker("test.local", "testuser", "testpass")
+	config := SSHWorkerConfig{
+		Host:     "test.local",
+		Username: "testuser",
+		Password: "testpass",
+	}
+	logger := logger.NewLogger(logger.LoggerConfig{})
+	worker, err := NewSSHWorker(config, logger)
+	
+	if err != nil {
+		t.Fatalf("Failed to create SSH worker: %v", err)
+	}
 	
 	if worker.host != "test.local" {
 		t.Errorf("Expected host 'test.local', got '%s'", worker.host)
@@ -92,7 +104,13 @@ func TestGenerateSSHKey(t *testing.T) {
 
 func TestSSHWorker_UpdateRemoteCodebase(t *testing.T) {
 	// This is a mock test since we can't actually SSH in unit tests
-	worker := NewSSHWorker("test.local", "testuser", "testpass")
+	config := SSHWorkerConfig{
+		Host:     "test.local",
+		Username: "testuser",
+		Password: "testpass",
+	}
+	logger := logger.NewLogger(logger.LoggerConfig{})
+	worker, err := NewSSHWorker(config, logger)
 	
 	// Test with nil client (not connected)
 	ctx := context.Background()
@@ -109,7 +127,13 @@ func TestSSHWorker_UpdateRemoteCodebase(t *testing.T) {
 }
 
 func TestSSHWorker_SyncCodebase(t *testing.T) {
-	worker := NewSSHWorker("test.local", "testuser", "testpass")
+	config := SSHWorkerConfig{
+		Host:     "test.local",
+		Username: "testuser",
+		Password: "testpass",
+	}
+	logger := logger.NewLogger(logger.LoggerConfig{})
+	worker, err := NewSSHWorker(config, logger)
 	
 	// Test with nil client
 	ctx := context.Background()
@@ -121,7 +145,13 @@ func TestSSHWorker_SyncCodebase(t *testing.T) {
 }
 
 func TestSSHWorker_VerifyCodebaseVersion(t *testing.T) {
-	worker := NewSSHWorker("test.local", "testuser", "testpass")
+	config := SSHWorkerConfig{
+		Host:     "test.local",
+		Username: "testuser",
+		Password: "testpass",
+	}
+	logger := logger.NewLogger(logger.LoggerConfig{})
+	worker, err := NewSSHWorker(config, logger)
 	
 	// Test with mock local hasher (should work even without SSH connection)
 	ctx := context.Background()
@@ -146,7 +176,13 @@ func TestSSHWorker_VerifyCodebaseVersion(t *testing.T) {
 }
 
 func TestSSHWorker_UploadFile(t *testing.T) {
-	worker := NewSSHWorker("test.local", "testuser", "testpass")
+	config := SSHWorkerConfig{
+		Host:     "test.local",
+		Username: "testuser",
+		Password: "testpass",
+	}
+	logger := logger.NewLogger(logger.LoggerConfig{})
+	worker, err := NewSSHWorker(config, logger)
 	
 	// Test with nil client
 	ctx := context.Background()
@@ -158,7 +194,13 @@ func TestSSHWorker_UploadFile(t *testing.T) {
 }
 
 func TestSSHWorker_DownloadFile(t *testing.T) {
-	worker := NewSSHWorker("test.local", "testuser", "testpass")
+	config := SSHWorkerConfig{
+		Host:     "test.local",
+		Username: "testuser",
+		Password: "testpass",
+	}
+	logger := logger.NewLogger(logger.LoggerConfig{})
+	worker, err := NewSSHWorker(config, logger)
 	
 	// Test with nil client
 	ctx := context.Background()
@@ -170,7 +212,13 @@ func TestSSHWorker_DownloadFile(t *testing.T) {
 }
 
 func TestSSHWorker_ExecuteCommand(t *testing.T) {
-	worker := NewSSHWorker("test.local", "testuser", "testpass")
+	config := SSHWorkerConfig{
+		Host:     "test.local",
+		Username: "testuser",
+		Password: "testpass",
+	}
+	logger := logger.NewLogger(logger.LoggerConfig{})
+	worker, err := NewSSHWorker(config, logger)
 	
 	// Test with nil client
 	ctx := context.Background()

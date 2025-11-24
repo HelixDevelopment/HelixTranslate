@@ -11,6 +11,7 @@ import (
 	"digital.vasic.translator/pkg/preparation"
 	"digital.vasic.translator/pkg/script"
 	"digital.vasic.translator/pkg/security"
+	"digital.vasic.translator/pkg/models"
 	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/translator/llm"
 	"digital.vasic.translator/pkg/websocket"
@@ -35,7 +36,7 @@ type Handler struct {
 	config             *config.Config
 	eventBus           *events.EventBus
 	cache              *cache.Cache
-	authService        *security.AuthService
+	authService        *security.UserAuthService
 	wsHub              *websocket.Hub
 	distributedManager interface{} // Will be *distributed.DistributedManager
 }
@@ -875,31 +876,29 @@ func (h *Handler) authMiddleware() gin.HandlerFunc {
 
 // Authentication handlers
 func (h *Handler) login(c *gin.Context) {
-	var req struct {
-		Username string `json:"username" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
+	var req security.LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// In a real implementation, validate credentials against database
-	// This is a placeholder
-	userID := uuid.New().String()
-
-	token, err := h.authService.GenerateToken(userID, req.Username, []string{"user"})
+	// Authenticate user
+	response, err := h.authService.AuthenticateUser(req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		if errors.Is(err, models.ErrInvalidCredentials) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+			return
+		}
+		if errors.Is(err, models.ErrUserInactive) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Account is inactive"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Authentication failed"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"token":    token,
-		"user_id":  userID,
-		"username": req.Username,
-	})
+	c.JSON(http.StatusOK, response)
 }
 
 func (h *Handler) generateToken(c *gin.Context) {

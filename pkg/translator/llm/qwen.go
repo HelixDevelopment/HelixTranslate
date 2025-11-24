@@ -182,9 +182,88 @@ func (c *QwenClient) refreshToken() error {
 		return fmt.Errorf("no refresh token available")
 	}
 
-	// Note: Actual refresh endpoint would need to be provided by Qwen documentation
-	// This is a placeholder implementation
-	return fmt.Errorf("token refresh not yet implemented - please re-authenticate")
+	// Qwen OAuth refresh endpoint (based on Alibaba Cloud API)
+	refreshURL := "https://oauth.aliyun.com/v1/token"
+
+	// Prepare refresh request
+	reqData := map[string]interface{}{
+		"grant_type":    "refresh_token",
+		"refresh_token": c.oauthToken.RefreshToken,
+		"client_id":     os.Getenv("QWEN_CLIENT_ID"),
+		"client_secret": os.Getenv("QWEN_CLIENT_SECRET"),
+	}
+
+	// Check for required environment variables
+	if reqData["client_id"] == "" {
+		return fmt.Errorf("QWEN_CLIENT_ID environment variable not set")
+	}
+	if reqData["client_secret"] == "" {
+		return fmt.Errorf("QWEN_CLIENT_SECRET environment variable not set")
+	}
+
+	jsonData, err := json.Marshal(reqData)
+	if err != nil {
+		return fmt.Errorf("failed to marshal refresh request: %w", err)
+	}
+
+	// Create HTTP request
+	req, err := http.NewRequestWithContext(context.Background(), "POST", refreshURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to create refresh request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	// Send request
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send refresh request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("token refresh failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	// Parse response
+	var refreshResponse struct {
+		AccessToken  string `json:"access_token"`
+		TokenType    string `json:"token_type"`
+		RefreshToken string `json:"refresh_token"`
+		ExpiresIn    int64  `json:"expires_in"`
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read refresh response: %w", err)
+	}
+
+	if err := json.Unmarshal(body, &refreshResponse); err != nil {
+		return fmt.Errorf("failed to parse refresh response: %w", err)
+	}
+
+	// Update OAuth token with new values
+	if refreshResponse.AccessToken == "" {
+		return fmt.Errorf("refresh response missing access token")
+	}
+
+	c.oauthToken.AccessToken = refreshResponse.AccessToken
+	c.oauthToken.TokenType = refreshResponse.TokenType
+	c.oauthToken.ExpiryDate = time.Now().UnixMilli() + (refreshResponse.ExpiresIn * 1000)
+
+	// Update refresh token if provided (some providers rotate refresh tokens)
+	if refreshResponse.RefreshToken != "" {
+		c.oauthToken.RefreshToken = refreshResponse.RefreshToken
+	}
+
+	// Save updated token to file
+	if err := c.saveOAuthToken(); err != nil {
+		return fmt.Errorf("failed to save refreshed token: %w", err)
+	}
+
+	return nil
 }
 
 // GetProviderName returns the provider name

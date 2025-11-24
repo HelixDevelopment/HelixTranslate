@@ -217,7 +217,7 @@ This is a paragraph with **bold** and *italic* text.
 
 ## Code Example
 
-\`\`\`javascript
+```javascript
 function hello() {
     console.log("Hello, world!");
 }
