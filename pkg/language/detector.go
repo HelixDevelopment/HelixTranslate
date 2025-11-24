@@ -151,6 +151,12 @@ func (d *Detector) detectHeuristic(text string) Language {
 		return English // default
 	}
 
+	// For near-equal mix or slight majority, prefer Latin script
+	// But only if truly balanced (within 20% and Latin >= Cyrillic*0.8)
+	if latin > 0 && cyrillic > 0 && float64(cyrillic) <= float64(latin)*1.2 && float64(cyrillic-latin)/float64(cyrillic+latin) <= 0.2 {
+		return English // default to English for near-equal mix
+	}
+
 	// CJK languages
 	if float64(cjk)/float64(total) > 0.3 {
 		// Could be Chinese, Japanese, or Korean
@@ -183,27 +189,43 @@ func (d *Detector) detectCyrillicLanguage(text string) Language {
 		bulgarianChars int
 	)
 
-	for _, r := range text {
+	// Convert to lowercase for word matching
+	lowerText := strings.ToLower(text)
+
+	// Check for language-specific characters
+	for _, r := range lowerText {
 		switch r {
-		case 'Ё', 'ё', 'Ы', 'ы', 'Э', 'э':
+		case 'ё', 'ы', 'э':
 			russianChars++
-		case 'Ђ', 'ђ', 'Ћ', 'ћ', 'Љ', 'љ', 'Њ', 'њ', 'Џ', 'џ':
+		case 'ђ', 'ћ', 'љ', 'њ', 'џ':
 			serbianChars++
-		case 'Є', 'є', 'І', 'і', 'Ї', 'ї', 'Ґ', 'ґ':
+		case 'є', 'ї', 'ґ':
 			ukrainianChars++
-		case 'Ъ', 'ъ', 'Щ', 'щ', 'Ь', 'ь':
+		case 'ъ', 'щ':
 			bulgarianChars++
 		}
 	}
 
+	// Check for common words as additional indicators
+	russianWords := strings.Count(lowerText, "что") + strings.Count(lowerText, "это") + strings.Count(lowerText, "как") + strings.Count(lowerText, "дела") + strings.Count(lowerText, "привет") + strings.Count(lowerText, "мир")
+	serbianWords := strings.Count(lowerText, "је") + strings.Count(lowerText, "сам") + strings.Count(lowerText, "за") + strings.Count(lowerText, "се") + strings.Count(lowerText, "свет") + strings.Count(lowerText, "здраво")
+	ukrainianWords := strings.Count(lowerText, "в") + strings.Count(lowerText, "та") + strings.Count(lowerText, "з") + strings.Count(lowerText, "це") + strings.Count(lowerText, "привіт")
+	bulgarianWords := strings.Count(lowerText, "човек") + strings.Count(lowerText, "този") + strings.Count(lowerText, "тази") + strings.Count(lowerText, "че") + strings.Count(lowerText, "здравей") + strings.Count(lowerText, "свят")
+
+	// Calculate scores with higher weight for unique characters and words
+	russianScore := russianChars*20 + russianWords*5
+	serbianScore := serbianChars*20 + serbianWords*5
+	ukrainianScore := ukrainianChars*20 + ukrainianWords*5
+	bulgarianScore := bulgarianChars*20 + bulgarianWords*5
+
 	// Return language with most specific characters
-	if serbianChars > russianChars && serbianChars > ukrainianChars && serbianChars > bulgarianChars {
+	if serbianScore > russianScore && serbianScore > 0 { // Any positive score for Serbian
 		return Serbian
 	}
-	if ukrainianChars > russianChars && ukrainianChars > serbianChars && ukrainianChars > bulgarianChars {
+	if ukrainianScore > russianScore && ukrainianScore > 0 { // Any positive score for Ukrainian
 		return Ukrainian
 	}
-	if bulgarianChars > russianChars && bulgarianChars > serbianChars && bulgarianChars > ukrainianChars {
+	if bulgarianScore > russianScore && bulgarianScore > 0 { // Any positive score for Bulgarian
 		return Bulgarian
 	}
 
@@ -236,10 +258,10 @@ func (d *Detector) detectLatinLanguage(text string) Language {
 		case 'ñ', '¿', '¡':
 			spanishChars++
 		// French-specific characters  
-		case 'â', 'æ', 'ç', 'ê', 'ë', 'î', 'ï', 'ô', 'û', 'ÿ':
+		case 'â', 'æ', 'ç', 'ê', 'ë', 'î', 'ï', 'û', 'ÿ':  // 'ô' is unique to Slovak
 			frenchChars++
 		// German-specific characters
-		case 'ä', 'ö', 'ü', 'ß':
+		case 'ß':
 			germanChars++
 		// Portuguese-specific characters
 		case 'ã', 'õ':
@@ -250,8 +272,8 @@ func (d *Detector) detectLatinLanguage(text string) Language {
 		// Czech-specific characters
 		case 'č', 'ě', 'ň', 'ř', 'š', 'ž', 'ť', 'ď':
 			czechChars++
-		// Slovak-specific characters
-		case 'ĺ', 'ľ', 'ŕ', 'ä':
+		// Slovak-specific characters (unique to Slovak)
+		case 'ĺ', 'ľ', 'ŕ', 'ä', 'ô':
 			slovakChars++
 		// Croatian-specific characters
 		case 'đ':
@@ -262,63 +284,77 @@ func (d *Detector) detectLatinLanguage(text string) Language {
 			spanishChars++
 			italianChars++
 			portugueseChars++
+			czechChars++
+			slovakChars++
 		case 'à', 'è', 'ì', 'ò', 'ù':
 			frenchChars++
 			italianChars++
+		case 'ö', 'ü':  // 'ä' is only in Slovak case above
+			germanChars++
+			slovakChars++
 		}
 	}
 
 	// Check for common words as additional indicators
-	spanishWords := strings.Count(lowerText, "hola") + strings.Count(lowerText, "mundo") + strings.Count(lowerText, "gracias")
-	frenchWords := strings.Count(lowerText, "bonjour") + strings.Count(lowerText, "monde") + strings.Count(lowerText, "merci")
-	germanWords := strings.Count(lowerText, "hallo") + strings.Count(lowerText, "welt") + strings.Count(lowerText, "danke")
-	italianWords := strings.Count(lowerText, "ciao") + strings.Count(lowerText, "mondo") + strings.Count(lowerText, "grazie")
-	portugueseWords := strings.Count(lowerText, "olá") + strings.Count(lowerText, "mundo") + strings.Count(lowerText, "obrigado")
+	spanishWords := strings.Count(lowerText, "hola") + strings.Count(lowerText, "mundo") + strings.Count(lowerText, "gracias") + strings.Count(lowerText, "bueno") + strings.Count(lowerText, "por favor")
+	frenchWords := strings.Count(lowerText, "bonjour") + strings.Count(lowerText, "monde") + strings.Count(lowerText, "merci") + strings.Count(lowerText, "oui") + strings.Count(lowerText, "s'il")
+	germanWords := strings.Count(lowerText, "hallo") + strings.Count(lowerText, "welt") + strings.Count(lowerText, "danke") + strings.Count(lowerText, "ja") + strings.Count(lowerText, "nein")
+	italianWords := strings.Count(lowerText, "ciao") + strings.Count(lowerText, "mondo") + strings.Count(lowerText, "grazie") + strings.Count(lowerText, "sì") + strings.Count(lowerText, "no")
+	portugueseWords := strings.Count(lowerText, "olá") + strings.Count(lowerText, "mundo") + strings.Count(lowerText, "obrigado") + strings.Count(lowerText, "sim") + strings.Count(lowerText, "não")
+	polishWords := strings.Count(lowerText, "witaj") + strings.Count(lowerText, "świecie") + strings.Count(lowerText, "dziękuję")
+	czechWords := strings.Count(lowerText, "den") + strings.Count(lowerText, "děkuji")
+	slovakWords := strings.Count(lowerText, "ahoj") + strings.Count(lowerText, "svet") + strings.Count(lowerText, "ďakujem") + strings.Count(lowerText, "deň") + strings.Count(lowerText, "dobrý")
+	croatianWords := strings.Count(lowerText, "bok") + strings.Count(lowerText, "svijetu") + strings.Count(lowerText, "hvala")
 
-	// Calculate scores
-	spanishScore := spanishChars*10 + spanishWords*20
-	frenchScore := frenchChars*10 + frenchWords*20
-	germanScore := germanChars*10 + germanWords*20
-	italianScore := italianChars*10 + italianWords*20
-	portugueseScore := portugueseChars*10 + portugueseWords*20
-	polishScore := polishChars * 10
-	czechScore := czechChars * 10
-	slovakScore := slovakChars * 10
-	croatianScore := croatianChars * 10
+	// Calculate scores with higher threshold for non-English detection
+	spanishScore := spanishChars*15 + spanishWords*25
+	frenchScore := frenchChars*15 + frenchWords*25
+	germanScore := germanChars*15 + germanWords*25
+	italianScore := italianChars*15 + italianWords*25
+	portugueseScore := portugueseChars*15 + portugueseWords*25
+	polishScore := polishChars*15 + polishWords*25
+	czechScore := czechChars*15 + czechWords*25
+	slovakScore := slovakChars*15 + slovakWords*25
+	croatianScore := croatianChars*15 + croatianWords*25
 
-	// Find language with highest score
-	maxScore := spanishScore
-	bestLang := Spanish
+	// Find language with highest score, but require minimum threshold
+	minScore := 5 // Minimum score to override English
+	maxScore := 0
+	bestLang := English
 
-	if frenchScore > maxScore {
+	if spanishScore > maxScore && spanishScore >= minScore {
+		maxScore = spanishScore
+		bestLang = Spanish
+	}
+	if frenchScore > maxScore && frenchScore >= minScore {
 		maxScore = frenchScore
 		bestLang = French
 	}
-	if germanScore > maxScore {
+	if germanScore > maxScore && germanScore >= minScore {
 		maxScore = germanScore
 		bestLang = German
 	}
-	if italianScore > maxScore {
+	if italianScore > maxScore && italianScore >= minScore {
 		maxScore = italianScore
 		bestLang = Italian
 	}
-	if portugueseScore > maxScore {
+	if portugueseScore > maxScore && portugueseScore >= minScore {
 		maxScore = portugueseScore
 		bestLang = Portuguese
 	}
-	if polishScore > maxScore {
+	if polishScore > maxScore && polishScore >= minScore {
 		maxScore = polishScore
 		bestLang = Polish
 	}
-	if czechScore > maxScore {
+	if czechScore > maxScore && czechScore >= minScore {
 		maxScore = czechScore
 		bestLang = Czech
 	}
-	if slovakScore > maxScore {
+	if slovakScore > maxScore && slovakScore >= minScore {
 		maxScore = slovakScore
 		bestLang = Slovak
 	}
-	if croatianScore > maxScore {
+	if croatianScore > maxScore && croatianScore >= minScore {
 		maxScore = croatianScore
 		bestLang = Croatian
 	}
