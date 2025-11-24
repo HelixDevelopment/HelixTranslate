@@ -1,6 +1,9 @@
 package deployment
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // DeploymentPlan represents a complete deployment plan for the distributed system
 type DeploymentPlan struct {

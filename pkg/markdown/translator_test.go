@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"digital.vasic.translator/pkg/markdown"
 	"digital.vasic.translator/pkg/translator"
 
 	"github.com/stretchr/testify/assert"
@@ -45,13 +44,13 @@ func TestMarkdownTranslatorBasicFunctionality(t *testing.T) {
 	defer cancel()
 
 	// Test basic Markdown translation
-	input := `# Hello World
-This is a paragraph with **bold text** and *italic text*.
-## Subsection
-- List item 1
-- List item 2
-> This is a quote
-\`This is code\``
+	input := "# Hello World\n" +
+		"This is a paragraph with **bold text** and *italic text*.\n" +
+		"## Subsection\n" +
+		"- List item 1\n" +
+		"- List item 2\n" +
+		"> This is a quote\n" +
+		"`This is code`\n"
 
 	result, err := mdTrans.TranslateMarkdown(ctx, input, "en", "ru")
 	require.NoError(t, err)
@@ -84,15 +83,15 @@ func TestMarkdownTranslatorCodeBlocks(t *testing.T) {
 	defer cancel()
 
 	// Test with code blocks
-	input := `# Code Test
-Here is some inline code: \`console.log('Hello')\`
-
-Here is a code block:
-\`\`\`javascript
-function greet() {
-    console.log('Hello world');
-}
-\`\`\`
+	input := "# Code Test\n" +
+		"Here is some inline code: `" + "`console.log('Hello')`" + "`\n" +
+		"\n" +
+		"Here is a code block:\n" +
+		"```javascript\n" +
+		"function greet() {\n" +
+		"    console.log('Hello world');\n" +
+		"}\n" +
+		"```\n"
 
 More text after code block.`
 

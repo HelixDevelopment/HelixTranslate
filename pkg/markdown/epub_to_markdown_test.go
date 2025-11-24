@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"digital.vasic.translator/pkg/markdown"
 	"digital.vasic.translator/pkg/ebook"
 
 	"github.com/stretchr/testify/assert"
