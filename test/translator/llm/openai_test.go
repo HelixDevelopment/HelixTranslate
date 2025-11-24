@@ -3,10 +3,10 @@ package llm_test
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/translator/llm"
 )
@@ -199,7 +199,7 @@ func TestLLMTranslatorTranslateWithProgress(t *testing.T) {
 	ctx := context.Background()
 	text := "Hello world"
 	contextStr := "Simple greeting"
-	eventBus := nil // We'll use nil to avoid event bus setup
+	var eventBus *events.EventBus = nil // We'll use nil to avoid event bus setup
 	sessionID := "test-session"
 
 	// This test verifies the function structure works
