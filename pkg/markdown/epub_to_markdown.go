@@ -3,7 +3,6 @@ package markdown
 import (
 	"archive/zip"
 	"digital.vasic.translator/pkg/ebook"
-	"digital.vasic.translator/pkg/format"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -43,7 +42,6 @@ func (c *EPUBToMarkdownConverter) ConvertEPUBToMarkdown(epubPath, outputMDPath s
 
 	// Parse EPUB using universal parser to get metadata including cover
 	parser := ebook.NewUniversalParser()
-	
 	book, err := parser.Parse(epubPath)
 	if err != nil {
 		return fmt.Errorf("failed to parse EPUB: %w", err)
@@ -229,6 +227,10 @@ func (c *EPUBToMarkdownConverter) parseOPF(f *zip.File, r *zip.ReadCloser, opfDi
 			Publisher   []string `xml:"publisher"`
 			Date        []string `xml:"date"`
 			Identifier  []string `xml:"identifier"`
+			Meta        []struct {
+				Name    string `xml:"name,attr"`
+				Content string `xml:"content,attr"`
+			} `xml:"meta"`
 		} `xml:"metadata"`
 		Spine struct {
 			Itemref []struct {
@@ -237,8 +239,10 @@ func (c *EPUBToMarkdownConverter) parseOPF(f *zip.File, r *zip.ReadCloser, opfDi
 		} `xml:"spine"`
 		Manifest struct {
 			Item []struct {
-				ID   string `xml:"id,attr"`
-				Href string `xml:"href,attr"`
+				ID         string `xml:"id,attr"`
+				Href       string `xml:"href,attr"`
+				MediaType  string `xml:"media-type,attr"`
+				Properties string `xml:"properties,attr"`
 			} `xml:"item"`
 		} `xml:"manifest"`
 	}
@@ -281,9 +285,25 @@ func (c *EPUBToMarkdownConverter) parseOPF(f *zip.File, r *zip.ReadCloser, opfDi
 	// Extract cover if present
 	var coverHref string
 	for _, item := range pkg.Manifest.Item {
-		if item.ID == "cover" && strings.HasSuffix(item.Href, ".jpg") {
-			coverHref = item.Href
-			break
+		// Use same comprehensive cover detection as EPUBParser
+		if strings.ToLower(item.ID) == "cover" ||
+			strings.ToLower(item.ID) == "cover-image" ||
+			strings.Contains(strings.ToLower(item.Properties), "cover-image") ||
+			strings.Contains(strings.ToLower(item.Href), "cover") {
+			if strings.HasPrefix(item.MediaType, "image/") {
+				coverHref = item.Href
+				break
+			}
+		}
+	}
+
+	// Also check for cover in meta tags (same as EPUBParser)
+	for _, meta := range pkg.Metadata.Meta {
+		if meta.Name == "cover" {
+			if href, ok := idToHref[meta.Content]; ok {
+				coverHref = href
+				break
+			}
 		}
 	}
 

@@ -1,9 +1,11 @@
 package markdown
 
 import (
+	"archive/zip"
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/format"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -626,46 +628,52 @@ func TestRoundTripPreservation(t *testing.T) {
 		t.Fatalf("Failed to write source EPUB: %v", err)
 	}
 	
-	// Debug: Check source EPUB format
+	// Debug: Check detected format
 	detector := format.NewDetector()
-	if fmt, err := detector.DetectFile(sourceEPUB); err == nil {
-		t.Logf("Source EPUB format: %s", fmt.String())
-		t.Logf("Source EPUB extension: %s", filepath.Ext(sourceEPUB))
+	detectedFormat, err := detector.DetectFile(sourceEPUB)
+	if err != nil {
+		t.Logf("Failed to detect format: %v", err)
 	} else {
-		t.Logf("Error detecting source EPUB format: %v", err)
-	}
-	
-	// Check if UniversalParser sees the same format
-	universalParser := ebook.NewUniversalParser()
-	book, err2 := universalParser.Parse(sourceEPUB)
-	if err2 != nil {
-		t.Logf("UniversalParser error: %v", err2)
-	} else {
-		t.Logf("UniversalParser detected format: %s", book.Format)
-	}
-	
-	// Check if UniversalParser sees the same format
-	debugParser := ebook.NewUniversalParser()
-	debugBook, err2 := debugParser.Parse(sourceEPUB)
-	if err2 != nil {
-		t.Logf("UniversalParser error: %v", err2)
-	} else {
-		t.Logf("UniversalParser detected format: %s", debugBook.Format)
+		t.Logf("Detected format: %s", detectedFormat)
 	}
 
 	// Step 2: Convert to Markdown
 	mdPath := tmpDir + "/intermediate.md"
 	epubToMd := NewEPUBToMarkdownConverter(false, "")
-	t.Logf("About to call ConvertEPUBToMarkdown with format detection...")
-	
-	// Check format one more time before conversion
-	detector2 := format.NewDetector()
-	if fmt, err := detector2.DetectFile(sourceEPUB); err == nil {
-		t.Logf("Pre-conversion format: %s", fmt.String())
-	}
-	
 	if err := epubToMd.ConvertEPUBToMarkdown(sourceEPUB, mdPath); err != nil {
 		t.Fatalf("Failed to convert EPUB to Markdown: %v", err)
+	}
+
+	// Debug: Check what's in the intermediate markdown
+	if mdData, err := os.ReadFile(mdPath); err == nil {
+		t.Logf("Intermediate markdown length: %d", len(mdData))
+		limit := 300
+		if len(mdData) < limit {
+			limit = len(mdData)
+		}
+		t.Logf("First %d chars: %s", limit, string(mdData[:limit]))
+	}
+	
+	// Debug: Check if cover is in the source EPUB
+	if r, err := zip.OpenReader(sourceEPUB); err == nil {
+		defer r.Close()
+		coverFound := false
+		for _, f := range r.File {
+			if strings.Contains(f.Name, "cover.jpg") {
+				t.Logf("Found cover in EPUB: %s", f.Name)
+				coverFound = true
+				if rc, err := f.Open(); err == nil {
+					if data, err := io.ReadAll(rc); err == nil {
+						t.Logf("Cover size: %d bytes", len(data))
+					}
+					rc.Close()
+				}
+				break
+			}
+		}
+		if !coverFound {
+			t.Log("Cover not found in source EPUB")
+		}
 	}
 
 	// Step 3: Convert back to EPUB

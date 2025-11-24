@@ -123,12 +123,14 @@ func (c *MarkdownToEPUBConverter) parseMarkdown(content string, mdDir string) ([
 				currentContent.Reset()
 			}
 
-			// Start new chapter
+			// Start new chapter and include the header in the content
 			chapterTitle := strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(line, "##"), "#"))
 			currentChapter = &ebook.Chapter{
 				Title:    chapterTitle,
 				Sections: []ebook.Section{},
 			}
+			// Add the header to the content so it's preserved in the round-trip
+			currentContent.WriteString(line + "\n")
 			continue
 		}
 
@@ -346,6 +348,12 @@ func (c *MarkdownToEPUBConverter) writeContentOPF(zw *zip.Writer, chapters []ebo
 	if c.metadata.Date != "" {
 		opf.WriteString(fmt.Sprintf("    <dc:date>%s</dc:date>\n", c.escapeXML(c.metadata.Date)))
 	}
+	
+	// Add cover meta tag if cover is present (helps with cover detection)
+	if len(c.metadata.Cover) > 0 {
+		opf.WriteString("    <meta name=\"cover\" content=\"cover\"/>\n")
+	}
+	
 	opf.WriteString("  </metadata>\n")
 
 	// Manifest
