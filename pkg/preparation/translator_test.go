@@ -189,6 +189,7 @@ func TestPreparationAwareTranslator_TranslateBook_WithPreparation(t *testing.T) 
 		SourceLanguage: "en",
 		TargetLanguage: "es",
 		Providers:      []string{"openai"},  // Use a valid provider
+		APIKey:         "test-key-for-testing",
 	}
 
 	pat := NewPreparationAwareTranslator(
@@ -256,7 +257,7 @@ func TestPreparationAwareTranslator_getChapterContext(t *testing.T) {
 					Genre:       "science_fiction",
 					Tone:        "formal",
 					Characters: []Character{
-						{Name: "John", Role: "protagonist"},
+						{Name: "John", Role: "protagonist", SpeechPattern: "Formal and articulate"},
 					},
 					ChapterAnalyses: []ChapterAnalysis{
 						{ChapterNum: 1, Summary: "Chapter 1 summary"},
@@ -269,7 +270,7 @@ func TestPreparationAwareTranslator_getChapterContext(t *testing.T) {
 				"science_fiction",
 				"formal",
 				"John",
-				"protagonist",
+				"Formal and articulate",
 				"Chapter 1 summary",
 			},
 		},

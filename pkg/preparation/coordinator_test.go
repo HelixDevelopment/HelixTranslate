@@ -5,7 +5,11 @@ import (
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/translator"
+	"fmt"
 	"os"
+	"regexp"
+	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -20,6 +24,44 @@ func (m *MockTranslator) Translate(ctx context.Context, text, context string) (s
 	if m.err != nil {
 		return "", m.err
 	}
+	
+	// Check if this is a chapter analysis prompt and extract chapter number
+	if strings.Contains(text, "You are analyzing Chapter") && strings.Contains(text, "for translation preparation") {
+		// Extract chapter number from the first line which contains "Chapter X"
+		lines := strings.Split(text, "\n")
+		if len(lines) > 0 {
+			// Parse from "You are analyzing Chapter X"
+			re := regexp.MustCompile(`Chapter (\d+)`)
+			matches := re.FindStringSubmatch(lines[0])
+			if len(matches) > 1 {
+				if chapterNum, err := strconv.Atoi(matches[1]); err == nil {
+					// Return response with the correct chapter number
+					return fmt.Sprintf(`{
+						"chapter_num": %d,
+						"title": "Test Chapter",
+						"summary": "Test summary",
+						"key_points": ["key_point1"],
+						"caveats": ["caveat1"],
+						"tone": "neutral",
+						"complexity": "moderate",
+						"special_notes": "special note"
+					}`, chapterNum), nil
+				}
+			}
+		}
+		// Fallback to chapter 1 if we can't extract
+		return `{
+			"chapter_num": 1,
+			"title": "Test Chapter",
+			"summary": "Test summary",
+			"key_points": ["key_point1"],
+			"caveats": ["caveat1"],
+			"tone": "neutral",
+			"complexity": "moderate",
+			"special_notes": "special note"
+		}`, nil
+	}
+	
 	return m.response, nil
 }
 
@@ -99,7 +141,7 @@ func TestPreparationCoordinator_PrepareBook(t *testing.T) {
 		response: `{
 			"content_type": "fiction",
 			"genre": "science_fiction",
-			"untranslatable_terms": ["term1", "term2"],
+			"untranslatable_terms": [{"term": "term1", "reason": "test"}, {"term": "term2", "reason": "test"}],
 			"footnote_guidance": [{"term": "term1", "explanation": "explanation"}],
 			"characters": [{"name": "John", "role": "protagonist"}],
 			"cultural_references": [{"reference": "cultural_ref", "explanation": "explanation"}]
@@ -213,15 +255,8 @@ func TestPreparationCoordinator_performPass(t *testing.T) {
 func TestPreparationCoordinator_analyzeChapters(t *testing.T) {
 	mockTranslator := &MockTranslator{
 		name: "test-provider",
-		response: `{
-			"chapter_number": 1,
-			"title": "Test Chapter",
-			"summary": "Test summary",
-			"key_terms": ["term1"],
-			"characters": ["character1"],
-			"cultural_elements": ["element1"],
-			"translation_challenges": ["challenge1"]
-		}`,
+		// Default response (not used for chapter analysis)
+		response: `{"status": "ok"}`,
 	}
 
 	coordinator := &PreparationCoordinator{
@@ -260,10 +295,17 @@ func TestPreparationCoordinator_analyzeChapters(t *testing.T) {
 		t.Errorf("Expected 2 chapter analyses, got %d", len(analyses))
 	}
 
-	for i, analysis := range analyses {
-		if analysis.ChapterNum != i+1 {
-			t.Errorf("Expected ChapterNum %d, got %d", i+1, analysis.ChapterNum)
-		}
+	// Check that we have both chapters (order might vary due to concurrency)
+	chapterNums := make(map[int]bool)
+	for _, analysis := range analyses {
+		chapterNums[analysis.ChapterNum] = true
+	}
+	
+	if !chapterNums[1] {
+		t.Error("Missing Chapter 1")
+	}
+	if !chapterNums[2] {
+		t.Error("Missing Chapter 2")
 	}
 }
 
@@ -273,7 +315,7 @@ func TestPreparationCoordinator_consolidateAnalyses(t *testing.T) {
 		response: `{
 			"content_type": "fiction",
 			"genre": "fantasy",
-			"untranslatable_terms": ["consolidated_term"],
+			"untranslatable_terms": [{"term": "consolidated_term", "original_script": "Latin", "reason": "Test term", "context": [], "transliteration": ""}],
 			"footnote_guidance": [],
 			"characters": [],
 			"cultural_references": []

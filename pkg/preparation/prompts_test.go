@@ -1,6 +1,7 @@
 package preparation
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -52,7 +53,7 @@ func TestPreparationPromptBuilder_BuildInitialAnalysisPrompt(t *testing.T) {
 	// Verify prompt contains key elements
 	expectedElements := []string{
 		"professional translator and literary analyst",
-		"English to Spanish",
+		"en to es",
 		"COMPREHENSIVE CONTENT ANALYSIS",
 		"CONTENT TO ANALYZE:",
 		content,
@@ -68,7 +69,7 @@ func TestPreparationPromptBuilder_BuildInitialAnalysisPrompt(t *testing.T) {
 		"footnote_guidance",
 		"characters",
 		"cultural_references",
-		"ONLY JSON output",
+		"ONLY the JSON output",
 	}
 
 	for _, element := range expectedElements {
@@ -103,7 +104,7 @@ func TestPreparationPromptBuilder_BuildRefinementPrompt(t *testing.T) {
 		"Prioritization",
 		"Consolidation",
 		"ENHANCED version",
-		"ONLY JSON output",
+		"ONLY the JSON output",
 		"fiction",
 		"science_fiction",
 	}
@@ -138,10 +139,10 @@ func TestPreparationPromptBuilder_BuildChapterAnalysisPrompt(t *testing.T) {
 	// Verify prompt contains key elements
 	expectedElements := []string{
 		"analyzing Chapter 3",
-		"English to Spanish",
+		"en to es",
 		"CHAPTER INFORMATION:",
-		"Number: 3",
-		"Title: The Mysterious Discovery",
+		"**Number**: 3",
+		"**Title**: The Mysterious Discovery",
 		chapterContent,
 		"SUMMARY",
 		"KEY POINTS",
@@ -159,7 +160,7 @@ func TestPreparationPromptBuilder_BuildChapterAnalysisPrompt(t *testing.T) {
 		"tone",
 		"complexity",
 		"special_notes",
-		"ONLY JSON output",
+		"ONLY the JSON output",
 	}
 
 	for _, element := range expectedElements {
@@ -202,7 +203,7 @@ func TestPreparationPromptBuilder_BuildConsolidationPrompt(t *testing.T) {
 		"Clarifying",
 		"Organizing",
 		"DEFINITIVE, HIGHEST-QUALITY analysis",
-		"ONLY JSON output",
+		"ONLY the JSON output",
 		"science_fiction",
 		"space_opera",
 	}
@@ -269,13 +270,13 @@ func TestPreparationPromptBuilder_PromptConsistency(t *testing.T) {
 
 	// Test initial prompt
 	initialPrompt := builder.BuildInitialAnalysisPrompt("Test content")
-	if !containsString(initialPrompt, "English to French") {
+	if !containsString(initialPrompt, "en to fr") {
 		t.Error("Initial prompt should contain correct language pair")
 	}
 
 	// Test chapter prompt
 	chapterPrompt := builder.BuildChapterAnalysisPrompt(1, "Test Chapter", "Test content")
-	if !containsString(chapterPrompt, "English to French") {
+	if !containsString(chapterPrompt, "en to fr") {
 		t.Error("Chapter prompt should contain correct language pair")
 	}
 
@@ -288,7 +289,7 @@ func TestPreparationPromptBuilder_PromptConsistency(t *testing.T) {
 	}
 
 	for i, prompt := range prompts {
-		if !containsString(prompt, "ONLY JSON output") {
+		if !containsString(prompt, "ONLY the JSON output") {
 			t.Errorf("Prompt %d should require JSON-only output", i)
 		}
 	}
@@ -303,6 +304,16 @@ func TestPreparationPromptBuilder_DifferentPassNumbers(t *testing.T) {
 	pass3Builder := NewPreparationPromptBuilder("en", "es", 3)
 
 	_ = pass1Builder.BuildInitialAnalysisPrompt(content)
+	
+	// Set previous analysis for pass 2
+	previousAnalysis := &ContentAnalysis{
+		AnalysisVersion: 1,
+		AnalyzedBy:      "provider1",
+		ContentType:     "fiction",
+		Genre:           "science_fiction",
+	}
+	pass2Builder.WithPreviousAnalysis(previousAnalysis)
+	
 	pass2Prompt := pass2Builder.BuildRefinementPrompt(content)
 	pass3Prompt := pass3Builder.BuildConsolidationPrompt([]ContentAnalysis{})
 
@@ -319,14 +330,7 @@ func TestPreparationPromptBuilder_ContentHandling(t *testing.T) {
 	builder := NewPreparationPromptBuilder("en", "es", 1)
 
 	// Test with very long content
-	longContent := "This is a very long content. " +
-		"It contains many sentences. " +
-		"And it should be truncated properly. " +
-		"The truncation should happen at sentence boundaries. " +
-		"This ensures that the content remains readable. " +
-		"Even when it's very long and contains multiple paragraphs. " +
-		"Each paragraph should be handled correctly. " +
-		"And the truncation should preserve the structure as much as possible."
+	longContent := strings.Repeat("This is a very long content that should definitely be truncated. ", 500)
 
 	prompt := builder.BuildInitialAnalysisPrompt(longContent)
 

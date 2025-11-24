@@ -152,7 +152,7 @@ func (b *PreparationPromptBuilder) BuildRefinementPrompt(content string) string 
 %s
 
 ## YOUR TASK:
-Review and IMPROVE the previous analysis. Focus on:
+Review and IMPROVE previous analysis. Focus on:
 
 1. **Validation**: Verify all identifications are accurate
 2. **Completeness**: Find what was missed
@@ -299,11 +299,21 @@ func truncateContent(content string, maxChars int) string {
 	lastNewline := strings.LastIndex(truncated, "\n\n")
 
 	cutPoint := maxChars
-	if lastPeriod > maxChars-200 {
+	if lastPeriod > maxChars-200 && lastPeriod > 0 {
 		cutPoint = lastPeriod + 1
-	} else if lastNewline > maxChars-200 {
+	} else if lastNewline > maxChars-200 && lastNewline > 0 {
 		cutPoint = lastNewline
 	}
 
-	return content[:cutPoint] + "\n\n[... content truncated for analysis ...]"
+	truncatedContent := content[:cutPoint]
+	if truncatedContent == "" {
+		// If nothing is left, just return the truncation indicator
+		return "[... content truncated for analysis ...]"
+	}
+	
+	// Only add newlines if content doesn't already end with them
+	if strings.HasSuffix(truncatedContent, "\n\n") {
+		return truncatedContent + "[... content truncated for analysis ...]"
+	}
+	return truncatedContent + "\n\n[... content truncated for analysis ...]"
 }
