@@ -505,7 +505,7 @@ func TestReportGenerator_ExportLogsToFile(t *testing.T) {
 		
 		// Check log entries section
 		assert.Contains(t, exportContent, "Log Entries:")
-		assert.Contains(t, exportContent, "[info] translator: Translation started")
-		assert.Contains(t, exportContent, "[error] ssh_client: Connection failed")
+		assert.Contains(t, exportContent, "info: Translation started")
+		assert.Contains(t, exportContent, "error: Connection failed")
 	})
 }

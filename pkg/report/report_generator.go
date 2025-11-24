@@ -410,10 +410,10 @@ func (r *ReportGenerator) GenerateLogArchive() error {
 // GetStats returns statistics about the session
 func (r *ReportGenerator) GetStats() map[string]interface{} {
 	stats := map[string]interface{}{
-		"session_start": r.startTime,
-		"issues_count":  len(r.issues),
-		"warnings_count": len(r.warnings),
-		"logs_count":    len(r.logs),
+		"session_start":  r.startTime,
+		"issues_count":  float64(len(r.issues)),
+		"warnings_count": float64(len(r.warnings)),
+		"logs_count":     float64(len(r.logs)),
 	}
 
 	// Count by severity

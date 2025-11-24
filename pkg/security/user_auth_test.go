@@ -323,11 +323,8 @@ func TestUserAuth_RateLimiting(t *testing.T) {
 		allowed := auth.CheckRateLimit(user)
 		assert.False(t, allowed)
 		
-		// Wait for token refill (simulating time passing)
-		auth.rateLimiter[user.Username] = &RateLimitState{
-			Tokens:   auth.config.RateLimitBurst, // Refill to burst amount
-			LastSeen: time.Now().Add(-time.Second), // 1 second ago to trigger refill
-		}
+		// Wait for token refill (actually wait for time to pass)
+		time.Sleep(time.Second)
 		
 		// Should be allowed again after token refill
 		allowed = auth.CheckRateLimit(user)
