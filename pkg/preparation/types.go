@@ -128,4 +128,7 @@ type PreparationConfig struct {
 	// Languages
 	SourceLanguage string `json:"source_language"`
 	TargetLanguage string `json:"target_language"`
+	
+	// API configuration
+	APIKey        string `json:"api_key"`        // API key for LLM providers
 }

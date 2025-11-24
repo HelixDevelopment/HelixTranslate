@@ -5,6 +5,7 @@ import (
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/translator"
+	"os"
 	"testing"
 )
 
@@ -35,6 +36,10 @@ func (m *MockTranslator) GetName() string {
 }
 
 func TestNewPreparationCoordinator(t *testing.T) {
+	// Set API key for testing
+	os.Setenv("OPENAI_API_KEY", "test-key-for-testing")
+	defer os.Unsetenv("OPENAI_API_KEY")
+	
 	tests := []struct {
 		name        string
 		config      PreparationConfig
@@ -46,7 +51,8 @@ func TestNewPreparationCoordinator(t *testing.T) {
 				SourceLanguage: "en",
 				TargetLanguage: "es",
 				PassCount:      2,
-				Providers:      []string{"mock"},
+				Providers:      []string{"openai"},  // Use a valid provider
+				APIKey:         "test-key-for-testing", // Set API key in config
 			},
 			expectError: false,
 		},
@@ -55,7 +61,8 @@ func TestNewPreparationCoordinator(t *testing.T) {
 			config: PreparationConfig{
 				SourceLanguage: "en",
 				TargetLanguage: "es",
-				Providers:      []string{"mock"},
+				Providers:      []string{"openai"},  // Use a valid provider
+				APIKey:         "test-key-for-testing", // Set API key in config
 			},
 			expectError: false,
 		},
@@ -75,6 +82,7 @@ func TestNewPreparationCoordinator(t *testing.T) {
 				}
 				if coordinator == nil {
 					t.Errorf("Expected coordinator but got nil")
+					return // Skip further checks if coordinator is nil
 				}
 				if coordinator.config.PassCount < 1 {
 					t.Errorf("Expected PassCount >= 1, got %d", coordinator.config.PassCount)

@@ -523,7 +523,7 @@ func ValidateSession(session UserSession) bool {
 
 // GenerateSessionToken generates a new session token
 func GenerateSessionToken() string {
-	return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_=gh" // Exactly 64 characters
+	return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_" // Exactly 64 characters
 }
 
 // UserHasRole checks if a user has a specific role

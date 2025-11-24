@@ -33,6 +33,7 @@ func NewPreparationCoordinator(config PreparationConfig) (*PreparationCoordinato
 			SourceLang: config.SourceLanguage,
 			TargetLang: config.TargetLanguage,
 			Provider:   providerName,
+			APIKey:     config.APIKey,
 		}
 
 		// Create LLM translator

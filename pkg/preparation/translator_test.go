@@ -188,7 +188,7 @@ func TestPreparationAwareTranslator_TranslateBook_WithPreparation(t *testing.T) 
 		PassCount:      1,
 		SourceLanguage: "en",
 		TargetLanguage: "es",
-		Providers:      []string{"mock"},
+		Providers:      []string{"openai"},  // Use a valid provider
 	}
 
 	pat := NewPreparationAwareTranslator(
@@ -349,7 +349,7 @@ func TestPreparationAwareTranslator_isUntranslatable(t *testing.T) {
 }
 
 func TestPreparationAwareTranslator_translateMetadata(t *testing.T) {
-	mockTranslator := &MockTranslator{
+	mockTranslator := &MockTranslator2{
 		name:     "test-translator",
 		response: "Translated text",
 	}
@@ -428,7 +428,7 @@ func TestPreparationAwareTranslator_translateMetadata(t *testing.T) {
 }
 
 func TestPreparationAwareTranslator_translateChapter(t *testing.T) {
-	mockTranslator := &MockTranslator{
+	mockTranslator := &MockTranslator2{
 		name:     "test-translator",
 		response: "Translated text",
 	}
