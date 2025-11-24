@@ -56,9 +56,14 @@ func (c *EPUBToMarkdownConverter) ConvertEPUBToMarkdown(epubPath, outputMDPath s
 	defer r.Close()
 
 	// Get content files structure
-	_, contentFiles, opfDir, err := c.parseEPUBStructure(r)
+	parsedMetadata, contentFiles, opfDir, err := c.parseEPUBStructure(r)
 	if err != nil {
 		return fmt.Errorf("failed to parse EPUB structure: %w", err)
+	}
+	
+	// Use metadata from parseEPUBStructure as it might have cover info
+	if parsedMetadata != nil {
+		metadata = *parsedMetadata
 	}
 
 	// Extract cover image if present

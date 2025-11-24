@@ -1,69 +1,29 @@
 package main
 
 import (
-	"archive/zip"
 	"fmt"
-	"os"
-	"strings"
+	"archive/zip"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: go run debug_epub.go <epub_file>")
-		os.Exit(1)
-	}
-
-	filename := os.Args[1]
+	// First create a test EPUB
+	fmt.Println("Creating test EPUB...")
+	// This would use createSimpleEPUB from the test
 	
-	r, err := zip.OpenReader(filename)
+	// Check format detection
+	//detector := format.NewDetector()
+	//fmt.Println("Detector created")
+	
+	// List files in an existing EPUB if it exists
+	r, err := zip.OpenReader("/Users/milosvasic/Projects/Translate/test.epub")
 	if err != nil {
-		fmt.Printf("Error opening file: %v\n", err)
-		os.Exit(1)
+		fmt.Printf("Error opening test EPUB: %v\n", err)
+		return
 	}
 	defer r.Close()
-
+	
 	fmt.Println("Files in EPUB:")
-	generalIndicators := []string{
-		"mimetype",
-		"OEBPS",
-		"META-INF",
-	}
-
-	azw3Specific := []string{
-		"kindle:embed",
-		"amzn-eastock",
-		"kindle-fonts",
-		"kindle:enclosure",
-		"kindle:meta",
-	}
-
-	hasGeneral := 0
-	hasSpecific := false
-
 	for _, f := range r.File {
-		fmt.Printf("- %s\n", f.Name)
-		
-		// Check for general indicators
-		for _, indicator := range generalIndicators {
-			if strings.Contains(f.Name, indicator) {
-				hasGeneral++
-				fmt.Printf("  General indicator found: %s\n", indicator)
-				break
-			}
-		}
-		
-		// Check for AZW3-specific indicators
-		for _, specific := range azw3Specific {
-			if strings.Contains(f.Name, specific) {
-				hasSpecific = true
-				fmt.Printf("  AZW3-specific indicator found: %s\n", specific)
-				break
-			}
-		}
+		fmt.Printf("  %s\n", f.Name)
 	}
-
-	fmt.Printf("\nAnalysis:\n")
-	fmt.Printf("- General indicators: %d\n", hasGeneral)
-	fmt.Printf("- AZW3-specific: %v\n", hasSpecific)
-	fmt.Printf("- Would be detected as AZW3: %v\n", hasGeneral >= 2 && hasSpecific)
 }
