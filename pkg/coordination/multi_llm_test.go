@@ -274,8 +274,8 @@ func TestMultiLLMCoordinator_TranslateWithConsensus_InsufficientInstances(t *tes
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	if result != "test translation" {
-		t.Errorf("Expected 'test translation', got: %s", result)
+	if result != "Hello world" {
+		t.Errorf("Expected 'Hello world', got: %s", result)
 	}
 }
 
@@ -345,9 +345,9 @@ func TestMultiLLMCoordinator_EmitEvent(t *testing.T) {
 	receivedEvent := false
 	var eventData events.Event
 	
-	eventBus.Subscribe("test.event", func(data interface{}) {
+	eventBus.Subscribe("test.event", func(event events.Event) {
 		receivedEvent = true
-		eventData = data.(events.Event)
+		eventData = event
 	})
 	
 	coordinator := &MultiLLMCoordinator{

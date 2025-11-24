@@ -119,6 +119,7 @@ func TestMultiLLMTranslatorWrapper_Translate(t *testing.T) {
 				Translator: &MockTranslator{},
 			},
 		},
+		maxRetries: 3, // Set maxRetries to ensure it tries at least once
 	}
 
 	wrapper := &MultiLLMTranslatorWrapper{
@@ -152,6 +153,7 @@ func TestMultiLLMTranslatorWrapper_TranslateWithProgress(t *testing.T) {
 				Translator: &MockTranslator{},
 			},
 		},
+		maxRetries: 3, // Set maxRetries to ensure it tries at least once
 	}
 
 	wrapper := &MultiLLMTranslatorWrapper{
