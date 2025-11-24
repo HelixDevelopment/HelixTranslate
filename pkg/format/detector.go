@@ -30,10 +30,10 @@ const (
 // Magic byte signatures for different formats
 var magicBytes = map[Format][]byte{
 	FormatPDF:  []byte("%PDF"),
-	FormatEPUB: []byte("PK"), // EPUB is a ZIP file (DOCX also uses PK but is handled by disambiguation)
+	FormatEPUB: []byte("PK"), // EPUB is a ZIP file (DOCX and AZW3 also use PK but are handled by disambiguation)
 	FormatMOBI: []byte("BOOKMOBI"),
 	FormatAZW:  []byte("TPZ0"),
-	FormatAZW3: []byte("PK"), // AZW3 is also a ZIP file, handled by disambiguation
+	// Note: AZW3 and DOCX removed since they also use PK magic bytes - handled by disambiguation
 }
 
 // Detector handles ebook format detection
@@ -297,11 +297,6 @@ func (d *Detector) IsSupported(format Format) bool {
 		FormatEPUB,
 		FormatTXT,
 		FormatHTML,
-		FormatPDF,
-		FormatDOCX,
-		FormatMOBI,
-		FormatAZW,
-		FormatAZW3,
 	}
 
 	for _, f := range supported {
@@ -319,10 +314,6 @@ func (d *Detector) GetSupportedFormats() []Format {
 		FormatEPUB,
 		FormatTXT,
 		FormatHTML,
-		FormatPDF,
-		FormatMOBI,
-		FormatAZW,
-		FormatAZW3,
 	}
 }
 

@@ -53,7 +53,16 @@ All tests in pkg/markdown are now passing after fixing:
    - Added fallback to direct EPUB parsing when UniversalParser fails due to format detection
    - Applied to both EPUBToMarkdownConverter and test verification
 
-### Next Packages to Fix
+### Format Package (COMPLETED)
+All tests in pkg/format are now passing after fixing:
+
+1. **Magic Bytes Detection**:
+   - Removed duplicate PK magic bytes for AZW3 to prevent incorrect detection
+   - EPUB, AZW3, and DOCX all use ZIP magic bytes, handled by disambiguation
+
+2. **Supported Formats**:
+   - Updated IsSupported() and GetSupportedFormats() to only return FB2, EPUB, TXT, HTML
+   - PDF, MOBI, AZW, AZW3, DOCX, RTF are now correctly reported as unsupported
 1. pkg/distributed: SSH key parsing errors
 2. pkg/format: Format support mismatch (expects 4, finds 8)
 3. pkg/models: User repository and session validation errors
@@ -82,7 +91,7 @@ All tests in pkg/markdown are now passing after fixing:
 
 ### Phase 1: Critical Test Coverage (IN PROGRESS)
 - ✅ pkg/markdown: All tests passing (100% complete)
-- 🔄 pkg/format: Need to fix format support count mismatch
+- ✅ pkg/format: All tests passing (100% complete)
 - 🔄 pkg/distributed: SSH key parsing issues
 - 🔄 pkg/models: Repository and validation errors
 - 🔄 pkg/preparation: Mock translator support
