@@ -105,3 +105,67 @@ func (m *MockTranslator) GetStats() translator.TranslationStats {
 func (m *MockTranslator) GetName() string {
 	return "mock-translator"
 }
+
+func TestMultiLLMTranslatorWrapper_Translate(t *testing.T) {
+	// Create a mock coordinator
+	coordinator := &MultiLLMCoordinator{
+		instances: []*LLMInstance{
+			{
+				ID:         "test-instance",
+				Provider:   "test",
+				Model:      "test-model",
+				Priority:   1,
+				Available:  true,
+				Translator: &MockTranslator{},
+			},
+		},
+	}
+
+	wrapper := &MultiLLMTranslatorWrapper{
+		Coordinator: coordinator,
+		config:      translator.TranslationConfig{},
+	}
+
+	// Test basic translation
+	result, err := wrapper.Translate(context.Background(), "test text", "test context")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	if result != "translated text" {
+		t.Errorf("Expected 'translated text', got '%s'", result)
+	}
+}
+
+func TestMultiLLMTranslatorWrapper_TranslateWithProgress(t *testing.T) {
+	eventBus := events.NewEventBus()
+	
+	// Create a mock coordinator
+	coordinator := &MultiLLMCoordinator{
+		instances: []*LLMInstance{
+			{
+				ID:         "test-instance",
+				Provider:   "test",
+				Model:      "test-model",
+				Priority:   1,
+				Available:  true,
+				Translator: &MockTranslator{},
+			},
+		},
+	}
+
+	wrapper := &MultiLLMTranslatorWrapper{
+		Coordinator: coordinator,
+		config:      translator.TranslationConfig{},
+	}
+
+	// Test translation with progress
+	result, err := wrapper.TranslateWithProgress(context.Background(), "test text", "test context", eventBus, "test-session")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	if result != "translated text" {
+		t.Errorf("Expected 'translated text', got '%s'", result)
+	}
+}
