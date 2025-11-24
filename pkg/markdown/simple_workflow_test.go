@@ -114,6 +114,12 @@ func TestSimpleWorkflow_ConvertToMarkdown(t *testing.T) {
 		t.Fatalf("Failed to create chapter1.xhtml: %v", err)
 	}
 
+	// Create the EPUB by zipping the contents
+	err = createEPUBFromDirectory(tmpDir, inputPath)
+	if err != nil {
+		t.Fatalf("Failed to create EPUB: %v", err)
+	}
+
 	// Create workflow
 	config := WorkflowConfig{
 		ChunkSize:      500,
@@ -410,6 +416,17 @@ func TestSimpleWorkflow_EndToEndWorkflow(t *testing.T) {
 	err = os.WriteFile(filepath.Join(tmpDir, "OEBPS", "chapter1.xhtml"), []byte(chapterXHTML), 0644)
 	if err != nil {
 		t.Fatalf("Failed to create chapter1.xhtml: %v", err)
+	}
+
+	// Create the EPUB by zipping the contents
+	err = createEPUBFromDirectory(tmpDir, inputPath)
+	if err != nil {
+		t.Fatalf("Failed to create EPUB: %v", err)
+	}
+
+	// Verify EPUB was created successfully
+	if _, err := os.Stat(inputPath); os.IsNotExist(err) {
+		t.Fatalf("EPUB file was not created at %s", inputPath)
 	}
 
 	// Create mock LLM client

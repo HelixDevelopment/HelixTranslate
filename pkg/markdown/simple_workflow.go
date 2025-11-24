@@ -1,6 +1,7 @@
 package markdown
 
 import (
+	"archive/zip"
 	"context"
 	"fmt"
 	"os"
@@ -201,9 +202,211 @@ func (sw *SimpleWorkflow) convertMarkdownToEPUB(ctx context.Context, inputPath, 
 		return fmt.Errorf("failed to read markdown file: %w", err)
 	}
 
-	// Simple EPUB creation (this would need proper implementation)
-	// For now, just copy the content as text
-	epubContent := fmt.Sprintf("EPUB Version of:\n\n%s", string(content))
-	
-	return os.WriteFile(outputPath, []byte(epubContent), 0644)
+	// Create a temporary directory for EPUB structure
+	tmpDir, err := os.MkdirTemp("", "epub_conversion_*")
+	if err != nil {
+		return fmt.Errorf("failed to create temp directory: %w", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Create EPUB directory structure
+	os.MkdirAll(filepath.Join(tmpDir, "META-INF"), 0755)
+	os.MkdirAll(filepath.Join(tmpDir, "OEBPS"), 0755)
+
+	// Create mimetype file
+	err = os.WriteFile(filepath.Join(tmpDir, "mimetype"), []byte("application/epub+zip"), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to create mimetype: %w", err)
+	}
+
+	// Create container.xml
+	containerXML := `<?xml version="1.0" encoding="UTF-8"?>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+  <rootfiles>
+    <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
+  </rootfiles>
+</container>`
+	err = os.WriteFile(filepath.Join(tmpDir, "META-INF", "container.xml"), []byte(containerXML), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to create container.xml: %w", err)
+	}
+
+	// Create content.opf
+	contentOPF := `<?xml version="1.0" encoding="UTF-8"?>
+<package version="3.0" xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookId">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:title>Translated Book</dc:title>
+    <dc:language>en</dc:language>
+    <dc:identifier id="BookId">translated-book-id</dc:identifier>
+  </metadata>
+  <manifest>
+    <item id="content" href="content.xhtml" media-type="application/xhtml+xml"/>
+  </manifest>
+  <spine>
+    <itemref idref="content"/>
+  </spine>
+</package>`
+	err = os.WriteFile(filepath.Join(tmpDir, "OEBPS", "content.opf"), []byte(contentOPF), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to create content.opf: %w", err)
+	}
+
+	// Convert markdown to basic XHTML
+	markdownText := string(content)
+	xhtmlContent := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Translated Book</title>
+  <style>
+    body { font-family: serif; line-height: 1.6; margin: 1em; }
+    h1, h2, h3 { color: #333; }
+    p { margin-bottom: 1em; }
+  </style>
+</head>
+<body>
+  <div>
+%s
+  </div>
+</body>
+</html>`, convertMarkdownToXHTML(markdownText))
+
+	err = os.WriteFile(filepath.Join(tmpDir, "OEBPS", "content.xhtml"), []byte(xhtmlContent), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to create content.xhtml: %w", err)
+	}
+
+	// Create the EPUB by zipping the contents
+	return createEPUBFromDirectory(tmpDir, outputPath)
+}
+
+// Helper function to create a proper EPUB file from a directory
+func createEPUBFromDirectory(sourceDir, outputPath string) error {
+	// Create the EPUB file
+	epubFile, err := os.Create(outputPath)
+	if err != nil {
+		return fmt.Errorf("failed to create EPUB file: %w", err)
+	}
+	defer epubFile.Close()
+
+	zipWriter := zip.NewWriter(epubFile)
+	defer zipWriter.Close()
+
+	// Add files to the ZIP in the correct order
+	// First add mimetype (must be uncompressed and first)
+	mimetypePath := filepath.Join(sourceDir, "mimetype")
+	mimeTypeWriter, err := zipWriter.CreateHeader(&zip.FileHeader{
+		Name:   "mimetype",
+		Method: zip.Store, // No compression
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create mimetype entry: %w", err)
+	}
+
+	mimeTypeContent, err := os.ReadFile(mimetypePath)
+	if err != nil {
+		return fmt.Errorf("failed to read mimetype: %w", err)
+	}
+
+	_, err = mimeTypeWriter.Write(mimeTypeContent)
+	if err != nil {
+		return fmt.Errorf("failed to write mimetype: %w", err)
+	}
+
+	// Walk the directory and add all files
+	err = filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip directories and the mimetype file (already added)
+		if info.IsDir() || filepath.Base(path) == "mimetype" {
+			return nil
+		}
+
+		// Get relative path
+		relPath, err := filepath.Rel(sourceDir, path)
+		if err != nil {
+			return fmt.Errorf("failed to get relative path: %w", err)
+		}
+
+		// Read file content
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("failed to read %s: %w", relPath, err)
+		}
+
+		// Create zip entry
+		writer, err := zipWriter.Create(relPath)
+		if err != nil {
+			return fmt.Errorf("failed to create entry for %s: %w", relPath, err)
+		}
+
+		// Write content
+		_, err = writer.Write(content)
+		if err != nil {
+			return fmt.Errorf("failed to write %s: %w", relPath, err)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to walk directory: %w", err)
+	}
+
+	return nil
+}
+
+// Convert basic markdown to simple XHTML
+func convertMarkdownToXHTML(markdown string) string {
+	lines := strings.Split(markdown, "\n")
+	var result strings.Builder
+	inParagraph := false
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		
+		// Headers
+		if strings.HasPrefix(line, "# ") {
+			if inParagraph {
+				result.WriteString("</p>\n")
+				inParagraph = false
+			}
+			result.WriteString(fmt.Sprintf("<h1>%s</h1>\n", strings.TrimPrefix(line, "# ")))
+		} else if strings.HasPrefix(line, "## ") {
+			if inParagraph {
+				result.WriteString("</p>\n")
+				inParagraph = false
+			}
+			result.WriteString(fmt.Sprintf("<h2>%s</h2>\n", strings.TrimPrefix(line, "## ")))
+		} else if strings.HasPrefix(line, "### ") {
+			if inParagraph {
+				result.WriteString("</p>\n")
+				inParagraph = false
+			}
+			result.WriteString(fmt.Sprintf("<h3>%s</h3>\n", strings.TrimPrefix(line, "### ")))
+		} else if line == "" {
+			// Empty line - close paragraph if open
+			if inParagraph {
+				result.WriteString("</p>\n")
+				inParagraph = false
+			}
+		} else {
+			// Regular text - start or continue paragraph
+			if !inParagraph {
+				result.WriteString("<p>")
+				inParagraph = true
+			} else {
+				result.WriteString(" ")
+			}
+			result.WriteString(line)
+		}
+	}
+
+	// Close any open paragraph
+	if inParagraph {
+		result.WriteString("</p>\n")
+	}
+
+	return result.String()
 }
