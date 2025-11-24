@@ -302,7 +302,7 @@ func TestDeploymentOrchestrator_ConfigValidation(t *testing.T) {
 				User:          "deploy",
 				DockerImage:   "translator:latest",
 				ContainerName: "valid-container",
-				Ports:         []PortMapping{{HostPort: 80, ContainerPort: 8443}}, // privileged port
+				Ports:         []PortMapping{{HostPort: 22, ContainerPort: 8443}}, // SSH port (privileged)
 			},
 			expectError: true,
 		},
