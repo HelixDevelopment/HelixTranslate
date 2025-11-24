@@ -154,8 +154,8 @@ func (d *Detector) detectHeuristic(text string) Language {
 	// CJK languages
 	if float64(cjk)/float64(total) > 0.3 {
 		// Could be Chinese, Japanese, or Korean
-		// For now, default to Chinese
-		return Chinese
+		// Try to distinguish based on specific characters
+		return d.detectCJKLanguage(sample)
 	}
 
 	// Arabic
@@ -169,9 +169,8 @@ func (d *Detector) detectHeuristic(text string) Language {
 		return d.detectCyrillicLanguage(sample)
 	}
 
-	// Latin scripts - default to English
-	// Could be improved with n-gram analysis
-	return English
+	// Latin scripts - try to distinguish between languages
+	return d.detectLatinLanguage(sample)
 }
 
 // detectCyrillicLanguage distinguishes between Cyrillic languages
@@ -181,6 +180,7 @@ func (d *Detector) detectCyrillicLanguage(text string) Language {
 		russianChars  int
 		serbianChars  int
 		ukrainianChars int
+		bulgarianChars int
 	)
 
 	for _, r := range text {
@@ -191,19 +191,181 @@ func (d *Detector) detectCyrillicLanguage(text string) Language {
 			serbianChars++
 		case 'Є', 'є', 'І', 'і', 'Ї', 'ї', 'Ґ', 'ґ':
 			ukrainianChars++
+		case 'Ъ', 'ъ', 'Щ', 'щ', 'Ь', 'ь':
+			bulgarianChars++
 		}
 	}
 
 	// Return language with most specific characters
-	if serbianChars > russianChars && serbianChars > ukrainianChars {
+	if serbianChars > russianChars && serbianChars > ukrainianChars && serbianChars > bulgarianChars {
 		return Serbian
 	}
-	if ukrainianChars > russianChars && ukrainianChars > serbianChars {
+	if ukrainianChars > russianChars && ukrainianChars > serbianChars && ukrainianChars > bulgarianChars {
 		return Ukrainian
+	}
+	if bulgarianChars > russianChars && bulgarianChars > serbianChars && bulgarianChars > ukrainianChars {
+		return Bulgarian
 	}
 
 	// Default to Russian for Cyrillic
 	return Russian
+}
+
+// detectLatinLanguage distinguishes between Latin-based languages
+func (d *Detector) detectLatinLanguage(text string) Language {
+	// Count language-specific characters and words
+	var (
+		spanishChars   int
+		frenchChars    int
+		germanChars    int
+		italianChars   int
+		portugueseChars int
+		polishChars    int
+		czechChars     int
+		slovakChars    int
+		croatianChars  int
+	)
+
+	// Convert to lowercase for word matching
+	lowerText := strings.ToLower(text)
+
+	// Check for language-specific characters
+	for _, r := range lowerText {
+		switch r {
+		// Spanish-specific characters
+		case 'ñ', '¿', '¡':
+			spanishChars++
+		// French-specific characters  
+		case 'â', 'æ', 'ç', 'ê', 'ë', 'î', 'ï', 'ô', 'û', 'ÿ':
+			frenchChars++
+		// German-specific characters
+		case 'ä', 'ö', 'ü', 'ß':
+			germanChars++
+		// Portuguese-specific characters
+		case 'ã', 'õ':
+			portugueseChars++
+		// Polish-specific characters
+		case 'ą', 'ć', 'ę', 'ł', 'ń', 'ś', 'ź', 'ż':
+			polishChars++
+		// Czech-specific characters
+		case 'č', 'ě', 'ň', 'ř', 'š', 'ž', 'ť', 'ď':
+			czechChars++
+		// Slovak-specific characters
+		case 'ĺ', 'ľ', 'ŕ', 'ä':
+			slovakChars++
+		// Croatian-specific characters
+		case 'đ':
+			croatianChars++
+		// Shared accented characters - check by language context
+		case 'á', 'é', 'í', 'ó', 'ú':
+			// Count for multiple languages but will use word detection
+			spanishChars++
+			italianChars++
+			portugueseChars++
+		case 'à', 'è', 'ì', 'ò', 'ù':
+			frenchChars++
+			italianChars++
+		}
+	}
+
+	// Check for common words as additional indicators
+	spanishWords := strings.Count(lowerText, "hola") + strings.Count(lowerText, "mundo") + strings.Count(lowerText, "gracias")
+	frenchWords := strings.Count(lowerText, "bonjour") + strings.Count(lowerText, "monde") + strings.Count(lowerText, "merci")
+	germanWords := strings.Count(lowerText, "hallo") + strings.Count(lowerText, "welt") + strings.Count(lowerText, "danke")
+	italianWords := strings.Count(lowerText, "ciao") + strings.Count(lowerText, "mondo") + strings.Count(lowerText, "grazie")
+	portugueseWords := strings.Count(lowerText, "olá") + strings.Count(lowerText, "mundo") + strings.Count(lowerText, "obrigado")
+
+	// Calculate scores
+	spanishScore := spanishChars*10 + spanishWords*20
+	frenchScore := frenchChars*10 + frenchWords*20
+	germanScore := germanChars*10 + germanWords*20
+	italianScore := italianChars*10 + italianWords*20
+	portugueseScore := portugueseChars*10 + portugueseWords*20
+	polishScore := polishChars * 10
+	czechScore := czechChars * 10
+	slovakScore := slovakChars * 10
+	croatianScore := croatianChars * 10
+
+	// Find language with highest score
+	maxScore := spanishScore
+	bestLang := Spanish
+
+	if frenchScore > maxScore {
+		maxScore = frenchScore
+		bestLang = French
+	}
+	if germanScore > maxScore {
+		maxScore = germanScore
+		bestLang = German
+	}
+	if italianScore > maxScore {
+		maxScore = italianScore
+		bestLang = Italian
+	}
+	if portugueseScore > maxScore {
+		maxScore = portugueseScore
+		bestLang = Portuguese
+	}
+	if polishScore > maxScore {
+		maxScore = polishScore
+		bestLang = Polish
+	}
+	if czechScore > maxScore {
+		maxScore = czechScore
+		bestLang = Czech
+	}
+	if slovakScore > maxScore {
+		maxScore = slovakScore
+		bestLang = Slovak
+	}
+	if croatianScore > maxScore {
+		maxScore = croatianScore
+		bestLang = Croatian
+	}
+
+	return bestLang
+}
+
+// detectCJKLanguage distinguishes between CJK languages
+func (d *Detector) detectCJKLanguage(text string) Language {
+	// Count specific script types
+	var (
+		hiragana int
+		katakana int
+		hangul   int
+		han      int
+	)
+
+	for _, r := range text {
+		switch {
+		case unicode.Is(unicode.Hiragana, r):
+			hiragana++
+		case unicode.Is(unicode.Katakana, r):
+			katakana++
+		case unicode.Is(unicode.Hangul, r):
+			hangul++
+		case unicode.Is(unicode.Han, r):
+			han++
+		}
+	}
+
+	totalCJK := hiragana + katakana + hangul + han
+	if totalCJK == 0 {
+		return Chinese // default
+	}
+
+	// Korean has Hangul characters
+	if float64(hangul)/float64(totalCJK) > 0.3 {
+		return Korean
+	}
+
+	// Japanese has Hiragana/Katakana mixed with Kanji
+	if (float64(hiragana)+float64(katakana))/float64(totalCJK) > 0.2 {
+		return Japanese
+	}
+
+	// Default to Chinese (mostly Han characters)
+	return Chinese
 }
 
 // ParseLanguage parses a language string (code or name)
