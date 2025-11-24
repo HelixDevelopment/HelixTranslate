@@ -2,8 +2,6 @@ package sshworker
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -114,7 +112,7 @@ func TestSSHWorker_UpdateRemoteCodebase(t *testing.T) {
 	
 	// Test with nil client (not connected)
 	ctx := context.Background()
-	err := worker.UpdateRemoteCodebase(ctx, "/tmp")
+	err = worker.UpdateRemoteCodebase(ctx, "/tmp")
 	
 	if err == nil {
 		t.Error("Expected error when not connected")
@@ -137,7 +135,7 @@ func TestSSHWorker_SyncCodebase(t *testing.T) {
 	
 	// Test with nil client
 	ctx := context.Background()
-	err := worker.SyncCodebase(ctx, "/tmp")
+	err = worker.SyncCodebase(ctx, "/tmp")
 	
 	if err == nil {
 		t.Error("Expected error when not connected")
@@ -186,7 +184,7 @@ func TestSSHWorker_UploadFile(t *testing.T) {
 	
 	// Test with nil client
 	ctx := context.Background()
-	err := worker.UploadFile(ctx, "/tmp/test.txt", "/tmp/remote.txt")
+	err = worker.UploadFile(ctx, "/tmp/test.txt", "/tmp/remote.txt")
 	
 	if err == nil {
 		t.Error("Expected error when not connected")
@@ -204,7 +202,7 @@ func TestSSHWorker_DownloadFile(t *testing.T) {
 	
 	// Test with nil client
 	ctx := context.Background()
-	err := worker.DownloadFile(ctx, "/tmp/remote.txt", "/tmp/local.txt")
+	err = worker.DownloadFile(ctx, "/tmp/remote.txt", "/tmp/local.txt")
 	
 	if err == nil {
 		t.Error("Expected error when not connected")
@@ -234,13 +232,19 @@ func TestSSHWorker_ExecuteCommand(t *testing.T) {
 }
 
 func TestSSHWorker_ConnectDisconnect(t *testing.T) {
-	worker := NewSSHWorker("invalid-host-that-does-not-exist.local", "testuser", "testpass")
+	config := SSHWorkerConfig{
+		Host:     "invalid-host-that-does-not-exist.local",
+		Username: "testuser",
+		Password: "testpass",
+	}
+	logger := logger.NewLogger(logger.LoggerConfig{})
+	worker, err := NewSSHWorker(config, logger)
 	
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	
 	// Test connection to invalid host
-	err := worker.Connect(ctx)
+	err = worker.Connect(ctx)
 	if err == nil {
 		t.Error("Expected connection to fail for invalid host")
 	}
@@ -253,13 +257,19 @@ func TestSSHWorker_ConnectDisconnect(t *testing.T) {
 }
 
 func TestSSHWorker_TestConnection(t *testing.T) {
-	worker := NewSSHWorker("invalid-host.local", "testuser", "testpass")
+	config := SSHWorkerConfig{
+		Host:     "invalid-host.local",
+		Username: "testuser",
+		Password: "testpass",
+	}
+	logger := logger.NewLogger(logger.LoggerConfig{})
+	worker, err := NewSSHWorker(config, logger)
 	
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	
 	// Test connection to invalid host
-	err := worker.TestConnection(ctx)
+	err = worker.TestConnection(ctx)
 	if err == nil {
 		t.Error("Expected test connection to fail for invalid host")
 	}
@@ -272,11 +282,18 @@ func TestSSHWorker_Integration(t *testing.T) {
 	
 	// This test would require an actual SSH server
 	// For now, just verify the structure is correct
-	worker := NewSSHWorker("localhost", "testuser", "testpass")
-	
-	if worker == nil {
-		t.Error("Worker should not be nil")
+	config := SSHWorkerConfig{
+		Host:     "localhost",
+		Username: "testuser",
+		Password: "testpass",
 	}
+	logger := logger.NewLogger(logger.LoggerConfig{})
+	worker, err := NewSSHWorker(config, logger)
+	
+	if err != nil {
+		t.Fatalf("Failed to create SSH worker: %v", err)
+	}
+	_ = worker // Suppress unused variable warning
 }
 
 // Helper function for string contains check

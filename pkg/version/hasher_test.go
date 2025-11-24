@@ -1,6 +1,8 @@
 package version
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"os"
 	"path/filepath"
 	"testing"
@@ -145,14 +147,14 @@ func TestCodebaseHasher_AddBinaryHashes(t *testing.T) {
 	os.Chdir(tempDir)
 	
 	// Calculate hash including binary
-	hasher := sha256.New()
-	err = hasher.addBinaryHashes(hasher)
+	shaHasher := sha256.New()
+	err = hasher.addBinaryHashes(shaHasher)
 	if err != nil {
 		t.Fatalf("Failed to add binary hashes: %v", err)
 	}
 	
 	// Verify binary was included
-	hashBytes := hasher.Sum(nil)
+	hashBytes := shaHasher.Sum(nil)
 	hashStr := hex.EncodeToString(hashBytes)
 	
 	if len(hashStr) == 0 {

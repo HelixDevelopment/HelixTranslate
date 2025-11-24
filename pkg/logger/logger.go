@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -147,18 +148,12 @@ func (l *StandardLogger) formatJSON(level, message string, fields map[string]int
 		logData[key] = value
 	}
 
-	// In a real implementation, use json.Marshal
-	// For simplicity, we'll use a simple JSON-like format
-	var sb strings.Builder
-	sb.WriteString("{")
-	sb.WriteString(fmt.Sprintf(`"timestamp":"%s","level":"%s","message":"%s"`, timestamp, level, message))
-	
-	for key, value := range fields {
-		sb.WriteString(fmt.Sprintf(`,"%s":%v`, key, value))
+	// Use json.Marshal for proper JSON formatting
+	jsonBytes, err := json.Marshal(logData)
+	if err != nil {
+		return fmt.Sprintf(`{"error":"failed to marshal log","message":"%s","timestamp":"%s","level":"%s"}`, message, timestamp, level)
 	}
-	sb.WriteString("}")
-
-	return sb.String()
+	return string(jsonBytes)
 }
 
 // log is the internal logging method

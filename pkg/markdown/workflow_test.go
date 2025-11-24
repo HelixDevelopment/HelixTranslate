@@ -2,15 +2,12 @@ package markdown
 
 import (
 	"context"
-	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/logger"
-	"digital.vasic.translator/pkg/translator/llm"
 )
 
 // MockLLMProvider for testing
@@ -82,12 +79,12 @@ func TestSimpleWorkflow_ConvertToMarkdown(t *testing.T) {
 	// Create temporary directory
 	tmpDir := t.TempDir()
 	
-	// Create a test ebook file
-	ebookPath := filepath.Join(tmpDir, "test.epub")
-	markdownPath := filepath.Join(tmpDir, "test.md")
+	// Create test paths (used for context, even if not directly used)
+	_ = filepath.Join(tmpDir, "test.epub")
+	_ = filepath.Join(tmpDir, "test.md")
 	
 	// Create minimal test content
-	book := &ebook.Book{
+	_ = &ebook.Book{
 		Metadata: ebook.Metadata{
 			Title:   "Test Book",
 			Authors: []string{"Test Author"},
