@@ -77,7 +77,7 @@ if [[ -n "$CONFIG_FILE" && -f "$CONFIG_FILE" ]]; then
         TOP_P=$(python3 -c "import json; data=json.load(open('$CONFIG_FILE')); print(data.get('top_p', $TOP_P))" 2>/dev/null || echo "$TOP_P")
         
         # Parse models array if available
-        IFS=$'\n' read -d '' -r -a config_models < <(python3 -c "import json; data=json.load(open('$CONFIG_file')); 
+        IFS=$'\n' read -d '' -r -a config_models < <(python3 -c "import json; data=json.load(open('$CONFIG_FILE')); 
 models = data.get('models', []);
 print('\\n'.join(models))" 2>/dev/null || true)
         

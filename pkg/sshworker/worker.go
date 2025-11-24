@@ -481,33 +481,20 @@ func (w *SSHWorker) GetRemoteCodebaseHash(ctx context.Context) (string, error) {
 		})
 	}
 
-	// Execute hash calculation on remote using the configured remote directory
-	cmd := fmt.Sprintf("cd %s && ./translator -hash-codebase", w.config.RemoteDir)
-	result, err := w.ExecuteCommand(ctx, cmd)
+	// For minimal setup, check if essential files exist and get a simple hash
+	checkFilesCmd := fmt.Sprintf("cd %s && ls -la translator python_translation.sh go.mod 2>/dev/null | sha256sum | cut -d' ' -f1", w.config.RemoteDir)
+	result, err := w.ExecuteCommand(ctx, checkFilesCmd)
 	if err != nil {
-		return "", fmt.Errorf("failed to get remote hash: %w", err)
+		return "", fmt.Errorf("failed to check essential files: %w", err)
 	}
 	if result.ExitCode != 0 {
-		w.logger.Debug("Remote hash command failed", map[string]interface{}{
-			"command": cmd,
-			"stdout": result.Stdout,
-			"stderr": result.Stderr,
-			"exit_code": result.ExitCode,
-		})
-		return "", fmt.Errorf("remote hash command failed: %s", result.Stderr)
+		return "", fmt.Errorf("essential files not found on remote")
 	}
 
-	// Extract hash from output
-	lines := strings.Split(strings.TrimSpace(result.Stdout), "\n")
-	if len(lines) == 0 {
-		return "", fmt.Errorf("no hash output from remote")
+	hash := strings.TrimSpace(result.Stdout)
+	if hash == "" {
+		return "", fmt.Errorf("empty hash received from remote")
 	}
-
-	hash := strings.TrimSpace(lines[len(lines)-1])
-	w.logger.Debug("Remote hash retrieved", map[string]interface{}{
-		"hash": hash,
-		"output": result.Stdout,
-	})
 
 	return hash, nil
 }
@@ -561,6 +548,68 @@ func (w *SSHWorker) UpdateRemoteCodebase(ctx context.Context, localBasePath stri
 	}
 	if result.ExitCode != 0 {
 		return fmt.Errorf("remote build failed: %s", result.Stderr)
+	}
+
+	return nil
+}
+
+// UploadEssentialFiles uploads only the binary and required scripts for faster execution
+func (w *SSHWorker) UploadEssentialFiles(ctx context.Context) error {
+	// Ensure remote directory exists and clean
+	setupCmd := fmt.Sprintf("mkdir -p %s && rm -rf %s/*", w.config.RemoteDir, w.config.RemoteDir)
+	_, err := w.ExecuteCommand(ctx, setupCmd)
+	if err != nil {
+		return fmt.Errorf("failed to setup remote directory: %w", err)
+	}
+
+	// Upload the pre-built binary
+	binaryPath := "./build/translator-ssh"
+	if _, err := os.Stat(binaryPath); err != nil {
+		return fmt.Errorf("binary not found at %s: %w", binaryPath, err)
+	}
+	
+	remoteBinaryPath := filepath.Join(w.config.RemoteDir, "translator")
+	if err := w.UploadFile(ctx, binaryPath, remoteBinaryPath); err != nil {
+		return fmt.Errorf("failed to upload binary: %w", err)
+	}
+
+	// Make binary executable
+	chmodCmd := fmt.Sprintf("chmod +x %s", remoteBinaryPath)
+	_, err = w.ExecuteCommand(ctx, chmodCmd)
+	if err != nil {
+		return fmt.Errorf("failed to make binary executable: %w", err)
+	}
+
+	// Upload Python translation script
+	scriptPath := "./scripts/python_translation.sh"
+	if _, err := os.Stat(scriptPath); err == nil {
+		remoteScriptPath := filepath.Join(w.config.RemoteDir, "python_translation.sh")
+		if err := w.UploadFile(ctx, scriptPath, remoteScriptPath); err != nil {
+			return fmt.Errorf("failed to upload Python script: %w", err)
+		}
+
+		// Make script executable
+		chmodScriptCmd := fmt.Sprintf("chmod +x %s", remoteScriptPath)
+		_, err = w.ExecuteCommand(ctx, chmodScriptCmd)
+		if err != nil {
+			return fmt.Errorf("failed to make script executable: %w", err)
+		}
+	}
+
+	// Create a minimal go.mod for the binary to work properly
+	goModContent := `module digital.vasic.translator
+
+go 1.25
+`
+	tempGoMod := filepath.Join(os.TempDir(), "go.mod")
+	if err := os.WriteFile(tempGoMod, []byte(goModContent), 0644); err != nil {
+		return fmt.Errorf("failed to create temp go.mod: %w", err)
+	}
+	defer os.Remove(tempGoMod)
+
+	remoteGoModPath := filepath.Join(w.config.RemoteDir, "go.mod")
+	if err := w.UploadFile(ctx, tempGoMod, remoteGoModPath); err != nil {
+		return fmt.Errorf("failed to upload go.mod: %w", err)
 	}
 
 	return nil

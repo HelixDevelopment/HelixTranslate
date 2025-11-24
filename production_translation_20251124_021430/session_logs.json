@@ -1,0 +1,18 @@
+Session Logs Export
+===================
+
+Session Start: 2025-11-24 02:14:31
+
+Log Entries:
+  [02:14:31] info: SSH translation session started
+  [02:14:31] info: Starting Step 1: Initialize SSH worker and verify codebase
+  [02:14:36] info: SSH connection established successfully
+  [02:14:36] debug: Local codebase hash generated
+  [02:14:36] info: Remote hash check skipped for testing
+  [02:14:36] info: Uploading essential codebase for translation
+  [02:14:36] info: Skipping binary upload for testing
+  [02:14:41] info: Codebase setup complete (hash verification bypassed)
+  [02:14:41] info: Starting Step 2: Converting input ebook to markdown
+  [02:14:41] info: Input file uploaded successfully
+  [02:14:41] info: Ebook converted to markdown successfully
+  [02:14:41] info: Starting Step 3: Translating markdown using remote llama.cpp

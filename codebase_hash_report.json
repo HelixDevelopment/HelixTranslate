@@ -20,6 +20,7 @@
     "MARKDOWN_WORKFLOW_GUIDE.md": "c7e4b1dc1596696a0bdb6ed85f9228ebdb602d03e04f59b8e5972b57c9f1f5ec",
     "Makefile": "86f49f21eae6fbabbdf72abb7ba939593cb2f256e6c2d0a5a19bd5ccbc2f9fd2",
     "PHASE2_COMPLETION_REPORT.md": "65d0de4b7e31d70ef3d786fcd53c4545caf65155d23d8359010d1e211a4a1a82",
+    "PRODUCTION_COMPLETION_REPORT.md": "4d5f0300d68c2bfa55dc0506923c156c4549408760486031ee8535cbfb552158",
     "PRODUCTION_DOCUMENTATION.md": "fb02e71dd72a66c5a38a3f222b72c7636199e628bd020c9eef51111b4a9e2389",
     "QUICK_START_LLAMACPP.md": "651aad3b382b948640685c9790497aa123ad7d7bcd72072b0221eb1108413f05",
     "README.md": "b871e3ca2b49cb5bb41e8261c1cea3f64d30040e3a251ba5ec54e8cc126daa7e",
@@ -53,11 +54,6 @@
     "cmd/server/main.go": "0a814c84e87b96e12dab05cd2977969b2ca63b39a466d17982e24e1851bd116c",
     "cmd/server/main_test.go": "673c682a148961a531f278ae1379608cb345cc192ae8deafb32bf8bb15050ed7",
     "cmd/translate-ssh/main.go": "40d9577b6adb7f5655f3c60eaa3420d4289ac27ff1987448bdc46c1433f9627e",
-    "codebase_hash_report.json": "381fb2dac12c38f8133fb316c0b49cc9470990b2b7f26966317f91e836c4e9c7",
-    "codebase_local_git.tar.gz": "4f3cec77903715fa08d52105879afac16854103e474de3e5b4f4d050da90df6c",
-    "codebase_remote_git.tar.gz": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "codebase_sync.tar.gz": "eef3860b6fcad693fb3ffac950427d7c1ac2256454b8e6345e46a09033f46975",
-    "completion_status.txt": "bab9bb5e29c9422fc9be2bef99f3b15af7ca26945e94fde35d232430b9a53a75",
     "config.distributed.json": "ee6ee0350954d7a9b0ea15f4635cb407de115059927557ebc99ba86210d60705",
     "config.distributed.test.json": "d4281fa69d37c434b19424f73bf7c9fcf15df7a0b50e9620ff502a862d1aa31d",
     "config.distributed.thinker.json": "ed3a89f2b747f7e303d00f3a4798faa495510de63d89489e46186b917e0fc766",
@@ -295,7 +291,6 @@
     "translate_distributed_books.sh": "89423c172029313563bc35236cb9ee3d548b0f22d0cbce507a29281d6eb83a71",
     "translate_with_deepseek.sh": "c01845290027468b4454e6d0f4928bb2e11b6868a19b3793cabbe70d1a049963",
     "translated.fb2": "b0e09713e23754bd6b1caa668b26940a802467e3b951ea00078511b14dbdeda2",
-    "translation_summary.txt": "ba3c12e390e7bbfe06bd6907f5650eaa5d104b3072da8c67229ce79f0b2aa100",
     "translator": "cb9032e1a404fc6c84f146927cdfba44c285bd5e1eab81ceb45b59b1e115cf3d",
     "translator-linux": "b515d22e3f162642e621320d70970a793743714d14f53b397f152c9d08d32cd1",
     "translator-macos": "82db8a52d5ff14133a7854068424caafb5c1686753d60a4bcd84dd514b99008b",
@@ -305,7 +300,7 @@
     "translator_linux": "e2794929a793ae9763dbddb7d2c709437b5ae74a85adae598814f609b0f79f75",
     "universal_verification.txt": "65dfeb8808dd997ffedc56ea2b840a5bf4809d3f6fd21938a0e169d15841b18d"
   },
-  "files_count": 302,
+  "files_count": 297,
   "timestamp": "/Users/milosvasic/Projects/Translate",
-  "total_hash": "9a6334822c22dd7b251117f1250027306ab1cadf36496f304ba2311e07cdf217"
+  "total_hash": "46b3b5202bc65bdfe93298e37850ca1562fbc799d7159606433bfd9bb4f5b9b7"
 }

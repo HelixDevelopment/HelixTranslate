@@ -1,0 +1,27 @@
+Session Logs Export
+===================
+
+Session Start: 2025-11-24 03:07:41
+
+Warnings:
+  1. [version_sync] version_manager - Remote hash verification failed, continuing anyway
+
+Log Entries:
+  [03:07:41] info: SSH translation session started
+  [03:07:41] info: Starting Step 1: Initialize SSH worker and verify codebase
+  [03:07:46] info: SSH connection established successfully
+  [03:07:46] debug: Local codebase hash generated
+  [03:07:51] info: Codebase hashes differ, updating remote
+  [03:07:51] info: Uploading essential files for faster execution
+  [03:08:11] info: Starting Step 2: Converting input ebook to markdown
+  [03:08:12] info: Input file uploaded successfully
+  [03:08:12] info: Ebook converted to markdown successfully
+  [03:08:12] info: Starting Step 3: Translating markdown using remote llama.cpp
+  [03:08:22] info: Markdown translation completed
+  [03:08:22] info: Starting Step 5: Downloading generated files
+  [03:08:22] info: File downloaded successfully
+  [03:08:22] info: File downloaded successfully
+  [03:08:22] info: File downloaded successfully
+  [03:08:22] info: Starting Step 6: Cleaning up remote files
+  [03:08:22] info: Remote files cleaned up successfully
+  [03:08:22] info: SSH translation session completed successfully
