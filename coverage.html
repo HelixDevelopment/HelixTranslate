@@ -55,15 +55,15 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">digital.vasic.translator/pkg/translator/llm/anthropic.go (90.9%)</option>
+				<option value="file0">digital.vasic.translator/pkg/translator/llm/anthropic.go (92.7%)</option>
 				
-				<option value="file1">digital.vasic.translator/pkg/translator/llm/deepseek.go (92.6%)</option>
+				<option value="file1">digital.vasic.translator/pkg/translator/llm/deepseek.go (96.3%)</option>
 				
 				<option value="file2">digital.vasic.translator/pkg/translator/llm/gemini.go (93.5%)</option>
 				
 				<option value="file3">digital.vasic.translator/pkg/translator/llm/llamacpp.go (80.5%)</option>
 				
-				<option value="file4">digital.vasic.translator/pkg/translator/llm/llamacpp_provider.go (0.0%)</option>
+				<option value="file4">digital.vasic.translator/pkg/translator/llm/llamacpp_provider.go (17.5%)</option>
 				
 				<option value="file5">digital.vasic.translator/pkg/translator/llm/llm.go (98.2%)</option>
 				
@@ -82,17 +82,8 @@
 			<div id="legend">
 				<span>not tracked</span>
 			
-				<span class="cov0">no coverage</span>
-				<span class="cov1">low coverage</span>
-				<span class="cov2">*</span>
-				<span class="cov3">*</span>
-				<span class="cov4">*</span>
-				<span class="cov5">*</span>
-				<span class="cov6">*</span>
-				<span class="cov7">*</span>
-				<span class="cov8">*</span>
-				<span class="cov9">*</span>
-				<span class="cov10">high coverage</span>
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
 			
 			</div>
 		</div>
@@ -155,39 +146,39 @@ type AnthropicUsage struct {
 }
 
 // NewAnthropicClient creates a new Anthropic client
-func NewAnthropicClient(config TranslationConfig) (*AnthropicClient, error) <span class="cov8" title="31">{
-        if config.APIKey == "" </span><span class="cov2" title="2">{
+func NewAnthropicClient(config TranslationConfig) (*AnthropicClient, error) <span class="cov8" title="1">{
+        if config.APIKey == "" </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("Anthropic API key is required")
         }</span>
 
         // Validate model
-        <span class="cov8" title="29">if config.Model != "" </span><span class="cov8" title="27">{
+        <span class="cov8" title="1">if config.Model != "" </span><span class="cov8" title="1">{
                 if strings.TrimSpace(config.Model) == "" </span><span class="cov0" title="0">{
                         return nil, fmt.Errorf("model cannot be empty or whitespace")
                 }</span>
-                <span class="cov8" title="27">validModels := ValidModels[ProviderAnthropic]
+                <span class="cov8" title="1">validModels := ValidModels[ProviderAnthropic]
                 modelValid := false
-                for _, validModel := range validModels </span><span class="cov10" title="59">{
-                        if config.Model == validModel </span><span class="cov8" title="24">{
+                for _, validModel := range validModels </span><span class="cov8" title="1">{
+                        if config.Model == validModel </span><span class="cov8" title="1">{
                                 modelValid = true
                                 break</span>
                         }
                 }
-                <span class="cov8" title="27">if !modelValid </span><span class="cov3" title="3">{
+                <span class="cov8" title="1">if !modelValid </span><span class="cov8" title="1">{
                         return nil, fmt.Errorf("model '%s' is not valid for Anthropic. Valid models: %v", 
                                 config.Model, validModels)
                 }</span>
-        } else<span class="cov2" title="2"> {
+        } else<span class="cov8" title="1"> {
                 // Empty model is not allowed for explicit configuration
                 return nil, fmt.Errorf("model must be specified for Anthropic client")
         }</span>
 
-        <span class="cov8" title="24">baseURL := config.BaseURL
-        if baseURL == "" </span><span class="cov4" title="6">{
+        <span class="cov8" title="1">baseURL := config.BaseURL
+        if baseURL == "" </span><span class="cov8" title="1">{
                 baseURL = "https://api.anthropic.com/v1"
         }</span>
 
-        <span class="cov8" title="24">return &amp;AnthropicClient{
+        <span class="cov8" title="1">return &amp;AnthropicClient{
                 config: config,
                 httpClient: &amp;http.Client{
                         Timeout: 600 * time.Second, // Increased to 10 minutes for very large book sections (up to 44KB)
@@ -197,32 +188,32 @@ func NewAnthropicClient(config TranslationConfig) (*AnthropicClient, error) <spa
 }
 
 // GetProviderName returns the provider name
-func (c *AnthropicClient) GetProviderName() string <span class="cov2" title="2">{
+func (c *AnthropicClient) GetProviderName() string <span class="cov8" title="1">{
         return "anthropic"
 }</span>
 
 // Translate translates text using Anthropic Claude
-func (c *AnthropicClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov8" title="25">{
+func (c *AnthropicClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov8" title="1">{
         model := c.config.Model
-        if model == "" </span><span class="cov0" title="0">{
+        if model == "" </span><span class="cov8" title="1">{
                 model = "claude-3-sonnet-20240229"
         }</span>
 
-        <span class="cov8" title="25">temperature := 0.3
-        if c.config.Options["temperature"] != nil </span><span class="cov4" title="4">{
-                if t, ok := c.config.Options["temperature"].(float64); ok </span><span class="cov4" title="4">{
+        <span class="cov8" title="1">temperature := 0.3
+        if c.config.Options["temperature"] != nil </span><span class="cov8" title="1">{
+                if t, ok := c.config.Options["temperature"].(float64); ok </span><span class="cov8" title="1">{
                         temperature = t
                 }</span>
         }
 
-        <span class="cov8" title="25">maxTokens := 4096
-        if c.config.Options["max_tokens"] != nil </span><span class="cov3" title="3">{
-                if mt, ok := c.config.Options["max_tokens"].(int); ok </span><span class="cov3" title="3">{
+        <span class="cov8" title="1">maxTokens := 4096
+        if c.config.Options["max_tokens"] != nil </span><span class="cov8" title="1">{
+                if mt, ok := c.config.Options["max_tokens"].(int); ok </span><span class="cov8" title="1">{
                         maxTokens = mt
                 }</span>
         }
 
-        <span class="cov8" title="25">request := AnthropicRequest{
+        <span class="cov8" title="1">request := AnthropicRequest{
                 Model: model,
                 Messages: []AnthropicMessage{
                         {Role: "user", Content: prompt},
@@ -236,40 +227,40 @@ func (c *AnthropicClient) Translate(ctx context.Context, text string, prompt str
                 return "", fmt.Errorf("failed to marshal request: %w", err)
         }</span>
 
-        <span class="cov8" title="25">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/messages", bytes.NewBuffer(jsonData))
+        <span class="cov8" title="1">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/messages", bytes.NewBuffer(jsonData))
         if err != nil </span><span class="cov0" title="0">{
                 return "", fmt.Errorf("failed to create request: %w", err)
         }</span>
 
-        <span class="cov8" title="25">req.Header.Set("Content-Type", "application/json")
+        <span class="cov8" title="1">req.Header.Set("Content-Type", "application/json")
         req.Header.Set("x-api-key", c.config.APIKey)
         req.Header.Set("anthropic-version", "2023-06-01")
 
         resp, err := c.httpClient.Do(req)
-        if err != nil </span><span class="cov6" title="10">{
+        if err != nil </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("failed to send request: %w", err)
         }</span>
-        <span class="cov6" title="15">defer resp.Body.Close()
+        <span class="cov8" title="1">defer resp.Body.Close()
 
         body, err := io.ReadAll(resp.Body)
         if err != nil </span><span class="cov0" title="0">{
                 return "", fmt.Errorf("failed to read response: %w", err)
         }</span>
 
-        <span class="cov6" title="15">if resp.StatusCode != http.StatusOK </span><span class="cov5" title="7">{
+        <span class="cov8" title="1">if resp.StatusCode != http.StatusOK </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("Anthropic API error (status %d): %s", resp.StatusCode, string(body))
         }</span>
 
-        <span class="cov5" title="8">var response AnthropicResponse
-        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov3" title="3">{
+        <span class="cov8" title="1">var response AnthropicResponse
+        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("failed to unmarshal response: %w", err)
         }</span>
 
-        <span class="cov4" title="5">if len(response.Content) == 0 </span><span class="cov3" title="3">{
+        <span class="cov8" title="1">if len(response.Content) == 0 </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("no content in response")
         }</span>
 
-        <span class="cov2" title="2">return response.Content[0].Text, nil</span>
+        <span class="cov8" title="1">return response.Content[0].Text, nil</span>
 }
 </pre>
 		
@@ -286,63 +277,63 @@ type DeepSeekClient struct {
 }
 
 // NewDeepSeekClient creates a new DeepSeek client
-func NewDeepSeekClient(config TranslationConfig) (*DeepSeekClient, error) <span class="cov10" title="22">{
-        if config.APIKey == "" </span><span class="cov1" title="1">{
+func NewDeepSeekClient(config TranslationConfig) (*DeepSeekClient, error) <span class="cov8" title="1">{
+        if config.APIKey == "" </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("DeepSeek API key is required")
         }</span>
 
         // Validate provider
-        <span class="cov9" title="21">if config.Provider != "deepseek" &amp;&amp; config.Provider != "" </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">if config.Provider != "deepseek" &amp;&amp; config.Provider != "" </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("invalid provider for DeepSeek client: %s", config.Provider)
         }</span>
 
         // DeepSeek uses OpenAI-compatible API
-        <span class="cov9" title="20">if config.BaseURL == "" </span><span class="cov5" title="4">{
+        <span class="cov8" title="1">if config.BaseURL == "" </span><span class="cov8" title="1">{
                 config.BaseURL = "https://api.deepseek.com/v1"
         }</span>
 
-        <span class="cov9" title="20">if config.Model == "" </span><span class="cov3" title="2">{
+        <span class="cov8" title="1">if config.Model == "" </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("DeepSeek model is required")
-        }</span> else<span class="cov9" title="18"> {
+        }</span> else<span class="cov8" title="1"> {
                 // Validate model if provided
-                if strings.TrimSpace(config.Model) == "" </span><span class="cov0" title="0">{
+                if strings.TrimSpace(config.Model) == "" </span><span class="cov8" title="1">{
                         return nil, fmt.Errorf("model cannot be empty or whitespace")
                 }</span>
-                <span class="cov9" title="18">validModels := ValidModels[ProviderDeepSeek]
+                <span class="cov8" title="1">validModels := ValidModels[ProviderDeepSeek]
                 modelValid := false
-                for _, validModel := range validModels </span><span class="cov10" title="22">{
-                        if config.Model == validModel </span><span class="cov8" title="15">{
+                for _, validModel := range validModels </span><span class="cov8" title="1">{
+                        if config.Model == validModel </span><span class="cov8" title="1">{
                                 modelValid = true
                                 break</span>
                         }
                 }
-                <span class="cov9" title="18">if !modelValid </span><span class="cov4" title="3">{
+                <span class="cov8" title="1">if !modelValid </span><span class="cov8" title="1">{
                         return nil, fmt.Errorf("model '%s' is not valid for DeepSeek. Valid models: %v", 
                                 config.Model, validModels)
                 }</span>
         }
 
         // Validate temperature if provided
-        <span class="cov8" title="15">if temp, exists := config.Options["temperature"]; exists </span><span class="cov6" title="6">{
-                if tempFloat, ok := temp.(float64); ok </span><span class="cov6" title="6">{
-                        if tempFloat &lt; 0.0 || tempFloat &gt; 2.0 </span><span class="cov3" title="2">{
+        <span class="cov8" title="1">if temp, exists := config.Options["temperature"]; exists </span><span class="cov8" title="1">{
+                if tempFloat, ok := temp.(float64); ok </span><span class="cov8" title="1">{
+                        if tempFloat &lt; 0.0 || tempFloat &gt; 2.0 </span><span class="cov8" title="1">{
                                 return nil, fmt.Errorf("temperature %.1f is invalid for DeepSeek. Must be between 0.0 and 2.0", tempFloat)
                         }</span>
                 }
         }
 
-        <span class="cov8" title="13">openaiClient, err := NewOpenAIClient(config)
+        <span class="cov8" title="1">openaiClient, err := NewOpenAIClient(config)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
 
-        <span class="cov8" title="13">return &amp;DeepSeekClient{
+        <span class="cov8" title="1">return &amp;DeepSeekClient{
                 OpenAIClient: openaiClient,
         }, nil</span>
 }
 
 // GetProviderName returns the provider name
-func (c *DeepSeekClient) GetProviderName() string <span class="cov3" title="2">{
+func (c *DeepSeekClient) GetProviderName() string <span class="cov8" title="1">{
         return "deepseek"
 }</span>
 </pre>
@@ -429,17 +420,17 @@ type GeminiUsageMetadata struct {
 }
 
 // NewGeminiClient creates a new Gemini client
-func NewGeminiClient(config TranslationConfig) (*GeminiClient, error) <span class="cov10" title="29">{
-        if config.APIKey == "" </span><span class="cov2" title="2">{
+func NewGeminiClient(config TranslationConfig) (*GeminiClient, error) <span class="cov8" title="1">{
+        if config.APIKey == "" </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("API key is required for Gemini")
         }</span>
         
-        <span class="cov9" title="27">baseURL := config.BaseURL
-        if baseURL == "" </span><span class="cov7" title="13">{
+        <span class="cov8" title="1">baseURL := config.BaseURL
+        if baseURL == "" </span><span class="cov8" title="1">{
                 baseURL = "https://generativelanguage.googleapis.com/v1beta"
         }</span>
 
-        <span class="cov9" title="27">return &amp;GeminiClient{
+        <span class="cov8" title="1">return &amp;GeminiClient{
                 config: config,
                 httpClient: &amp;http.Client{
                         Timeout: 60 * time.Second, // Default timeout
@@ -449,13 +440,13 @@ func NewGeminiClient(config TranslationConfig) (*GeminiClient, error) <span clas
 }
 
 // Translate performs translation using Google Gemini
-func (g *GeminiClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov8" title="18">{
-        if text == "" </span><span class="cov2" title="2">{
+func (g *GeminiClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov8" title="1">{
+        if text == "" </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("text is required")
         }</span>
 
         // Build the full prompt
-        <span class="cov8" title="16">fullPrompt := g.buildPrompt(text, prompt)
+        <span class="cov8" title="1">fullPrompt := g.buildPrompt(text, prompt)
 
         // Create the request
         geminiReq := GeminiRequest{
@@ -495,29 +486,29 @@ func (g *GeminiClient) Translate(ctx context.Context, text string, prompt string
 
         // Make the API request
         resp, err := g.makeRequest(ctx, geminiReq)
-        if err != nil </span><span class="cov7" title="11">{
+        if err != nil </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("failed to make Gemini request: %w", err)
         }</span>
 
         // Parse the response
-        <span class="cov5" title="5">translatedText, err := g.parseResponse(resp)
+        <span class="cov8" title="1">translatedText, err := g.parseResponse(resp)
         if err != nil </span><span class="cov0" title="0">{
                 return "", fmt.Errorf("failed to parse Gemini response: %w", err)
         }</span>
 
-        <span class="cov5" title="5">return translatedText, nil</span>
+        <span class="cov8" title="1">return translatedText, nil</span>
 }
 
 // buildPrompt creates the translation prompt
-func (g *GeminiClient) buildPrompt(text, prompt string) string <span class="cov8" title="16">{
+func (g *GeminiClient) buildPrompt(text, prompt string) string <span class="cov8" title="1">{
         var fullPrompt strings.Builder
 
-        if prompt != "" </span><span class="cov8" title="16">{
+        if prompt != "" </span><span class="cov8" title="1">{
                 fullPrompt.WriteString(prompt)
                 fullPrompt.WriteString("\n\n")
         }</span>
 
-        <span class="cov8" title="16">fullPrompt.WriteString("Text to translate:\n")
+        <span class="cov8" title="1">fullPrompt.WriteString("Text to translate:\n")
         fullPrompt.WriteString(text)
         fullPrompt.WriteString("\n\n")
         fullPrompt.WriteString("Provide only the translated text without any explanations or additional formatting.")
@@ -526,14 +517,14 @@ func (g *GeminiClient) buildPrompt(text, prompt string) string <span class="cov8
 }
 
 // makeRequest sends a request to the Gemini API
-func (g *GeminiClient) makeRequest(ctx context.Context, req GeminiRequest) (*GeminiResponse, error) <span class="cov9" title="25">{
+func (g *GeminiClient) makeRequest(ctx context.Context, req GeminiRequest) (*GeminiResponse, error) <span class="cov8" title="1">{
         // Build the URL
         model := g.config.Model
-        if model == "" </span><span class="cov1" title="1">{
+        if model == "" </span><span class="cov8" title="1">{
                 model = "gemini-pro"
         }</span>
 
-        <span class="cov9" title="25">url := fmt.Sprintf("%s/models/%s:generateContent?key=%s",
+        <span class="cov8" title="1">url := fmt.Sprintf("%s/models/%s:generateContent?key=%s",
                 g.baseURL,
                 model,
                 g.config.APIKey)
@@ -545,19 +536,19 @@ func (g *GeminiClient) makeRequest(ctx context.Context, req GeminiRequest) (*Gem
         }</span>
 
         // Create HTTP request
-        <span class="cov9" title="25">httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(reqBody))
+        <span class="cov8" title="1">httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(reqBody))
         if err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("failed to create request: %w", err)
         }</span>
 
-        <span class="cov9" title="25">httpReq.Header.Set("Content-Type", "application/json")
+        <span class="cov8" title="1">httpReq.Header.Set("Content-Type", "application/json")
 
         // Send request
         resp, err := g.httpClient.Do(httpReq)
-        if err != nil </span><span class="cov4" title="4">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("failed to send request: %w", err)
         }</span>
-        <span class="cov9" title="21">defer resp.Body.Close()
+        <span class="cov8" title="1">defer resp.Body.Close()
 
         // Read response body
         body, err := io.ReadAll(resp.Body)
@@ -566,48 +557,48 @@ func (g *GeminiClient) makeRequest(ctx context.Context, req GeminiRequest) (*Gem
         }</span>
 
         // Check status code
-        <span class="cov9" title="21">if resp.StatusCode != http.StatusOK </span><span class="cov6" title="9">{
+        <span class="cov8" title="1">if resp.StatusCode != http.StatusOK </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("Gemini API returned status %d: %s", resp.StatusCode, string(body))
         }</span>
 
         // Parse response
-        <span class="cov7" title="12">var geminiResp GeminiResponse
-        if err := json.Unmarshal(body, &amp;geminiResp); err != nil </span><span class="cov3" title="3">{
+        <span class="cov8" title="1">var geminiResp GeminiResponse
+        if err := json.Unmarshal(body, &amp;geminiResp); err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("failed to unmarshal response: %w", err)
         }</span>
 
         // Check for candidates
-        <span class="cov6" title="9">if len(geminiResp.Candidates) == 0 </span><span class="cov4" title="4">{
+        <span class="cov8" title="1">if len(geminiResp.Candidates) == 0 </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("no candidates in Gemini response")
         }</span>
 
-        <span class="cov5" title="5">return &amp;geminiResp, nil</span>
+        <span class="cov8" title="1">return &amp;geminiResp, nil</span>
 }
 
 // parseResponse extracts the translated text from the Gemini response
-func (g *GeminiClient) parseResponse(resp *GeminiResponse) (string, error) <span class="cov8" title="15">{
-        if len(resp.Candidates) == 0 </span><span class="cov2" title="2">{
+func (g *GeminiClient) parseResponse(resp *GeminiResponse) (string, error) <span class="cov8" title="1">{
+        if len(resp.Candidates) == 0 </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("no candidates in response")
         }</span>
 
-        <span class="cov7" title="12">candidate := resp.Candidates[0]
+        <span class="cov8" title="1">candidate := resp.Candidates[0]
 
         // Check finish reason
-        if candidate.FinishReason != "STOP" </span><span class="cov1" title="1">{
+        if candidate.FinishReason != "STOP" </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("generation did not complete successfully: %s", candidate.FinishReason)
         }</span>
 
         // Extract text from parts
-        <span class="cov7" title="11">var translatedText strings.Builder
-        for _, part := range candidate.Content.Parts </span><span class="cov7" title="11">{
+        <span class="cov8" title="1">var translatedText strings.Builder
+        for _, part := range candidate.Content.Parts </span><span class="cov8" title="1">{
                 translatedText.WriteString(part.Text)
         }</span>
 
-        <span class="cov7" title="11">return strings.TrimSpace(translatedText.String()), nil</span>
+        <span class="cov8" title="1">return strings.TrimSpace(translatedText.String()), nil</span>
 }
 
 // GetProviderName returns the provider name
-func (g *GeminiClient) GetProviderName() string <span class="cov3" title="3">{
+func (g *GeminiClient) GetProviderName() string <span class="cov8" title="1">{
         return "gemini"
 }</span>
 </pre>
@@ -639,36 +630,36 @@ type LlamaCppClient struct {
 }
 
 // NewLlamaCppClient creates a new llama.cpp client with automatic hardware detection and model selection
-func NewLlamaCppClient(config TranslationConfig) (*LlamaCppClient, error) <span class="cov9" title="50">{
+func NewLlamaCppClient(config TranslationConfig) (*LlamaCppClient, error) <span class="cov8" title="1">{
         // Detect hardware capabilities
         detector := hardware.NewDetector()
         caps, err := detector.Detect()
-        if err != nil </span><span class="cov1" title="1">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("hardware detection failed: %w", err)
         }</span>
 
         // Find llama-cli executable
-        <span class="cov9" title="49">executable, err := findLlamaCppExecutable()
+        <span class="cov8" title="1">executable, err := findLlamaCppExecutable()
         if err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("llama.cpp not found: %w (install with: brew install llama.cpp)", err)
         }</span>
 
         // Initialize model registry
-        <span class="cov9" title="49">registry := models.NewRegistry()
+        <span class="cov8" title="1">registry := models.NewRegistry()
 
         // Determine which model to use
         var modelInfo *models.ModelInfo
         var modelPath string
 
-        if config.Model != "" </span><span class="cov6" title="14">{
+        if config.Model != "" </span><span class="cov8" title="1">{
                 // User specified a model
                 modelInfo, exists := registry.Get(config.Model)
-                if !exists </span><span class="cov6" title="13">{
+                if !exists </span><span class="cov8" title="1">{
                         return nil, fmt.Errorf("model not found: %s (use --list-models to see available models)", config.Model)
                 }</span>
 
                 // Check if system can run this model
-                <span class="cov1" title="1">if !caps.CanRunModel(modelInfo.Parameters) </span><span class="cov1" title="1">{
+                <span class="cov8" title="1">if !caps.CanRunModel(modelInfo.Parameters) </span><span class="cov8" title="1">{
                         return nil, fmt.Errorf(
                                 "insufficient resources for model %s (%dB parameters). Your system supports up to %dB parameters",
                                 modelInfo.Name,
@@ -676,7 +667,7 @@ func NewLlamaCppClient(config TranslationConfig) (*LlamaCppClient, error) <span 
                                 caps.MaxModelSize/1_000_000_000,
                         )
                 }</span>
-        } else<span class="cov8" title="35"> {
+        } else<span class="cov8" title="1"> {
                 // Auto-select best model for hardware and languages
                 // Use 60% of total RAM for model selection (more realistic for dedicated model loading)
                 // AvailableRAM only shows currently free memory, which is too conservative
@@ -691,22 +682,22 @@ func NewLlamaCppClient(config TranslationConfig) (*LlamaCppClient, error) <span 
                         return nil, fmt.Errorf("failed to find suitable model: %w", err)
                 }</span>
 
-                <span class="cov8" title="35">fmt.Fprintf(os.Stderr, "[LLAMACPP] Auto-selected model: %s\n", modelInfo.Name)
+                <span class="cov8" title="1">fmt.Fprintf(os.Stderr, "[LLAMACPP] Auto-selected model: %s\n", modelInfo.Name)
                 fmt.Fprintf(os.Stderr, "[LLAMACPP] RAM available for model: %.1f GB (60%% of %.1f GB total)\n",
                         float64(ramForModel)/(1024*1024*1024),
                         float64(caps.TotalRAM)/(1024*1024*1024))</span>
         }
 
         // Check if model is already downloaded
-        <span class="cov8" title="35">downloader := models.NewDownloader()
+        <span class="cov8" title="1">downloader := models.NewDownloader()
         modelPath, err = downloader.GetModelPath(modelInfo)
-        if err != nil </span><span class="cov8" title="35">{
+        if err != nil </span><span class="cov8" title="1">{
                 // Model not downloaded, download it now
                 fmt.Fprintf(os.Stderr, "[LLAMACPP] Downloading model: %s\n", modelInfo.Name)
                 fmt.Fprintf(os.Stderr, "[LLAMACPP] This may take several minutes depending on your connection...\n")
 
                 modelPath, err = downloader.DownloadModel(modelInfo)
-                if err != nil </span><span class="cov8" title="35">{
+                if err != nil </span><span class="cov8" title="1">{
                         return nil, fmt.Errorf("failed to download model: %w", err)
                 }</span>
 
@@ -744,7 +735,7 @@ func NewLlamaCppClient(config TranslationConfig) (*LlamaCppClient, error) <span 
 }
 
 // findLlamaCppExecutable locates the llama-cli executable
-func findLlamaCppExecutable() (string, error) <span class="cov9" title="72">{
+func findLlamaCppExecutable() (string, error) <span class="cov8" title="1">{
         // Try common locations
         candidates := []string{
                 "llama-cli",                   // In PATH
@@ -754,8 +745,8 @@ func findLlamaCppExecutable() (string, error) <span class="cov9" title="72">{
                 filepath.Join(os.Getenv("HOME"), ".local/bin/llama-cli"), // Local install
         }
 
-        for _, candidate := range candidates </span><span class="cov10" title="76">{
-                if path, err := exec.LookPath(candidate); err == nil </span><span class="cov9" title="72">{
+        for _, candidate := range candidates </span><span class="cov8" title="1">{
+                if path, err := exec.LookPath(candidate); err == nil </span><span class="cov8" title="1">{
                         return path, nil
                 }</span>
         }
@@ -764,18 +755,18 @@ func findLlamaCppExecutable() (string, error) <span class="cov9" title="72">{
 }
 
 // GetProviderName returns the provider name
-func (c *LlamaCppClient) GetProviderName() string <span class="cov1" title="1">{
+func (c *LlamaCppClient) GetProviderName() string <span class="cov8" title="1">{
         return "llamacpp"
 }</span>
 
 // Translate translates text using llama.cpp local inference
-func (c *LlamaCppClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov5" title="9">{
-        if text == "" || strings.TrimSpace(text) == "" </span><span class="cov2" title="2">{
+func (c *LlamaCppClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov8" title="1">{
+        if text == "" || strings.TrimSpace(text) == "" </span><span class="cov8" title="1">{
                 return text, nil
         }</span>
 
         // Build command with optimized parameters for translation
-        <span class="cov5" title="7">args := []string{
+        <span class="cov8" title="1">args := []string{
                 "-m", c.modelPath,
                 "-p", prompt,
                 "-n", "4096", // max tokens to generate (increased for book translation)
@@ -789,19 +780,19 @@ func (c *LlamaCppClient) Translate(ctx context.Context, text string, prompt stri
         }
 
         // Enable GPU acceleration if available
-        if c.hardwareCaps.HasGPU </span><span class="cov3" title="4">{
+        if c.hardwareCaps.HasGPU </span><span class="cov8" title="1">{
                 switch c.hardwareCaps.GPUType </span>{
-                case "metal":<span class="cov1" title="1">
+                case "metal":<span class="cov8" title="1">
                         args = append(args, "-ngl", "99")</span> // offload all layers to Metal GPU
-                case "cuda":<span class="cov1" title="1">
+                case "cuda":<span class="cov8" title="1">
                         args = append(args, "-ngl", "99")</span> // offload all layers to CUDA
-                case "rocm":<span class="cov1" title="1">
+                case "rocm":<span class="cov8" title="1">
                         args = append(args, "-ngl", "99")</span> // offload all layers to ROCm
                 }
         }
 
         // Create command with context for cancellation
-        <span class="cov5" title="7">cmd := exec.CommandContext(ctx, c.executable, args...)
+        <span class="cov8" title="1">cmd := exec.CommandContext(ctx, c.executable, args...)
 
         // Capture output
         var stdout, stderr bytes.Buffer
@@ -816,16 +807,16 @@ func (c *LlamaCppClient) Translate(ctx context.Context, text string, prompt stri
         err := cmd.Run()
         duration := time.Since(startTime)
 
-        if err != nil </span><span class="cov4" title="6">{
+        if err != nil </span><span class="cov8" title="1">{
                 // Include stderr in error message for debugging
                 stderrStr := stderr.String()
-                if stderrStr != "" </span><span class="cov1" title="1">{
+                if stderrStr != "" </span><span class="cov8" title="1">{
                         return "", fmt.Errorf("llama.cpp execution failed: %w\nStderr: %s", err, stderrStr)
                 }</span>
-                <span class="cov4" title="5">return "", fmt.Errorf("llama.cpp execution failed: %w", err)</span>
+                <span class="cov8" title="1">return "", fmt.Errorf("llama.cpp execution failed: %w", err)</span>
         }
 
-        <span class="cov1" title="1">result := stdout.String()
+        <span class="cov8" title="1">result := stdout.String()
 
         // Log performance metrics
         tokensPerSecond := float64(len(result)) / duration.Seconds()
@@ -841,34 +832,34 @@ func (c *LlamaCppClient) Translate(ctx context.Context, text string, prompt stri
                 result = strings.TrimSpace(result)
         }</span>
 
-        <span class="cov1" title="1">return result, nil</span>
+        <span class="cov8" title="1">return result, nil</span>
 }
 
 // GetModelInfo returns information about the currently loaded model
-func (c *LlamaCppClient) GetModelInfo() *models.ModelInfo <span class="cov1" title="1">{
+func (c *LlamaCppClient) GetModelInfo() *models.ModelInfo <span class="cov8" title="1">{
         return c.modelInfo
 }</span>
 
 // GetHardwareInfo returns detected hardware capabilities
-func (c *LlamaCppClient) GetHardwareInfo() *hardware.Capabilities <span class="cov1" title="1">{
+func (c *LlamaCppClient) GetHardwareInfo() *hardware.Capabilities <span class="cov8" title="1">{
         return c.hardwareCaps
 }</span>
 
 // Validate checks if the client is properly configured
-func (c *LlamaCppClient) Validate() error <span class="cov3" title="4">{
+func (c *LlamaCppClient) Validate() error <span class="cov8" title="1">{
         // Check if model file exists
-        if _, err := os.Stat(c.modelPath); err != nil </span><span class="cov1" title="1">{
+        if _, err := os.Stat(c.modelPath); err != nil </span><span class="cov8" title="1">{
                 return fmt.Errorf("model file not found: %s", c.modelPath)
         }</span>
 
         // Check if executable exists
-        <span class="cov3" title="3">if _, err := os.Stat(c.executable); err != nil </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">if _, err := os.Stat(c.executable); err != nil </span><span class="cov8" title="1">{
                 return fmt.Errorf("llama-cli not found: %s", c.executable)
         }</span>
 
         // Check if we have enough RAM
-        <span class="cov2" title="2">requiredRAM := c.modelInfo.MinRAM
-        if c.hardwareCaps.AvailableRAM &lt; requiredRAM </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">requiredRAM := c.modelInfo.MinRAM
+        if c.hardwareCaps.AvailableRAM &lt; requiredRAM </span><span class="cov8" title="1">{
                 return fmt.Errorf(
                         "insufficient RAM: model requires %.1f GB, but only %.1f GB available",
                         float64(requiredRAM)/(1024*1024*1024),
@@ -876,7 +867,7 @@ func (c *LlamaCppClient) Validate() error <span class="cov3" title="4">{
                 )
         }</span>
 
-        <span class="cov1" title="1">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 </pre>
 		
@@ -1251,7 +1242,7 @@ func (c *MultiLLMCoordinator) buildCommand(worker *LlamaCppWorker, task Translat
 }
 
 // buildPrompt creates the translation prompt for llama.cpp
-func (c *MultiLLMCoordinator) buildPrompt(task TranslationTask) string <span class="cov0" title="0">{
+func (c *MultiLLMCoordinator) buildPrompt(task TranslationTask) string <span class="cov8" title="1">{
         prompt := fmt.Sprintf(`Translate the following text from %s to %s. 
 Provide ONLY the translation without any explanations, notes, or additional text.
 Maintain the original formatting, line breaks, and structure.
@@ -1283,7 +1274,7 @@ func (c *MultiLLMCoordinator) executeCommand(cmd *exec.Cmd) (string, error) <spa
 }
 
 // parseOutput cleans and extracts the translation from llama.cpp output
-func (c *MultiLLMCoordinator) parseOutput(output string) string <span class="cov0" title="0">{
+func (c *MultiLLMCoordinator) parseOutput(output string) string <span class="cov8" title="1">{
         // Remove ANSI color codes
         output = removeAnsiCodes(output)
         
@@ -1294,25 +1285,25 @@ func (c *MultiLLMCoordinator) parseOutput(output string) string <span class="cov
         var translationLines []string
         foundTranslation := false
         
-        for _, line := range lines </span><span class="cov0" title="0">{
+        for _, line := range lines </span><span class="cov8" title="1">{
                 line = strings.TrimSpace(line)
-                if foundTranslation </span><span class="cov0" title="0">{
+                if foundTranslation </span><span class="cov8" title="1">{
                         translationLines = append(translationLines, line)
-                }</span> else<span class="cov0" title="0"> if strings.Contains(line, "Translation:") </span><span class="cov0" title="0">{
+                }</span> else<span class="cov8" title="1"> if strings.Contains(line, "Translation:") </span><span class="cov8" title="1">{
                         foundTranslation = true
                         // Remove the "Translation:" part
                         parts := strings.SplitN(line, "Translation:", 2)
-                        if len(parts) &gt; 1 </span><span class="cov0" title="0">{
+                        if len(parts) &gt; 1 </span><span class="cov8" title="1">{
                                 translationLines = append(translationLines, strings.TrimSpace(parts[1]))
                         }</span>
                 }
         }
 
-        <span class="cov0" title="0">return strings.Join(translationLines, "\n")</span>
+        <span class="cov8" title="1">return strings.Join(translationLines, "\n")</span>
 }
 
 // getLanguageName converts language codes to full names
-func (c *MultiLLMCoordinator) getLanguageName(code string) string <span class="cov0" title="0">{
+func (c *MultiLLMCoordinator) getLanguageName(code string) string <span class="cov8" title="1">{
         languages := map[string]string{
                 "en": "English",
                 "ru": "Russian",
@@ -1321,14 +1312,14 @@ func (c *MultiLLMCoordinator) getLanguageName(code string) string <span class="c
                 "sr-latn": "Serbian Latin",
         }
         
-        if name, exists := languages[code]; exists </span><span class="cov0" title="0">{
+        if name, exists := languages[code]; exists </span><span class="cov8" title="1">{
                 return name
         }</span>
-        <span class="cov0" title="0">return code</span>
+        <span class="cov8" title="1">return code</span>
 }
 
 // removeAnsiCodes removes ANSI escape codes from text
-func removeAnsiCodes(text string) string <span class="cov0" title="0">{
+func removeAnsiCodes(text string) string <span class="cov8" title="1">{
         // Simple ANSI code removal - can be enhanced if needed
         return text
 }</span>
@@ -1382,21 +1373,21 @@ func (c *MultiLLMCoordinator) TranslateText(ctx context.Context, text, fromLang,
 }
 
 // GetProviderName returns the provider name
-func (c *MultiLLMCoordinator) GetProviderName() string <span class="cov0" title="0">{
+func (c *MultiLLMCoordinator) GetProviderName() string <span class="cov8" title="1">{
         return "llamacpp-multi"
 }</span>
 
 // GetAvailableModels returns information about available models
-func (c *MultiLLMCoordinator) GetAvailableModels() []ModelConfig <span class="cov0" title="0">{
+func (c *MultiLLMCoordinator) GetAvailableModels() []ModelConfig <span class="cov8" title="1">{
         c.mu.RLock()
         defer c.mu.RUnlock()
 
         var models []ModelConfig
-        for _, worker := range c.Workers </span><span class="cov0" title="0">{
+        for _, worker := range c.Workers </span><span class="cov8" title="1">{
                 models = append(models, worker.Config)
         }</span>
 
-        <span class="cov0" title="0">return models</span>
+        <span class="cov8" title="1">return models</span>
 }
 
 // Shutdown gracefully shuts down the coordinator and all workers
@@ -1477,7 +1468,7 @@ type TranslationConfig struct {
 }
 
 // ConvertFromTranslatorConfig converts from parent package config to local config
-func ConvertFromTranslatorConfig(config translator.TranslationConfig) TranslationConfig <span class="cov2" title="13">{
+func ConvertFromTranslatorConfig(config translator.TranslationConfig) TranslationConfig <span class="cov8" title="1">{
         return TranslationConfig{
                 SourceLang:     config.SourceLang,
                 TargetLang:     config.TargetLang,
@@ -1526,7 +1517,7 @@ type LLMTranslator struct {
 }
 
 // GetStats returns translation statistics (implements translator.Translator interface)
-func (lt *LLMTranslator) GetStats() translator.TranslationStats <span class="cov1" title="1">{
+func (lt *LLMTranslator) GetStats() translator.TranslationStats <span class="cov8" title="1">{
         stats := lt.BaseTranslator.GetStats()
         return translator.TranslationStats{
                 Total:      stats.Total,
@@ -1552,7 +1543,7 @@ type TranslationStats struct {
 }
 
 // NewBaseTranslator creates a new base translator
-func NewBaseTranslator(config TranslationConfig) *BaseTranslator <span class="cov3" title="20">{
+func NewBaseTranslator(config TranslationConfig) *BaseTranslator <span class="cov8" title="1">{
         return &amp;BaseTranslator{
                 config: config,
                 stats:  TranslationStats{},
@@ -1561,52 +1552,52 @@ func NewBaseTranslator(config TranslationConfig) *BaseTranslator <span class="co
 }</span>
 
 // GetStats returns translation statistics
-func (bt *BaseTranslator) GetStats() TranslationStats <span class="cov1" title="4">{
+func (bt *BaseTranslator) GetStats() TranslationStats <span class="cov8" title="1">{
         return bt.stats
 }</span>
 
 // CheckCache checks if translation is cached
-func (bt *BaseTranslator) CheckCache(text string) (string, bool) <span class="cov2" title="12">{
-        if translated, ok := bt.cache[text]; ok </span><span class="cov1" title="2">{
+func (bt *BaseTranslator) CheckCache(text string) (string, bool) <span class="cov8" title="1">{
+        if translated, ok := bt.cache[text]; ok </span><span class="cov8" title="1">{
                 bt.stats.Cached++
                 return translated, true
         }</span>
-        <span class="cov2" title="10">return "", false</span>
+        <span class="cov8" title="1">return "", false</span>
 }
 
 // AddToCache adds a translation to cache
-func (bt *BaseTranslator) AddToCache(original, translated string) <span class="cov2" title="6">{
+func (bt *BaseTranslator) AddToCache(original, translated string) <span class="cov8" title="1">{
         bt.cache[original] = translated
 }</span>
 
 // UpdateStats updates translation statistics
-func (bt *BaseTranslator) UpdateStats(success bool) <span class="cov2" title="11">{
+func (bt *BaseTranslator) UpdateStats(success bool) <span class="cov8" title="1">{
         bt.stats.Total++
-        if success </span><span class="cov2" title="6">{
+        if success </span><span class="cov8" title="1">{
                 bt.stats.Translated++
-        }</span> else<span class="cov2" title="5"> {
+        }</span> else<span class="cov8" title="1"> {
                 bt.stats.Errors++
         }</span>
 }
 
 // EmitProgress emits a progress event
-func EmitProgress(eventBus *events.EventBus, sessionID, message string, data map[string]interface{}) <span class="cov1" title="2">{
-        if eventBus == nil </span><span class="cov1" title="1">{
+func EmitProgress(eventBus *events.EventBus, sessionID, message string, data map[string]interface{}) <span class="cov8" title="1">{
+        if eventBus == nil </span><span class="cov8" title="1">{
                 return
         }</span>
 
-        <span class="cov1" title="1">event := events.NewEvent(events.EventTranslationProgress, message, data)
+        <span class="cov8" title="1">event := events.NewEvent(events.EventTranslationProgress, message, data)
         event.SessionID = sessionID
         eventBus.Publish(event)</span>
 }
 
 // EmitError emits an error event
-func EmitError(eventBus *events.EventBus, sessionID, message string, err error) <span class="cov1" title="2">{
-        if eventBus == nil </span><span class="cov1" title="1">{
+func EmitError(eventBus *events.EventBus, sessionID, message string, err error) <span class="cov8" title="1">{
+        if eventBus == nil </span><span class="cov8" title="1">{
                 return
         }</span>
 
-        <span class="cov1" title="1">data := map[string]interface{}{
+        <span class="cov8" title="1">data := map[string]interface{}{
                 "error": err.Error(),
         }
 
@@ -1622,69 +1613,69 @@ type LLMClient interface {
 }
 
 // NewLLMTranslator creates a new LLM translator
-func NewLLMTranslator(config translator.TranslationConfig) (*LLMTranslator, error) <span class="cov2" title="12">{
+func NewLLMTranslator(config translator.TranslationConfig) (*LLMTranslator, error) <span class="cov8" title="1">{
         return NewLLMTranslatorWithConfig(ConvertFromTranslatorConfig(config))
 }</span>
 
 // NewLLMTranslatorWithConfig creates a new LLM translator with local config
-func NewLLMTranslatorWithConfig(config TranslationConfig) (*LLMTranslator, error) <span class="cov3" title="17">{
+func NewLLMTranslatorWithConfig(config TranslationConfig) (*LLMTranslator, error) <span class="cov8" title="1">{
         provider := Provider(config.Provider)
 
         // Validate provider
-        if provider == "" </span><span class="cov1" title="2">{
+        if provider == "" </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("provider must be specified")
         }</span>
 
         // Validate model if provided
-        <span class="cov2" title="15">if config.Model != "" </span><span class="cov2" title="15">{
-                if validModels, exists := ValidModels[provider]; exists </span><span class="cov2" title="13">{
+        <span class="cov8" title="1">if config.Model != "" </span><span class="cov8" title="1">{
+                if validModels, exists := ValidModels[provider]; exists </span><span class="cov8" title="1">{
                         modelValid := false
-                        for _, validModel := range validModels </span><span class="cov3" title="23">{
-                                if config.Model == validModel </span><span class="cov2" title="11">{
+                        for _, validModel := range validModels </span><span class="cov8" title="1">{
+                                if config.Model == validModel </span><span class="cov8" title="1">{
                                         modelValid = true
                                         break</span>
                                 }
                         }
-                        <span class="cov2" title="13">if !modelValid </span><span class="cov1" title="2">{
+                        <span class="cov8" title="1">if !modelValid </span><span class="cov8" title="1">{
                                 return nil, fmt.Errorf("model '%s' is not valid for provider '%s'. Valid models: %v", 
                                         config.Model, provider, validModels)
                         }</span>
                 }
                 // For Ollama and LlamaCpp, we allow custom models but warn
-                <span class="cov2" title="13">if provider == ProviderOllama || provider == ProviderLlamaCpp </span><span class="cov1" title="3">{
+                <span class="cov8" title="1">if provider == ProviderOllama || provider == ProviderLlamaCpp </span><span class="cov8" title="1">{
                         fmt.Printf("Warning: Using custom model '%s' with %s provider\n", config.Model, provider)
                 }</span>
         }
 
-        <span class="cov2" title="13">var client LLMClient
+        <span class="cov8" title="1">var client LLMClient
         var err error
 
         switch provider </span>{
-        case ProviderOpenAI:<span class="cov1" title="2">
+        case ProviderOpenAI:<span class="cov8" title="1">
                 client, err = NewOpenAIClient(config)</span>
-        case ProviderAnthropic:<span class="cov1" title="2">
+        case ProviderAnthropic:<span class="cov8" title="1">
                 client, err = NewAnthropicClient(config)</span>
         case ProviderZhipu:<span class="cov0" title="0">
                 client, err = NewZhipuClient(config)</span>
-        case ProviderDeepSeek:<span class="cov1" title="2">
+        case ProviderDeepSeek:<span class="cov8" title="1">
                 client, err = NewDeepSeekClient(config)</span>
-        case ProviderQwen:<span class="cov1" title="1">
+        case ProviderQwen:<span class="cov8" title="1">
                 client, err = NewQwenClient(config)</span>
-        case ProviderGemini:<span class="cov1" title="1">
+        case ProviderGemini:<span class="cov8" title="1">
                 client, err = NewGeminiClient(config)</span>
-        case ProviderOllama:<span class="cov1" title="2">
+        case ProviderOllama:<span class="cov8" title="1">
                 client, err = NewOllamaClient(config)</span>
-        case ProviderLlamaCpp:<span class="cov1" title="1">
+        case ProviderLlamaCpp:<span class="cov8" title="1">
                 client, err = NewLlamaCppClient(config)</span>
-        default:<span class="cov1" title="2">
+        default:<span class="cov8" title="1">
                 return nil, fmt.Errorf("unsupported LLM provider: %s", provider)</span>
         }
 
-        <span class="cov2" title="11">if err != nil </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("failed to create LLM client: %w", err)
         }</span>
 
-        <span class="cov2" title="10">return &amp;LLMTranslator{
+        <span class="cov8" title="1">return &amp;LLMTranslator{
                 BaseTranslator: NewBaseTranslator(config),
                 provider:       provider,
                 client:         client,
@@ -1692,34 +1683,34 @@ func NewLLMTranslatorWithConfig(config TranslationConfig) (*LLMTranslator, error
 }
 
 // GetName returns the translator name
-func (lt *LLMTranslator) GetName() string <span class="cov2" title="6">{
+func (lt *LLMTranslator) GetName() string <span class="cov8" title="1">{
         return fmt.Sprintf("llm-%s", lt.provider)
 }</span>
 
 // Translate translates text using LLM with automatic retry and text splitting
-func (lt *LLMTranslator) Translate(ctx context.Context, text string, contextStr string) (string, error) <span class="cov2" title="12">{
-        if text == "" || strings.TrimSpace(text) == "" </span><span class="cov1" title="2">{
+func (lt *LLMTranslator) Translate(ctx context.Context, text string, contextStr string) (string, error) <span class="cov8" title="1">{
+        if text == "" || strings.TrimSpace(text) == "" </span><span class="cov8" title="1">{
                 return text, nil
         }</span>
 
         // Check cache
-        <span class="cov2" title="10">cacheKey := fmt.Sprintf("%s:%s", text, contextStr)
-        if cached, found := lt.CheckCache(cacheKey); found </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">cacheKey := fmt.Sprintf("%s:%s", text, contextStr)
+        if cached, found := lt.CheckCache(cacheKey); found </span><span class="cov8" title="1">{
                 return cached, nil
         }</span>
 
         // Create translation prompt
-        <span class="cov2" title="9">prompt := lt.createTranslationPrompt(text, contextStr)
+        <span class="cov8" title="1">prompt := lt.createTranslationPrompt(text, contextStr)
 
         // Translate using LLM with smart retry
         result, err := lt.translateWithRetry(ctx, text, prompt, contextStr)
-        if err != nil </span><span class="cov1" title="4">{
+        if err != nil </span><span class="cov8" title="1">{
                 lt.UpdateStats(false)
                 return "", fmt.Errorf("LLM translation failed: %w", err)
         }</span>
 
         // Enhance translation
-        <span class="cov2" title="5">result = lt.enhanceTranslation(text, result)
+        <span class="cov8" title="1">result = lt.enhanceTranslation(text, result)
 
         // Update stats
         lt.UpdateStats(true)
@@ -1731,56 +1722,56 @@ func (lt *LLMTranslator) Translate(ctx context.Context, text string, contextStr 
 }
 
 // translateWithRetry attempts translation with automatic splitting on size errors
-func (lt *LLMTranslator) translateWithRetry(ctx context.Context, text, prompt, contextStr string) (string, error) <span class="cov2" title="12">{
+func (lt *LLMTranslator) translateWithRetry(ctx context.Context, text, prompt, contextStr string) (string, error) <span class="cov8" title="1">{
         // First attempt - try with full text
         result, err := lt.client.Translate(ctx, text, prompt)
-        if err == nil </span><span class="cov2" title="6">{
+        if err == nil </span><span class="cov8" title="1">{
                 return result, nil
         }</span>
 
         // Check if error is due to text size
-        <span class="cov2" title="6">if !isTextSizeError(err) </span><span class="cov1" title="3">{
+        <span class="cov8" title="1">if !isTextSizeError(err) </span><span class="cov8" title="1">{
                 return "", err
         }</span>
 
         // Text is too large - split and translate in chunks
-        <span class="cov1" title="3">fmt.Fprintf(os.Stderr, "[LLM_RETRY] Text too large (%d bytes), splitting into chunks\n", len(text))
+        <span class="cov8" title="1">fmt.Fprintf(os.Stderr, "[LLM_RETRY] Text too large (%d bytes), splitting into chunks\n", len(text))
 
         chunks := lt.splitText(text)
-        if len(chunks) == 1 </span><span class="cov1" title="1">{
+        if len(chunks) == 1 </span><span class="cov8" title="1">{
                 // Cannot split further - text is too large even for one sentence
                 return "", fmt.Errorf("text too large to translate even after splitting (min chunk: %d bytes): %w", len(chunks[0]), err)
         }</span>
 
-        <span class="cov1" title="2">fmt.Fprintf(os.Stderr, "[LLM_RETRY] Split into %d chunks, translating separately\n", len(chunks))
+        <span class="cov8" title="1">fmt.Fprintf(os.Stderr, "[LLM_RETRY] Split into %d chunks, translating separately\n", len(chunks))
 
         // Translate each chunk
         var translatedChunks []string
-        for i, chunk := range chunks </span><span class="cov1" title="4">{
+        for i, chunk := range chunks </span><span class="cov8" title="1">{
                 chunkPrompt := lt.createTranslationPrompt(chunk, fmt.Sprintf("%s (part %d/%d)", contextStr, i+1, len(chunks)))
 
                 chunkResult, chunkErr := lt.client.Translate(ctx, chunk, chunkPrompt)
-                if chunkErr != nil </span><span class="cov1" title="1">{
+                if chunkErr != nil </span><span class="cov8" title="1">{
                         return "", fmt.Errorf("failed to translate chunk %d/%d: %w", i+1, len(chunks), chunkErr)
                 }</span>
 
-                <span class="cov1" title="3">translatedChunks = append(translatedChunks, chunkResult)</span>
+                <span class="cov8" title="1">translatedChunks = append(translatedChunks, chunkResult)</span>
         }
 
         // Combine translated chunks
-        <span class="cov1" title="1">result = strings.Join(translatedChunks, "")
+        <span class="cov8" title="1">result = strings.Join(translatedChunks, "")
         fmt.Fprintf(os.Stderr, "[LLM_RETRY] Successfully translated %d chunks\n", len(chunks))
 
         return result, nil</span>
 }
 
 // isTextSizeError checks if error is due to text being too large
-func isTextSizeError(err error) bool <span class="cov2" title="13">{
-        if err == nil </span><span class="cov1" title="1">{
+func isTextSizeError(err error) bool <span class="cov8" title="1">{
+        if err == nil </span><span class="cov8" title="1">{
                 return false
         }</span>
 
-        <span class="cov2" title="12">errStr := strings.ToLower(err.Error())
+        <span class="cov8" title="1">errStr := strings.ToLower(err.Error())
 
         // Common size-related error patterns
         sizeErrorPatterns := []string{
@@ -1794,78 +1785,78 @@ func isTextSizeError(err error) bool <span class="cov2" title="13">{
                 "invalid request",
         }
 
-        for _, pattern := range sizeErrorPatterns </span><span class="cov3" title="59">{
-                if strings.Contains(errStr, pattern) </span><span class="cov2" title="7">{
+        for _, pattern := range sizeErrorPatterns </span><span class="cov8" title="1">{
+                if strings.Contains(errStr, pattern) </span><span class="cov8" title="1">{
                         return true
                 }</span>
         }
 
-        <span class="cov2" title="5">return false</span>
+        <span class="cov8" title="1">return false</span>
 }
 
 // splitText splits text into smaller chunks at sentence boundaries
-func (lt *LLMTranslator) splitText(text string) []string <span class="cov3" title="19">{
+func (lt *LLMTranslator) splitText(text string) []string <span class="cov8" title="1">{
         // Target chunk size (roughly 20KB to stay well under limits)
         const maxChunkSize = 20000
 
         // If text is small enough, return as-is
-        if len(text) &lt;= maxChunkSize </span><span class="cov2" title="11">{
+        if len(text) &lt;= maxChunkSize </span><span class="cov8" title="1">{
                 return []string{text}
         }</span>
 
-        <span class="cov2" title="8">var chunks []string
+        <span class="cov8" title="1">var chunks []string
         var currentChunk strings.Builder
 
         // Split by paragraphs first
         paragraphs := strings.Split(text, "\n\n")
 
-        for _, para := range paragraphs </span><span class="cov2" title="10">{
+        for _, para := range paragraphs </span><span class="cov8" title="1">{
                 // If single paragraph is too large, split by sentences
-                if len(para) &gt; maxChunkSize </span><span class="cov2" title="8">{
+                if len(para) &gt; maxChunkSize </span><span class="cov8" title="1">{
                         sentences := lt.splitBySentences(para)
-                        for _, sentence := range sentences </span><span class="cov7" title="6808">{
-                                if currentChunk.Len()+len(sentence) &gt; maxChunkSize &amp;&amp; currentChunk.Len() &gt; 0 </span><span class="cov2" title="8">{
+                        for _, sentence := range sentences </span><span class="cov8" title="1">{
+                                if currentChunk.Len()+len(sentence) &gt; maxChunkSize &amp;&amp; currentChunk.Len() &gt; 0 </span><span class="cov8" title="1">{
                                         // Current chunk is full, start new chunk
                                         chunks = append(chunks, currentChunk.String())
                                         currentChunk.Reset()
                                 }</span>
-                                <span class="cov7" title="6808">currentChunk.WriteString(sentence)</span>
+                                <span class="cov8" title="1">currentChunk.WriteString(sentence)</span>
                         }
-                } else<span class="cov1" title="2"> {
+                } else<span class="cov8" title="1"> {
                         // Add paragraph to current chunk
                         if currentChunk.Len()+len(para)+2 &gt; maxChunkSize &amp;&amp; currentChunk.Len() &gt; 0 </span><span class="cov0" title="0">{
                                 // Current chunk is full, start new chunk
                                 chunks = append(chunks, currentChunk.String())
                                 currentChunk.Reset()
                         }</span>
-                        <span class="cov1" title="2">if currentChunk.Len() &gt; 0 </span><span class="cov1" title="1">{
+                        <span class="cov8" title="1">if currentChunk.Len() &gt; 0 </span><span class="cov8" title="1">{
                                 currentChunk.WriteString("\n\n")
                         }</span>
-                        <span class="cov1" title="2">currentChunk.WriteString(para)</span>
+                        <span class="cov8" title="1">currentChunk.WriteString(para)</span>
                 }
         }
 
         // Add final chunk
-        <span class="cov2" title="8">if currentChunk.Len() &gt; 0 </span><span class="cov2" title="8">{
+        <span class="cov8" title="1">if currentChunk.Len() &gt; 0 </span><span class="cov8" title="1">{
                 chunks = append(chunks, currentChunk.String())
         }</span>
 
-        <span class="cov2" title="8">return chunks</span>
+        <span class="cov8" title="1">return chunks</span>
 }
 
 // splitBySentences splits text into sentences
-func (lt *LLMTranslator) splitBySentences(text string) []string <span class="cov2" title="12">{
+func (lt *LLMTranslator) splitBySentences(text string) []string <span class="cov8" title="1">{
         var sentences []string
         var currentSentence strings.Builder
 
         runes := []rune(text)
-        for i := 0; i &lt; len(runes); i++ </span><span class="cov10" title="320534">{
+        for i := 0; i &lt; len(runes); i++ </span><span class="cov8" title="1">{
                 currentSentence.WriteRune(runes[i])
 
                 // Check for sentence endings
-                if runes[i] == '.' || runes[i] == '!' || runes[i] == '?' || runes[i] == '…' </span><span class="cov7" title="6809">{
+                if runes[i] == '.' || runes[i] == '!' || runes[i] == '?' || runes[i] == '…' </span><span class="cov8" title="1">{
                         // Check if followed by space or end of text
-                        if i+1 &gt;= len(runes) || runes[i+1] == ' ' || runes[i+1] == '\n' </span><span class="cov7" title="6809">{
+                        if i+1 &gt;= len(runes) || runes[i+1] == ' ' || runes[i+1] == '\n' </span><span class="cov8" title="1">{
                                 sentences = append(sentences, currentSentence.String())
                                 currentSentence.Reset()
                         }</span>
@@ -1873,11 +1864,11 @@ func (lt *LLMTranslator) splitBySentences(text string) []string <span class="cov
         }
 
         // Add remaining text
-        <span class="cov2" title="12">if currentSentence.Len() &gt; 0 </span><span class="cov2" title="7">{
+        <span class="cov8" title="1">if currentSentence.Len() &gt; 0 </span><span class="cov8" title="1">{
                 sentences = append(sentences, currentSentence.String())
         }</span>
 
-        <span class="cov2" title="12">return sentences</span>
+        <span class="cov8" title="1">return sentences</span>
 }
 
 // TranslateWithProgress translates and reports progress (implements translator.Translator interface)
@@ -1887,7 +1878,7 @@ func (lt *LLMTranslator) TranslateWithProgress(
         contextStr string,
         eventBus *events.EventBus,
         sessionID string,
-) (string, error) <span class="cov1" title="3">{
+) (string, error) <span class="cov8" title="1">{
         translator.EmitProgress(eventBus, sessionID, "Starting LLM translation", map[string]interface{}{
                 "provider":    string(lt.provider),
                 "text_length": len(text),
@@ -1895,7 +1886,7 @@ func (lt *LLMTranslator) TranslateWithProgress(
 
         result, err := lt.Translate(ctx, text, contextStr)
 
-        if err != nil </span><span class="cov1" title="1">{
+        if err != nil </span><span class="cov8" title="1">{
                 // Log detailed error to stdout for debugging
                 fmt.Fprintf(os.Stderr, "[LLM_ERROR] Translation failed: %v\n", err)
                 fmt.Fprintf(os.Stderr, "[LLM_ERROR] Text length: %d bytes, Context: %s\n", len(text), contextStr)
@@ -1903,7 +1894,7 @@ func (lt *LLMTranslator) TranslateWithProgress(
                 return "", err
         }</span>
 
-        <span class="cov1" title="2">translator.EmitProgress(eventBus, sessionID, "LLM translation completed", map[string]interface{}{
+        <span class="cov8" title="1">translator.EmitProgress(eventBus, sessionID, "LLM translation completed", map[string]interface{}{
                 "provider":          string(lt.provider),
                 "original_length":   len(text),
                 "translated_length": len(result),
@@ -1913,13 +1904,13 @@ func (lt *LLMTranslator) TranslateWithProgress(
 }
 
 // createTranslationPrompt creates the translation prompt
-func (lt *LLMTranslator) createTranslationPrompt(text string, contextStr string) string <span class="cov2" title="16">{
+func (lt *LLMTranslator) createTranslationPrompt(text string, contextStr string) string <span class="cov8" title="1">{
         context := contextStr
-        if context == "" </span><span class="cov1" title="1">{
+        if context == "" </span><span class="cov8" title="1">{
                 context = "Literary text"
         }</span>
 
-        <span class="cov2" title="16">return fmt.Sprintf(`You are a professional literary translator specializing in Russian to Serbian translation.
+        <span class="cov8" title="1">return fmt.Sprintf(`You are a professional literary translator specializing in Russian to Serbian translation.
 Your task is to translate the following Russian text into natural, idiomatic Serbian.
 
 Guidelines:
@@ -1946,7 +1937,7 @@ Serbian translation (Ekavica only):`, context, text)</span>
 }
 
 // enhanceTranslation post-processes the translation
-func (lt *LLMTranslator) enhanceTranslation(original, translated string) string <span class="cov2" title="8">{
+func (lt *LLMTranslator) enhanceTranslation(original, translated string) string <span class="cov8" title="1">{
         enhanced := translated
 
         // Fix common punctuation issues
@@ -1955,36 +1946,36 @@ func (lt *LLMTranslator) enhanceTranslation(original, translated string) string 
         enhanced = strings.ReplaceAll(enhanced, "\u2018", "'")
 
         // Preserve paragraph structure
-        if strings.HasSuffix(original, "\n") &amp;&amp; !strings.HasSuffix(enhanced, "\n") </span><span class="cov1" title="1">{
+        if strings.HasSuffix(original, "\n") &amp;&amp; !strings.HasSuffix(enhanced, "\n") </span><span class="cov8" title="1">{
                 enhanced += "\n"
         }</span>
 
         // Fix sentence capitalization
-        <span class="cov2" title="8">if len(enhanced) &gt; 0 &amp;&amp; len(original) &gt; 0 </span><span class="cov2" title="8">{
-                if isLower(rune(enhanced[0])) &amp;&amp; isUpper(rune(original[0])) </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">if len(enhanced) &gt; 0 &amp;&amp; len(original) &gt; 0 </span><span class="cov8" title="1">{
+                if isLower(rune(enhanced[0])) &amp;&amp; isUpper(rune(original[0])) </span><span class="cov8" title="1">{
                         runes := []rune(enhanced)
                         runes[0] = toUpper(runes[0])
                         enhanced = string(runes)
                 }</span>
         }
 
-        <span class="cov2" title="8">return enhanced</span>
+        <span class="cov8" title="1">return enhanced</span>
 }
 
 // Helper functions
-func isLower(r rune) bool <span class="cov2" title="13">{
+func isLower(r rune) bool <span class="cov8" title="1">{
         return r &gt;= 'a' &amp;&amp; r &lt;= 'z'
 }</span>
 
-func isUpper(r rune) bool <span class="cov1" title="3">{
+func isUpper(r rune) bool <span class="cov8" title="1">{
         return r &gt;= 'A' &amp;&amp; r &lt;= 'Z'
 }</span>
 
-func toUpper(r rune) rune <span class="cov1" title="3">{
-        if isLower(r) </span><span class="cov1" title="2">{
+func toUpper(r rune) rune <span class="cov8" title="1">{
+        if isLower(r) </span><span class="cov8" title="1">{
                 return r - 32
         }</span>
-        <span class="cov1" title="1">return r</span>
+        <span class="cov8" title="1">return r</span>
 }
 </pre>
 		
@@ -2023,13 +2014,13 @@ type OllamaResponse struct {
 }
 
 // NewOllamaClient creates a new Ollama client
-func NewOllamaClient(config TranslationConfig) (*OllamaClient, error) <span class="cov10" title="30">{
+func NewOllamaClient(config TranslationConfig) (*OllamaClient, error) <span class="cov8" title="1">{
         baseURL := config.BaseURL
-        if baseURL == "" </span><span class="cov5" title="5">{
+        if baseURL == "" </span><span class="cov8" title="1">{
                 baseURL = "http://localhost:11434"
         }</span>
 
-        <span class="cov10" title="30">return &amp;OllamaClient{
+        <span class="cov8" title="1">return &amp;OllamaClient{
                 config: config,
                 httpClient: &amp;http.Client{
                         Timeout: 600 * time.Second, // Increased to 10 minutes for very large book sections (up to 44KB)
@@ -2039,18 +2030,18 @@ func NewOllamaClient(config TranslationConfig) (*OllamaClient, error) <span clas
 }
 
 // GetProviderName returns the provider name
-func (c *OllamaClient) GetProviderName() string <span class="cov3" title="3">{
+func (c *OllamaClient) GetProviderName() string <span class="cov8" title="1">{
         return "ollama"
 }</span>
 
 // Translate translates text using Ollama
-func (c *OllamaClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov9" title="28">{
+func (c *OllamaClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov8" title="1">{
         model := c.config.Model
-        if model == "" </span><span class="cov6" title="7">{
+        if model == "" </span><span class="cov8" title="1">{
                 model = "llama3:8b"
         }</span>
 
-        <span class="cov9" title="28">request := OllamaRequest{
+        <span class="cov8" title="1">request := OllamaRequest{
                 Model:  model,
                 Prompt: prompt,
                 Stream: false,
@@ -2061,34 +2052,34 @@ func (c *OllamaClient) Translate(ctx context.Context, text string, prompt string
                 return "", fmt.Errorf("failed to marshal request: %w", err)
         }</span>
 
-        <span class="cov9" title="28">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/api/generate", bytes.NewBuffer(jsonData))
+        <span class="cov8" title="1">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/api/generate", bytes.NewBuffer(jsonData))
         if err != nil </span><span class="cov0" title="0">{
                 return "", fmt.Errorf("failed to create request: %w", err)
         }</span>
 
-        <span class="cov9" title="28">req.Header.Set("Content-Type", "application/json")
+        <span class="cov8" title="1">req.Header.Set("Content-Type", "application/json")
 
         resp, err := c.httpClient.Do(req)
-        if err != nil </span><span class="cov7" title="13">{
+        if err != nil </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("failed to send request: %w", err)
         }</span>
-        <span class="cov8" title="15">defer resp.Body.Close()
+        <span class="cov8" title="1">defer resp.Body.Close()
 
         body, err := io.ReadAll(resp.Body)
-        if err != nil </span><span class="cov1" title="1">{
+        if err != nil </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("failed to read response: %w", err)
         }</span>
 
-        <span class="cov7" title="14">if resp.StatusCode != http.StatusOK </span><span class="cov6" title="8">{
+        <span class="cov8" title="1">if resp.StatusCode != http.StatusOK </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("Ollama API error (status %d): %s", resp.StatusCode, string(body))
         }</span>
 
-        <span class="cov5" title="6">var response OllamaResponse
-        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov2" title="2">{
+        <span class="cov8" title="1">var response OllamaResponse
+        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("failed to unmarshal response: %w", err)
         }</span>
 
-        <span class="cov4" title="4">return response.Response, nil</span>
+        <span class="cov8" title="1">return response.Response, nil</span>
 }
 </pre>
 		
@@ -2151,32 +2142,32 @@ type Usage struct {
 }
 
 // NewOpenAIClient creates a new OpenAI client
-func NewOpenAIClient(config TranslationConfig) (*OpenAIClient, error) <span class="cov10" title="35">{
-        if config.APIKey == "" </span><span class="cov1" title="1">{
+func NewOpenAIClient(config TranslationConfig) (*OpenAIClient, error) <span class="cov8" title="1">{
+        if config.APIKey == "" </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("OpenAI API key is required")
         }</span>
 
         // Validate model if provided (skip validation for delegated providers)
-        <span class="cov9" title="34">if config.Model != "" </span><span class="cov9" title="31">{
+        <span class="cov8" title="1">if config.Model != "" </span><span class="cov8" title="1">{
                 // Skip validation for non-OpenAI providers that delegate to OpenAI
                 isDelegated := false
-                if config.Provider != "" &amp;&amp; config.Provider != "openai" </span><span class="cov7" title="15">{
+                if config.Provider != "" &amp;&amp; config.Provider != "openai" </span><span class="cov8" title="1">{
                         isDelegated = true
                 }</span>
                 
-                <span class="cov9" title="31">if !isDelegated </span><span class="cov8" title="16">{
+                <span class="cov8" title="1">if !isDelegated </span><span class="cov8" title="1">{
                         if strings.TrimSpace(config.Model) == "" </span><span class="cov0" title="0">{
                                 return nil, fmt.Errorf("model cannot be empty or whitespace")
                         }</span>
-                        <span class="cov8" title="16">validModels := ValidModels[ProviderOpenAI]
+                        <span class="cov8" title="1">validModels := ValidModels[ProviderOpenAI]
                         modelValid := false
-                        for _, validModel := range validModels </span><span class="cov9" title="24">{
-                                if config.Model == validModel </span><span class="cov8" title="16">{
+                        for _, validModel := range validModels </span><span class="cov8" title="1">{
+                                if config.Model == validModel </span><span class="cov8" title="1">{
                                         modelValid = true
                                         break</span>
                                 }
                         }
-                        <span class="cov8" title="16">if !modelValid </span><span class="cov0" title="0">{
+                        <span class="cov8" title="1">if !modelValid </span><span class="cov0" title="0">{
                                 return nil, fmt.Errorf("model '%s' is not valid for OpenAI. Valid models: %v", 
                                         config.Model, validModels)
                         }</span>
@@ -2184,20 +2175,20 @@ func NewOpenAIClient(config TranslationConfig) (*OpenAIClient, error) <span clas
         }
 
         // Validate temperature if provided
-        <span class="cov9" title="34">if temp, exists := config.Options["temperature"]; exists </span><span class="cov6" title="8">{
-                if tempFloat, ok := temp.(float64); ok </span><span class="cov6" title="8">{
-                        if tempFloat &lt; 0.0 || tempFloat &gt; 2.0 </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">if temp, exists := config.Options["temperature"]; exists </span><span class="cov8" title="1">{
+                if tempFloat, ok := temp.(float64); ok </span><span class="cov8" title="1">{
+                        if tempFloat &lt; 0.0 || tempFloat &gt; 2.0 </span><span class="cov8" title="1">{
                                 return nil, fmt.Errorf("temperature %.1f is invalid for OpenAI. Must be between 0.0 and 2.0", tempFloat)
                         }</span>
                 }
         }
 
-        <span class="cov9" title="33">baseURL := config.BaseURL
-        if baseURL == "" </span><span class="cov7" title="12">{
+        <span class="cov8" title="1">baseURL := config.BaseURL
+        if baseURL == "" </span><span class="cov8" title="1">{
                 baseURL = "https://api.openai.com/v1"
         }</span>
 
-        <span class="cov9" title="33">return &amp;OpenAIClient{
+        <span class="cov8" title="1">return &amp;OpenAIClient{
                 config: config,
                 httpClient: &amp;http.Client{
                         Timeout: 600 * time.Second, // Increased to 10 minutes for very large book sections (up to 44KB)
@@ -2207,32 +2198,32 @@ func NewOpenAIClient(config TranslationConfig) (*OpenAIClient, error) <span clas
 }
 
 // GetProviderName returns the provider name
-func (c *OpenAIClient) GetProviderName() string <span class="cov5" title="5">{
+func (c *OpenAIClient) GetProviderName() string <span class="cov8" title="1">{
         return "openai"
 }</span>
 
 // Translate translates text using OpenAI
-func (c *OpenAIClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov8" title="22">{
+func (c *OpenAIClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov8" title="1">{
         model := c.config.Model
-        if model == "" </span><span class="cov1" title="1">{
+        if model == "" </span><span class="cov8" title="1">{
                 model = "gpt-4"
         }</span>
 
-        <span class="cov8" title="22">temperature := c.config.Options["temperature"]
-        if temperature == nil </span><span class="cov8" title="20">{
+        <span class="cov8" title="1">temperature := c.config.Options["temperature"]
+        if temperature == nil </span><span class="cov8" title="1">{
                 temperature = 0.3
         }</span>
 
         // Increase max_tokens for large translations (book sections can be very long)
         // DeepSeek/OpenAI compatible models support up to 8192 max_tokens
-        <span class="cov8" title="22">maxTokens := 8192 // Increased from 4000 to handle book chapters (DeepSeek max)
-        if c.config.Options["max_tokens"] != nil </span><span class="cov1" title="1">{
-                if mt, ok := c.config.Options["max_tokens"].(int); ok </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">maxTokens := 8192 // Increased from 4000 to handle book chapters (DeepSeek max)
+        if c.config.Options["max_tokens"] != nil </span><span class="cov8" title="1">{
+                if mt, ok := c.config.Options["max_tokens"].(int); ok </span><span class="cov8" title="1">{
                         maxTokens = mt
                 }</span>
         }
 
-        <span class="cov8" title="22">request := OpenAIRequest{
+        <span class="cov8" title="1">request := OpenAIRequest{
                 Model: model,
                 Messages: []Message{
                         {Role: "user", Content: prompt},
@@ -2246,39 +2237,39 @@ func (c *OpenAIClient) Translate(ctx context.Context, text string, prompt string
                 return "", fmt.Errorf("failed to marshal request: %w", err)
         }</span>
 
-        <span class="cov8" title="22">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/chat/completions", bytes.NewBuffer(jsonData))
+        <span class="cov8" title="1">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/chat/completions", bytes.NewBuffer(jsonData))
         if err != nil </span><span class="cov0" title="0">{
                 return "", fmt.Errorf("failed to create request: %w", err)
         }</span>
 
-        <span class="cov8" title="22">req.Header.Set("Content-Type", "application/json")
+        <span class="cov8" title="1">req.Header.Set("Content-Type", "application/json")
         req.Header.Set("Authorization", "Bearer "+c.config.APIKey)
 
         resp, err := c.httpClient.Do(req)
-        if err != nil </span><span class="cov2" title="2">{
+        if err != nil </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("failed to send request: %w", err)
         }</span>
-        <span class="cov8" title="20">defer resp.Body.Close()
+        <span class="cov8" title="1">defer resp.Body.Close()
 
         body, err := io.ReadAll(resp.Body)
         if err != nil </span><span class="cov0" title="0">{
                 return "", fmt.Errorf("failed to read response: %w", err)
         }</span>
 
-        <span class="cov8" title="20">if resp.StatusCode != http.StatusOK </span><span class="cov5" title="6">{
+        <span class="cov8" title="1">if resp.StatusCode != http.StatusOK </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("OpenAI API error (status %d): %s", resp.StatusCode, string(body))
         }</span>
 
-        <span class="cov7" title="14">var response OpenAIResponse
-        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">var response OpenAIResponse
+        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("failed to unmarshal response: %w", err)
         }</span>
 
-        <span class="cov7" title="13">if len(response.Choices) == 0 </span><span class="cov3" title="3">{
+        <span class="cov8" title="1">if len(response.Choices) == 0 </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("no choices in response")
         }</span>
 
-        <span class="cov6" title="10">return response.Choices[0].Message.Content, nil</span>
+        <span class="cov8" title="1">return response.Choices[0].Message.Content, nil</span>
 }
 </pre>
 		
@@ -2353,21 +2344,21 @@ type QwenUsage struct {
 }
 
 // NewQwenClient creates a new Qwen client with OAuth support
-func NewQwenClient(config TranslationConfig) (*QwenClient, error) <span class="cov10" title="37">{
+func NewQwenClient(config TranslationConfig) (*QwenClient, error) <span class="cov8" title="1">{
         credDir := os.Getenv("HOME")
-        if credDir == "" </span><span class="cov1" title="1">{
+        if credDir == "" </span><span class="cov8" title="1">{
                 credDir = "."
         }</span>
 
         // Primary location for translator-specific credentials
-        <span class="cov10" title="37">credFile := filepath.Join(credDir, ".translator", "qwen_credentials.json")
+        <span class="cov8" title="1">credFile := filepath.Join(credDir, ".translator", "qwen_credentials.json")
 
         baseURL := config.BaseURL
-        if baseURL == "" </span><span class="cov9" title="31">{
+        if baseURL == "" </span><span class="cov8" title="1">{
                 baseURL = "https://dashscope.aliyuncs.com/api/v1"
         }</span>
 
-        <span class="cov10" title="37">client := &amp;QwenClient{
+        <span class="cov8" title="1">client := &amp;QwenClient{
                 config:       config,
                 httpClient:   &amp;http.Client{Timeout: 600 * time.Second}, // Increased to 10 minutes for very large book sections (up to 44KB)
                 baseURL:      baseURL,
@@ -2375,18 +2366,18 @@ func NewQwenClient(config TranslationConfig) (*QwenClient, error) <span class="c
         }
 
         // Load OAuth token from file or use API key
-        if config.APIKey != "" </span><span class="cov9" title="32">{
+        if config.APIKey != "" </span><span class="cov8" title="1">{
                 // API key provided - use it directly
                 return client, nil
         }</span>
 
         // No API key provided, try to load OAuth token
         // Try loading OAuth token from translator-specific location
-        <span class="cov5" title="5">if err := client.loadOAuthToken(); err != nil </span><span class="cov3" title="3">{
+        <span class="cov8" title="1">if err := client.loadOAuthToken(); err != nil </span><span class="cov8" title="1">{
                 // Try Qwen Code standard location as fallback
                 qwenCodeCredFile := filepath.Join(credDir, ".qwen", "oauth_creds.json")
                 client.credFilePath = qwenCodeCredFile
-                if err := client.loadOAuthToken(); err != nil </span><span class="cov3" title="3">{
+                if err := client.loadOAuthToken(); err != nil </span><span class="cov8" title="1">{
                         return nil, fmt.Errorf("no API key or valid OAuth token found: %w\nPlease set QWEN_API_KEY environment variable or authenticate via OAuth", err)
                 }</span>
         }
@@ -2394,53 +2385,53 @@ func NewQwenClient(config TranslationConfig) (*QwenClient, error) <span class="c
         // Note: We don't pre-emptively refresh expired tokens on initialization
         // Instead, we'll attempt to use the token and only refresh if we get a 401 error
         // This allows tokens to work even if the expiry date calculation is off
-        <span class="cov2" title="2">if client.isTokenExpired() </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">if client.isTokenExpired() </span><span class="cov8" title="1">{
                 // Log warning but continue - will refresh on 401
                 fmt.Fprintf(os.Stderr, "Warning: Qwen OAuth token appears expired, will attempt to use it anyway\n")
         }</span>
 
-        <span class="cov2" title="2">return client, nil</span>
+        <span class="cov8" title="1">return client, nil</span>
 }
 
 // loadOAuthToken loads OAuth token from credentials file
-func (c *QwenClient) loadOAuthToken() error <span class="cov6" title="11">{
+func (c *QwenClient) loadOAuthToken() error <span class="cov8" title="1">{
         data, err := os.ReadFile(c.credFilePath)
-        if err != nil </span><span class="cov5" title="6">{
+        if err != nil </span><span class="cov8" title="1">{
                 return fmt.Errorf("failed to read credentials file: %w", err)
         }</span>
 
-        <span class="cov5" title="5">var token QwenOAuthToken
-        if err := json.Unmarshal(data, &amp;token); err != nil </span><span class="cov2" title="2">{
+        <span class="cov8" title="1">var token QwenOAuthToken
+        if err := json.Unmarshal(data, &amp;token); err != nil </span><span class="cov8" title="1">{
                 return fmt.Errorf("failed to parse credentials: %w", err)
         }</span>
 
-        <span class="cov3" title="3">c.oauthToken = &amp;token
+        <span class="cov8" title="1">c.oauthToken = &amp;token
         return nil</span>
 }
 
 // saveOAuthToken saves OAuth token to credentials file
-func (c *QwenClient) saveOAuthToken(token *QwenOAuthToken) error <span class="cov6" title="11">{
+func (c *QwenClient) saveOAuthToken(token *QwenOAuthToken) error <span class="cov8" title="1">{
         // Ensure directory exists
         dir := filepath.Dir(c.credFilePath)
-        if err := os.MkdirAll(dir, 0700); err != nil </span><span class="cov1" title="1">{
+        if err := os.MkdirAll(dir, 0700); err != nil </span><span class="cov8" title="1">{
                 return fmt.Errorf("failed to create credentials directory: %w", err)
         }</span>
 
-        <span class="cov6" title="10">data, err := json.MarshalIndent(token, "", "  ")
+        <span class="cov8" title="1">data, err := json.MarshalIndent(token, "", "  ")
         if err != nil </span><span class="cov0" title="0">{
                 return fmt.Errorf("failed to marshal credentials: %w", err)
         }</span>
 
-        <span class="cov6" title="10">if err := os.WriteFile(c.credFilePath, data, 0600); err != nil </span><span class="cov3" title="3">{
+        <span class="cov8" title="1">if err := os.WriteFile(c.credFilePath, data, 0600); err != nil </span><span class="cov8" title="1">{
                 return fmt.Errorf("failed to write credentials file: %w", err)
         }</span>
 
-        <span class="cov5" title="7">c.oauthToken = token
+        <span class="cov8" title="1">c.oauthToken = token
         return nil</span>
 }
 
 // SetOAuthToken sets OAuth token from external source (e.g., OAuth flow)
-func (c *QwenClient) SetOAuthToken(accessToken, refreshToken, resourceURL string, expiryDate int64) error <span class="cov3" title="3">{
+func (c *QwenClient) SetOAuthToken(accessToken, refreshToken, resourceURL string, expiryDate int64) error <span class="cov8" title="1">{
         token := &amp;QwenOAuthToken{
                 AccessToken:  accessToken,
                 TokenType:    "Bearer",
@@ -2452,22 +2443,22 @@ func (c *QwenClient) SetOAuthToken(accessToken, refreshToken, resourceURL string
 }</span>
 
 // isTokenExpired checks if the OAuth token is expired
-func (c *QwenClient) isTokenExpired() bool <span class="cov6" title="9">{
-        if c.oauthToken == nil </span><span class="cov1" title="1">{
+func (c *QwenClient) isTokenExpired() bool <span class="cov8" title="1">{
+        if c.oauthToken == nil </span><span class="cov8" title="1">{
                 return true
         }</span>
         // Consider token expired if less than 5 minutes until expiry
-        <span class="cov6" title="8">return time.Now().Unix() &gt; (c.oauthToken.ExpiryDate/1000 - 300)</span>
+        <span class="cov8" title="1">return time.Now().Unix() &gt; (c.oauthToken.ExpiryDate/1000 - 300)</span>
 }
 
 // refreshToken refreshes the OAuth token
-func (c *QwenClient) refreshToken() error <span class="cov9" title="25">{
-        if c.oauthToken == nil || c.oauthToken.RefreshToken == "" </span><span class="cov5" title="5">{
+func (c *QwenClient) refreshToken() error <span class="cov8" title="1">{
+        if c.oauthToken == nil || c.oauthToken.RefreshToken == "" </span><span class="cov8" title="1">{
                 return fmt.Errorf("no refresh token available")
         }</span>
 
         // Qwen OAuth refresh endpoint (based on Alibaba Cloud API)
-        <span class="cov8" title="20">refreshURL := "https://oauth.aliyun.com/v1/token"
+        <span class="cov8" title="1">refreshURL := "https://oauth.aliyun.com/v1/token"
 
         // Prepare refresh request
         reqData := map[string]interface{}{
@@ -2478,41 +2469,41 @@ func (c *QwenClient) refreshToken() error <span class="cov9" title="25">{
         }
 
         // Check for required environment variables
-        if reqData["client_id"] == "" </span><span class="cov4" title="4">{
+        if reqData["client_id"] == "" </span><span class="cov8" title="1">{
                 return fmt.Errorf("QWEN_CLIENT_ID environment variable not set")
         }</span>
-        <span class="cov7" title="16">if reqData["client_secret"] == "" </span><span class="cov3" title="3">{
+        <span class="cov8" title="1">if reqData["client_secret"] == "" </span><span class="cov8" title="1">{
                 return fmt.Errorf("QWEN_CLIENT_SECRET environment variable not set")
         }</span>
 
-        <span class="cov7" title="13">jsonData, err := json.Marshal(reqData)
+        <span class="cov8" title="1">jsonData, err := json.Marshal(reqData)
         if err != nil </span><span class="cov0" title="0">{
                 return fmt.Errorf("failed to marshal refresh request: %w", err)
         }</span>
 
         // Create HTTP request
-        <span class="cov7" title="13">req, err := http.NewRequestWithContext(context.Background(), "POST", refreshURL, bytes.NewBuffer(jsonData))
+        <span class="cov8" title="1">req, err := http.NewRequestWithContext(context.Background(), "POST", refreshURL, bytes.NewBuffer(jsonData))
         if err != nil </span><span class="cov0" title="0">{
                 return fmt.Errorf("failed to create refresh request: %w", err)
         }</span>
 
-        <span class="cov7" title="13">req.Header.Set("Content-Type", "application/json")
+        <span class="cov8" title="1">req.Header.Set("Content-Type", "application/json")
         req.Header.Set("Accept", "application/json")
 
         // Send request
         resp, err := c.httpClient.Do(req)
-        if err != nil </span><span class="cov1" title="1">{
+        if err != nil </span><span class="cov8" title="1">{
                 return fmt.Errorf("failed to send refresh request: %w", err)
         }</span>
-        <span class="cov7" title="12">defer resp.Body.Close()
+        <span class="cov8" title="1">defer resp.Body.Close()
 
-        if resp.StatusCode != http.StatusOK </span><span class="cov6" title="8">{
+        if resp.StatusCode != http.StatusOK </span><span class="cov8" title="1">{
                 body, _ := io.ReadAll(resp.Body)
                 return fmt.Errorf("token refresh failed with status %d: %s", resp.StatusCode, string(body))
         }</span>
 
         // Parse response
-        <span class="cov4" title="4">var refreshResponse struct {
+        <span class="cov8" title="1">var refreshResponse struct {
                 AccessToken  string `json:"access_token"`
                 TokenType    string `json:"token_type"`
                 RefreshToken string `json:"refresh_token"`
@@ -2524,59 +2515,59 @@ func (c *QwenClient) refreshToken() error <span class="cov9" title="25">{
                 return fmt.Errorf("failed to read refresh response: %w", err)
         }</span>
 
-        <span class="cov4" title="4">if err := json.Unmarshal(body, &amp;refreshResponse); err != nil </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">if err := json.Unmarshal(body, &amp;refreshResponse); err != nil </span><span class="cov8" title="1">{
                 return fmt.Errorf("failed to parse refresh response: %w", err)
         }</span>
 
         // Update OAuth token with new values
-        <span class="cov3" title="3">if refreshResponse.AccessToken == "" </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">if refreshResponse.AccessToken == "" </span><span class="cov8" title="1">{
                 return fmt.Errorf("refresh response missing access token")
         }</span>
 
-        <span class="cov2" title="2">c.oauthToken.AccessToken = refreshResponse.AccessToken
+        <span class="cov8" title="1">c.oauthToken.AccessToken = refreshResponse.AccessToken
         c.oauthToken.TokenType = refreshResponse.TokenType
         c.oauthToken.ExpiryDate = time.Now().UnixMilli() + (refreshResponse.ExpiresIn * 1000)
 
         // Update refresh token if provided (some providers rotate refresh tokens)
-        if refreshResponse.RefreshToken != "" </span><span class="cov1" title="1">{
+        if refreshResponse.RefreshToken != "" </span><span class="cov8" title="1">{
                 c.oauthToken.RefreshToken = refreshResponse.RefreshToken
         }</span>
 
         // Save updated token to file
-        <span class="cov2" title="2">if err := c.saveOAuthToken(c.oauthToken); err != nil </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">if err := c.saveOAuthToken(c.oauthToken); err != nil </span><span class="cov8" title="1">{
                 return fmt.Errorf("failed to save refreshed token: %w", err)
         }</span>
 
-        <span class="cov1" title="1">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 // GetProviderName returns the provider name
-func (c *QwenClient) GetProviderName() string <span class="cov3" title="3">{
+func (c *QwenClient) GetProviderName() string <span class="cov8" title="1">{
         return "qwen"
 }</span>
 
 // Translate translates text using Qwen (Alibaba Cloud) LLM
-func (c *QwenClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov9" title="25">{
+func (c *QwenClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov8" title="1">{
         model := c.config.Model
-        if model == "" </span><span class="cov1" title="1">{
+        if model == "" </span><span class="cov8" title="1">{
                 model = "qwen-plus" // Default model
         }</span>
 
-        <span class="cov9" title="25">temperature := 0.3
-        if c.config.Options["temperature"] != nil </span><span class="cov3" title="3">{
-                if t, ok := c.config.Options["temperature"].(float64); ok </span><span class="cov3" title="3">{
+        <span class="cov8" title="1">temperature := 0.3
+        if c.config.Options["temperature"] != nil </span><span class="cov8" title="1">{
+                if t, ok := c.config.Options["temperature"].(float64); ok </span><span class="cov8" title="1">{
                         temperature = t
                 }</span>
         }
 
-        <span class="cov9" title="25">maxTokens := 4000
-        if c.config.Options["max_tokens"] != nil </span><span class="cov2" title="2">{
-                if mt, ok := c.config.Options["max_tokens"].(int); ok </span><span class="cov2" title="2">{
+        <span class="cov8" title="1">maxTokens := 4000
+        if c.config.Options["max_tokens"] != nil </span><span class="cov8" title="1">{
+                if mt, ok := c.config.Options["max_tokens"].(int); ok </span><span class="cov8" title="1">{
                         maxTokens = mt
                 }</span>
         }
 
-        <span class="cov9" title="25">request := QwenRequest{
+        <span class="cov8" title="1">request := QwenRequest{
                 Model: model,
                 Messages: []QwenMessage{
                         {Role: "user", Content: prompt},
@@ -2591,54 +2582,54 @@ func (c *QwenClient) Translate(ctx context.Context, text string, prompt string) 
                 return "", fmt.Errorf("failed to marshal request: %w", err)
         }</span>
 
-        <span class="cov9" title="25">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/services/aigc/text-generation/generation", bytes.NewBuffer(jsonData))
+        <span class="cov8" title="1">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/services/aigc/text-generation/generation", bytes.NewBuffer(jsonData))
         if err != nil </span><span class="cov0" title="0">{
                 return "", fmt.Errorf("failed to create request: %w", err)
         }</span>
 
-        <span class="cov9" title="25">req.Header.Set("Content-Type", "application/json")
+        <span class="cov8" title="1">req.Header.Set("Content-Type", "application/json")
 
         // Use OAuth token or API key
-        if c.config.APIKey != "" </span><span class="cov8" title="20">{
+        if c.config.APIKey != "" </span><span class="cov8" title="1">{
                 req.Header.Set("Authorization", "Bearer "+c.config.APIKey)
-        }</span> else<span class="cov5" title="5"> if c.oauthToken != nil </span><span class="cov4" title="4">{
+        }</span> else<span class="cov8" title="1"> if c.oauthToken != nil </span><span class="cov8" title="1">{
                 req.Header.Set("Authorization", c.oauthToken.TokenType+" "+c.oauthToken.AccessToken)
-        }</span> else<span class="cov1" title="1"> {
+        }</span> else<span class="cov8" title="1"> {
                 return "", fmt.Errorf("no authentication credentials available")
         }</span>
 
-        <span class="cov8" title="24">resp, err := c.httpClient.Do(req)
-        if err != nil </span><span class="cov6" title="9">{
+        <span class="cov8" title="1">resp, err := c.httpClient.Do(req)
+        if err != nil </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("failed to send request: %w", err)
         }</span>
-        <span class="cov7" title="15">defer resp.Body.Close()
+        <span class="cov8" title="1">defer resp.Body.Close()
 
         body, err := io.ReadAll(resp.Body)
         if err != nil </span><span class="cov0" title="0">{
                 return "", fmt.Errorf("failed to read response: %w", err)
         }</span>
 
-        <span class="cov7" title="15">if resp.StatusCode != http.StatusOK </span><span class="cov5" title="7">{
+        <span class="cov8" title="1">if resp.StatusCode != http.StatusOK </span><span class="cov8" title="1">{
                 // Check if token expired
-                if resp.StatusCode == http.StatusUnauthorized &amp;&amp; c.oauthToken != nil </span><span class="cov3" title="3">{
+                if resp.StatusCode == http.StatusUnauthorized &amp;&amp; c.oauthToken != nil </span><span class="cov8" title="1">{
                         if err := c.refreshToken(); err == nil </span><span class="cov0" title="0">{
                                 // Retry with refreshed token
                                 return c.Translate(ctx, text, prompt)
                         }</span>
                 }
-                <span class="cov5" title="7">return "", fmt.Errorf("Qwen API error (status %d): %s", resp.StatusCode, string(body))</span>
+                <span class="cov8" title="1">return "", fmt.Errorf("Qwen API error (status %d): %s", resp.StatusCode, string(body))</span>
         }
 
-        <span class="cov6" title="8">var response QwenResponse
-        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">var response QwenResponse
+        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("failed to unmarshal response: %w", err)
         }</span>
 
-        <span class="cov5" title="7">if len(response.Choices) == 0 </span><span class="cov2" title="2">{
+        <span class="cov8" title="1">if len(response.Choices) == 0 </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("no choices in response")
         }</span>
 
-        <span class="cov5" title="5">return response.Choices[0].Message.Content, nil</span>
+        <span class="cov8" title="1">return response.Choices[0].Message.Content, nil</span>
 }
 </pre>
 		
@@ -2649,7 +2640,7 @@ import (
 )
 
 // getTestAPIKey retrieves API key from environment variable for testing
-func getTestAPIKey(envVar string) string <span class="cov10" title="2">{
+func getTestAPIKey(envVar string) string <span class="cov8" title="1">{
         return os.Getenv(envVar)
 }</pre>
 		
@@ -2710,17 +2701,17 @@ type ZhipuUsage struct {
 }
 
 // NewZhipuClient creates a new Zhipu client
-func NewZhipuClient(config TranslationConfig) (*ZhipuClient, error) <span class="cov10" title="22">{
-        if config.APIKey == "" </span><span class="cov3" title="2">{
+func NewZhipuClient(config TranslationConfig) (*ZhipuClient, error) <span class="cov8" title="1">{
+        if config.APIKey == "" </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("Zhipu API key is required")
         }</span>
 
-        <span class="cov9" title="20">baseURL := config.BaseURL
-        if baseURL == "" </span><span class="cov7" title="9">{
+        <span class="cov8" title="1">baseURL := config.BaseURL
+        if baseURL == "" </span><span class="cov8" title="1">{
                 baseURL = "https://open.bigmodel.cn/api/paas/v4"
         }</span>
 
-        <span class="cov9" title="20">return &amp;ZhipuClient{
+        <span class="cov8" title="1">return &amp;ZhipuClient{
                 config: config,
                 httpClient: &amp;http.Client{
                         Timeout: 600 * time.Second, // Increased to 10 minutes for very large book sections (up to 44KB)
@@ -2730,32 +2721,32 @@ func NewZhipuClient(config TranslationConfig) (*ZhipuClient, error) <span class=
 }
 
 // GetProviderName returns the provider name
-func (c *ZhipuClient) GetProviderName() string <span class="cov5" title="4">{
+func (c *ZhipuClient) GetProviderName() string <span class="cov8" title="1">{
         return "zhipu"
 }</span>
 
 // Translate translates text using Zhipu AI
-func (c *ZhipuClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov9" title="19">{
+func (c *ZhipuClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov8" title="1">{
         model := c.config.Model
-        if model == "" </span><span class="cov1" title="1">{
+        if model == "" </span><span class="cov8" title="1">{
                 model = "glm-4"
         }</span>
 
-        <span class="cov9" title="19">temperature := 0.3
-        if c.config.Options["temperature"] != nil </span><span class="cov4" title="3">{
-                if t, ok := c.config.Options["temperature"].(float64); ok </span><span class="cov4" title="3">{
+        <span class="cov8" title="1">temperature := 0.3
+        if c.config.Options["temperature"] != nil </span><span class="cov8" title="1">{
+                if t, ok := c.config.Options["temperature"].(float64); ok </span><span class="cov8" title="1">{
                         temperature = t
                 }</span>
         }
 
-        <span class="cov9" title="19">maxTokens := 4000
-        if c.config.Options["max_tokens"] != nil </span><span class="cov3" title="2">{
-                if mt, ok := c.config.Options["max_tokens"].(int); ok </span><span class="cov3" title="2">{
+        <span class="cov8" title="1">maxTokens := 4000
+        if c.config.Options["max_tokens"] != nil </span><span class="cov8" title="1">{
+                if mt, ok := c.config.Options["max_tokens"].(int); ok </span><span class="cov8" title="1">{
                         maxTokens = mt
                 }</span>
         }
 
-        <span class="cov9" title="19">request := ZhipuRequest{
+        <span class="cov8" title="1">request := ZhipuRequest{
                 Model: model,
                 Messages: []ZhipuMessage{
                         {Role: "user", Content: prompt},
@@ -2769,39 +2760,39 @@ func (c *ZhipuClient) Translate(ctx context.Context, text string, prompt string)
                 return "", fmt.Errorf("failed to marshal request: %w", err)
         }</span>
 
-        <span class="cov9" title="19">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/chat/completions", bytes.NewBuffer(jsonData))
+        <span class="cov8" title="1">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/chat/completions", bytes.NewBuffer(jsonData))
         if err != nil </span><span class="cov0" title="0">{
                 return "", fmt.Errorf("failed to create request: %w", err)
         }</span>
 
-        <span class="cov9" title="19">req.Header.Set("Content-Type", "application/json")
+        <span class="cov8" title="1">req.Header.Set("Content-Type", "application/json")
         req.Header.Set("Authorization", "Bearer "+c.config.APIKey)
 
         resp, err := c.httpClient.Do(req)
-        if err != nil </span><span class="cov7" title="8">{
+        if err != nil </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("failed to send request: %w", err)
         }</span>
-        <span class="cov7" title="11">defer resp.Body.Close()
+        <span class="cov8" title="1">defer resp.Body.Close()
 
         body, err := io.ReadAll(resp.Body)
         if err != nil </span><span class="cov0" title="0">{
                 return "", fmt.Errorf("failed to read response: %w", err)
         }</span>
 
-        <span class="cov7" title="11">if resp.StatusCode != http.StatusOK </span><span class="cov6" title="6">{
+        <span class="cov8" title="1">if resp.StatusCode != http.StatusOK </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("Zhipu API error (status %d): %s", resp.StatusCode, string(body))
         }</span>
 
-        <span class="cov5" title="5">var response ZhipuResponse
-        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov1" title="1">{
+        <span class="cov8" title="1">var response ZhipuResponse
+        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("failed to unmarshal response: %w", err)
         }</span>
 
-        <span class="cov5" title="4">if len(response.Choices) == 0 </span><span class="cov3" title="2">{
+        <span class="cov8" title="1">if len(response.Choices) == 0 </span><span class="cov8" title="1">{
                 return "", fmt.Errorf("no choices in response")
         }</span>
 
-        <span class="cov3" title="2">return response.Choices[0].Message.Content, nil</span>
+        <span class="cov8" title="1">return response.Choices[0].Message.Content, nil</span>
 }
 </pre>
 		

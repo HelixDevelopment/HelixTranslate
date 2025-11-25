@@ -1,9 +1,66 @@
 package llm
 
 import (
+	"context"
 	"strings"
 	"testing"
+
+	"digital.vasic.translator/pkg/logger"
 )
+
+// TestNewLlamaCppProvider tests the NewLlamaCppProvider function
+func TestNewLlamaCppProvider(t *testing.T) {
+	// Create a mock logger
+	mockLogger := logger.NewLogger(logger.LoggerConfig{
+		Level:  "info",
+		Format: "text",
+	})
+
+	t.Run("invalid_binary_path", func(t *testing.T) {
+		config := LlamaCppProviderConfig{
+			BinaryPath: "/nonexistent/binary/path",
+			Models: []ModelConfig{
+				{
+					ID:        "test-model",
+					ModelName: "test-model",
+					Path:      "/path/to/model.ggml",
+				},
+			},
+		}
+		
+		coordinator, err := NewLlamaCppProvider(config, mockLogger)
+		if err == nil {
+			t.Error("Expected error for invalid binary path")
+			coordinator.Shutdown(context.Background())
+		}
+		if coordinator != nil {
+			t.Error("Expected coordinator to be nil when error occurs")
+		}
+		if !strings.Contains(err.Error(), "binary not found") {
+			t.Errorf("Expected 'binary not found' in error, got: %v", err)
+		}
+	})
+
+	t.Run("empty_models", func(t *testing.T) {
+		config := LlamaCppProviderConfig{
+			BinaryPath: "/usr/bin/echo", // Use a common binary that exists
+			Models:     []ModelConfig{}, // Empty models
+		}
+		
+		coordinator, err := NewLlamaCppProvider(config, mockLogger)
+		if err != nil {
+			t.Errorf("Expected no error for empty models, got: %v", err)
+		}
+		if coordinator == nil {
+			t.Error("Expected coordinator to be created even with empty models")
+		}
+		// Verify the coordinator is properly initialized
+		if len(coordinator.Workers) != 0 {
+			t.Errorf("Expected 0 workers, got %d", len(coordinator.Workers))
+		}
+		coordinator.Shutdown(context.Background())
+	})
+}
 
 // TestGetLanguageName tests the getLanguageName function
 func TestGetLanguageName(t *testing.T) {

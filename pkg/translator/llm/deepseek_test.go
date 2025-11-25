@@ -100,6 +100,18 @@ func TestDeepSeekClient(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "temperature invalid type",
+			config: TranslationConfig{
+				Provider: "deepseek",
+				APIKey:   "test-key",
+				Model:    "deepseek-chat",
+				Options: map[string]interface{}{
+					"temperature": "invalid",
+				},
+			},
+			wantErr: false, // Should not error, just ignore invalid type
+		},
 	}
 
 	for _, tt := range tests {
