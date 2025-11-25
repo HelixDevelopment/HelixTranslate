@@ -174,3 +174,53 @@ func TestBuildPrompt(t *testing.T) {
 		}
 	})
 }
+
+// TestParseOutput tests the parseOutput function
+func TestParseOutput(t *testing.T) {
+	coordinator := &MultiLLMCoordinator{}
+	
+	t.Run("simple_translation", func(t *testing.T) {
+		output := "Some prompt text\nTranslation:Hola mundo\nMore text"
+		result := coordinator.parseOutput(output)
+		expected := "Hola mundo\nMore text"
+		if result != expected {
+			t.Errorf("parseOutput() = %q, want %q", result, expected)
+		}
+	})
+	
+	t.Run("translation_on_same_line", func(t *testing.T) {
+		output := "Some text Translation:Bonjour le monde More text"
+		result := coordinator.parseOutput(output)
+		expected := "Bonjour le monde More text"
+		if result != expected {
+			t.Errorf("parseOutput() = %q, want %q", result, expected)
+		}
+	})
+	
+	t.Run("multiline_translation", func(t *testing.T) {
+		output := "Prompt text\nTranslation:Line 1\nLine 2\nLine 3\nMore text"
+		result := coordinator.parseOutput(output)
+		expected := "Line 1\nLine 2\nLine 3\nMore text"
+		if result != expected {
+			t.Errorf("parseOutput() = %q, want %q", result, expected)
+		}
+	})
+	
+	t.Run("no_translation_marker", func(t *testing.T) {
+		output := "Some text without translation marker\nMore text"
+		result := coordinator.parseOutput(output)
+		expected := ""
+		if result != expected {
+			t.Errorf("parseOutput() = %q, want %q", result, expected)
+		}
+	})
+	
+	t.Run("empty_translation", func(t *testing.T) {
+		output := "Text Translation: More text"
+		result := coordinator.parseOutput(output)
+		expected := "More text"
+		if result != expected {
+			t.Errorf("parseOutput() = %q, want %q", result, expected)
+		}
+	})
+}
