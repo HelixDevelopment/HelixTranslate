@@ -115,7 +115,151 @@ func TestSplitText(t *testing.T) {
 	}
 }
 
-// TestSplitBySentences tests sentence splitting
+// TestSplitTextEdgeCases tests edge cases in text splitting functionality
+func TestSplitTextEdgeCases(t *testing.T) {
+	lt := &LLMTranslator{}
+
+	t.Run("empty text", func(t *testing.T) {
+		chunks := lt.splitText("")
+		if len(chunks) != 1 || chunks[0] != "" {
+			t.Errorf("Expected single empty chunk, got: %v", chunks)
+		}
+	})
+
+	t.Run("single long paragraph that needs sentence splitting", func(t *testing.T) {
+		// Create a single paragraph longer than maxChunkSize with multiple sentences
+		longParagraph := strings.Repeat("This is a long sentence. ", 1000) // ~30KB
+		chunks := lt.splitText(longParagraph)
+
+		// Should split into multiple chunks
+		if len(chunks) < 2 {
+			t.Errorf("Expected multiple chunks for long paragraph, got: %d", len(chunks))
+		}
+
+		// All chunks should be within size limit
+		for i, chunk := range chunks {
+			if len(chunk) > 20000 {
+				t.Errorf("Chunk %d is too large: %d bytes", i, len(chunk))
+			}
+		}
+
+		// Combined should equal original
+		combined := strings.Join(chunks, "")
+		if combined != longParagraph {
+			t.Error("Combined chunks don't match original text")
+		}
+	})
+
+	t.Run("text with unicode characters", func(t *testing.T) {
+		// Test with unicode characters that might affect chunking
+		text := "Привет! Как дела? Это тест русского языка... Всё хорошо."
+		chunks := lt.splitText(text)
+
+		// Should handle unicode correctly
+		if len(chunks) == 0 {
+			t.Error("Expected at least one chunk")
+		}
+
+		// Combined should equal original
+		combined := strings.Join(chunks, "")
+		if combined != text {
+			t.Error("Combined chunks don't match original text")
+		}
+	})
+
+	t.Run("text with various sentence endings", func(t *testing.T) {
+		// Test different sentence terminators
+		text := "First sentence! Second sentence? Third sentence... Fourth sentence."
+		chunks := lt.splitText(text)
+
+		// Should handle all sentence types correctly
+		if len(chunks) == 0 {
+			t.Error("Expected at least one chunk")
+		}
+
+		// Combined should equal original
+		combined := strings.Join(chunks, "")
+		if combined != text {
+			t.Error("Combined chunks don't match original text")
+		}
+	})
+
+	t.Run("extremely_long_single_word", func(t *testing.T) {
+		// Test with a single word longer than max chunk size
+		longWord := strings.Repeat("a", 25000) // 25KB single word
+		chunks := lt.splitText(longWord)
+
+		// Should handle gracefully - might need to split the word
+		if len(chunks) == 0 {
+			t.Error("Expected at least one chunk")
+		}
+
+		// Combined should equal original
+		combined := strings.Join(chunks, "")
+		if combined != longWord {
+			t.Error("Combined chunks don't match original text")
+		}
+	})
+
+	t.Run("text_with_no_sentence_breaks", func(t *testing.T) {
+		// Test with text that has no natural sentence breaks
+		text := strings.Repeat("This is continuous text without periods or other punctuation ", 1000)
+		chunks := lt.splitText(text)
+
+		// Note: The function may not split text without sentence breaks
+		// This tests the current behavior
+		if len(chunks) == 0 {
+			t.Error("Expected at least one chunk")
+		}
+
+		// Check if the function handles large continuous text appropriately
+		// It might keep it as one chunk or split it based on other logic
+		if len(chunks) == 1 {
+			// If kept as one chunk, it might be larger than usual limit
+			t.Logf("Text without sentence breaks kept as single chunk of %d bytes", len(chunks[0]))
+		}
+
+		// Combined should equal original
+		combined := strings.Join(chunks, "")
+		if combined != text {
+			t.Error("Combined chunks don't match original text")
+		}
+	})
+
+	t.Run("mixed_whitespace", func(t *testing.T) {
+		// Test with various whitespace patterns
+		text := "Sentence 1.\n\n  Sentence 2.\t\t\tSentence 3.  \n   Sentence 4."
+		chunks := lt.splitText(text)
+
+		if len(chunks) == 0 {
+			t.Error("Expected at least one chunk")
+		}
+
+		// Combined should equal original
+		combined := strings.Join(chunks, "")
+		if combined != text {
+			t.Error("Combined chunks don't match original text")
+		}
+	})
+
+	t.Run("text_near_boundary", func(t *testing.T) {
+		// Test text that's exactly at the boundary size
+		text := strings.Repeat("Sentence. ", 1333) // ~20KB, close to boundary
+		chunks := lt.splitText(text)
+
+		if len(chunks) == 0 {
+			t.Error("Expected at least one chunk")
+		}
+
+		// Combined should equal original
+		combined := strings.Join(chunks, "")
+		if combined != text {
+			t.Error("Combined chunks don't match original text")
+		}
+	})
+}
+
+// TestSplitTextEdgeCases tests edge cases in text splitting functionality
 func TestSplitBySentences(t *testing.T) {
 	lt := &LLMTranslator{}
 

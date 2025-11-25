@@ -70,10 +70,6 @@ type QwenUsage struct {
 
 // NewQwenClient creates a new Qwen client with OAuth support
 func NewQwenClient(config TranslationConfig) (*QwenClient, error) {
-	if config.APIKey == "" {
-		return nil, fmt.Errorf("API key is required for Qwen")
-	}
-	
 	credDir := os.Getenv("HOME")
 	if credDir == "" {
 		credDir = "."
@@ -100,6 +96,7 @@ func NewQwenClient(config TranslationConfig) (*QwenClient, error) {
 		return client, nil
 	}
 
+	// No API key provided, try to load OAuth token
 	// Try loading OAuth token from translator-specific location
 	if err := client.loadOAuthToken(); err != nil {
 		// Try Qwen Code standard location as fallback
