@@ -17,11 +17,11 @@ digital.vasic.translator/pkg/translator/llm/anthropic.go:100.52,102.2 1 1
 digital.vasic.translator/pkg/translator/llm/anthropic.go:105.102,107.17 2 1
 digital.vasic.translator/pkg/translator/llm/anthropic.go:107.17,109.3 1 0
 digital.vasic.translator/pkg/translator/llm/anthropic.go:111.2,112.44 2 1
-digital.vasic.translator/pkg/translator/llm/anthropic.go:112.44,113.61 1 0
-digital.vasic.translator/pkg/translator/llm/anthropic.go:113.61,115.4 1 0
+digital.vasic.translator/pkg/translator/llm/anthropic.go:112.44,113.61 1 1
+digital.vasic.translator/pkg/translator/llm/anthropic.go:113.61,115.4 1 1
 digital.vasic.translator/pkg/translator/llm/anthropic.go:118.2,119.43 2 1
-digital.vasic.translator/pkg/translator/llm/anthropic.go:119.43,120.57 1 0
-digital.vasic.translator/pkg/translator/llm/anthropic.go:120.57,122.4 1 0
+digital.vasic.translator/pkg/translator/llm/anthropic.go:119.43,120.57 1 1
+digital.vasic.translator/pkg/translator/llm/anthropic.go:120.57,122.4 1 1
 digital.vasic.translator/pkg/translator/llm/anthropic.go:125.2,135.16 3 1
 digital.vasic.translator/pkg/translator/llm/anthropic.go:135.16,137.3 1 0
 digital.vasic.translator/pkg/translator/llm/anthropic.go:139.2,140.16 2 1
@@ -376,7 +376,7 @@ digital.vasic.translator/pkg/translator/llm/ollama.go:88.16,90.3 1 0
 digital.vasic.translator/pkg/translator/llm/ollama.go:92.2,92.38 1 1
 digital.vasic.translator/pkg/translator/llm/ollama.go:92.38,94.3 1 1
 digital.vasic.translator/pkg/translator/llm/ollama.go:96.2,97.56 2 1
-digital.vasic.translator/pkg/translator/llm/ollama.go:97.56,99.3 1 0
+digital.vasic.translator/pkg/translator/llm/ollama.go:97.56,99.3 1 1
 digital.vasic.translator/pkg/translator/llm/ollama.go:101.2,101.31 1 1
 digital.vasic.translator/pkg/translator/llm/openai.go:60.71,61.25 1 1
 digital.vasic.translator/pkg/translator/llm/openai.go:61.25,63.3 1 0

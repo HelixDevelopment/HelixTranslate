@@ -9,34 +9,57 @@ import (
 	"strings"
 	"testing"
 	"time"
+	
+	"github.com/stretchr/testify/assert"
 )
 
 // TestFindLlamaCppExecutable tests locating llama-cli
 func TestFindLlamaCppExecutable(t *testing.T) {
-	path, err := findLlamaCppExecutable()
+	// Store original PATH and HOME
+	originalPath := os.Getenv("PATH")
+	originalHome := os.Getenv("HOME")
+	defer func() {
+		os.Setenv("PATH", originalPath)
+		os.Setenv("HOME", originalHome)
+	}()
 
-	if err != nil {
-		// llama.cpp not installed - skip integration tests
-		t.Skip("llama.cpp not installed - install with: brew install llama.cpp")
-		return
-	}
+	t.Run("executable_found_in_system", func(t *testing.T) {
+		path, err := findLlamaCppExecutable()
 
-	if path == "" {
-		t.Error("findLlamaCppExecutable() returned empty path")
-	}
+		if err != nil {
+			// llama.cpp not installed - skip integration tests
+			t.Skip("llama.cpp not installed - install with: brew install llama.cpp")
+			return
+		}
 
-	// Verify executable exists and is executable
-	info, err := os.Stat(path)
-	if err != nil {
-		t.Errorf("Executable not found at %s: %v", path, err)
-	}
+		if path == "" {
+			t.Error("findLlamaCppExecutable() returned empty path")
+		}
 
-	// Check if it's executable (Unix-like systems)
-	if info.Mode()&0111 == 0 {
-		t.Errorf("File at %s is not executable", path)
-	}
+		// Verify executable exists and is executable
+		info, err := os.Stat(path)
+		if err != nil {
+			t.Errorf("Executable not found at %s: %v", path, err)
+		}
 
-	t.Logf("Found llama-cli at: %s", path)
+		// Check if it's executable (Unix-like systems)
+		if info.Mode()&0111 == 0 {
+			t.Errorf("File at %s is not executable", path)
+		}
+
+		t.Logf("Found llama-cli at: %s", path)
+	})
+
+	t.Run("executable_not_found_with_empty_path", func(t *testing.T) {
+		// Set PATH to empty to ensure llama-cli is not found
+		os.Setenv("PATH", "")
+		os.Setenv("HOME", "/nonexistent/home")
+		
+		path, err := findLlamaCppExecutable()
+		assert.Error(t, err)
+		assert.Empty(t, path)
+		assert.Contains(t, err.Error(), "llama-cli not found")
+	})
 }
 
 // TestNewLlamaCppClient tests client initialization

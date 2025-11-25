@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -2733,4 +2734,334 @@ func TestZhipuTranslateWithContext(t *testing.T) {
 	_, err = client.Translate(ctx, "Hello", "Translate to Spanish")
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "context canceled")
+}
+
+// TestAnthropicTranslateErrorPaths tests error paths in Anthropic Translate function
+func TestAnthropicTranslateErrorPaths(t *testing.T) {
+	tests := []struct {
+		name             string
+		serverResponse   string
+		statusCode       int
+		expectError      bool
+		errorContains    string
+	}{
+		{
+			name:           "api_error_response",
+			serverResponse: `{"error": {"message": "Invalid API key", "type": "authentication_error"}}`,
+			statusCode:     401,
+			expectError:    true,
+			errorContains:  "Anthropic API error (status 401)",
+		},
+		{
+			name:           "empty_content_response",
+			serverResponse: `{"content": []}`,
+			statusCode:     200,
+			expectError:    true,
+			errorContains:  "no content in response",
+		},
+		{
+			name:           "invalid_json_response",
+			serverResponse: `invalid json response`,
+			statusCode:     200,
+			expectError:    true,
+			errorContains:  "failed to unmarshal response",
+		},
+		{
+			name:           "network_error",
+			serverResponse: "", // Not used due to mock server failure
+			statusCode:     200,
+			expectError:    true,
+			errorContains:  "failed to send request",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.name == "network_error" {
+				// Test with invalid URL to simulate network error
+				config := TranslationConfig{
+					APIKey:  "test-key",
+					BaseURL: "http://invalid-host-name-12345.invalid",
+					Model:   "claude-3-sonnet-20240229",
+				}
+
+				client, err := NewAnthropicClient(config)
+				if err != nil {
+					t.Fatalf("Failed to create Anthropic client: %v", err)
+				}
+
+				ctx := context.Background()
+				_, err = client.Translate(ctx, "Hello", "Translate to Spanish")
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errorContains)
+			} else {
+				// Create mock server
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, "POST", r.Method)
+					assert.Equal(t, "/messages", r.URL.Path)
+					assert.Equal(t, "test-api-key", r.Header.Get("x-api-key"))
+					assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+					assert.Equal(t, "2023-06-01", r.Header.Get("anthropic-version"))
+
+					w.WriteHeader(tt.statusCode)
+					w.Write([]byte(tt.serverResponse))
+				}))
+				defer server.Close()
+
+				config := TranslationConfig{
+					APIKey:  "test-api-key",
+					BaseURL: server.URL,
+					Model:   "claude-3-sonnet-20240229",
+				}
+
+				client, err := NewAnthropicClient(config)
+				if err != nil {
+					t.Fatalf("Failed to create Anthropic client: %v", err)
+				}
+
+				ctx := context.Background()
+				_, err = client.Translate(ctx, "Hello", "Translate to Chinese")
+				if tt.expectError {
+					assert.Error(t, err)
+					if tt.errorContains != "" {
+						assert.Contains(t, err.Error(), tt.errorContains)
+					}
+				} else {
+					assert.NoError(t, err)
+				}
+			}
+		})
+	}
+}
+
+// TestAnthropicTranslateWithContext tests context cancellation
+func TestAnthropicTranslateWithContext(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Take some time to allow for context cancellation
+		time.Sleep(100 * time.Millisecond)
+		w.WriteHeader(200)
+		w.Write([]byte(`{"content": [{"text": "Hola"}]}`))
+	}))
+	defer server.Close()
+
+	config := TranslationConfig{
+		APIKey:  "test-api-key",
+		BaseURL: server.URL,
+		Model:   "claude-3-sonnet-20240229",
+	}
+
+	client, err := NewAnthropicClient(config)
+	if err != nil {
+		t.Fatalf("Failed to create Anthropic client: %v", err)
+	}
+
+	// Test with canceled context
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // Cancel immediately
+
+	_, err = client.Translate(ctx, "Hello", "Translate to Spanish")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "context canceled")
+}
+
+// TestAnthropicTranslateWithOptions tests custom options
+func TestAnthropicTranslateWithOptions(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Read request body to verify options
+		body, _ := io.ReadAll(r.Body)
+		var request map[string]interface{}
+		json.Unmarshal(body, &request)
+
+		// Verify custom options are passed
+		if temp, ok := request["temperature"].(float64); !ok || temp != 0.8 {
+			t.Errorf("Expected temperature 0.8, got %v", request["temperature"])
+		}
+		if maxTokens, ok := request["max_tokens"].(float64); !ok || maxTokens != 3000 {
+			t.Errorf("Expected max_tokens 3000, got %v", request["max_tokens"])
+		}
+
+		w.WriteHeader(200)
+		w.Write([]byte(`{"content": [{"text": "Bonjour"}]}`))
+	}))
+	defer server.Close()
+
+	config := TranslationConfig{
+		APIKey: "test-api-key",
+		BaseURL: server.URL,
+		Model: "claude-3-sonnet-20240229",
+		Options: map[string]interface{}{
+			"temperature": 0.8,
+			"max_tokens":  3000,
+		},
+	}
+
+	client, err := NewAnthropicClient(config)
+	if err != nil {
+		t.Fatalf("Failed to create Anthropic client: %v", err)
+	}
+
+	ctx := context.Background()
+	result, err := client.Translate(ctx, "Hello", "Translate to French")
+	assert.NoError(t, err)
+	assert.Equal(t, "Bonjour", result)
+}
+
+// TestOllamaTranslateErrorPaths tests error paths in Ollama Translate function
+func TestOllamaTranslateErrorPaths(t *testing.T) {
+	tests := []struct {
+		name             string
+		serverResponse   string
+		statusCode       int
+		expectError      bool
+		errorContains    string
+	}{
+		{
+			name:           "api_error_response",
+			serverResponse: `{"error": "model not found"}`,
+			statusCode:     404,
+			expectError:    true,
+			errorContains:  "Ollama API error (status 404)",
+		},
+		{
+			name:           "empty_response",
+			serverResponse: `{"response": ""}`,
+			statusCode:     200,
+			expectError:    false, // Empty response is technically valid
+		},
+		{
+			name:           "invalid_json_response",
+			serverResponse: `invalid json response`,
+			statusCode:     200,
+			expectError:    true,
+			errorContains:  "failed to unmarshal response",
+		},
+		{
+			name:           "network_error",
+			serverResponse: "", // Not used due to mock server failure
+			statusCode:     200,
+			expectError:    true,
+			errorContains:  "failed to send request",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.name == "network_error" {
+				// Test with invalid URL to simulate network error
+				config := TranslationConfig{
+					APIKey:  "test-key",
+					BaseURL: "http://invalid-host-name-12345.invalid",
+					Model:   "llama3:8b",
+				}
+
+				client, err := NewOllamaClient(config)
+				if err != nil {
+					t.Fatalf("Failed to create Ollama client: %v", err)
+				}
+
+				ctx := context.Background()
+				_, err = client.Translate(ctx, "Hello", "Translate to Spanish")
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errorContains)
+			} else {
+				// Create mock server
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, "POST", r.Method)
+					assert.Equal(t, "/api/generate", r.URL.Path)
+					assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+
+					w.WriteHeader(tt.statusCode)
+					w.Write([]byte(tt.serverResponse))
+				}))
+				defer server.Close()
+
+				config := TranslationConfig{
+					APIKey:  "test-api-key",
+					BaseURL: server.URL,
+					Model:   "llama3:8b",
+				}
+
+				client, err := NewOllamaClient(config)
+				if err != nil {
+					t.Fatalf("Failed to create Ollama client: %v", err)
+				}
+
+				ctx := context.Background()
+				_, err = client.Translate(ctx, "Hello", "Translate to Chinese")
+				if tt.expectError {
+					assert.Error(t, err)
+					if tt.errorContains != "" {
+						assert.Contains(t, err.Error(), tt.errorContains)
+					}
+				} else {
+					assert.NoError(t, err)
+				}
+			}
+		})
+	}
+}
+
+// TestOllamaTranslateWithContext tests context cancellation
+func TestOllamaTranslateWithContext(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Take some time to allow for context cancellation
+		time.Sleep(100 * time.Millisecond)
+		w.WriteHeader(200)
+		w.Write([]byte(`{"response": "Hola"}`))
+	}))
+	defer server.Close()
+
+	config := TranslationConfig{
+		APIKey:  "test-api-key",
+		BaseURL: server.URL,
+		Model:   "llama3:8b",
+	}
+
+	client, err := NewOllamaClient(config)
+	if err != nil {
+		t.Fatalf("Failed to create Ollama client: %v", err)
+	}
+
+	// Test with canceled context
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // Cancel immediately
+
+	_, err = client.Translate(ctx, "Hello", "Translate to Spanish")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "context canceled")
+}
+
+// TestOllamaTranslateWithCustomModel tests custom model names
+func TestOllamaTranslateWithCustomModel(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Read request body to verify model
+		body, _ := io.ReadAll(r.Body)
+		var request map[string]interface{}
+		json.Unmarshal(body, &request)
+
+		// Verify custom model is passed
+		if model, ok := request["model"].(string); !ok || model != "custom-model:latest" {
+			t.Errorf("Expected custom-model:latest, got %v", request["model"])
+		}
+
+		w.WriteHeader(200)
+		w.Write([]byte(`{"response": "Bonjour"}`))
+	}))
+	defer server.Close()
+
+	config := TranslationConfig{
+		APIKey: "test-api-key",
+		BaseURL: server.URL,
+		Model: "custom-model:latest",
+	}
+
+	client, err := NewOllamaClient(config)
+	if err != nil {
+		t.Fatalf("Failed to create Ollama client: %v", err)
+	}
+
+	ctx := context.Background()
+	result, err := client.Translate(ctx, "Hello", "Translate to French")
+	assert.NoError(t, err)
+	assert.Equal(t, "Bonjour", result)
 }
