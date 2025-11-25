@@ -1,0 +1,2837 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>llm: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">digital.vasic.translator/pkg/translator/llm/anthropic.go (90.9%)</option>
+				
+				<option value="file1">digital.vasic.translator/pkg/translator/llm/deepseek.go (92.6%)</option>
+				
+				<option value="file2">digital.vasic.translator/pkg/translator/llm/gemini.go (88.7%)</option>
+				
+				<option value="file3">digital.vasic.translator/pkg/translator/llm/llamacpp.go (34.5%)</option>
+				
+				<option value="file4">digital.vasic.translator/pkg/translator/llm/llamacpp_provider.go (0.0%)</option>
+				
+				<option value="file5">digital.vasic.translator/pkg/translator/llm/llm.go (96.9%)</option>
+				
+				<option value="file6">digital.vasic.translator/pkg/translator/llm/ollama.go (86.2%)</option>
+				
+				<option value="file7">digital.vasic.translator/pkg/translator/llm/openai.go (85.0%)</option>
+				
+				<option value="file8">digital.vasic.translator/pkg/translator/llm/qwen.go (89.4%)</option>
+				
+				<option value="file9">digital.vasic.translator/pkg/translator/llm/test_utils.go (100.0%)</option>
+				
+				<option value="file10">digital.vasic.translator/pkg/translator/llm/zhipu.go (90.5%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package llm
+
+import (
+        "bytes"
+        "context"
+        "encoding/json"
+        "fmt"
+        "io"
+        "net/http"
+        "strings"
+        "time"
+)
+
+// AnthropicClient implements Anthropic Claude API client
+type AnthropicClient struct {
+        config     TranslationConfig
+        httpClient *http.Client
+        baseURL    string
+}
+
+// AnthropicRequest represents Anthropic API request
+type AnthropicRequest struct {
+        Model       string            `json:"model"`
+        Messages    []AnthropicMessage `json:"messages"`
+        MaxTokens   int               `json:"max_tokens"`
+        Temperature float64           `json:"temperature,omitempty"`
+}
+
+// AnthropicMessage represents a message in Anthropic format
+type AnthropicMessage struct {
+        Role    string `json:"role"`
+        Content string `json:"content"`
+}
+
+// AnthropicResponse represents Anthropic API response
+type AnthropicResponse struct {
+        ID      string   `json:"id"`
+        Type    string   `json:"type"`
+        Role    string   `json:"role"`
+        Content []Content `json:"content"`
+        Model   string   `json:"model"`
+        Usage   AnthropicUsage `json:"usage"`
+}
+
+// Content represents content block
+type Content struct {
+        Type string `json:"type"`
+        Text string `json:"text"`
+}
+
+// AnthropicUsage represents token usage
+type AnthropicUsage struct {
+        InputTokens  int `json:"input_tokens"`
+        OutputTokens int `json:"output_tokens"`
+}
+
+// NewAnthropicClient creates a new Anthropic client
+func NewAnthropicClient(config TranslationConfig) (*AnthropicClient, error) <span class="cov8" title="25">{
+        if config.APIKey == "" </span><span class="cov2" title="2">{
+                return nil, fmt.Errorf("Anthropic API key is required")
+        }</span>
+
+        // Validate model
+        <span class="cov8" title="23">if config.Model != "" </span><span class="cov8" title="21">{
+                if strings.TrimSpace(config.Model) == "" </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("model cannot be empty or whitespace")
+                }</span>
+                <span class="cov8" title="21">validModels := ValidModels[ProviderAnthropic]
+                modelValid := false
+                for _, validModel := range validModels </span><span class="cov10" title="41">{
+                        if config.Model == validModel </span><span class="cov8" title="18">{
+                                modelValid = true
+                                break</span>
+                        }
+                }
+                <span class="cov8" title="21">if !modelValid </span><span class="cov3" title="3">{
+                        return nil, fmt.Errorf("model '%s' is not valid for Anthropic. Valid models: %v", 
+                                config.Model, validModels)
+                }</span>
+        } else<span class="cov2" title="2"> {
+                // Empty model is not allowed for explicit configuration
+                return nil, fmt.Errorf("model must be specified for Anthropic client")
+        }</span>
+
+        <span class="cov8" title="18">baseURL := config.BaseURL
+        if baseURL == "" </span><span class="cov2" title="2">{
+                baseURL = "https://api.anthropic.com/v1"
+        }</span>
+
+        <span class="cov8" title="18">return &amp;AnthropicClient{
+                config: config,
+                httpClient: &amp;http.Client{
+                        Timeout: 600 * time.Second, // Increased to 10 minutes for very large book sections (up to 44KB)
+                },
+                baseURL: baseURL,
+        }, nil</span>
+}
+
+// GetProviderName returns the provider name
+func (c *AnthropicClient) GetProviderName() string <span class="cov2" title="2">{
+        return "anthropic"
+}</span>
+
+// Translate translates text using Anthropic Claude
+func (c *AnthropicClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov7" title="13">{
+        model := c.config.Model
+        if model == "" </span><span class="cov0" title="0">{
+                model = "claude-3-sonnet-20240229"
+        }</span>
+
+        <span class="cov7" title="13">temperature := 0.3
+        if c.config.Options["temperature"] != nil </span><span class="cov1" title="1">{
+                if t, ok := c.config.Options["temperature"].(float64); ok </span><span class="cov1" title="1">{
+                        temperature = t
+                }</span>
+        }
+
+        <span class="cov7" title="13">maxTokens := 4096
+        if c.config.Options["max_tokens"] != nil </span><span class="cov1" title="1">{
+                if mt, ok := c.config.Options["max_tokens"].(int); ok </span><span class="cov1" title="1">{
+                        maxTokens = mt
+                }</span>
+        }
+
+        <span class="cov7" title="13">request := AnthropicRequest{
+                Model: model,
+                Messages: []AnthropicMessage{
+                        {Role: "user", Content: prompt},
+                },
+                MaxTokens:   maxTokens,
+                Temperature: temperature,
+        }
+
+        jsonData, err := json.Marshal(request)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to marshal request: %w", err)
+        }</span>
+
+        <span class="cov7" title="13">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/messages", bytes.NewBuffer(jsonData))
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to create request: %w", err)
+        }</span>
+
+        <span class="cov7" title="13">req.Header.Set("Content-Type", "application/json")
+        req.Header.Set("x-api-key", c.config.APIKey)
+        req.Header.Set("anthropic-version", "2023-06-01")
+
+        resp, err := c.httpClient.Do(req)
+        if err != nil </span><span class="cov3" title="3">{
+                return "", fmt.Errorf("failed to send request: %w", err)
+        }</span>
+        <span class="cov6" title="10">defer resp.Body.Close()
+
+        body, err := io.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to read response: %w", err)
+        }</span>
+
+        <span class="cov6" title="10">if resp.StatusCode != http.StatusOK </span><span class="cov4" title="4">{
+                return "", fmt.Errorf("Anthropic API error (status %d): %s", resp.StatusCode, string(body))
+        }</span>
+
+        <span class="cov5" title="6">var response AnthropicResponse
+        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov2" title="2">{
+                return "", fmt.Errorf("failed to unmarshal response: %w", err)
+        }</span>
+
+        <span class="cov4" title="4">if len(response.Content) == 0 </span><span class="cov2" title="2">{
+                return "", fmt.Errorf("no content in response")
+        }</span>
+
+        <span class="cov2" title="2">return response.Content[0].Text, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package llm
+
+import (
+        "fmt"
+        "strings"
+)
+
+// DeepSeekClient implements DeepSeek API client (uses OpenAI-compatible API)
+type DeepSeekClient struct {
+        *OpenAIClient
+}
+
+// NewDeepSeekClient creates a new DeepSeek client
+func NewDeepSeekClient(config TranslationConfig) (*DeepSeekClient, error) <span class="cov10" title="22">{
+        if config.APIKey == "" </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("DeepSeek API key is required")
+        }</span>
+
+        // Validate provider
+        <span class="cov9" title="21">if config.Provider != "deepseek" &amp;&amp; config.Provider != "" </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("invalid provider for DeepSeek client: %s", config.Provider)
+        }</span>
+
+        // DeepSeek uses OpenAI-compatible API
+        <span class="cov9" title="20">if config.BaseURL == "" </span><span class="cov5" title="4">{
+                config.BaseURL = "https://api.deepseek.com/v1"
+        }</span>
+
+        <span class="cov9" title="20">if config.Model == "" </span><span class="cov3" title="2">{
+                return nil, fmt.Errorf("DeepSeek model is required")
+        }</span> else<span class="cov9" title="18"> {
+                // Validate model if provided
+                if strings.TrimSpace(config.Model) == "" </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("model cannot be empty or whitespace")
+                }</span>
+                <span class="cov9" title="18">validModels := ValidModels[ProviderDeepSeek]
+                modelValid := false
+                for _, validModel := range validModels </span><span class="cov10" title="22">{
+                        if config.Model == validModel </span><span class="cov8" title="15">{
+                                modelValid = true
+                                break</span>
+                        }
+                }
+                <span class="cov9" title="18">if !modelValid </span><span class="cov4" title="3">{
+                        return nil, fmt.Errorf("model '%s' is not valid for DeepSeek. Valid models: %v", 
+                                config.Model, validModels)
+                }</span>
+        }
+
+        // Validate temperature if provided
+        <span class="cov8" title="15">if temp, exists := config.Options["temperature"]; exists </span><span class="cov6" title="6">{
+                if tempFloat, ok := temp.(float64); ok </span><span class="cov6" title="6">{
+                        if tempFloat &lt; 0.0 || tempFloat &gt; 2.0 </span><span class="cov3" title="2">{
+                                return nil, fmt.Errorf("temperature %.1f is invalid for DeepSeek. Must be between 0.0 and 2.0", tempFloat)
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="13">openaiClient, err := NewOpenAIClient(config)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="13">return &amp;DeepSeekClient{
+                OpenAIClient: openaiClient,
+        }, nil</span>
+}
+
+// GetProviderName returns the provider name
+func (c *DeepSeekClient) GetProviderName() string <span class="cov3" title="2">{
+        return "deepseek"
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package llm
+
+import (
+        "bytes"
+        "context"
+        "encoding/json"
+        "fmt"
+        "io"
+        "net/http"
+        "strings"
+        "time"
+
+)
+
+// GeminiClient implements the LLMClient interface for Google Gemini
+type GeminiClient struct {
+        config     TranslationConfig
+        httpClient *http.Client
+        baseURL    string
+}
+
+// GeminiRequest represents a request to the Gemini API
+type GeminiRequest struct {
+        Contents         []GeminiContent         `json:"contents"`
+        GenerationConfig *GeminiGenerationConfig `json:"generationConfig,omitempty"`
+        SafetySettings   []GeminiSafetySetting   `json:"safetySettings,omitempty"`
+}
+
+// GeminiContent represents content in a Gemini request
+type GeminiContent struct {
+        Parts []GeminiPart `json:"parts"`
+        Role  string       `json:"role,omitempty"`
+}
+
+// GeminiPart represents a part of content
+type GeminiPart struct {
+        Text string `json:"text"`
+}
+
+// GeminiGenerationConfig represents generation configuration
+type GeminiGenerationConfig struct {
+        Temperature     float64  `json:"temperature,omitempty"`
+        TopK            int      `json:"topK,omitempty"`
+        TopP            float64  `json:"topP,omitempty"`
+        MaxOutputTokens int      `json:"maxOutputTokens,omitempty"`
+        StopSequences   []string `json:"stopSequences,omitempty"`
+}
+
+// GeminiSafetySetting represents safety settings
+type GeminiSafetySetting struct {
+        Category  string `json:"category"`
+        Threshold string `json:"threshold"`
+}
+
+// GeminiResponse represents a response from the Gemini API
+type GeminiResponse struct {
+        Candidates    []GeminiCandidate    `json:"candidates"`
+        UsageMetadata *GeminiUsageMetadata `json:"usageMetadata,omitempty"`
+}
+
+// GeminiCandidate represents a candidate response
+type GeminiCandidate struct {
+        Content       GeminiContent        `json:"content"`
+        FinishReason  string               `json:"finishReason"`
+        Index         int                  `json:"index"`
+        SafetyRatings []GeminiSafetyRating `json:"safetyRatings"`
+}
+
+// GeminiSafetyRating represents safety ratings
+type GeminiSafetyRating struct {
+        Category    string `json:"category"`
+        Probability string `json:"probability"`
+}
+
+// GeminiUsageMetadata represents usage metadata
+type GeminiUsageMetadata struct {
+        PromptTokenCount     int `json:"promptTokenCount"`
+        CandidatesTokenCount int `json:"candidatesTokenCount"`
+        TotalTokenCount      int `json:"totalTokenCount"`
+}
+
+// NewGeminiClient creates a new Gemini client
+func NewGeminiClient(config TranslationConfig) (*GeminiClient, error) <span class="cov10" title="13">{
+        if config.APIKey == "" </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("API key is required for Gemini")
+        }</span>
+        
+        <span class="cov9" title="12">baseURL := config.BaseURL
+        if baseURL == "" </span><span class="cov4" title="3">{
+                baseURL = "https://generativelanguage.googleapis.com/v1beta"
+        }</span>
+
+        <span class="cov9" title="12">return &amp;GeminiClient{
+                config: config,
+                httpClient: &amp;http.Client{
+                        Timeout: 60 * time.Second, // Default timeout
+                },
+                baseURL: baseURL,
+        }, nil</span>
+}
+
+// Translate performs translation using Google Gemini
+func (g *GeminiClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov8" title="9">{
+        if text == "" </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("text is required")
+        }</span>
+
+        // Build the full prompt
+        <span class="cov8" title="9">fullPrompt := g.buildPrompt(text, prompt)
+
+        // Create the request
+        geminiReq := GeminiRequest{
+                Contents: []GeminiContent{
+                        {
+                                Parts: []GeminiPart{
+                                        {Text: fullPrompt},
+                                },
+                                Role: "user",
+                        },
+                },
+                GenerationConfig: &amp;GeminiGenerationConfig{
+                        Temperature:     0.3,
+                        TopK:            40,
+                        TopP:            0.95,
+                        MaxOutputTokens: 4000,
+                },
+                SafetySettings: []GeminiSafetySetting{
+                        {
+                                Category:  "HARM_CATEGORY_HARASSMENT",
+                                Threshold: "BLOCK_MEDIUM_AND_ABOVE",
+                        },
+                        {
+                                Category:  "HARM_CATEGORY_HATE_SPEECH",
+                                Threshold: "BLOCK_MEDIUM_AND_ABOVE",
+                        },
+                        {
+                                Category:  "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                                Threshold: "BLOCK_MEDIUM_AND_ABOVE",
+                        },
+                        {
+                                Category:  "HARM_CATEGORY_DANGEROUS_CONTENT",
+                                Threshold: "BLOCK_MEDIUM_AND_ABOVE",
+                        },
+                },
+        }
+
+        // Make the API request
+        resp, err := g.makeRequest(ctx, geminiReq)
+        if err != nil </span><span class="cov5" title="4">{
+                return "", fmt.Errorf("failed to make Gemini request: %w", err)
+        }</span>
+
+        // Parse the response
+        <span class="cov6" title="5">translatedText, err := g.parseResponse(resp)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to parse Gemini response: %w", err)
+        }</span>
+
+        <span class="cov6" title="5">return translatedText, nil</span>
+}
+
+// buildPrompt creates the translation prompt
+func (g *GeminiClient) buildPrompt(text, prompt string) string <span class="cov8" title="9">{
+        var fullPrompt strings.Builder
+
+        if prompt != "" </span><span class="cov8" title="9">{
+                fullPrompt.WriteString(prompt)
+                fullPrompt.WriteString("\n\n")
+        }</span>
+
+        <span class="cov8" title="9">fullPrompt.WriteString("Text to translate:\n")
+        fullPrompt.WriteString(text)
+        fullPrompt.WriteString("\n\n")
+        fullPrompt.WriteString("Provide only the translated text without any explanations or additional formatting.")
+
+        return fullPrompt.String()</span>
+}
+
+// makeRequest sends a request to the Gemini API
+func (g *GeminiClient) makeRequest(ctx context.Context, req GeminiRequest) (*GeminiResponse, error) <span class="cov9" title="11">{
+        // Build the URL
+        model := g.config.Model
+        if model == "" </span><span class="cov0" title="0">{
+                model = "gemini-pro"
+        }</span>
+
+        <span class="cov9" title="11">url := fmt.Sprintf("%s/models/%s:generateContent?key=%s",
+                g.baseURL,
+                model,
+                g.config.APIKey)
+
+        // Marshal the request
+        reqBody, err := json.Marshal(req)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to marshal request: %w", err)
+        }</span>
+
+        // Create HTTP request
+        <span class="cov9" title="11">httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(reqBody))
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create request: %w", err)
+        }</span>
+
+        <span class="cov9" title="11">httpReq.Header.Set("Content-Type", "application/json")
+
+        // Send request
+        resp, err := g.httpClient.Do(httpReq)
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("failed to send request: %w", err)
+        }</span>
+        <span class="cov9" title="10">defer resp.Body.Close()
+
+        // Read response body
+        body, err := io.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to read response body: %w", err)
+        }</span>
+
+        // Check status code
+        <span class="cov9" title="10">if resp.StatusCode != http.StatusOK </span><span class="cov3" title="2">{
+                return nil, fmt.Errorf("Gemini API returned status %d: %s", resp.StatusCode, string(body))
+        }</span>
+
+        // Parse response
+        <span class="cov8" title="8">var geminiResp GeminiResponse
+        if err := json.Unmarshal(body, &amp;geminiResp); err != nil </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+        }</span>
+
+        // Check for candidates
+        <span class="cov7" title="7">if len(geminiResp.Candidates) == 0 </span><span class="cov3" title="2">{
+                return nil, fmt.Errorf("no candidates in Gemini response")
+        }</span>
+
+        <span class="cov6" title="5">return &amp;geminiResp, nil</span>
+}
+
+// parseResponse extracts the translated text from the Gemini response
+func (g *GeminiClient) parseResponse(resp *GeminiResponse) (string, error) <span class="cov8" title="9">{
+        if len(resp.Candidates) == 0 </span><span class="cov1" title="1">{
+                return "", fmt.Errorf("no candidates in response")
+        }</span>
+
+        <span class="cov7" title="7">candidate := resp.Candidates[0]
+
+        // Check finish reason
+        if candidate.FinishReason != "STOP" </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("generation did not complete successfully: %s", candidate.FinishReason)
+        }</span>
+
+        // Extract text from parts
+        <span class="cov7" title="7">var translatedText strings.Builder
+        for _, part := range candidate.Content.Parts </span><span class="cov7" title="6">{
+                translatedText.WriteString(part.Text)
+        }</span>
+
+        <span class="cov7" title="7">return strings.TrimSpace(translatedText.String()), nil</span>
+}
+
+// GetProviderName returns the provider name
+func (g *GeminiClient) GetProviderName() string <span class="cov1" title="1">{
+        return "gemini"
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package llm
+
+import (
+        "bytes"
+        "context"
+        "digital.vasic.translator/pkg/hardware"
+        "digital.vasic.translator/pkg/models"
+        "fmt"
+        "os"
+        "os/exec"
+        "path/filepath"
+        "strings"
+        "time"
+)
+
+// LlamaCppClient implements llama.cpp integration for local LLM inference
+type LlamaCppClient struct {
+        config       TranslationConfig
+        modelPath    string
+        modelInfo    *models.ModelInfo
+        hardwareCaps *hardware.Capabilities
+        threads      int
+        contextSize  int
+        executable   string
+}
+
+// NewLlamaCppClient creates a new llama.cpp client with automatic hardware detection and model selection
+func NewLlamaCppClient(config TranslationConfig) (*LlamaCppClient, error) <span class="cov8" title="18">{
+        // Detect hardware capabilities
+        detector := hardware.NewDetector()
+        caps, err := detector.Detect()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("hardware detection failed: %w", err)
+        }</span>
+
+        // Find llama-cli executable
+        <span class="cov8" title="18">executable, err := findLlamaCppExecutable()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("llama.cpp not found: %w (install with: brew install llama.cpp)", err)
+        }</span>
+
+        // Initialize model registry
+        <span class="cov8" title="18">registry := models.NewRegistry()
+
+        // Determine which model to use
+        var modelInfo *models.ModelInfo
+        var modelPath string
+
+        if config.Model != "" </span><span class="cov3" title="3">{
+                // User specified a model
+                modelInfo, exists := registry.Get(config.Model)
+                if !exists </span><span class="cov3" title="3">{
+                        return nil, fmt.Errorf("model not found: %s (use --list-models to see available models)", config.Model)
+                }</span>
+
+                // Check if system can run this model
+                <span class="cov0" title="0">if !caps.CanRunModel(modelInfo.Parameters) </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf(
+                                "insufficient resources for model %s (%dB parameters). Your system supports up to %dB parameters",
+                                modelInfo.Name,
+                                modelInfo.Parameters/1_000_000_000,
+                                caps.MaxModelSize/1_000_000_000,
+                        )
+                }</span>
+        } else<span class="cov7" title="15"> {
+                // Auto-select best model for hardware and languages
+                // Use 60% of total RAM for model selection (more realistic for dedicated model loading)
+                // AvailableRAM only shows currently free memory, which is too conservative
+                ramForModel := uint64(float64(caps.TotalRAM) * 0.6)
+
+                modelInfo, err = registry.FindBestModel(
+                        ramForModel,
+                        []string{"en", "es"}, // English to Spanish translation (example)
+                        caps.HasGPU,
+                )
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("failed to find suitable model: %w", err)
+                }</span>
+
+                <span class="cov7" title="15">fmt.Fprintf(os.Stderr, "[LLAMACPP] Auto-selected model: %s\n", modelInfo.Name)
+                fmt.Fprintf(os.Stderr, "[LLAMACPP] RAM available for model: %.1f GB (60%% of %.1f GB total)\n",
+                        float64(ramForModel)/(1024*1024*1024),
+                        float64(caps.TotalRAM)/(1024*1024*1024))</span>
+        }
+
+        // Check if model is already downloaded
+        <span class="cov7" title="15">downloader := models.NewDownloader()
+        modelPath, err = downloader.GetModelPath(modelInfo)
+        if err != nil </span><span class="cov7" title="15">{
+                // Model not downloaded, download it now
+                fmt.Fprintf(os.Stderr, "[LLAMACPP] Downloading model: %s\n", modelInfo.Name)
+                fmt.Fprintf(os.Stderr, "[LLAMACPP] This may take several minutes depending on your connection...\n")
+
+                modelPath, err = downloader.DownloadModel(modelInfo)
+                if err != nil </span><span class="cov7" title="15">{
+                        return nil, fmt.Errorf("failed to download model: %w", err)
+                }</span>
+
+                <span class="cov0" title="0">fmt.Fprintf(os.Stderr, "[LLAMACPP] Download complete: %s\n", modelPath)</span>
+        } else<span class="cov0" title="0"> {
+                fmt.Fprintf(os.Stderr, "[LLAMACPP] Using cached model: %s\n", modelPath)
+        }</span>
+
+        // Configure threads (use 75% of physical cores for optimal performance)
+        <span class="cov0" title="0">threads := int(float64(caps.CPUCores) * 0.75)
+        if threads &lt; 1 </span><span class="cov0" title="0">{
+                threads = 1
+        }</span>
+
+        // Configure context size (from model info or default)
+        <span class="cov0" title="0">contextSize := modelInfo.ContextLength
+        if contextSize == 0 </span><span class="cov0" title="0">{
+                contextSize = 8192 // Default
+        }</span>
+
+        <span class="cov0" title="0">fmt.Fprintf(os.Stderr, "[LLAMACPP] Configuration: %d threads, %d context size\n", threads, contextSize)
+        if caps.HasGPU </span><span class="cov0" title="0">{
+                fmt.Fprintf(os.Stderr, "[LLAMACPP] GPU acceleration: %s\n", caps.GPUType)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;LlamaCppClient{
+                config:       config,
+                modelPath:    modelPath,
+                modelInfo:    modelInfo,
+                hardwareCaps: caps,
+                threads:      threads,
+                contextSize:  contextSize,
+                executable:   executable,
+        }, nil</span>
+}
+
+// findLlamaCppExecutable locates the llama-cli executable
+func findLlamaCppExecutable() (string, error) <span class="cov9" title="33">{
+        // Try common locations
+        candidates := []string{
+                "llama-cli",                   // In PATH
+                "/opt/homebrew/bin/llama-cli", // Homebrew on Apple Silicon
+                "/usr/local/bin/llama-cli",    // Homebrew on Intel
+                "/usr/bin/llama-cli",          // System install
+                filepath.Join(os.Getenv("HOME"), ".local/bin/llama-cli"), // Local install
+        }
+
+        for _, candidate := range candidates </span><span class="cov10" title="36">{
+                if path, err := exec.LookPath(candidate); err == nil </span><span class="cov9" title="33">{
+                        return path, nil
+                }</span>
+        }
+
+        <span class="cov0" title="0">return "", fmt.Errorf("llama-cli not found in standard locations")</span>
+}
+
+// GetProviderName returns the provider name
+func (c *LlamaCppClient) GetProviderName() string <span class="cov1" title="1">{
+        return "llamacpp"
+}</span>
+
+// Translate translates text using llama.cpp local inference
+func (c *LlamaCppClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov0" title="0">{
+        if text == "" || strings.TrimSpace(text) == "" </span><span class="cov0" title="0">{
+                return text, nil
+        }</span>
+
+        // Build command with optimized parameters for translation
+        <span class="cov0" title="0">args := []string{
+                "-m", c.modelPath,
+                "-p", prompt,
+                "-n", "4096", // max tokens to generate (increased for book translation)
+                "-t", fmt.Sprintf("%d", c.threads),
+                "-c", fmt.Sprintf("%d", c.contextSize),
+                "--temp", "0.3", // low temperature for consistent, accurate translation
+                "--top-p", "0.9", // nucleus sampling
+                "--top-k", "40", // top-k sampling
+                "--repeat-penalty", "1.1", // prevent repetition
+                "--no-display-prompt", // don't echo the prompt in output
+        }
+
+        // Enable GPU acceleration if available
+        if c.hardwareCaps.HasGPU </span><span class="cov0" title="0">{
+                switch c.hardwareCaps.GPUType </span>{
+                case "metal":<span class="cov0" title="0">
+                        args = append(args, "-ngl", "99")</span> // offload all layers to Metal GPU
+                case "cuda":<span class="cov0" title="0">
+                        args = append(args, "-ngl", "99")</span> // offload all layers to CUDA
+                case "rocm":<span class="cov0" title="0">
+                        args = append(args, "-ngl", "99")</span> // offload all layers to ROCm
+                }
+        }
+
+        // Create command with context for cancellation
+        <span class="cov0" title="0">cmd := exec.CommandContext(ctx, c.executable, args...)
+
+        // Capture output
+        var stdout, stderr bytes.Buffer
+        cmd.Stdout = &amp;stdout
+        cmd.Stderr = &amp;stderr
+
+        // Log the inference start
+        startTime := time.Now()
+        fmt.Fprintf(os.Stderr, "[LLAMACPP] Starting inference (text length: %d bytes)\n", len(text))
+
+        // Execute
+        err := cmd.Run()
+        duration := time.Since(startTime)
+
+        if err != nil </span><span class="cov0" title="0">{
+                // Include stderr in error message for debugging
+                stderrStr := stderr.String()
+                if stderrStr != "" </span><span class="cov0" title="0">{
+                        return "", fmt.Errorf("llama.cpp execution failed: %w\nStderr: %s", err, stderrStr)
+                }</span>
+                <span class="cov0" title="0">return "", fmt.Errorf("llama.cpp execution failed: %w", err)</span>
+        }
+
+        <span class="cov0" title="0">result := stdout.String()
+
+        // Log performance metrics
+        tokensPerSecond := float64(len(result)) / duration.Seconds()
+        fmt.Fprintf(os.Stderr, "[LLAMACPP] Inference complete: %.1f tokens/sec, duration: %v\n",
+                tokensPerSecond, duration.Round(time.Millisecond))
+
+        // Post-process: remove any prompt echo that might have slipped through
+        result = strings.TrimSpace(result)
+
+        // Remove prompt if it appears at the start
+        if strings.HasPrefix(result, prompt) </span><span class="cov0" title="0">{
+                result = strings.TrimPrefix(result, prompt)
+                result = strings.TrimSpace(result)
+        }</span>
+
+        <span class="cov0" title="0">return result, nil</span>
+}
+
+// GetModelInfo returns information about the currently loaded model
+func (c *LlamaCppClient) GetModelInfo() *models.ModelInfo <span class="cov0" title="0">{
+        return c.modelInfo
+}</span>
+
+// GetHardwareInfo returns detected hardware capabilities
+func (c *LlamaCppClient) GetHardwareInfo() *hardware.Capabilities <span class="cov0" title="0">{
+        return c.hardwareCaps
+}</span>
+
+// Validate checks if the client is properly configured
+func (c *LlamaCppClient) Validate() error <span class="cov0" title="0">{
+        // Check if model file exists
+        if _, err := os.Stat(c.modelPath); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("model file not found: %s", c.modelPath)
+        }</span>
+
+        // Check if executable exists
+        <span class="cov0" title="0">if _, err := os.Stat(c.executable); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("llama-cli not found: %s", c.executable)
+        }</span>
+
+        // Check if we have enough RAM
+        <span class="cov0" title="0">requiredRAM := c.modelInfo.MinRAM
+        if c.hardwareCaps.AvailableRAM &lt; requiredRAM </span><span class="cov0" title="0">{
+                return fmt.Errorf(
+                        "insufficient RAM: model requires %.1f GB, but only %.1f GB available",
+                        float64(requiredRAM)/(1024*1024*1024),
+                        float64(c.hardwareCaps.AvailableRAM)/(1024*1024*1024),
+                )
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package llm
+
+import (
+        "context"
+        "fmt"
+        "os"
+        "os/exec"
+        "strings"
+        "sync"
+        "time"
+
+        "digital.vasic.translator/pkg/logger"
+)
+
+// LlamaCppProviderConfig holds configuration for llama.cpp provider
+type LlamaCppProviderConfig struct {
+        BinaryPath      string            `json:"binary_path" yaml:"binary_path"`
+        Models          []ModelConfig     `json:"models" yaml:"models"`
+        MaxConcurrency  int               `json:"max_concurrency" yaml:"max_concurrency"`
+        RequestTimeout  time.Duration     `json:"request_timeout" yaml:"request_timeout"`
+        Temperature     float64           `json:"temperature" yaml:"temperature"`
+        TopP            float64           `json:"top_p" yaml:"top_p"`
+        TopK            int               `json:"top_k" yaml:"top_k"`
+        RepeatPenalty   float64           `json:"repeat_penalty" yaml:"repeat_penalty"`
+        ContextSize     int               `json:"context_size" yaml:"context_size"`
+        GPULayers       int               `json:"gpu_layers" yaml:"gpu_layers"`
+        AdditionalArgs  map[string]string `json:"additional_args" yaml:"additional_args"`
+}
+
+// ModelConfig defines a single llama.cpp model configuration
+type ModelConfig struct {
+        ID             string            `json:"id" yaml:"id"`
+        Path           string            `json:"path" yaml:"path"`
+        ModelName      string            `json:"model_name" yaml:"model_name"`
+        Size           int64             `json:"size" yaml:"size"`             // Size in bytes
+        Quantization   string            `json:"quantization" yaml:"quantization"` // Q4_0, Q5_K_M, etc.
+        MaxTokens      int               `json:"max_tokens" yaml:"max_tokens"`
+        Capabilities   []string          `json:"capabilities" yaml:"capabilities"` // translation, reasoning, etc.
+        PreferredFor   []string          `json:"preferred_for" yaml:"preferred_for"` // text, code, etc.
+        ModelParams    map[string]string `json:"model_params" yaml:"model_params"`
+        IsDefault      bool              `json:"is_default" yaml:"is_default"`
+        IsAvailable    bool              `json:"is_available" yaml:"is_available"`
+        LastUsed       time.Time         `json:"last_used" yaml:"last_used"`
+}
+
+// LlamaCppWorker represents a single llama.cpp model worker
+type LlamaCppWorker struct {
+        ID         string
+        Config     ModelConfig
+        BinaryPath string
+        Process    *exec.Cmd
+        IsRunning  bool
+        mu         sync.RWMutex
+}
+
+// MultiLLMCoordinator manages multiple llama.cpp workers for parallel processing
+type MultiLLMCoordinator struct {
+        Config      LlamaCppProviderConfig
+        Workers     map[string]*LlamaCppWorker
+        WorkQueue   chan TranslationTask
+        Results     chan TranslationResult
+        mu          sync.RWMutex
+        logger      logger.Logger
+        ctx         context.Context
+        cancel      context.CancelFunc
+        wg          sync.WaitGroup
+}
+
+// TranslationTask represents a translation request
+type TranslationTask struct {
+        ID       string
+        Text     string
+        FromLang string
+        ToLang   string
+        Context  string
+        WorkerID string
+        Result   chan TranslationResult
+}
+
+// TranslationResult represents the result of a translation task
+type TranslationResult struct {
+        ID        string
+        Text      string
+        Success   bool
+        Error     error
+        Metadata  map[string]interface{}
+        WorkerID  string
+        Duration  time.Duration
+        TokensUsed int
+        ModelUsed string
+}
+
+// NewLlamaCppProvider creates a new multi-LLM llama.cpp provider
+func NewLlamaCppProvider(config LlamaCppProviderConfig, logger logger.Logger) (*MultiLLMCoordinator, error) <span class="cov0" title="0">{
+        ctx, cancel := context.WithCancel(context.Background())
+        
+        coordinator := &amp;MultiLLMCoordinator{
+                Config:    config,
+                Workers:   make(map[string]*LlamaCppWorker),
+                WorkQueue: make(chan TranslationTask, 100),
+                Results:   make(chan TranslationResult, 100),
+                logger:    logger,
+                ctx:       ctx,
+                cancel:    cancel,
+        }
+
+        // Initialize workers
+        if err := coordinator.initializeWorkers(); err != nil </span><span class="cov0" title="0">{
+                cancel()
+                return nil, fmt.Errorf("failed to initialize workers: %w", err)
+        }</span>
+
+        // Start worker pool
+        <span class="cov0" title="0">coordinator.startWorkerPool()
+
+        return coordinator, nil</span>
+}
+
+// initializeWorkers sets up all configured llama.cpp workers
+func (c *MultiLLMCoordinator) initializeWorkers() error <span class="cov0" title="0">{
+        for _, modelConfig := range c.Config.Models </span><span class="cov0" title="0">{
+                worker := &amp;LlamaCppWorker{
+                        ID:         modelConfig.ID,
+                        Config:     modelConfig,
+                        BinaryPath: c.Config.BinaryPath,
+                }
+
+                // Check if model file exists and is accessible
+                if _, err := exec.LookPath(c.Config.BinaryPath); err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("llama.cpp binary not found at %s: %w", c.Config.BinaryPath, err)
+                }</span>
+
+                // Check if model file exists and is accessible
+                <span class="cov0" title="0">if _, err := os.Stat(modelConfig.Path); err != nil </span><span class="cov0" title="0">{
+                        c.logger.Warn("Model file not found, marking worker unavailable", 
+                                map[string]interface{}{
+                                        "model_id": modelConfig.ID,
+                                        "path": modelConfig.Path,
+                                        "error": err.Error(),
+                                })
+                        worker.Config.IsAvailable = false
+                }</span> else<span class="cov0" title="0"> {
+                        worker.Config.IsAvailable = true
+                }</span>
+
+                <span class="cov0" title="0">c.Workers[modelConfig.ID] = worker
+                c.logger.Info("Initialized llama.cpp worker", 
+                        map[string]interface{}{
+                                "model_id": modelConfig.ID,
+                                "path": modelConfig.Path,
+                                "available": modelConfig.IsAvailable,
+                        })</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// startWorkerPool starts the goroutines that process translation tasks
+func (c *MultiLLMCoordinator) startWorkerPool() <span class="cov0" title="0">{
+        for i := 0; i &lt; c.Config.MaxConcurrency; i++ </span><span class="cov0" title="0">{
+                c.wg.Add(1)
+                go c.worker(i)
+        }</span>
+}
+
+// worker processes translation tasks from the queue
+func (c *MultiLLMCoordinator) worker(workerIndex int) <span class="cov0" title="0">{
+        defer c.wg.Done()
+        
+        c.logger.Debug("Starting llama.cpp worker", 
+                map[string]interface{}{
+                        "worker_index": workerIndex,
+                })
+
+        for </span><span class="cov0" title="0">{
+                select </span>{
+                case task := &lt;-c.WorkQueue:<span class="cov0" title="0">
+                        result := c.processTask(task)
+                        if task.Result != nil </span><span class="cov0" title="0">{
+                                select </span>{
+                                case task.Result &lt;- result:<span class="cov0" title="0"></span>
+                                case &lt;-c.ctx.Done():<span class="cov0" title="0">
+                                        return</span>
+                                }
+                        }
+                        <span class="cov0" title="0">select </span>{
+                        case c.Results &lt;- result:<span class="cov0" title="0"></span>
+                        case &lt;-c.ctx.Done():<span class="cov0" title="0">
+                                return</span>
+                        }
+                case &lt;-c.ctx.Done():<span class="cov0" title="0">
+                        return</span>
+                }
+        }
+}
+
+// processTask executes a single translation task
+func (c *MultiLLMCoordinator) processTask(task TranslationTask) TranslationResult <span class="cov0" title="0">{
+        startTime := time.Now()
+        
+        c.logger.Debug("Processing translation task", 
+                map[string]interface{}{
+                        "task_id": task.ID,
+                        "from_lang": task.FromLang,
+                        "to_lang": task.ToLang,
+                        "text_length": len(task.Text),
+                })
+
+        // Select best available worker for this task
+        workerID := task.WorkerID
+        if workerID == "" </span><span class="cov0" title="0">{
+                workerID = c.selectBestWorker(task)
+                if workerID == "" </span><span class="cov0" title="0">{
+                        return TranslationResult{
+                                ID:       task.ID,
+                                Success:  false,
+                                Error:    fmt.Errorf("no available workers for task %s", task.ID),
+                                Duration: time.Since(startTime),
+                        }
+                }</span>
+        }
+
+        <span class="cov0" title="0">worker := c.Workers[workerID]
+        
+        // Build llama.cpp command
+        cmd := c.buildCommand(worker, task)
+        
+        // Execute translation
+        output, err := c.executeCommand(cmd)
+        if err != nil </span><span class="cov0" title="0">{
+                c.logger.Error("Translation failed", 
+                        map[string]interface{}{
+                                "task_id": task.ID,
+                                "worker_id": workerID,
+                                "error": err.Error(),
+                        })
+                
+                return TranslationResult{
+                        ID:        task.ID,
+                        Success:   false,
+                        Error:     err,
+                        WorkerID:  workerID,
+                        Duration:  time.Since(startTime),
+                }
+        }</span>
+
+        // Parse and clean output
+        <span class="cov0" title="0">translatedText := c.parseOutput(output)
+
+        // Update worker last used time
+        worker.mu.Lock()
+        worker.Config.LastUsed = time.Now()
+        worker.mu.Unlock()
+
+        c.logger.Debug("Translation completed", 
+                map[string]interface{}{
+                        "task_id": task.ID,
+                        "worker_id": workerID,
+                        "duration_ms": time.Since(startTime).Milliseconds(),
+                })
+
+        return TranslationResult{
+                ID:         task.ID,
+                Text:       translatedText,
+                Success:    true,
+                WorkerID:   workerID,
+                Duration:   time.Since(startTime),
+                ModelUsed:  worker.Config.ModelName,
+                Metadata: map[string]interface{}{
+                        "model_id": worker.Config.ID,
+                        "quantization": worker.Config.Quantization,
+                },
+        }</span>
+}
+
+// selectBestWorker chooses the optimal worker for a given task
+func (c *MultiLLMCoordinator) selectBestWorker(task TranslationTask) string <span class="cov0" title="0">{
+        c.mu.RLock()
+        defer c.mu.RUnlock()
+
+        var bestWorkerID string
+        var bestScore float64 = -1
+
+        for workerID, worker := range c.Workers </span><span class="cov0" title="0">{
+                if !worker.Config.IsAvailable </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">score := c.calculateWorkerScore(worker, task)
+                if score &gt; bestScore </span><span class="cov0" title="0">{
+                        bestScore = score
+                        bestWorkerID = workerID
+                }</span>
+        }
+
+        <span class="cov0" title="0">return bestWorkerID</span>
+}
+
+// calculateWorkerScore computes a score for worker selection
+func (c *MultiLLMCoordinator) calculateWorkerScore(worker *LlamaCppWorker, task TranslationTask) float64 <span class="cov0" title="0">{
+        score := 0.0
+
+        // Base availability score
+        if worker.IsRunning </span><span class="cov0" title="0">{
+                score += 10.0
+        }</span>
+
+        // Model capability matching
+        <span class="cov0" title="0">for _, capability := range worker.Config.Capabilities </span><span class="cov0" title="0">{
+                if capability == "translation" </span><span class="cov0" title="0">{
+                        score += 20.0
+                }</span>
+        }
+
+        // Text type preference matching
+        <span class="cov0" title="0">for _, preferredFor := range worker.Config.PreferredFor </span><span class="cov0" title="0">{
+                if strings.Contains(task.Text, "code") &amp;&amp; preferredFor == "code" </span><span class="cov0" title="0">{
+                        score += 15.0
+                }</span> else<span class="cov0" title="0"> if preferredFor == "text" </span><span class="cov0" title="0">{
+                        score += 10.0
+                }</span>
+        }
+
+        // Quantization quality (higher is better)
+        <span class="cov0" title="0">switch worker.Config.Quantization </span>{
+        case "Q8_0":<span class="cov0" title="0">
+                score += 8.0</span>
+        case "Q5_K_M":<span class="cov0" title="0">
+                score += 6.0</span>
+        case "Q4_K_M":<span class="cov0" title="0">
+                score += 4.0</span>
+        case "Q4_0":<span class="cov0" title="0">
+                score += 2.0</span>
+        }
+
+        // Load balancing (prefer less recently used workers)
+        <span class="cov0" title="0">timeSinceLastUse := time.Since(worker.Config.LastUsed)
+        score += float64(timeSinceLastUse.Hours()) * 0.1
+
+        return score</span>
+}
+
+// buildCommand constructs the llama.cpp command for execution
+func (c *MultiLLMCoordinator) buildCommand(worker *LlamaCppWorker, task TranslationTask) *exec.Cmd <span class="cov0" title="0">{
+        args := []string{
+                "-m", worker.Config.Path,
+                "--ctx-size", fmt.Sprintf("%d", c.Config.ContextSize),
+                "--temp", fmt.Sprintf("%.2f", c.Config.Temperature),
+                "--top-p", fmt.Sprintf("%.2f", c.Config.TopP),
+                "--top-k", fmt.Sprintf("%d", c.Config.TopK),
+                "--repeat-penalty", fmt.Sprintf("%.2f", c.Config.RepeatPenalty),
+                "--gpu-layers", fmt.Sprintf("%d", c.Config.GPULayers),
+                "--color",
+                "-p", c.buildPrompt(task),
+        }
+
+        // Add model-specific parameters
+        for key, value := range worker.Config.ModelParams </span><span class="cov0" title="0">{
+                args = append(args, fmt.Sprintf("--%s=%s", key, value))
+        }</span>
+
+        // Add additional global parameters
+        <span class="cov0" title="0">for key, value := range c.Config.AdditionalArgs </span><span class="cov0" title="0">{
+                args = append(args, fmt.Sprintf("--%s=%s", key, value))
+        }</span>
+
+        <span class="cov0" title="0">cmd := exec.Command(c.Config.BinaryPath, args...)
+        return cmd</span>
+}
+
+// buildPrompt creates the translation prompt for llama.cpp
+func (c *MultiLLMCoordinator) buildPrompt(task TranslationTask) string <span class="cov0" title="0">{
+        prompt := fmt.Sprintf(`Translate the following text from %s to %s. 
+Provide ONLY the translation without any explanations, notes, or additional text.
+Maintain the original formatting, line breaks, and structure.
+
+Source text:
+%s
+
+Translation:`, 
+                c.getLanguageName(task.FromLang),
+                c.getLanguageName(task.ToLang),
+                task.Text)
+
+        return prompt
+}</span>
+
+// executeCommand runs the llama.cpp command with timeout
+func (c *MultiLLMCoordinator) executeCommand(cmd *exec.Cmd) (string, error) <span class="cov0" title="0">{
+        ctx, cancel := context.WithTimeout(c.ctx, c.Config.RequestTimeout)
+        defer cancel()
+
+        cmd = exec.CommandContext(ctx, cmd.Path, cmd.Args[1:]...)
+        
+        output, err := cmd.Output()
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("llama.cpp execution failed: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return string(output), nil</span>
+}
+
+// parseOutput cleans and extracts the translation from llama.cpp output
+func (c *MultiLLMCoordinator) parseOutput(output string) string <span class="cov0" title="0">{
+        // Remove ANSI color codes
+        output = removeAnsiCodes(output)
+        
+        // Split into lines and find the translation part
+        lines := strings.Split(output, "\n")
+        
+        // Look for the actual translation (after "Translation:" prompt)
+        var translationLines []string
+        foundTranslation := false
+        
+        for _, line := range lines </span><span class="cov0" title="0">{
+                line = strings.TrimSpace(line)
+                if foundTranslation </span><span class="cov0" title="0">{
+                        translationLines = append(translationLines, line)
+                }</span> else<span class="cov0" title="0"> if strings.Contains(line, "Translation:") </span><span class="cov0" title="0">{
+                        foundTranslation = true
+                        // Remove the "Translation:" part
+                        parts := strings.SplitN(line, "Translation:", 2)
+                        if len(parts) &gt; 1 </span><span class="cov0" title="0">{
+                                translationLines = append(translationLines, strings.TrimSpace(parts[1]))
+                        }</span>
+                }
+        }
+
+        <span class="cov0" title="0">return strings.Join(translationLines, "\n")</span>
+}
+
+// getLanguageName converts language codes to full names
+func (c *MultiLLMCoordinator) getLanguageName(code string) string <span class="cov0" title="0">{
+        languages := map[string]string{
+                "en": "English",
+                "ru": "Russian",
+                "sr": "Serbian",
+                "sr-cyrl": "Serbian Cyrillic",
+                "sr-latn": "Serbian Latin",
+        }
+        
+        if name, exists := languages[code]; exists </span><span class="cov0" title="0">{
+                return name
+        }</span>
+        <span class="cov0" title="0">return code</span>
+}
+
+// removeAnsiCodes removes ANSI escape codes from text
+func removeAnsiCodes(text string) string <span class="cov0" title="0">{
+        // Simple ANSI code removal - can be enhanced if needed
+        return text
+}</span>
+
+// Translate implements the LLMClient interface
+func (c *MultiLLMCoordinator) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov0" title="0">{
+        // Extract language info from prompt if available
+        fromLang, toLang := "en", "sr" // defaults
+        
+        if strings.Contains(strings.ToLower(prompt), "russian") || strings.Contains(strings.ToLower(prompt), "ru") </span><span class="cov0" title="0">{
+                fromLang = "ru"
+        }</span>
+        <span class="cov0" title="0">if strings.Contains(strings.ToLower(prompt), "serbian") || strings.Contains(strings.ToLower(prompt), "sr") </span><span class="cov0" title="0">{
+                toLang = "sr"
+        }</span>
+        
+        <span class="cov0" title="0">return c.TranslateText(ctx, text, fromLang, toLang, "")</span>
+}
+
+// TranslateText is the actual translation method with language support
+func (c *MultiLLMCoordinator) TranslateText(ctx context.Context, text, fromLang, toLang string, contextText string) (string, error) <span class="cov0" title="0">{
+        taskID := fmt.Sprintf("task_%d", time.Now().UnixNano())
+        task := TranslationTask{
+                ID:       taskID,
+                Text:     text,
+                FromLang: fromLang,
+                ToLang:   toLang,
+                Context:  contextText,
+                Result:   make(chan TranslationResult, 1),
+        }
+
+        // Submit task to queue
+        select </span>{
+        case c.WorkQueue &lt;- task:<span class="cov0" title="0"></span>
+        case &lt;-ctx.Done():<span class="cov0" title="0">
+                return "", ctx.Err()</span>
+        }
+
+        // Wait for result
+        <span class="cov0" title="0">select </span>{
+        case result := &lt;-task.Result:<span class="cov0" title="0">
+                if result.Success </span><span class="cov0" title="0">{
+                        return result.Text, nil
+                }</span>
+                <span class="cov0" title="0">return "", result.Error</span>
+        case &lt;-ctx.Done():<span class="cov0" title="0">
+                return "", ctx.Err()</span>
+        case &lt;-time.After(c.Config.RequestTimeout):<span class="cov0" title="0">
+                return "", fmt.Errorf("translation timeout for task %s", taskID)</span>
+        }
+}
+
+// GetProviderName returns the provider name
+func (c *MultiLLMCoordinator) GetProviderName() string <span class="cov0" title="0">{
+        return "llamacpp-multi"
+}</span>
+
+// GetAvailableModels returns information about available models
+func (c *MultiLLMCoordinator) GetAvailableModels() []ModelConfig <span class="cov0" title="0">{
+        c.mu.RLock()
+        defer c.mu.RUnlock()
+
+        var models []ModelConfig
+        for _, worker := range c.Workers </span><span class="cov0" title="0">{
+                models = append(models, worker.Config)
+        }</span>
+
+        <span class="cov0" title="0">return models</span>
+}
+
+// Shutdown gracefully shuts down the coordinator and all workers
+func (c *MultiLLMCoordinator) Shutdown(ctx context.Context) error <span class="cov0" title="0">{
+        c.logger.Info("Shutting down multi-LLM coordinator", nil)
+        
+        // Cancel context to stop workers
+        c.cancel()
+        
+        // Wait for workers to finish
+        done := make(chan struct{})
+        go func() </span><span class="cov0" title="0">{
+                c.wg.Wait()
+                close(done)
+        }</span>()
+
+        <span class="cov0" title="0">select </span>{
+        case &lt;-done:<span class="cov0" title="0">
+                c.logger.Info("All workers shut down successfully", nil)
+                return nil</span>
+        case &lt;-ctx.Done():<span class="cov0" title="0">
+                c.logger.Error("Shutdown timeout", nil)
+                return fmt.Errorf("shutdown timeout")</span>
+        }
+}
+
+// GetStats returns statistics about the coordinator and workers
+func (c *MultiLLMCoordinator) GetStats() map[string]interface{} <span class="cov0" title="0">{
+        c.mu.RLock()
+        defer c.mu.RUnlock()
+
+        stats := map[string]interface{}{
+                "total_workers":       len(c.Workers),
+                "available_workers":   0,
+                "running_workers":     0,
+                "queue_length":        len(c.WorkQueue),
+                "max_concurrency":     c.Config.MaxConcurrency,
+        }
+
+        for _, worker := range c.Workers </span><span class="cov0" title="0">{
+                if worker.Config.IsAvailable </span><span class="cov0" title="0">{
+                        stats["available_workers"] = stats["available_workers"].(int) + 1
+                }</span>
+                <span class="cov0" title="0">if worker.IsRunning </span><span class="cov0" title="0">{
+                        stats["running_workers"] = stats["running_workers"].(int) + 1
+                }</span>
+        }
+
+        <span class="cov0" title="0">return stats</span>
+}
+
+// Ensure MultiLLMCoordinator implements LLMClient
+var _ LLMClient = (*MultiLLMCoordinator)(nil)</pre>
+		
+		<pre class="file" id="file5" style="display: none">package llm
+
+import (
+        "context"
+        "digital.vasic.translator/pkg/events"
+        "digital.vasic.translator/pkg/translator"
+        "fmt"
+        "os"
+        "strings"
+)
+
+// TranslationConfig holds translation configuration (local copy to avoid import cycle)
+type TranslationConfig struct {
+        SourceLang     string
+        TargetLang     string
+        SourceLanguage string // Alias for SourceLang
+        TargetLanguage string // Alias for TargetLang
+        Provider       string
+        Model          string
+        APIKey         string
+        BaseURL        string
+        Script         string // Script type (cyrillic, latin)
+        Options        map[string]interface{}
+}
+
+// ConvertFromTranslatorConfig converts from parent package config to local config
+func ConvertFromTranslatorConfig(config translator.TranslationConfig) TranslationConfig <span class="cov2" title="13">{
+        return TranslationConfig{
+                SourceLang:     config.SourceLang,
+                TargetLang:     config.TargetLang,
+                SourceLanguage: config.SourceLanguage,
+                TargetLanguage: config.TargetLanguage,
+                Provider:       config.Provider,
+                Model:          config.Model,
+                APIKey:         config.APIKey,
+                BaseURL:        config.BaseURL,
+                Script:         config.Script,
+                Options:        config.Options,
+        }
+}</span>
+
+// Provider represents LLM provider types
+type Provider string
+
+const (
+        ProviderOpenAI    Provider = "openai"
+        ProviderAnthropic Provider = "anthropic"
+        ProviderZhipu     Provider = "zhipu"
+        ProviderDeepSeek  Provider = "deepseek"
+        ProviderQwen      Provider = "qwen"
+        ProviderGemini    Provider = "gemini"
+        ProviderOllama    Provider = "ollama"
+        ProviderLlamaCpp  Provider = "llamacpp"
+)
+
+// ValidModels defines valid model names for each provider
+var ValidModels = map[Provider][]string{
+        ProviderOpenAI:    {"gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o"},
+        ProviderAnthropic: {"claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"},
+        ProviderZhipu:     {"glm-4", "glm-3-turbo"},
+        ProviderDeepSeek:  {"deepseek-chat", "deepseek-coder"},
+        ProviderQwen:      {"qwen-max", "qwen-plus", "qwen-turbo"},
+        ProviderGemini:    {"gemini-pro", "gemini-pro-vision"},
+        ProviderOllama:    {"llama2", "codellama", "mistral", "vicuna"}, // Common Ollama models
+        ProviderLlamaCpp:  {"llama2", "mistral", "vicuna"}, // Common local models
+}
+
+// LLMTranslator implements LLM-based translation
+type LLMTranslator struct {
+        *BaseTranslator
+        provider Provider
+        client   LLMClient
+}
+
+// GetStats returns translation statistics (implements translator.Translator interface)
+func (lt *LLMTranslator) GetStats() translator.TranslationStats <span class="cov1" title="1">{
+        stats := lt.BaseTranslator.GetStats()
+        return translator.TranslationStats{
+                Total:      stats.Total,
+                Translated: stats.Translated,
+                Cached:     stats.Cached,
+                Errors:     stats.Errors,
+        }
+}</span>
+
+// BaseTranslator provides common functionality (local copy to avoid import cycle)
+type BaseTranslator struct {
+        config TranslationConfig
+        stats  TranslationStats
+        cache  map[string]string
+}
+
+// TranslationStats tracks translation statistics (local copy to avoid import cycle)
+type TranslationStats struct {
+        Total      int
+        Translated int
+        Cached     int
+        Errors     int
+}
+
+// NewBaseTranslator creates a new base translator
+func NewBaseTranslator(config TranslationConfig) *BaseTranslator <span class="cov3" title="19">{
+        return &amp;BaseTranslator{
+                config: config,
+                stats:  TranslationStats{},
+                cache:  make(map[string]string),
+        }
+}</span>
+
+// GetStats returns translation statistics
+func (bt *BaseTranslator) GetStats() TranslationStats <span class="cov1" title="4">{
+        return bt.stats
+}</span>
+
+// CheckCache checks if translation is cached
+func (bt *BaseTranslator) CheckCache(text string) (string, bool) <span class="cov2" title="12">{
+        if translated, ok := bt.cache[text]; ok </span><span class="cov1" title="2">{
+                bt.stats.Cached++
+                return translated, true
+        }</span>
+        <span class="cov2" title="10">return "", false</span>
+}
+
+// AddToCache adds a translation to cache
+func (bt *BaseTranslator) AddToCache(original, translated string) <span class="cov2" title="6">{
+        bt.cache[original] = translated
+}</span>
+
+// UpdateStats updates translation statistics
+func (bt *BaseTranslator) UpdateStats(success bool) <span class="cov2" title="11">{
+        bt.stats.Total++
+        if success </span><span class="cov2" title="6">{
+                bt.stats.Translated++
+        }</span> else<span class="cov2" title="5"> {
+                bt.stats.Errors++
+        }</span>
+}
+
+// EmitProgress emits a progress event
+func EmitProgress(eventBus *events.EventBus, sessionID, message string, data map[string]interface{}) <span class="cov1" title="2">{
+        if eventBus == nil </span><span class="cov1" title="1">{
+                return
+        }</span>
+
+        <span class="cov1" title="1">event := events.NewEvent(events.EventTranslationProgress, message, data)
+        event.SessionID = sessionID
+        eventBus.Publish(event)</span>
+}
+
+// EmitError emits an error event
+func EmitError(eventBus *events.EventBus, sessionID, message string, err error) <span class="cov1" title="2">{
+        if eventBus == nil </span><span class="cov1" title="1">{
+                return
+        }</span>
+
+        <span class="cov1" title="1">data := map[string]interface{}{
+                "error": err.Error(),
+        }
+
+        event := events.NewEvent(events.EventTranslationError, message, data)
+        event.SessionID = sessionID
+        eventBus.Publish(event)</span>
+}
+
+// LLMClient interface for different LLM providers
+type LLMClient interface {
+        Translate(ctx context.Context, text string, prompt string) (string, error)
+        GetProviderName() string
+}
+
+// NewLLMTranslator creates a new LLM translator
+func NewLLMTranslator(config translator.TranslationConfig) (*LLMTranslator, error) <span class="cov2" title="12">{
+        return NewLLMTranslatorWithConfig(ConvertFromTranslatorConfig(config))
+}</span>
+
+// NewLLMTranslatorWithConfig creates a new LLM translator with local config
+func NewLLMTranslatorWithConfig(config TranslationConfig) (*LLMTranslator, error) <span class="cov2" title="12">{
+        provider := Provider(config.Provider)
+
+        // Validate provider
+        if provider == "" </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("provider must be specified")
+        }</span>
+
+        // Validate model if provided
+        <span class="cov2" title="11">if config.Model != "" </span><span class="cov2" title="11">{
+                if validModels, exists := ValidModels[provider]; exists </span><span class="cov2" title="10">{
+                        modelValid := false
+                        for _, validModel := range validModels </span><span class="cov3" title="17">{
+                                if config.Model == validModel </span><span class="cov2" title="9">{
+                                        modelValid = true
+                                        break</span>
+                                }
+                        }
+                        <span class="cov2" title="10">if !modelValid </span><span class="cov1" title="1">{
+                                return nil, fmt.Errorf("model '%s' is not valid for provider '%s'. Valid models: %v", 
+                                        config.Model, provider, validModels)
+                        }</span>
+                }
+                // For Ollama and LlamaCpp, we allow custom models but warn
+                <span class="cov2" title="10">if provider == ProviderOllama || provider == ProviderLlamaCpp </span><span class="cov1" title="1">{
+                        fmt.Printf("Warning: Using custom model '%s' with %s provider\n", config.Model, provider)
+                }</span>
+        }
+
+        <span class="cov2" title="10">var client LLMClient
+        var err error
+
+        switch provider </span>{
+        case ProviderOpenAI:<span class="cov1" title="2">
+                client, err = NewOpenAIClient(config)</span>
+        case ProviderAnthropic:<span class="cov1" title="2">
+                client, err = NewAnthropicClient(config)</span>
+        case ProviderZhipu:<span class="cov0" title="0">
+                client, err = NewZhipuClient(config)</span>
+        case ProviderDeepSeek:<span class="cov1" title="2">
+                client, err = NewDeepSeekClient(config)</span>
+        case ProviderQwen:<span class="cov1" title="1">
+                client, err = NewQwenClient(config)</span>
+        case ProviderGemini:<span class="cov1" title="1">
+                client, err = NewGeminiClient(config)</span>
+        case ProviderOllama:<span class="cov1" title="1">
+                client, err = NewOllamaClient(config)</span>
+        case ProviderLlamaCpp:<span class="cov0" title="0">
+                client, err = NewLlamaCppClient(config)</span>
+        default:<span class="cov1" title="1">
+                return nil, fmt.Errorf("unsupported LLM provider: %s", provider)</span>
+        }
+
+        <span class="cov2" title="9">if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create LLM client: %w", err)
+        }</span>
+
+        <span class="cov2" title="9">return &amp;LLMTranslator{
+                BaseTranslator: NewBaseTranslator(config),
+                provider:       provider,
+                client:         client,
+        }, nil</span>
+}
+
+// GetName returns the translator name
+func (lt *LLMTranslator) GetName() string <span class="cov2" title="6">{
+        return fmt.Sprintf("llm-%s", lt.provider)
+}</span>
+
+// Translate translates text using LLM with automatic retry and text splitting
+func (lt *LLMTranslator) Translate(ctx context.Context, text string, contextStr string) (string, error) <span class="cov2" title="12">{
+        if text == "" || strings.TrimSpace(text) == "" </span><span class="cov1" title="2">{
+                return text, nil
+        }</span>
+
+        // Check cache
+        <span class="cov2" title="10">cacheKey := fmt.Sprintf("%s:%s", text, contextStr)
+        if cached, found := lt.CheckCache(cacheKey); found </span><span class="cov1" title="1">{
+                return cached, nil
+        }</span>
+
+        // Create translation prompt
+        <span class="cov2" title="9">prompt := lt.createTranslationPrompt(text, contextStr)
+
+        // Translate using LLM with smart retry
+        result, err := lt.translateWithRetry(ctx, text, prompt, contextStr)
+        if err != nil </span><span class="cov1" title="4">{
+                lt.UpdateStats(false)
+                return "", fmt.Errorf("LLM translation failed: %w", err)
+        }</span>
+
+        // Enhance translation
+        <span class="cov2" title="5">result = lt.enhanceTranslation(text, result)
+
+        // Update stats
+        lt.UpdateStats(true)
+
+        // Cache result
+        lt.AddToCache(cacheKey, result)
+
+        return result, nil</span>
+}
+
+// translateWithRetry attempts translation with automatic splitting on size errors
+func (lt *LLMTranslator) translateWithRetry(ctx context.Context, text, prompt, contextStr string) (string, error) <span class="cov2" title="12">{
+        // First attempt - try with full text
+        result, err := lt.client.Translate(ctx, text, prompt)
+        if err == nil </span><span class="cov2" title="6">{
+                return result, nil
+        }</span>
+
+        // Check if error is due to text size
+        <span class="cov2" title="6">if !isTextSizeError(err) </span><span class="cov1" title="3">{
+                return "", err
+        }</span>
+
+        // Text is too large - split and translate in chunks
+        <span class="cov1" title="3">fmt.Fprintf(os.Stderr, "[LLM_RETRY] Text too large (%d bytes), splitting into chunks\n", len(text))
+
+        chunks := lt.splitText(text)
+        if len(chunks) == 1 </span><span class="cov1" title="1">{
+                // Cannot split further - text is too large even for one sentence
+                return "", fmt.Errorf("text too large to translate even after splitting (min chunk: %d bytes): %w", len(chunks[0]), err)
+        }</span>
+
+        <span class="cov1" title="2">fmt.Fprintf(os.Stderr, "[LLM_RETRY] Split into %d chunks, translating separately\n", len(chunks))
+
+        // Translate each chunk
+        var translatedChunks []string
+        for i, chunk := range chunks </span><span class="cov1" title="4">{
+                chunkPrompt := lt.createTranslationPrompt(chunk, fmt.Sprintf("%s (part %d/%d)", contextStr, i+1, len(chunks)))
+
+                chunkResult, chunkErr := lt.client.Translate(ctx, chunk, chunkPrompt)
+                if chunkErr != nil </span><span class="cov1" title="1">{
+                        return "", fmt.Errorf("failed to translate chunk %d/%d: %w", i+1, len(chunks), chunkErr)
+                }</span>
+
+                <span class="cov1" title="3">translatedChunks = append(translatedChunks, chunkResult)</span>
+        }
+
+        // Combine translated chunks
+        <span class="cov1" title="1">result = strings.Join(translatedChunks, "")
+        fmt.Fprintf(os.Stderr, "[LLM_RETRY] Successfully translated %d chunks\n", len(chunks))
+
+        return result, nil</span>
+}
+
+// isTextSizeError checks if error is due to text being too large
+func isTextSizeError(err error) bool <span class="cov2" title="13">{
+        if err == nil </span><span class="cov1" title="1">{
+                return false
+        }</span>
+
+        <span class="cov2" title="12">errStr := strings.ToLower(err.Error())
+
+        // Common size-related error patterns
+        sizeErrorPatterns := []string{
+                "max_tokens",
+                "token limit",
+                "too large",
+                "too long",
+                "maximum length",
+                "context length",
+                "exceeds",
+                "invalid request",
+        }
+
+        for _, pattern := range sizeErrorPatterns </span><span class="cov3" title="59">{
+                if strings.Contains(errStr, pattern) </span><span class="cov2" title="7">{
+                        return true
+                }</span>
+        }
+
+        <span class="cov2" title="5">return false</span>
+}
+
+// splitText splits text into smaller chunks at sentence boundaries
+func (lt *LLMTranslator) splitText(text string) []string <span class="cov3" title="19">{
+        // Target chunk size (roughly 20KB to stay well under limits)
+        const maxChunkSize = 20000
+
+        // If text is small enough, return as-is
+        if len(text) &lt;= maxChunkSize </span><span class="cov2" title="11">{
+                return []string{text}
+        }</span>
+
+        <span class="cov2" title="8">var chunks []string
+        var currentChunk strings.Builder
+
+        // Split by paragraphs first
+        paragraphs := strings.Split(text, "\n\n")
+
+        for _, para := range paragraphs </span><span class="cov2" title="10">{
+                // If single paragraph is too large, split by sentences
+                if len(para) &gt; maxChunkSize </span><span class="cov2" title="8">{
+                        sentences := lt.splitBySentences(para)
+                        for _, sentence := range sentences </span><span class="cov7" title="6808">{
+                                if currentChunk.Len()+len(sentence) &gt; maxChunkSize &amp;&amp; currentChunk.Len() &gt; 0 </span><span class="cov2" title="8">{
+                                        // Current chunk is full, start new chunk
+                                        chunks = append(chunks, currentChunk.String())
+                                        currentChunk.Reset()
+                                }</span>
+                                <span class="cov7" title="6808">currentChunk.WriteString(sentence)</span>
+                        }
+                } else<span class="cov1" title="2"> {
+                        // Add paragraph to current chunk
+                        if currentChunk.Len()+len(para)+2 &gt; maxChunkSize &amp;&amp; currentChunk.Len() &gt; 0 </span><span class="cov0" title="0">{
+                                // Current chunk is full, start new chunk
+                                chunks = append(chunks, currentChunk.String())
+                                currentChunk.Reset()
+                        }</span>
+                        <span class="cov1" title="2">if currentChunk.Len() &gt; 0 </span><span class="cov1" title="1">{
+                                currentChunk.WriteString("\n\n")
+                        }</span>
+                        <span class="cov1" title="2">currentChunk.WriteString(para)</span>
+                }
+        }
+
+        // Add final chunk
+        <span class="cov2" title="8">if currentChunk.Len() &gt; 0 </span><span class="cov2" title="8">{
+                chunks = append(chunks, currentChunk.String())
+        }</span>
+
+        <span class="cov2" title="8">return chunks</span>
+}
+
+// splitBySentences splits text into sentences
+func (lt *LLMTranslator) splitBySentences(text string) []string <span class="cov2" title="12">{
+        var sentences []string
+        var currentSentence strings.Builder
+
+        runes := []rune(text)
+        for i := 0; i &lt; len(runes); i++ </span><span class="cov10" title="320534">{
+                currentSentence.WriteRune(runes[i])
+
+                // Check for sentence endings
+                if runes[i] == '.' || runes[i] == '!' || runes[i] == '?' || runes[i] == '…' </span><span class="cov7" title="6809">{
+                        // Check if followed by space or end of text
+                        if i+1 &gt;= len(runes) || runes[i+1] == ' ' || runes[i+1] == '\n' </span><span class="cov7" title="6809">{
+                                sentences = append(sentences, currentSentence.String())
+                                currentSentence.Reset()
+                        }</span>
+                }
+        }
+
+        // Add remaining text
+        <span class="cov2" title="12">if currentSentence.Len() &gt; 0 </span><span class="cov2" title="7">{
+                sentences = append(sentences, currentSentence.String())
+        }</span>
+
+        <span class="cov2" title="12">return sentences</span>
+}
+
+// TranslateWithProgress translates and reports progress (implements translator.Translator interface)
+func (lt *LLMTranslator) TranslateWithProgress(
+        ctx context.Context,
+        text string,
+        contextStr string,
+        eventBus *events.EventBus,
+        sessionID string,
+) (string, error) <span class="cov1" title="3">{
+        translator.EmitProgress(eventBus, sessionID, "Starting LLM translation", map[string]interface{}{
+                "provider":    string(lt.provider),
+                "text_length": len(text),
+        })
+
+        result, err := lt.Translate(ctx, text, contextStr)
+
+        if err != nil </span><span class="cov1" title="1">{
+                // Log detailed error to stdout for debugging
+                fmt.Fprintf(os.Stderr, "[LLM_ERROR] Translation failed: %v\n", err)
+                fmt.Fprintf(os.Stderr, "[LLM_ERROR] Text length: %d bytes, Context: %s\n", len(text), contextStr)
+                translator.EmitError(eventBus, sessionID, "LLM translation failed", err)
+                return "", err
+        }</span>
+
+        <span class="cov1" title="2">translator.EmitProgress(eventBus, sessionID, "LLM translation completed", map[string]interface{}{
+                "provider":          string(lt.provider),
+                "original_length":   len(text),
+                "translated_length": len(result),
+        })
+
+        return result, nil</span>
+}
+
+// createTranslationPrompt creates the translation prompt
+func (lt *LLMTranslator) createTranslationPrompt(text string, contextStr string) string <span class="cov2" title="16">{
+        context := contextStr
+        if context == "" </span><span class="cov1" title="1">{
+                context = "Literary text"
+        }</span>
+
+        <span class="cov2" title="16">return fmt.Sprintf(`You are a professional literary translator specializing in Russian to Serbian translation.
+Your task is to translate the following Russian text into natural, idiomatic Serbian.
+
+Guidelines:
+1. Preserve the literary style and tone
+2. Use appropriate Serbian vocabulary and grammar
+3. Maintain cultural nuances and idioms
+4. Keep names of people and places unchanged unless they have standard Serbian equivalents
+5. Preserve formatting, punctuation, and paragraph structure
+6. Use Serbian Cyrillic script (ћирилица)
+7. **CRITICAL**: Use ONLY Ekavica dialect (екавица) - the standard Serbian dialect used in Serbia
+   - Use "е" instead of "ије/је": mleko (not mlijeko), dete (not dijete), pesma (not pjesma)
+   - Ekavica examples: hteo (not htio), lepo (not lijepo), reka (not rijeka)
+   - This is MANDATORY for all translations to Serbian
+8. **CRITICAL**: Use ONLY pure Serbian vocabulary - avoid Croatian, Bosnian, or Montenegrin words
+   - Use standard Serbian words preferred in Serbia, not regional variants
+   - Example: use "avion" (not Croatian "zrakoplov"), "pozorište" (not Croatian "kazalište")
+
+Context: %s
+
+Russian text:
+%s
+
+Serbian translation (Ekavica only):`, context, text)</span>
+}
+
+// enhanceTranslation post-processes the translation
+func (lt *LLMTranslator) enhanceTranslation(original, translated string) string <span class="cov2" title="8">{
+        enhanced := translated
+
+        // Fix common punctuation issues
+        enhanced = strings.ReplaceAll(enhanced, "\u201c", "\"")
+        enhanced = strings.ReplaceAll(enhanced, "\u201d", "\"")
+        enhanced = strings.ReplaceAll(enhanced, "\u2018", "'")
+
+        // Preserve paragraph structure
+        if strings.HasSuffix(original, "\n") &amp;&amp; !strings.HasSuffix(enhanced, "\n") </span><span class="cov1" title="1">{
+                enhanced += "\n"
+        }</span>
+
+        // Fix sentence capitalization
+        <span class="cov2" title="8">if len(enhanced) &gt; 0 &amp;&amp; len(original) &gt; 0 </span><span class="cov2" title="8">{
+                if isLower(rune(enhanced[0])) &amp;&amp; isUpper(rune(original[0])) </span><span class="cov1" title="1">{
+                        runes := []rune(enhanced)
+                        runes[0] = toUpper(runes[0])
+                        enhanced = string(runes)
+                }</span>
+        }
+
+        <span class="cov2" title="8">return enhanced</span>
+}
+
+// Helper functions
+func isLower(r rune) bool <span class="cov2" title="13">{
+        return r &gt;= 'a' &amp;&amp; r &lt;= 'z'
+}</span>
+
+func isUpper(r rune) bool <span class="cov1" title="3">{
+        return r &gt;= 'A' &amp;&amp; r &lt;= 'Z'
+}</span>
+
+func toUpper(r rune) rune <span class="cov1" title="3">{
+        if isLower(r) </span><span class="cov1" title="2">{
+                return r - 32
+        }</span>
+        <span class="cov1" title="1">return r</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package llm
+
+import (
+        "bytes"
+        "context"
+        "encoding/json"
+        "fmt"
+        "io"
+        "net/http"
+        "time"
+)
+
+// OllamaClient implements Ollama API client (local LLM)
+type OllamaClient struct {
+        config     TranslationConfig
+        httpClient *http.Client
+        baseURL    string
+}
+
+// OllamaRequest represents Ollama API request
+type OllamaRequest struct {
+        Model  string `json:"model"`
+        Prompt string `json:"prompt"`
+        Stream bool   `json:"stream"`
+}
+
+// OllamaResponse represents Ollama API response
+type OllamaResponse struct {
+        Model     string    `json:"model"`
+        CreatedAt time.Time `json:"created_at"`
+        Response  string    `json:"response"`
+        Done      bool      `json:"done"`
+}
+
+// NewOllamaClient creates a new Ollama client
+func NewOllamaClient(config TranslationConfig) (*OllamaClient, error) <span class="cov10" title="15">{
+        baseURL := config.BaseURL
+        if baseURL == "" </span><span class="cov4" title="3">{
+                baseURL = "http://localhost:11434"
+        }</span>
+
+        <span class="cov10" title="15">return &amp;OllamaClient{
+                config: config,
+                httpClient: &amp;http.Client{
+                        Timeout: 600 * time.Second, // Increased to 10 minutes for very large book sections (up to 44KB)
+                },
+                baseURL: baseURL,
+        }, nil</span>
+}
+
+// GetProviderName returns the provider name
+func (c *OllamaClient) GetProviderName() string <span class="cov1" title="1">{
+        return "ollama"
+}</span>
+
+// Translate translates text using Ollama
+func (c *OllamaClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov9" title="12">{
+        model := c.config.Model
+        if model == "" </span><span class="cov0" title="0">{
+                model = "llama3:8b"
+        }</span>
+
+        <span class="cov9" title="12">request := OllamaRequest{
+                Model:  model,
+                Prompt: prompt,
+                Stream: false,
+        }
+
+        jsonData, err := json.Marshal(request)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to marshal request: %w", err)
+        }</span>
+
+        <span class="cov9" title="12">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/api/generate", bytes.NewBuffer(jsonData))
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to create request: %w", err)
+        }</span>
+
+        <span class="cov9" title="12">req.Header.Set("Content-Type", "application/json")
+
+        resp, err := c.httpClient.Do(req)
+        if err != nil </span><span class="cov4" title="3">{
+                return "", fmt.Errorf("failed to send request: %w", err)
+        }</span>
+        <span class="cov8" title="9">defer resp.Body.Close()
+
+        body, err := io.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to read response: %w", err)
+        }</span>
+
+        <span class="cov8" title="9">if resp.StatusCode != http.StatusOK </span><span class="cov5" title="4">{
+                return "", fmt.Errorf("Ollama API error (status %d): %s", resp.StatusCode, string(body))
+        }</span>
+
+        <span class="cov6" title="5">var response OllamaResponse
+        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov1" title="1">{
+                return "", fmt.Errorf("failed to unmarshal response: %w", err)
+        }</span>
+
+        <span class="cov5" title="4">return response.Response, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package llm
+
+import (
+        "bytes"
+        "context"
+        "encoding/json"
+        "fmt"
+        "io"
+        "net/http"
+        "strings"
+        "time"
+)
+
+// OpenAIClient implements OpenAI API client
+type OpenAIClient struct {
+        config     TranslationConfig
+        httpClient *http.Client
+        baseURL    string
+}
+
+// OpenAIRequest represents OpenAI API request
+type OpenAIRequest struct {
+        Model       string    `json:"model"`
+        Messages    []Message `json:"messages"`
+        Temperature float64   `json:"temperature"`
+        MaxTokens   int       `json:"max_tokens,omitempty"`
+}
+
+// Message represents a chat message
+type Message struct {
+        Role    string `json:"role"`
+        Content string `json:"content"`
+}
+
+// OpenAIResponse represents OpenAI API response
+type OpenAIResponse struct {
+        ID      string   `json:"id"`
+        Object  string   `json:"object"`
+        Created int64    `json:"created"`
+        Model   string   `json:"model"`
+        Choices []Choice `json:"choices"`
+        Usage   Usage    `json:"usage"`
+}
+
+// Choice represents a response choice
+type Choice struct {
+        Index        int     `json:"index"`
+        Message      Message `json:"message"`
+        FinishReason string  `json:"finish_reason"`
+}
+
+// Usage represents token usage
+type Usage struct {
+        PromptTokens     int `json:"prompt_tokens"`
+        CompletionTokens int `json:"completion_tokens"`
+        TotalTokens      int `json:"total_tokens"`
+}
+
+// NewOpenAIClient creates a new OpenAI client
+func NewOpenAIClient(config TranslationConfig) (*OpenAIClient, error) <span class="cov10" title="26">{
+        if config.APIKey == "" </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("OpenAI API key is required")
+        }</span>
+
+        // Validate model if provided (skip validation for delegated providers)
+        <span class="cov10" title="26">if config.Model != "" </span><span class="cov9" title="25">{
+                // Skip validation for non-OpenAI providers that delegate to OpenAI
+                isDelegated := false
+                if config.Provider != "" &amp;&amp; config.Provider != "openai" </span><span class="cov8" title="14">{
+                        isDelegated = true
+                }</span>
+                
+                <span class="cov9" title="25">if !isDelegated </span><span class="cov7" title="11">{
+                        if strings.TrimSpace(config.Model) == "" </span><span class="cov0" title="0">{
+                                return nil, fmt.Errorf("model cannot be empty or whitespace")
+                        }</span>
+                        <span class="cov7" title="11">validModels := ValidModels[ProviderOpenAI]
+                        modelValid := false
+                        for _, validModel := range validModels </span><span class="cov8" title="13">{
+                                if config.Model == validModel </span><span class="cov7" title="11">{
+                                        modelValid = true
+                                        break</span>
+                                }
+                        }
+                        <span class="cov7" title="11">if !modelValid </span><span class="cov0" title="0">{
+                                return nil, fmt.Errorf("model '%s' is not valid for OpenAI. Valid models: %v", 
+                                        config.Model, validModels)
+                        }</span>
+                }
+        }
+
+        // Validate temperature if provided
+        <span class="cov10" title="26">if temp, exists := config.Options["temperature"]; exists </span><span class="cov5" title="6">{
+                if tempFloat, ok := temp.(float64); ok </span><span class="cov5" title="6">{
+                        if tempFloat &lt; 0.0 || tempFloat &gt; 2.0 </span><span class="cov1" title="1">{
+                                return nil, fmt.Errorf("temperature %.1f is invalid for OpenAI. Must be between 0.0 and 2.0", tempFloat)
+                        }</span>
+                }
+        }
+
+        <span class="cov9" title="25">baseURL := config.BaseURL
+        if baseURL == "" </span><span class="cov4" title="4">{
+                baseURL = "https://api.openai.com/v1"
+        }</span>
+
+        <span class="cov9" title="25">return &amp;OpenAIClient{
+                config: config,
+                httpClient: &amp;http.Client{
+                        Timeout: 600 * time.Second, // Increased to 10 minutes for very large book sections (up to 44KB)
+                },
+                baseURL: baseURL,
+        }, nil</span>
+}
+
+// GetProviderName returns the provider name
+func (c *OpenAIClient) GetProviderName() string <span class="cov2" title="2">{
+        return "openai"
+}</span>
+
+// Translate translates text using OpenAI
+func (c *OpenAIClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov8" title="17">{
+        model := c.config.Model
+        if model == "" </span><span class="cov0" title="0">{
+                model = "gpt-4"
+        }</span>
+
+        <span class="cov8" title="17">temperature := c.config.Options["temperature"]
+        if temperature == nil </span><span class="cov8" title="16">{
+                temperature = 0.3
+        }</span>
+
+        // Increase max_tokens for large translations (book sections can be very long)
+        // DeepSeek/OpenAI compatible models support up to 8192 max_tokens
+        <span class="cov8" title="17">maxTokens := 8192 // Increased from 4000 to handle book chapters (DeepSeek max)
+        if c.config.Options["max_tokens"] != nil </span><span class="cov0" title="0">{
+                if mt, ok := c.config.Options["max_tokens"].(int); ok </span><span class="cov0" title="0">{
+                        maxTokens = mt
+                }</span>
+        }
+
+        <span class="cov8" title="17">request := OpenAIRequest{
+                Model: model,
+                Messages: []Message{
+                        {Role: "user", Content: prompt},
+                },
+                Temperature: temperature.(float64),
+                MaxTokens:   maxTokens,
+        }
+
+        jsonData, err := json.Marshal(request)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to marshal request: %w", err)
+        }</span>
+
+        <span class="cov8" title="17">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/chat/completions", bytes.NewBuffer(jsonData))
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to create request: %w", err)
+        }</span>
+
+        <span class="cov8" title="17">req.Header.Set("Content-Type", "application/json")
+        req.Header.Set("Authorization", "Bearer "+c.config.APIKey)
+
+        resp, err := c.httpClient.Do(req)
+        if err != nil </span><span class="cov1" title="1">{
+                return "", fmt.Errorf("failed to send request: %w", err)
+        }</span>
+        <span class="cov8" title="16">defer resp.Body.Close()
+
+        body, err := io.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to read response: %w", err)
+        }</span>
+
+        <span class="cov8" title="16">if resp.StatusCode != http.StatusOK </span><span class="cov2" title="2">{
+                return "", fmt.Errorf("OpenAI API error (status %d): %s", resp.StatusCode, string(body))
+        }</span>
+
+        <span class="cov8" title="14">var response OpenAIResponse
+        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov1" title="1">{
+                return "", fmt.Errorf("failed to unmarshal response: %w", err)
+        }</span>
+
+        <span class="cov8" title="13">if len(response.Choices) == 0 </span><span class="cov4" title="3">{
+                return "", fmt.Errorf("no choices in response")
+        }</span>
+
+        <span class="cov7" title="10">return response.Choices[0].Message.Content, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package llm
+
+import (
+        "bytes"
+        "context"
+        "encoding/json"
+        "fmt"
+        "io"
+        "net/http"
+        "os"
+        "path/filepath"
+        "time"
+)
+
+// QwenClient implements Qwen (Alibaba Cloud) LLM API client with OAuth support
+type QwenClient struct {
+        config       TranslationConfig
+        httpClient   *http.Client
+        baseURL      string
+        oauthToken   *QwenOAuthToken
+        credFilePath string
+}
+
+// QwenOAuthToken represents OAuth credentials for Qwen
+type QwenOAuthToken struct {
+        AccessToken  string `json:"access_token"`
+        TokenType    string `json:"token_type"`
+        RefreshToken string `json:"refresh_token"`
+        ResourceURL  string `json:"resource_url"`
+        ExpiryDate   int64  `json:"expiry_date"`
+}
+
+// QwenRequest represents Qwen API request
+type QwenRequest struct {
+        Model      string        `json:"model"`
+        Messages   []QwenMessage `json:"messages"`
+        Stream     bool          `json:"stream"`
+        MaxTokens  int           `json:"max_tokens,omitempty"`
+        Temperature float64      `json:"temperature,omitempty"`
+}
+
+// QwenMessage represents a message
+type QwenMessage struct {
+        Role    string `json:"role"`
+        Content string `json:"content"`
+}
+
+// QwenResponse represents Qwen API response
+type QwenResponse struct {
+        ID      string       `json:"id"`
+        Created int64        `json:"created"`
+        Model   string       `json:"model"`
+        Choices []QwenChoice `json:"choices"`
+        Usage   QwenUsage    `json:"usage"`
+}
+
+// QwenChoice represents a response choice
+type QwenChoice struct {
+        Index        int         `json:"index"`
+        Message      QwenMessage `json:"message"`
+        FinishReason string      `json:"finish_reason"`
+}
+
+// QwenUsage represents token usage
+type QwenUsage struct {
+        PromptTokens     int `json:"prompt_tokens"`
+        CompletionTokens int `json:"completion_tokens"`
+        TotalTokens      int `json:"total_tokens"`
+}
+
+// NewQwenClient creates a new Qwen client with OAuth support
+func NewQwenClient(config TranslationConfig) (*QwenClient, error) <span class="cov10" title="25">{
+        credDir := os.Getenv("HOME")
+        if credDir == "" </span><span class="cov1" title="1">{
+                credDir = "."
+        }</span>
+
+        // Primary location for translator-specific credentials
+        <span class="cov10" title="25">credFile := filepath.Join(credDir, ".translator", "qwen_credentials.json")
+
+        baseURL := config.BaseURL
+        if baseURL == "" </span><span class="cov9" title="20">{
+                baseURL = "https://dashscope.aliyuncs.com/api/v1"
+        }</span>
+
+        <span class="cov10" title="25">client := &amp;QwenClient{
+                config:       config,
+                httpClient:   &amp;http.Client{Timeout: 600 * time.Second}, // Increased to 10 minutes for very large book sections (up to 44KB)
+                baseURL:      baseURL,
+                credFilePath: credFile,
+        }
+
+        // Load OAuth token from file or use API key
+        if config.APIKey != "" </span><span class="cov9" title="21">{
+                // API key provided - use it directly
+                return client, nil
+        }</span>
+
+        // No API key provided, try to load OAuth token
+        // Try loading OAuth token from translator-specific location
+        <span class="cov4" title="4">if err := client.loadOAuthToken(); err != nil </span><span class="cov4" title="3">{
+                // Try Qwen Code standard location as fallback
+                qwenCodeCredFile := filepath.Join(credDir, ".qwen", "oauth_creds.json")
+                client.credFilePath = qwenCodeCredFile
+                if err := client.loadOAuthToken(); err != nil </span><span class="cov4" title="3">{
+                        return nil, fmt.Errorf("no API key or valid OAuth token found: %w\nPlease set QWEN_API_KEY environment variable or authenticate via OAuth", err)
+                }</span>
+        }
+
+        // Note: We don't pre-emptively refresh expired tokens on initialization
+        // Instead, we'll attempt to use the token and only refresh if we get a 401 error
+        // This allows tokens to work even if the expiry date calculation is off
+        <span class="cov1" title="1">if client.isTokenExpired() </span><span class="cov0" title="0">{
+                // Log warning but continue - will refresh on 401
+                fmt.Fprintf(os.Stderr, "Warning: Qwen OAuth token appears expired, will attempt to use it anyway\n")
+        }</span>
+
+        <span class="cov1" title="1">return client, nil</span>
+}
+
+// loadOAuthToken loads OAuth token from credentials file
+func (c *QwenClient) loadOAuthToken() error <span class="cov7" title="10">{
+        data, err := os.ReadFile(c.credFilePath)
+        if err != nil </span><span class="cov6" title="6">{
+                return fmt.Errorf("failed to read credentials file: %w", err)
+        }</span>
+
+        <span class="cov4" title="4">var token QwenOAuthToken
+        if err := json.Unmarshal(data, &amp;token); err != nil </span><span class="cov2" title="2">{
+                return fmt.Errorf("failed to parse credentials: %w", err)
+        }</span>
+
+        <span class="cov2" title="2">c.oauthToken = &amp;token
+        return nil</span>
+}
+
+// saveOAuthToken saves OAuth token to credentials file
+func (c *QwenClient) saveOAuthToken(token *QwenOAuthToken) error <span class="cov7" title="11">{
+        // Ensure directory exists
+        dir := filepath.Dir(c.credFilePath)
+        if err := os.MkdirAll(dir, 0700); err != nil </span><span class="cov1" title="1">{
+                return fmt.Errorf("failed to create credentials directory: %w", err)
+        }</span>
+
+        <span class="cov7" title="10">data, err := json.MarshalIndent(token, "", "  ")
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to marshal credentials: %w", err)
+        }</span>
+
+        <span class="cov7" title="10">if err := os.WriteFile(c.credFilePath, data, 0600); err != nil </span><span class="cov4" title="3">{
+                return fmt.Errorf("failed to write credentials file: %w", err)
+        }</span>
+
+        <span class="cov6" title="7">c.oauthToken = token
+        return nil</span>
+}
+
+// SetOAuthToken sets OAuth token from external source (e.g., OAuth flow)
+func (c *QwenClient) SetOAuthToken(accessToken, refreshToken, resourceURL string, expiryDate int64) error <span class="cov4" title="3">{
+        token := &amp;QwenOAuthToken{
+                AccessToken:  accessToken,
+                TokenType:    "Bearer",
+                RefreshToken: refreshToken,
+                ResourceURL:  resourceURL,
+                ExpiryDate:   expiryDate,
+        }
+        return c.saveOAuthToken(token)
+}</span>
+
+// isTokenExpired checks if the OAuth token is expired
+func (c *QwenClient) isTokenExpired() bool <span class="cov6" title="8">{
+        if c.oauthToken == nil </span><span class="cov1" title="1">{
+                return true
+        }</span>
+        // Consider token expired if less than 5 minutes until expiry
+        <span class="cov6" title="7">return time.Now().Unix() &gt; (c.oauthToken.ExpiryDate/1000 - 300)</span>
+}
+
+// refreshToken refreshes the OAuth token
+func (c *QwenClient) refreshToken() error <span class="cov8" title="16">{
+        if c.oauthToken == nil || c.oauthToken.RefreshToken == "" </span><span class="cov5" title="5">{
+                return fmt.Errorf("no refresh token available")
+        }</span>
+
+        // Qwen OAuth refresh endpoint (based on Alibaba Cloud API)
+        <span class="cov7" title="11">refreshURL := "https://oauth.aliyun.com/v1/token"
+
+        // Prepare refresh request
+        reqData := map[string]interface{}{
+                "grant_type":    "refresh_token",
+                "refresh_token": c.oauthToken.RefreshToken,
+                "client_id":     os.Getenv("QWEN_CLIENT_ID"),
+                "client_secret": os.Getenv("QWEN_CLIENT_SECRET"),
+        }
+
+        // Check for required environment variables
+        if reqData["client_id"] == "" </span><span class="cov4" title="3">{
+                return fmt.Errorf("QWEN_CLIENT_ID environment variable not set")
+        }</span>
+        <span class="cov6" title="8">if reqData["client_secret"] == "" </span><span class="cov2" title="2">{
+                return fmt.Errorf("QWEN_CLIENT_SECRET environment variable not set")
+        }</span>
+
+        <span class="cov6" title="6">jsonData, err := json.Marshal(reqData)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to marshal refresh request: %w", err)
+        }</span>
+
+        // Create HTTP request
+        <span class="cov6" title="6">req, err := http.NewRequestWithContext(context.Background(), "POST", refreshURL, bytes.NewBuffer(jsonData))
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create refresh request: %w", err)
+        }</span>
+
+        <span class="cov6" title="6">req.Header.Set("Content-Type", "application/json")
+        req.Header.Set("Accept", "application/json")
+
+        // Send request
+        resp, err := c.httpClient.Do(req)
+        if err != nil </span><span class="cov1" title="1">{
+                return fmt.Errorf("failed to send refresh request: %w", err)
+        }</span>
+        <span class="cov5" title="5">defer resp.Body.Close()
+
+        if resp.StatusCode != http.StatusOK </span><span class="cov4" title="3">{
+                body, _ := io.ReadAll(resp.Body)
+                return fmt.Errorf("token refresh failed with status %d: %s", resp.StatusCode, string(body))
+        }</span>
+
+        // Parse response
+        <span class="cov2" title="2">var refreshResponse struct {
+                AccessToken  string `json:"access_token"`
+                TokenType    string `json:"token_type"`
+                RefreshToken string `json:"refresh_token"`
+                ExpiresIn    int64  `json:"expires_in"`
+        }
+
+        body, err := io.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to read refresh response: %w", err)
+        }</span>
+
+        <span class="cov2" title="2">if err := json.Unmarshal(body, &amp;refreshResponse); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to parse refresh response: %w", err)
+        }</span>
+
+        // Update OAuth token with new values
+        <span class="cov2" title="2">if refreshResponse.AccessToken == "" </span><span class="cov0" title="0">{
+                return fmt.Errorf("refresh response missing access token")
+        }</span>
+
+        <span class="cov2" title="2">c.oauthToken.AccessToken = refreshResponse.AccessToken
+        c.oauthToken.TokenType = refreshResponse.TokenType
+        c.oauthToken.ExpiryDate = time.Now().UnixMilli() + (refreshResponse.ExpiresIn * 1000)
+
+        // Update refresh token if provided (some providers rotate refresh tokens)
+        if refreshResponse.RefreshToken != "" </span><span class="cov1" title="1">{
+                c.oauthToken.RefreshToken = refreshResponse.RefreshToken
+        }</span>
+
+        // Save updated token to file
+        <span class="cov2" title="2">if err := c.saveOAuthToken(c.oauthToken); err != nil </span><span class="cov1" title="1">{
+                return fmt.Errorf("failed to save refreshed token: %w", err)
+        }</span>
+
+        <span class="cov1" title="1">return nil</span>
+}
+
+// GetProviderName returns the provider name
+func (c *QwenClient) GetProviderName() string <span class="cov4" title="3">{
+        return "qwen"
+}</span>
+
+// Translate translates text using Qwen (Alibaba Cloud) LLM
+func (c *QwenClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov7" title="10">{
+        model := c.config.Model
+        if model == "" </span><span class="cov1" title="1">{
+                model = "qwen-plus" // Default model
+        }</span>
+
+        <span class="cov7" title="10">temperature := 0.3
+        if c.config.Options["temperature"] != nil </span><span class="cov1" title="1">{
+                if t, ok := c.config.Options["temperature"].(float64); ok </span><span class="cov1" title="1">{
+                        temperature = t
+                }</span>
+        }
+
+        <span class="cov7" title="10">maxTokens := 4000
+        if c.config.Options["max_tokens"] != nil </span><span class="cov1" title="1">{
+                if mt, ok := c.config.Options["max_tokens"].(int); ok </span><span class="cov1" title="1">{
+                        maxTokens = mt
+                }</span>
+        }
+
+        <span class="cov7" title="10">request := QwenRequest{
+                Model: model,
+                Messages: []QwenMessage{
+                        {Role: "user", Content: prompt},
+                },
+                Stream:      false,
+                Temperature: temperature,
+                MaxTokens:   maxTokens,
+        }
+
+        jsonData, err := json.Marshal(request)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to marshal request: %w", err)
+        }</span>
+
+        <span class="cov7" title="10">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/services/aigc/text-generation/generation", bytes.NewBuffer(jsonData))
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to create request: %w", err)
+        }</span>
+
+        <span class="cov7" title="10">req.Header.Set("Content-Type", "application/json")
+
+        // Use OAuth token or API key
+        if c.config.APIKey != "" </span><span class="cov6" title="8">{
+                req.Header.Set("Authorization", "Bearer "+c.config.APIKey)
+        }</span> else<span class="cov2" title="2"> if c.oauthToken != nil </span><span class="cov1" title="1">{
+                req.Header.Set("Authorization", c.oauthToken.TokenType+" "+c.oauthToken.AccessToken)
+        }</span> else<span class="cov1" title="1"> {
+                return "", fmt.Errorf("no authentication credentials available")
+        }</span>
+
+        <span class="cov7" title="9">resp, err := c.httpClient.Do(req)
+        if err != nil </span><span class="cov2" title="2">{
+                return "", fmt.Errorf("failed to send request: %w", err)
+        }</span>
+        <span class="cov6" title="7">defer resp.Body.Close()
+
+        body, err := io.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to read response: %w", err)
+        }</span>
+
+        <span class="cov6" title="7">if resp.StatusCode != http.StatusOK </span><span class="cov1" title="1">{
+                // Check if token expired
+                if resp.StatusCode == http.StatusUnauthorized &amp;&amp; c.oauthToken != nil </span><span class="cov0" title="0">{
+                        if err := c.refreshToken(); err == nil </span><span class="cov0" title="0">{
+                                // Retry with refreshed token
+                                return c.Translate(ctx, text, prompt)
+                        }</span>
+                }
+                <span class="cov1" title="1">return "", fmt.Errorf("Qwen API error (status %d): %s", resp.StatusCode, string(body))</span>
+        }
+
+        <span class="cov6" title="6">var response QwenResponse
+        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to unmarshal response: %w", err)
+        }</span>
+
+        <span class="cov6" title="6">if len(response.Choices) == 0 </span><span class="cov1" title="1">{
+                return "", fmt.Errorf("no choices in response")
+        }</span>
+
+        <span class="cov5" title="5">return response.Choices[0].Message.Content, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package llm
+
+import (
+        "os"
+)
+
+// getTestAPIKey retrieves API key from environment variable for testing
+func getTestAPIKey(envVar string) string <span class="cov10" title="2">{
+        return os.Getenv(envVar)
+}</pre>
+		
+		<pre class="file" id="file10" style="display: none">package llm
+
+import (
+        "bytes"
+        "context"
+        "encoding/json"
+        "fmt"
+        "io"
+        "net/http"
+        "time"
+)
+
+// ZhipuClient implements Zhipu AI (GLM) API client
+type ZhipuClient struct {
+        config     TranslationConfig
+        httpClient *http.Client
+        baseURL    string
+}
+
+// ZhipuRequest represents Zhipu API request
+type ZhipuRequest struct {
+        Model       string          `json:"model"`
+        Messages    []ZhipuMessage  `json:"messages"`
+        Temperature float64         `json:"temperature,omitempty"`
+        MaxTokens   int             `json:"max_tokens,omitempty"`
+}
+
+// ZhipuMessage represents a message
+type ZhipuMessage struct {
+        Role    string `json:"role"`
+        Content string `json:"content"`
+}
+
+// ZhipuResponse represents Zhipu API response
+type ZhipuResponse struct {
+        ID      string        `json:"id"`
+        Created int64         `json:"created"`
+        Model   string        `json:"model"`
+        Choices []ZhipuChoice `json:"choices"`
+        Usage   ZhipuUsage    `json:"usage"`
+}
+
+// ZhipuChoice represents a response choice
+type ZhipuChoice struct {
+        Index        int          `json:"index"`
+        Message      ZhipuMessage `json:"message"`
+        FinishReason string       `json:"finish_reason"`
+}
+
+// ZhipuUsage represents token usage
+type ZhipuUsage struct {
+        PromptTokens     int `json:"prompt_tokens"`
+        CompletionTokens int `json:"completion_tokens"`
+        TotalTokens      int `json:"total_tokens"`
+}
+
+// NewZhipuClient creates a new Zhipu client
+func NewZhipuClient(config TranslationConfig) (*ZhipuClient, error) <span class="cov10" title="12">{
+        if config.APIKey == "" </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("Zhipu API key is required")
+        }</span>
+
+        <span class="cov9" title="11">baseURL := config.BaseURL
+        if baseURL == "" </span><span class="cov3" title="2">{
+                baseURL = "https://open.bigmodel.cn/api/paas/v4"
+        }</span>
+
+        <span class="cov9" title="11">return &amp;ZhipuClient{
+                config: config,
+                httpClient: &amp;http.Client{
+                        Timeout: 600 * time.Second, // Increased to 10 minutes for very large book sections (up to 44KB)
+                },
+                baseURL: baseURL,
+        }, nil</span>
+}
+
+// GetProviderName returns the provider name
+func (c *ZhipuClient) GetProviderName() string <span class="cov3" title="2">{
+        return "zhipu"
+}</span>
+
+// Translate translates text using Zhipu AI
+func (c *ZhipuClient) Translate(ctx context.Context, text string, prompt string) (string, error) <span class="cov8" title="7">{
+        model := c.config.Model
+        if model == "" </span><span class="cov0" title="0">{
+                model = "glm-4"
+        }</span>
+
+        <span class="cov8" title="7">temperature := 0.3
+        if c.config.Options["temperature"] != nil </span><span class="cov1" title="1">{
+                if t, ok := c.config.Options["temperature"].(float64); ok </span><span class="cov1" title="1">{
+                        temperature = t
+                }</span>
+        }
+
+        <span class="cov8" title="7">maxTokens := 4000
+        if c.config.Options["max_tokens"] != nil </span><span class="cov1" title="1">{
+                if mt, ok := c.config.Options["max_tokens"].(int); ok </span><span class="cov1" title="1">{
+                        maxTokens = mt
+                }</span>
+        }
+
+        <span class="cov8" title="7">request := ZhipuRequest{
+                Model: model,
+                Messages: []ZhipuMessage{
+                        {Role: "user", Content: prompt},
+                },
+                Temperature: temperature,
+                MaxTokens:   maxTokens,
+        }
+
+        jsonData, err := json.Marshal(request)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to marshal request: %w", err)
+        }</span>
+
+        <span class="cov8" title="7">req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/chat/completions", bytes.NewBuffer(jsonData))
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to create request: %w", err)
+        }</span>
+
+        <span class="cov8" title="7">req.Header.Set("Content-Type", "application/json")
+        req.Header.Set("Authorization", "Bearer "+c.config.APIKey)
+
+        resp, err := c.httpClient.Do(req)
+        if err != nil </span><span class="cov3" title="2">{
+                return "", fmt.Errorf("failed to send request: %w", err)
+        }</span>
+        <span class="cov6" title="5">defer resp.Body.Close()
+
+        body, err := io.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to read response: %w", err)
+        }</span>
+
+        <span class="cov6" title="5">if resp.StatusCode != http.StatusOK </span><span class="cov1" title="1">{
+                return "", fmt.Errorf("Zhipu API error (status %d): %s", resp.StatusCode, string(body))
+        }</span>
+
+        <span class="cov6" title="4">var response ZhipuResponse
+        if err := json.Unmarshal(body, &amp;response); err != nil </span><span class="cov1" title="1">{
+                return "", fmt.Errorf("failed to unmarshal response: %w", err)
+        }</span>
+
+        <span class="cov4" title="3">if len(response.Choices) == 0 </span><span class="cov1" title="1">{
+                return "", fmt.Errorf("no choices in response")
+        }</span>
+
+        <span class="cov3" title="2">return response.Choices[0].Message.Content, nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
