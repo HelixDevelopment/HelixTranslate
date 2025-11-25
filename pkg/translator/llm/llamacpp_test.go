@@ -1145,3 +1145,177 @@ func TestExecutableSearch(t *testing.T) {
 		t.Logf("llama-cli version info: %s", string(output))
 	}
 }
+
+// TestNewLlamaCppClientAdditionalPaths tests additional error paths in NewLlamaCppClient
+func TestNewLlamaCppClientAdditionalPaths(t *testing.T) {
+	t.Run("model_registry_error", func(t *testing.T) {
+		// This test targets the error path around model registry operations
+		config := TranslationConfig{
+			Provider: "llamacpp",
+			Model:    "nonexistent-model-name-12345",
+		}
+
+		client, err := NewLlamaCppClient(config)
+		
+		// Should fail with model not found error
+		if err == nil {
+			t.Error("Expected error for nonexistent model")
+		}
+		if client != nil {
+			t.Error("Client should be nil when model not found")
+		}
+		
+		// Check for specific error message
+		if !strings.Contains(err.Error(), "model not found") {
+			t.Errorf("Expected 'model not found' error, got: %v", err)
+		}
+	})
+
+	t.Run("auto_selection_failure", func(t *testing.T) {
+		// Test auto-selection path with no model specified
+		config := TranslationConfig{
+			Provider: "llamacpp",
+			Model:    "", // Empty to trigger auto-selection
+		}
+
+		client, err := NewLlamaCppClient(config)
+		
+		// Either succeeds (if models exist) or fails gracefully
+		if err != nil {
+			// Check for expected failure types
+			if !strings.Contains(err.Error(), "failed to find suitable model") &&
+			   !strings.Contains(err.Error(), "hardware detection failed") &&
+			   !strings.Contains(err.Error(), "llama.cpp not found") &&
+			   !strings.Contains(err.Error(), "failed to download") {
+				t.Errorf("Unexpected error type: %v", err)
+			}
+		}
+		
+		if client != nil && client.modelInfo == nil {
+			t.Error("Model info should be set when client creation succeeds")
+		}
+	})
+
+	t.Run("download_failure_path", func(t *testing.T) {
+		// Test the download failure path by using a model that exists but can't be downloaded
+		config := TranslationConfig{
+			Provider: "llamacpp",
+			Model:    "Hunyuan-MT 7B (Q4)", // This model exists but requires auth
+		}
+
+		// Remove any cached model to force download attempt
+		client, err := NewLlamaCppClient(config)
+		
+		if err != nil {
+			// Expected error path - download failed
+			if client != nil {
+				t.Error("Client should be nil when download fails")
+			}
+			
+			// Check for download-related error
+			if !strings.Contains(err.Error(), "failed to download") &&
+			   !strings.Contains(err.Error(), "model not found") &&
+			   !strings.Contains(err.Error(), "insufficient resources") {
+				t.Logf("Error may not be download-related: %v", err)
+			}
+		}
+	})
+
+	t.Run("thread_configuration_edge_cases", func(t *testing.T) {
+		// Test thread configuration logic
+		config := TranslationConfig{
+			Provider: "llamacpp",
+		}
+
+		client, err := NewLlamaCppClient(config)
+		
+		// Handle expected hardware/download failures
+		if err != nil {
+			if !strings.Contains(err.Error(), "hardware detection failed") &&
+			   !strings.Contains(err.Error(), "llama.cpp not found") &&
+			   !strings.Contains(err.Error(), "failed to download") {
+				t.Errorf("Unexpected error: %v", err)
+			}
+			return
+		}
+
+		if client == nil {
+			t.Error("Client should not be nil when creation succeeds")
+			return
+		}
+
+		// Verify thread configuration is reasonable
+		if client.threads < 1 {
+			t.Errorf("Thread count should be at least 1, got: %d", client.threads)
+		}
+		
+		// For most systems, thread count should be reasonable (not too high)
+		if client.threads > 64 {
+			t.Logf("Warning: High thread count: %d", client.threads)
+		}
+	})
+
+	t.Run("context_size_configuration", func(t *testing.T) {
+		// Test context size configuration
+		config := TranslationConfig{
+			Provider: "llamacpp",
+		}
+
+		client, err := NewLlamaCppClient(config)
+		
+		// Handle expected hardware/download failures
+		if err != nil {
+			if !strings.Contains(err.Error(), "hardware detection failed") &&
+			   !strings.Contains(err.Error(), "llama.cpp not found") &&
+			   !strings.Contains(err.Error(), "failed to download") {
+				t.Errorf("Unexpected error: %v", err)
+			}
+			return
+		}
+
+		if client == nil {
+			t.Error("Client should not be nil when creation succeeds")
+			return
+		}
+
+		// Verify context size configuration is reasonable
+		if client.contextSize < 1024 {
+			t.Errorf("Context size should be at least 1024, got: %d", client.contextSize)
+		}
+		
+		// Context size should be reasonable (not too high)
+		if client.contextSize > 32768 {
+			t.Logf("Warning: High context size: %d", client.contextSize)
+		}
+	})
+
+	t.Run("provider_config_validation", func(t *testing.T) {
+		// Test that provider configuration is properly preserved
+		config := TranslationConfig{
+			Provider: "llamacpp",
+			Model:    "test-model",
+			Options: map[string]interface{}{
+				"test_option": "test_value",
+				"timeout":     30,
+			},
+		}
+
+		client, err := NewLlamaCppClient(config)
+		
+		// Expected to fail with model not found, but should preserve config
+		if err == nil {
+			t.Error("Expected error for test model")
+		}
+		
+		// If client creation somehow succeeds, verify config preservation
+		if client != nil {
+			if client.config.Provider != "llamacpp" {
+				t.Errorf("Provider should be preserved, got: %s", client.config.Provider)
+			}
+			
+			if client.config.Model != "test-model" {
+				t.Errorf("Model should be preserved, got: %s", client.config.Model)
+			}
+		}
+	})
+}

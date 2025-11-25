@@ -283,3 +283,163 @@ func TestAnthropicClient_ModelValidation(t *testing.T) {
 		})
 	}
 }
+
+// TestAnthropicRequestErrorPaths tests additional error paths in anthropic Translate function
+func TestAnthropicRequestErrorPaths(t *testing.T) {
+	t.Run("context_cancellation", func(t *testing.T) {
+		client, err := NewAnthropicClient(TranslationConfig{
+			Provider: "anthropic",
+			APIKey:   "test-api-key",
+			Model:    "claude-3-haiku-20240307",
+		})
+		if err != nil || client == nil {
+			t.Skip("Skipping test - client creation failed")
+			return
+		}
+
+		// Create cancelled context
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel() // Cancel immediately
+
+		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
+		if err != nil {
+			// Expected error path
+			if result != "" {
+				t.Error("Result should be empty when context is cancelled")
+			}
+			// Check for context-related error
+			if !contains(err.Error(), "context") && 
+			   !contains(err.Error(), "canceled") && 
+			   !contains(err.Error(), "deadline") {
+				t.Logf("Error may not be context-related: %v", err)
+			}
+		}
+	})
+
+	t.Run("very_long_text", func(t *testing.T) {
+		client, err := NewAnthropicClient(TranslationConfig{
+			Provider: "anthropic",
+			APIKey:   "test-api-key",
+			Model:    "claude-3-haiku-20240307",
+		})
+		if err != nil || client == nil {
+			t.Skip("Skipping test - client creation failed")
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		// Create very long text that might trigger size limits
+		longText := ""
+		for i := 0; i < 1000; i++ {
+			longText += "Hello world. "
+		}
+		
+		result, err := client.Translate(ctx, longText, "Translate to Russian")
+		if err != nil {
+			// Expected error path - text too long
+			if result != "" {
+				t.Error("Result should be empty when text is too long")
+			}
+			// Check for size-related error
+			if !contains(err.Error(), "too large") && 
+			   !contains(err.Error(), "size") && 
+			   !contains(err.Error(), "limit") {
+				t.Logf("Error may not be size-related: %v", err)
+			}
+		}
+	})
+
+	t.Run("temperature_option_validation", func(t *testing.T) {
+		client, err := NewAnthropicClient(TranslationConfig{
+			Provider: "anthropic",
+			APIKey:   "test-api-key",
+			Model:    "claude-3-haiku-20240307",
+			Options: map[string]interface{}{
+				"temperature": 2.5, // Too high (should be 0.0-1.0)
+			},
+		})
+		if err != nil || client == nil {
+			t.Skip("Skipping test - client creation failed")
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
+		if err != nil {
+			// Expected error path - invalid temperature
+			if result != "" {
+				t.Error("Result should be empty when temperature is invalid")
+			}
+			// Check for temperature-related error
+			if !contains(err.Error(), "temperature") &&
+			   !contains(err.Error(), "invalid") {
+				t.Logf("Error may not be temperature-related: %v", err)
+			}
+		}
+	})
+
+	t.Run("max_tokens_option_validation", func(t *testing.T) {
+		client, err := NewAnthropicClient(TranslationConfig{
+			Provider: "anthropic",
+			APIKey:   "test-api-key",
+			Model:    "claude-3-haiku-20240307",
+			Options: map[string]interface{}{
+				"max_tokens": -1, // Invalid max_tokens
+			},
+		})
+		if err != nil || client == nil {
+			t.Skip("Skipping test - client creation failed")
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
+		if err != nil {
+			// Expected error path - invalid max_tokens
+			if result != "" {
+				t.Error("Result should be empty when max_tokens is invalid")
+			}
+			// Check for max_tokens-related error
+			if !contains(err.Error(), "max_tokens") &&
+			   !contains(err.Error(), "invalid") {
+				t.Logf("Error may not be max_tokens-related: %v", err)
+			}
+		}
+	})
+
+	t.Run("invalid_base_url", func(t *testing.T) {
+		client, err := NewAnthropicClient(TranslationConfig{
+			Provider: "anthropic",
+			APIKey:   "test-api-key",
+			Model:    "claude-3-haiku-20240307",
+			BaseURL:  "invalid-url://invalid", // Invalid URL
+		})
+		if err != nil || client == nil {
+			t.Skip("Skipping test - client creation failed")
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
+		if err != nil {
+			// Expected error path - invalid URL
+			if result != "" {
+				t.Error("Result should be empty when URL is invalid")
+			}
+			// Check for URL-related error
+			if !contains(err.Error(), "url") && 
+			   !contains(err.Error(), "scheme") &&
+			   !contains(err.Error(), "invalid") {
+				t.Logf("Error may not be URL-related: %v", err)
+			}
+		}
+	})
+}

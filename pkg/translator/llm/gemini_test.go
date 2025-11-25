@@ -209,3 +209,164 @@ func TestGeminiClientCreation(t *testing.T) {
 		}
 	})
 }
+
+// TestGeminiParseResponseErrorPaths tests error paths in gemini parseResponse function
+func TestGeminiParseResponseErrorPaths(t *testing.T) {
+	// Create a test client to access parseResponse method
+	client, err := NewGeminiClient(TranslationConfig{
+		Provider: "gemini",
+		APIKey:   "test-api-key",
+	})
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	t.Run("empty_candidates", func(t *testing.T) {
+		response := &GeminiResponse{
+			Candidates: []GeminiCandidate{},
+		}
+
+		result, err := client.parseResponse(response)
+		if err == nil {
+			t.Error("Expected error for empty candidates")
+		}
+		if result != "" {
+			t.Error("Result should be empty when candidates are empty")
+		}
+		
+		if !strings.Contains(err.Error(), "no candidates in response") {
+			t.Errorf("Expected 'no candidates' error, got: %v", err)
+		}
+	})
+
+	t.Run("non_stop_finish_reason", func(t *testing.T) {
+		response := &GeminiResponse{
+			Candidates: []GeminiCandidate{
+				{
+					FinishReason: "MAX_TOKENS",
+					Content: GeminiContent{
+						Parts: []GeminiPart{
+							{Text: "Partial translation"},
+						},
+					},
+				},
+			},
+		}
+
+		result, err := client.parseResponse(response)
+		if err == nil {
+			t.Error("Expected error for non-STOP finish reason")
+		}
+		if result != "" {
+			t.Error("Result should be empty when finish reason is not STOP")
+		}
+		
+		if !strings.Contains(err.Error(), "generation did not complete successfully") {
+			t.Errorf("Expected completion error, got: %v", err)
+		}
+	})
+
+	t.Run("empty_content_parts", func(t *testing.T) {
+		response := &GeminiResponse{
+			Candidates: []GeminiCandidate{
+				{
+					FinishReason: "STOP",
+					Content: GeminiContent{
+						Parts: []GeminiPart{},
+					},
+				},
+			},
+		}
+
+		result, err := client.parseResponse(response)
+		if err != nil {
+			t.Errorf("Unexpected error for empty parts: %v", err)
+		}
+		if result != "" {
+			t.Errorf("Expected empty result for empty parts, got: '%s'", result)
+		}
+	})
+
+	t.Run("multiple_content_parts", func(t *testing.T) {
+		response := &GeminiResponse{
+			Candidates: []GeminiCandidate{
+				{
+					FinishReason: "STOP",
+					Content: GeminiContent{
+						Parts: []GeminiPart{
+							{Text: "Hello "},
+							{Text: "world"},
+							{Text: "!"},
+						},
+					},
+				},
+			},
+		}
+
+		result, err := client.parseResponse(response)
+		if err != nil {
+			t.Errorf("Unexpected error for multiple parts: %v", err)
+		}
+		expected := "Hello world!"
+		if result != expected {
+			t.Errorf("Expected concatenated result '%s', got: '%s'", expected, result)
+		}
+	})
+
+	t.Run("whitespace_handling", func(t *testing.T) {
+		response := &GeminiResponse{
+			Candidates: []GeminiCandidate{
+				{
+					FinishReason: "STOP",
+					Content: GeminiContent{
+						Parts: []GeminiPart{
+							{Text: "  Hello world  "},
+						},
+					},
+				},
+			},
+		}
+
+		result, err := client.parseResponse(response)
+		if err != nil {
+			t.Errorf("Unexpected error for whitespace: %v", err)
+		}
+		expected := "Hello world"
+		if result != expected {
+			t.Errorf("Expected trimmed result '%s', got: '%s'", expected, result)
+		}
+	})
+
+	t.Run("multiple_candidates", func(t *testing.T) {
+		response := &GeminiResponse{
+			Candidates: []GeminiCandidate{
+				{
+					FinishReason: "STOP",
+					Content: GeminiContent{
+						Parts: []GeminiPart{
+							{Text: "First candidate"},
+						},
+					},
+				},
+				{
+					FinishReason: "STOP",
+					Content: GeminiContent{
+						Parts: []GeminiPart{
+							{Text: "Second candidate"},
+						},
+					},
+				},
+			},
+		}
+
+		result, err := client.parseResponse(response)
+		if err != nil {
+			t.Errorf("Unexpected error for multiple candidates: %v", err)
+		}
+		// Should only use the first candidate
+		expected := "First candidate"
+		if result != expected {
+			t.Errorf("Expected first candidate '%s', got: '%s'", expected, result)
+		}
+	})
+}

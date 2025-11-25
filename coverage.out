@@ -95,7 +95,7 @@ digital.vasic.translator/pkg/translator/llm/gemini.go:235.2,235.25 1 1
 digital.vasic.translator/pkg/translator/llm/gemini.go:239.76,240.31 1 1
 digital.vasic.translator/pkg/translator/llm/gemini.go:240.31,242.3 1 1
 digital.vasic.translator/pkg/translator/llm/gemini.go:244.2,247.38 2 1
-digital.vasic.translator/pkg/translator/llm/gemini.go:247.38,249.3 1 0
+digital.vasic.translator/pkg/translator/llm/gemini.go:247.38,249.3 1 1
 digital.vasic.translator/pkg/translator/llm/gemini.go:252.2,253.47 2 1
 digital.vasic.translator/pkg/translator/llm/gemini.go:253.47,255.3 1 1
 digital.vasic.translator/pkg/translator/llm/gemini.go:257.2,257.56 1 1
