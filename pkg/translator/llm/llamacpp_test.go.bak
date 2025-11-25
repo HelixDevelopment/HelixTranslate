@@ -1,0 +1,50 @@
+package llm
+
+import (
+	"context"
+	"digital.vasic.translator/pkg/hardware"
+	"digital.vasic.translator/pkg/models"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"testing"
+	"time"
+	
+	"github.com/stretchr/testify/assert"
+)
+
+// TestFindLlamaCppExecutable tests findLlamaCppExecutable function
+func TestFindLlamaCppExecutable(t *testing.T) {
+	t.Run("executable_search_behavior", func(t *testing.T) {
+		path, err := findLlamaCppExecutable()
+		
+		// Either we get a valid path or a proper error
+		if err == nil {
+			if path == "" {
+				t.Error("No error but empty path returned")
+			}
+			
+			// If it claims to be found, verify it's actually an executable
+			if runtime.GOOS != "windows" {
+				// Skip on Windows where file checks work differently
+				info, err := os.Stat(path)
+				if err != nil {
+					t.Errorf("File at path doesn't exist: %v", err)
+				} else if info.Mode()&0111 == 0 {
+					t.Errorf("File at path is not executable")
+				}
+			}
+		} else {
+			// If error, it should be informative
+			if !strings.Contains(err.Error(), "llama-cli not found") {
+				t.Errorf("Expected 'llama-cli not found' error, got: %v", err)
+			}
+			if path != "" {
+				t.Error("Expected empty path when error returned")
+			}
+		}
+	})
+}

@@ -219,20 +219,17 @@ func TestSaveOAuthTokenErrorPaths(t *testing.T) {
 		// Override the credentials file path
 		client.credFilePath = credFile
 
-		// Create token with invalid data that would cause marshaling to fail
-		// This is a bit tricky since JSON marshaling rarely fails for valid structs
-		// We'll test by temporarily manipulating the client
-		originalToken := &QwenOAuthToken{
-			AccessToken:  "test_access_token",
-			TokenType:    "Bearer",
-			RefreshToken: "test_refresh_token",
-			ResourceURL:  "https://resource.url",
-			ExpiryDate:   time.Now().Add(time.Hour).Unix(),
+		// Test JSON marshaling error by using invalid path
+		// This will cause directory creation to fail before marshaling
+		client.credFilePath = "\x00invalid" // Null byte in path should cause an error
+		token := &QwenOAuthToken{
+			AccessToken: "test_token",
+			TokenType:   "Bearer",
 		}
 
-		err = client.saveOAuthToken(originalToken)
-		if err != nil {
-			t.Errorf("Valid token should not cause marshal error: %v", err)
+		err = client.saveOAuthToken(token)
+		if err == nil {
+			t.Error("Expected error with invalid path")
 		}
 	})
 }
@@ -1180,6 +1177,31 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 		if err != nil {
 			// This confirms the error path is being tested
 			t.Logf("Expected error (JSON marshal or request creation): %v", err)
+		}
+	})
+	
+	t.Run("no_credentials_error", func(t *testing.T) {
+		// Test with no API key and no OAuth token
+		client := &QwenClient{
+			config: TranslationConfig{
+				Provider: "qwen",
+				Model:    "qwen-max",
+				// No APIKey set
+			},
+			httpClient: &http.Client{},
+			baseURL:    "http://localhost:99999", // Invalid port to prevent actual requests
+			// No oauthToken set
+		}
+		
+		ctx := context.Background()
+		_, err := client.Translate(ctx, "test text", "test prompt")
+		if err == nil {
+			t.Error("Expected error with no credentials")
+		}
+		
+		// Should get error about no authentication credentials
+		if !strings.Contains(err.Error(), "no authentication credentials available") {
+			t.Errorf("Expected 'no authentication credentials' error, got: %v", err)
 		}
 	})
 	

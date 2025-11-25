@@ -49,6 +49,57 @@ func TestDeepSeekClient(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "empty model",
+			config: TranslationConfig{
+				Provider: "deepseek",
+				APIKey:   "test-key",
+				Model:    "",
+			},
+			wantErr: true,
+		},
+		{
+			name: "whitespace model",
+			config: TranslationConfig{
+				Provider: "deepseek",
+				APIKey:   "test-key",
+				Model:    "   ",
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid model",
+			config: TranslationConfig{
+				Provider: "deepseek",
+				APIKey:   "test-key",
+				Model:    "invalid-model-name",
+			},
+			wantErr: true,
+		},
+		{
+			name: "temperature too low",
+			config: TranslationConfig{
+				Provider: "deepseek",
+				APIKey:   "test-key",
+				Model:    "deepseek-chat",
+				Options: map[string]interface{}{
+					"temperature": -0.1,
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "temperature too high",
+			config: TranslationConfig{
+				Provider: "deepseek",
+				APIKey:   "test-key",
+				Model:    "deepseek-chat",
+				Options: map[string]interface{}{
+					"temperature": 2.1,
+				},
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
