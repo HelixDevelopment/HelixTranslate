@@ -115,8 +115,8 @@ func TestSplitText(t *testing.T) {
 	}
 }
 
-// TestSplitTextEdgeCases tests edge cases in text splitting functionality
-func TestSplitTextEdgeCases(t *testing.T) {
+// TestSplitTextComprehensive tests comprehensive text splitting scenarios
+func TestSplitTextComprehensive(t *testing.T) {
 	lt := &LLMTranslator{}
 
 	t.Run("empty text", func(t *testing.T) {
