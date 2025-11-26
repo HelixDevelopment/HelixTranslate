@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -10,6 +11,7 @@ import (
 	"digital.vasic.translator/internal/config"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/websocket"
+	"digital.vasic.translator/pkg/translator"
 	
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -347,7 +349,199 @@ func TestAPIHandlerStructure(t *testing.T) {
 	assert.NotNil(t, handler.wsHub)
 }
 
-// TestAPIErrorHandling tests error handling in API handlers
+// TestAPIErrorHandlingExtended tests error handling in API handlers
+func TestAPIErrorHandlingExtended(t *testing.T) {
+	// Set Gin to test mode
+	gin.SetMode(gin.TestMode)
+	
+	// Create a test handler with mock dependencies
+	cfg := &config.Config{}
+	eventBus := events.NewEventBus()
+	wsHub := websocket.NewHub(eventBus)
+	
+	handler := &Handler{
+		config:             cfg,
+		eventBus:           eventBus,
+		wsHub:              wsHub,
+		distributedManager: nil,
+	}
+	
+	t.Run("serveDashboard", func(t *testing.T) {
+		router := gin.New()
+		router.GET("/api/v1/monitoring/version/dashboard.html", handler.serveDashboard)
+		
+		req, _ := http.NewRequest("GET", "/api/v1/monitoring/version/dashboard.html", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+		
+		// Should return 200 with HTML content (fallback dashboard)
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Contains(t, w.Header().Get("Content-Type"), "text/html")
+		assert.Contains(t, w.Body.String(), "<!DOCTYPE html>")
+	})
+	
+	t.Run("getEmbeddedDashboardHTML", func(t *testing.T) {
+		// Test getEmbeddedDashboardHTML function directly
+		html := handler.getEmbeddedDashboardHTML()
+		
+		// Should return a basic HTML structure
+		assert.Contains(t, html, "<!DOCTYPE html>")
+		assert.Contains(t, html, "<html")
+		assert.Contains(t, html, "</html>")
+	})
+}
+
+// TestDistributedTranslator tests the distributedTranslator implementation
+func TestDistributedTranslator(t *testing.T) {
+	// Test with nil DistributedManager
+	dt := &distributedTranslator{dm: nil}
+	
+	t.Run("Translate with nil manager", func(t *testing.T) {
+		dt := &distributedTranslator{dm: nil}
+		ctx := context.Background()
+		
+		// This will panic with nil dereference, so we need to recover
+		assert.Panics(t, func() {
+			dt.Translate(ctx, "test text", "context")
+		})
+	})
+	
+	t.Run("TranslateWithProgress with nil manager", func(t *testing.T) {
+		dt := &distributedTranslator{dm: nil}
+		ctx := context.Background()
+		
+		// This will panic with nil dereference, so we need to recover
+		assert.Panics(t, func() {
+			dt.TranslateWithProgress(ctx, "test text", "context", nil, "session123")
+		})
+	})
+	
+	t.Run("GetStats", func(t *testing.T) {
+		stats := dt.GetStats()
+		
+		// Should return empty stats
+		assert.Equal(t, translator.TranslationStats{}, stats)
+	})
+	
+	t.Run("GetName", func(t *testing.T) {
+		name := dt.GetName()
+		
+		// Should return "distributed"
+		assert.Equal(t, "distributed", name)
+	})
+}
+
+// TestGenerateToken tests the generateToken handler
+func TestGenerateToken(t *testing.T) {
+	// Set Gin to test mode
+	gin.SetMode(gin.TestMode)
+	
+	// Create a test handler with mock dependencies
+	cfg := &config.Config{}
+	eventBus := events.NewEventBus()
+	wsHub := websocket.NewHub(eventBus)
+	
+	handler := &Handler{
+		config:             cfg,
+		eventBus:           eventBus,
+		wsHub:              wsHub,
+		distributedManager: nil,
+		authService:        nil, // This will cause a panic when used
+	}
+	
+	t.Run("generateToken without auth", func(t *testing.T) {
+		router := gin.New()
+		router.POST("/api/v1/auth/token", handler.generateToken)
+		
+		testData := map[string]interface{}{
+			"user_id":  "test-user",
+			"username": "test-username",
+			"roles":    []string{"user"},
+		}
+		
+		jsonData, _ := json.Marshal(testData)
+		req, _ := http.NewRequest("POST", "/api/v1/auth/token", bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		
+		// This will panic because authService is nil
+		assert.Panics(t, func() {
+			router.ServeHTTP(w, req)
+		})
+	})
+}
+
+// TestDiscoverWorkers tests the discoverWorkers handler
+func TestDiscoverWorkers(t *testing.T) {
+	// Set Gin to test mode
+	gin.SetMode(gin.TestMode)
+	
+	// Create a test handler with mock dependencies
+	cfg := &config.Config{}
+	eventBus := events.NewEventBus()
+	wsHub := websocket.NewHub(eventBus)
+	
+	handler := &Handler{
+		config:             cfg,
+		eventBus:           eventBus,
+		wsHub:              wsHub,
+		distributedManager: nil,
+	}
+	
+	t.Run("discoverWorkers with nil manager", func(t *testing.T) {
+		router := gin.New()
+		router.POST("/api/v1/distributed/workers/discover", handler.discoverWorkers)
+		
+		testData := map[string]interface{}{
+			"network_range": "192.168.1.0/24",
+		}
+		
+		jsonData, _ := json.Marshal(testData)
+		req, _ := http.NewRequest("POST", "/api/v1/distributed/workers/discover", bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+		
+		// Should return 503 when distributedManager is nil
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
+
+// TestPairWorker tests the pairWorker handler
+func TestPairWorker(t *testing.T) {
+	// Set Gin to test mode
+	gin.SetMode(gin.TestMode)
+	
+	// Create a test handler with mock dependencies
+	cfg := &config.Config{}
+	eventBus := events.NewEventBus()
+	wsHub := websocket.NewHub(eventBus)
+	
+	handler := &Handler{
+		config:             cfg,
+		eventBus:           eventBus,
+		wsHub:              wsHub,
+		distributedManager: nil,
+	}
+	
+	t.Run("pairWorker with nil manager", func(t *testing.T) {
+		router := gin.New()
+		router.POST("/api/v1/distributed/workers/:worker_id/pair", handler.pairWorker)
+		
+		testData := map[string]interface{}{
+			"auth_token": "test-token",
+		}
+		
+		jsonData, _ := json.Marshal(testData)
+		req, _ := http.NewRequest("POST", "/api/v1/distributed/workers/test-worker/pair", bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+		
+		// Should return 503 when distributedManager is nil
+		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+}
 func TestAPIErrorHandling(t *testing.T) {
 	// Set Gin to test mode
 	gin.SetMode(gin.TestMode)
