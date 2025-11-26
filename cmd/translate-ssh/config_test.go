@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -132,12 +133,15 @@ func TestConfigValidation(t *testing.T) {
 		
 		err := validateConfig(config)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "input file does not exist")
+		assert.Contains(t, err.Error(), "input file not found")
 	})
 }
 
 // TestSessionIDGeneration tests session ID generation
 func TestSessionIDGeneration(t *testing.T) {
+	// Reset flag.CommandLine to avoid redefinition errors
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	
 	t.Run("generateSessionID", func(t *testing.T) {
 		// Create a mock config
 		config := &Config{
