@@ -461,3 +461,61 @@ func BenchmarkParseLanguage(b *testing.B) {
 		_, _ = ParseLanguage(input)
 	}
 }
+
+// TestGetSupportedLanguages tests the GetSupportedLanguages function
+func TestGetSupportedLanguages(t *testing.T) {
+	languages := GetSupportedLanguages()
+	
+	// Should return exactly 18 supported languages
+	assert.Equal(t, 18, len(languages), "Should return 18 supported languages")
+	
+	// Check that major languages are included
+	expectedCodes := []string{"en", "ru", "de", "fr", "es", "it", "pt", "zh", "ja", "ko", "ar"}
+	codes := make([]string, len(languages))
+	for i, lang := range languages {
+		codes[i] = lang.Code
+	}
+	
+	for _, expectedCode := range expectedCodes {
+		assert.Contains(t, codes, expectedCode, "Should contain language code: %s", expectedCode)
+	}
+	
+	// Check that all languages have valid codes and names
+	for _, lang := range languages {
+		assert.NotEmpty(t, lang.Code, "Language code should not be empty")
+		assert.NotEmpty(t, lang.Name, "Language name should not be empty")
+		assert.True(t, len(lang.Code) >= 2, "Language code should be at least 2 characters")
+	}
+}
+
+// TestSimpleLLMDetector_AnthropicCall tests callAnthropic method
+func TestSimpleLLMDetector_AnthropicCall(t *testing.T) {
+	// Create a detector with Anthropic provider
+	detector := NewSimpleLLMDetector("anthropic", "test-key")
+	
+	// This will fail due to invalid API key, but it will exercise the callAnthropic function
+	ctx := context.Background()
+	prompt := "Detect the language of: Hello world"
+	
+	// Call callAnthropic directly to test its logic
+	_, err := detector.callAnthropic(ctx, prompt)
+	
+	// We expect an error due to invalid API setup, but not a panic
+	assert.Error(t, err, "Should return error for invalid API setup")
+}
+
+// TestSimpleLLMDetector_ZhipuCall tests callZhipu method
+func TestSimpleLLMDetector_ZhipuCall(t *testing.T) {
+	// Create a detector with Zhipu provider
+	detector := NewSimpleLLMDetector("zhipu", "test-key")
+	
+	// This will fail due to invalid API key, but it will exercise the callZhipu function
+	ctx := context.Background()
+	prompt := "Detect the language of: Hello world"
+	
+	// Call callZhipu directly to test its logic
+	_, err := detector.callZhipu(ctx, prompt)
+	
+	// We expect an error due to invalid API setup, but not a panic
+	assert.Error(t, err, "Should return error for invalid API setup")
+}

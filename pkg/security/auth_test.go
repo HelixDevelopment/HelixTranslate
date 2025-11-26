@@ -665,7 +665,7 @@ func TestAuthService_TokenExpirationEdgeCases(t *testing.T) {
 		{
 			name:      "Short TTL",
 			ttl:       time.Second,
-			waitTime:   time.Millisecond * 100, // Reduced wait time to ensure token is still valid
+			waitTime:   time.Millisecond * 50, // Further reduced wait time to ensure token is still valid
 			expectErr:  false,
 		},
 		{

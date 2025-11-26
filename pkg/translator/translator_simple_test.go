@@ -225,3 +225,145 @@ func BenchmarkUniversalTranslator_TranslateBookSimple(b *testing.B) {
 		ut.TranslateBook(ctx, book, eventBus, sessionID)
 	}
 }
+
+// TestBaseTranslator_New tests NewBaseTranslator constructor
+func TestBaseTranslator_New(t *testing.T) {
+	config := TranslationConfig{
+		Provider: "test",
+		Model:    "test-model",
+		APIKey:   "test-key",
+	}
+	
+	bt := NewBaseTranslator(config)
+	
+	require.NotNil(t, bt)
+	assert.Equal(t, config, bt.config)
+	assert.NotNil(t, bt.stats)
+	assert.NotNil(t, bt.cache)
+}
+
+// TestBaseTranslator_GetStats tests GetStats function
+func TestBaseTranslator_GetStats(t *testing.T) {
+	config := TranslationConfig{
+		Provider: "test",
+		Model:    "test-model",
+		APIKey:   "test-key",
+	}
+	
+	bt := NewBaseTranslator(config)
+	
+	// Initial stats should be empty
+	stats := bt.GetStats()
+	assert.Equal(t, 0, stats.Translated)
+	assert.Equal(t, 0, stats.Cached)
+}
+
+// TestBaseTranslator_CheckCache tests CheckCache function
+func TestBaseTranslator_CheckCache(t *testing.T) {
+	config := TranslationConfig{
+		Provider: "test",
+		Model:    "test-model",
+		APIKey:   "test-key",
+	}
+	
+	bt := NewBaseTranslator(config)
+	
+	// Test cache miss
+	translated, found := bt.CheckCache("test text")
+	assert.Equal(t, "", translated)
+	assert.False(t, found)
+	
+	// Add to cache manually
+	bt.cache["test text"] = "cached translation"
+	
+	// Test cache hit
+	translated, found = bt.CheckCache("test text")
+	assert.Equal(t, "cached translation", translated)
+	assert.True(t, found)
+	
+	// Check stats update
+	stats := bt.GetStats()
+	assert.Equal(t, 1, stats.Cached)
+}
+
+// TestBaseTranslator_AddToCache tests AddToCache function
+func TestBaseTranslator_AddToCache(t *testing.T) {
+	config := TranslationConfig{
+		Provider: "test",
+		Model:    "test-model",
+		APIKey:   "test-key",
+	}
+	
+	bt := NewBaseTranslator(config)
+	
+	// Add to cache
+	bt.AddToCache("test text", "cached translation")
+	
+	// Verify it was added
+	assert.Equal(t, "cached translation", bt.cache["test text"])
+}
+
+// TestUniversalTranslator_GetSourceLanguage tests GetSourceLanguage function
+func TestUniversalTranslator_GetSourceLanguage(t *testing.T) {
+	mockTranslator := &MockTranslator{}
+	
+	sourceLang := language.Language{Code: "en", Name: "English"}
+	targetLang := language.Language{Code: "ru", Name: "Russian"}
+	
+	ut := NewUniversalTranslator(mockTranslator, nil, sourceLang, targetLang)
+	
+	// Test GetSourceLanguage
+	result := ut.GetSourceLanguage()
+	assert.Equal(t, sourceLang, result)
+}
+
+// TestUniversalTranslator_GetTargetLanguage tests GetTargetLanguage function
+func TestUniversalTranslator_GetTargetLanguage(t *testing.T) {
+	mockTranslator := &MockTranslator{}
+	
+	sourceLang := language.Language{Code: "en", Name: "English"}
+	targetLang := language.Language{Code: "ru", Name: "Russian"}
+	
+	ut := NewUniversalTranslator(mockTranslator, nil, sourceLang, targetLang)
+	
+	// Test GetTargetLanguage
+	result := ut.GetTargetLanguage()
+	assert.Equal(t, targetLang, result)
+}
+
+// TestUniversalTranslator_CreatePromptForLanguages tests CreatePromptForLanguages function
+func TestUniversalTranslator_CreatePromptForLanguages(t *testing.T) {
+	sourceLang := "en"
+	targetLang := "ru"
+	context := "Literary text"
+	
+	// Test prompt creation
+	prompt := CreatePromptForLanguages("Hello world", sourceLang, targetLang, context)
+	
+	assert.NotEmpty(t, prompt)
+	assert.Contains(t, prompt, "Hello world")
+	assert.Contains(t, prompt, "en")
+	assert.Contains(t, prompt, "ru")
+	assert.Contains(t, prompt, context)
+}
+
+// TestBaseTranslator_EmitError tests EmitError function
+func TestBaseTranslator_EmitError(t *testing.T) {
+	// Set up event bus
+	eventBus := events.NewEventBus()
+	
+	// Track error events
+	errorReceived := false
+	eventBus.Subscribe(events.EventTranslationError, func(event events.Event) {
+		errorReceived = true
+		assert.Contains(t, event.Message, "Test error")
+	})
+	
+	// Emit error
+	EmitError(eventBus, "test-session", "Test error", nil)
+	
+	// Wait for async event
+	time.Sleep(time.Millisecond * 10)
+	
+	assert.True(t, errorReceived, "Error event should be emitted")
+}

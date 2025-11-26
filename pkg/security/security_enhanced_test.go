@@ -1,6 +1,7 @@
 package security
 
 import (
+	"encoding/hex"
 	"fmt"
 	"strings"
 	"sync"
@@ -197,9 +198,7 @@ func TestRateLimiter_KeyManagement(t *testing.T) {
 // TestUserAuthService_RepositoryErrors tests error handling from repository
 func TestUserAuthService_RepositoryErrors(t *testing.T) {
 	// Mock repository that returns errors
-	mockRepo := &MockUserRepository{
-		users: make(map[string]*models.User),
-	}
+	mockRepo := NewMockUserRepository()
 	
 	auth := NewUserAuthService("test-secret-key-16-chars", time.Hour, mockRepo)
 	
@@ -405,6 +404,13 @@ type MockUserRepository struct {
 	forceError bool
 }
 
+// NewMockUserRepository creates a new mock repository
+func NewMockUserRepository() *MockUserRepository {
+	return &MockUserRepository{
+		users: make(map[string]*models.User),
+	}
+}
+
 func (m *MockUserRepository) FindByUsername(username string) (*models.User, error) {
 	if m.forceError {
 		return nil, fmt.Errorf("forced repository error")
@@ -480,4 +486,186 @@ func (m *MockUserRepository) List() ([]*models.User, error) {
 	}
 	
 	return users, nil
+}
+
+// TestRateLimiter_getLimiter tests the getLimiter function
+func TestRateLimiter_getLimiter(t *testing.T) {
+	rl := NewRateLimiter(10, 5)
+	
+	key := "test-key"
+	
+	// First call should create a new limiter
+	limiter1 := rl.getLimiter(key)
+	require.NotNil(t, limiter1)
+	
+	// Second call should return the same limiter
+	limiter2 := rl.getLimiter(key)
+	require.Same(t, limiter1, limiter2)
+	
+	// Different key should create a different limiter
+	limiter3 := rl.getLimiter("different-key")
+	require.NotSame(t, limiter1, limiter3)
+	require.NotNil(t, limiter3)
+}
+
+// TestUserAuthValidateUser tests the ValidateUser function
+func TestUserAuthValidateUser(t *testing.T) {
+	mockRepo := NewMockUserRepository()
+	uas := NewUserAuthService("this-is-a-valid-secret-key", time.Hour, mockRepo)
+	
+	// Set up test users
+	testUser := &models.User{
+		ID:       "test-user-123",
+		Username: "testuser",
+		Email:    "test@example.com",
+		IsActive: true,
+		Roles:    []string{"user"},
+	}
+	
+	inactiveUser := &models.User{
+		ID:       "inactive-user-456",
+		Username: "inactiveuser",
+		Email:    "inactive@example.com",
+		IsActive: false,
+		Roles:    []string{"user"},
+	}
+	
+	mockRepo.users = map[string]*models.User{
+		"test-user-123": testUser,
+		"inactive-user-456": inactiveUser,
+	}
+	
+	t.Run("Valid active user", func(t *testing.T) {
+		user, err := uas.ValidateUser("test-user-123")
+		require.NoError(t, err)
+		require.Equal(t, testUser, user)
+	})
+	
+	t.Run("Inactive user", func(t *testing.T) {
+		user, err := uas.ValidateUser("inactive-user-456")
+		require.Error(t, err)
+		require.Equal(t, models.ErrUserInactive, err)
+		require.Nil(t, user)
+	})
+	
+	t.Run("Non-existent user", func(t *testing.T) {
+		user, err := uas.ValidateUser("non-existent")
+		require.Error(t, err)
+		require.Equal(t, models.ErrUserNotFound, err)
+		require.Nil(t, user)
+	})
+	
+	t.Run("Repository error", func(t *testing.T) {
+		mockRepo.forceError = true
+		user, err := uas.ValidateUser("test-user-123")
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "failed to list users")
+		require.Nil(t, user)
+		mockRepo.forceError = false
+	})
+}
+
+// TestUserAuthCreateUser tests the CreateUser function
+func TestUserAuthCreateUser(t *testing.T) {
+	mockRepo := NewMockUserRepository()
+	uas := NewUserAuthService("this-is-a-valid-secret-key", time.Hour, mockRepo)
+	
+	t.Run("Successful user creation", func(t *testing.T) {
+		req := CreateUserRequest{
+			Username: "newuser",
+			Email:    "newuser@example.com",
+			Password: "password123",
+			Roles:    []string{"user", "admin"},
+		}
+		
+		user, err := uas.CreateUser(req)
+		require.NoError(t, err)
+		require.NotEmpty(t, user.ID)
+		require.Equal(t, req.Username, user.Username)
+		require.Equal(t, req.Email, user.Email)
+		require.Equal(t, req.Roles, user.Roles)
+		require.True(t, user.IsActive)
+		require.Empty(t, user.Password) // Password should be hashed
+	})
+	
+	t.Run("Default roles assignment", func(t *testing.T) {
+		req := CreateUserRequest{
+			Username: "defaultuser",
+			Email:    "default@example.com",
+			Password: "password123",
+			Roles:    []string{}, // Empty roles
+		}
+		
+		user, err := uas.CreateUser(req)
+		require.NoError(t, err)
+		require.Equal(t, []string{"user"}, user.Roles) // Should get default role
+	})
+	
+	t.Run("Username already exists", func(t *testing.T) {
+		req := CreateUserRequest{
+			Username: "existinguser",
+			Email:    "new@example.com",
+			Password: "password123",
+		}
+		
+		// Create user first
+		_, _ = uas.CreateUser(req)
+		
+		// Try to create user with same username
+		req2 := CreateUserRequest{
+			Username: "existinguser", // Same username
+			Email:    "different@example.com",
+			Password: "password123",
+		}
+		
+		user, err := uas.CreateUser(req2)
+		require.Error(t, err)
+		require.Equal(t, models.ErrUserAlreadyExists, err)
+		require.Nil(t, user)
+	})
+	
+	t.Run("Email already exists", func(t *testing.T) {
+		req := CreateUserRequest{
+			Username: "emailuser1",
+			Email:    "email@example.com",
+			Password: "password123",
+		}
+		
+		// Create user first
+		_, _ = uas.CreateUser(req)
+		
+		// Try to create user with same email
+		req2 := CreateUserRequest{
+			Username: "emailuser2", // Different username
+			Email:    "email@example.com", // Same email
+			Password: "password123",
+		}
+		
+		user, err := uas.CreateUser(req2)
+		require.Error(t, err)
+		require.Equal(t, models.ErrUserAlreadyExists, err)
+		require.Nil(t, user)
+	})
+}
+
+// TestGenerateUserID tests the generateUserID function
+func TestGenerateUserID(t *testing.T) {
+	// Generate multiple IDs
+	id1 := generateUserID()
+	id2 := generateUserID()
+	
+	// IDs should not be empty
+	require.NotEmpty(t, id1)
+	require.NotEmpty(t, id2)
+	
+	// IDs should be different
+	require.NotEqual(t, id1, id2)
+	
+	// IDs should be 32 characters (16 bytes * 2 for hex encoding)
+	require.Equal(t, 32, len(id1))
+	require.Equal(t, 32, len(id2))
+	
+	// IDs should be valid hex
+	_, err := hex.DecodeString(id1)
+	require.NoError(t, err)
 }

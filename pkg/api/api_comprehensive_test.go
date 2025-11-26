@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"digital.vasic.translator/pkg/logger"
+	"digital.vasic.translator/pkg/translator"
 )
 
 // TestNewServer tests server creation
@@ -291,4 +292,46 @@ func TestServerStartStop(t *testing.T) {
 	// Test that methods exist (can't actually test start/stop without more complex setup)
 	assert.NotNil(t, server.Start)
 	assert.NotNil(t, server.Stop)
+}
+
+// TestDistributedTranslator_GetName tests the GetName function
+func TestDistributedTranslator_GetName(t *testing.T) {
+	// Since distributed.DistributedManager requires complex setup,
+	// we'll test with a nil pointer just to verify method exists
+	dt := &distributedTranslator{}
+	
+	name := dt.GetName()
+	assert.Equal(t, "distributed", name)
+}
+
+// TestDistributedTranslator_GetStats tests the GetStats function
+func TestDistributedTranslator_GetStats(t *testing.T) {
+	dt := &distributedTranslator{}
+	
+	stats := dt.GetStats()
+	// Should return empty stats as per implementation
+	assert.Equal(t, 0, stats.Total)
+	assert.Equal(t, 0, stats.Translated)
+	assert.Equal(t, 0, stats.Cached)
+	assert.Equal(t, 0, stats.Errors)
+}
+
+// TestDistributedTranslator_TranslateWithProgress tests that TranslateWithProgress method exists
+func TestDistributedTranslator_TranslateWithProgress(t *testing.T) {
+	dt := &distributedTranslator{}
+	
+	// Just test that the method exists and has correct signature
+	// We can't actually call it without proper distributed manager setup
+	assert.NotNil(t, dt.TranslateWithProgress)
+}
+
+// TestDistributedTranslator_Translate tests that Translate method exists
+func TestDistributedTranslator_Translate(t *testing.T) {
+	dt := &distributedTranslator{}
+	
+	// Just test that method exists and has correct signature
+	assert.NotNil(t, dt.Translate)
+	
+	// Verify return types match expected translator interface
+	var _ translator.Translator = dt
 }
