@@ -11,11 +11,8 @@ import (
 	"syscall"
 	"time"
 
-	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/pkg/sshworker"
-	"digital.vasic.translator/pkg/translator/llm"
-	"digital.vasic.translator/pkg/websocket"
 	"github.com/gorilla/websocket"
 )
 
@@ -109,8 +106,11 @@ func main() {
 	}
 
 	// Initialize logger
-	logger := logger.NewJSONLogger()
-	logger.Info("Starting SSH worker translation", "session_id", sessionID)
+	logger := logger.NewLogger(logger.LoggerConfig{
+		Level:  "info",
+		Format: "text",
+	})
+	logger.Info("Starting SSH worker translation", map[string]interface{}{"session_id": sessionID})
 
 	// Initialize SSH worker
 	emitProgressEvent(progress, "translation_progress", "Connecting to SSH worker...", 5)
@@ -176,13 +176,14 @@ func main() {
 		
 		// Execute command on remote worker
 		result, err := sshWorker.ExecuteCommand(ctx, translationCmd)
+		var translatedLine string
 		if err != nil {
 			log.Printf("Failed to translate line %d: %v", i+1, err)
 			// Fall back to demo translation
-			translatedLine := translateDemoText(line)
+			translatedLine = translateDemoText(line)
 			translatedLines = append(translatedLines, translatedLine)
 		} else {
-			translatedLine := strings.TrimSpace(result.Stdout)
+			translatedLine = strings.TrimSpace(result.Stdout)
 			if translatedLine == "" {
 				// Fallback to demo if worker returned empty
 				translatedLine = translateDemoText(line)

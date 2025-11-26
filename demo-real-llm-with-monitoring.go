@@ -130,10 +130,16 @@ func main() {
 	}
 
 	// Create WebSocket-enabled event bus
-	var eventBus events.EventBusInterface
+	var eventBus *events.EventBus
+	baseEventBus := events.NewEventBus()
+	
 	if ws != nil {
 		wsEventBus := NewWebSocketEventBus(ws, sessionID)
+		// Use the wrapped event bus for publishing
+		baseEventBus = wsEventBus.EventBus
 		eventBus = wsEventBus
+	} else {
+		eventBus = baseEventBus
 	}
 
 	// Initialize real LLM translator
@@ -175,18 +181,18 @@ func main() {
 		}
 		event := events.NewEvent(events.EventTranslationStarted, "Translation job started with LLM", data)
 		event.SessionID = sessionID
-		eventBus.Publish(event)
+		baseEventBus.Publish(event)
 	}
 
 	// Read input file
-	if eventBus != nil {
+	if baseEventBus != nil {
 		data := map[string]interface{}{
 			"progress": 5,
 			"step":     "reading",
 		}
 		event := events.NewEvent(events.EventTranslationProgress, "Reading input file...", data)
 		event.SessionID = sessionID
-		eventBus.Publish(event)
+		baseEventBus.Publish(event)
 	}
 
 	content, err := os.ReadFile(inputFile)

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation Monitoring Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .progress-bar {
+            transition: width 0.3s ease-in-out;
+        }
+        .status-indicator {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .event-log {
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+        .worker-card {
+            transition: all 0.3s ease;
+        }
+        .worker-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">🔍 Translation Monitoring Dashboard</h1>
+                    <p class="text-gray-600 mt-2">Real-time progress tracking for SSH worker translations</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600" id="activeSessions">0</div>
+                        <div class="text-sm text-gray-600">Active Sessions</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600" id="completedSessions">0</div>
+                        <div class="text-sm text-gray-600">Completed</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-red-600" id="errorCount">0</div>
+                        <div class="text-sm text-gray-600">Errors</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">⚙️ Control Panel</h2>
+                <div class="flex space-x-4">
+                    <button onclick="connectWebSocket()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition">
+                        Connect
+                    </button>
+                    <button onclick="disconnectWebSocket()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition">
+                        Disconnect
+                    </button>
+                    <button onclick="clearLogs()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition">
+                        Clear Logs
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <label for="sessionId" class="text-gray-700 font-medium">Session ID:</label>
+                <input type="text" id="sessionId" placeholder="Enter session ID to monitor" class="border border-gray-300 rounded-lg px-3 py-2 flex-1">
+                <button onclick="monitorSpecificSession()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition">
+                    Monitor Session
+                </button>
+                <div class="flex items-center">
+                    <div class="w-3 h-3 bg-green-500 rounded-full mr-2" id="connectionStatus"></div>
+                    <span class="text-sm text-gray-600" id="connectionText">Connected</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Worker Information -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6" id="workerInfo" style="display: none;">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">🖥️ Worker Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="worker-card bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-600">Worker Host</div>
+                    <div class="text-lg font-semibold" id="workerHost">-</div>
+                </div>
+                <div class="worker-card bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-600">Model</div>
+                    <div class="text-lg font-semibold" id="workerModel">-</div>
+                </div>
+                <div class="worker-card bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-600">Capacity</div>
+                    <div class="text-lg font-semibold" id="workerCapacity">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Current Session Progress -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">📊 Current Session Progress</h2>
+                <div class="mb-4">
+                    <div class="flex justify-between text-sm text-gray-600 mb-2">
+                        <span>Overall Progress</span>
+                        <span id="progressPercentage">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div class="progress-bar bg-blue-600 h-3 rounded-full" id="progressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Session ID:</span>
+                        <span class="font-mono text-sm" id="currentSessionId">-</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Current Step:</span>
+                        <span class="font-medium" id="currentStep">-</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Current Item:</span>
+                        <span class="font-medium" id="currentItem">-</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Total Items:</span>
+                        <span class="font-medium" id="totalItems">-</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Duration:</span>
+                        <span class="font-medium" id="sessionDuration">-</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Status:</span>
+                        <span class="px-3 py-1 rounded-full text-sm font-medium status-indicator" id="sessionStatus">Initializing</span>
+                    </div>
+                </div>
+
+                <!-- Mini Chart -->
+                <div class="mt-6">
+                    <canvas id="progressChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Event Log -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">📝 Event Log</h2>
+                <div class="event-log border border-gray-200 rounded-lg p-3 bg-gray-50" id="eventLog">
+                    <div class="text-gray-500 text-sm">Waiting for events...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Session History -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">📚 Session History</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Session ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Worker</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Started</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="sessionHistory">
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">No sessions recorded yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // WebSocket connection
+        let ws = null;
+        let sessions = new Map();
+        let currentSession = null;
+        let progressChart = null;
+        let sessionStartTime = null;
+
+        // Initialize progress chart
+        function initProgressChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            progressChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Progress %',
+                        data: [],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // WebSocket connection functions
+        function connectWebSocket() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                return;
+            }
+
+            ws = new WebSocket('ws://localhost:8090/ws?client_id=dashboard');
+            
+            ws.onopen = function() {
+                updateConnectionStatus(true);
+                addLogEntry('✅ Connected to WebSocket server', 'success');
+            };
+
+            ws.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    handleWebSocketMessage(data);
+                } catch (e) {
+                    console.error('Failed to parse WebSocket message:', e);
+                }
+            };
+
+            ws.onclose = function() {
+                updateConnectionStatus(false);
+                addLogEntry('❌ WebSocket connection closed', 'error');
+            };
+
+            ws.onerror = function(error) {
+                addLogEntry('⚠️ WebSocket error: ' + error, 'error');
+            };
+        }
+
+        function disconnectWebSocket() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+        }
+
+        function handleWebSocketMessage(data) {
+            // Update session information
+            if (data.session_id && !sessions.has(data.session_id)) {
+                sessions.set(data.session_id, {
+                    id: data.session_id,
+                    start: new Date(),
+                    progress: 0,
+                    step: 'initialization',
+                    worker: data.worker_info ? `${data.worker_info.host}:${data.worker_info.port}` : 'local'
+                });
+                updateSessionHistory();
+            }
+
+            const session = sessions.get(data.session_id);
+            if (session) {
+                session.progress = data.progress || 0;
+                session.step = data.step || session.step;
+                session.lastUpdate = new Date();
+                
+                if (data.worker_info) {
+                    session.worker = `${data.worker_info.host}:${data.worker_info.port}`;
+                }
+            }
+
+            // Update UI for current monitored session
+            if (currentSession && data.session_id === currentSession) {
+                updateSessionProgress(data);
+            }
+
+            // Add to log
+            const logMessage = formatLogMessage(data);
+            const logType = data.type === 'translation_error' ? 'error' : 
+                          data.type === 'translation_completed' ? 'success' : 'info';
+            addLogEntry(logMessage, logType);
+
+            // Update statistics
+            updateStatistics();
+        }
+
+        function updateSessionProgress(data) {
+            document.getElementById('currentSessionId').textContent = data.session_id;
+            document.getElementById('progressPercentage').textContent = Math.round(data.progress || 0) + '%';
+            document.getElementById('progressBar').style.width = (data.progress || 0) + '%';
+            document.getElementById('currentStep').textContent = data.step || '-';
+            document.getElementById('currentItem').textContent = data.current_item || '-';
+            document.getElementById('totalItems').textContent = data.total_items || '-';
+            
+            // Update worker information
+            if (data.worker_info) {
+                document.getElementById('workerInfo').style.display = 'block';
+                document.getElementById('workerHost').textContent = `${data.worker_info.host}:${data.worker_info.port}`;
+                document.getElementById('workerModel').textContent = data.worker_info.model || 'Unknown';
+                document.getElementById('workerCapacity').textContent = data.worker_info.capacity || 'Unknown';
+            }
+
+            // Update status
+            updateSessionStatus(data.type);
+
+            // Update duration
+            if (sessionStartTime) {
+                const duration = Date.now() - sessionStartTime;
+                document.getElementById('sessionDuration').textContent = formatDuration(duration);
+            }
+
+            // Update progress chart
+            updateProgressChart(data.progress || 0);
+        }
+
+        function updateSessionStatus(eventType) {
+            const statusElement = document.getElementById('sessionStatus');
+            statusElement.className = 'px-3 py-1 rounded-full text-sm font-medium status-indicator';
+            
+            switch (eventType) {
+                case 'translation_started':
+                    statusElement.textContent = 'Starting';
+                    statusElement.classList.add('bg-yellow-100', 'text-yellow-800');
+                    break;
+                case 'translation_progress':
+                    statusElement.textContent = 'In Progress';
+                    statusElement.classList.add('bg-blue-100', 'text-blue-800');
+                    break;
+                case 'translation_completed':
+                    statusElement.textContent = 'Completed';
+                    statusElement.classList.add('bg-green-100', 'text-green-800');
+                    break;
+                case 'translation_error':
+                    statusElement.textContent = 'Error';
+                    statusElement.classList.add('bg-red-100', 'text-red-800');
+                    break;
+                default:
+                    statusElement.textContent = 'Processing';
+                    statusElement.classList.add('bg-gray-100', 'text-gray-800');
+            }
+        }
+
+        function updateProgressChart(progress) {
+            if (!progressChart) return;
+
+            const now = new Date().toLocaleTimeString();
+            progressChart.data.labels.push(now);
+            progressChart.data.datasets[0].data.push(progress);
+
+            // Keep only last 20 data points
+            if (progressChart.data.labels.length > 20) {
+                progressChart.data.labels.shift();
+                progressChart.data.datasets[0].data.shift();
+            }
+
+            progressChart.update();
+        }
+
+        function formatLogMessage(data) {
+            const time = new Date().toLocaleTimeString();
+            let message = `[${time}] ${data.type.toUpperCase()}: ${data.message}`;
+            
+            if (data.step) {
+                message += ` (Step: ${data.step})`;
+            }
+            
+            if (data.progress !== undefined) {
+                message += ` (${Math.round(data.progress)}%)`;
+            }
+            
+            if (data.worker_info) {
+                message += ` [Worker: ${data.worker_info.host}:${data.worker_info.port}]`;
+            }
+            
+            return message;
+        }
+
+        function addLogEntry(message, type = 'info') {
+            const logContainer = document.getElementById('eventLog');
+            const entry = document.createElement('div');
+            entry.className = 'mb-2 p-2 rounded text-sm';
+            
+            switch (type) {
+                case 'error':
+                    entry.classList.add('bg-red-100', 'text-red-800', 'border-l-4', 'border-red-500');
+                    break;
+                case 'success':
+                    entry.classList.add('bg-green-100', 'text-green-800', 'border-l-4', 'border-green-500');
+                    break;
+                case 'warning':
+                    entry.classList.add('bg-yellow-100', 'text-yellow-800', 'border-l-4', 'border-yellow-500');
+                    break;
+                default:
+                    entry.classList.add('bg-white', 'text-gray-800', 'border-l-4', 'border-blue-500');
+            }
+            
+            entry.textContent = message;
+            logContainer.appendChild(entry);
+            
+            // Auto-scroll to bottom
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // Limit log entries
+            while (logContainer.children.length > 100) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusIndicator = document.getElementById('connectionStatus');
+            const statusText = document.getElementById('connectionText');
+            
+            if (connected) {
+                statusIndicator.className = 'w-3 h-3 bg-green-500 rounded-full mr-2';
+                statusText.textContent = 'Connected';
+            } else {
+                statusIndicator.className = 'w-3 h-3 bg-red-500 rounded-full mr-2';
+                statusText.textContent = 'Disconnected';
+            }
+        }
+
+        function updateStatistics() {
+            const activeCount = Array.from(sessions.values()).filter(s => 
+                s.progress > 0 && s.progress < 100
+            ).length;
+            
+            const completedCount = Array.from(sessions.values()).filter(s => 
+                s.progress === 100
+            ).length;
+            
+            document.getElementById('activeSessions').textContent = activeCount;
+            document.getElementById('completedSessions').textContent = completedCount;
+        }
+
+        function updateSessionHistory() {
+            const tbody = document.getElementById('sessionHistory');
+            tbody.innerHTML = '';
+            
+            Array.from(sessions.values()).slice(-10).reverse().forEach(session => {
+                const row = document.createElement('tr');
+                const duration = session.start ? formatDuration(Date.now() - session.start.getTime()) : '-';
+                const statusBadge = getStatusBadge(session.progress);
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${session.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${session.worker}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${statusBadge}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${duration}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${Math.round(session.progress)}%</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${session.start.toLocaleTimeString()}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function getStatusBadge(progress) {
+            if (progress === 0) return '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Pending</span>';
+            if (progress === 100) return '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Completed</span>';
+            return '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">In Progress</span>';
+        }
+
+        function formatDuration(ms) {
+            const seconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            
+            if (minutes > 0) {
+                return `${minutes}m ${remainingSeconds}s`;
+            }
+            return `${remainingSeconds}s`;
+        }
+
+        function monitorSpecificSession() {
+            const sessionId = document.getElementById('sessionId').value;
+            if (sessionId) {
+                currentSession = sessionId;
+                sessionStartTime = Date.now();
+                addLogEntry(`🎯 Now monitoring session: ${sessionId}`, 'info');
+                
+                // Clear previous progress chart data
+                if (progressChart) {
+                    progressChart.data.labels = [];
+                    progressChart.data.datasets[0].data = [];
+                    progressChart.update();
+                }
+            }
+        }
+
+        function clearLogs() {
+            const logContainer = document.getElementById('eventLog');
+            logContainer.innerHTML = '<div class="text-gray-500 text-sm">Logs cleared...</div>';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initProgressChart();
+            connectWebSocket();
+            
+            // Auto-connect and start monitoring
+            setTimeout(() => {
+                addLogEntry('🚀 Dashboard initialized and ready', 'success');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
