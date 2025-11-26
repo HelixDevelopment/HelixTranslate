@@ -1,0 +1,17 @@
+Session Logs Export
+===================
+
+Session Start: 2025-11-23 22:46:28
+
+Issues:
+  1. [critical] version_manager - Remote codebase update verification failed
+
+Warnings:
+  1. [version_sync] version_manager - Codebase update required
+
+Log Entries:
+  [22:46:28] info: SSH translation session started
+  [22:46:28] info: Starting Step 1: Initialize SSH worker and verify codebase
+  [22:46:31] info: SSH connection established successfully
+  [22:46:31] debug: Local codebase hash generated
+  [22:46:36] info: Codebase hashes differ, updating remote

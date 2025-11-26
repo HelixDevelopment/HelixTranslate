@@ -1,0 +1,43 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8443,
+    "enable_http3": true,
+    "tls_cert_file": "certs/server.crt",
+    "tls_key_file": "certs/server.key",
+    "read_timeout": 30,
+    "write_timeout": 30,
+    "max_upload_size": 104857600
+  },
+  "security": {
+    "enable_auth": false,
+    "jwt_secret": "",
+    "api_key_header": "X-API-Key",
+    "rate_limit_rps": 10,
+    "rate_limit_burst": 20,
+    "cors_origins": [
+      "*"
+    ]
+  },
+  "translation": {
+    "default_provider": "dictionary",
+    "default_model": "",
+    "cache_enabled": true,
+    "cache_ttl": 3600,
+    "max_concurrent": 5,
+    "providers": {}
+  },
+  "distributed": {
+    "enabled": false,
+    "workers": {},
+    "ssh_timeout": 30,
+    "ssh_max_retries": 3,
+    "health_check_interval": 30,
+    "max_remote_instances": 20
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "output_file": ""
+  }
+}

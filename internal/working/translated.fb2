@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0">
+  <description>
+    <title-info>
+      <book-title>Test Book</book-title>
+      <annotation></annotation>
+      <date></date>
+      <coverpage>
+        <image xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href=""></image>
+      </coverpage>
+      <lang>sr</lang>
+    </title-info>
+    <document-info>
+      <date></date>
+      <id></id>
+      <version></version>
+    </document-info>
+    <publish-info></publish-info>
+  </description>
+  <body>
+    <title></title>
+    <section>
+      <title></title>
+      <p>This is a test paragraph for end-to-end testing.</p>
+      <p>The system should translate this content properly.</p>
+    </section>
+  </body>
+</FictionBook>

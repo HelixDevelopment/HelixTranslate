@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0">
+  <description>
+    <title-info>
+      <book-title>Test Book</book-title>
+      <lang>en</lang>
+    </title-info>
+  </description>
+  <body>
+    <section>
+      <p>This is a test paragraph for end-to-end testing.</p>
+      <p>The system should translate this content properly.</p>
+    </section>
+  </body>
+</FictionBook>

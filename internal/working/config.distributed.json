@@ -1,0 +1,63 @@
+{
+    "server": {
+        "host": "0.0.0.0",
+        "port": 8443,
+        "enable_http3": true,
+    "tls_cert_file": "certs/server.crt",
+    "tls_key_file": "certs/server.key",
+    "read_timeout": 30,
+    "write_timeout": 30,
+    "max_upload_size": 104857600
+  },
+  "security": {
+    "enable_auth": true,
+    "jwt_secret": "main-server-secret-key",
+    "api_key_header": "X-API-Key",
+    "rate_limit_rps": 10,
+    "rate_limit_burst": 20,
+    "cors_origins": ["*"]
+  },
+  "translation": {
+    "default_provider": "dictionary",
+    "default_model": "",
+    "cache_enabled": true,
+    "cache_ttl": 3600,
+    "max_concurrent": 5,
+    "providers": {}
+  },
+  "preparation": {
+    "enabled": false,
+    "pass_count": 1,
+    "providers": ["dictionary"],
+    "analyze_content_type": true,
+    "analyze_characters": true,
+    "analyze_terminology": true,
+    "analyze_culture": true,
+    "analyze_chapters": true,
+    "detail_level": "standard"
+  },
+   "distributed": {
+    "enabled": true,
+    "workers": {
+      "thinker-worker": {
+        "name": "Local Llama.cpp Worker",
+        "host": "localhost",
+        "port": 8444,
+        "user": "milosvasic",
+        "password": "WhiteSnake8587",
+        "max_capacity": 10,
+        "enabled": true,
+        "tags": ["gpu", "llamacpp"]
+      }
+    },
+    "ssh_timeout": 30,
+    "ssh_max_retries": 3,
+    "health_check_interval": 30,
+    "max_remote_instances": 20
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "output_file": ""
+  }
+}

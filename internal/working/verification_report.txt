@@ -1,0 +1,47 @@
+==========================================
+EBOOK TRANSLATION VERIFICATION REPORT
+==========================================
+
+Checking file existence:
+✓ materials/books/book1.fb2 exists (  606538 bytes)
+✓ materials/books/book1_original.md exists (  593870 bytes)
+✓ materials/books/book1_translated.md exists (  600424 bytes)
+✓ materials/books/book1_sr.epub exists (  292827 bytes)
+
+----------------------------------------
+CONTENT VERIFICATION
+----------------------------------------
+1. Checking original FB2 file for Russian content:
+   - Russian characters found: 1276
+
+2. Checking original markdown file:
+   - File size:   593870 bytes
+   - Markdown headers found: 1
+
+3. Checking translated markdown for Serbian Cyrillic:
+   - Serbian Cyrillic characters found: 1138
+
+4. Checking for specific Serbian translations:
+   ✓ Found: Крв на снегу
+   ✓ Found: Ја – убица
+   ✓ Found: мами
+   ✓ Found: наруџби
+
+5. Checking translated EPUB file:
+   - EPUB size:   292827 bytes
+   - EPUB structure verification:
+     ✓ EPUB structure is valid
+     ✓ Correct mimetype
+     ✓ Serbian Cyrillic found in EPUB content
+
+----------------------------------------
+SUMMARY
+----------------------------------------
+✓ VERIFICATION PASSED
+  All required files created with proper Serbian Cyrillic content
+
+Generated files:
+  1. Original ebook: materials/books/book1.fb2
+  2. Original markdown: materials/books/book1_original.md
+  3. Translated markdown: materials/books/book1_translated.md
+  4. Translated EPUB: materials/books/book1_sr.epub

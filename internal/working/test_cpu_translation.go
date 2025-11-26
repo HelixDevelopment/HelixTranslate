@@ -1,0 +1,200 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"time"
+
+	"digital.vasic.translator/pkg/logger"
+	"digital.vasic.translator/pkg/sshworker"
+)
+
+func main() {
+	// Initialize SSH worker
+	config := sshworker.SSHWorkerConfig{
+		Host:       "thinker.local",
+		Port:       22,
+		Username:   "milosvasic",
+		Password:   "WhiteSnake8587",
+		RemoteDir:  "/tmp/translate-ssh",
+		ConnectionTimeout: 30 * time.Second,
+		CommandTimeout: 60 * time.Second,
+	}
+
+	loggerConfig := logger.LoggerConfig{
+		Level: logger.INFO,
+		Format: logger.FORMAT_TEXT,
+	}
+	log := logger.NewLogger(loggerConfig)
+	
+	worker, err := sshworker.NewSSHWorker(config, log)
+	if err != nil {
+		fmt.Printf("Failed to create SSH worker: %v\n", err)
+		os.Exit(1)
+	}
+
+	ctx := context.Background()
+	
+	// Connect to worker
+	if err := worker.Connect(ctx); err != nil {
+		fmt.Printf("Failed to connect: %v\n", err)
+		os.Exit(1)
+	}
+	defer worker.Disconnect()
+
+	// Test llama-cli with reduced GPU layers
+	fmt.Println("Testing model with CPU only...")
+	testCmd := `/home/milosvasic/llama.cpp/build/bin/llama-cli \
+		-m /home/milosvasic/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf \
+		--n-gpu-layers 0 \
+		-p "Translate Russian to Serbian: Привет мир" \
+		-n 50 \
+		--temp 0.3`
+	
+	result, err := worker.ExecuteCommand(ctx, testCmd)
+	if err != nil {
+		fmt.Printf("Failed to test model: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("CPU test - Exit Code: %d\n", result.ExitCode)
+	fmt.Printf("STDOUT:\n%s\n", result.Stdout)
+	if result.Stderr != "" {
+		fmt.Printf("STDERR:\n%s\n", result.Stderr)
+	}
+
+	// Test with small number of GPU layers
+	fmt.Println("Testing model with reduced GPU layers...")
+	testCmd2 := `/home/milosvasic/llama.cpp/build/bin/llama-cli \
+		-m /home/milosvasic/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf \
+		--n-gpu-layers 10 \
+		-p "Translate Russian to Serbian: Привет мир" \
+		-n 50 \
+		--temp 0.3`
+	
+	result, err = worker.ExecuteCommand(ctx, testCmd2)
+	if err != nil {
+		fmt.Printf("Failed to test model: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("Reduced GPU test - Exit Code: %d\n", result.ExitCode)
+	fmt.Printf("STDOUT:\n%s\n", result.Stdout)
+	if result.Stderr != "" {
+		fmt.Printf("STDERR:\n%s\n", result.Stderr)
+	}
+
+	// Update translation script to use CPU-only mode
+	fmt.Println("Updating translation script to use CPU-only mode...")
+	updatedScript := `
+import os
+import sys
+import subprocess
+import json
+
+def translate_with_llamacpp(text, from_lang="ru", to_lang="sr"):
+    """Translate using local llama.cpp with CPU-only mode"""
+    
+    # Build translation prompt
+    prompt = f"""Translate following text from {from_lang.upper()} to {to_lang.upper()}. 
+Provide ONLY translation without any explanations, notes, or additional text.
+Maintain original formatting and structure.
+
+Source text:
+{text}
+
+Translation:"""
+    
+    # Build llama.cpp command with CPU-only mode
+    cmd = [
+        "/home/milosvasic/llama.cpp/build/bin/llama-cli",
+        "-m", "/home/milosvasic/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+        "--n-gpu-layers", "0",  # Force CPU-only mode
+        "-p", prompt,
+        "--ctx-size", "4096",
+        "--temp", "0.3",
+        "-n", "2048"
+    ]
+    
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        if result.returncode != 0:
+            raise Exception(f"llama.cpp failed: {result.stderr}")
+        
+        # Extract translation from output
+        lines = result.stdout.split('\n')
+        translation_lines = []
+        capturing = False
+        
+        for line in lines:
+            if "Translation:" in line:
+                capturing = True
+                parts = line.split("Translation:", 1)
+                if len(parts) > 1 and parts[1].strip():
+                    translation_lines.append(parts[1].strip())
+            elif capturing and line.strip():
+                translation_lines.append(line.strip())
+        
+        return '\\n'.join(translation_lines).strip()
+        
+    except subprocess.TimeoutExpired:
+        raise Exception("Translation timed out")
+
+def main():
+    if len(sys.argv) != 3:
+        print("Usage: python3 simple_translate.py <input> <output>")
+        sys.exit(1)
+    
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]
+    
+    # Read input
+    with open(input_file, 'r') as f:
+        text = f.read().strip()
+    
+    # Translate
+    try:
+        translated = translate_with_llamacpp(text)
+        if not translated or translated == text:
+            print("Translation failed or returned original text")
+            sys.exit(1)
+        
+        # Write output
+        with open(output_file, 'w') as f:
+            f.write(translated)
+        
+        print(f"Translation successful: {text[:50]}... -> {translated[:50]}...")
+        
+    except Exception as e:
+        print(f"Translation error: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+`
+	
+	if err := worker.UploadData(ctx, []byte(updatedScript), "/tmp/translate-ssh/simple_translate.py"); err != nil {
+		fmt.Printf("Failed to upload updated script: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Test the simple translation
+	fmt.Println("Testing updated translation...")
+	testInput := `Переведите меня на сербский`
+	if err := worker.UploadData(ctx, []byte(testInput), "/tmp/translate-ssh/test_in.txt"); err != nil {
+		fmt.Printf("Failed to upload test input: %v\n", err)
+		os.Exit(1)
+	}
+
+	translateCmd := "cd /tmp/translate-ssh && python3 simple_translate.py test_in.txt test_out.txt"
+	result, err = worker.ExecuteCommand(ctx, translateCmd)
+	if err != nil {
+		fmt.Printf("Failed to translate: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Simple translation - Exit Code: %d\n", result.ExitCode)
+	fmt.Printf("STDOUT:\n%s\n", result.Stdout)
+	if result.Stderr != "" {
+		fmt.Printf("STDERR:\n%s\n", result.Stderr)
+	}
+}

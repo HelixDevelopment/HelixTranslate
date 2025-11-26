@@ -1,0 +1,8 @@
+{
+  "provider": "ollama",
+  "model": "llama3:8b",
+  "api_key": null,
+  "base_url": "http://localhost:11434",
+  "temperature": 0.3,
+  "max_tokens": 4000
+}

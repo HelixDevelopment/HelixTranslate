@@ -1,0 +1,6 @@
+Translation completed at Wed Nov 26 19:08:54 MSK 2025
+Files generated: 
+All tests passed: 82/82
+Translation completed at Wed Nov 26 19:08:57 MSK 2025
+Files generated: -rw-r--r--@ 1 milosvasic  staff  292827 Nov 26 19:04 materials/books/book1_sr.epub
+All tests passed: 82/82

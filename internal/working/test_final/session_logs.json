@@ -1,0 +1,25 @@
+Session Logs Export
+===================
+
+Session Start: 2025-11-24 00:21:05
+
+Warnings:
+  1. [version_sync] version_manager - Codebase update required but bypassed for testing
+
+Log Entries:
+  [00:21:05] info: SSH translation session started
+  [00:21:05] info: Starting Step 1: Initialize SSH worker and verify codebase
+  [00:21:07] info: SSH connection established successfully
+  [00:21:08] debug: Local codebase hash generated
+  [00:21:13] info: Starting Step 2: Converting input ebook to markdown
+  [00:21:13] info: Input file uploaded successfully
+  [00:21:13] info: Ebook converted to markdown successfully
+  [00:21:13] info: Starting Step 3: Translating markdown using remote llama.cpp
+  [00:21:28] info: Markdown translation completed
+  [00:21:28] info: Starting Step 5: Downloading generated files
+  [00:21:28] info: File downloaded successfully
+  [00:21:28] info: File downloaded successfully
+  [00:21:28] info: File downloaded successfully
+  [00:21:28] info: Starting Step 6: Cleaning up remote files
+  [00:21:28] info: Remote files cleaned up successfully
+  [00:21:28] info: SSH translation session completed successfully

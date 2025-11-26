@@ -1,0 +1,211 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8443,
+    "enable_http3": true,
+    "tls_cert_file": "/app/certs/server.crt",
+    "tls_key_file": "/app/certs/server.key",
+    "read_timeout": 30,
+    "write_timeout": 30,
+    "max_upload_size": 104857600
+  },
+  "security": {
+    "enable_auth": true,
+    "jwt_secret": "${JWT_SECRET}",
+    "api_key_header": "X-API-Key",
+    "rate_limit_rps": 10,
+    "rate_limit_burst": 20,
+    "cors_origins": ["${CORS_ORIGINS}"]
+  },
+  "database": {
+    "type": "${DB_TYPE:-postgres}",
+    "host": "${DB_HOST:-postgres}",
+    "port": ${DB_PORT:-5432},
+    "user": "${DB_USER:-translator}",
+    "password": "${DB_PASSWORD}",
+    "name": "${DB_NAME:-translator}",
+    "sslmode": "${DB_SSLMODE:-require}",
+    "max_connections": ${DB_MAX_CONNECTIONS:-20},
+    "connection_timeout": ${DB_CONNECTION_TIMEOUT:-30}
+  },
+  "cache": {
+    "type": "${CACHE_TYPE:-redis}",
+    "host": "${REDIS_HOST:-redis}",
+    "port": ${REDIS_PORT:-6379},
+    "password": "${REDIS_PASSWORD}",
+    "db": ${REDIS_DB:-0},
+    "ttl": ${CACHE_TTL:-3600}
+  },
+  "translation": {
+    "default_provider": "${DEFAULT_PROVIDER:-dictionary}",
+    "default_model": "${DEFAULT_MODEL:-}",
+    "cache_enabled": ${CACHE_ENABLED:-true},
+    "cache_ttl": ${TRANSLATION_CACHE_TTL:-3600},
+    "max_concurrent": ${MAX_CONCURRENT_TRANSLATIONS:-5},
+    "max_file_size_mb": ${MAX_FILE_SIZE_MB:-100},
+    "supported_languages": ["en", "sr", "ru", "de", "fr", "es", "it", "pt", "zh", "ja", "ko", "ar", "pl", "cs", "hr", "bs", "bg", "uk"],
+    "providers": {
+      "openai": {
+        "enabled": ${OPENAI_ENABLED:-false},
+        "api_key": "${OPENAI_API_KEY}",
+        "base_url": "${OPENAI_BASE_URL:-https://api.openai.com/v1}",
+        "models": ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"],
+        "default_model": "${OPENAI_DEFAULT_MODEL:-gpt-4}",
+        "max_tokens": ${OPENAI_MAX_TOKENS:-4000},
+        "temperature": ${OPENAI_TEMPERATURE:-0.3},
+        "timeout_seconds": ${OPENAI_TIMEOUT_SECONDS:-60}
+      },
+      "anthropic": {
+        "enabled": ${ANTHROPIC_ENABLED:-false},
+        "api_key": "${ANTHROPIC_API_KEY}",
+        "base_url": "${ANTHROPIC_BASE_URL:-https://api.anthropic.com}",
+        "models": ["claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"],
+        "default_model": "${ANTHROPIC_DEFAULT_MODEL:-claude-3-sonnet-20240229}",
+        "max_tokens": ${ANTHROPIC_MAX_TOKENS:-4000},
+        "temperature": ${ANTHROPIC_TEMPERATURE:-0.3},
+        "timeout_seconds": ${ANTHROPIC_TIMEOUT_SECONDS:-60}
+      },
+      "zhipu": {
+        "enabled": ${ZHIPU_ENABLED:-false},
+        "api_key": "${ZHIPU_API_KEY}",
+        "base_url": "${ZHIPU_BASE_URL:-https://open.bigmodel.cn/api/paas/v4}",
+        "models": ["glm-4", "glm-3-turbo"],
+        "default_model": "${ZHIPU_DEFAULT_MODEL:-glm-4}",
+        "max_tokens": ${ZHIPU_MAX_TOKENS:-4000},
+        "temperature": ${ZHIPU_TEMPERATURE:-0.3},
+        "timeout_seconds": ${ZHIPU_TIMEOUT_SECONDS:-60}
+      },
+      "deepseek": {
+        "enabled": ${DEEPSEEK_ENABLED:-false},
+        "api_key": "${DEEPSEEK_API_KEY}",
+        "base_url": "${DEEPSEEK_BASE_URL:-https://api.deepseek.com}",
+        "models": ["deepseek-chat", "deepseek-coder"],
+        "default_model": "${DEEPSEEK_DEFAULT_MODEL:-deepseek-chat}",
+        "max_tokens": ${DEEPSEEK_MAX_TOKENS:-4000},
+        "temperature": ${DEEPSEEK_TEMPERATURE:-0.3},
+        "timeout_seconds": ${DEEPSEEK_TIMEOUT_SECONDS:-60}
+      },
+      "qwen": {
+        "enabled": ${QWEN_ENABLED:-false},
+        "api_key": "${QWEN_API_KEY}",
+        "base_url": "${QWEN_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}",
+        "models": ["qwen-turbo", "qwen-plus", "qwen-max"],
+        "default_model": "${QWEN_DEFAULT_MODEL:-qwen-plus}",
+        "max_tokens": ${QWEN_MAX_TOKENS:-4000},
+        "temperature": ${QWEN_TEMPERATURE:-0.3},
+        "timeout_seconds": ${QWEN_TIMEOUT_SECONDS:-60}
+      },
+      "gemini": {
+        "enabled": ${GEMINI_ENABLED:-false},
+        "api_key": "${GEMINI_API_KEY}",
+        "base_url": "${GEMINI_BASE_URL:-https://generativelanguage.googleapis.com/v1beta}",
+        "models": ["gemini-pro", "gemini-pro-vision", "gemini-1.5-pro", "gemini-1.5-flash"],
+        "default_model": "${GEMINI_DEFAULT_MODEL:-gemini-pro}",
+        "max_tokens": ${GEMINI_MAX_TOKENS:-4000},
+        "temperature": ${GEMINI_TEMPERATURE:-0.3},
+        "timeout_seconds": ${GEMINI_TIMEOUT_SECONDS:-60}
+      },
+      "ollama": {
+        "enabled": ${OLLAMA_ENABLED:-false},
+        "host": "${OLLAMA_HOST:-http://localhost:11434}",
+        "models": ["llama3:8b", "llama3:70b", "mistral", "codellama"],
+        "default_model": "${OLLAMA_DEFAULT_MODEL:-llama3:8b}",
+        "max_tokens": ${OLLAMA_MAX_TOKENS:-4000},
+        "temperature": ${OLLAMA_TEMPERATURE:-0.3},
+        "timeout_seconds": ${OLLAMA_TIMEOUT_SECONDS:-120}
+      },
+      "llamacpp": {
+        "enabled": ${LLAMACPP_ENABLED:-false},
+        "host": "${LLAMACPP_HOST:-http://localhost:8080}",
+        "models": ["local-model"],
+        "default_model": "${LLAMACPP_DEFAULT_MODEL:-local-model}",
+        "max_tokens": ${LLAMACPP_MAX_TOKENS:-4000},
+        "temperature": ${LLAMACPP_TEMPERATURE:-0.3},
+        "timeout_seconds": ${LLAMACPP_TIMEOUT_SECONDS:-120}
+      }
+    }
+  },
+  "distributed": {
+    "enabled": ${DISTRIBUTED_ENABLED:-false},
+    "coordinator_host": "${COORDINATOR_HOST:-localhost}",
+    "coordinator_port": ${COORDINATOR_PORT:-8443},
+    "worker_discovery": "${WORKER_DISCOVERY:-static}",
+    "workers": {
+      "worker-1": {
+        "name": "Worker Instance 1",
+        "host": "${WORKER_1_HOST:-worker-1}",
+        "port": ${WORKER_1_PORT:-8443},
+        "enabled": ${WORKER_1_ENABLED:-false},
+        "max_capacity": ${WORKER_1_MAX_CAPACITY:-10},
+        "tags": ["${WORKER_1_TAGS:-general}"]
+      },
+      "worker-2": {
+        "name": "Worker Instance 2",
+        "host": "${WORKER_2_HOST:-worker-2}",
+        "port": ${WORKER_2_PORT:-8443},
+        "enabled": ${WORKER_2_ENABLED:-false},
+        "max_capacity": ${WORKER_2_MAX_CAPACITY:-10},
+        "tags": ["${WORKER_2_TAGS:-general}"]
+      }
+    },
+    "load_balancing": {
+      "strategy": "${LOAD_BALANCING_STRATEGY:-round_robin}",
+      "health_check_interval": ${HEALTH_CHECK_INTERVAL:-30},
+      "max_failures": ${MAX_FAILURES:-3},
+      "recovery_timeout": ${RECOVERY_TIMEOUT:-60}
+    },
+    "ssh_config": {
+      "timeout": ${SSH_TIMEOUT:-30},
+      "max_retries": ${SSH_MAX_RETRIES:-3},
+      "key_path": "${SSH_KEY_PATH:-/app/.ssh/id_rsa}",
+      "known_hosts_path": "${SSH_KNOWN_HOSTS_PATH:-/app/.ssh/known_hosts}"
+    }
+  },
+  "storage": {
+    "type": "${STORAGE_TYPE:-filesystem}",
+    "filesystem": {
+      "base_path": "${STORAGE_BASE_PATH:-/app/storage}",
+      "temp_path": "${STORAGE_TEMP_PATH:-/tmp/translator}",
+      "max_file_age_days": ${STORAGE_MAX_FILE_AGE_DAYS:-7}
+    },
+    "s3": {
+      "enabled": ${S3_ENABLED:-false},
+      "endpoint": "${S3_ENDPOINT}",
+      "region": "${S3_REGION:-us-east-1}",
+      "bucket": "${S3_BUCKET}",
+      "access_key": "${S3_ACCESS_KEY}",
+      "secret_key": "${S3_SECRET_KEY}",
+      "use_ssl": ${S3_USE_SSL:-true}
+    }
+  },
+  "monitoring": {
+    "enabled": ${MONITORING_ENABLED:-true},
+    "metrics_port": ${METRICS_PORT:-9090},
+    "health_check_path": "/health",
+    "metrics_path": "/metrics",
+    "alerting": {
+      "enabled": ${ALERTING_ENABLED:-false},
+      "webhook_url": "${ALERT_WEBHOOK_URL}",
+      "alert_on_errors": ${ALERT_ON_ERRORS:-true},
+      "alert_on_high_load": ${ALERT_ON_HIGH_LOAD:-true},
+      "high_load_threshold": ${HIGH_LOAD_THRESHOLD:-80}
+    },
+    "logging": {
+      "level": "${LOG_LEVEL:-info}",
+      "format": "${LOG_FORMAT:-json}",
+      "output_file": "${LOG_OUTPUT_FILE:-/app/logs/translator.log}",
+      "max_size_mb": ${LOG_MAX_SIZE_MB:-100},
+      "max_age_days": ${LOG_MAX_AGE_DAYS:-30},
+      "compress": ${LOG_COMPRESS:-true}
+    }
+  },
+  "features": {
+    "websocket_enabled": ${WEBSOCKET_ENABLED:-true},
+    "batch_processing": ${BATCH_PROCESSING_ENABLED:-true},
+    "multi_pass_translation": ${MULTI_PASS_ENABLED:-true},
+    "script_conversion": ${SCRIPT_CONVERSION_ENABLED:-true},
+    "format_conversion": ${FORMAT_CONVERSION_ENABLED:-true},
+    "progress_tracking": ${PROGRESS_TRACKING_ENABLED:-true},
+    "version_management": ${VERSION_MANAGEMENT_ENABLED:-true}
+  }
+}

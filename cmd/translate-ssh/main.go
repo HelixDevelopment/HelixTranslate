@@ -479,13 +479,21 @@ func step2ConvertToMarkdown(ctx context.Context, config *Config, progress *Trans
 		return "", fmt.Errorf("SSH worker not initialized - ensure step1 completed successfully")
 	}
 
-	// Upload input file
+	// Upload input file to organized structure
 	inputFileName := filepath.Base(config.InputFile)
-	remoteInputPath := filepath.Join(config.RemoteDir, inputFileName)
+	remoteInputPath := filepath.Join(config.RemoteDir, "materials/books", inputFileName)
 
 	if err := worker.UploadFile(ctx, config.InputFile, remoteInputPath); err != nil {
 		progress.ReportGenerator.AddIssue("file_operation", "error", "Failed to upload input file", "sshworker")
 		return "", fmt.Errorf("failed to upload input file: %w", err)
+	}
+	
+	// Create remote materials directory if needed
+	materialsDir := filepath.Join(config.RemoteDir, "materials/books")
+	mkdirCmd := fmt.Sprintf("mkdir -p %s", materialsDir)
+	if _, err := worker.ExecuteCommand(ctx, mkdirCmd); err != nil {
+		progress.ReportGenerator.AddIssue("file_operation", "error", "Failed to create materials directory", "sshworker")
+		return "", fmt.Errorf("failed to create materials directory: %w", err)
 	}
 	
 	progress.ReportGenerator.AddLogEntry("info", "Input file uploaded successfully", "sshworker", 
@@ -502,19 +510,33 @@ func step2ConvertToMarkdown(ctx context.Context, config *Config, progress *Trans
 	var convertCmd string
 	switch strings.ToLower(ext) {
 	case ".fb2":
+		// Read FB2 to markdown script
+		fb2ScriptPath := filepath.Join(getProjectRoot(), "internal/scripts/fb2_to_markdown.py")
+		fb2Script, err := os.ReadFile(fb2ScriptPath)
+		if err != nil {
+			return "", fmt.Errorf("failed to read FB2 conversion script: %w", err)
+		}
+		
 		convertCmd = fmt.Sprintf(`cd %s && cat << 'SCRIPT' > convert_to_markdown.sh
 #!/bin/bash
-# Simple FB2 to markdown conversion
+# FB2 to markdown conversion using Python
 input_file='%s'
 output_file='%s'
 
-# Create simple markdown from FB2 (basic text extraction)
-echo "# Converted Book" > "%s"
-echo "" >> "%s"
-grep -o '>[^<]*<' "%s" | sed 's/[<>]//g' >> "%s"
+# Upload FB2 converter
+cat << 'PYEOF' > fb2_to_markdown.py
+%s
+PYEOF
+
+# Run conversion
+python3 fb2_to_markdown.py "$input_file" "$output_file"
 SCRIPT
 chmod +x convert_to_markdown.sh
-./convert_to_markdown.sh`, config.RemoteDir, remoteInputPath, markdownOriginalPath, markdownOriginalPath, markdownOriginalPath, remoteInputPath, markdownOriginalPath)
+./convert_to_markdown.sh`, 
+	config.RemoteDir, 
+	remoteInputPath, 
+	markdownOriginalPath,
+	string(fb2Script))
 	case ".epub":
 		convertCmd = fmt.Sprintf(`cd %s && cat << 'SCRIPT' > convert_to_markdown.sh
 #!/bin/bash
@@ -582,24 +604,150 @@ func step3TranslateMarkdown(ctx context.Context, config *Config, progress *Trans
 		return "", fmt.Errorf("failed to upload workflow config: %w", err)
 	}
 
+	// Update paths for organized structure - already handled in upload step
+
 	// Execute translation workflow on remote
 	baseName := strings.TrimSuffix(markdownOriginal, "_original.md")
 	markdownTranslatedPath := baseName + "_translated.md"
 
-	// Upload Python-based translation script (doesn't require GGUF models)
-	scriptPath := filepath.Join(config.RemoteDir, "python_translation.sh")
-	pythonScriptPath := filepath.Join(getProjectRoot(), "scripts", "python_translation.sh")
-	pythonScript, err := os.ReadFile(pythonScriptPath)
+	// Upload LLM-only translation script
+	llamaLLMOnlyScriptPath := filepath.Join(getProjectRoot(), "internal/scripts/translate_llm_only.py")
+	llamaLLMOnlyScript, err := os.ReadFile(llamaLLMOnlyScriptPath)
 	if err != nil {
-		return "", fmt.Errorf("failed to read Python translation script: %w", err)
+		return "", fmt.Errorf("failed to read LLM-only translation script: %w", err)
 	}
 	
-	if err := worker.UploadData(ctx, pythonScript, scriptPath); err != nil {
-		return "", fmt.Errorf("failed to upload Python translation script: %w", err)
+	if err := worker.UploadData(ctx, llamaLLMOnlyScript, filepath.Join(config.RemoteDir, "translate_llm_only.py")); err != nil {
+		return "", fmt.Errorf("failed to upload LLM-only translation script: %w", err)
 	}
 
-	// Make script executable and run it
-	translateCmd := fmt.Sprintf(`cd %s && chmod +x python_translation.sh && ./python_translation.sh "%s" "%s" "config.json"`,
+	// Upload llama setup script
+	setupScriptPath := filepath.Join(getProjectRoot(), "internal/scripts/setup_llama.py")
+	setupScript, err := os.ReadFile(setupScriptPath)
+	if err != nil {
+		config.Logger.Warn("Failed to read setup script", map[string]interface{}{"error": err.Error()})
+	} else {
+		remoteSetupScript := filepath.Join(config.RemoteDir, "setup_llama.py")
+		if err := worker.UploadData(ctx, setupScript, remoteSetupScript); err != nil {
+			config.Logger.Warn("Failed to upload setup script", map[string]interface{}{"error": err.Error()})
+		}
+	}
+
+	// Upload llama test script
+	testScriptPath := filepath.Join(getProjectRoot(), "internal/scripts/test_llama.py")
+	testScript, err := os.ReadFile(testScriptPath)
+	if err != nil {
+		config.Logger.Warn("Failed to read test script", map[string]interface{}{"error": err.Error()})
+	} else {
+		remoteTestScript := filepath.Join(config.RemoteDir, "test_llama.py")
+		if err := worker.UploadData(ctx, testScript, remoteTestScript); err != nil {
+			config.Logger.Warn("Failed to upload test script", map[string]interface{}{"error": err.Error()})
+		}
+	}
+
+	// First, check what llama.cpp models and binaries are available
+	checkModelsCmd := fmt.Sprintf(`cd %s && python3 -c "
+import os
+print('Checking for llama.cpp models...')
+paths = ['/tmp/translate-ssh/models', '/home/milosvasic/models', '/usr/local/models', './models']
+for path in paths:
+    if os.path.exists(path):
+        models = [f for f in os.listdir(path) if f.endswith('.gguf')]
+        if models:
+            print(f'Found models in {path}: {models}')
+        else:
+            print(f'No .gguf models found in {path}')
+    else:
+        print(f'Path does not exist: {path}')
+        
+# Check for llama.cpp binary in common locations
+llama_paths = ['./llama.cpp', '/usr/local/bin/llama.cpp', '/usr/bin/llama.cpp', '/home/milosvasic/llama.cpp']
+for path in llama_paths:
+    if os.path.exists(path):
+        print(f'llama.cpp binary found at: {path}')
+        break
+else:
+    print('llama.cpp binary not found in common locations')
+    
+# Check if we can install/compile llama.cpp or if there are alternatives
+if os.path.exists('/usr/bin/which'):
+    result = os.popen('which llama.cpp').read().strip()
+    if result:
+        print(f'llama.cpp found via which: {result}')
+"`, config.RemoteDir)
+
+	config.Logger.Info("Checking for llama.cpp models and binaries", nil)
+	checkResult, err := worker.ExecuteCommand(ctx, checkModelsCmd)
+	if err != nil {
+		config.Logger.Warn("Failed to check llama.cpp models", map[string]interface{}{"error": err.Error()})
+	} else {
+		config.Logger.Info("llama.cpp check results", map[string]interface{}{
+			"stdout": checkResult.Stdout,
+			"stderr": checkResult.Stderr,
+		})
+	}
+
+	// Check for llama.cpp installation and install if needed
+	if !strings.Contains(checkResult.Stdout, "llama.cpp binary found") {
+		config.Logger.Info("llama.cpp not found, installing automatically", nil)
+		
+		// Upload installation script
+		installScript := filepath.Join(getProjectRoot(), "internal/scripts/install_llamacpp.sh")
+		if _, err := os.Stat(installScript); err == nil {
+			remoteInstallScript := filepath.Join(config.RemoteDir, "install_llamacpp.sh")
+			if err := worker.UploadFile(ctx, installScript, remoteInstallScript); err != nil {
+				config.Logger.Warn("Failed to upload installation script", map[string]interface{}{"error": err.Error()})
+			} else {
+				// Make executable and run installation
+				chmodCmd := fmt.Sprintf("chmod +x %s", remoteInstallScript)
+				if _, err := worker.ExecuteCommand(ctx, chmodCmd); err != nil {
+					config.Logger.Warn("Failed to make install script executable", map[string]interface{}{"error": err.Error()})
+				} else {
+					installCmd := fmt.Sprintf("%s", remoteInstallScript)
+					config.Logger.Info("Running llama.cpp installation", map[string]interface{}{"command": installCmd})
+					
+					installResult, err := worker.ExecuteCommand(ctx, installCmd)
+					if err != nil {
+						config.Logger.Warn("llama.cpp installation failed", map[string]interface{}{"error": err.Error()})
+					} else if installResult.ExitCode != 0 {
+						config.Logger.Warn("llama.cpp installation failed", map[string]interface{}{
+							"exit_code": installResult.ExitCode,
+							"stdout": installResult.Stdout,
+							"stderr": installResult.Stderr,
+						})
+					} else {
+						config.Logger.Info("llama.cpp installation completed successfully", nil)
+					}
+				}
+			}
+		}
+	}
+
+	// Try to find and upload llama.cpp binary if available locally
+	llamaBinaryPath := "/opt/homebrew/bin/llama" // Default location on macOS
+	if _, err := os.Stat(llamaBinaryPath); err != nil {
+		// Try to find in other common locations
+		paths := []string{"/usr/local/bin/llama", "/usr/bin/llama", "/opt/llama.cpp/bin/llama.cpp"}
+		for _, path := range paths {
+			if _, err := os.Stat(path); err == nil {
+				llamaBinaryPath = path
+				break
+			}
+		}
+	}
+	
+	// If we found a local llama.cpp binary, upload it
+	if _, err := os.Stat(llamaBinaryPath); err == nil {
+		config.Logger.Info("Uploading llama.cpp binary", map[string]interface{}{"path": llamaBinaryPath})
+		if err := worker.UploadFile(ctx, llamaBinaryPath, filepath.Join(config.RemoteDir, "llama.cpp")); err != nil {
+			config.Logger.Warn("Failed to upload llama.cpp binary", map[string]interface{}{"error": err.Error()})
+		} else {
+			config.Logger.Info("llama.cpp binary uploaded successfully", nil)
+		}
+	}
+
+	// Run translation using pure LLM
+	translateCmd := fmt.Sprintf(`cd %s && python3 translate_llm_only.py "%s" "%s"`,
 		config.RemoteDir, markdownOriginal, markdownTranslatedPath)
 
 	config.Logger.Debug("Executing translation command", map[string]interface{}{
@@ -649,73 +797,34 @@ func step4ConvertToEPUB(ctx context.Context, config *Config, progress *Translati
 	outputFileName := filepath.Base(config.OutputFile)
 	remoteOutputPath := filepath.Join(config.RemoteDir, outputFileName)
 
-	// Convert markdown to EPUB on remote
+	// Convert markdown to EPUB using Python script
+	// Read EPUB generator script
+	epubScriptPath := filepath.Join(getProjectRoot(), "internal/scripts/epub_generator.py")
+	epubScript, err := os.ReadFile(epubScriptPath)
+	if err != nil {
+		return fmt.Errorf("failed to read EPUB generator script: %w", err)
+	}
+	
 	convertCmd := fmt.Sprintf(`cd %s && cat << 'SCRIPT' > convert_to_epub.sh
 #!/bin/bash
-# Simple markdown to EPUB conversion
+# Markdown to EPUB conversion using Python
 input_file='%s'
 output_file='%s'
 
-# Create simple EPUB (this is a basic implementation)
-mkdir -p temp_epub/META-INF
-mkdir -p temp_epub/OEBPS
+# Upload EPUB generator
+cat << 'PYEOF' > epub_generator.py
+%s
+PYEOF
 
-# Create mimetype
-echo "application/epub+zip" > temp_epub/mimetype
-
-# Create container.xml
-cat << 'EOF' > temp_epub/META-INF/container.xml
-<?xml version="1.0"?>
-<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
-  <rootfiles>
-    <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
-  </rootfiles>
-</container>
-EOF
-
-# Create content.opf
-cat << 'EOFX' > temp_epub/OEBPS/content.opf
-<?xml version="1.0" encoding="UTF-8"?>
-<package xmlns="http://www.idpf.org/2007/opf" version="2.0">
-  <metadata>
-    <dc:title xmlns:dc="http://purl.org/dc/elements/1.1/">Translated Book</dc:title>
-    <dc:language xmlns:dc="http://purl.org/dc/elements/1.1/">sr</dc:language>
-  </metadata>
-  <manifest>
-    <item id="chapter1" href="chapter1.xhtml" media-type="application/xhtml+xml"/>
-  </manifest>
-  <spine>
-    <itemref idref="chapter1"/>
-  </spine>
-</package>
-EOFX
-
-# Convert markdown to XHTML
-echo '<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title>Translated Book</title>
-</head>
-<body>
-<h1>Translated Content</h1>
-<div>' > temp_epub/OEBPS/chapter1.xhtml
-
-# Add markdown content (basic conversion)
-sed 's/^# /<h1>/; s/^## /<h2>/; s/^### /<h3>/; s/$/<br\/>/' "%s" >> temp_epub/OEBPS/chapter1.xhtml
-
-echo '</div>
-</body>
-</html>' >> temp_epub/OEBPS/chapter1.xhtml
-
-# Create EPUB
-cd temp_epub
-zip -rX "../%s" mimetype META-INF OEBPS
-cd ..
-rm -rf temp_epub
+# Run EPUB generation
+python3 epub_generator.py "$input_file" "$output_file"
 SCRIPT
 chmod +x convert_to_epub.sh
-./convert_to_epub.sh`, config.RemoteDir, markdownTranslated, remoteOutputPath, markdownTranslated, outputFileName)
+./convert_to_epub.sh`, 
+	config.RemoteDir, 
+	markdownTranslated, 
+	remoteOutputPath,
+	string(epubScript))
 
 	result, err := worker.ExecuteCommand(ctx, convertCmd)
 	if err != nil {
