@@ -2,28 +2,37 @@
 
 ## Build/Lint/Test Commands
 - **Build**: `make build` or `go build ./cmd/cli`
-- **Test all**: `make test-unit test-integration test-e2e`
-- **Test single**: `go test -v -run TestFunctionName ./pkg/package`
-- **Lint**: `make lint` (golangci-lint)
+- **Test all**: `make test` or `go test ./... -v`
+- **Test single package**: `go test -v ./pkg/package`
+- **Test specific function**: `go test -v -run TestFunctionName ./pkg/package`
+- **Coverage**: `make test-coverage` (generates coverage for all packages)
+- **Lint**: No golangci-lint configured yet (check tools/setup/go.mod for linting setup)
 - **Format**: `make fmt` (go fmt)
-- **Coverage**: `make test-coverage` (generates coverage.html)
 - **Docker**: `make docker-build && make docker-run`
-- **Distributed deployment**: `make deploy` (requires deployment-plan.json)
-- **Monitor**: `make monitor` for production health checks
+- **Development**: `make dev` (starts gRPC and API servers in debug mode)
 
 ## Project Architecture
 
 ### Module Information
 - **Go version**: 1.25.2
 - **Module**: `digital.vasic.translator`
-- **Entry points**: `cmd/cli/main.go` (CLI tool), `cmd/server/main.go` (REST API)
+- **Entry points**: Multiple commands in `cmd/` directory:
+  - `cmd/cli/main.go` - Main CLI tool
+  - `cmd/server/main.go` - REST API server
+  - `cmd/grpc-server/main.go` - gRPC server
+  - `cmd/api-server/main.go` - API server
+  - `cmd/monitor-server/main.go` - WebSocket monitoring server
+  - `cmd/unified-translator/main.go` - Unified CLI tool
+  - `cmd/translate-ssh/main.go` - SSH translation worker
+  - `cmd/preparation-translator/main.go` - Preparation phase translator
+  - `cmd/markdown-translator/main.go` - Markdown workflow translator
 
 ### Core Packages Structure
 ```
 pkg/
-├── ebook/          # Universal ebook parsing (FB2, EPUB, TXT, HTML)
-├── translator/     # Translation engines (dictionary, Google, LLM)
-│   └── llm/       # LLM providers (OpenAI, Anthropic, Zhipu, DeepSeek, Ollama)
+├── ebook/          # Universal ebook parsing (FB2, EPUB, TXT, HTML, PDF, DOCX)
+├── translator/     # Translation engines and LLM providers
+│   └── llm/       # LLM providers (OpenAI, Anthropic, Zhipu, DeepSeek, Ollama, Qwen, Gemini, LlamaCpp)
 ├── format/        # Format detection and validation
 ├── language/      # Language detection
 ├── api/          # REST API handlers and WebSocket
@@ -31,14 +40,30 @@ pkg/
 ├── security/     # JWT auth, rate limiting
 ├── events/       # Event bus system
 ├── storage/      # Database abstraction (PostgreSQL, Redis, SQLite)
-└── verification/ # Translation quality verification
+├── verification/ # Translation quality verification
+├── markdown/     # EPUB to Markdown conversion workflow
+├── preparation/  # Pre-translation preparation phase
+├── websocket/    # WebSocket hub and connections
+├── deployment/   # Docker and SSH deployment
+├── coordination/ # Multi-LLM coordination
+├── batch/        # Batch processing
+├── hardware/     # Hardware detection for optimization
+├── script/       # Script conversion (Cyrillic/Latin)
+├── progress/     # Progress tracking
+├── report/       # Report generation
+├── cache/        # Translation caching
+├── logger/       # Logging utilities
+├── fb2/          # FB2 format specific handling
+├── grpc/         # gRPC service definitions
+└── models/       # Data models and registry
 ```
 
 ### Configuration System
-- **Config files**: JSON format (see `config.json` for template)
+- **Config files**: JSON format (see `config.json` or files in `internal/working/`)
 - **Environment variables**: Use for API keys and secrets
 - **Internal config**: `internal/config/config.go` handles loading and validation
-- **TLS certs**: Required for HTTPS/HTTP3, generate with `make generate-certs`
+- **TLS certs**: Required for HTTPS/HTTP3 (certs stored in `certs/` directory)
+- **Docker config**: Environment-based configuration in `docker-compose.yml`
 
 ## Code Style Guidelines
 
@@ -54,8 +79,16 @@ pkg/
 - **Table-driven tests**: Preferred for unit tests
 - **Naming**: `TestFunctionName_Scenario`
 - **Build tags**: Use `//go:build integration`, `//go:build e2e`
-- **Test locations**: `test/unit/`, `test/integration/`, `test/e2e/`, `test/performance/`, `test/stress/`
-- **Mocking**: Create mock implementations in test files
+- **Test locations**: 
+  - `test/unit/` - Unit tests
+  - `test/integration/` - Integration tests
+  - `test/e2e/` - End-to-end tests
+  - `test/performance/` - Performance benchmarks
+  - `test/stress/` - Stress tests
+  - `test/security/` - Security tests
+  - `test/distributed/` - Distributed system tests
+- **Mocking**: Create mock implementations in test files using testify/mock
+- **Coverage**: Current overall coverage is approximately 43.6%
 
 ## Essential Commands
 
@@ -63,52 +96,85 @@ pkg/
 ```bash
 # Initial setup
 make deps
-make generate-certs
 
 # Development cycle
 make build
-make test-unit
-make lint
+make test
 make fmt
+make vet
 
 # Run locally
-make run-cli    # CLI tool
-make run-server  # API server
+make dev        # Development environment with both servers
+make run-grpc    # gRPC server only
+make run-api     # API server only
+make run-system  # Full system
+
+# Test specific packages
+go test ./pkg/markdown -v
+go test ./pkg/format -v
+go test ./pkg/distributed -v
 ```
 
 ### Translation Operations
 ```bash
-# Basic translation
-./build/translator -input book.fb2 -output book_sr.epub
+# CLI tools (build first)
+make build-cli
+./build/unified-translator -input book.fb2 -output book_sr.epub
 
 # With specific LLM provider
-./build/translator -input book.fb2 -provider openai -model gpt-4
+./build/unified-translator -input book.fb2 -provider openai -model gpt-4
 
 # Language detection
-./build/translator -input book.txt -detect-lang
+./build/unified-translator -input book.txt -detect-lang
+
+# Markdown workflow
+make build
+./build/markdown-translator -input book.epub -output book.md
+
+# Preparation phase
+./build/preparation-translator -input book.epub -output book_sr.epub
+
+# SSH translation worker
+./build/translate-ssh -config config.worker.json
 ```
 
 ### API Operations
 ```bash
 # Start API server
-./build/translator-server -config config.json
+make run-api
+
+# Development mode
+make dev
+
+# Docker deployment
+make docker-build && make docker-run
 
 # Test API (examples in api/examples/)
 curl -X POST https://localhost:8443/api/v1/translate \
   -H "Content-Type: application/json" \
   -d '{"input_file": "book.fb2", "provider": "openai"}'
+
+# WebSocket monitoring
+./build/monitor-server
+# Then visit http://localhost:8090/monitor
 ```
 
 ### Distributed Processing
 ```bash
-# Deploy to workers
-make deploy
+# Docker compose for full stack
+docker-compose up -d
+
+# Deploy to workers (scripts in internal/scripts/)
+./internal/scripts/deploy_worker.sh
+./internal/scripts/deploy_system.sh
 
 # Monitor distributed system
-make monitor-continuous
+./scripts/monitor_production.sh
+./scripts/monitor_translation.sh
 
 # Check worker status
-./scripts/check_worker.sh
+./internal/scripts/check_worker.sh
+./internal/scripts/check_health.sh
 ```
 
 ## Key Patterns and Conventions
@@ -252,3 +318,27 @@ type LLMClient interface {
 - **Current version**: 2.3.0 (see `VERSION` file)
 - **API versioning**: Follows semantic versioning
 - **Backward compatibility**: Maintained within major versions
+- **Build version**: 3.0.0 in Makefile (system version)
+
+## Quick Reference
+
+### Essential Files
+- **VERSION**: Current application version (2.3.0)
+- **go.mod**: Module definition and dependencies
+- **Makefile**: Build, test, and development commands
+- **docker-compose.yml**: Full production stack deployment
+- **.golangci.yml**: Linting configuration (if golangci-lint is installed)
+- **internal/config/config.go**: Configuration structure and loading
+- **pkg/events/events.go**: Event system for real-time updates
+- **pkg/websocket/hub.go**: WebSocket hub for monitoring
+
+### Important Scripts
+- **internal/scripts/**: Production and deployment scripts
+- **scripts/**: Utility and demonstration scripts
+- **test/fixtures/**: Test data and sample files
+
+### Monitoring and Debugging
+- **WebSocket Monitoring**: Use `cmd/monitor-server` for real-time progress
+- **Event System**: All components emit events via `pkg/events`
+- **Health Checks**: Built-in health check endpoints
+- **Logging**: Structured logging with configurable levels

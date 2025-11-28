@@ -68,7 +68,7 @@ func DefaultFallbackConfig() *FallbackConfig {
 type FallbackManager struct {
 	config      *FallbackConfig
 	performance *PerformanceConfig
-	eventBus    *events.EventBus
+	eventBus    EventBusInterface
 	logger      Logger
 
 	// State tracking
@@ -99,7 +99,7 @@ type RecoveryTracker struct {
 }
 
 // NewFallbackManager creates a new fallback manager
-func NewFallbackManager(config *FallbackConfig, performance *PerformanceConfig, eventBus *events.EventBus, logger Logger) *FallbackManager {
+func NewFallbackManager(config *FallbackConfig, performance *PerformanceConfig, eventBus EventBusInterface, logger Logger) *FallbackManager {
 	fm := &FallbackManager{
 		config:        config,
 		performance:   performance,
@@ -110,9 +110,12 @@ func NewFallbackManager(config *FallbackConfig, performance *PerformanceConfig, 
 		degradedMode:  false,
 	}
 
-	// Start monitoring goroutines
-	go fm.monitorFailures()
-	go fm.monitorRecovery()
+	// Only start monitoring goroutines if not in test environment
+	// In tests, goroutines would cause issues with zero intervals
+	if config != nil && config.RecoveryCheckInterval > 0 {
+		go fm.monitorFailures()
+		go fm.monitorRecovery()
+	}
 
 	return fm
 }
@@ -293,22 +296,35 @@ func (fm *FallbackManager) recordSuccess(componentID string) {
 	defer fm.mu.Unlock()
 
 	// Update failure tracker
-	if tracker, exists := fm.failureCounts[componentID]; exists {
-		tracker.mu.Lock()
-		tracker.TotalRequests++
-		tracker.mu.Unlock()
+	tracker, exists := fm.failureCounts[componentID]
+	if !exists {
+		tracker = &FailureTracker{
+			ComponentID: componentID,
+			WindowStart: time.Now(),
+		}
+		fm.failureCounts[componentID] = tracker
 	}
+	
+	tracker.mu.Lock()
+	tracker.TotalRequests++
+	tracker.mu.Unlock()
 
 	// Update recovery tracker
-	if tracker, exists := fm.recoveryState[componentID]; exists {
-		tracker.mu.Lock()
-		tracker.ConsecutiveSuccesses++
-		tracker.LastSuccess = time.Now()
-		if tracker.ConsecutiveSuccesses >= fm.config.RecoverySuccessThreshold {
-			tracker.InRecovery = false
+	recoveryTracker, exists := fm.recoveryState[componentID]
+	if !exists {
+		recoveryTracker = &RecoveryTracker{
+			ComponentID: componentID,
 		}
-		tracker.mu.Unlock()
+		fm.recoveryState[componentID] = recoveryTracker
 	}
+
+	recoveryTracker.mu.Lock()
+	recoveryTracker.ConsecutiveSuccesses++
+	recoveryTracker.LastSuccess = time.Now()
+	if recoveryTracker.ConsecutiveSuccesses >= fm.config.RecoverySuccessThreshold {
+		recoveryTracker.InRecovery = false
+	}
+	recoveryTracker.mu.Unlock()
 }
 
 // recordFailure records a failed operation
@@ -515,7 +531,10 @@ func (fm *FallbackManager) GetStatus() map[string]interface{} {
 
 	for componentID, tracker := range fm.failureCounts {
 		tracker.mu.Lock()
-		failureRate := float64(tracker.Failures) / float64(tracker.TotalRequests)
+		var failureRate float64
+		if tracker.TotalRequests > 0 {
+			failureRate = float64(tracker.Failures) / float64(tracker.TotalRequests)
+		}
 		tracker.mu.Unlock()
 
 		recoveryTracker := fm.recoveryState[componentID]
