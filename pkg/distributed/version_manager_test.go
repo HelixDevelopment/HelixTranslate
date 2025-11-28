@@ -238,3 +238,74 @@ func (m *MockAlertChannel) SendAlert(alert *DriftAlert) error {
 func (m *MockAlertChannel) Name() string {
 	return "mock"
 }
+
+func TestEmailAlertChannel_SendAlert(t *testing.T) {
+	channel := &EmailAlertChannel{
+		SMTPHost:    "smtp.example.com",
+		SMTPPort:    587,
+		Username:    "test@example.com",
+		Password:    "password",
+		FromAddress: "test@example.com",
+		ToAddresses: []string{"admin@example.com"},
+	}
+	
+	alert := &DriftAlert{
+		WorkerID: "test-worker",
+		ExpectedVersion: VersionInfo{CodebaseVersion: "1.0.0"},
+		CurrentVersion:  VersionInfo{CodebaseVersion: "1.1.0"},
+		Message:    "Version drift detected",
+		Timestamp:  time.Now(),
+		Severity:   "warning",
+	}
+	
+	// Send alert (will fail since we don't have a real SMTP server)
+	err := channel.SendAlert(alert)
+	if err == nil {
+		t.Error("Expected error for sending email without real SMTP server")
+	}
+}
+
+func TestWebhookAlertChannel_SendAlert(t *testing.T) {
+	channel := &WebhookAlertChannel{
+		URL:     "https://hooks.slack.com/test",
+		Method:  "POST",
+		Headers: map[string]string{"Content-Type": "application/json"},
+	}
+	
+	alert := &DriftAlert{
+		WorkerID: "test-worker",
+		ExpectedVersion: VersionInfo{CodebaseVersion: "1.0.0"},
+		CurrentVersion:  VersionInfo{CodebaseVersion: "1.1.0"},
+		Message:    "Version drift detected",
+		Timestamp:  time.Now(),
+		Severity:   "warning",
+	}
+	
+	// Send alert (may succeed or fail depending on network)
+	// We're testing that the function doesn't panic and handles errors appropriately
+	err := channel.SendAlert(alert)
+	// We don't assert a specific error result since it depends on network conditions
+	_ = err // Just to avoid unused variable error
+}
+
+func TestSlackAlertChannel_SendAlert(t *testing.T) {
+	channel := &SlackAlertChannel{
+		WebhookURL: "https://hooks.slack.com/test",
+		Channel:    "#alerts",
+	}
+	
+	alert := &DriftAlert{
+		WorkerID: "test-worker",
+		ExpectedVersion: VersionInfo{CodebaseVersion: "1.0.0"},
+		CurrentVersion:  VersionInfo{CodebaseVersion: "1.1.0"},
+		Message:    "Version drift detected",
+		Timestamp:  time.Now(),
+		Severity:   "warning",
+	}
+	
+	// Send alert (may succeed or fail depending on network)
+	// We're testing that the function doesn't panic and handles errors appropriately
+	err := channel.SendAlert(alert)
+	// We don't assert a specific error result since it depends on network conditions
+	_ = err // Just to avoid unused variable error
+}

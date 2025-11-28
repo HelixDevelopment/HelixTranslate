@@ -108,3 +108,40 @@ func TestPairingManager_emitEvent(t *testing.T) {
 		// Should not panic
 	})
 }
+
+func TestPairingManager_QueryServiceInfo(t *testing.T) {
+	t.Run("QueryNonExistentService", func(t *testing.T) {
+		sshPool := NewSSHPool()
+		manager := NewPairingManager(sshPool, nil)
+		defer manager.Close()
+		
+		// Try to query non-existent service
+		service, err := manager.queryServiceInfo("non-existent-worker")
+		if err == nil {
+			t.Error("Expected error querying non-existent service")
+		}
+		if service != nil {
+			t.Error("Expected nil service for non-existent worker")
+		}
+	})
+	
+	t.Run("QueryExistingService", func(t *testing.T) {
+		sshPool := NewSSHPool()
+		manager := NewPairingManager(sshPool, nil)
+		defer manager.Close()
+		
+		// Add a mock connection to the pool
+		config := NewWorkerConfig("test-worker", "Test Worker", "127.0.0.1", "testuser")
+		conn := &SSHConnection{Config: config}
+		sshPool.connections["test-worker"] = conn
+		
+		// Try to query existing service (should fail due to no HTTP server)
+		service, err := manager.queryServiceInfo("test-worker")
+		if err == nil {
+			t.Error("Expected error due to no HTTP server running")
+		}
+		if service != nil {
+			t.Error("Expected nil service when HTTP server is not available")
+		}
+	})
+}

@@ -338,3 +338,108 @@ func TestSecurityAuditor_LogNetworkAccess(t *testing.T) {
 		// No assertions needed - just verify it doesn't panic
 	})
 }
+
+func TestSecurityConfig_MatchesPattern(t *testing.T) {
+	config := DefaultSecurityConfig()
+	
+	t.Run("WildcardPattern", func(t *testing.T) {
+		// Wildcard should match any hostname
+		if !config.matchesPattern("example.com", "*") {
+			t.Error("Expected wildcard pattern to match any hostname")
+		}
+		if !config.matchesPattern("test.example.com", "*") {
+			t.Error("Expected wildcard pattern to match any hostname")
+		}
+	})
+	
+	t.Run("PatternContainsHostname", func(t *testing.T) {
+		// Pattern that contains hostname should match
+		if !config.matchesPattern("example.com", "example.com") {
+			t.Error("Expected exact match")
+		}
+		if !config.matchesPattern("example.com", "test.example.com") {
+			t.Error("Expected match when pattern contains hostname")
+		}
+	})
+	
+	t.Run("HostnameContainsPattern", func(t *testing.T) {
+		// Hostname that contains pattern should match
+		if !config.matchesPattern("test.example.com", "example") {
+			t.Error("Expected match when hostname contains pattern")
+		}
+		if !config.matchesPattern("test.example.com", "test") {
+			t.Error("Expected match when hostname contains pattern")
+		}
+	})
+	
+	t.Run("NoMatch", func(t *testing.T) {
+		// No match should return false
+		if config.matchesPattern("example.com", "test") {
+			t.Error("Expected no match when neither contains the other")
+		}
+		if config.matchesPattern("test.com", "example") {
+			t.Error("Expected no match when neither contains the other")
+		}
+	})
+}
+
+func TestSecurityConfig_SecureTLSConfig(t *testing.T) {
+	t.Run("DefaultTLSConfig", func(t *testing.T) {
+		config := DefaultSecurityConfig()
+		
+		// Should not panic and return valid config
+		tlsConfig, err := config.SecureTLSConfig()
+		if err != nil {
+			t.Errorf("Unexpected error creating TLS config: %v", err)
+		}
+		if tlsConfig == nil {
+			t.Error("Expected non-nil TLS config")
+		}
+	})
+	
+	t.Run("TLSConfigWithCertVerification", func(t *testing.T) {
+		config := DefaultSecurityConfig()
+		config.TLSCertVerification = true
+		
+		// Should work without CA file
+		tlsConfig, err := config.SecureTLSConfig()
+		if err != nil {
+			t.Errorf("Unexpected error creating TLS config: %v", err)
+		}
+		if tlsConfig == nil {
+			t.Error("Expected non-nil TLS config")
+		}
+		if tlsConfig.InsecureSkipVerify {
+			t.Error("Expected certificate verification to be enabled")
+		}
+	})
+	
+	t.Run("TLSConfigWithMutualTLS", func(t *testing.T) {
+		config := DefaultSecurityConfig()
+		config.RequireMutualTLS = true
+		
+		// Should fail without client cert/key
+		tlsConfig, err := config.SecureTLSConfig()
+		if err == nil {
+			t.Error("Expected error for mutual TLS without client cert/key")
+		}
+		if tlsConfig != nil {
+			t.Error("Expected nil TLS config on error")
+		}
+	})
+	
+	t.Run("TLSConfigWithInvalidCAFile", func(t *testing.T) {
+		config := DefaultSecurityConfig()
+		config.TLSCertVerification = true
+		config.TLSCAFile = "/non/existent/ca.pem"
+		
+		// Should fail with invalid CA file
+		tlsConfig, err := config.SecureTLSConfig()
+		if err == nil {
+			t.Error("Expected error for invalid CA file")
+		}
+		if tlsConfig != nil {
+			t.Error("Expected nil TLS config on error")
+		}
+	})
+}

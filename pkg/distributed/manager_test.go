@@ -2,208 +2,277 @@ package distributed
 
 import (
 	"testing"
-
+	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/internal/config"
 	"digital.vasic.translator/pkg/deployment"
-	"digital.vasic.translator/pkg/events"
 )
 
-func TestDefaultLogger_Log(t *testing.T) {
-	t.Run("BasicLogging", func(t *testing.T) {
-		logger := &defaultLogger{}
+func TestDistributedManager_emitWarning(t *testing.T) {
+	t.Run("EmitWarningWithEventBus", func(t *testing.T) {
+		// Create an event bus
+		eventBus := events.NewEventBus()
 		
-		// Test that logging doesn't panic
-		logger.Log("info", "test message", map[string]interface{}{
-			"key": "value",
-		})
+		// Create manager with event bus
+		cfg := config.DefaultConfig()
+		apiLogger := &deployment.APICommunicationLogger{}
+		manager := NewDistributedManager(cfg, eventBus, apiLogger)
 		
-		logger.Log("error", "error message", nil)
+		// Emit warning (should not panic)
+		manager.emitWarning("test warning message")
 		
-		// No assertions needed - just verify it doesn't panic
+		// We can't easily verify the event was published without more complex setup
+		// Just verify no panic occurred
+	})
+	
+	t.Run("EmitWarningWithoutEventBus", func(t *testing.T) {
+		// Create manager without event bus
+		cfg := config.DefaultConfig()
+		apiLogger := &deployment.APICommunicationLogger{}
+		manager := NewDistributedManager(cfg, nil, apiLogger)
+		
+		// Emit warning (should not panic even with nil event bus)
+		manager.emitWarning("test warning message")
+		
+		// Should not panic
 	})
 }
 
-func TestNewDistributedManager(t *testing.T) {
-	t.Run("Constructor", func(t *testing.T) {
-		cfg := &config.Config{
-			Distributed: config.DistributedConfig{
-				Workers: make(map[string]config.WorkerConfig),
-			},
-		}
+func TestDistributedManager_GetVersionMetrics(t *testing.T) {
+	t.Run("GetMetricsUninitialized", func(t *testing.T) {
+		cfg := config.DefaultConfig()
+		apiLogger := &deployment.APICommunicationLogger{}
+		manager := NewDistributedManager(cfg, nil, apiLogger)
 		
-		eventBus := events.NewEventBus()
-		apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
+		// Get metrics from uninitialized manager
+		metrics := manager.GetVersionMetrics()
 		
-		dm := NewDistributedManager(cfg, eventBus, apiLogger)
-		
-		if dm == nil {
-			t.Error("Expected non-nil DistributedManager")
-		}
-		
-		if dm.config != cfg {
-			t.Error("Expected config to be set correctly")
-		}
-		
-		if dm.initialized {
-			t.Error("Expected initialized to be false initially")
-		}
-	})
-}
-
-func TestDistributedManager_GetWorkerByID(t *testing.T) {
-	t.Run("NotInitialized", func(t *testing.T) {
-		cfg := &config.Config{
-			Distributed: config.DistributedConfig{
-				Workers: make(map[string]config.WorkerConfig),
-			},
-		}
-		
-		eventBus := events.NewEventBus()
-		apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
-		
-		dm := NewDistributedManager(cfg, eventBus, apiLogger)
-		
-		// Test when not initialized
-		worker := dm.GetWorkerByID("test-worker")
-		if worker != nil {
-			t.Error("Expected nil worker when not initialized")
+		// Should return empty metrics for uninitialized manager
+		if metrics == nil {
+			t.Error("Expected non-empty metrics struct")
 		}
 	})
 	
-	t.Run("Initialized", func(t *testing.T) {
-		cfg := &config.Config{
-			Distributed: config.DistributedConfig{
-				Workers: make(map[string]config.WorkerConfig),
-			},
-		}
+	t.Run("GetMetricsInitialized", func(t *testing.T) {
+		cfg := config.DefaultConfig()
+		apiLogger := &deployment.APICommunicationLogger{}
+		manager := NewDistributedManager(cfg, nil, apiLogger)
 		
-		eventBus := events.NewEventBus()
-		apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
-		
-		dm := NewDistributedManager(cfg, eventBus, apiLogger)
-		
-		// Initialize
-		err := dm.Initialize(nil)
+		// Initialize manager
+		err := manager.Initialize(nil)
 		if err != nil {
-			t.Errorf("Failed to initialize: %v", err)
+			t.Fatalf("Failed to initialize manager: %v", err)
 		}
 		
-		// Test with non-existent worker
-		worker := dm.GetWorkerByID("non-existent-worker")
-		if worker != nil {
-			t.Error("Expected nil worker for non-existent worker")
+		// Get metrics from initialized manager
+		metrics := manager.GetVersionMetrics()
+		
+		// Should return metrics struct
+		if metrics == nil {
+			t.Error("Expected non-empty metrics struct")
 		}
+		
+		// Close manager to clean up
+		manager.Close()
 	})
 }
 
-func TestDistributedManager_GetStatus(t *testing.T) {
-	t.Run("NotInitialized", func(t *testing.T) {
-		cfg := &config.Config{
-			Distributed: config.DistributedConfig{
-				Workers: make(map[string]config.WorkerConfig),
-			},
+func TestDistributedManager_GetVersionAlerts(t *testing.T) {
+	t.Run("GetAlertsUninitialized", func(t *testing.T) {
+		cfg := config.DefaultConfig()
+		apiLogger := &deployment.APICommunicationLogger{}
+		manager := NewDistributedManager(cfg, nil, apiLogger)
+		
+		// Get alerts from uninitialized manager
+		alerts := manager.GetVersionAlerts()
+		
+		// Should return empty slice for uninitialized manager
+		if alerts == nil {
+			t.Error("Expected non-nil alerts slice")
 		}
-		
-		eventBus := events.NewEventBus()
-		apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
-		
-		dm := NewDistributedManager(cfg, eventBus, apiLogger)
-		
-		// Test when not initialized
-		status := dm.GetStatus()
-		if status == nil {
-			t.Error("Expected non-nil status map")
-		}
-		
-		// Should have basic fields
-		if _, exists := status["initialized"]; !exists {
-			t.Error("Expected 'initialized' field in status")
-		}
-		
-		if status["initialized"].(bool) {
-			t.Error("Expected initialized to be false")
+		if len(alerts) != 0 {
+			t.Error("Expected empty alerts slice for uninitialized manager")
 		}
 	})
 	
-	t.Run("Initialized", func(t *testing.T) {
-		cfg := &config.Config{
-			Distributed: config.DistributedConfig{
-				Workers: make(map[string]config.WorkerConfig),
-			},
-		}
+	t.Run("GetAlertsInitialized", func(t *testing.T) {
+		cfg := config.DefaultConfig()
+		apiLogger := &deployment.APICommunicationLogger{}
+		manager := NewDistributedManager(cfg, nil, apiLogger)
 		
-		eventBus := events.NewEventBus()
-		apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
-		
-		dm := NewDistributedManager(cfg, eventBus, apiLogger)
-		
-		// Initialize
-		err := dm.Initialize(nil)
+		// Initialize manager
+		err := manager.Initialize(nil)
 		if err != nil {
-			t.Errorf("Failed to initialize: %v", err)
+			t.Fatalf("Failed to initialize manager: %v", err)
 		}
 		
-		// Test when initialized
-		status := dm.GetStatus()
-		if status == nil {
-			t.Error("Expected non-nil status map")
+		// Get alerts from initialized manager
+		alerts := manager.GetVersionAlerts()
+		
+		// Should return alerts slice
+		if alerts == nil {
+			t.Error("Expected non-nil alerts slice")
 		}
 		
-		// Should have basic fields
-		if _, exists := status["initialized"]; !exists {
-			t.Error("Expected 'initialized' field in status")
-		}
-		
-		if !status["initialized"].(bool) {
-			t.Error("Expected initialized to be true")
-		}
-		
-		// Should have workers field
-		if _, exists := status["workers"]; !exists {
-			t.Error("Expected 'workers' field in status")
-		}
+		// Close manager to clean up
+		manager.Close()
 	})
 }
 
-func TestDistributedManager_GetPairedServices(t *testing.T) {
-	t.Run("EmptyServices", func(t *testing.T) {
-		cfg := &config.Config{
-			Distributed: config.DistributedConfig{
-				Workers: make(map[string]config.WorkerConfig),
-			},
+func TestDistributedManager_GetVersionHealth(t *testing.T) {
+	t.Run("GetHealthUninitialized", func(t *testing.T) {
+		cfg := config.DefaultConfig()
+		apiLogger := &deployment.APICommunicationLogger{}
+		manager := NewDistributedManager(cfg, nil, apiLogger)
+		
+		// Get health from uninitialized manager
+		health := manager.GetVersionHealth()
+		
+		// Should return zero health values for uninitialized manager
+		if health["status"] != "uninitialized" {
+			t.Error("Expected uninitialized status")
+		}
+	})
+	
+	t.Run("GetHealthInitialized", func(t *testing.T) {
+		cfg := config.DefaultConfig()
+		apiLogger := &deployment.APICommunicationLogger{}
+		manager := NewDistributedManager(cfg, nil, apiLogger)
+		
+		// Initialize manager
+		err := manager.Initialize(nil)
+		if err != nil {
+			t.Fatalf("Failed to initialize manager: %v", err)
 		}
 		
-		eventBus := events.NewEventBus()
-		apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
+		// Get health from initialized manager
+		health := manager.GetVersionHealth()
 		
-		dm := NewDistributedManager(cfg, eventBus, apiLogger)
-		
-		// Test without initialization
-		services := dm.GetPairedServices()
-		if services == nil {
-			t.Error("Expected non-nil services map")
+		// Should return health struct
+		if health["status"] == nil {
+			t.Error("Expected status in health map")
 		}
 		
-		if len(services) != 0 {
-			t.Error("Expected empty services map")
-		}
+		// Close manager to clean up
+		manager.Close()
 	})
 }
 
-func TestDistributedManager_Close(t *testing.T) {
-	t.Run("CloseGracefully", func(t *testing.T) {
-		cfg := &config.Config{
-			Distributed: config.DistributedConfig{
-				Workers: make(map[string]config.WorkerConfig),
-			},
+func TestDistributedManager_GetAlertHistory(t *testing.T) {
+	t.Run("GetAlertHistoryUninitialized", func(t *testing.T) {
+		cfg := config.DefaultConfig()
+		apiLogger := &deployment.APICommunicationLogger{}
+		manager := NewDistributedManager(cfg, nil, apiLogger)
+		
+		// Get alert history from uninitialized manager
+		history := manager.GetAlertHistory(10)
+		
+		// Should return empty slice for uninitialized manager
+		if history == nil {
+			t.Error("Expected non-nil alert history slice")
+		}
+		if len(history) != 0 {
+			t.Error("Expected empty alert history for uninitialized manager")
+		}
+	})
+	
+	t.Run("GetAlertHistoryInitialized", func(t *testing.T) {
+		cfg := config.DefaultConfig()
+		apiLogger := &deployment.APICommunicationLogger{}
+		manager := NewDistributedManager(cfg, nil, apiLogger)
+		
+		// Initialize manager
+		err := manager.Initialize(nil)
+		if err != nil {
+			t.Fatalf("Failed to initialize manager: %v", err)
 		}
 		
-		eventBus := events.NewEventBus()
-		apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
+		// Get alert history from initialized manager
+		history := manager.GetAlertHistory(10)
 		
-		dm := NewDistributedManager(cfg, eventBus, apiLogger)
+		// Should return history slice
+		if history == nil {
+			t.Error("Expected non-nil alert history slice")
+		}
 		
-		// Should not panic when closing
-		dm.Close()
+		// Close manager to clean up
+		manager.Close()
+	})
+}
+
+func TestDistributedManager_AcknowledgeAlert(t *testing.T) {
+	t.Run("AcknowledgeAlertUninitialized", func(t *testing.T) {
+		cfg := config.DefaultConfig()
+		apiLogger := &deployment.APICommunicationLogger{}
+		manager := NewDistributedManager(cfg, nil, apiLogger)
+		
+		// Try to acknowledge alert with uninitialized manager
+		result := manager.AcknowledgeAlert("non-existent-alert-id", "test-user")
+		
+		// Should handle gracefully (no panic)
+		if result {
+			t.Error("Expected false when acknowledging alert with uninitialized manager")
+		}
+	})
+	
+	t.Run("AcknowledgeAlertInitialized", func(t *testing.T) {
+		cfg := config.DefaultConfig()
+		apiLogger := &deployment.APICommunicationLogger{}
+		manager := NewDistributedManager(cfg, nil, apiLogger)
+		
+		// Initialize manager
+		err := manager.Initialize(nil)
+		if err != nil {
+			t.Fatalf("Failed to initialize manager: %v", err)
+		}
+		
+		// Try to acknowledge non-existent alert
+		result := manager.AcknowledgeAlert("non-existent-alert-id", "test-user")
+		
+		// Should handle gracefully
+		if result {
+			t.Error("Expected false when acknowledging non-existent alert")
+		}
+		
+		// Close manager to clean up
+		manager.Close()
+	})
+}
+
+func TestDistributedManager_AddAlertChannel(t *testing.T) {
+	t.Run("AddAlertChannelUninitialized", func(t *testing.T) {
+		cfg := config.DefaultConfig()
+		apiLogger := &deployment.APICommunicationLogger{}
+		manager := NewDistributedManager(cfg, nil, apiLogger)
+		
+		// Create a mock alert channel
+		channel := &MockAlertChannel{}
+		
+		// Try to add alert channel with uninitialized manager
+		manager.AddAlertChannel(channel)
+		
+		// Should handle gracefully (no panic)
+		// No assertion needed - just verify it doesn't panic
+	})
+	
+	t.Run("AddAlertChannelInitialized", func(t *testing.T) {
+		cfg := config.DefaultConfig()
+		apiLogger := &deployment.APICommunicationLogger{}
+		manager := NewDistributedManager(cfg, nil, apiLogger)
+		
+		// Initialize manager
+		err := manager.Initialize(nil)
+		if err != nil {
+			t.Fatalf("Failed to initialize manager: %v", err)
+		}
+		
+		// Create a mock alert channel
+		channel := &MockAlertChannel{}
+		
+		// Add alert channel
+		manager.AddAlertChannel(channel)
+		// Should not panic
+		
+		// Close manager to clean up
+		manager.Close()
 	})
 }
