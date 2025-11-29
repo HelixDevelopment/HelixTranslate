@@ -383,6 +383,99 @@ func TestSecurityConfig_MatchesPattern(t *testing.T) {
 	})
 }
 
+func TestSecurityConfig_ValidateNetworkAccess(t *testing.T) {
+	t.Run("ValidateNetworkAccess_NoRestrictions", func(t *testing.T) {
+		config := &SecurityConfig{
+			AllowedNetworks: []string{}, // Empty list = no restrictions
+		}
+		
+		// Any address should be allowed
+		err := config.ValidateNetworkAccess("127.0.0.1:22")
+		if err != nil {
+			t.Errorf("Expected no error for unrestricted access, got: %v", err)
+		}
+		
+		err = config.ValidateNetworkAccess("192.168.1.100:8080")
+		if err != nil {
+			t.Errorf("Expected no error for unrestricted access, got: %v", err)
+		}
+	})
+	
+	t.Run("ValidateNetworkAccess_InvalidAddress", func(t *testing.T) {
+		config := &SecurityConfig{
+			AllowedNetworks: []string{"192.168.1.0/24"},
+		}
+		
+		// Invalid address format
+		err := config.ValidateNetworkAccess("invalid-address")
+		if err == nil {
+			t.Error("Expected error for invalid address format")
+		}
+		
+		if !strings.Contains(err.Error(), "invalid address format") {
+			t.Errorf("Expected address format error, got: %v", err)
+		}
+	})
+	
+	t.Run("ValidateNetworkAccess_AllowedNetwork", func(t *testing.T) {
+		config := &SecurityConfig{
+			AllowedNetworks: []string{"192.168.1.0/24"},
+		}
+		
+		// Address in allowed network
+		err := config.ValidateNetworkAccess("192.168.1.100:22")
+		if err != nil {
+			t.Errorf("Expected no error for address in allowed network, got: %v", err)
+		}
+	})
+	
+	t.Run("ValidateNetworkAccess_NotAllowedNetwork", func(t *testing.T) {
+		config := &SecurityConfig{
+			AllowedNetworks: []string{"192.168.1.0/24"},
+		}
+		
+		// Address not in allowed network
+		err := config.ValidateNetworkAccess("10.0.0.100:22")
+		if err == nil {
+			t.Error("Expected error for address not in allowed network")
+		}
+		
+		if !strings.Contains(err.Error(), "not in allowed networks") {
+			t.Errorf("Expected network restriction error, got: %v", err)
+		}
+	})
+	
+	t.Run("ValidateNetworkAccess_MultipleNetworks", func(t *testing.T) {
+		config := &SecurityConfig{
+			AllowedNetworks: []string{
+				"192.168.1.0/24",
+				"10.0.0.0/8",
+				"127.0.0.0/8",
+			},
+		}
+		
+		// Test each allowed network
+		testAddresses := []string{
+			"192.168.1.50:22",    // In 192.168.1.0/24
+			"10.10.10.10:8080",   // In 10.0.0.0/8
+			"127.0.0.1:3000",     // In 127.0.0.0/8
+		}
+		
+		for _, addr := range testAddresses {
+			err := config.ValidateNetworkAccess(addr)
+			if err != nil {
+				t.Errorf("Expected no error for address %s, got: %v", addr, err)
+			}
+		}
+		
+		// Test address not in any allowed network
+		err := config.ValidateNetworkAccess("172.16.0.1:22")
+		if err == nil {
+			t.Error("Expected error for address not in any allowed network")
+		}
+	})
+}
+
 func TestSecurityConfig_SecureTLSConfig(t *testing.T) {
 	t.Run("DefaultTLSConfig", func(t *testing.T) {
 		config := DefaultSecurityConfig()

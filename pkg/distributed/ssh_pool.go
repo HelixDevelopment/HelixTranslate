@@ -261,6 +261,10 @@ func (conn *SSHConnection) ExecuteCommand(ctx context.Context, command string) (
 	conn.LastUsed = time.Now()
 	conn.mu.Unlock()
 
+	if conn.Client == nil {
+		return nil, fmt.Errorf("SSH client is not initialized")
+	}
+
 	session, err := conn.Client.NewSession()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create session: %w", err)
@@ -333,7 +337,9 @@ func (p *SSHPool) cleanup() {
 			now := time.Now()
 			for id, conn := range p.connections {
 				if now.Sub(conn.LastUsed) > p.maxIdleTime {
-					conn.Client.Close()
+					if conn.Client != nil {
+						conn.Client.Close()
+					}
 					delete(p.connections, id)
 				}
 			}
@@ -353,7 +359,9 @@ func (p *SSHPool) Close() {
 	defer p.mu.Unlock()
 
 	for _, conn := range p.connections {
-		conn.Client.Close()
+		if conn.Client != nil {
+			conn.Client.Close()
+		}
 	}
 	p.connections = make(map[string]*SSHConnection)
 }

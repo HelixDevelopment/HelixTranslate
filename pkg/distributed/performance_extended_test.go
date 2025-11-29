@@ -5,6 +5,92 @@ import (
 	"time"
 )
 
+func TestResultCache_Set(t *testing.T) {
+	t.Run("Set_Basic", func(t *testing.T) {
+		config := DefaultPerformanceConfig()
+		config.CacheTTL = time.Second
+		config.MaxCacheSize = 10
+		cache := NewResultCache(config)
+		
+		// Set a value
+		cache.Set("test-key", "test-value")
+		
+		// Get the value
+		value, exists := cache.Get("test-key")
+		if !exists {
+			t.Error("Expected key to exist")
+		}
+		if value != "test-value" {
+			t.Errorf("Expected 'test-value', got '%s'", value)
+		}
+	})
+	
+	t.Run("Set_Expiration", func(t *testing.T) {
+		config := DefaultPerformanceConfig()
+		config.CacheTTL = 10 * time.Millisecond
+		config.MaxCacheSize = 10
+		cache := NewResultCache(config)
+		
+		// Set a value
+		cache.Set("test-key", "test-value")
+		
+		// Should exist immediately
+		value, exists := cache.Get("test-key")
+		if !exists {
+			t.Error("Expected key to exist immediately")
+		}
+		if value != "test-value" {
+			t.Errorf("Expected 'test-value', got '%s'", value)
+		}
+		
+		// Wait for expiration
+		time.Sleep(20 * time.Millisecond)
+		
+		// Should not exist after expiration
+		_, exists = cache.Get("test-key")
+		if exists {
+			t.Error("Expected key to be expired")
+		}
+	})
+	
+	t.Run("Set_CapacityLimit", func(t *testing.T) {
+		config := DefaultPerformanceConfig()
+		config.CacheTTL = time.Hour
+		config.MaxCacheSize = 2
+		cache := NewResultCache(config)
+		
+		// Fill cache to capacity
+		cache.Set("key1", "value1")
+		cache.Set("key2", "value2")
+		
+		// Add one more - should evict oldest
+		cache.Set("key3", "value3")
+		
+		// Oldest should be evicted
+		_, exists := cache.Get("key1")
+		if exists {
+			t.Error("Expected key1 to be evicted (oldest)")
+		}
+		
+		// Others should exist
+		value, exists := cache.Get("key2")
+		if !exists {
+			t.Error("Expected key2 to exist")
+		}
+		if value != "value2" {
+			t.Errorf("Expected 'value2', got '%s'", value)
+		}
+		
+		value, exists = cache.Get("key3")
+		if !exists {
+			t.Error("Expected key3 to exist")
+		}
+		if value != "value3" {
+			t.Errorf("Expected 'value3', got '%s'", value)
+		}
+	})
+}
+
 func TestPerformance_ConnectionPool(t *testing.T) {
 	t.Run("NewConnectionPool", func(t *testing.T) {
 		config := DefaultPerformanceConfig()

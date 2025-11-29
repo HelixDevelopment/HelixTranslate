@@ -31,16 +31,14 @@ func TestSSHConnection_ExecuteCommand(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 		defer cancel()
 		
-		// Expect panic when trying to execute command with nil client
-		defer func() {
-			if r := recover(); r == nil {
-				t.Error("Expected panic for nil client")
-			}
-		}()
-		
+		// Expect error when trying to execute command with nil client
 		_, err := conn.ExecuteCommand(ctx, "test command")
-		// Should not reach here
-		t.Errorf("Expected panic, got err: %v", err)
+		if err == nil {
+			t.Error("Expected error for nil client")
+		}
+		if err.Error() != "SSH client is not initialized" {
+			t.Errorf("Expected 'SSH client is not initialized', got: %v", err)
+		}
 	})
 }
 

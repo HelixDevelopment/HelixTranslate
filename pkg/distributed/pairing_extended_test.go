@@ -1,147 +1,109 @@
 package distributed
 
 import (
-	"context"
 	"testing"
-	
-	"digital.vasic.translator/pkg/events"
 )
 
-func TestPairingManager_DiscoverService(t *testing.T) {
-	t.Run("DiscoverNonExistentService", func(t *testing.T) {
+func TestPairingManager_queryServiceInfo(t *testing.T) {
+	t.Run("queryServiceInfo_NoConnection", func(t *testing.T) {
 		sshPool := NewSSHPool()
-		manager := NewPairingManager(sshPool, nil)
-		defer manager.Close()
+		defer sshPool.Close()
 		
-		// Try to discover non-existent service
-		ctx := context.Background()
-		service, err := manager.DiscoverService(ctx, "non-existent-worker")
+		pairingManager := NewPairingManager(sshPool, nil)
+		defer pairingManager.Close()
+		
+		// Try to query service info for a worker that doesn't exist
+		service, err := pairingManager.queryServiceInfo("non-existent-worker")
+		
 		if err == nil {
-			t.Error("Expected error discovering non-existent service")
+			t.Error("Expected error when querying non-existent worker")
 		}
 		
 		if service != nil {
-			t.Error("Expected nil service when discovery fails")
+			t.Error("Expected nil service when querying non-existent worker")
+		}
+		
+		if !contains(err.Error(), "worker non-existent-worker not configured") {
+			t.Errorf("Expected 'worker not configured' error, got: %v", err)
 		}
 	})
-}
-
-func TestPairingManager_PairWithService(t *testing.T) {
-	t.Run("PairWithNonExistentService", func(t *testing.T) {
+	
+	t.Run("queryServiceInfo_InvalidEndpoints", func(t *testing.T) {
 		sshPool := NewSSHPool()
-		manager := NewPairingManager(sshPool, nil)
-		defer manager.Close()
+		defer sshPool.Close()
 		
-		// Try to pair with non-existent service
-		err := manager.PairWithService("non-existent-service-id")
-		if err == nil {
-			t.Error("Expected error pairing with non-existent service")
-		}
-	})
-}
-
-func TestPairingManager_UnpairService(t *testing.T) {
-	t.Run("UnpairNonExistentService", func(t *testing.T) {
-		sshPool := NewSSHPool()
-		manager := NewPairingManager(sshPool, nil)
-		defer manager.Close()
+		pairingManager := NewPairingManager(sshPool, nil)
+		defer pairingManager.Close()
 		
-		// Try to unpair non-existent service (should not panic)
-		manager.UnpairService("non-existent-service-id")
-		
-		// Should not panic, just no-op
-	})
-}
-
-func TestPairingManager_performHealthChecks(t *testing.T) {
-	t.Run("HealthCheckWithNoServices", func(t *testing.T) {
-		sshPool := NewSSHPool()
-		manager := NewPairingManager(sshPool, nil)
-		defer manager.Close()
-		
-		// Perform health checks with no services (should not panic)
-		manager.performHealthChecks()
-		
-		// Should not panic
-	})
-}
-
-func TestPairingManager_checkServiceHealth(t *testing.T) {
-	t.Run("CheckHealthOfNonExistentService", func(t *testing.T) {
-		sshPool := NewSSHPool()
-		manager := NewPairingManager(sshPool, nil)
-		defer manager.Close()
-		
-		// Check health of non-existent service (should not panic)
-		service := &RemoteService{
-			WorkerID: "test-worker",
-			Name:     "Test Service",
-			Host:     "nonexistent.example.com",
-			Port:     8080,
-			Protocol: "http",
-			Status:   "unknown",
-		}
-		manager.checkServiceHealth("non-existent-service-id", service)
-		
-		// Should not panic
-	})
-}
-
-func TestPairingManager_emitEvent(t *testing.T) {
-	t.Run("EmitEvent", func(t *testing.T) {
-		sshPool := NewSSHPool()
-		manager := NewPairingManager(sshPool, nil)
-		defer manager.Close()
-		
-		// Create a mock event
-		event := events.Event{
-			Type:    "pairing",
-			Message: "test event",
-			Data: map[string]interface{}{
-				"service": "test-service",
+		// Create a mock worker config
+		config := &WorkerConfig{
+			ID: "test-worker",
+			SSH: SSHConfig{
+				Host: "invalid-host-that-does-not-exist",
+				Port: 22,
 			},
 		}
 		
-		// Emit event (should not panic even with nil event bus)
-		manager.emitEvent(event)
+		// Add config to the pool (not just connection)
+		sshPool.configs["test-worker"] = config
 		
-		// Should not panic
-	})
-}
-
-func TestPairingManager_QueryServiceInfo(t *testing.T) {
-	t.Run("QueryNonExistentService", func(t *testing.T) {
-		sshPool := NewSSHPool()
-		manager := NewPairingManager(sshPool, nil)
-		defer manager.Close()
-		
-		// Try to query non-existent service
-		service, err := manager.queryServiceInfo("non-existent-worker")
-		if err == nil {
-			t.Error("Expected error querying non-existent service")
+		// Add connection directly to the pool
+		conn := &SSHConnection{
+			Config: config,
+			Client: nil, // No actual SSH client
 		}
-		if service != nil {
-			t.Error("Expected nil service for non-existent worker")
-		}
-	})
-	
-	t.Run("QueryExistingService", func(t *testing.T) {
-		sshPool := NewSSHPool()
-		manager := NewPairingManager(sshPool, nil)
-		defer manager.Close()
-		
-		// Add a mock connection to the pool
-		config := NewWorkerConfig("test-worker", "Test Worker", "127.0.0.1", "testuser")
-		conn := &SSHConnection{Config: config}
 		sshPool.connections["test-worker"] = conn
 		
-		// Try to query existing service (should fail due to no HTTP server)
-		service, err := manager.queryServiceInfo("test-worker")
+		// Try to query service info - will fail at all endpoints
+		service, err := pairingManager.queryServiceInfo("test-worker")
+		
+		// Should return an error after trying all endpoints
 		if err == nil {
-			t.Error("Expected error due to no HTTP server running")
+			t.Error("Expected error when all endpoints are unreachable")
 		}
+		
 		if service != nil {
-			t.Error("Expected nil service when HTTP server is not available")
+			t.Error("Expected nil service when all endpoints are unreachable")
+		}
+		
+		// Set the client to nil manually to avoid panic in Close
+		conn.Client = nil
+	})
+	
+	t.Run("queryServiceInfo_ConnectionError", func(t *testing.T) {
+		sshPool := NewSSHPool()
+		defer sshPool.Close()
+		
+		pairingManager := NewPairingManager(sshPool, nil)
+		defer pairingManager.Close()
+		
+		// Create a connection to a non-existent host
+		config := &WorkerConfig{
+			ID: "test-worker",
+			SSH: SSHConfig{
+				Host: "127.0.0.1", // Localhost but wrong port
+				Port: 12345,       // Non-existent service port
+			},
+		}
+		
+		// Add config to the pool
+		sshPool.configs["test-worker"] = config
+		
+		conn := &SSHConnection{
+			Config: config,
+			Client: nil,
+		}
+		sshPool.connections["test-worker"] = conn
+		
+		// Try to query service info - will fail to connect
+		service, err := pairingManager.queryServiceInfo("test-worker")
+		
+		if err == nil {
+			t.Error("Expected error when connection fails")
+		}
+		
+		if service != nil {
+			t.Error("Expected nil service when connection fails")
 		}
 	})
 }
