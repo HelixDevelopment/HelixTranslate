@@ -42,6 +42,7 @@ func TestPairingManager_queryServiceInfo(t *testing.T) {
 				Host: "invalid-host-that-does-not-exist",
 				Port: 22,
 			},
+			Enabled: true,
 		}
 		
 		// Add config to the pool (not just connection)
@@ -84,6 +85,7 @@ func TestPairingManager_queryServiceInfo(t *testing.T) {
 				Host: "127.0.0.1", // Localhost but wrong port
 				Port: 12345,       // Non-existent service port
 			},
+			Enabled: true,
 		}
 		
 		// Add config to the pool
