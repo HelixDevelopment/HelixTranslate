@@ -2,6 +2,11 @@ package distributed
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 	"digital.vasic.translator/pkg/events"
@@ -166,6 +171,94 @@ func TestDistributedCoordinator_queryRemoteProviders(t *testing.T) {
 		
 		if providers != nil {
 			t.Error("Expected nil providers when connection fails")
+		}
+	})
+	
+	t.Run("queryRemoteProviders_WithSuccessfulResponse", func(t *testing.T) {
+		sshPool := NewSSHPool()
+		defer sshPool.Close()
+		
+		pairingManager := NewPairingManager(sshPool, nil)
+		defer pairingManager.Close()
+		
+		apiLogger, _ := deployment.NewAPICommunicationLogger("test.log")
+		coordinator := NewDistributedCoordinator(
+			nil, // localCoordinator
+			sshPool,
+			pairingManager,
+			nil, // fallbackManager
+			nil, // versionManager
+			events.NewEventBus(),
+			apiLogger,
+		)
+		
+		// Create a mock HTTP server that returns provider data
+		providersResponse := map[string]interface{}{
+			"providers": []interface{}{
+				map[string]interface{}{
+					"name": "openai",
+					"type": "api",
+				},
+				map[string]interface{}{
+					"name": "anthropic",
+					"type": "api",
+				},
+			},
+		}
+		
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/api/v1/providers" {
+				t.Errorf("Expected path '/api/v1/providers', got: %s", r.URL.Path)
+			}
+			
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(providersResponse)
+		}))
+		defer server.Close()
+		
+		// Parse server URL to get host and port
+		serverURL := server.URL
+		hostPort := serverURL[7:] // Remove "http://"
+		parts := strings.Split(hostPort, ":")
+		host := parts[0]
+		port := 8080 // Default test port
+		if len(parts) > 1 {
+			if _, err := fmt.Sscanf(parts[1], "%d", &port); err == nil {
+				// Successfully parsed port
+			}
+		}
+		
+		// Create a service with the mock server's host and port
+		service := &RemoteService{
+			WorkerID: "test-worker",
+			Host:     host,
+			Port:     port,
+			Protocol: "http",
+		}
+		
+		// Try to query providers - should succeed
+		providers, err := coordinator.queryRemoteProviders(context.Background(), service)
+		
+		if err != nil {
+			t.Errorf("Unexpected error: %v", err)
+		}
+		
+		if providers == nil {
+			t.Error("Expected non-nil providers")
+		}
+		
+		// Check that both providers are returned
+		if len(providers) != 2 {
+			t.Errorf("Expected 2 providers, got: %d", len(providers))
+		}
+		
+		// Check for specific providers
+		if _, ok := providers["openai"]; !ok {
+			t.Error("Expected 'openai' provider in result")
+		}
+		
+		if _, ok := providers["anthropic"]; !ok {
+			t.Error("Expected 'anthropic' provider in result")
 		}
 	})
 }
