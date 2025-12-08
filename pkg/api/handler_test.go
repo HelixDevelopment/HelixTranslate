@@ -9,10 +9,12 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"digital.vasic.translator/internal/cache"
 	"digital.vasic.translator/internal/config"
 	"digital.vasic.translator/pkg/events"
+	"digital.vasic.translator/pkg/security"
 	"digital.vasic.translator/pkg/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -42,20 +44,20 @@ func TestGenerateOutputFilename(t *testing.T) {
 // TestAPIInfo tests the apiInfo handler
 func TestAPIInfo(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	// Create a minimal handler
 	h := &Handler{}
-	
+
 	// Setup test context
 	router := gin.New()
 	router.GET("/test", h.apiInfo)
-	
+
 	req, _ := http.NewRequest("GET", "/test", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
-	
+
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	var response map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
@@ -68,7 +70,7 @@ func TestAPIInfo(t *testing.T) {
 // TestTranslateText tests the translateText handler
 func TestTranslateText(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	// Create a handler with minimal config to avoid nil pointer
 	h := &Handler{
 		config: &config.Config{
@@ -77,10 +79,10 @@ func TestTranslateText(t *testing.T) {
 			},
 		},
 	}
-	
+
 	router := gin.New()
 	router.POST("/translate", h.translateText)
-	
+
 	tests := []struct {
 		name           string
 		requestBody    string
@@ -148,13 +150,13 @@ func TestTranslateText(t *testing.T) {
 			shouldContain:  "error",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/translate", bytes.NewBufferString(tt.requestBody))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
-			
+
 			// Use defer to catch any panics from nil dependencies
 			defer func() {
 				if r := recover(); r != nil {
@@ -163,9 +165,9 @@ func TestTranslateText(t *testing.T) {
 					w.WriteHeader(http.StatusInternalServerError)
 				}
 			}()
-			
+
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
 			assert.Contains(t, w.Body.String(), tt.shouldContain)
 		})
@@ -175,18 +177,18 @@ func TestTranslateText(t *testing.T) {
 // TestHealthCheck tests the healthCheck handler
 func TestHealthCheck(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	h := &Handler{}
-	
+
 	router := gin.New()
 	router.GET("/health", h.healthCheck)
-	
+
 	req, _ := http.NewRequest("GET", "/health", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
-	
+
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	var response map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
@@ -196,18 +198,18 @@ func TestHealthCheck(t *testing.T) {
 // TestVersionInfo tests version-related handlers
 func TestVersionInfo(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	h := &Handler{}
-	
+
 	router := gin.New()
 	router.GET("/version", h.getVersion)
-	
+
 	req, _ := http.NewRequest("GET", "/version", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
-	
+
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	var response map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
@@ -220,22 +222,22 @@ func TestVersionInfo(t *testing.T) {
 // TestStats tests the stats handler
 func TestStats(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	// Create minimal mocks for testing
-	mockCache := &cache.Cache{} // This will be nil, but handler should handle it
+	mockCache := &cache.Cache{}          // This will be nil, but handler should handle it
 	mockWebSocketHub := &websocket.Hub{} // This will be nil, but handler should handle it
-	
+
 	h := &Handler{
 		cache: mockCache,
 		wsHub: mockWebSocketHub,
 	}
-	
+
 	router := gin.New()
 	router.GET("/stats", h.getStats)
-	
+
 	req, _ := http.NewRequest("GET", "/stats", nil)
 	w := httptest.NewRecorder()
-	
+
 	// Use a defer to catch any panics from nil dependencies
 	defer func() {
 		if r := recover(); r != nil {
@@ -244,9 +246,9 @@ func TestStats(t *testing.T) {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}()
-	
+
 	router.ServeHTTP(w, req)
-	
+
 	// Should handle nil dependencies gracefully or return error
 	assert.True(t, w.Code == http.StatusOK || w.Code == http.StatusInternalServerError)
 }
@@ -254,16 +256,16 @@ func TestStats(t *testing.T) {
 // TestWebSocketHandler tests the websocket handler setup
 func TestWebSocketHandler(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	h := &Handler{}
-	
+
 	router := gin.New()
 	router.GET("/ws", h.websocketHandler)
-	
+
 	req, _ := http.NewRequest("GET", "/ws", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
-	
+
 	// WebSocket upgrade should return 101 if properly configured
 	// or error if no upgrade headers provided
 	assert.True(t, w.Code == http.StatusSwitchingProtocols || w.Code == http.StatusBadRequest)
@@ -272,28 +274,136 @@ func TestWebSocketHandler(t *testing.T) {
 // TestAuthMiddleware tests the authentication middleware
 func TestAuthMiddleware(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	h := &Handler{}
-	
+
 	// Test middleware without proper auth token
 	router := gin.New()
 	router.Use(h.authMiddleware())
 	router.GET("/protected", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "success"})
 	})
-	
+
 	req, _ := http.NewRequest("GET", "/protected", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
-	
+
 	// Should return 401 Unauthorized when no token provided
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
+}
+
+// TestAuthMiddleware_HandlerSpecific tests handler authentication middleware with various scenarios
+func TestAuthMiddleware_HandlerSpecific(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	t.Run("No authorization header", func(t *testing.T) {
+		authService := security.NewUserAuthService("test-secret-key-16-chars", 24*time.Hour, nil)
+		h := &Handler{authService: authService}
+
+		router := gin.New()
+		router.Use(h.authMiddleware())
+		router.GET("/protected", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{"message": "success"})
+		})
+
+		req, _ := http.NewRequest("GET", "/protected", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+		var response map[string]interface{}
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "No authorization header", response["error"])
+	})
+
+	t.Run("Invalid token", func(t *testing.T) {
+		authService := security.NewUserAuthService("test-secret-key-16-chars", 24*time.Hour, nil)
+		h := &Handler{authService: authService}
+
+		router := gin.New()
+		router.Use(h.authMiddleware())
+		router.GET("/protected", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{"message": "success"})
+		})
+
+		req, _ := http.NewRequest("GET", "/protected", nil)
+		req.Header.Set("Authorization", "Bearer invalid-token")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+		var response map[string]interface{}
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "Invalid token", response["error"])
+	})
+
+	t.Run("Valid Bearer token", func(t *testing.T) {
+		authService := security.NewUserAuthService("test-secret-key-16-chars", 24*time.Hour, nil)
+		h := &Handler{authService: authService}
+
+		// Generate a valid token
+		token, _ := authService.GenerateToken("test-user", "testuser", []string{"user"})
+
+		router := gin.New()
+		router.Use(h.authMiddleware())
+		router.GET("/protected", func(c *gin.Context) {
+			userID, _ := c.Get("user_id")
+			username, _ := c.Get("username")
+			roles, _ := c.Get("roles")
+			c.JSON(http.StatusOK, gin.H{
+				"user_id":  userID,
+				"username": username,
+				"roles":    roles,
+			})
+		})
+
+		req, _ := http.NewRequest("GET", "/protected", nil)
+		req.Header.Set("Authorization", "Bearer "+token)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var response map[string]interface{}
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "test-user", response["user_id"])
+		assert.Equal(t, "testuser", response["username"])
+	})
+
+	t.Run("Valid token without Bearer prefix", func(t *testing.T) {
+		authService := security.NewUserAuthService("test-secret-key-16-chars", 24*time.Hour, nil)
+		h := &Handler{authService: authService}
+
+		// Generate a valid token
+		token, _ := authService.GenerateToken("test-user", "testuser", []string{"user"})
+
+		router := gin.New()
+		router.Use(h.authMiddleware())
+		router.GET("/protected", func(c *gin.Context) {
+			userID, _ := c.Get("user_id")
+			c.JSON(http.StatusOK, gin.H{"user_id": userID})
+		})
+
+		req, _ := http.NewRequest("GET", "/protected", nil)
+		req.Header.Set("Authorization", token) // No "Bearer " prefix
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var response map[string]interface{}
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "test-user", response["user_id"])
+	})
+
 }
 
 // TestLogin tests the login handler
 func TestLogin(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	tests := []struct {
 		name         string
 		setupHandler func() *Handler
@@ -325,18 +435,18 @@ func TestLogin(t *testing.T) {
 			expectedCode: http.StatusInternalServerError, // Valid JSON but nil auth service
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			h := tt.setupHandler()
-			
+
 			router := gin.New()
 			router.POST("/login", h.login)
-			
+
 			req, _ := http.NewRequest("POST", "/login", bytes.NewBufferString(tt.requestBody))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
-			
+
 			// Use a defer to catch any panics from nil pointer access
 			defer func() {
 				if r := recover(); r != nil {
@@ -345,24 +455,24 @@ func TestLogin(t *testing.T) {
 					w.WriteHeader(http.StatusInternalServerError)
 				}
 			}()
-			
+
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedCode, w.Code)
 		})
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			h := tt.setupHandler()
-			
+
 			router := gin.New()
 			router.POST("/login", h.login)
-			
+
 			req, _ := http.NewRequest("POST", "/login", bytes.NewBufferString(tt.requestBody))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
-			
+
 			// Use a defer to catch any panics from nil pointer access
 			defer func() {
 				if r := recover(); r != nil {
@@ -371,30 +481,97 @@ func TestLogin(t *testing.T) {
 					w.WriteHeader(http.StatusInternalServerError)
 				}
 			}()
-			
+
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedCode, w.Code)
 		})
 	}
 }
 
+// TestLogin_Comprehensive tests login handler with various scenarios
+func TestLogin_Comprehensive(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	t.Run("Invalid JSON", func(t *testing.T) {
+		h := &Handler{}
+
+		router := gin.New()
+		router.POST("/login", h.login)
+
+		req, _ := http.NewRequest("POST", "/login", bytes.NewBufferString("invalid json"))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("Missing required fields", func(t *testing.T) {
+		h := &Handler{}
+
+		router := gin.New()
+		router.POST("/login", h.login)
+
+		testData := map[string]interface{}{
+			"username": "testuser",
+			// Missing password
+		}
+
+		jsonData, _ := json.Marshal(testData)
+		req, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("Nil auth service", func(t *testing.T) {
+		h := &Handler{authService: nil}
+
+		router := gin.New()
+		router.POST("/login", h.login)
+
+		testData := map[string]interface{}{
+			"username": "testuser",
+			"password": "testpass",
+		}
+
+		jsonData, _ := json.Marshal(testData)
+		req, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+
+		// This should panic due to nil authService
+		defer func() {
+			if r := recover(); r != nil {
+				// Expected panic due to nil authService
+			}
+		}()
+
+		router.ServeHTTP(w, req)
+		// If no panic, check for internal server error
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+	})
+}
+
 // TestProfile tests the profile handler
 func TestProfile(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	h := &Handler{}
-	
+
 	router := gin.New()
 	router.GET("/profile", h.getProfile)
-	
+
 	req, _ := http.NewRequest("GET", "/profile", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
-	
+
 	// Should return 200 with empty user data (no authentication check in handler)
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	// Parse response to verify structure
 	var response map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -406,7 +583,7 @@ func TestProfile(t *testing.T) {
 // TestTranslateFB2 tests translateFB2 handler
 func TestTranslateFB2(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	h := &Handler{
 		config: &config.Config{
 			Translation: config.TranslationConfig{
@@ -414,27 +591,27 @@ func TestTranslateFB2(t *testing.T) {
 			},
 		},
 	}
-	
+
 	router := gin.New()
 	router.POST("/translate/fb2", h.translateFB2)
-	
+
 	// Test with no file provided
 	req, _ := http.NewRequest("POST", "/translate/fb2", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
-	
+
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Contains(t, w.Body.String(), "No file provided")
-	
+
 	// Test with empty file
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	
+
 	// Create a temporary file to simulate FB2 upload
 	tempFile, err := os.CreateTemp("", "test-*.fb2")
 	assert.NoError(t, err)
 	defer os.Remove(tempFile.Name())
-	
+
 	// Write some minimal FB2 content
 	tempFile.WriteString(`<?xml version="1.0" encoding="UTF-8"?>
 <FictionBook>
@@ -455,25 +632,25 @@ func TestTranslateFB2(t *testing.T) {
 	</body>
 </FictionBook>`)
 	tempFile.Close()
-	
+
 	// Reopen for reading
 	file, err := os.Open(tempFile.Name())
 	assert.NoError(t, err)
 	defer file.Close()
-	
+
 	part, err := writer.CreateFormFile("file", "test.fb2")
 	assert.NoError(t, err)
-	
+
 	_, err = io.Copy(part, file)
 	assert.NoError(t, err)
-	
+
 	writer.Close()
-	
+
 	// Test with file but no provider
 	req, _ = http.NewRequest("POST", "/translate/fb2", body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	w = httptest.NewRecorder()
-	
+
 	// Use defer to catch any panics from nil dependencies
 	defer func() {
 		if r := recover(); r != nil {
@@ -482,33 +659,33 @@ func TestTranslateFB2(t *testing.T) {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}()
-	
+
 	router.ServeHTTP(w, req)
-	
+
 	// Should fail at translator creation step
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	
+
 	// Test with file and custom provider
 	body = &bytes.Buffer{}
 	writer = multipart.NewWriter(body)
-	
+
 	file, err = os.Open(tempFile.Name())
 	assert.NoError(t, err)
-	
+
 	part, err = writer.CreateFormFile("file", "test.fb2")
 	assert.NoError(t, err)
-	
+
 	_, err = io.Copy(part, file)
 	assert.NoError(t, err)
-	
+
 	writer.WriteField("provider", "openai")
 	writer.WriteField("model", "gpt-3.5-turbo")
 	writer.Close()
-	
+
 	req, _ = http.NewRequest("POST", "/translate/fb2", body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	w = httptest.NewRecorder()
-	
+
 	// Use defer to catch any panics from nil dependencies
 	defer func() {
 		if r := recover(); r != nil {
@@ -517,32 +694,32 @@ func TestTranslateFB2(t *testing.T) {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}()
-	
+
 	router.ServeHTTP(w, req)
-	
+
 	// Should fail at translator creation step
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	
+
 	// Test with file and invalid provider
 	body = &bytes.Buffer{}
 	writer = multipart.NewWriter(body)
-	
+
 	file, err = os.Open(tempFile.Name())
 	assert.NoError(t, err)
-	
+
 	part, err = writer.CreateFormFile("file", "test.fb2")
 	assert.NoError(t, err)
-	
+
 	_, err = io.Copy(part, file)
 	assert.NoError(t, err)
-	
+
 	writer.WriteField("provider", "invalid-provider")
 	writer.Close()
-	
+
 	req, _ = http.NewRequest("POST", "/translate/fb2", body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	w = httptest.NewRecorder()
-	
+
 	// Use defer to catch any panics from nil dependencies
 	defer func() {
 		if r := recover(); r != nil {
@@ -551,9 +728,9 @@ func TestTranslateFB2(t *testing.T) {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}()
-	
+
 	router.ServeHTTP(w, req)
-	
+
 	// Should fail at translator creation step
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
@@ -561,12 +738,12 @@ func TestTranslateFB2(t *testing.T) {
 // TestConvertScript tests convertScript handler
 func TestConvertScript(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	h := &Handler{}
-	
+
 	router := gin.New()
 	router.POST("/convert/script", h.convertScript)
-	
+
 	tests := []struct {
 		name           string
 		requestBody    string
@@ -604,14 +781,14 @@ func TestConvertScript(t *testing.T) {
 			shouldContain:  "converted",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/convert/script", bytes.NewBufferString(tt.requestBody))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
 			assert.Contains(t, w.Body.String(), tt.shouldContain)
 		})
@@ -621,27 +798,27 @@ func TestConvertScript(t *testing.T) {
 // TestListProviders tests listProviders handler
 func TestListProviders(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	h := &Handler{}
-	
+
 	router := gin.New()
 	router.GET("/providers", h.listProviders)
-	
+
 	req, _ := http.NewRequest("GET", "/providers", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
-	
+
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	var response map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.Contains(t, response, "providers")
-	
+
 	providers, ok := response["providers"].([]interface{})
 	assert.True(t, ok)
 	assert.Greater(t, len(providers), 0)
-	
+
 	// Check that OpenAI provider is included
 	found := false
 	for _, provider := range providers {
@@ -658,28 +835,28 @@ func TestListProviders(t *testing.T) {
 // TestListLanguages tests listLanguages handler
 func TestListLanguages(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	h := &Handler{}
-	
+
 	router := gin.New()
 	router.GET("/languages", h.listLanguages)
-	
+
 	req, _ := http.NewRequest("GET", "/languages", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
-	
+
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	var response map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.Contains(t, response, "languages")
 	assert.Contains(t, response, "total")
-	
+
 	languages, ok := response["languages"].([]interface{})
 	assert.True(t, ok)
 	assert.Greater(t, len(languages), 0)
-	
+
 	// Check that English is included
 	found := false
 	for _, language := range languages {
@@ -698,7 +875,7 @@ func TestListLanguages(t *testing.T) {
 // TestValidateTranslationRequest tests validateTranslationRequest handler
 func TestValidateTranslationRequest(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	// Create a mock config to avoid nil pointer issues
 	config := &config.Config{
 		Translation: config.TranslationConfig{
@@ -706,10 +883,10 @@ func TestValidateTranslationRequest(t *testing.T) {
 		},
 	}
 	h := &Handler{config: config}
-	
+
 	router := gin.New()
 	router.POST("/translate/validate", h.validateTranslationRequest)
-	
+
 	tests := []struct {
 		name           string
 		requestBody    string
@@ -747,14 +924,14 @@ func TestValidateTranslationRequest(t *testing.T) {
 			shouldContain:  "valid",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/translate/validate", bytes.NewBufferString(tt.requestBody))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
 			assert.Contains(t, w.Body.String(), tt.shouldContain)
 		})
@@ -764,7 +941,7 @@ func TestValidateTranslationRequest(t *testing.T) {
 // TestBatchTranslate tests batchTranslate handler
 func TestBatchTranslate(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	// Create a mock config to avoid nil pointer issues
 	config := &config.Config{
 		Translation: config.TranslationConfig{
@@ -772,10 +949,10 @@ func TestBatchTranslate(t *testing.T) {
 		},
 	}
 	h := &Handler{config: config}
-	
+
 	router := gin.New()
 	router.POST("/batch", h.batchTranslate)
-	
+
 	tests := []struct {
 		name           string
 		requestBody    string
@@ -807,13 +984,13 @@ func TestBatchTranslate(t *testing.T) {
 			shouldContain:  "error",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/batch", bytes.NewBufferString(tt.requestBody))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
-			
+
 			// Use defer to catch any panics from nil dependencies
 			defer func() {
 				if r := recover(); r != nil {
@@ -822,9 +999,9 @@ func TestBatchTranslate(t *testing.T) {
 					w.WriteHeader(http.StatusInternalServerError)
 				}
 			}()
-			
+
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
 			assert.Contains(t, w.Body.String(), tt.shouldContain)
 		})
@@ -834,15 +1011,15 @@ func TestBatchTranslate(t *testing.T) {
 // TestPreparationAnalysis tests preparationAnalysis handler
 func TestPreparationAnalysis(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	// Create a handler with minimal dependencies to avoid nil pointer issues
 	h := &Handler{
 		eventBus: events.NewEventBus(),
 	}
-	
+
 	router := gin.New()
 	router.POST("/preparation/analyze", h.preparationAnalysis)
-	
+
 	tests := []struct {
 		name           string
 		requestBody    string
@@ -880,14 +1057,14 @@ func TestPreparationAnalysis(t *testing.T) {
 			shouldContain:  "session_id",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/preparation/analyze", bytes.NewBufferString(tt.requestBody))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
 			assert.Contains(t, w.Body.String(), tt.shouldContain)
 		})
@@ -897,12 +1074,12 @@ func TestPreparationAnalysis(t *testing.T) {
 // TestGetPreparationResult tests getPreparationResult handler
 func TestGetPreparationResult(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	h := &Handler{}
-	
+
 	router := gin.New()
 	router.GET("/preparation/result/:session_id", h.getPreparationResult)
-	
+
 	tests := []struct {
 		name           string
 		url            string
@@ -922,13 +1099,13 @@ func TestGetPreparationResult(t *testing.T) {
 			shouldContain:  "session_id",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req, _ := http.NewRequest("GET", tt.url, nil)
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
 			assert.Contains(t, w.Body.String(), tt.shouldContain)
 		})
@@ -938,15 +1115,15 @@ func TestGetPreparationResult(t *testing.T) {
 // TestTranslateEbook tests translateEbook handler
 func TestTranslateEbook(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	// Create a handler with minimal dependencies to avoid nil pointer issues
 	h := &Handler{
 		eventBus: events.NewEventBus(),
 	}
-	
+
 	router := gin.New()
 	router.POST("/translate/ebook", h.translateEbook)
-	
+
 	tests := []struct {
 		name           string
 		requestBody    string
@@ -984,14 +1161,14 @@ func TestTranslateEbook(t *testing.T) {
 			shouldContain:  "input file does not exist",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/translate/ebook", bytes.NewBufferString(tt.requestBody))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
 			assert.Contains(t, w.Body.String(), tt.shouldContain)
 		})
@@ -1001,15 +1178,15 @@ func TestTranslateEbook(t *testing.T) {
 // TestCancelTranslation tests cancelTranslation handler
 func TestCancelTranslation(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	// Create a handler with minimal dependencies to avoid nil pointer issues
 	h := &Handler{
 		eventBus: events.NewEventBus(),
 	}
-	
+
 	router := gin.New()
 	router.POST("/translate/cancel/:session_id", h.cancelTranslation)
-	
+
 	tests := []struct {
 		name           string
 		url            string
@@ -1021,13 +1198,13 @@ func TestCancelTranslation(t *testing.T) {
 			expectedStatus: http.StatusOK,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req, _ := http.NewRequest("POST", tt.url, nil)
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
 		})
 	}
@@ -1036,12 +1213,12 @@ func TestCancelTranslation(t *testing.T) {
 // TestGetStatus tests getStatus handler
 func TestGetStatus(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	h := &Handler{}
-	
+
 	router := gin.New()
 	router.GET("/status/:session_id", h.getStatus)
-	
+
 	tests := []struct {
 		name           string
 		url            string
@@ -1055,13 +1232,13 @@ func TestGetStatus(t *testing.T) {
 			shouldContain:  "session_id",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req, _ := http.NewRequest("GET", tt.url, nil)
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
-			
+
 			assert.Equal(t, tt.expectedStatus, w.Code)
 			assert.Contains(t, w.Body.String(), tt.shouldContain)
 		})
@@ -1073,12 +1250,12 @@ func TestVersionHelperFunctions(t *testing.T) {
 	// Test readVersionFile with non-existent file
 	_, err := readVersionFile("non-existent-file")
 	assert.Error(t, err)
-	
+
 	// Test runCommand with valid command
 	output, err := runCommand("echo", "test")
 	assert.NoError(t, err)
 	assert.Equal(t, "test\n", output)
-	
+
 	// Test runCommand with invalid command
 	_, err = runCommand("non-existent-command")
 	assert.Error(t, err)
@@ -1087,17 +1264,44 @@ func TestVersionHelperFunctions(t *testing.T) {
 // TestDistributedHandlers tests distributed-related handlers
 func TestDistributedHandlers(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	h := &Handler{} // No distributed manager
-	
+
 	router := gin.New()
 	router.GET("/distributed/status", h.getDistributedStatus)
-	
+
 	req, _ := http.NewRequest("GET", "/distributed/status", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
-	
+
 	// Should return 501 Service Unavailable when no distributed manager
 	assert.Equal(t, http.StatusServiceUnavailable, w.Code)
 	assert.Contains(t, w.Body.String(), "Distributed work not available")
+}
+
+// TestGetDistributedStatus_InvalidManagerType tests getDistributedStatus with invalid manager type
+func TestGetDistributedStatus_InvalidManagerType(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	// Create a mock distributed manager (wrong type)
+	mockDM := &MockDistributedManager{}
+
+	h := &Handler{
+		distributedManager: mockDM,
+	}
+
+	router := gin.New()
+	router.GET("/distributed/status", h.getDistributedStatus)
+
+	req, _ := http.NewRequest("GET", "/distributed/status", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	// Should return 500 Internal Server Error for invalid manager type
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "Invalid distributed manager", response["error"])
 }
