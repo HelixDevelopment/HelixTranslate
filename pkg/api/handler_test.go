@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -14,11 +15,80 @@ import (
 	"digital.vasic.translator/internal/cache"
 	"digital.vasic.translator/internal/config"
 	"digital.vasic.translator/pkg/events"
+	"digital.vasic.translator/pkg/models"
 	"digital.vasic.translator/pkg/security"
 	"digital.vasic.translator/pkg/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
+
+// MockUserRepository is a mock implementation for testing
+type MockUserRepository struct {
+	users      map[string]*models.User
+	forceError bool
+}
+
+func (m *MockUserRepository) FindByUsername(username string) (*models.User, error) {
+	if m.forceError {
+		return nil, fmt.Errorf("forced repository error")
+	}
+
+	user, exists := m.users[username]
+	if !exists {
+		return nil, models.ErrUserNotFound
+	}
+
+	return user, nil
+}
+
+func (m *MockUserRepository) FindByEmail(email string) (*models.User, error) {
+	if m.forceError {
+		return nil, fmt.Errorf("forced repository error")
+	}
+
+	for _, user := range m.users {
+		if user.Email == email {
+			return user, nil
+		}
+	}
+
+	return nil, models.ErrUserNotFound
+}
+
+func (m *MockUserRepository) Create(user *models.User) error {
+	if m.forceError {
+		return fmt.Errorf("forced repository error")
+	}
+	m.users[user.Username] = user
+	return nil
+}
+
+func (m *MockUserRepository) Update(user *models.User) error {
+	if m.forceError {
+		return fmt.Errorf("forced repository error")
+	}
+	m.users[user.Username] = user
+	return nil
+}
+
+func (m *MockUserRepository) Delete(id string) error {
+	if m.forceError {
+		return fmt.Errorf("forced repository error")
+	}
+	delete(m.users, id)
+	return nil
+}
+
+func (m *MockUserRepository) List() ([]*models.User, error) {
+	if m.forceError {
+		return nil, fmt.Errorf("forced repository error")
+	}
+	users := make([]*models.User, 0, len(m.users))
+	for _, user := range m.users {
+		users = append(users, user)
+	}
+	return users, nil
+}
 
 func TestGenerateOutputFilename(t *testing.T) {
 	tests := []struct {
@@ -554,6 +624,58 @@ func TestLogin_Comprehensive(t *testing.T) {
 		// If no panic, check for internal server error
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
 	})
+}
+
+func TestLogin_Success(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	// Create mock user repository with a test user
+	mockRepo := &MockUserRepository{
+		users: make(map[string]*models.User),
+	}
+
+	// Add a test user
+	testUser := &models.User{
+		ID:       "user123",
+		Username: "testuser",
+		Email:    "test@example.com",
+		IsActive: true,
+		Roles:    []string{"user"},
+	}
+	testUser.SetPassword("testpass")
+	mockRepo.users["testuser"] = testUser
+
+	// Create real UserAuthService with mock repository
+	authService := security.NewUserAuthService("test-secret-key-16-chars", time.Hour, mockRepo)
+
+	h := &Handler{
+		authService: authService,
+	}
+
+	router := gin.New()
+	router.POST("/login", h.login)
+
+	testData := map[string]interface{}{
+		"username": "testuser",
+		"password": "testpass",
+	}
+
+	jsonData, _ := json.Marshal(testData)
+	req, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	// Should succeed with valid login response
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response security.LoginResponse
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, response.Token)
+	assert.Equal(t, "user123", response.UserID)
+	assert.Equal(t, "testuser", response.Username)
+	assert.Contains(t, response.Roles, "user")
 }
 
 // TestProfile tests the profile handler

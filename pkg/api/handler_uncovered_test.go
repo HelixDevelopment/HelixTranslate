@@ -847,6 +847,44 @@ func TestRollbackUpdateSuccess(t *testing.T) {
 	assert.NotEqual(t, http.StatusBadRequest, w.Code)          // Not "Worker ID is required"
 }
 
+// TestGetVersionAlertsSuccess tests the success case for getVersionAlerts
+func TestGetVersionAlertsSuccess(t *testing.T) {
+	// Set Gin to test mode
+	gin.SetMode(gin.TestMode)
+
+	// Create a real DistributedManager for testing
+	cfg := &config.Config{}
+	eventBus := events.NewEventBus()
+	apiLogger := &deployment.APICommunicationLogger{}
+
+	realDM := distributed.NewDistributedManager(cfg, eventBus, apiLogger)
+
+	handler := &Handler{
+		config:             cfg,
+		eventBus:           eventBus,
+		wsHub:              websocket.NewHub(eventBus),
+		distributedManager: realDM,
+	}
+
+	router := gin.New()
+	router.GET("/api/v1/monitoring/version/alerts", handler.getVersionAlerts)
+
+	req, _ := http.NewRequest("GET", "/api/v1/monitoring/version/alerts", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	// Should succeed with alerts data
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+
+	// Verify response structure
+	assert.Contains(t, response, "alerts")
+	assert.Contains(t, response, "count")
+}
+
 // TestAPIAlertHandlers tests alert-related handlers
 func TestAPIAlertHandlers(t *testing.T) {
 	// Set Gin to test mode
