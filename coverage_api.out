@@ -191,11 +191,11 @@ digital.vasic.translator/pkg/api/handler.go:839.68,843.2 3 1
 digital.vasic.translator/pkg/api/handler.go:846.52,847.30 1 1
 digital.vasic.translator/pkg/api/handler.go:847.30,849.23 2 1
 digital.vasic.translator/pkg/api/handler.go:849.23,853.4 3 1
-digital.vasic.translator/pkg/api/handler.go:856.3,857.57 2 0
-digital.vasic.translator/pkg/api/handler.go:857.57,859.4 1 0
-digital.vasic.translator/pkg/api/handler.go:862.3,863.17 2 0
-digital.vasic.translator/pkg/api/handler.go:863.17,867.4 3 0
-digital.vasic.translator/pkg/api/handler.go:870.3,874.11 4 0
+digital.vasic.translator/pkg/api/handler.go:856.3,857.57 2 1
+digital.vasic.translator/pkg/api/handler.go:857.57,859.4 1 1
+digital.vasic.translator/pkg/api/handler.go:862.3,863.17 2 1
+digital.vasic.translator/pkg/api/handler.go:863.17,867.4 3 1
+digital.vasic.translator/pkg/api/handler.go:870.3,874.11 4 1
 digital.vasic.translator/pkg/api/handler.go:879.41,882.47 2 1
 digital.vasic.translator/pkg/api/handler.go:882.47,885.3 2 1
 digital.vasic.translator/pkg/api/handler.go:888.2,889.16 2 1
@@ -213,8 +213,8 @@ digital.vasic.translator/pkg/api/handler.go:923.2,925.4 1 0
 digital.vasic.translator/pkg/api/handler.go:928.46,938.2 4 1
 digital.vasic.translator/pkg/api/handler.go:942.56,943.33 1 1
 digital.vasic.translator/pkg/api/handler.go:943.33,946.3 2 1
-digital.vasic.translator/pkg/api/handler.go:949.2,950.9 2 0
-digital.vasic.translator/pkg/api/handler.go:950.9,953.3 2 0
+digital.vasic.translator/pkg/api/handler.go:949.2,950.9 2 1
+digital.vasic.translator/pkg/api/handler.go:950.9,953.3 2 1
 digital.vasic.translator/pkg/api/handler.go:955.2,956.31 2 0
 digital.vasic.translator/pkg/api/handler.go:959.51,960.33 1 1
 digital.vasic.translator/pkg/api/handler.go:960.33,963.3 2 1

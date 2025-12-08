@@ -607,6 +607,51 @@ func TestAPIVersionHandlers(t *testing.T) {
 		assert.Equal(t, "Invalid distributed manager", response["error"])
 	})
 
+	t.Run("getVersionDashboard_Success", func(t *testing.T) {
+		// Test getVersionDashboard handler with valid mock manager
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.GET("/api/v1/monitoring/version/dashboard", handlerWithMock.getVersionDashboard)
+
+		req, _ := http.NewRequest("GET", "/api/v1/monitoring/version/dashboard", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should succeed with valid manager
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+
+		// Check that dashboard contains expected fields
+		assert.Contains(t, response, "summary")
+		assert.Contains(t, response, "metrics")
+		assert.Contains(t, response, "alerts")
+		assert.Contains(t, response, "health")
+		assert.Contains(t, response, "workers")
+		assert.Contains(t, response, "status")
+		assert.Contains(t, response, "timestamp")
+
+		// Check summary structure
+		summary := response["summary"].(map[string]interface{})
+		assert.Contains(t, summary, "total_workers")
+		assert.Contains(t, summary, "up_to_date_workers")
+		assert.Contains(t, summary, "outdated_workers")
+		assert.Contains(t, summary, "unhealthy_workers")
+		assert.Contains(t, summary, "active_alerts")
+		assert.Contains(t, summary, "health_score")
+		assert.Contains(t, summary, "last_drift_check")
+	})
+
 	t.Run("triggerVersionDriftCheck", func(t *testing.T) {
 		// Test triggerVersionDriftCheck handler
 		router := gin.New()
@@ -645,6 +690,37 @@ func TestAPIVersionHandlers(t *testing.T) {
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
 		assert.Equal(t, "Invalid distributed manager", response["error"])
+	})
+
+	t.Run("triggerVersionDriftCheck_Success", func(t *testing.T) {
+		// Test triggerVersionDriftCheck handler with valid mock manager
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.POST("/api/v1/monitoring/version/drift-check", handlerWithMock.triggerVersionDriftCheck)
+
+		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/drift-check", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should succeed with valid manager
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+
+		// Check that response contains expected fields
+		assert.Equal(t, "Version drift check completed", response["message"])
+		assert.Contains(t, response, "alerts_generated")
+		assert.Contains(t, response, "alerts")
 	})
 }
 

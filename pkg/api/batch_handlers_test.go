@@ -168,6 +168,28 @@ func TestTranslateDirectoryHandler(t *testing.T) {
 			},
 			expectedStatus: http.StatusBadRequest,
 		},
+		{
+			name: "invalid target language",
+			requestBody: TranslateDirectoryRequest{
+				InputPath:      "/tmp/test",
+				TargetLanguage: "invalid-lang",
+			},
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name: "invalid source language",
+			requestBody: TranslateDirectoryRequest{
+				InputPath:      "/tmp/test",
+				TargetLanguage: "es",
+				SourceLanguage: "invalid-lang",
+			},
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "empty request body",
+			requestBody:    TranslateDirectoryRequest{},
+			expectedStatus: http.StatusBadRequest,
+		},
 	}
 
 	for _, tt := range tests {
