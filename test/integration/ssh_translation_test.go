@@ -15,6 +15,7 @@ import (
 	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/pkg/sshworker"
 	"digital.vasic.translator/pkg/version"
+	"digital.vasic.translator/test/utils"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -216,12 +217,17 @@ func generateHostKey() (ssh.Signer, error) {
 
 // TestSSHTranslationIntegration tests the complete SSH translation workflow
 func TestSSHTranslationIntegration(t *testing.T) {
-	t.Skip("Skipping integration tests that require SSH infrastructure")
-	// Setup mock SSH server
-	mockServer := NewMockSSHServer(t)
-	defer mockServer.Stop()
+	// Setup test SSH server with proper infrastructure
+	testServer, err := utils.NewTestSSHServer()
+	if err != nil {
+		t.Fatalf("Failed to create test SSH server: %v", err)
+	}
+	defer testServer.Stop()
 
-	mockServer.Start(t)
+	err = testServer.Start()
+	if err != nil {
+		t.Fatalf("Failed to start test SSH server: %v", err)
+	}
 
 	// Wait for server to start
 	time.Sleep(100 * time.Millisecond)

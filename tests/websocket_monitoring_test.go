@@ -13,6 +13,7 @@ import (
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/sshworker"
 	"digital.vasic.translator/pkg/websocket"
+	"digital.vasic.translator/test/utils"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -78,9 +79,12 @@ type TestWorkerInfo struct {
 }
 
 func (suite *WebSocketMonitoringTestSuite) Setup(t *testing.T) {
+	// Get dynamic port for testing
+	port := utils.GetFreePort()
+	
 	// Initialize test monitoring server
 	suite.server = &MonitoringTestServer{
-		Port:    8091, // Use different port for testing
+		Port:    port, // Use dynamic port for testing
 		Clients: make(map[string]*websocket.Conn),
 		Hub:     websocket.NewHub(),
 	}

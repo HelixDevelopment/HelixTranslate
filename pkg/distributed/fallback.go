@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"digital.vasic.translator/pkg/events"
+	"digital.vasic.translator/pkg/logger"
 )
 
 // FallbackConfig holds fallback and recovery configuration
@@ -68,8 +69,8 @@ func DefaultFallbackConfig() *FallbackConfig {
 type FallbackManager struct {
 	config      *FallbackConfig
 	performance *PerformanceConfig
-	eventBus    EventBusInterface
-	logger      Logger
+	eventBus    events.EventBusInterface
+	logger      logger.Logger
 
 	// State tracking
 	failureCounts map[string]*FailureTracker
@@ -99,7 +100,7 @@ type RecoveryTracker struct {
 }
 
 // NewFallbackManager creates a new fallback manager
-func NewFallbackManager(config *FallbackConfig, performance *PerformanceConfig, eventBus EventBusInterface, logger Logger) *FallbackManager {
+func NewFallbackManager(config *FallbackConfig, performance *PerformanceConfig, eventBus events.EventBusInterface, logger logger.Logger) *FallbackManager {
 	fm := &FallbackManager{
 		config:        config,
 		performance:   performance,

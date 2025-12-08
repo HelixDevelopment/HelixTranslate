@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"digital.vasic.translator/test/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -61,12 +62,15 @@ func TestDistributedManager_WorkerDiscovery(t *testing.T) {
 	
 	// Test 1: Discover new workers
 	t.Run("DiscoverNewWorkers", func(t *testing.T) {
-		// Mock worker discovery
+		// Mock worker discovery with dynamic ports
+		port1 := utils.GetFreePort()
+		port2 := utils.GetFreePort()
+		
 		workers := []*WorkerNode{
 			{
 				ID:         "worker-1",
 				Host:       "worker1.local",
-				Port:       8080,
+				Port:       port1,
 				Status:     "active",
 				Load:       0.2,
 				ActiveJobs: 2,
@@ -76,7 +80,7 @@ func TestDistributedManager_WorkerDiscovery(t *testing.T) {
 			{
 				ID:         "worker-2",
 				Host:       "worker2.local",
-				Port:       8080,
+				Port:       port2,
 				Status:     "active",
 				Load:       0.7,
 				ActiveJobs: 7,
@@ -84,6 +88,8 @@ func TestDistributedManager_WorkerDiscovery(t *testing.T) {
 				Tags:       map[string]string{"region": "us-east", "capacity": "medium"},
 			},
 		}
+		defer utils.ReleasePort(port1)
+		defer utils.ReleasePort(port2)
 		
 		for _, worker := range workers {
 			err := manager.RegisterWorker(worker)
@@ -104,10 +110,13 @@ func TestDistributedManager_WorkerDiscovery(t *testing.T) {
 	
 	// Test 2: Duplicate worker registration
 	t.Run("DuplicateWorkerRegistration", func(t *testing.T) {
+		port := utils.GetFreePort()
+		defer utils.ReleasePort(port)
+		
 		duplicateWorker := &WorkerNode{
 			ID:     "worker-1", // Same ID as above
 			Host:   "worker1-updated.local",
-			Port:   8080,
+			Port:   port,
 			Status: "active",
 		}
 		

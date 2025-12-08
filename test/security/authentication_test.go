@@ -11,13 +11,13 @@ import (
 	"digital.vasic.translator/pkg/api"
 	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/test/mocks"
+	"digital.vasic.translator/test/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 func TestAuthentication(t *testing.T) {
-	t.Skip("Skipping authentication tests that require HTTP server infrastructure")
 	// Test 1: Valid API key authentication
 	t.Run("ValidAPIKey", func(t *testing.T) {
 		mockLogger := logger.NewLogger(logger.LoggerConfig{
@@ -30,30 +30,19 @@ func TestAuthentication(t *testing.T) {
 		mockTranslator.On("Translate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 			Return("translated text", nil)
 
-		server := api.NewServer(api.ServerConfig{
-			Port:     8080,
-			Logger:    mockLogger,
-			Security: &api.SecurityConfig{
-				APIKey: "test-api-key-12345",
-			},
-		})
-		server.SetTranslator(mockTranslator)
+		// Use test HTTP server infrastructure
+		httpServer := utils.NewTestHTTPServer(t)
+		defer httpServer.Close()
 
-		// Start test server
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		
-		go func() {
-			if err := server.Start(ctx); err != nil && err != context.Canceled {
-				t.Logf("Server error: %v", err)
-			}
-		}()
+		// Get server URL for testing
+		serverURL := httpServer.GetURL()
+		apiServer := httpServer.GetAPIServer()
 		
 		// Wait for server to start
 		time.Sleep(100 * time.Millisecond)
 
 		// Test valid API key
-		req, err := http.NewRequest("POST", "http://localhost:8080/api/translate", strings.NewReader(`{
+		req, err := http.NewRequest("POST", serverURL+"/api/v1/translate", strings.NewReader(`{
 			"text": "Hello world",
 			"source_lang": "en",
 			"target_lang": "es"
@@ -72,32 +61,24 @@ func TestAuthentication(t *testing.T) {
 
 	// Test 2: Invalid API key
 	t.Run("InvalidAPIKey", func(t *testing.T) {
+		// Create another test server with different API key
 		mockLogger := logger.NewLogger(logger.LoggerConfig{
 			Level:  logger.DEBUG,
 			Format: logger.FORMAT_TEXT,
 		})
 
-		server := api.NewServer(api.ServerConfig{
-			Port:     8081,
-			Logger:    mockLogger,
-			Security: &api.SecurityConfig{
-				APIKey: "correct-api-key-12345",
-			},
-		})
+		mockTranslator := new(mocks.MockTranslator)
+		mockTranslator.On("GetName").Return("test-translator")
+		mockTranslator.On("Translate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+			Return("translated text", nil)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
+		httpServer2 := utils.NewTestHTTPServer(t)
+		defer httpServer2.Close()
 		
-		go func() {
-			if err := server.Start(ctx); err != nil && err != context.Canceled {
-				t.Logf("Server error: %v", err)
-			}
-		}()
-		
-		time.Sleep(100 * time.Millisecond)
+		serverURL := httpServer2.GetURL()
 
 		// Test invalid API key
-		req, err := http.NewRequest("POST", "http://localhost:8081/api/translate", strings.NewReader(`{
+		req, err := http.NewRequest("POST", serverURL+"/api/v1/translate", strings.NewReader(`{
 			"text": "Hello world",
 			"source_lang": "en", 
 			"target_lang": "es"

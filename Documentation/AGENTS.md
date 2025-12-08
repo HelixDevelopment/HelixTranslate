@@ -1,15 +1,31 @@
 # AGENTS.md - Universal Multi-Format Multi-Language Ebook Translation System
 
 ## Build/Lint/Test Commands
-- **Build**: `make build` or `go build ./cmd/cli`
+
+### Core Commands
+- **Build all**: `make build` (builds gRPC, API, and CLI binaries)
+- **Build specific**: `make build-grpc`, `make build-api`, `make build-cli`
+- **Build for all platforms**: `make build-all`
 - **Test all**: `make test` or `go test ./... -v`
+- **Test with coverage**: `make test-coverage` (generates coverage.html)
 - **Test single package**: `go test -v ./pkg/package`
 - **Test specific function**: `go test -v -run TestFunctionName ./pkg/package`
-- **Coverage**: `make test-coverage` (generates coverage for all packages)
-- **Lint**: No golangci-lint configured yet (check tools/setup/go.mod for linting setup)
+- **Lint**: `golangci-lint run` (uses .golangci.yml configuration)
 - **Format**: `make fmt` (go fmt)
-- **Docker**: `make docker-build && make docker-run`
-- **Development**: `make dev` (starts gRPC and API servers in debug mode)
+- **Vet**: `make vet` (go vet)
+- **Quick test cycle**: `make quick-test` (fmt + vet + test)
+- **Pre-commit**: `make pre-commit`
+
+### Running Services
+- **Development**: `make dev` (starts gRPC on 50051 and API on 8080 in debug mode)
+- **Full system**: `make run-system` (builds and runs both servers)
+- **gRPC server only**: `make run-grpc`
+- **API server only**: `make run-api`
+
+### Docker
+- **Build**: `make docker-build`
+- **Run**: `make docker-run`
+- **Full stack**: `docker-compose up -d` (includes PostgreSQL, Redis, monitoring)
 
 ## Project Architecture
 
@@ -17,15 +33,17 @@
 - **Go version**: 1.25.2
 - **Module**: `digital.vasic.translator`
 - **Entry points**: Multiple commands in `cmd/` directory:
-  - `cmd/cli/main.go` - Main CLI tool
-  - `cmd/server/main.go` - REST API server
-  - `cmd/grpc-server/main.go` - gRPC server
-  - `cmd/api-server/main.go` - API server
-  - `cmd/monitor-server/main.go` - WebSocket monitoring server
-  - `cmd/unified-translator/main.go` - Unified CLI tool
+  - `cmd/cli/main.go` - Basic CLI tool
+  - `cmd/server/main.go` - Main REST API server
+  - `cmd/grpc-server/main.go` - gRPC server (port 50051)
+  - `cmd/api-server/main.go` - API server (port 8080)
+  - `cmd/monitor-server/main.go` - WebSocket monitoring server (port 8090)
+  - `cmd/unified-translator/main.go` - **Primary unified CLI tool** with full provider support
   - `cmd/translate-ssh/main.go` - SSH translation worker
   - `cmd/preparation-translator/main.go` - Preparation phase translator
   - `cmd/markdown-translator/main.go` - Markdown workflow translator
+  - `cmd/ebook-translator/main.go` - Specialized ebook translator
+  - `cmd/deployment/main.go` - Deployment management tool
 
 ### Core Packages Structure
 ```
@@ -76,19 +94,21 @@ pkg/
 - **Security**: Never hardcode API keys, use environment variables
 
 ### Testing Patterns
-- **Table-driven tests**: Preferred for unit tests
+- **Table-driven tests**: Preferred for unit tests with struct-based test cases
 - **Naming**: `TestFunctionName_Scenario`
-- **Build tags**: Use `//go:build integration`, `//go:build e2e`
+- **Build tags**: Use `//go:build integration`, `//go:build e2e` for selective test execution
 - **Test locations**: 
-  - `test/unit/` - Unit tests
-  - `test/integration/` - Integration tests
-  - `test/e2e/` - End-to-end tests
+  - `test/unit/` - Unit tests for individual components
+  - `test/integration/` - Cross-package integration tests
+  - `test/e2e/` - End-to-end tests with real scenarios
   - `test/performance/` - Performance benchmarks
-  - `test/stress/` - Stress tests
-  - `test/security/` - Security tests
+  - `test/stress/` - Load testing
+  - `test/security/` - Security-focused tests
   - `test/distributed/` - Distributed system tests
-- **Mocking**: Create mock implementations in test files using testify/mock
-- **Coverage**: Current overall coverage is approximately 43.6%
+- **Mocking**: Create mock implementations in test files using testify/mock (see `test/mocks/`)
+- **Coverage**: Current overall coverage is approximately 43.6%, HTML reports available at `coverage.html`
+- **Test utilities**: Helper functions in `test/utils/helpers.go` for creating test files and configurations
+- **Fixtures**: Test data in `test/fixtures/ebooks/`, `test/fixtures/configs/`, `test/fixtures/translations/`
 
 ## Essential Commands
 
@@ -119,24 +139,44 @@ go test ./pkg/distributed -v
 ```bash
 # CLI tools (build first)
 make build-cli
+
+# Basic translation
 ./build/unified-translator -input book.fb2 -output book_sr.epub
 
 # With specific LLM provider
-./build/unified-translator -input book.fb2 -provider openai -model gpt-4
+./build/unified-translator -i book.fb2 -provider openai -model gpt-4 -api-key YOUR_KEY
+
+# Local llama.cpp translation
+./build/unified-translator -i book.fb2 -provider llamacpp -llama-model ./model.gguf
+
+# SSH worker translation
+./build/unified-translator -i book.fb2 -provider ssh -ssh-host worker.local -ssh-user user -ssh-password pass
+
+# With monitoring
+./build/unified-translator -i book.fb2 -provider openai -monitoring -monitoring-port 8080
 
 # Language detection
 ./build/unified-translator -input book.txt -detect-lang
 
 # Markdown workflow
-make build
 ./build/markdown-translator -input book.epub -output book.md
 
 # Preparation phase
 ./build/preparation-translator -input book.epub -output book_sr.epub
 
-# SSH translation worker
+# SSH worker (standalone)
 ./build/translate-ssh -config config.worker.json
 ```
+
+### Unified Translator CLI Flags
+- **Input/Output**: `-input, -i`, `-output, -o`
+- **Language**: `-source-lang`, `-target-lang`, `-script` (cyrillic/latin)
+- **Provider**: `-provider` (openai, anthropic, zhipu, deepseek, qwen, gemini, ollama, llamacpp, ssh)
+- **Provider Config**: `-model`, `-api-key`, `-base-url`, `-temperature`, `-max-tokens`, `-timeout`
+- **SSH Config**: `-ssh-host`, `-ssh-user`, `-ssh-password`, `-ssh-port`, `-remote-dir`
+- **LlamaCpp Config**: `-llama-binary`, `-llama-model`, `-context-size`
+- **Execution**: `-workers`, `-chunk-size`, `-concurrency`, `-verify`, `-verbose`
+- **Monitoring**: `-monitoring`, `-monitoring-port`
 
 ### API Operations
 ```bash
@@ -198,6 +238,17 @@ type LLMClient interface {
     GetProviderName() string
 }
 ```
+
+**Supported Providers**:
+- **API-based**: OpenAI, Anthropic, Zhipu, DeepSeek, Qwen, Gemini
+- **Self-hosted**: Ollama, LlamaCpp (local binary execution)
+- **Distributed**: SSH workers for remote processing
+- **Factory Pattern**: `NewLLMTranslator()` validates provider/model and creates appropriate client
+
+**Provider Configuration**:
+- JSON config in `config.json` under `translation.providers` section
+- Provider-specific config files (e.g., `config_openai.json`)
+- Environment variable overrides for API keys
 
 ### Configuration Pattern
 - Struct-based config in `internal/config/config.go`
@@ -268,6 +319,38 @@ type LLMClient interface {
 - **Concurrent requests**: Balance between speed and rate limits
 - **Cache hit rates**: Monitor cache effectiveness
 
+## Event-Driven Architecture
+
+### EventBus System
+- **Core**: `pkg/events/events.go` - Central pub/sub system with thread-safe handler management
+- **Event Types**: Predefined constants for translation lifecycle:
+  - `EventTranslationStarted`
+  - `EventTranslationProgress` 
+  - `EventTranslationCompleted`
+  - `EventTranslationError`
+  - `EventConversionStarted`
+  - `EventConversionProgress`
+  - `EventConversionCompleted`
+  - `EventConversionError`
+- **Subscription**: 
+  - `Subscribe(eventType, handler)` - Type-specific subscriptions
+  - `SubscribeAll(handler)` - Global event listeners
+- **WebSocket Integration**: `pkg/websocket/hub.go` automatically subscribes to all events and broadcasts to clients
+- **Session Tracking**: Events filtered by session ID for per-client monitoring
+
+### Usage Patterns
+```go
+// Emit events with session tracking
+EmitProgress(eventBus, sessionID, "Translating chapter 5/10", map[string]interface{}{
+    "current": 5, "total": 10, "progress": 0.5,
+})
+
+// Subscribe to events in your component
+eventBus.Subscribe(EventTranslationProgress, func(event Event) {
+    log.Printf("Progress: %s", event.Message)
+})
+```
+
 ## Advanced Features
 
 ### Preparation Phase System
@@ -308,6 +391,16 @@ type LLMClient interface {
 - **Logging**: Set `logging.level` to `debug` in config
 - **Verbose output**: Use `-v` flag with CLI tools
 - **Event monitoring**: WebSocket events show real-time progress
+- **Debug scripts**: Various `debug_*.sh` scripts for troubleshooting specific issues
+- **Test utilities**: `test_*` scripts for isolated component testing
+
+### Development Patterns
+- **Code style**: Follow Go standards, use golangci-lint configuration
+- **Error handling**: Explicit returns with context wrapping
+- **Testing**: Table-driven tests with sub-tests, comprehensive mocking
+- **Events**: Use event bus for component communication and progress tracking
+- **Sessions**: Unique session IDs for tracking translation operations
+- **Configuration**: JSON-based with environment variable overrides
 
 ### Performance Monitoring
 - **Built-in metrics**: Available via `/api/v1/metrics` endpoint
@@ -316,9 +409,10 @@ type LLMClient interface {
 
 ## Version Information
 - **Current version**: 2.3.0 (see `VERSION` file)
+- **System version**: 3.0.0 (in Makefile)
 - **API versioning**: Follows semantic versioning
 - **Backward compatibility**: Maintained within major versions
-- **Build version**: 3.0.0 in Makefile (system version)
+- **Version tracking**: Distributed system requires version synchronization across workers
 
 ## Quick Reference
 

@@ -12,13 +12,13 @@ import (
 	"digital.vasic.translator/pkg/api"
 	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/test/mocks"
+	"digital.vasic.translator/test/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 func TestInputSanitization(t *testing.T) {
-	t.Skip("Skipping input sanitization tests that require HTTP server infrastructure")
 	// Test 1: HTML tag sanitization
 	t.Run("HTMLTagSanitization", func(t *testing.T) {
 		mockLogger := logger.NewLogger(logger.LoggerConfig{
@@ -31,19 +31,11 @@ func TestInputSanitization(t *testing.T) {
 		mockTranslator.On("Translate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 			Return("translated text", nil)
 
-		server := api.NewServer(api.ServerConfig{
-			Port:     8089,
-			Logger:    mockLogger,
-			Security: &api.SecurityConfig{
-				APIKey:         "test-key",
-				SanitizeInput:  true,
-			},
-		})
-		server.SetTranslator(mockTranslator)
+		// Use test infrastructure with dynamic port
+		httpServer := utils.NewTestHTTPServer(t)
+		defer httpServer.Close()
 
-		// Use httptest for better control
-		testServer := httptest.NewServer(server.GetRouter())
-		defer testServer.Close()
+		testServerURL := httpServer.GetURL()
 
 		// Send input with HTML tags
 		htmlInput := `<p>Hello <b>world</b> <script>alert('xss')</script></p>`
@@ -53,7 +45,7 @@ func TestInputSanitization(t *testing.T) {
 			"target_lang": "es"
 		}`, htmlInput)
 
-		req, err := http.NewRequest("POST", testServer.URL+"/api/translate", strings.NewReader(reqBody))
+		req, err := http.NewRequest("POST", testServerURL+"/api/v1/translate", strings.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set("Authorization", "Bearer test-key")
 		req.Header.Set("Content-Type", "application/json")
