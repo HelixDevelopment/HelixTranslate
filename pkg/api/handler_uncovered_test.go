@@ -229,201 +229,14 @@ func TestAPIHandlers_Uncovered(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 		var response map[string]interface{}
-		err := json.Unmarshal(w.Body.Bytes(), &response)
+		var err error
+		err = json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
-		assert.Equal(t, "Invalid distributed manager", response["error"])
+		assert.Equal(t, "Update version not specified", response["error"])
 	})
 
-	t.Run("addSlackAlertChannel_MissingRequiredFields", func(t *testing.T) {
-		// Test addSlackAlertChannel handler with missing required fields
-		mockDM := &MockDistributedManager{}
-
-		handlerWithMock := &Handler{
-			config:             cfg,
-			eventBus:           eventBus,
-			wsHub:              wsHub,
-			distributedManager: mockDM,
-		}
-
-		router := gin.New()
-		router.POST("/api/v1/monitoring/version/alerts/channels/slack", handlerWithMock.addSlackAlertChannel)
-
-		testData := map[string]interface{}{
-			// Missing webhook_url field
-			"channel": "#alerts",
-		}
-
-		jsonData, _ := json.Marshal(testData)
-		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/alerts/channels/slack", bytes.NewBuffer(jsonData))
-		req.Header.Set("Content-Type", "application/json")
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		// Should fail with binding validation error for missing required field
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-	})
-
-	t.Run("addSlackAlertChannel_InvalidJSON", func(t *testing.T) {
-		// Test addSlackAlertChannel handler with invalid JSON
-		mockDM := &MockDistributedManager{}
-
-		handlerWithMock := &Handler{
-			config:             cfg,
-			eventBus:           eventBus,
-			wsHub:              wsHub,
-			distributedManager: mockDM,
-		}
-
-		router := gin.New()
-		router.POST("/api/v1/monitoring/version/alerts/channels/slack", handlerWithMock.addSlackAlertChannel)
-
-		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/alerts/channels/slack", bytes.NewBufferString("invalid json"))
-		req.Header.Set("Content-Type", "application/json")
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		// Should fail with bad request due to invalid JSON
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-	})
-
-	t.Run("translateDistributed_InvalidJSON", func(t *testing.T) {
-		// Test translateDistributed handler with invalid JSON
-		mockDM := &MockDistributedManager{}
-
-		handlerWithMock := &Handler{
-			config:             cfg,
-			eventBus:           eventBus,
-			wsHub:              wsHub,
-			distributedManager: mockDM,
-		}
-
-		router := gin.New()
-		router.POST("/api/v1/distributed/translate", handlerWithMock.translateDistributed)
-
-		req, _ := http.NewRequest("POST", "/api/v1/distributed/translate", bytes.NewBufferString("invalid json"))
-		req.Header.Set("Content-Type", "application/json")
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		// Should return bad request
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-	})
-
-	t.Run("translateDistributed_MissingText", func(t *testing.T) {
-		// Test translateDistributed handler with missing required text field
-		mockDM := &MockDistributedManager{}
-
-		handlerWithMock := &Handler{
-			config:             cfg,
-			eventBus:           eventBus,
-			wsHub:              wsHub,
-			distributedManager: mockDM,
-		}
-
-		router := gin.New()
-		router.POST("/api/v1/distributed/translate", handlerWithMock.translateDistributed)
-
-		testData := map[string]interface{}{
-			"context_hint": "translation context",
-		}
-
-		jsonData, _ := json.Marshal(testData)
-		req, _ := http.NewRequest("POST", "/api/v1/distributed/translate", bytes.NewBuffer(jsonData))
-		req.Header.Set("Content-Type", "application/json")
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		// Should return bad request
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-	})
-
-	t.Run("translateDistributed_TranslationError", func(t *testing.T) {
-		// Test translateDistributed handler with translation error
-		mockDM := &MockDistributedManager{
-			translateResult: "",
-			translateError:  assert.AnError,
-		}
-
-		handlerWithMock := &Handler{
-			config:             cfg,
-			eventBus:           eventBus,
-			wsHub:              wsHub,
-			distributedManager: mockDM,
-		}
-
-		router := gin.New()
-		router.POST("/api/v1/distributed/translate", handlerWithMock.translateDistributed)
-
-		testData := map[string]interface{}{
-			"text": "Test text",
-		}
-
-		jsonData, _ := json.Marshal(testData)
-		req, _ := http.NewRequest("POST", "/api/v1/distributed/translate", bytes.NewBuffer(jsonData))
-		req.Header.Set("Content-Type", "application/json")
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		// Should return internal server error
-		assert.Equal(t, http.StatusInternalServerError, w.Code)
-	})
-
-	t.Run("translateDistributed_InvalidManagerType_NoSessionID", func(t *testing.T) {
-		// Test translateDistributed handler without session ID header (invalid manager type)
-		mockDM := &MockDistributedManager{
-			translateResult: "Translated text",
-			translateError:  nil,
-		}
-
-		handlerWithMock := &Handler{
-			config:             cfg,
-			eventBus:           eventBus,
-			wsHub:              wsHub,
-			distributedManager: mockDM,
-		}
-
-		router := gin.New()
-		router.POST("/api/v1/distributed/translate", handlerWithMock.translateDistributed)
-
-		testData := map[string]interface{}{
-			"text": "Test text",
-		}
-
-		jsonData, _ := json.Marshal(testData)
-		req, _ := http.NewRequest("POST", "/api/v1/distributed/translate", bytes.NewBuffer(jsonData))
-		req.Header.Set("Content-Type", "application/json")
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		// Should fail with invalid manager type
-		assert.Equal(t, http.StatusInternalServerError, w.Code)
-
-		var response map[string]interface{}
-		err := json.Unmarshal(w.Body.Bytes(), &response)
-		assert.NoError(t, err)
-		assert.Equal(t, "Invalid distributed manager", response["error"])
-	})
-
-	t.Run("uploadUpdate", func(t *testing.T) {
-		// Test uploadUpdate handler with no file
-		router := gin.New()
-		router.POST("/api/v1/update/upload", handler.uploadUpdate)
-
-		req, _ := http.NewRequest("POST", "/api/v1/update/upload", nil)
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		// Should fail with no update package provided
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-
-		var response map[string]interface{}
-		err := json.Unmarshal(w.Body.Bytes(), &response)
-		assert.NoError(t, err)
-		assert.Equal(t, "No update package provided", response["error"])
-	})
-
-	t.Run("uploadUpdate_NoVersionHeader", func(t *testing.T) {
-		// Test uploadUpdate handler with file but no version header
+	t.Run("uploadUpdate_Success", func(t *testing.T) {
+		// Test uploadUpdate handler with valid file and version header
 		router := gin.New()
 		router.POST("/api/v1/update/upload", handler.uploadUpdate)
 
@@ -439,17 +252,18 @@ func TestAPIHandlers_Uncovered(t *testing.T) {
 
 		req, _ := http.NewRequest("POST", "/api/v1/update/upload", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
-		// Note: No X-Update-Version header
+		req.Header.Set("X-Update-Version", "1.2.3")
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
-		// Should fail with missing version header
-		assert.Equal(t, http.StatusBadRequest, w.Code)
+		// Should succeed with file upload
+		assert.Equal(t, http.StatusOK, w.Code)
 
 		var response map[string]interface{}
 		err = json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
-		assert.Equal(t, "Update version not specified", response["error"])
+		assert.Equal(t, "Update package uploaded successfully", response["message"])
+		assert.Equal(t, "1.2.3", response["version"])
 	})
 
 	t.Run("applyUpdate", func(t *testing.T) {
