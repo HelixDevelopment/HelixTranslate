@@ -240,7 +240,7 @@ func TestSSHTranslationIntegration(t *testing.T) {
 		})
 
 		// Parse address to get host and port
-		addr := mockServer.GetAddress()
+		addr := testServer.GetAddress()
 		host, portStr, err := net.SplitHostPort(addr)
 		if err != nil {
 			t.Fatalf("Failed to parse mock server address: %v", err)
@@ -284,7 +284,7 @@ func TestSSHTranslationIntegration(t *testing.T) {
 		})
 
 		// Parse address to get host and port
-		addr := mockServer.GetAddress()
+		addr := testServer.GetAddress()
 		host, portStr, err := net.SplitHostPort(addr)
 		if err != nil {
 			t.Fatalf("Failed to parse mock server address: %v", err)
@@ -345,7 +345,7 @@ func TestSSHTranslationIntegration(t *testing.T) {
 		})
 
 		// Parse address to get host and port
-		addr := mockServer.GetAddress()
+		addr := testServer.GetAddress()
 		host, portStr, err := net.SplitHostPort(addr)
 		if err != nil {
 			t.Fatalf("Failed to parse mock server address: %v", err)

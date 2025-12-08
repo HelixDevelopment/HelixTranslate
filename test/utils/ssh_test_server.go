@@ -7,7 +7,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io"
 	"net"
 	"sync"
 	"time"
@@ -53,179 +52,97 @@ func NewTestSSHServer() (*TestSSHServer, error) {
 		return nil, fmt.Errorf("failed to marshal public key: %v", err)
 	}
 
+	// Encode public key to PEM format
+	publicKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PUBLIC KEY",
+		Bytes: publicKeyBytes,
+	})
+
 	// Create SSH server config
 	config := &ssh.ServerConfig{
 		PasswordCallback: func(conn ssh.ConnMetadata, password []byte) (*ssh.Permissions, error) {
-			// Accept test credentials
+			// Accept any password for testing
 			if conn.User() == "testuser" && string(password) == "testpass" {
 				return nil, nil
 			}
-			return nil, fmt.Errorf("authentication failed for user %s", conn.User())
+			return nil, fmt.Errorf("password rejected for %q", conn.User())
 		},
 		PublicKeyCallback: func(conn ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
-			// Accept test key
+			// Accept any public key for testing
 			if conn.User() == "testuser" {
 				return nil, nil
 			}
-			return nil, fmt.Errorf("public key authentication failed for user %s", conn.User())
+			return nil, fmt.Errorf("public key rejected for %q", conn.User())
 		},
 	}
 
-	// Add host key to config
+	// Add host key
 	signer, err := ssh.NewSignerFromKey(privateKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create signer: %v", err)
 	}
 	config.AddHostKey(signer)
 
-	// Get dynamic port
-	port := GetFreePort()
-
 	return &TestSSHServer{
-		host:       "127.0.0.1",
-		port:       port,
+		host:       "localhost",
+		port:       GetFreePort(),
 		privateKey: privateKey,
-		publicKey:  publicKeyBytes,
+		publicKey:  publicKeyPEM,
 		config:     config,
 		clients:    make(map[string]*ssh.ServerConn),
 		commands:   make([]SSHCommand, 0),
 	}, nil
 }
 
-// Start starts the SSH server
+// Start starts the SSH test server
 func (s *TestSSHServer) Start() error {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
-	if s.running {
-		return fmt.Errorf("server is already running")
-	}
-
-	// Create listener
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.host, s.port))
 	if err != nil {
-		return fmt.Errorf("failed to listen on port %d: %v", s.port, err)
+		return fmt.Errorf("failed to listen on %s:%d: %v", s.host, s.port, err)
 	}
 
 	s.listener = listener
 	s.running = true
 
 	// Start accepting connections
-	go s.acceptConnections()
+	go func() {
+		for s.running {
+			conn, err := listener.Accept()
+			if err != nil {
+				if s.running {
+					fmt.Printf("Error accepting connection: %v\n", err)
+				}
+				continue
+			}
+
+			// Handle connection in goroutine
+			go s.handleConnection(conn)
+		}
+	}()
 
 	return nil
 }
 
-// Stop stops the SSH server
-func (s *TestSSHServer) Stop() error {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
-	if !s.running {
-		return nil
-	}
-
+// Stop stops the SSH test server
+func (s *TestSSHServer) Stop() {
 	s.running = false
-
-	// Close listener
 	if s.listener != nil {
 		s.listener.Close()
 	}
-
-	// Close all client connections
-	for _, client := range s.clients {
-		client.Close()
-	}
-
-	// Release port
 	ReleasePort(s.port)
-
-	return nil
 }
 
-// GetAddress returns the server address
-func (s *TestSSHServer) GetAddress() string {
-	return fmt.Sprintf("%s:%d", s.host, s.port)
-}
-
-// GetHost returns the server host
-func (s *TestSSHServer) GetHost() string {
-	return s.host
-}
-
-// GetPort returns the server port
-func (s *TestSSHServer) GetPort() int {
-	return s.port
-}
-
-// GetPrivateKey returns the PEM-encoded private key
-func (s *TestSSHServer) GetPrivateKey() (string, error) {
-	privateKeyBytes := x509.MarshalPKCS1PrivateKey(s.privateKey)
-	privateKeyPEM := pem.EncodeToMemory(&pem.Block{
-		Type:  "RSA PRIVATE KEY",
-		Bytes: privateKeyBytes,
-	})
-	return string(privateKeyPEM), nil
-}
-
-// GetPublicKey returns the public key bytes
-func (s *TestSSHServer) GetPublicKey() []byte {
-	return s.publicKey
-}
-
-// GetCommands returns all recorded commands
-func (s *TestSSHServer) GetCommands() []SSHCommand {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	
-	// Return a copy to avoid race conditions
-	commands := make([]SSHCommand, len(s.commands))
-	copy(commands, s.commands)
-	return commands
-}
-
-// ClearCommands clears the recorded commands
-func (s *TestSSHServer) ClearCommands() {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	s.commands = make([]SSHCommand, 0)
-}
-
-// SetCommandResponse sets a predefined response for specific commands
-func (s *TestSSHServer) SetCommandResponse(command string, response string, err error) {
-	// This can be extended to handle predefined responses
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-}
-
-// acceptConnections accepts incoming SSH connections
-func (s *TestSSHServer) acceptConnections() {
-	for s.running {
-		conn, err := s.listener.Accept()
-		if err != nil {
-			if s.running {
-				// Log error but continue accepting
-				continue
-			}
-			return
-		}
-
-		// Handle connection in goroutine
-		go s.handleConnection(conn)
-	}
-}
-
-// handleConnection handles an individual SSH connection
+// handleConnection handles an incoming SSH connection
 func (s *TestSSHServer) handleConnection(conn net.Conn) {
-	// Perform SSH handshake
+	// Convert to SSH connection
 	sshConn, chans, reqs, err := ssh.NewServerConn(conn, s.config)
 	if err != nil {
 		return
 	}
 	defer sshConn.Close()
 
-	// Register client
-	clientID := sshConn.RemoteAddr().String()
+	// Store client
+	clientID := fmt.Sprintf("%s:%d", sshConn.RemoteAddr().Network(), sshConn.RemoteAddr().String())
 	s.mutex.Lock()
 	s.clients[clientID] = sshConn
 	s.mutex.Unlock()
@@ -240,7 +157,7 @@ func (s *TestSSHServer) handleConnection(conn net.Conn) {
 	// Handle global requests
 	go ssh.DiscardRequests(reqs)
 
-	// Handle channel requests
+	// Handle channels
 	for newChannel := range chans {
 		if newChannel.ChannelType() != "session" {
 			newChannel.Reject(ssh.UnknownChannelType, "unknown channel type")
@@ -255,12 +172,13 @@ func (s *TestSSHServer) handleConnection(conn net.Conn) {
 		// Handle session requests
 		go func(in <-chan *ssh.Request) {
 			for req := range in {
-				if req.Type == "exec" {
-					s.handleExecCommand(channel, req)
-				} else if req.Type == "shell" {
-					req.Reply(true, nil)
+				switch req.Type {
+				case "exec":
+					s.handleExec(channel, req)
+				case "shell":
 					s.handleShell(channel)
-				} else {
+					req.Reply(true, nil)
+				default:
 					req.Reply(false, nil)
 				}
 			}
@@ -268,13 +186,13 @@ func (s *TestSSHServer) handleConnection(conn net.Conn) {
 	}
 }
 
-// handleExecCommand handles exec requests
-func (s *TestSSHServer) handleExecCommand(channel ssh.Channel, req *ssh.Request) {
+// handleExec handles exec requests
+func (s *TestSSHServer) handleExec(channel ssh.Channel, req *ssh.Request) {
 	type execMsg struct {
 		Command string
 	}
+
 	var execMsgValue execMsg
-	
 	if err := ssh.Unmarshal(req.Payload, &execMsgValue); err != nil {
 		req.Reply(false, nil)
 		return
@@ -341,60 +259,18 @@ func (s *TestSSHServer) handleShell(channel ssh.Channel) {
 			break
 		}
 		
-		input := string(buffer[:n])
-		
-		// Record command
-		cmd := SSHCommand{
-			Command: input,
-			Input:   input,
-			Time:    time.Now(),
-		}
-
-		s.mutex.Lock()
-		s.commands = append(s.commands, cmd)
-		s.mutex.Unlock()
-
-		// Simulate command response
-		var output string
-		switch input {
-		case "ls\n":
-			output = "file1.txt file2.txt\n"
-		case "pwd\n":
-			output = "/home/testuser\n"
-		case "exit\n":
-			output = "logout\n"
-			channel.Write([]byte(output))
-			return
-		default:
-			output = fmt.Sprintf("Command: %s", input)
-		}
-
-		// Update command with output
-		s.mutex.Lock()
-		if len(s.commands) > 0 {
-			s.commands[len(s.commands)-1].Output = output
-		}
-		s.mutex.Unlock()
-
-		// Write response
-		channel.Write([]byte(output))
+		// Echo back input with prefix
+		response := fmt.Sprintf("shell: %s", string(buffer[:n]))
+		channel.Write([]byte(response))
 	}
 }
 
 // SSHClientConfig returns client configuration for connecting to this test server
 func (s *TestSSHServer) SSHClientConfig(username string) *ssh.ClientConfig {
-	privateKey, err := ssh.ParsePrivateKey([]byte(`-----BEGIN RSA PRIVATE KEY-----
-MIIEowIBAAKCAQEAzK8vJv0l5F1M2l5k2jFf2Y0t9vJmZJkJmJmJmJmJmJmJmJmJm
-JmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJ
-mJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJ
-mJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJ
-mJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJ
-mJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJ
-mJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJmJ
-wIDAQABAoIBAQC1...
------END RSA PRIVATE KEY-----`))
+	// Use the generated private key from the server
+	signer, err := ssh.NewSignerFromKey(s.privateKey)
 	if err != nil {
-		// Fallback to password auth if key parsing fails
+		// Fallback to password auth if key signing fails
 		return &ssh.ClientConfig{
 			User: username,
 			Auth: []ssh.AuthMethod{
@@ -408,7 +284,7 @@ wIDAQABAoIBAQC1...
 	return &ssh.ClientConfig{
 		User: username,
 		Auth: []ssh.AuthMethod{
-			privateKey,
+			ssh.PublicKeys(signer),
 			ssh.Password("testpass"),
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
@@ -441,4 +317,31 @@ func (s *TestSSHServer) ExecuteCommand(command string) (string, error) {
 	}
 
 	return stdout.String(), nil
+}
+
+// GetAddress returns the server address
+func (s *TestSSHServer) GetAddress() string {
+	return fmt.Sprintf("%s:%d", s.host, s.port)
+}
+
+// GetPort returns the server port
+func (s *TestSSHServer) GetPort() int {
+	return s.port
+}
+
+// GetCommands returns the list of executed commands
+func (s *TestSSHServer) GetCommands() []SSHCommand {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	
+	commands := make([]SSHCommand, len(s.commands))
+	copy(commands, s.commands)
+	return commands
+}
+
+// ClearCommands clears the command history
+func (s *TestSSHServer) ClearCommands() {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	s.commands = make([]SSHCommand, 0)
 }

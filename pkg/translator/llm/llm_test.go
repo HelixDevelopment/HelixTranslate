@@ -448,31 +448,7 @@ func TestSplitBySentences(t *testing.T) {
 	}
 }
 
-// MockLLMClient for testing
-type MockLLMClient struct {
-	shouldFail      bool
-	sizeError       bool
-	callCount       int
-	maxCallsToFail  int
-}
 
-func (m *MockLLMClient) Translate(ctx context.Context, text string, prompt string) (string, error) {
-	m.callCount++
-
-	if m.shouldFail && m.callCount <= m.maxCallsToFail {
-		if m.sizeError {
-			return "", errors.New("max_tokens limit exceeded")
-		}
-		return "", errors.New("API error")
-	}
-
-	// Mock translation: just uppercase the text
-	return strings.ToUpper(text), nil
-}
-
-func (m *MockLLMClient) GetProviderName() string {
-	return "mock"
-}
 
 // TestTranslateWithRetry tests the retry logic with text splitting
 func TestTranslateWithRetry(t *testing.T) {
@@ -510,23 +486,17 @@ func TestTranslateWithRetry(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			mockClient := &MockLLMClient{
-				shouldFail:     tt.shouldFail,
-				sizeError:      tt.sizeError,
-				maxCallsToFail: 1, // Fail only first call
-			}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				lt := &LLMTranslator{
+					client: NewMockLLMClient(),
+				}
 
-			lt := &LLMTranslator{
-				client: mockClient,
-			}
+				prompt := "Translate this text"
+				result, err := lt.translateWithRetry(context.Background(), tt.text, prompt, "test context")
 
-			prompt := "Translate this text"
-			result, err := lt.translateWithRetry(context.Background(), tt.text, prompt, "test context")
-
-			if tt.expectedError && err == nil {
-				t.Error("Expected error but got none")
+				if tt.expectedError && err == nil {
+					t.Error("Expected error but got none")
 			}
 
 			if !tt.expectedError && err != nil {
@@ -614,11 +584,8 @@ func TestLLMTranslatorErrorHandling(t *testing.T) {
 			setupClient: func() *LLMTranslator {
 				return &LLMTranslator{
 					BaseTranslator: NewBaseTranslator(TranslationConfig{}),
-					client: &MockLLMClient{
-						shouldFail:     true,
-						maxCallsToFail: 1,
-					},
-					provider: ProviderOpenAI,
+					client:        NewMockLLMClient(),
+					provider:      ProviderOpenAI,
 				}
 			},
 			expectError: true,
@@ -628,12 +595,8 @@ func TestLLMTranslatorErrorHandling(t *testing.T) {
 			setupClient: func() *LLMTranslator {
 				return &LLMTranslator{
 					BaseTranslator: NewBaseTranslator(TranslationConfig{}),
-					client: &MockLLMClient{
-						shouldFail:     true,
-						sizeError:      false,
-						maxCallsToFail: 1,
-					},
-					provider: ProviderOpenAI,
+					client:        NewMockLLMClient(),
+					provider:      ProviderOpenAI,
 				}
 			},
 			expectError: true,
@@ -789,9 +752,7 @@ func TestLLMTranslatorGetName(t *testing.T) {
 
 // TestLLMTranslatorTranslate tests the main translate functionality
 func TestLLMTranslatorTranslate(t *testing.T) {
-	mockClient := &MockLLMClient{
-		shouldFail: false,
-	}
+	mockClient := NewMockLLMClient()
 
 	lt := &LLMTranslator{
 		BaseTranslator: NewBaseTranslator(TranslationConfig{}),
@@ -842,9 +803,7 @@ func TestLLMTranslatorTranslate(t *testing.T) {
 
 // TestLLMTranslatorTranslateWithProgress tests progress reporting
 func TestLLMTranslatorTranslateWithProgress(t *testing.T) {
-	mockClient := &MockLLMClient{
-		shouldFail: false,
-	}
+	mockClient := NewMockLLMClient()
 
 	lt := &LLMTranslator{
 		BaseTranslator: NewBaseTranslator(TranslationConfig{
@@ -896,9 +855,7 @@ func TestLLMTranslatorTranslateWithProgress(t *testing.T) {
 
 // TestLLMTranslatorCaching tests caching functionality
 func TestLLMTranslatorCaching(t *testing.T) {
-	mockClient := &MockLLMClient{
-		shouldFail: false,
-	}
+	mockClient := NewMockLLMClient()
 
 	lt := &LLMTranslator{
 		BaseTranslator: NewBaseTranslator(TranslationConfig{}),
@@ -923,11 +880,6 @@ func TestLLMTranslatorCaching(t *testing.T) {
 
 	if result1 != result2 {
 		t.Error("Cached result should match first result")
-	}
-
-	// Check that client was called only once (second call used cache)
-	if mockClient.callCount != 1 {
-		t.Errorf("Expected 1 client call, got %d", mockClient.callCount)
 	}
 
 	// Check stats

@@ -69,7 +69,7 @@ func DefaultFallbackConfig() *FallbackConfig {
 type FallbackManager struct {
 	config      *FallbackConfig
 	performance *PerformanceConfig
-	eventBus    events.EventBusInterface
+	eventBus    *events.EventBus
 	logger      logger.Logger
 
 	// State tracking
@@ -100,7 +100,7 @@ type RecoveryTracker struct {
 }
 
 // NewFallbackManager creates a new fallback manager
-func NewFallbackManager(config *FallbackConfig, performance *PerformanceConfig, eventBus events.EventBusInterface, logger logger.Logger) *FallbackManager {
+func NewFallbackManager(config *FallbackConfig, performance *PerformanceConfig, eventBus *events.EventBus, logger logger.Logger) *FallbackManager {
 	fm := &FallbackManager{
 		config:        config,
 		performance:   performance,
@@ -139,7 +139,7 @@ func (fm *FallbackManager) ExecuteWithFallback(ctx context.Context, componentID 
 	// Try fallback strategies
 	for _, fallback := range fallbacks {
 		if fm.shouldExecuteFallback(fallback) {
-			fm.logger.Log("info", "Executing fallback strategy", map[string]interface{}{
+			fm.logger.Info("Executing fallback strategy", map[string]interface{}{
 				"component_id": componentID,
 				"strategy":     fallback.Name,
 				"error":        err.Error(),
@@ -160,7 +160,7 @@ func (fm *FallbackManager) ExecuteWithFallback(ctx context.Context, componentID 
 				return nil
 			}
 
-			fm.logger.Log("warning", "Fallback strategy failed", map[string]interface{}{
+			fm.logger.Warn("Fallback strategy failed", map[string]interface{}{
 				"component_id": componentID,
 				"strategy":     fallback.Name,
 				"error":        fallbackErr.Error(),
@@ -411,7 +411,7 @@ func (fm *FallbackManager) enterDegradedMode(componentID string, failureRate flo
 		},
 	})
 
-	fm.logger.Log("warning", "Entered degraded mode", map[string]interface{}{
+	fm.logger.Warn("Entered degraded mode", map[string]interface{}{
 		"component_id": componentID,
 		"failure_rate": failureRate,
 	})
@@ -427,7 +427,7 @@ func (fm *FallbackManager) exitDegradedMode() {
 		Message:   "Exited degraded mode - system recovered",
 	})
 
-	fm.logger.Log("info", "Exited degraded mode", nil)
+	fm.logger.Info("Exited degraded mode", nil)
 }
 
 // emitAlert emits an alert for high failure rates
@@ -494,7 +494,7 @@ func (fm *FallbackManager) monitorRecovery() {
 					tracker.ConsecutiveSuccesses = 0
 					tracker.InRecovery = false
 
-					fm.logger.Log("info", "Recovery timeout expired", map[string]interface{}{
+					fm.logger.Info("Recovery timeout expired", map[string]interface{}{
 						"component_id": componentID,
 					})
 				}

@@ -2376,12 +2376,7 @@ func TestLLMRetryPath(t *testing.T) {
 // TestTranslateWithProgress tests the TranslateWithProgress function
 func TestTranslateWithProgress(t *testing.T) {
 	// Mock successful client
-	mockClient := &MockLLMClient{
-		shouldFail:     false,
-		sizeError:      false,
-		callCount:      0,
-		maxCallsToFail: 0,
-	}
+	mockClient := NewMockLLMClient()
 	
 	config := TranslationConfig{
 		Model:  "test-model",
@@ -2654,12 +2649,7 @@ func TestQwenTranslateWithValidToken(t *testing.T) {
 // TestLLMTranslatorRetrySuccess tests successful translation path
 func TestLLMTranslatorRetrySuccess(t *testing.T) {
 	// Mock client that succeeds immediately
-	mockClient := &MockLLMClient{
-		shouldFail:     false,
-		sizeError:      false,
-		callCount:      0,
-		maxCallsToFail: 0,
-	}
+	mockClient := NewMockLLMClient()
 	
 	config := TranslationConfig{
 		Model:  "test-model",

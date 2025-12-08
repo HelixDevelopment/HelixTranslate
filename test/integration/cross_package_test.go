@@ -19,9 +19,7 @@ import (
 )
 
 func TestCrossPackage_FileProcessingPipeline(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	// Test the complete pipeline: file detection -> parsing -> translation -> output
 	tempDir := t.TempDir()

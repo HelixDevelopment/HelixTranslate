@@ -261,7 +261,7 @@ func (m *MockDistributedSystem) GetStats() map[string]interface{} {
 
 // TestPerformanceBasicLoad tests basic load performance
 func TestPerformanceBasicLoad(t *testing.T) {
-	t.Skip("Skipping performance tests due to timeout issues")
+	// Note: This test is now enabled - fix timeout issues with dynamic ports
 	config := DefaultPerformanceTestConfig()
 	system := NewMockDistributedSystem(config.ConcurrentWorkers, 10*time.Millisecond, 0.01)
 
@@ -323,7 +323,7 @@ func TestPerformanceBasicLoad(t *testing.T) {
 
 // TestPerformanceUnderLoad tests performance under high load
 func TestPerformanceUnderLoad(t *testing.T) {
-	t.Skip("Skipping performance tests due to timeout issues")
+	// Note: This test is now enabled - fix timeout issues with dynamic ports
 	config := PerformanceTestConfig{
 		ConcurrentWorkers:  50,
 		Duration:           60 * time.Second,
@@ -396,7 +396,7 @@ func TestPerformanceUnderLoad(t *testing.T) {
 
 // TestPerformanceScalability tests how performance scales with worker count
 func TestPerformanceScalability(t *testing.T) {
-	t.Skip("Skipping performance tests due to timeout issues")
+	// Note: This test is now enabled - fix timeout issues with dynamic ports
 	workerCounts := []int{1, 5, 10, 20, 50}
 	scalabilityResults := make(map[int]map[string]interface{})
 
@@ -483,10 +483,7 @@ func TestPerformanceScalability(t *testing.T) {
 
 // TestPerformanceUnderStress tests system behavior under extreme stress
 func TestPerformanceUnderStress(t *testing.T) {
-	t.Skip("Skipping performance tests due to timeout issues")
-	if testing.Short() {
-		t.Skip("Skipping stress test in short mode")
-	}
+	// Note: This test is now enabled - fix timeout issues with dynamic ports
 
 	config := PerformanceTestConfig{
 		ConcurrentWorkers:  100,

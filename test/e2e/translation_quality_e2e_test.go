@@ -48,9 +48,7 @@ func (m *MockTranslator) GetName() string {
 
 // TestProjectGutenbergTranslation tests translation of real books from Project Gutenberg
 func TestProjectGutenbergTranslation(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping E2E test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	ctx := context.Background()
 	tmpDir := t.TempDir()
@@ -187,9 +185,7 @@ func TestProjectGutenbergTranslation(t *testing.T) {
 
 // TestMultiLLMCoordinationE2E tests the multi-LLM coordination system end-to-end
 func TestMultiLLMCoordinationE2E(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping E2E test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	// Skip if no API keys are set
 	if os.Getenv("DEEPSEEK_API_KEY") == "" &&
@@ -286,9 +282,7 @@ func TestMultiLLMCoordinationE2E(t *testing.T) {
 
 // TestFullPipelineWithVerification tests the complete translation pipeline
 func TestFullPipelineWithVerification(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping E2E test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	ctx := context.Background()
 	tmpDir := t.TempDir()
@@ -399,9 +393,7 @@ func TestFullPipelineWithVerification(t *testing.T) {
 
 // TestErrorRecovery tests error handling and recovery mechanisms
 func TestErrorRecovery(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping E2E test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	ctx := context.Background()
 
@@ -447,9 +439,7 @@ func TestErrorRecovery(t *testing.T) {
 
 // TestLargeBookPerformance tests performance with larger books
 func TestLargeBookPerformance(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping performance test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	ctx := context.Background()
 
@@ -508,9 +498,7 @@ func TestLargeBookPerformance(t *testing.T) {
 
 // TestCLIBypassIssue tests the fix for CLI bypassing distributed API
 func TestCLIBypassIssue(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping E2E test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	t.Run("APIReturnsValidEPUB", func(t *testing.T) {
 		// This test ensures that the API properly translates files

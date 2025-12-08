@@ -12,7 +12,23 @@ import (
 // MockLogger implements the Logger interface for testing
 type MockLogger struct{}
 
-func (m *MockLogger) Log(level, message string, fields map[string]interface{}) {
+func (m *MockLogger) Debug(message string, fields map[string]interface{}) {
+	// Do nothing in tests
+}
+
+func (m *MockLogger) Info(message string, fields map[string]interface{}) {
+	// Do nothing in tests
+}
+
+func (m *MockLogger) Warn(message string, fields map[string]interface{}) {
+	// Do nothing in tests
+}
+
+func (m *MockLogger) Error(message string, fields map[string]interface{}) {
+	// Do nothing in tests
+}
+
+func (m *MockLogger) Fatal(message string, fields map[string]interface{}) {
 	// Do nothing in tests
 }
 

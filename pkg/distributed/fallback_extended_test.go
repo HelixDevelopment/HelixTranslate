@@ -3,11 +3,55 @@ package distributed
 import (
 	"context"
 	"errors"
+	"sync"
 	"testing"
 	"time"
 
 	"digital.vasic.translator/pkg/events"
 )
+
+// mockLogger for testing
+type mockLogger struct {
+	logs []map[string]interface{}
+	mu   sync.Mutex
+}
+
+func (m *mockLogger) Debug(message string, fields map[string]interface{}) {
+	m.log("debug", message, fields)
+}
+
+func (m *mockLogger) Info(message string, fields map[string]interface{}) {
+	m.log("info", message, fields)
+}
+
+func (m *mockLogger) Warn(message string, fields map[string]interface{}) {
+	m.log("warn", message, fields)
+}
+
+func (m *mockLogger) Error(message string, fields map[string]interface{}) {
+	m.log("error", message, fields)
+}
+
+func (m *mockLogger) Fatal(message string, fields map[string]interface{}) {
+	m.log("fatal", message, fields)
+}
+
+func (m *mockLogger) log(level string, message string, fields map[string]interface{}) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	
+	log := map[string]interface{}{
+		"level":   level,
+		"message": message,
+		"data":    fields,
+	}
+	if fields != nil {
+		for k, v := range fields {
+			log[k] = v
+		}
+	}
+	m.logs = append(m.logs, log)
+}
 
 func TestFallbackManager_executeWithRetries_EdgeCases(t *testing.T) {
 	t.Run("executeWithRetries_ImmediateSuccess", func(t *testing.T) {

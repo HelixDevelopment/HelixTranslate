@@ -14,9 +14,7 @@ import (
 )
 
 func TestDistributedManager_Integration(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	// Create test configuration
 	cfg := &config.Config{}

@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+// MockSecurityLoggerTest for testing - implements distributed.Logger interface
+type MockSecurityLoggerTest struct{}
+
+func (m *MockSecurityLoggerTest) Log(level, message string, fields map[string]interface{}) {
+	// Do nothing in tests
+}
+
 func TestDefaultPerformanceConfig(t *testing.T) {
 	t.Run("DefaultConfiguration", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
@@ -89,7 +96,7 @@ func TestNewConnectionPool(t *testing.T) {
 	t.Run("Constructor", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		security := DefaultSecurityConfig()
-		auditor := NewSecurityAuditor(false, &MockSecurityLogger{})
+		auditor := NewSecurityAuditor(false, &MockSecurityLoggerTest{})
 		
 		pool := NewConnectionPool(config, security, auditor)
 		

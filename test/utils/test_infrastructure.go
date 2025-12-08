@@ -11,10 +11,11 @@ import (
 	"digital.vasic.translator/pkg/api"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/logger"
-	"digital.vasic.translator/pkg/websocket"
+	ws "digital.vasic.translator/pkg/websocket"
 	"digital.vasic.translator/test/mocks"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/mock"
+	"digital.vasic.translator/pkg/translator"
 )
 
 // TestHTTPServer provides a reusable HTTP server for testing
@@ -37,12 +38,11 @@ func NewTestHTTPServer(t *testing.T) *TestHTTPServer {
 	mockTranslator.On("GetName").Return("test-translator")
 	mockTranslator.On("Translate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return("translated text", nil)
-	mockTranslator.On("GetStats").Return(api.TranslationStats{
+	mockTranslator.On("GetStats").Return(translator.TranslationStats{
 		Total:        0,
 		Cached:       0,
 		Translated:   0,
 		Errors:       0,
-		CacheHitRate: 0.0,
 	})
 
 	// Create API server with dynamic port
@@ -93,10 +93,10 @@ func (s *TestHTTPServer) GetAPIServer() *api.Server {
 // TestWebSocketServer provides a WebSocket server for testing
 type TestWebSocketServer struct {
 	server    *http.Server
-	hub       *websocket.Hub
+	hub       *ws.Hub
 	eventBus  *events.EventBus
 	port      int
-	clients   []*websocket.Conn
+	clients   []*ws.Client
 	mutex     sync.Mutex
 }
 
@@ -106,7 +106,7 @@ func NewTestWebSocketServer(t *testing.T) *TestWebSocketServer {
 	
 	// Create event bus and hub
 	eventBus := events.NewEventBus()
-	hub := websocket.NewHub()
+	hub := ws.NewHub(eventBus)
 	
 	// Create HTTP server with WebSocket endpoint
 	mux := http.NewServeMux()
@@ -135,6 +135,10 @@ func NewTestWebSocketServer(t *testing.T) *TestWebSocketServer {
 
 // Start starts the WebSocket server
 func (s *TestWebSocketServer) Start(t *testing.T) {
+	// Start the hub
+	go s.hub.Run()
+	
+	// Start the HTTP server
 	go func() {
 		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			t.Logf("WebSocket server error: %v", err)
@@ -152,7 +156,7 @@ func (s *TestWebSocketServer) Close(ctx context.Context) error {
 	
 	// Close all client connections
 	for _, client := range s.clients {
-		client.Close()
+		s.hub.Unregister(client)
 	}
 	s.clients = nil
 	
@@ -176,31 +180,29 @@ func (s *TestWebSocketServer) handleWebSocket(w http.ResponseWriter, r *http.Req
 		return
 	}
 	
+	// Create client
+	client := &ws.Client{
+		ID:        "test-client",
+		SessionID: "test-session",
+		Conn:      conn,
+		Send:      make(chan []byte, 256),
+		Hub:       s.hub,
+	}
+	
 	s.mutex.Lock()
-	s.clients = append(s.clients, conn)
+	s.clients = append(s.clients, client)
 	s.mutex.Unlock()
 	
 	// Register with hub
-	s.hub.RegisterClient(conn)
+	s.hub.Register(client)
 	
-	// Handle messages
-	go func() {
-		defer func() {
-			s.hub.UnregisterClient(conn)
-			conn.Close()
-		}()
-		
-		for {
-			_, _, err := conn.ReadMessage()
-			if err != nil {
-				break
-			}
-		}
-	}()
+	// Start client pumps
+	go client.ReadPump()
+	go client.WritePump()
 }
 
 // GetHub returns the WebSocket hub
-func (s *TestWebSocketServer) GetHub() *websocket.Hub {
+func (s *TestWebSocketServer) GetHub() *ws.Hub {
 	return s.hub
 }
 
@@ -215,40 +217,50 @@ func (s *TestWebSocketServer) GetPort() int {
 }
 
 // ConnectClient creates a test WebSocket client connection
-func ConnectClient(t *testing.T, port int) *websocket.Conn {
+func ConnectClient(t *testing.T, port int) *ws.Client {
 	wsURL := GetLocalhostWSURL(port, "/ws")
 	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
 		t.Fatalf("Failed to connect to WebSocket: %v", err)
 	}
-	return conn
+	
+	// Create a simple client wrapper for testing
+	client := &ws.Client{
+		ID:        "test-client-" + wsURL,
+		SessionID: "test-session",
+		Conn:      conn,
+		Send:      make(chan []byte, 256),
+		Hub:       nil, // Will be set by server
+	}
+	
+	return client
 }
 
-// CreateTestContext creates a test context with timeout
-func CreateTestContext(t *testing.T) context.Context {
+// CreateTestContextWithTimeout creates a test context with timeout
+func CreateTestContextWithTimeout(t *testing.T) context.Context {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	t.Cleanup(cancel)
 	return ctx
 }
 
-// SetupTestEnvironment provides a complete test environment setup
-type SetupTestEnvironment struct {
+// TestInfrastructure provides a complete test environment setup
+type TestInfrastructure struct {
 	HTTPServer  *TestHTTPServer
 	WSServer    *TestWebSocketServer
 	Context     context.Context
 	Logger      logger.Logger
 }
 
-// SetupTestEnvironment creates a complete test environment with HTTP and WebSocket servers
-func SetupTestEnvironment(t *testing.T) *SetupTestEnvironment {
-	ctx := CreateTestContext(t)
+// SetupTestInfrastructure creates a complete test environment with HTTP and WebSocket servers
+func SetupTestInfrastructure(t *testing.T) *TestInfrastructure {
+	ctx := CreateTestContextWithTimeout(t)
 	httpServer := NewTestHTTPServer(t)
 	wsServer := NewTestWebSocketServer(t)
 	
 	// Start WebSocket server
 	wsServer.Start(t)
 	
-	return &SetupTestEnvironment{
+	return &TestInfrastructure{
 		HTTPServer: httpServer,
 		WSServer:   wsServer,
 		Context:    ctx,
@@ -259,8 +271,8 @@ func SetupTestEnvironment(t *testing.T) *SetupTestEnvironment {
 	}
 }
 
-// Cleanup cleans up the test environment
-func (env *SetupTestEnvironment) Cleanup() {
+// Cleanup cleans up the test infrastructure
+func (env *TestInfrastructure) Cleanup() {
 	if env.HTTPServer != nil {
 		env.HTTPServer.Close()
 	}

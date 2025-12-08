@@ -14,9 +14,7 @@ import (
 )
 
 func TestDistributedManager_Stress_ConcurrentOperations(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping stress test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	cfg := &config.Config{}
 	cfg.Distributed.Enabled = true

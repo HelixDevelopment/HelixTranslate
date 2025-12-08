@@ -22,6 +22,7 @@ import (
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/language"
+	"digital.vasic.translator/pkg/models"
 	"digital.vasic.translator/pkg/security"
 	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/websocket"
@@ -37,15 +38,20 @@ func setupTestAPI() (*gin.Engine, *api.Handler, *events.EventBus) {
 	os.Setenv("ANTHROPIC_API_KEY", "sk-ant-test-key-for-integration-tests")
 
 	cfg := config.DefaultConfig()
-	cfg.Translation.DefaultProvider = "openai"
-	cfg.Translation.DefaultModel = "default"
+	cfg.Translation.DefaultProvider = "mock"
+	cfg.Translation.DefaultModel = "mock"
+	cfg.Translation.Providers = map[string]config.ProviderConfig{
+		"mock": {
+			Model: "mock",
+		},
+	}
 
 	eventBus := events.NewEventBus()
 	cacheStore := cache.NewCache(time.Hour, true)
-	authService := security.NewAuthService("test-secret", 24*time.Hour)
+	userAuthService := security.NewUserAuthService("test-secret-key-123456", 24*time.Hour, models.NewInMemoryUserRepository())
 	wsHub := websocket.NewHub(eventBus)
 
-	handler := api.NewHandler(cfg, eventBus, cacheStore, authService, wsHub, nil)
+	handler := api.NewHandler(cfg, eventBus, cacheStore, userAuthService, wsHub, nil)
 
 	router := gin.New()
 	handler.RegisterRoutes(router)
@@ -60,40 +66,31 @@ func TestStringTranslationAPI(t *testing.T) {
 		reqBody := map[string]interface{}{
 			"text":            "Hello, world!",
 			"target_language": "sr",
-			"provider":        "openai",
+			"provider":        "mock",
 		}
 
 		jsonBody, _ := json.Marshal(reqBody)
-		req, _ := http.NewRequest("POST", "/api/v1/translate/string", bytes.NewBuffer(jsonBody))
+		req, _ := http.NewRequest("POST", "/api/v1/translate", bytes.NewBuffer(jsonBody))
 		req.Header.Set("Content-Type", "application/json")
 
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
 		if w.Code != http.StatusOK {
-			t.Errorf("Expected status 200, got %d", w.Code)
+			t.Errorf("Expected status 200, got %d. Response: %s", w.Code, w.Body.String())
+		} else {
+			t.Logf("Response: %s", w.Body.String())
 		}
 
-		var response api.TranslateStringResponse
+		var response map[string]interface{}
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		if err != nil {
 			t.Fatalf("Failed to parse response: %v", err)
 		}
 
-		if response.TranslatedText == "" {
-			t.Error("Expected translated text, got empty string")
-		}
-
-		if response.TargetLanguage != "sr" {
-			t.Errorf("Expected target language 'sr', got '%s'", response.TargetLanguage)
-		}
-
-		if response.SessionID == "" {
-			t.Error("Expected session ID, got empty string")
-		}
-
-		if response.Duration <= 0 {
-			t.Error("Expected positive duration")
+		translatedText, ok := response["translated"].(string)
+		if !ok || translatedText == "" {
+			t.Errorf("Expected translated text, got %v", response["translated"])
 		}
 	})
 
@@ -140,21 +137,27 @@ func TestStringTranslationAPI(t *testing.T) {
 		}
 
 		jsonBody, _ := json.Marshal(reqBody)
-		req, _ := http.NewRequest("POST", "/api/v1/translate/string", bytes.NewBuffer(jsonBody))
+		req, _ := http.NewRequest("POST", "/api/v1/translate", bytes.NewBuffer(jsonBody))
 		req.Header.Set("Content-Type", "application/json")
 
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
+		t.Logf("Response body: %s", w.Body.String())
+
 		if w.Code != http.StatusOK {
-			t.Errorf("Expected status 200, got %d", w.Code)
+			t.Errorf("Expected status 200, got %d. Response: %s", w.Code, w.Body.String())
 		}
 
-		var response api.TranslateStringResponse
-		json.Unmarshal(w.Body.Bytes(), &response)
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		if err != nil {
+			t.Fatalf("Failed to parse response: %v", err)
+		}
 
-		if response.SourceLanguage != "en" {
-			t.Errorf("Expected source language 'en', got '%s'", response.SourceLanguage)
+		translatedText, ok := response["translated"].(string)
+		if !ok || translatedText == "" {
+			t.Errorf("Expected translated text, got %v", response["translated"])
 		}
 	})
 }

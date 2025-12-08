@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+// MockSecurityLogger for testing
+type MockSecurityLogger struct{}
+
+func (m *MockSecurityLogger) Log(level, message string, fields map[string]interface{}) {
+	// Do nothing in tests
+}
+
 func TestResultCache_Set(t *testing.T) {
 	t.Run("Set_Basic", func(t *testing.T) {
 		config := DefaultPerformanceConfig()

@@ -150,10 +150,26 @@ type testAddr struct{}
 func (a *testAddr) Network() string { return "tcp" }
 func (a *testAddr) String() string  { return "127.0.0.1:22" }
 
-// MockLogger for security testing
-type MockSecurityLogger struct{}
+// MockSecurityLoggerTest2 for security testing
+type MockSecurityLoggerTest2 struct{}
 
-func (m *MockSecurityLogger) Log(level, message string, fields map[string]interface{}) {
+func (m *MockSecurityLoggerTest2) Debug(message string, fields map[string]interface{}) {
+	// Do nothing in tests
+}
+
+func (m *MockSecurityLoggerTest2) Info(message string, fields map[string]interface{}) {
+	// Do nothing in tests
+}
+
+func (m *MockSecurityLoggerTest2) Warn(message string, fields map[string]interface{}) {
+	// Do nothing in tests
+}
+
+func (m *MockSecurityLoggerTest2) Error(message string, fields map[string]interface{}) {
+	// Do nothing in tests
+}
+
+func (m *MockSecurityLoggerTest2) Fatal(message string, fields map[string]interface{}) {
 	// Do nothing in tests
 }
 

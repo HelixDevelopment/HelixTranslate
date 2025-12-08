@@ -15,8 +15,24 @@ import (
 // defaultLogger provides a basic logger implementation
 type defaultLogger struct{}
 
-func (l *defaultLogger) Log(level, message string, fields map[string]interface{}) {
-	log.Printf("[%s] %s %v", level, message, fields)
+func (l *defaultLogger) Debug(message string, fields map[string]interface{}) {
+	log.Printf("[DEBUG] %s %v", message, fields)
+}
+
+func (l *defaultLogger) Info(message string, fields map[string]interface{}) {
+	log.Printf("[INFO] %s %v", message, fields)
+}
+
+func (l *defaultLogger) Warn(message string, fields map[string]interface{}) {
+	log.Printf("[WARN] %s %v", message, fields)
+}
+
+func (l *defaultLogger) Error(message string, fields map[string]interface{}) {
+	log.Printf("[ERROR] %s %v", message, fields)
+}
+
+func (l *defaultLogger) Fatal(message string, fields map[string]interface{}) {
+	log.Printf("[FATAL] %s %v", message, fields)
 }
 
 // DistributedManager manages all distributed work functionality

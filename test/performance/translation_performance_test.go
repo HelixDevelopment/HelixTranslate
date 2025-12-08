@@ -189,9 +189,7 @@ func BenchmarkVerificationLargeBook(b *testing.B) {
 
 // TestTranslationThroughput measures translation throughput
 func TestTranslationThroughput(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping throughput test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	ctx := context.Background()
 
@@ -221,9 +219,7 @@ func TestTranslationThroughput(t *testing.T) {
 
 // TestVerificationThroughput measures verification throughput
 func TestVerificationThroughput(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping throughput test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	ctx := context.Background()
 
@@ -255,9 +251,7 @@ func TestVerificationThroughput(t *testing.T) {
 
 // TestMemoryUsage measures memory usage during translation
 func TestMemoryUsage(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping memory test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	ctx := context.Background()
 
@@ -279,9 +273,7 @@ func TestMemoryUsage(t *testing.T) {
 
 // TestConcurrentTranslations measures performance under concurrent load
 func TestConcurrentTranslations(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping concurrent test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	ctx := context.Background()
 
@@ -325,9 +317,7 @@ func TestConcurrentTranslations(t *testing.T) {
 
 // TestScalability tests how performance scales with book size
 func TestScalability(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping scalability test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	ctx := context.Background()
 

@@ -39,9 +39,8 @@ func (m *MockTranslator) GetName() string {
 }
 
 func TestTranslationStress_ConcurrentRequests(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping stress test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
+	// The test infrastructure with dynamic ports prevents conflicts
 
 	const numGoroutines = 50
 	const requestsPerGoroutine = 20
@@ -101,9 +100,7 @@ func TestTranslationStress_ConcurrentRequests(t *testing.T) {
 }
 
 func TestDictionaryStress_LargeConcurrentLoad(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping stress test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	const numGoroutines = 20
 	const translationsPerGoroutine = 10
@@ -153,9 +150,7 @@ func TestDictionaryStress_LargeConcurrentLoad(t *testing.T) {
 }
 
 func TestMemoryStress_LargeTextTranslation(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping stress test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	// Create a moderately large text for memory stress testing
 	var largeText string
@@ -189,15 +184,10 @@ func TestMemoryStress_LargeTextTranslation(t *testing.T) {
 }
 
 func TestResourceStress_LongRunning(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping stress test in short mode")
-	}
+	// Note: This test is now enabled - remove short mode check to ensure it runs
 
 	// Test system stability over time
 	duration := 10 * time.Second
-	if testing.Short() {
-		duration = 2 * time.Second
-	}
 
 	t.Logf("Starting long-running resource stress test for %v", duration)
 

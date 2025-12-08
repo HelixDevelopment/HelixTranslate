@@ -42,6 +42,7 @@ const (
 	ProviderGemini    Provider = "gemini"
 	ProviderOllama    Provider = "ollama"
 	ProviderLlamaCpp  Provider = "llamacpp"
+	ProviderMock      Provider = "mock"
 )
 
 // ValidModels defines valid model names for each provider
@@ -54,6 +55,7 @@ var ValidModels = map[Provider][]string{
 	ProviderGemini:    {"gemini-pro", "gemini-pro-vision"},
 	ProviderOllama:    {"llama2", "codellama", "mistral", "vicuna"}, // Common Ollama models
 	ProviderLlamaCpp:  {"llama2", "mistral", "vicuna"}, // Common local models
+	ProviderMock:      {"mock"},
 }
 
 // LLMTranslator implements LLM-based translation
@@ -214,6 +216,9 @@ func NewLLMTranslatorWithConfig(config TranslationConfig) (*LLMTranslator, error
 		client, err = NewOllamaClient(config)
 	case ProviderLlamaCpp:
 		client, err = NewLlamaCppClient(config)
+	case "mock":
+		client = NewMockLLMClient()
+		err = nil
 	default:
 		return nil, fmt.Errorf("unsupported LLM provider: %s", provider)
 	}
