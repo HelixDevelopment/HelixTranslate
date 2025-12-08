@@ -176,46 +176,46 @@ func (m *MockSecurityLoggerTest2) Fatal(message string, fields map[string]interf
 func TestDefaultSecurityConfig(t *testing.T) {
 	t.Run("DefaultConfiguration", func(t *testing.T) {
 		config := DefaultSecurityConfig()
-			
+
 		if config == nil {
 			t.Error("Expected non-nil security config")
 		}
-		
+
 		// Check SSH settings
 		if !config.SSHHostKeyVerification {
 			t.Error("Expected SSH host key verification to be enabled")
 		}
-		
+
 		if config.KnownHostsFile != "~/.ssh/known_hosts" {
 			t.Errorf("Expected known hosts file '~/.ssh/known_hosts', got '%s'", config.KnownHostsFile)
 		}
-		
+
 		if len(config.SSHCiphers) == 0 {
 			t.Error("Expected SSH ciphers to be configured")
 		}
-		
+
 		if len(config.SSHKexAlgorithms) == 0 {
 			t.Error("Expected SSH key exchange algorithms to be configured")
 		}
-		
+
 		if len(config.SSHMACs) == 0 {
 			t.Error("Expected SSH MACs to be configured")
 		}
-		
+
 		// Check TLS settings
 		if !config.TLSCertVerification {
 			t.Error("Expected TLS certificate verification to be enabled")
 		}
-		
+
 		if len(config.TLSCipherSuites) == 0 {
 			t.Error("Expected TLS cipher suites to be configured")
 		}
-		
+
 		// Check connection limits
 		if config.MaxConnectionsPerWorker != 5 {
 			t.Errorf("Expected max connections per worker to be 5, got %d", config.MaxConnectionsPerWorker)
 		}
-		
+
 		if config.ConnectionTimeout != 30*time.Second {
 			t.Errorf("Expected connection timeout to be 30s, got %v", config.ConnectionTimeout)
 		}
@@ -225,25 +225,25 @@ func TestDefaultSecurityConfig(t *testing.T) {
 func TestNewSecurityAuditor(t *testing.T) {
 	t.Run("Constructor", func(t *testing.T) {
 		logger := &MockSecurityLogger{}
-		
+
 		// Test enabled auditor
 		auditor := NewSecurityAuditor(true, logger)
-		
+
 		if auditor == nil {
 			t.Error("Expected non-nil security auditor")
 		}
-		
+
 		if !auditor.enabled {
 			t.Error("Expected auditor to be enabled")
 		}
-		
+
 		if auditor.logger != logger {
 			t.Error("Expected logger to be set correctly")
 		}
-		
+
 		// Test disabled auditor
 		disabledAuditor := NewSecurityAuditor(false, logger)
-		
+
 		if disabledAuditor.enabled {
 			t.Error("Expected auditor to be disabled")
 		}
@@ -254,31 +254,31 @@ func TestSecurityAuditor_LogSecurityEvent(t *testing.T) {
 	t.Run("EnabledAuditor", func(t *testing.T) {
 		logger := &MockSecurityLogger{}
 		auditor := NewSecurityAuditor(true, logger)
-		
+
 		// Should not panic when logging security event
 		auditor.LogSecurityEvent("auth_success", "User authenticated successfully", map[string]interface{}{
 			"user": "testuser",
 			"ip":   "127.0.0.1",
 		})
-		
+
 		auditor.LogSecurityEvent("auth_failure", "Authentication failed", map[string]interface{}{
 			"user":   "baduser",
 			"ip":     "127.0.0.1",
 			"reason": "invalid_password",
 		})
-		
+
 		// No assertions needed - just verify it doesn't panic
 	})
-	
+
 	t.Run("DisabledAuditor", func(t *testing.T) {
 		logger := &MockSecurityLogger{}
 		auditor := NewSecurityAuditor(false, logger)
-		
+
 		// Should return early without logging when disabled
 		auditor.LogSecurityEvent("auth_success", "User authenticated successfully", map[string]interface{}{
 			"user": "testuser",
 		})
-		
+
 		// No assertions needed - just verify it doesn't panic
 	})
 }
@@ -287,22 +287,22 @@ func TestSecurityAuditor_LogConnectionAttempt(t *testing.T) {
 	t.Run("ConnectionLogging", func(t *testing.T) {
 		logger := &MockSecurityLogger{}
 		auditor := NewSecurityAuditor(true, logger)
-		
+
 		// Should not panic when logging connection attempt
 		auditor.LogConnectionAttempt("worker1", "127.0.0.1:22", true, "")
-		
+
 		auditor.LogConnectionAttempt("worker2", "127.0.0.1:2222", false, "connection failed")
-		
+
 		// No assertions needed - just verify it doesn't panic
 	})
-	
+
 	t.Run("DisabledAuditor", func(t *testing.T) {
 		logger := &MockSecurityLogger{}
 		auditor := NewSecurityAuditor(false, logger)
-		
+
 		// Should return early without logging when disabled
 		auditor.LogConnectionAttempt("worker1", "127.0.0.1:22", true, "")
-		
+
 		// No assertions needed - just verify it doesn't panic
 	})
 }
@@ -311,22 +311,22 @@ func TestSecurityAuditor_LogAuthAttempt(t *testing.T) {
 	t.Run("AuthLogging", func(t *testing.T) {
 		logger := &MockSecurityLogger{}
 		auditor := NewSecurityAuditor(true, logger)
-		
+
 		// Should not panic when logging auth attempt
 		auditor.LogAuthAttempt("worker1", "testuser", "password", true)
-		
+
 		auditor.LogAuthAttempt("worker2", "baduser", "key", false)
-		
+
 		// No assertions needed - just verify it doesn't panic
 	})
-	
+
 	t.Run("DisabledAuditor", func(t *testing.T) {
 		logger := &MockSecurityLogger{}
 		auditor := NewSecurityAuditor(false, logger)
-		
+
 		// Should return early without logging when disabled
 		auditor.LogAuthAttempt("worker1", "testuser", "password", true)
-		
+
 		// No assertions needed - just verify it doesn't panic
 	})
 }
@@ -335,29 +335,29 @@ func TestSecurityAuditor_LogNetworkAccess(t *testing.T) {
 	t.Run("NetworkLogging", func(t *testing.T) {
 		logger := &MockSecurityLogger{}
 		auditor := NewSecurityAuditor(true, logger)
-		
+
 		// Should not panic when logging network access
 		auditor.LogNetworkAccess("127.0.0.1:22", true)
-		
+
 		auditor.LogNetworkAccess("192.168.1.100:8080", false)
-		
+
 		// No assertions needed - just verify it doesn't panic
 	})
-	
+
 	t.Run("DisabledAuditor", func(t *testing.T) {
 		logger := &MockSecurityLogger{}
 		auditor := NewSecurityAuditor(false, logger)
-		
+
 		// Should return early without logging when disabled
 		auditor.LogNetworkAccess("127.0.0.1:22", true)
-		
+
 		// No assertions needed - just verify it doesn't panic
 	})
 }
 
 func TestSecurityConfig_MatchesPattern(t *testing.T) {
 	config := DefaultSecurityConfig()
-	
+
 	t.Run("WildcardPattern", func(t *testing.T) {
 		// Wildcard should match any hostname
 		if !config.matchesPattern("example.com", "*") {
@@ -367,7 +367,7 @@ func TestSecurityConfig_MatchesPattern(t *testing.T) {
 			t.Error("Expected wildcard pattern to match any hostname")
 		}
 	})
-	
+
 	t.Run("PatternContainsHostname", func(t *testing.T) {
 		// Pattern that contains hostname should match
 		if !config.matchesPattern("example.com", "example.com") {
@@ -377,7 +377,7 @@ func TestSecurityConfig_MatchesPattern(t *testing.T) {
 			t.Error("Expected match when pattern contains hostname")
 		}
 	})
-	
+
 	t.Run("HostnameContainsPattern", func(t *testing.T) {
 		// Hostname that contains pattern should match
 		if !config.matchesPattern("test.example.com", "example") {
@@ -387,7 +387,7 @@ func TestSecurityConfig_MatchesPattern(t *testing.T) {
 			t.Error("Expected match when hostname contains pattern")
 		}
 	})
-	
+
 	t.Run("NoMatch", func(t *testing.T) {
 		// No match should return false
 		if config.matchesPattern("example.com", "test") {
@@ -404,63 +404,63 @@ func TestSecurityConfig_ValidateNetworkAccess(t *testing.T) {
 		config := &SecurityConfig{
 			AllowedNetworks: []string{}, // Empty list = no restrictions
 		}
-		
+
 		// Any address should be allowed
 		err := config.ValidateNetworkAccess("127.0.0.1:22")
 		if err != nil {
 			t.Errorf("Expected no error for unrestricted access, got: %v", err)
 		}
-		
+
 		err = config.ValidateNetworkAccess("192.168.1.100:8080")
 		if err != nil {
 			t.Errorf("Expected no error for unrestricted access, got: %v", err)
 		}
 	})
-	
+
 	t.Run("ValidateNetworkAccess_InvalidAddress", func(t *testing.T) {
 		config := &SecurityConfig{
 			AllowedNetworks: []string{"192.168.1.0/24"},
 		}
-		
+
 		// Invalid address format
 		err := config.ValidateNetworkAccess("invalid-address")
 		if err == nil {
 			t.Error("Expected error for invalid address format")
 		}
-		
+
 		if !strings.Contains(err.Error(), "invalid address format") {
 			t.Errorf("Expected address format error, got: %v", err)
 		}
 	})
-	
+
 	t.Run("ValidateNetworkAccess_AllowedNetwork", func(t *testing.T) {
 		config := &SecurityConfig{
 			AllowedNetworks: []string{"192.168.1.0/24"},
 		}
-		
+
 		// Address in allowed network
 		err := config.ValidateNetworkAccess("192.168.1.100:22")
 		if err != nil {
 			t.Errorf("Expected no error for address in allowed network, got: %v", err)
 		}
 	})
-	
+
 	t.Run("ValidateNetworkAccess_NotAllowedNetwork", func(t *testing.T) {
 		config := &SecurityConfig{
 			AllowedNetworks: []string{"192.168.1.0/24"},
 		}
-		
+
 		// Address not in allowed network
 		err := config.ValidateNetworkAccess("10.0.0.100:22")
 		if err == nil {
 			t.Error("Expected error for address not in allowed network")
 		}
-		
+
 		if !strings.Contains(err.Error(), "not in allowed networks") {
 			t.Errorf("Expected network restriction error, got: %v", err)
 		}
 	})
-	
+
 	t.Run("ValidateNetworkAccess_MultipleNetworks", func(t *testing.T) {
 		config := &SecurityConfig{
 			AllowedNetworks: []string{
@@ -469,21 +469,21 @@ func TestSecurityConfig_ValidateNetworkAccess(t *testing.T) {
 				"127.0.0.0/8",
 			},
 		}
-		
+
 		// Test each allowed network
 		testAddresses := []string{
-			"192.168.1.50:22",    // In 192.168.1.0/24
-			"10.10.10.10:8080",   // In 10.0.0.0/8
-			"127.0.0.1:3000",     // In 127.0.0.0/8
+			"192.168.1.50:22",  // In 192.168.1.0/24
+			"10.10.10.10:8080", // In 10.0.0.0/8
+			"127.0.0.1:3000",   // In 127.0.0.0/8
 		}
-		
+
 		for _, addr := range testAddresses {
 			err := config.ValidateNetworkAccess(addr)
 			if err != nil {
 				t.Errorf("Expected no error for address %s, got: %v", addr, err)
 			}
 		}
-		
+
 		// Test address not in any allowed network
 		err := config.ValidateNetworkAccess("172.16.0.1:22")
 		if err == nil {
@@ -492,10 +492,134 @@ func TestSecurityConfig_ValidateNetworkAccess(t *testing.T) {
 	})
 }
 
+func TestSecurityConfig_SecureSSHConfig(t *testing.T) {
+	t.Run("SecureSSHConfigWithHostKeyVerification", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		knownHostsFile := filepath.Join(tmpDir, "known_hosts")
+
+		// Generate a test SSH key
+		privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+		if err != nil {
+			t.Fatalf("Failed to generate test key: %v", err)
+		}
+
+		publicKey, err := ssh.NewPublicKey(&privateKey.PublicKey)
+		if err != nil {
+			t.Fatalf("Failed to create public key: %v", err)
+		}
+
+		// Write a known hosts entry
+		knownHostsContent := "example.com " + string(ssh.MarshalAuthorizedKey(publicKey))
+		err = os.WriteFile(knownHostsFile, []byte(knownHostsContent), 0600)
+		if err != nil {
+			t.Fatalf("Failed to write known hosts file: %v", err)
+		}
+
+		config := &SecurityConfig{
+			SSHHostKeyVerification: true,
+			KnownHostsFile:         knownHostsFile,
+			SSHCiphers:             []string{"aes128-gcm@openssh.com"},
+			SSHKexAlgorithms:       []string{"curve25519-sha256"},
+			SSHMACs:                []string{"hmac-sha2-256-etm@openssh.com"},
+			ConnectionTimeout:      30 * time.Second,
+		}
+
+		authMethods := []ssh.AuthMethod{
+			ssh.Password("test-password"),
+		}
+
+		sshConfig, err := config.SecureSSHConfig("testuser", authMethods)
+		if err != nil {
+			t.Errorf("Unexpected error creating SSH config: %v", err)
+		}
+		if sshConfig == nil {
+			t.Error("Expected non-nil SSH config")
+		}
+
+		// Verify config properties
+		if sshConfig.User != "testuser" {
+			t.Errorf("Expected user 'testuser', got '%s'", sshConfig.User)
+		}
+		if sshConfig.Timeout != 30*time.Second {
+			t.Errorf("Expected timeout 30s, got %v", sshConfig.Timeout)
+		}
+		if sshConfig.HostKeyCallback == nil {
+			t.Error("Expected host key callback to be set")
+		}
+	})
+
+	t.Run("SecureSSHConfigWithoutHostKeyVerification", func(t *testing.T) {
+		config := &SecurityConfig{
+			SSHHostKeyVerification: false,
+			SSHCiphers:             []string{"aes128-gcm@openssh.com"},
+			SSHKexAlgorithms:       []string{"curve25519-sha256"},
+			SSHMACs:                []string{"hmac-sha2-256-etm@openssh.com"},
+			ConnectionTimeout:      30 * time.Second,
+		}
+
+		authMethods := []ssh.AuthMethod{
+			ssh.Password("test-password"),
+		}
+
+		sshConfig, err := config.SecureSSHConfig("testuser", authMethods)
+		if err != nil {
+			t.Errorf("Unexpected error creating SSH config: %v", err)
+		}
+		if sshConfig == nil {
+			t.Error("Expected non-nil SSH config")
+		}
+
+		// Should use insecure callback
+		if sshConfig.HostKeyCallback == nil {
+			t.Error("Expected insecure host key callback to be set")
+		}
+	})
+
+	t.Run("SecureSSHConfigWithNonExistentKnownHosts", func(t *testing.T) {
+		config := &SecurityConfig{
+			SSHHostKeyVerification: true,
+			KnownHostsFile:         "/non/existent/known_hosts",
+			SSHCiphers:             []string{"aes128-gcm@openssh.com"},
+			SSHKexAlgorithms:       []string{"curve25519-sha256"},
+			SSHMACs:                []string{"hmac-sha2-256-etm@openssh.com"},
+			ConnectionTimeout:      30 * time.Second,
+		}
+
+		authMethods := []ssh.AuthMethod{
+			ssh.Password("test-password"),
+		}
+
+		sshConfig, err := config.SecureSSHConfig("testuser", authMethods)
+		if err != nil {
+			t.Errorf("Unexpected error creating SSH config with non-existent known hosts: %v", err)
+		}
+		if sshConfig == nil {
+			t.Error("Expected non-nil SSH config")
+		}
+
+		// The callback should reject all keys for non-existent known hosts file
+		if sshConfig.HostKeyCallback == nil {
+			t.Error("Expected host key callback to be set")
+		}
+
+		// Test that the callback rejects keys
+		privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
+		publicKey, _ := ssh.NewPublicKey(&privateKey.PublicKey)
+
+		err = sshConfig.HostKeyCallback("example.com", &testAddr{}, publicKey)
+		if err == nil {
+			t.Error("Expected callback to reject keys for non-existent known hosts file")
+		}
+		if !strings.Contains(err.Error(), "does not exist") {
+			t.Errorf("Expected 'does not exist' error, got: %v", err)
+		}
+	})
+}
+
 func TestSecurityConfig_SecureTLSConfig(t *testing.T) {
 	t.Run("DefaultTLSConfig", func(t *testing.T) {
 		config := DefaultSecurityConfig()
-		
+
 		// Should not panic and return valid config
 		tlsConfig, err := config.SecureTLSConfig()
 		if err != nil {
@@ -505,11 +629,11 @@ func TestSecurityConfig_SecureTLSConfig(t *testing.T) {
 			t.Error("Expected non-nil TLS config")
 		}
 	})
-	
+
 	t.Run("TLSConfigWithCertVerification", func(t *testing.T) {
 		config := DefaultSecurityConfig()
 		config.TLSCertVerification = true
-		
+
 		// Should work without CA file
 		tlsConfig, err := config.SecureTLSConfig()
 		if err != nil {
@@ -522,11 +646,11 @@ func TestSecurityConfig_SecureTLSConfig(t *testing.T) {
 			t.Error("Expected certificate verification to be enabled")
 		}
 	})
-	
+
 	t.Run("TLSConfigWithMutualTLS", func(t *testing.T) {
 		config := DefaultSecurityConfig()
 		config.RequireMutualTLS = true
-		
+
 		// Should fail without client cert/key
 		tlsConfig, err := config.SecureTLSConfig()
 		if err == nil {
@@ -536,12 +660,12 @@ func TestSecurityConfig_SecureTLSConfig(t *testing.T) {
 			t.Error("Expected nil TLS config on error")
 		}
 	})
-	
+
 	t.Run("TLSConfigWithInvalidCAFile", func(t *testing.T) {
 		config := DefaultSecurityConfig()
 		config.TLSCertVerification = true
 		config.TLSCAFile = "/non/existent/ca.pem"
-		
+
 		// Should fail with invalid CA file
 		tlsConfig, err := config.SecureTLSConfig()
 		if err == nil {
