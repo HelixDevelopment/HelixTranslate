@@ -257,18 +257,28 @@ func TestDockerOrchestrator_AddSupportingServices(t *testing.T) {
 		orchestrator.addSupportingServices(composeConfig)
 		
 		// Check that database service was added
-		if _, exists := composeConfig.Services["translator-db"]; !exists {
-			t.Error("Database service was not added")
+		if _, exists := composeConfig.Services["postgres"]; !exists {
+			t.Error("PostgreSQL service was not added")
 		}
 		
-		// Check that network was added
-		if _, exists := composeConfig.Networks["translator-network"]; !exists {
-			t.Error("Network was not added")
+		// Check that Redis service was added
+		if _, exists := composeConfig.Services["redis"]; !exists {
+			t.Error("Redis service was not added")
+		}
+		
+		// Check that network was NOT added (added in different method)
+		if _, exists := composeConfig.Networks["translator-network"]; exists {
+			t.Error("Network should not be added by addSupportingServices")
 		}
 		
 		// Check that database volume was added
-		if _, exists := composeConfig.Volumes["translator-db-data"]; !exists {
-			t.Error("Database volume was not added")
+		if _, exists := composeConfig.Volumes["postgres-data"]; !exists {
+			t.Error("PostgreSQL volume was not added")
+		}
+		
+		// Check that Redis volume was added
+		if _, exists := composeConfig.Volumes["redis-data"]; !exists {
+			t.Error("Redis volume was not added")
 		}
 	})
 }

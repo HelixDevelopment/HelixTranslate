@@ -142,7 +142,7 @@ func (s *TestSSHServer) handleConnection(conn net.Conn) {
 	defer sshConn.Close()
 
 	// Store client
-	clientID := fmt.Sprintf("%s:%d", sshConn.RemoteAddr().Network(), sshConn.RemoteAddr().String())
+	clientID := fmt.Sprintf("%s:%s", sshConn.RemoteAddr().Network(), sshConn.RemoteAddr().String())
 	s.mutex.Lock()
 	s.clients[clientID] = sshConn
 	s.mutex.Unlock()

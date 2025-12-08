@@ -234,10 +234,10 @@ func TestStorageValidation(t *testing.T) {
 	})
 	
 	t.Run("Redis config validation", func(t *testing.T) {
-		// Valid config
+		// Valid config (but will fail to connect)
 		validConfig := &Config{
 			Type:    "redis",
-			Host:    "localhost",
+			Host:    "nonexistent-host-12345.local",
 			Port:    6379,
 			Database: "0",
 		}
@@ -247,10 +247,10 @@ func TestStorageValidation(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, storage)
 		
-		// Invalid config - missing host
+		// Invalid config - missing host (this will still try to connect since no validation)
 		invalidConfig := &Config{
 			Type:    "redis",
-			Host:    "",
+			Host:    "", // This becomes empty string, which will still try to connect
 			Port:    6379,
 			Database: "0",
 		}

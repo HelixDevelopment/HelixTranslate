@@ -35,7 +35,7 @@ func TestWebSocketMonitoringSystem(t *testing.T) {
 
 type WebSocketMonitoringTestSuite struct {
 	server      *MonitoringTestServer
-	clients     []*websocket.Conn
+	clients     []*websocket.Client
 	eventBus     *events.EventBus
 	testSessions map[string]*TestSession
 	httpServer  *http.Server
@@ -43,7 +43,7 @@ type WebSocketMonitoringTestSuite struct {
 
 type MonitoringTestServer struct {
 	Port    int
-	Clients map[string]*websocket.Conn
+	Clients map[string]*websocket.Client
 	Hub     *websocket.Hub
 }
 
@@ -82,18 +82,18 @@ func (suite *WebSocketMonitoringTestSuite) Setup(t *testing.T) {
 	// Get dynamic port for testing
 	port := utils.GetFreePort()
 	
-	// Initialize test monitoring server
-	suite.server = &MonitoringTestServer{
-		Port:    port, // Use dynamic port for testing
-		Clients: make(map[string]*websocket.Conn),
-		Hub:     websocket.NewHub(),
-	}
-
 	// Initialize event bus
 	suite.eventBus = events.NewEventBus()
 
 	// Initialize test sessions
 	suite.testSessions = make(map[string]*TestSession)
+
+	// Initialize test monitoring server
+	suite.server = &MonitoringTestServer{
+		Port:    port, // Use dynamic port for testing
+		Clients: make(map[string]*websocket.Client),
+		Hub:     websocket.NewHub(suite.eventBus),
+	}
 
 	// Start test server
 	go suite.startTestServer()
@@ -185,15 +185,15 @@ func (suite *WebSocketMonitoringTestSuite) handleWebSocket(w http.ResponseWriter
 	go suite.handleClientMessages(clientID, sessionID, conn)
 }
 
-func (suite *WebSocketMonitoringTestSuite) handleClientMessages(clientID, sessionID string, conn *websocket.Conn) {
+func (suite *WebSocketMonitoringTestSuite) handleClientMessages(clientID, sessionID string, client *websocket.Client) {
 	defer func() {
 		delete(suite.server.Clients, clientID)
-		conn.Close()
+		client.Hub.Unregister <- client
 	}()
 
 	for {
 		var event TestEvent
-		err := conn.ReadJSON(&event)
+		err := client.Conn.ReadJSON(&event)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("WebSocket error: %v", err)

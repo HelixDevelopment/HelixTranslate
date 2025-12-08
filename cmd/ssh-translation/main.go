@@ -759,7 +759,7 @@ func (s *SSHTranslationSystem) convertFB2ToMarkdown(ctx context.Context, workflo
 	inputFile := workflowCtx.InputFile
 	markdownFile := filepath.Join(
 		filepath.Dir(inputFile),
-		strings.TrimSuffix(filepath.Base(inputFile), filepath.Ext(inputFile))+".md"
+		strings.TrimSuffix(filepath.Base(inputFile), filepath.Ext(inputFile))+".md",
 	)
 
 	// Convert FB2 to Markdown
@@ -1017,7 +1017,7 @@ func (s *SSHTranslationSystem) convertTranslatedToEPUB(ctx context.Context, work
 	// Transfer translated file back from remote
 	localTranslatedFile := filepath.Join(
 		filepath.Dir(workflowCtx.InputFile),
-		strings.TrimSuffix(filepath.Base(workflowCtx.InputFile), filepath.Ext(workflowCtx.InputFile))+"_translated.md"
+		strings.TrimSuffix(filepath.Base(workflowCtx.InputFile), filepath.Ext(workflowCtx.InputFile))+"_translated.md",
 	)
 
 	if err := s.sshWorker.TransferFileFromRemote(ctx, remoteTranslatedFile, localTranslatedFile); err != nil {
@@ -1030,7 +1030,7 @@ func (s *SSHTranslationSystem) convertTranslatedToEPUB(ctx context.Context, work
 	// Create EPUB output path
 	epubFile := filepath.Join(
 		filepath.Dir(workflowCtx.InputFile),
-		strings.TrimSuffix(filepath.Base(workflowCtx.InputFile), filepath.Ext(workflowCtx.InputFile))+"_sr.epub"
+		strings.TrimSuffix(filepath.Base(workflowCtx.InputFile), filepath.Ext(workflowCtx.InputFile))+"_sr.epub",
 	)
 
 	// Create markdown workflow for EPUB conversion
@@ -1076,7 +1076,7 @@ func (s *SSHTranslationSystem) verifyOutput(ctx context.Context, workflowCtx *Wo
 	// Transfer translated markdown for verification
 	localTranslatedMarkdown := filepath.Join(
 		filepath.Dir(workflowCtx.InputFile),
-		strings.TrimSuffix(filepath.Base(workflowCtx.InputFile), filepath.Ext(workflowCtx.InputFile))+"_translated.md"
+		strings.TrimSuffix(filepath.Base(workflowCtx.InputFile), filepath.Ext(workflowCtx.InputFile))+"_translated.md",
 	)
 
 	if err := s.sshWorker.TransferFileFromRemote(ctx, translatedMarkdown, localTranslatedMarkdown); err != nil {

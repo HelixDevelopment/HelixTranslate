@@ -696,6 +696,18 @@ func TestTranslate_Integration(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
 		t.Skip("llama.cpp not installed - install with: brew install llama.cpp")
 	}
+	
+	// Check if we have sufficient RAM
+	detector := hardware.NewDetector()
+	caps, _ := detector.Detect()
+	if caps.TotalRAM < 8*1024*1024*1024 { // Less than 8GB
+		t.Skip("Insufficient RAM for integration test - need at least 8GB")
+	}
+	
+	// Check if HF_TOKEN is available (required for model download)
+	if os.Getenv("HF_TOKEN") == "" {
+		t.Skip("HF_TOKEN environment variable not set - required for model download")
+	}
 
 	// Create client
 	config := TranslationConfig{
@@ -808,6 +820,16 @@ func TestGPUAcceleration_Integration(t *testing.T) {
 
 	if !caps.HasGPU {
 		t.Skip("No GPU detected - skipping GPU acceleration test")
+	}
+	
+	// Check if we have sufficient resources
+	if caps.TotalRAM < 8*1024*1024*1024 { // Less than 8GB
+		t.Skip("Insufficient RAM for GPU acceleration test - need at least 8GB")
+	}
+	
+	// Check if HF_TOKEN is available (required for model download)
+	if os.Getenv("HF_TOKEN") == "" {
+		t.Skip("HF_TOKEN environment variable not set - required for model download")
 	}
 
 	t.Logf("GPU detected: %s", caps.GPUType)

@@ -21,11 +21,6 @@ import (
 func TestInputSanitization(t *testing.T) {
 	// Test 1: HTML tag sanitization
 	t.Run("HTMLTagSanitization", func(t *testing.T) {
-		mockLogger := logger.NewLogger(logger.LoggerConfig{
-			Level:  logger.DEBUG,
-			Format: logger.FORMAT_TEXT,
-		})
-
 		mockTranslator := new(mocks.MockTranslator)
 		mockTranslator.On("GetName").Return("test-translator")
 		mockTranslator.On("Translate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
@@ -72,11 +67,6 @@ func TestInputSanitization(t *testing.T) {
 
 	// Test 2: Script injection in various fields
 	t.Run("ScriptInjectionInFields", func(t *testing.T) {
-		mockLogger := logger.NewLogger(logger.LoggerConfig{
-			Level:  logger.DEBUG,
-			Format: logger.FORMAT_TEXT,
-		})
-
 		server := api.NewServer(api.ServerConfig{
 			Port:     8090,
 			Logger:    mockLogger,

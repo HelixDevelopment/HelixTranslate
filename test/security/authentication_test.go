@@ -20,11 +20,6 @@ import (
 func TestAuthentication(t *testing.T) {
 	// Test 1: Valid API key authentication
 	t.Run("ValidAPIKey", func(t *testing.T) {
-		mockLogger := logger.NewLogger(logger.LoggerConfig{
-			Level:  logger.DEBUG,
-			Format: logger.FORMAT_TEXT,
-		})
-
 		mockTranslator := new(mocks.MockTranslator)
 		mockTranslator.On("GetName").Return("test-translator")
 		mockTranslator.On("Translate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
@@ -36,7 +31,6 @@ func TestAuthentication(t *testing.T) {
 
 		// Get server URL for testing
 		serverURL := httpServer.GetURL()
-		apiServer := httpServer.GetAPIServer()
 		
 		// Wait for server to start
 		time.Sleep(100 * time.Millisecond)
@@ -62,11 +56,6 @@ func TestAuthentication(t *testing.T) {
 	// Test 2: Invalid API key
 	t.Run("InvalidAPIKey", func(t *testing.T) {
 		// Create another test server with different API key
-		mockLogger := logger.NewLogger(logger.LoggerConfig{
-			Level:  logger.DEBUG,
-			Format: logger.FORMAT_TEXT,
-		})
-
 		mockTranslator := new(mocks.MockTranslator)
 		mockTranslator.On("GetName").Return("test-translator")
 		mockTranslator.On("Translate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).

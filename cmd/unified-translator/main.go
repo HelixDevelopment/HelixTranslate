@@ -13,12 +13,12 @@ import (
 
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
+	"digital.vasic.translator/pkg/fb2"
 	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/pkg/markdown"
 	"digital.vasic.translator/pkg/sshworker"
 	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/translator/llm"
-	"digital.vasic.translator/pkg/version"
 )
 
 const (
@@ -301,10 +301,20 @@ func executeSSHTranslation(ctx context.Context, config *UnifiedConfig, session *
 	}
 	
 	// Download result
-	translatedData, err := worker.DownloadData(ctx, remoteOutputPath)
+	tempFile := filepath.Join(os.TempDir(), "translation_result_"+session.ID+".txt")
+	err = worker.DownloadFile(ctx, remoteOutputPath, tempFile)
 	if err != nil {
 		return "", fmt.Errorf("failed to download translation result: %w", err)
 	}
+	
+	// Read the downloaded file
+	translatedData, err := os.ReadFile(tempFile)
+	if err != nil {
+		return "", fmt.Errorf("failed to read downloaded translation result: %w", err)
+	}
+	
+	// Clean up temp file
+	os.Remove(tempFile)
 	
 	return string(translatedData), nil
 }
@@ -643,27 +653,76 @@ func addFile(session *TranslationSession, path, fileType string, size int64, ver
 // Placeholder functions - these need to be implemented based on existing functionality
 func parseInputFile(filePath string) (string, string, error) {
 	// Use existing ebook parser
-	parser := ebook.NewParser()
-	content, format, err := parser.ParseFile(filePath)
+	parser := ebook.NewUniversalParser()
+	book, err := parser.Parse(filePath)
 	if err != nil {
 		return "", "", err
 	}
-	return content, format, nil
+	return bookToString(book), book.Format.String(), nil
 }
 
 func convertToMarkdown(content, format string) (string, error) {
 	// Use existing markdown converter
 	switch format {
 	case "fb2":
-		converter := &ebook.FB2Parser{}
-		return converter.ToMarkdown(content)
+		// Create temporary input file
+		tmpFile := filepath.Join(os.TempDir(), "input.fb2")
+		if err := os.WriteFile(tmpFile, []byte(content), 0644); err != nil {
+			return "", fmt.Errorf("failed to write temp file: %w", err)
+		}
+		defer os.Remove(tmpFile)
+		
+		// Create temporary output file
+		outputFile := filepath.Join(os.TempDir(), "output.md")
+		defer os.Remove(outputFile)
+		
+		// Convert using FB2 to markdown workflow
+		converter := fb2.NewMarkdownConverter(logger.NewNoOpLogger())
+		if err := converter.ConvertToMarkdown(tmpFile, outputFile); err != nil {
+			return "", fmt.Errorf("failed to convert FB2 to markdown: %w", err)
+		}
+		
+		// Read result
+		result, err := os.ReadFile(outputFile)
+		return string(result), err
 	case "epub":
-		converter := markdown.NewEPUBToMarkdownConverter()
-		return converter.Convert(content)
+		// Create temporary input file
+		tmpFile := filepath.Join(os.TempDir(), "input.epub")
+		if err := os.WriteFile(tmpFile, []byte(content), 0644); err != nil {
+			return "", fmt.Errorf("failed to write temp file: %w", err)
+		}
+		defer os.Remove(tmpFile)
+		
+		// Create temporary output file
+		outputFile := filepath.Join(os.TempDir(), "output.md")
+		defer os.Remove(outputFile)
+		
+		// Convert using EPUB to markdown workflow
+		converter := markdown.NewEPUBToMarkdownConverter(false, "")
+		if err := converter.ConvertEPUBToMarkdown(tmpFile, outputFile); err != nil {
+			return "", fmt.Errorf("failed to convert EPUB to markdown: %w", err)
+		}
+		
+		// Read result
+		result, err := os.ReadFile(outputFile)
+		return string(result), err
 	default:
 		// Simple text conversion for other formats
 		return content, nil
 	}
+}
+
+func bookToString(book *ebook.Book) string {
+	var result strings.Builder
+	for _, chapter := range book.Chapters {
+		result.WriteString(chapter.Title)
+		result.WriteString("\n\n")
+		for _, section := range chapter.Sections {
+			result.WriteString(section.Content)
+			result.WriteString("\n\n")
+		}
+	}
+	return result.String()
 }
 
 func verifyTranslation(text, targetLang, script string) bool {
@@ -681,9 +740,16 @@ func verifyTranslation(text, targetLang, script string) bool {
 }
 
 func generateEPUB(content, outputPath, inputFile string) error {
+	// Create temporary markdown file
+	tmpFile := filepath.Join(os.TempDir(), "content.md")
+	if err := os.WriteFile(tmpFile, []byte(content), 0644); err != nil {
+		return fmt.Errorf("failed to write temp markdown: %w", err)
+	}
+	defer os.Remove(tmpFile)
+	
 	// Use existing EPUB generator
 	generator := markdown.NewMarkdownToEPUBConverter()
-	return generator.GenerateEPUB(content, outputPath, inputFile)
+	return generator.ConvertMarkdownToEPUB(tmpFile, outputPath)
 }
 
 func verifyEPUB(path string) bool {

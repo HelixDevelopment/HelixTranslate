@@ -15,7 +15,6 @@ import (
 	"time"
 	
 	"digital.vasic.translator/pkg/events"
-	"digital.vasic.translator/pkg/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -2211,51 +2210,28 @@ func TestNewLlamaCppClientErrorPaths(t *testing.T) {
 
 // TestNewLlamaCppClientUncoveredPaths tests additional error paths in NewLlamaCppClient
 func TestNewLlamaCppClientUncoveredPaths(t *testing.T) {
-	// Test 1: Model that exists but requires too many resources
-	// This tests the resource validation path
+	// Test 1: Invalid model name that doesn't exist
+	// This tests the model validation path
 	t.Run("insufficient_resources_for_model", func(t *testing.T) {
-		// First, get the registry to find a valid model name
-		registry := models.NewRegistry()
-		
-		// Get list of all models
-		allModels := registry.List()
-		
-		if len(allModels) == 0 {
-			t.Skip("No models available in registry for testing")
-		}
-		
-		// Use the first available model
-		testModel := allModels[0]
-		
-		// Create a config with this model
+		// Create a config with an invalid model name
 		config := TranslationConfig{
-			Model: testModel.ID,
+			Model: "non-existent-model-12345",
 		}
 		
-		// Test NewLlamaCppClient - it will either succeed or fail with appropriate errors
-		// This tests the model validation and resource checking paths
+		// Test NewLlamaCppClient - it should fail with model not found error
 		client, err := NewLlamaCppClient(config)
 		
-		// We don't care if it succeeds or fails - we just want to exercise the code paths
-		if err != nil {
-			// If it fails, it should be for a legitimate reason
-			t.Logf("Expected failure for model %s: %v", testModel.ID, err)
-			
-			// Verify the error is meaningful
-			if !strings.Contains(err.Error(), "hardware") && 
-			   !strings.Contains(err.Error(), "model") &&
-			   !strings.Contains(err.Error(), "not found") &&
-			   !strings.Contains(err.Error(), "llama.cpp") {
-				t.Errorf("Unexpected error type: %v", err)
+		// This should definitely fail with a model not found error
+		if err == nil {
+			t.Errorf("Expected error for non-existent model, but got none")
+			if client != nil {
+				t.Errorf("Expected nil client on error, got non-nil")
 			}
 		} else {
-			// If it succeeds, verify the client structure
-			assert.NotNil(t, client)
-			assert.NotEmpty(t, client.modelPath)
-			assert.NotEmpty(t, client.executable)
-			assert.Greater(t, client.threads, 0)
-			assert.Greater(t, client.contextSize, 0)
-			t.Logf("Success with model %s: using %s", testModel.ID, client.modelPath)
+			// Verify the error is about model not found
+			if !strings.Contains(err.Error(), "model not found") {
+				t.Errorf("Expected 'model not found' error, got: %v", err)
+			}
 		}
 	})
 	

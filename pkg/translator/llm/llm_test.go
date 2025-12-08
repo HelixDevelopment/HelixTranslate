@@ -768,6 +768,11 @@ func TestLLMTranslatorGetName(t *testing.T) {
 // TestLLMTranslatorTranslate tests the main translate functionality
 func TestLLMTranslatorTranslate(t *testing.T) {
 	mockClient := NewMockLLMClient()
+	
+	// Set up expected responses
+	mockClient.SetResponse("Hello world", "HELLO WORLD")
+	mockClient.SetResponse("", "")
+	mockClient.SetResponse("   ", "   ")
 
 	lt := &LLMTranslator{
 		BaseTranslator: NewBaseTranslator(TranslationConfig{}),
@@ -819,6 +824,9 @@ func TestLLMTranslatorTranslate(t *testing.T) {
 // TestLLMTranslatorTranslateWithProgress tests progress reporting
 func TestLLMTranslatorTranslateWithProgress(t *testing.T) {
 	mockClient := NewMockLLMClient()
+	
+	// Set up expected response
+	mockClient.SetResponse("Hello world", "HELLO WORLD")
 
 	lt := &LLMTranslator{
 		BaseTranslator: NewBaseTranslator(TranslationConfig{

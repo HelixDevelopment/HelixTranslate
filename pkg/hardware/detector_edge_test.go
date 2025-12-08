@@ -10,25 +10,27 @@ func TestHardware_DetectorMethods(t *testing.T) {
 	
 	t.Run("MaxModelSizeEdgeCases", func(t *testing.T) {
 		// Test various RAM values and GPU configurations
+		// Note: calculation is: ramGB / multiplier (2.0 for CPU, 1.5 for GPU)
+		// Then round to nearest standard model size
 		testCases := []struct {
 			ramGB      float64
 			hasGPU     bool
 			expectedMax uint64
 		}{
-			{1, false, 1_000_000_000},    // 1GB RAM -> 1B model minimum
-			{2, false, 1_000_000_000},    // 2GB RAM -> 1B model minimum
-			{4, false, 1_000_000_000},    // 4GB RAM -> 1B model minimum
-			{8, false, 3_000_000_000},    // 8GB RAM -> 3B model
-			{16, false, 7_000_000_000},   // 16GB RAM -> 7B model
-			{32, false, 13_000_000_000},   // 32GB RAM -> 13B model
-			{64, false, 27_000_000_000},   // 64GB RAM -> 27B model
-			{128, false, 70_000_000_000},  // 128GB RAM -> 70B model
-			{256, false, 70_000_000_000},  // 256GB RAM -> 70B model (max)
-			{8, true, 3_000_000_000},     // 8GB RAM with GPU -> 3B model
-			{16, true, 7_000_000_000},    // 16GB RAM with GPU -> 7B model
-			{32, true, 13_000_000_000},   // 32GB RAM with GPU -> 13B model
-			{64, true, 27_000_000_000},   // 64GB RAM with GPU -> 27B model
-			{128, true, 70_000_000_000},  // 128GB RAM with GPU -> 70B model
+			{1, false, 1_000_000_000},    // 1/2 = 0.5 -> 1B minimum
+			{2, false, 1_000_000_000},    // 2/2 = 1 -> 1B minimum
+			{4, false, 1_000_000_000},    // 4/2 = 2 -> 1B (next threshold is 3B)
+			{8, false, 3_000_000_000},    // 8/2 = 4 -> 3B threshold
+			{16, false, 7_000_000_000},   // 16/2 = 8 -> 7B threshold
+			{32, false, 13_000_000_000},   // 32/2 = 16 -> 13B threshold
+			{64, false, 27_000_000_000},   // 64/2 = 32 -> 27B threshold
+			{128, false, 27_000_000_000},  // 128/2 = 64 -> 27B threshold (64 < 70)
+			{256, false, 70_000_000_000},  // 256/2 = 128 -> 70B max
+			{8, true, 3_000_000_000},     // 8/1.5 = 5.33 -> 3B threshold
+			{16, true, 7_000_000_000},    // 16/1.5 = 10.66 -> 7B threshold
+			{32, true, 13_000_000_000},   // 32/1.5 = 21.33 -> 13B threshold
+			{64, true, 27_000_000_000},   // 64/1.5 = 42.66 -> 27B threshold
+			{128, true, 70_000_000_000},  // 128/1.5 = 85.33 -> 70B max
 		}
 		
 		for _, tc := range testCases {

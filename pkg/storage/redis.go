@@ -17,6 +17,14 @@ type RedisStorage struct {
 
 // NewRedisStorage creates a new Redis storage
 func NewRedisStorage(config *Config, ttl time.Duration) (*RedisStorage, error) {
+	// Validate configuration
+	if config.Host == "" {
+		return nil, fmt.Errorf("redis host is required")
+	}
+	if config.Port <= 0 || config.Port > 65535 {
+		return nil, fmt.Errorf("redis port must be between 1 and 65535")
+	}
+	
 	addr := fmt.Sprintf("%s:%d", config.Host, config.Port)
 
 	client := redis.NewClient(&redis.Options{

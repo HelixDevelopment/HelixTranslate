@@ -25,7 +25,7 @@ func TestEBookTranslationWorkflow(t *testing.T) {
 	defer os.RemoveAll(tempDir)
 
 	// Create test logger
-	testLogger := logger.NewLogger(logger.Config{
+	testLogger := logger.NewLogger(logger.LoggerConfig{
 		Level:  "debug",
 		Format: "text",
 	})
@@ -279,7 +279,7 @@ func testFileVerification(t *testing.T, tempDir string) {
 
 	// Create translator instance for testing
 	translator := &EBookTranslator{
-		logger:        logger.NewLogger(logger.Config{Level: "debug", Format: "text"}),
+		logger:        logger.NewLogger(logger.LoggerConfig{Level: "debug", Format: "text"}),
 		targetLanguage: "sr-cyrl",
 	}
 

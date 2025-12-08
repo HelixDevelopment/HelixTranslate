@@ -16,7 +16,7 @@ func TestDetector_getTotalRAM(t *testing.T) {
 		// We'll just verify the function exists and returns something
 		_, err := d.getTotalRAM()
 		// err should be nil for valid OS
-		if err != nil && originalGOOS == "darwin" || originalGOOS == "linux" || originalGOOS == "windows" {
+		if err != nil && (originalGOOS == "darwin" || originalGOOS == "linux" || originalGOOS == "windows") {
 			t.Errorf("Unexpected error for supported OS %s: %v", originalGOOS, err)
 		}
 	})
