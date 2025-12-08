@@ -488,8 +488,19 @@ func TestTranslateWithRetry(t *testing.T) {
 
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
+				mockClient := NewMockLLMClient()
+				if tt.shouldFail {
+					// For non-size errors, we need at least 1 failure
+					maxFailures := tt.expectedRetries
+					if !tt.sizeError {
+						maxFailures = 1
+					}
+					mockClient.SetFailure(true, maxFailures)
+					mockClient.SetSizeError(tt.sizeError)
+				}
+
 				lt := &LLMTranslator{
-					client: NewMockLLMClient(),
+					client: mockClient,
 				}
 
 				prompt := "Translate this text"
@@ -497,17 +508,17 @@ func TestTranslateWithRetry(t *testing.T) {
 
 				if tt.expectedError && err == nil {
 					t.Error("Expected error but got none")
-			}
+				}
 
-			if !tt.expectedError && err != nil {
-				t.Errorf("Unexpected error: %v", err)
-			}
+				if !tt.expectedError && err != nil {
+					t.Errorf("Unexpected error: %v", err)
+				}
 
-			if !tt.expectedError && result == "" {
-				t.Error("Expected non-empty result")
-			}
-		})
-	}
+				if !tt.expectedError && result == "" {
+					t.Error("Expected non-empty result")
+				}
+			})
+		}
 }
 
 // Benchmark text splitting performance
@@ -582,9 +593,11 @@ func TestLLMTranslatorErrorHandling(t *testing.T) {
 		{
 			name: "client returns error",
 			setupClient: func() *LLMTranslator {
+				mockClient := NewMockLLMClient()
+				mockClient.SetFailure(true, 1)
 				return &LLMTranslator{
 					BaseTranslator: NewBaseTranslator(TranslationConfig{}),
-					client:        NewMockLLMClient(),
+					client:        mockClient,
 					provider:      ProviderOpenAI,
 				}
 			},
@@ -593,9 +606,11 @@ func TestLLMTranslatorErrorHandling(t *testing.T) {
 		{
 			name: "client returns non-size error",
 			setupClient: func() *LLMTranslator {
+				mockClient := NewMockLLMClient()
+				mockClient.SetFailure(true, 1)
 				return &LLMTranslator{
 					BaseTranslator: NewBaseTranslator(TranslationConfig{}),
-					client:        NewMockLLMClient(),
+					client:        mockClient,
 					provider:      ProviderOpenAI,
 				}
 			},
@@ -880,6 +895,11 @@ func TestLLMTranslatorCaching(t *testing.T) {
 
 	if result1 != result2 {
 		t.Error("Cached result should match first result")
+	}
+
+	// Check that client was called only once (second call used cache)
+	if mockClient.callCount != 1 {
+		t.Errorf("Expected 1 client call, got %d", mockClient.callCount)
 	}
 
 	// Check stats
