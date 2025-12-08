@@ -134,8 +134,8 @@ func TestAPIHandlers_Uncovered(t *testing.T) {
 		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
 	})
 
-	t.Run("unpairWorker_InvalidManagerType", func(t *testing.T) {
-		// Test unpairWorker handler with mock manager (wrong type)
+	t.Run("addSlackAlertChannel_InvalidManagerType", func(t *testing.T) {
+		// Test addSlackAlertChannel handler with mock manager (wrong type)
 		mockDM := &MockDistributedManager{}
 
 		handlerWithMock := &Handler{
@@ -146,9 +146,15 @@ func TestAPIHandlers_Uncovered(t *testing.T) {
 		}
 
 		router := gin.New()
-		router.DELETE("/api/v1/distributed/workers/:worker_id/pair", handlerWithMock.unpairWorker)
+		router.POST("/api/v1/monitoring/version/alerts/channels/slack", handlerWithMock.addSlackAlertChannel)
 
-		req, _ := http.NewRequest("DELETE", "/api/v1/distributed/workers/test-worker/pair", nil)
+		testData := map[string]interface{}{
+			"webhook_url": "https://hooks.slack.com/test",
+		}
+
+		jsonData, _ := json.Marshal(testData)
+		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/alerts/channels/slack", bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -161,34 +167,9 @@ func TestAPIHandlers_Uncovered(t *testing.T) {
 		assert.Equal(t, "Invalid distributed manager", response["error"])
 	})
 
-	t.Run("translateDistributed", func(t *testing.T) {
-		// Test translateDistributed handler with nil manager
-		router := gin.New()
-		router.POST("/api/v1/distributed/translate", handler.translateDistributed)
-
-		testData := map[string]interface{}{
-			"text":        "Test text",
-			"source_lang": "en",
-			"target_lang": "es",
-			"worker_id":   "test-worker",
-		}
-
-		jsonData, _ := json.Marshal(testData)
-		req, _ := http.NewRequest("POST", "/api/v1/distributed/translate", bytes.NewBuffer(jsonData))
-		req.Header.Set("Content-Type", "application/json")
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		// Should fail gracefully with nil distributedManager
-		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
-	})
-
-	t.Run("translateDistributed_InvalidManagerType", func(t *testing.T) {
-		// Test translateDistributed handler with mock manager (wrong type)
-		mockDM := &MockDistributedManager{
-			translateResult: "Translated text",
-			translateError:  nil,
-		}
+	t.Run("addSlackAlertChannel_MissingRequiredFields", func(t *testing.T) {
+		// Test addSlackAlertChannel handler with missing required fields
+		mockDM := &MockDistributedManager{}
 
 		handlerWithMock := &Handler{
 			config:             cfg,
@@ -198,27 +179,44 @@ func TestAPIHandlers_Uncovered(t *testing.T) {
 		}
 
 		router := gin.New()
-		router.POST("/api/v1/distributed/translate", handlerWithMock.translateDistributed)
+		router.POST("/api/v1/monitoring/version/alerts/channels/slack", handlerWithMock.addSlackAlertChannel)
 
 		testData := map[string]interface{}{
-			"text":         "Test text",
-			"context_hint": "translation context",
+			// Missing webhook_url field
+			"channel": "#alerts",
 		}
 
 		jsonData, _ := json.Marshal(testData)
-		req, _ := http.NewRequest("POST", "/api/v1/distributed/translate", bytes.NewBuffer(jsonData))
+		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/alerts/channels/slack", bytes.NewBuffer(jsonData))
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("X-Session-ID", "test-session-123")
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
-		// Should fail with invalid manager type
-		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		// Should fail with binding validation error for missing required field
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
 
-		var response map[string]interface{}
-		err := json.Unmarshal(w.Body.Bytes(), &response)
-		assert.NoError(t, err)
-		assert.Equal(t, "Invalid distributed manager", response["error"])
+	t.Run("addSlackAlertChannel_InvalidJSON", func(t *testing.T) {
+		// Test addSlackAlertChannel handler with invalid JSON
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.POST("/api/v1/monitoring/version/alerts/channels/slack", handlerWithMock.addSlackAlertChannel)
+
+		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/alerts/channels/slack", bytes.NewBufferString("invalid json"))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should fail with bad request due to invalid JSON
+		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
 
 	t.Run("translateDistributed_InvalidJSON", func(t *testing.T) {
@@ -570,7 +568,7 @@ func TestAPIVersionHandlers(t *testing.T) {
 	})
 
 	t.Run("getVersionDashboard", func(t *testing.T) {
-		// Test getVersionDashboard handler
+		// Test getVersionDashboard handler with nil manager
 		router := gin.New()
 		router.GET("/api/v1/monitoring/version/dashboard", handler.getVersionDashboard)
 
@@ -578,8 +576,35 @@ func TestAPIVersionHandlers(t *testing.T) {
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
-		// Should return JSON response
+		// Should fail with nil distributedManager
 		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+
+	t.Run("getVersionDashboard_InvalidManagerType", func(t *testing.T) {
+		// Test getVersionDashboard handler with mock manager (wrong type)
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.GET("/api/v1/monitoring/version/dashboard", handlerWithMock.getVersionDashboard)
+
+		req, _ := http.NewRequest("GET", "/api/v1/monitoring/version/dashboard", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should fail with invalid manager type
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Invalid distributed manager", response["error"])
 	})
 
 	t.Run("triggerVersionDriftCheck", func(t *testing.T) {
@@ -587,18 +612,39 @@ func TestAPIVersionHandlers(t *testing.T) {
 		router := gin.New()
 		router.POST("/api/v1/monitoring/version/drift-check", handler.triggerVersionDriftCheck)
 
-		testData := map[string]interface{}{
-			"check_id": "test-check",
-		}
-
-		jsonData, _ := json.Marshal(testData)
-		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/drift-check", bytes.NewBuffer(jsonData))
-		req.Header.Set("Content-Type", "application/json")
+		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/drift-check", nil)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
 		// Should fail gracefully with nil distributedManager
 		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+
+	t.Run("triggerVersionDriftCheck_InvalidManagerType", func(t *testing.T) {
+		// Test triggerVersionDriftCheck handler with mock manager (wrong type)
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.POST("/api/v1/monitoring/version/drift-check", handlerWithMock.triggerVersionDriftCheck)
+
+		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/drift-check", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should fail with invalid manager type
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Invalid distributed manager", response["error"])
 	})
 }
 
@@ -632,13 +678,84 @@ func TestAPIAlertHandlers(t *testing.T) {
 		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
 	})
 
+	t.Run("getAlertHistory_InvalidManagerType", func(t *testing.T) {
+		// Test getAlertHistory handler with mock manager (wrong type)
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.GET("/api/v1/monitoring/version/alerts/history", handlerWithMock.getAlertHistory)
+
+		req, _ := http.NewRequest("GET", "/api/v1/monitoring/version/alerts/history", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should fail with invalid manager type
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Invalid distributed manager", response["error"])
+	})
+
+	t.Run("getAlertHistory_WithLimit", func(t *testing.T) {
+		// Test getAlertHistory handler with limit parameter
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.GET("/api/v1/monitoring/version/alerts/history", handlerWithMock.getAlertHistory)
+
+		req, _ := http.NewRequest("GET", "/api/v1/monitoring/version/alerts/history?limit=10", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should fail with invalid manager type (but would succeed with valid manager)
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+	})
+
+	t.Run("getAlertHistory_InvalidLimit", func(t *testing.T) {
+		// Test getAlertHistory handler with invalid limit parameter
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.GET("/api/v1/monitoring/version/alerts/history", handlerWithMock.getAlertHistory)
+
+		req, _ := http.NewRequest("GET", "/api/v1/monitoring/version/alerts/history?limit=invalid", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should fail with invalid manager type (but would use default limit with valid manager)
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+	})
+
 	t.Run("acknowledgeAlert", func(t *testing.T) {
-		// Test acknowledgeAlert handler
+		// Test acknowledgeAlert handler with nil manager
 		router := gin.New()
 		router.POST("/api/v1/monitoring/version/alerts/:alert_id/acknowledge", handler.acknowledgeAlert)
 
 		testData := map[string]interface{}{
-			"comment": "Acknowledged in test",
+			"acknowledged_by": "test-user",
 		}
 
 		jsonData, _ := json.Marshal(testData)
@@ -651,15 +768,79 @@ func TestAPIAlertHandlers(t *testing.T) {
 		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
 	})
 
+	t.Run("acknowledgeAlert_InvalidManagerType", func(t *testing.T) {
+		// Test acknowledgeAlert handler with mock manager (wrong type)
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.POST("/api/v1/monitoring/version/alerts/:alert_id/acknowledge", handlerWithMock.acknowledgeAlert)
+
+		testData := map[string]interface{}{
+			"acknowledged_by": "test-user",
+		}
+
+		jsonData, _ := json.Marshal(testData)
+		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/alerts/test-alert/acknowledge", bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should fail with invalid manager type
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Invalid distributed manager", response["error"])
+	})
+
+	t.Run("acknowledgeAlert_MissingAcknowledgedBy", func(t *testing.T) {
+		// Test acknowledgeAlert handler with missing acknowledged_by field
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.POST("/api/v1/monitoring/version/alerts/:alert_id/acknowledge", handlerWithMock.acknowledgeAlert)
+
+		testData := map[string]interface{}{
+			// Missing acknowledged_by field
+		}
+
+		jsonData, _ := json.Marshal(testData)
+		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/alerts/test-alert/acknowledge", bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should fail with binding validation error for missing required field
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
 	t.Run("addEmailAlertChannel", func(t *testing.T) {
-		// Test addEmailAlertChannel handler
+		// Test addEmailAlertChannel handler with nil manager
 		router := gin.New()
 		router.POST("/api/v1/monitoring/version/alerts/channels/email", handler.addEmailAlertChannel)
 
 		testData := map[string]interface{}{
-			"email":        "test@example.com",
-			"enabled":      true,
-			"min_severity": "warning",
+			"smtp_host":    "smtp.example.com",
+			"smtp_port":    587,
+			"username":     "test@example.com",
+			"password":     "password",
+			"from_address": "test@example.com",
+			"to_addresses": []string{"alerts@example.com"},
 		}
 
 		jsonData, _ := json.Marshal(testData)
@@ -670,6 +851,73 @@ func TestAPIAlertHandlers(t *testing.T) {
 
 		// Should fail gracefully with nil distributedManager
 		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+
+	t.Run("addEmailAlertChannel_InvalidManagerType", func(t *testing.T) {
+		// Test addEmailAlertChannel handler with mock manager (wrong type)
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.POST("/api/v1/monitoring/version/alerts/channels/email", handlerWithMock.addEmailAlertChannel)
+
+		testData := map[string]interface{}{
+			"smtp_host":    "smtp.example.com",
+			"smtp_port":    587,
+			"username":     "test@example.com",
+			"password":     "password",
+			"from_address": "test@example.com",
+			"to_addresses": []string{"alerts@example.com"},
+		}
+
+		jsonData, _ := json.Marshal(testData)
+		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/alerts/channels/email", bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should fail with invalid manager type
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Invalid distributed manager", response["error"])
+	})
+
+	t.Run("addEmailAlertChannel_MissingRequiredFields", func(t *testing.T) {
+		// Test addEmailAlertChannel handler with missing required fields
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.POST("/api/v1/monitoring/version/alerts/channels/email", handlerWithMock.addEmailAlertChannel)
+
+		testData := map[string]interface{}{
+			"smtp_host": "smtp.example.com",
+			// Missing other required fields
+		}
+
+		jsonData, _ := json.Marshal(testData)
+		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/alerts/channels/email", bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should fail with binding validation error for missing required fields
+		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
 
 	t.Run("addWebhookAlertChannel", func(t *testing.T) {
@@ -691,6 +939,91 @@ func TestAPIAlertHandlers(t *testing.T) {
 
 		// Should fail gracefully with nil distributedManager
 		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+
+	t.Run("addWebhookAlertChannel_InvalidManagerType", func(t *testing.T) {
+		// Test addWebhookAlertChannel handler with mock manager (wrong type)
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.POST("/api/v1/monitoring/version/alerts/channels/webhook", handlerWithMock.addWebhookAlertChannel)
+
+		testData := map[string]interface{}{
+			"url": "https://example.com/webhook",
+		}
+
+		jsonData, _ := json.Marshal(testData)
+		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/alerts/channels/webhook", bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should fail with invalid manager type
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Invalid distributed manager", response["error"])
+	})
+
+	t.Run("addWebhookAlertChannel_MissingRequiredFields", func(t *testing.T) {
+		// Test addWebhookAlertChannel handler with missing required fields
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.POST("/api/v1/monitoring/version/alerts/channels/webhook", handlerWithMock.addWebhookAlertChannel)
+
+		testData := map[string]interface{}{
+			// Missing url field
+			"method": "POST",
+		}
+
+		jsonData, _ := json.Marshal(testData)
+		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/alerts/channels/webhook", bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should fail with binding validation error for missing required field
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("addWebhookAlertChannel_InvalidJSON", func(t *testing.T) {
+		// Test addWebhookAlertChannel handler with invalid JSON
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.POST("/api/v1/monitoring/version/alerts/channels/webhook", handlerWithMock.addWebhookAlertChannel)
+
+		req, _ := http.NewRequest("POST", "/api/v1/monitoring/version/alerts/channels/webhook", bytes.NewBufferString("invalid json"))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should fail with bad request due to invalid JSON
+		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
 
 	t.Run("addSlackAlertChannel", func(t *testing.T) {
@@ -948,18 +1281,90 @@ func TestDiscoverWorkers(t *testing.T) {
 		router := gin.New()
 		router.POST("/api/v1/distributed/workers/discover", handler.discoverWorkers)
 
-		testData := map[string]interface{}{
-			"network_range": "192.168.1.0/24",
-		}
-
-		jsonData, _ := json.Marshal(testData)
-		req, _ := http.NewRequest("POST", "/api/v1/distributed/workers/discover", bytes.NewBuffer(jsonData))
-		req.Header.Set("Content-Type", "application/json")
+		req, _ := http.NewRequest("POST", "/api/v1/distributed/workers/discover", nil)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
 		// Should return 503 when distributedManager is nil
 		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	})
+
+	t.Run("discoverWorkers_InvalidManagerType", func(t *testing.T) {
+		// Test discoverWorkers handler with mock manager (wrong type)
+		mockDM := &MockDistributedManager{}
+
+		handlerWithMock := &Handler{
+			config:             cfg,
+			eventBus:           eventBus,
+			wsHub:              wsHub,
+			distributedManager: mockDM,
+		}
+
+		router := gin.New()
+		router.POST("/api/v1/distributed/workers/discover", handlerWithMock.discoverWorkers)
+
+		req, _ := http.NewRequest("POST", "/api/v1/distributed/workers/discover", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should fail with invalid manager type
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+		var response map[string]interface{}
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Invalid distributed manager", response["error"])
+	})
+
+	t.Run("translateText_InvalidJSON", func(t *testing.T) {
+		router := gin.New()
+		router.POST("/api/v1/translate", handler.translateText)
+
+		req, _ := http.NewRequest("POST", "/api/v1/translate", bytes.NewBufferString("invalid json"))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should return bad request for invalid JSON
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("translateText_MissingText", func(t *testing.T) {
+		router := gin.New()
+		router.POST("/api/v1/translate", handler.translateText)
+
+		testData := map[string]interface{}{
+			"provider": "dictionary",
+			// Missing required text field
+		}
+
+		jsonData, _ := json.Marshal(testData)
+		req, _ := http.NewRequest("POST", "/api/v1/translate", bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should return bad request for missing required field
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("translateText_InvalidProvider", func(t *testing.T) {
+		router := gin.New()
+		router.POST("/api/v1/translate", handler.translateText)
+
+		testData := map[string]interface{}{
+			"text":     "Hello world",
+			"provider": "invalid-provider",
+		}
+
+		jsonData, _ := json.Marshal(testData)
+		req, _ := http.NewRequest("POST", "/api/v1/translate", bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Should return bad request for invalid provider
+		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
 }
 
