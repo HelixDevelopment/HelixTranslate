@@ -1,0 +1,6 @@
+[submodule "Containers"]
+	path = Containers
+	url = git@github.com:vasic-digital/Containers.git
+[submodule "Challenges"]
+	path = Challenges
+	url = git@github.com:vasic-digital/Challenges.git
