@@ -382,3 +382,10 @@ func (cgh *CodebaseHashGenerator) PrintHashSummary() {
 	fmt.Printf("\nCombined hash: %s\n", cgh.generateFinalHash())
 	fmt.Printf("Generated at: %s\n\n", time.Now().Format(time.RFC3339))
 }
+func main() {
+	generator := NewCodebaseHashGenerator(".")
+	if _, err := generator.GenerateCodebaseHash(); err != nil {
+		log.Fatalf("Failed to generate hash: %v", err)
+	}
+	generator.PrintHashSummary()
+}

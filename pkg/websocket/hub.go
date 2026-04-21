@@ -3,6 +3,8 @@ package websocket
 import (
 	"digital.vasic.translator/pkg/events"
 	"encoding/json"
+	"log"
+	"net/http"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -172,4 +174,35 @@ func (c *Client) WritePump() {
 			return
 		}
 	}
+}
+
+
+// StartServer starts an HTTP server with WebSocket endpoint on the given address
+func (h *Hub) StartServer(addr string) error {
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Printf("WebSocket upgrade error: %v", err)
+			return
+		}
+
+		client := &Client{
+			ID:   r.URL.Query().Get("client_id"),
+			Conn: conn,
+			Send: make(chan []byte, 256),
+			Hub:  h,
+		}
+		h.Register(client)
+
+		go client.WritePump()
+		go client.ReadPump()
+	})
+
+	return http.ListenAndServe(addr, nil)
 }

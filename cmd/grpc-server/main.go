@@ -1,21 +1,18 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
 	"digital.vasic.translator/pkg/events"
-	"digital.vasic.translator/pkg/grpc"
+	translatorgrpc "digital.vasic.translator/pkg/grpc"
 	"digital.vasic.translator/pkg/grpc/proto"
 	"digital.vasic.translator/pkg/logger"
 )
@@ -26,119 +23,119 @@ const (
 
 // ServerConfig holds configuration for the gRPC server
 type ServerConfig struct {
-	Address        string
-	Port           int
-	MaxConnections int
+	Address          string
+	Port             int
+	MaxConnections   int
 	EnableReflection bool
-	EnableMetrics  bool
-	LogLevel       string
+	EnableMetrics    bool
+	LogLevel         string
 }
 
 func main() {
 	// Parse command line flags
 	config := parseFlags()
-	
+
 	// Initialize logger
 	logLevel := parseLogLevel(config.LogLevel)
-	logger := logger.NewLogger(logger.LoggerConfig{
+	log := logger.NewLogger(logger.LoggerConfig{
 		Level:  logLevel,
 		Format: logger.FORMAT_JSON,
 	})
-	
-	logger.Info("Starting gRPC Translation Server", map[string]interface{}{
+
+	log.Info("Starting gRPC Translation Server", map[string]interface{}{
 		"version": appVersion,
 		"address": fmt.Sprintf("%s:%d", config.Address, config.Port),
 	})
-	
+
 	// Initialize event bus
 	eventBus := events.NewEventBus()
-	
+
 	// Initialize core translator
-	coreTranslator := grpc.NewCoreTranslator(logger)
-	
+	coreTranslator := translatorgrpc.NewCoreTranslator(log)
+
 	// Initialize server configuration
-	serverConfig := &grpc.ServerConfig{
+	serverConfig := &translatorgrpc.ServerConfig{
 		MaxConcurrentTranslations: 50,
-		SessionTimeout:          24 * time.Hour,
-		StreamBufferSize:        1000,
-		EnableMetrics:           config.EnableMetrics,
+		SessionTimeout:            24 * time.Hour,
+		StreamBufferSize:          1000,
+		EnableMetrics:             config.EnableMetrics,
 	}
-	
+
 	// Create gRPC server
-	grpcServer := grpc.NewServer(eventBus, logger, coreTranslator, serverConfig)
-	
+	grpcServer := translatorgrpc.NewServer(eventBus, log, coreTranslator, serverConfig)
+
 	// Create listener
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Address, config.Port))
 	if err != nil {
-		logger.Fatal("Failed to listen", map[string]interface{}{
+		log.Fatal("Failed to listen", map[string]interface{}{
 			"address": fmt.Sprintf("%s:%d", config.Address, config.Port),
-			"error": err.Error(),
+			"error":   err.Error(),
 		})
 	}
-	
+
 	// Register reflection if enabled
 	if config.EnableReflection {
 		reflection.Register(grpcServer.GetGRPCServer())
-		logger.Info("gRPC reflection enabled")
+		log.Info("gRPC reflection enabled", nil)
 	}
-	
+
 	// Register translation service
 	proto.RegisterTranslationServiceServer(grpcServer.GetGRPCServer(), grpcServer)
-	
+
 	// Start server in goroutine
 	errChan := make(chan error, 1)
 	go func() {
-		logger.Info("gRPC server starting", map[string]interface{}{
+		log.Info("gRPC server starting", map[string]interface{}{
 			"address": lis.Addr().String(),
 		})
-		
+
 		if err := grpcServer.GetGRPCServer().Serve(lis); err != nil {
 			errChan <- err
 		}
 	}()
-	
+
 	// Wait for interrupt signal
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	
+
 	select {
 	case err := <-errChan:
-		logger.Fatal("Server failed", map[string]interface{}{
+		log.Fatal("Server failed", map[string]interface{}{
 			"error": err.Error(),
 		})
 	case <-quit:
-		logger.Info("Shutting down gRPC server...")
+		log.Info("Shutting down gRPC server...", nil)
 		grpcServer.Shutdown()
-		logger.Info("gRPC server shutdown complete")
+		log.Info("gRPC server shutdown complete", nil)
 	}
 }
 
 // parseFlags parses command line flags
 func parseFlags() *ServerConfig {
 	config := &ServerConfig{}
-	
+
 	flag.StringVar(&config.Address, "address", "0.0.0.0", "Server address")
 	flag.IntVar(&config.Port, "port", 50051, "Server port")
 	flag.IntVar(&config.MaxConnections, "max-connections", 1000, "Maximum concurrent connections")
 	flag.BoolVar(&config.EnableReflection, "reflection", true, "Enable gRPC reflection")
 	flag.BoolVar(&config.EnableMetrics, "metrics", true, "Enable metrics collection")
 	flag.StringVar(&config.LogLevel, "log-level", "info", "Log level: debug, info, warn, error")
-	
+
 	versionFlag := flag.Bool("version", false, "Show version information")
 	help := flag.Bool("help", false, "Show help information")
-	
+
 	flag.Parse()
-	
+
 	if *versionFlag {
 		fmt.Printf("gRPC Translation Server v%s\n", appVersion)
 		os.Exit(0)
 	}
-	
+
 	if *help {
 		printHelp()
 		os.Exit(0)
 	}
-	
+
 	return config
 }
 
@@ -205,8 +202,8 @@ For more information, see the project documentation.
 `, appVersion)
 }
 
-// parseLogLevel converts string to logger.Level
-func parseLogLevel(level string) logger.Level {
+// parseLogLevel converts string to logger level string
+func parseLogLevel(level string) string {
 	switch level {
 	case "debug":
 		return logger.DEBUG

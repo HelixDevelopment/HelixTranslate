@@ -6,9 +6,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -17,7 +17,6 @@ import (
 	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/pkg/markdown"
 	"digital.vasic.translator/pkg/sshworker"
-	"digital.vasic.translator/pkg/translator/llm"
 	"digital.vasic.translator/pkg/version"
 	"digital.vasic.translator/pkg/websocket"
 )
@@ -27,7 +26,7 @@ type SSHTranslationSystem struct {
 	logger           logger.Logger
 	sshWorker        *sshworker.SSHWorker
 	versionManager   *version.CodebaseHasher
-	eventManager     *events.Manager
+	eventManager     *events.EventBus
 	wsHub            *websocket.Hub
 	config           SystemConfig
 	workflowID       string
@@ -97,24 +96,21 @@ func main() {
 	os.MkdirAll("logs", 0755)
 	
 	logger := logger.NewLogger(logger.LoggerConfig{
-		Level:      "info",
-		Output:     "file",
-		Filename:   logFile,
-		MaxSize:    100, // MB
-		MaxBackups: 3,
-		MaxAge:     30, // days
+		Level:      logger.INFO,
+		Format:     logger.FORMAT_JSON,
+		OutputFile: logFile,
 	})
 
 	// Generate unique workflow ID
 	workflowID := generateWorkflowID()
 
 	// Initialize event manager and WebSocket hub if monitoring is enabled
-	var eventManager *events.Manager
+	var eventManager *events.EventBus
 	var wsHub *websocket.Hub
 	
-	eventManager = events.NewEventManager(logger)
-	wsHub = websocket.NewHub(logger)
-	go wsHub.Start()
+	eventManager = events.NewEventBus()
+	wsHub = websocket.NewHub(eventManager)
+	go wsHub.Run()
 
 	// System configuration
 	config := SystemConfig{
@@ -196,7 +192,7 @@ func main() {
 		})
 		
 		// Send failure event
-		eventManager.SendEvent(events.Event{
+		eventManager.Publish(events.Event{
 			Type:      "workflow_failed",
 			Data:      map[string]interface{}{"error": err.Error()},
 			Timestamp: time.Now(),
@@ -211,7 +207,7 @@ func main() {
 	})
 
 	// Send completion event
-	eventManager.SendEvent(events.Event{
+	eventManager.Publish(events.Event{
 		Type:      "workflow_completed",
 		Data:      map[string]interface{}{"workflow_id": workflowID},
 		Timestamp: time.Now(),
@@ -223,7 +219,7 @@ func main() {
 }
 
 // NewSSHTranslationSystem creates a new SSH translation system
-func NewSSHTranslationSystem(config SystemConfig, logger logger.Logger, eventManager *events.Manager, wsHub *websocket.Hub, workflowID string) (*SSHTranslationSystem, error) {
+func NewSSHTranslationSystem(config SystemConfig, logger logger.Logger, eventManager *events.EventBus, wsHub *websocket.Hub, workflowID string) (*SSHTranslationSystem, error) {
 	// Create SSH worker
 	sshWorker, err := sshworker.NewSSHWorker(config.SSH, logger)
 	if err != nil {
@@ -313,7 +309,7 @@ func (s *SSHTranslationSystem) ExecuteTranslationWorkflow(ctx context.Context, i
 		})
 
 		// Send progress event
-		s.eventManager.SendEvent(events.Event{
+		s.eventManager.Publish(events.Event{
 			Type: "step_started",
 			Data: map[string]interface{}{
 				"step":        step.Name,
@@ -332,7 +328,7 @@ func (s *SSHTranslationSystem) ExecuteTranslationWorkflow(ctx context.Context, i
 		}
 
 		// Send completion event
-		s.eventManager.SendEvent(events.Event{
+		s.eventManager.Publish(events.Event{
 			Type: "step_completed",
 			Data: map[string]interface{}{
 				"step":        step.Name,
@@ -431,6 +427,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"os/exec"
 	"strings"
 )
 
@@ -1033,15 +1030,9 @@ func (s *SSHTranslationSystem) convertTranslatedToEPUB(ctx context.Context, work
 		strings.TrimSuffix(filepath.Base(workflowCtx.InputFile), filepath.Ext(workflowCtx.InputFile))+"_sr.epub",
 	)
 
-	// Create markdown workflow for EPUB conversion
-	translateFunc := func(text string) (string, error) {
-		return text, nil // No translation needed, just conversion
-	}
-
-	translator := markdown.NewMarkdownTranslator(translateFunc)
-
 	// Convert markdown to EPUB
-	if err := translator.ConvertMarkdownToEPUB(localTranslatedFile, epubFile); err != nil {
+	epubConverter := markdown.NewMarkdownToEPUBConverter()
+	if err := epubConverter.ConvertMarkdownToEPUB(localTranslatedFile, epubFile); err != nil {
 		return fmt.Errorf("failed to convert markdown to EPUB: %w", err)
 	}
 
@@ -1193,7 +1184,7 @@ func (s *SSHTranslationSystem) verifyTranslatedMarkdown(filePath string) error {
 	if cyrillicCount > 0 && totalChars > 0 {
 		cyrillicRatio := float64(cyrillicCount) / float64(cyrillicCount + totalChars)
 		if cyrillicRatio < 0.3 {
-			s.logger.Warning("Low Cyrillic character ratio detected", map[string]interface{}{
+			s.logger.Warn("Low Cyrillic character ratio detected", map[string]interface{}{
 				"cyrillic_count": cyrillicCount,
 				"total_chars":    totalChars,
 				"ratio":          cyrillicRatio,
@@ -1219,7 +1210,7 @@ func (s *SSHTranslationSystem) cleanup(ctx context.Context, workflowCtx *Workflo
 	// Clean up local temp files
 	for _, tempFile := range workflowCtx.TempFiles {
 		if err := os.Remove(tempFile); err != nil && !os.IsNotExist(err) {
-			s.logger.Warning("Failed to remove temp file", map[string]interface{}{
+			s.logger.Warn("Failed to remove temp file", map[string]interface{}{
 				"file":  tempFile,
 				"error": err.Error(),
 			})
@@ -1235,7 +1226,7 @@ rm -f *.log *.tmp
 
 	_, err := s.sshWorker.ExecuteCommand(ctx, cleanupScript)
 	if err != nil {
-		s.logger.Warning("Failed to cleanup remote temp files", map[string]interface{}{
+		s.logger.Warn("Failed to cleanup remote temp files", map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
@@ -1270,7 +1261,8 @@ func (s *SSHTranslationSystem) updateProgress(phase string, currentStep, totalSt
 			"total_bytes":     s.Progress().TotalBytes,
 		}
 
-		s.wsHub.BroadcastMessage("progress", progressData)
+		progressJSON, _ := json.Marshal(progressData)
+		s.wsHub.Broadcast(progressJSON)
 	}
 
 	s.logger.Info("Progress updated", map[string]interface{}{

@@ -6,10 +6,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
+	"digital.vasic.translator/pkg/format"
 	"digital.vasic.translator/pkg/grpc/proto"
 	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/pkg/markdown"
@@ -268,13 +270,17 @@ func (ct *CoreTranslatorImpl) executeSSHTranslation(job *TranslationJob, text st
 	
 	// Emit progress
 	ct.emitProgress(eventBus, job.ID, "translation_complete", "translation", 80, "Translation completed on remote worker")
-	
-	// Download result
-	translatedData, err := worker.DownloadData(ctx, remoteOutputPath)
-	if err != nil {
+	// Download result to temp file
+	tempFile := ct.generatePath(req.InputFile, "_translated.md")
+	if err := worker.DownloadFile(ctx, remoteOutputPath, tempFile); err != nil {
 		return "", fmt.Errorf("failed to download translation result: %w", err)
 	}
-	
+	translatedData, err := os.ReadFile(tempFile)
+	if err != nil {
+		return "", fmt.Errorf("failed to read downloaded translation: %w", err)
+	}
+	_ = os.Remove(tempFile)
+
 	return string(translatedData), nil
 }
 
@@ -366,18 +372,39 @@ func (ct *CoreTranslatorImpl) executeAPITranslation(job *TranslationJob, text st
 // Helper methods
 
 func (ct *CoreTranslatorImpl) parseInputFile(filePath string) (string, string, error) {
-	parser := ebook.NewParser()
-	return parser.ParseFile(filePath)
+	detector := format.NewDetector()
+	f, err := detector.DetectFile(filePath)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to detect format: %w", err)
+	}
+	parser := ebook.NewUniversalParser()
+	book, err := parser.Parse(filePath)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to parse file: %w", err)
+	}
+	return book.ExtractText(), f.String(), nil
 }
 
 func (ct *CoreTranslatorImpl) convertToMarkdown(content, format string) (string, error) {
 	switch format {
-	case "fb2":
-		parser := &ebook.FB2Parser{}
-		return parser.ToMarkdown(content)
 	case "epub":
-		converter := markdown.NewEPUBToMarkdownConverter()
-		return converter.Convert(content)
+		// Write content to temp file and convert
+		tempEpub := filepath.Join(os.TempDir(), "input.epub")
+		if err := os.WriteFile(tempEpub, []byte(content), 0644); err != nil {
+			return "", fmt.Errorf("failed to write temp epub: %w", err)
+		}
+		defer os.Remove(tempEpub)
+		tempMD := filepath.Join(os.TempDir(), "output.md")
+		converter := markdown.NewEPUBToMarkdownConverter(true, "")
+		if err := converter.ConvertEPUBToMarkdown(tempEpub, tempMD); err != nil {
+			return "", fmt.Errorf("failed to convert epub to markdown: %w", err)
+		}
+		mdBytes, err := os.ReadFile(tempMD)
+		if err != nil {
+			return "", fmt.Errorf("failed to read markdown: %w", err)
+		}
+		_ = os.Remove(tempMD)
+		return string(mdBytes), nil
 	default:
 		return content, nil
 	}
@@ -403,8 +430,14 @@ func (ct *CoreTranslatorImpl) verifyTranslation(text, targetLang, script string)
 }
 
 func (ct *CoreTranslatorImpl) generateEPUB(content, outputPath, inputFile string) error {
+	// Write markdown to temp file then convert
+	tempMD := filepath.Join(os.TempDir(), "input.md")
+	if err := os.WriteFile(tempMD, []byte(content), 0644); err != nil {
+		return fmt.Errorf("failed to write temp markdown: %w", err)
+	}
+	defer os.Remove(tempMD)
 	generator := markdown.NewMarkdownToEPUBConverter()
-	return generator.GenerateEPUB(content, outputPath, inputFile)
+	return generator.ConvertMarkdownToEPUB(tempMD, outputPath)
 }
 
 func (ct *CoreTranslatorImpl) verifyEPUB(path string) bool {
@@ -416,7 +449,7 @@ func (ct *CoreTranslatorImpl) verifyEPUB(path string) bool {
 	
 	buffer := make([]byte, 1024)
 	n, err := file.Read(buffer)
-	if err != nil && err != nil {
+	if err != nil {
 		return false
 	}
 	
@@ -546,7 +579,7 @@ func (ct *CoreTranslatorImpl) emitProgress(eventBus *events.EventBus, sessionID,
 		return
 	}
 	
-	event := events.NewEvent(eventType, message, map[string]interface{}{
+	event := events.NewEvent(events.EventType(eventType), message, map[string]interface{}{
 		"session_id":   sessionID,
 		"step_name":    stepName,
 		"progress":     progress,

@@ -178,7 +178,7 @@ func executeTranslation(session *TranslationSession) error {
 	step := addStep(session, "Input Parsing")
 	ebookContent, format, err := parseInputFile(config.InputFile)
 	if err != nil {
-		return stepError(step, fmt.Sprintf("Failed to parse input file: %w", err))
+		return stepError(step, fmt.Sprintf("Failed to parse input file: %v", err))
 	}
 	step.Details = fmt.Sprintf("Parsed %s format, %d characters", format, len(ebookContent))
 	stepComplete(step)
@@ -187,13 +187,13 @@ func executeTranslation(session *TranslationSession) error {
 	step = addStep(session, "Markdown Conversion")
 	originalMarkdown, err := convertToMarkdown(ebookContent, format)
 	if err != nil {
-		return stepError(step, fmt.Sprintf("Failed to convert to markdown: %w", err))
+		return stepError(step, fmt.Sprintf("Failed to convert to markdown: %v", err))
 	}
 	
 	// Save original markdown
 	originalMDPath := generateOriginalMDPath(config.InputFile)
 	if err := os.WriteFile(originalMDPath, []byte(originalMarkdown), 0644); err != nil {
-		return stepError(step, fmt.Sprintf("Failed to save original markdown: %w", err))
+		return stepError(step, fmt.Sprintf("Failed to save original markdown: %v", err))
 	}
 	
 	addFile(session, originalMDPath, "original_md", int64(len(originalMarkdown)), true, "Saved successfully")
@@ -204,13 +204,13 @@ func executeTranslation(session *TranslationSession) error {
 	step = addStep(session, fmt.Sprintf("Translation (%s)", config.Provider))
 	translatedMarkdown, err := executeProviderTranslation(ctx, config, session, originalMarkdown)
 	if err != nil {
-		return stepError(step, fmt.Sprintf("Translation failed: %w", err))
+		return stepError(step, fmt.Sprintf("Translation failed: %v", err))
 	}
 	
 	// Save translated markdown
 	translatedMDPath := generateTranslatedMDPath(config.InputFile)
 	if err := os.WriteFile(translatedMDPath, []byte(translatedMarkdown), 0644); err != nil {
-		return stepError(step, fmt.Sprintf("Failed to save translated markdown: %w", err))
+		return stepError(step, fmt.Sprintf("Failed to save translated markdown: %v", err))
 	}
 	
 	// Verify translation quality
@@ -225,7 +225,7 @@ func executeTranslation(session *TranslationSession) error {
 	step = addStep(session, "EPUB Generation")
 	epubPath := config.OutputFile
 	if err := generateEPUB(translatedMarkdown, epubPath, config.InputFile); err != nil {
-		return stepError(step, fmt.Sprintf("EPUB generation failed: %w", err))
+		return stepError(step, fmt.Sprintf("EPUB generation failed: %v", err))
 	}
 	
 	// Verify EPUB
@@ -637,7 +637,7 @@ func stepError(step *TranslationStep, err string) error {
 	step.EndTime = time.Now()
 	step.Success = false
 	step.Error = err
-	return fmt.Errorf(err)
+	return fmt.Errorf("%s", err)
 }
 
 func addFile(session *TranslationSession, path, fileType string, size int64, verified bool, verification string) {
@@ -762,7 +762,7 @@ func verifyEPUB(path string) bool {
 	
 	buffer := make([]byte, 1024)
 	n, err := file.Read(buffer)
-	if err != nil && err != nil {
+	if err != nil {
 		return false
 	}
 	

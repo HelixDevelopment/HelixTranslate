@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -441,7 +439,7 @@ func BenchmarkFB2ToMarkdown(b *testing.B) {
 		b.Fatalf("Failed to create test FB2 file: %v", err)
 	}
 
-	testLogger := logger.NewLogger(logger.Config{
+	testLogger := logger.NewLogger(logger.LoggerConfig{
 		Level:  "error", // Minimal logging for benchmark
 		Format: "text",
 	})

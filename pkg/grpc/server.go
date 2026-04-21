@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"digital.vasic.translator/pkg/events"
@@ -150,9 +151,7 @@ func (s *Server) StartTranslation(ctx context.Context, req *proto.TranslationReq
 		UpdatedAt: time.Now(),
 		CancelFunc: cancel,
 		EventBus:  events.NewEventBus(), // Private event bus for this session
-		Logger:    s.logger.With(map[string]interface{}{
-			"session_id": req.SessionId,
-		}),
+		Logger:    s.logger,
 		Ctx: sessionCtx,
 		Steps:    make([]*proto.TranslationStep, 0),
 		Files:    make([]*proto.GeneratedFile, 0),
@@ -212,7 +211,7 @@ func (s *Server) GetTranslationStatus(ctx context.Context, req *proto.Translatio
 }
 
 // ListTranslations returns all translation sessions
-func (s *Server) ListTranslations(ctx context.Context, _ *proto.Empty) (*proto.TranslationListResponse, error) {
+func (s *Server) ListTranslations(ctx context.Context, _ *emptypb.Empty) (*proto.TranslationListResponse, error) {
 	s.sessionsMutex.RLock()
 	defer s.sessionsMutex.RUnlock()
 	
@@ -316,7 +315,7 @@ func (s *Server) StreamTranslationProgress(req *proto.TranslationStreamRequest, 
 			SessionId:          req.SessionId,
 			EventType:          "status_update",
 			ProgressPercentage: currentStatus.ProgressPercentage,
-			CurrentStep:        currentStatus.CurrentStep,
+			CurrentOperation:   currentStatus.CurrentStep,
 			Message:            fmt.Sprintf("Current status: %s", currentStatus.Status),
 			Timestamp:          timeToProto(time.Now()),
 		}
@@ -344,7 +343,7 @@ func (s *Server) StreamTranslationProgress(req *proto.TranslationStreamRequest, 
 }
 
 // GetProviders returns available translation providers
-func (s *Server) GetProviders(ctx context.Context, _ *proto.Empty) (*proto.ProvidersResponse, error) {
+func (s *Server) GetProviders(ctx context.Context, _ *emptypb.Empty) (*proto.ProvidersResponse, error) {
 	providers := s.providers.GetAll()
 	return &proto.ProvidersResponse{
 		Providers: providers,
@@ -362,12 +361,12 @@ func (s *Server) SubscribeEvents(req *proto.EventSubscriptionRequest, stream pro
 	eventChan := make(chan *proto.SystemEvent, 100)
 	
 	// Subscribe to event bus
-	unsubscribe := s.eventBus.Subscribe(func(event *events.Event) {
+	s.eventBus.SubscribeAll(func(event events.Event) {
 		// Filter by event types if specified
 		if len(req.EventTypes) > 0 {
 			found := false
 			for _, eventType := range req.EventTypes {
-				if event.Type == eventType {
+				if string(event.Type) == eventType {
 					found = true
 					break
 				}
@@ -377,15 +376,19 @@ func (s *Server) SubscribeEvents(req *proto.EventSubscriptionRequest, stream pro
 			}
 		}
 		
+		// Convert data map
+		data := make(map[string]string)
+		for k, v := range event.Data {
+			data[k] = fmt.Sprintf("%v", v)
+		}
+		
 		// Convert to proto
 		protoEvent := &proto.SystemEvent{
-			EventType:  event.Type,
-			Source:     event.Source,
+			EventType:  string(event.Type),
 			Timestamp:  timeToProto(event.Timestamp),
-			Data:       event.Data,
+			Data:       data,
 			SessionId:  event.SessionID,
 			ClientId:   req.ClientId,
-			Severity:   proto.Severity(event.Severity),
 		}
 		
 		select {
@@ -397,7 +400,6 @@ func (s *Server) SubscribeEvents(req *proto.EventSubscriptionRequest, stream pro
 	
 	// Clean up on exit
 	defer func() {
-		unsubscribe()
 		close(eventChan)
 	}()
 	
@@ -500,7 +502,7 @@ func (s *Server) emitProgressEvent(sessionID, eventType, stepName string, progre
 	s.streamsMutex.RUnlock()
 	
 	// Also emit to main event bus
-	s.eventBus.Publish(events.NewEvent(eventType, message, metadata))
+	s.eventBus.Publish(events.NewEvent(events.EventType(eventType), message, metadata))
 }
 
 func (s *Server) cleanupRoutine() {
@@ -652,7 +654,7 @@ func (s *Server) GetGRPCServer() *grpc.Server {
 
 // Shutdown gracefully shuts down the gRPC server
 func (s *Server) Shutdown() {
-	s.logger.Info("Shutting down gRPC server")
+	s.logger.Info("Shutting down gRPC server", nil)
 	
 	// Cancel all active sessions
 	s.sessionsMutex.Lock()
@@ -669,5 +671,5 @@ func (s *Server) Shutdown() {
 		s.grpcServer.GracefulStop()
 	}
 	
-	s.logger.Info("gRPC server shutdown complete")
+	s.logger.Info("gRPC server shutdown complete", nil)
 }

@@ -67,12 +67,16 @@ func TestInputSanitization(t *testing.T) {
 
 	// Test 2: Script injection in various fields
 	t.Run("ScriptInjectionInFields", func(t *testing.T) {
+		testLogger := logger.NewLogger(logger.LoggerConfig{
+			Level:  logger.ERROR,
+			Format: logger.FORMAT_TEXT,
+		})
 		server := api.NewServer(api.ServerConfig{
 			Port:     8090,
-			Logger:    mockLogger,
+			Logger:   testLogger,
 			Security: &api.SecurityConfig{
 				APIKey:        "test-key",
-				SanitizeInput:  true,
+				SanitizeInput: true,
 			},
 		})
 

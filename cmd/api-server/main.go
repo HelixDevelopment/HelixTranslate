@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -13,6 +12,8 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"digital.vasic.translator/pkg/grpc/proto"
 	"digital.vasic.translator/pkg/logger"
@@ -218,7 +219,7 @@ func (s *APIServer) Start() error {
 	case err := <-errChan:
 		return err
 	case <-quit:
-		s.logger.Info("Shutting down API server...")
+		s.logger.Info("Shutting down API server...", nil)
 		return s.Shutdown()
 	}
 }
@@ -242,7 +243,7 @@ func (s *APIServer) Shutdown() error {
 		})
 	}
 	
-	s.logger.Info("API server shutdown complete")
+	s.logger.Info("API server shutdown complete", nil)
 	return nil
 }
 
@@ -334,7 +335,7 @@ func (s *APIServer) getTranslationStatus(c *gin.Context) {
 }
 
 func (s *APIServer) listTranslations(c *gin.Context) {
-	req := &proto.Empty{}
+	req := &emptypb.Empty{}
 	
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
@@ -459,7 +460,7 @@ func (s *APIServer) streamTranslationProgress(c *gin.Context) {
 }
 
 func (s *APIServer) getProviders(c *gin.Context) {
-	req := &proto.Empty{}
+	req := &emptypb.Empty{}
 	
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
@@ -591,7 +592,7 @@ func (s *APIServer) convertToGRPCRequest(req TranslationRequest) *proto.Translat
 			Verbose:         false,
 			EnableMonitoring: true,
 		},
-		CreatedAt: time.Now(),
+		CreatedAt: timestamppb.New(time.Now()),
 		ClientId:  "rest-api",
 	}
 }
