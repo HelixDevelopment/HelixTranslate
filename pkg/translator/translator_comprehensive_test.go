@@ -4,16 +4,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/language"
+	"github.com/stretchr/testify/assert"
 )
 
 // TestNewUniversalTranslator tests the creation of a universal translator
 func TestNewUniversalTranslator(t *testing.T) {
 	mockTranslator := new(MockTranslator)
 	mockDetector := NewMockDetector()
-	
+
 	sourceLang := language.Language{Code: "en", Name: "English"}
 	targetLang := language.Language{Code: "ru", Name: "Russian"}
 
@@ -112,7 +112,7 @@ func TestTranslationEvents(t *testing.T) {
 	eventBus.Subscribe(events.EventTranslationError, func(event events.Event) {
 		errorEvents <- event
 	})
-	
+
 	testError := assert.AnError
 	EmitError(eventBus, sessionID, "Test error", testError)
 
@@ -219,12 +219,12 @@ func TestTranslationConfigStructure(t *testing.T) {
 func TestUniversalTranslatorSimpleWorkflow(t *testing.T) {
 	mockTranslator := new(MockTranslator)
 	mockDetector := NewMockDetector()
-	
+
 	sourceLang := language.Language{Code: "en", Name: "English"}
 	targetLang := language.Language{Code: "ru", Name: "Russian"}
 
 	ut := NewUniversalTranslator(mockTranslator, mockDetector, sourceLang, targetLang)
-	
+
 	// Test that the universal translator was created correctly
 	assert.NotNil(t, ut)
 	assert.Equal(t, sourceLang, ut.sourceLanguage)

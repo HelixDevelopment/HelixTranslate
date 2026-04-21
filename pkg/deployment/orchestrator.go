@@ -23,7 +23,7 @@ type DeploymentOrchestrator struct {
 	apiLogger   *APICommunicationLogger
 	logger      *log.Logger
 	mu          sync.RWMutex
-	initialized bool
+	initialized bool //nolint:unused
 	deployed    map[string]*DeployedInstance
 }
 
@@ -561,6 +561,38 @@ func (do *DeploymentOrchestrator) RestartAllServices(ctx context.Context) error 
 	})
 
 	do.logger.Println("All services restarted successfully")
+	return nil
+}
+
+// StopDeployment stops all deployed services gracefully
+func (do *DeploymentOrchestrator) StopDeployment(ctx context.Context) error {
+	do.logger.Println("Stopping all deployed services...")
+
+	do.mu.RLock()
+	instances := make([]*DeployedInstance, 0, len(do.deployed))
+	for _, instance := range do.deployed {
+		instances = append(instances, instance)
+	}
+	do.mu.RUnlock()
+
+	for _, instance := range instances {
+		do.logger.Printf("Stopping instance %s...", instance.ID)
+		if err := do.deployer.StopInstance(ctx, instance.ID); err != nil {
+			do.logger.Printf("Failed to stop instance %s: %v", instance.ID, err)
+		} else {
+			instance.mu.Lock()
+			instance.Status = "stopped"
+			instance.mu.Unlock()
+		}
+	}
+
+	do.emitEvent(events.Event{
+		Type:      "deployment_stopped",
+		SessionID: "system",
+		Message:   "All deployed services stopped",
+	})
+
+	do.logger.Println("All services stopped")
 	return nil
 }
 

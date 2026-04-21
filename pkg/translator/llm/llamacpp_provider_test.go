@@ -15,20 +15,20 @@ func TestGetStatsQueue(t *testing.T) {
 		Level:  "info",
 		Format: "text",
 	})
-	
+
 	t.Run("with_queue_items", func(t *testing.T) {
 		config := LlamaCppProviderConfig{
 			BinaryPath:     "/bin/echo",
 			Models:         []ModelConfig{},
 			MaxConcurrency: 1,
 		}
-		
+
 		coordinator, err := NewLlamaCppProvider(config, mockLogger)
 		if err != nil {
 			t.Fatalf("Failed to create coordinator: %v", err)
 		}
 		defer coordinator.Shutdown(context.Background())
-		
+
 		// Add some tasks to the queue
 		task1 := TranslationTask{
 			ID:       "task1",
@@ -42,18 +42,18 @@ func TestGetStatsQueue(t *testing.T) {
 			FromLang: "en",
 			ToLang:   "fr",
 		}
-		
+
 		coordinator.WorkQueue <- task1
 		coordinator.WorkQueue <- task2
-		
+
 		stats := coordinator.GetStats()
-		
+
 		// Check queue length reflects the tasks we added
 		queueLength := stats["queue_length"].(int)
 		if queueLength < 2 {
 			t.Errorf("Expected queue_length >= 2, got %d", queueLength)
 		}
-		
+
 		// Drain the queue to clean up
 		<-coordinator.WorkQueue
 		<-coordinator.WorkQueue
@@ -67,22 +67,22 @@ func TestGetStats(t *testing.T) {
 		Level:  "info",
 		Format: "text",
 	})
-	
+
 	t.Run("empty_coordinator", func(t *testing.T) {
 		config := LlamaCppProviderConfig{
 			BinaryPath:     "/bin/echo",
 			Models:         []ModelConfig{},
 			MaxConcurrency: 0,
 		}
-		
+
 		coordinator, err := NewLlamaCppProvider(config, mockLogger)
 		if err != nil {
 			t.Fatalf("Failed to create coordinator: %v", err)
 		}
 		defer coordinator.Shutdown(context.Background())
-		
+
 		stats := coordinator.GetStats()
-		
+
 		// Check that all expected fields are present
 		if _, ok := stats["total_workers"]; !ok {
 			t.Error("Expected 'total_workers' in stats")
@@ -99,7 +99,7 @@ func TestGetStats(t *testing.T) {
 		if _, ok := stats["max_concurrency"]; !ok {
 			t.Error("Expected 'max_concurrency' in stats")
 		}
-		
+
 		// Check values for empty coordinator
 		if stats["total_workers"] != 0 {
 			t.Errorf("Expected total_workers=0, got %v", stats["total_workers"])
@@ -114,10 +114,10 @@ func TestGetStats(t *testing.T) {
 			t.Errorf("Expected max_concurrency=0, got %v", stats["max_concurrency"])
 		}
 	})
-	
+
 	t.Run("with_workers", func(t *testing.T) {
 		config := LlamaCppProviderConfig{
-			BinaryPath:     "/bin/echo", // Use a valid system binary
+			BinaryPath: "/bin/echo", // Use a valid system binary
 			Models: []ModelConfig{
 				{
 					ID:          "worker1",
@@ -134,15 +134,15 @@ func TestGetStats(t *testing.T) {
 			},
 			MaxConcurrency: 2,
 		}
-		
+
 		coordinator, err := NewLlamaCppProvider(config, mockLogger)
 		if err != nil {
 			t.Fatalf("Failed to create coordinator: %v", err)
 		}
 		defer coordinator.Shutdown(context.Background())
-		
+
 		stats := coordinator.GetStats()
-		
+
 		// Should have 2 workers configured
 		if stats["total_workers"] != 2 {
 			t.Errorf("Expected total_workers=2, got %v", stats["total_workers"])
@@ -157,10 +157,10 @@ func TestSelectBestWorker(t *testing.T) {
 		Level:  "info",
 		Format: "text",
 	})
-	
+
 	t.Run("no_available_workers", func(t *testing.T) {
 		config := LlamaCppProviderConfig{
-			BinaryPath:     "/bin/echo",
+			BinaryPath: "/bin/echo",
 			Models: []ModelConfig{
 				{
 					ID:          "worker1",
@@ -171,20 +171,20 @@ func TestSelectBestWorker(t *testing.T) {
 			},
 			MaxConcurrency: 1,
 		}
-		
+
 		coordinator, err := NewLlamaCppProvider(config, mockLogger)
 		if err != nil {
 			t.Fatalf("Failed to create coordinator: %v", err)
 		}
 		defer coordinator.Shutdown(context.Background())
-		
+
 		task := TranslationTask{
 			ID:       "test-task",
 			Text:     "test text",
 			FromLang: "en",
 			ToLang:   "es",
 		}
-		
+
 		// Use reflection to access private method for testing
 		// Since selectBestWorker is private, we'll test it through processTask
 		result := coordinator.processTask(task)
@@ -192,10 +192,10 @@ func TestSelectBestWorker(t *testing.T) {
 			t.Error("Expected failure when no workers available")
 		}
 	})
-	
+
 	t.Run("with_available_workers", func(t *testing.T) {
 		config := LlamaCppProviderConfig{
-			BinaryPath:     "/bin/echo",
+			BinaryPath: "/bin/echo",
 			Models: []ModelConfig{
 				{
 					ID:           "worker1",
@@ -209,20 +209,20 @@ func TestSelectBestWorker(t *testing.T) {
 			},
 			MaxConcurrency: 1,
 		}
-		
+
 		coordinator, err := NewLlamaCppProvider(config, mockLogger)
 		if err != nil {
 			t.Fatalf("Failed to create coordinator: %v", err)
 		}
 		defer coordinator.Shutdown(context.Background())
-		
+
 		task := TranslationTask{
 			ID:       "test-task",
 			Text:     "simple text",
 			FromLang: "en",
 			ToLang:   "es",
 		}
-		
+
 		// Test that processTask uses selectBestWorker internally
 		// This indirectly tests selectBestWorker and calculateWorkerScore
 		result := coordinator.processTask(task)
@@ -240,24 +240,24 @@ func TestTranslateSimple(t *testing.T) {
 		Level:  "info",
 		Format: "text",
 	})
-	
+
 	t.Run("context_cancellation", func(t *testing.T) {
 		config := LlamaCppProviderConfig{
 			BinaryPath:     "/bin/echo",
 			Models:         []ModelConfig{},
 			MaxConcurrency: 0,
 		}
-		
+
 		coordinator, err := NewLlamaCppProvider(config, mockLogger)
 		if err != nil {
 			t.Fatalf("Failed to create coordinator: %v", err)
 		}
 		defer coordinator.Shutdown(context.Background())
-		
+
 		// Test with cancelled context
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel() // Cancel immediately
-		
+
 		_, err = coordinator.Translate(ctx, "test text", "test prompt")
 		if err == nil {
 			t.Error("Expected error for cancelled context")
@@ -272,14 +272,14 @@ func TestStartWorkerPool(t *testing.T) {
 		Level:  "info",
 		Format: "text",
 	})
-	
+
 	t.Run("valid_config", func(t *testing.T) {
 		config := LlamaCppProviderConfig{
-			BinaryPath:     "/bin/echo", // Use a common binary that exists
+			BinaryPath:     "/bin/echo",     // Use a common binary that exists
 			Models:         []ModelConfig{}, // Empty models
-			MaxConcurrency: 2,              // Set to 2 to test worker pool
+			MaxConcurrency: 2,               // Set to 2 to test worker pool
 		}
-		
+
 		coordinator, err := NewLlamaCppProvider(config, mockLogger)
 		if err != nil {
 			t.Errorf("Expected no error for valid config, got: %v", err)
@@ -287,18 +287,18 @@ func TestStartWorkerPool(t *testing.T) {
 		if coordinator == nil {
 			t.Error("Expected coordinator to be created")
 		}
-		
+
 		// Let the workers run for a moment then shutdown
 		coordinator.Shutdown(context.Background())
 	})
-	
+
 	t.Run("zero_concurrency", func(t *testing.T) {
 		config := LlamaCppProviderConfig{
 			BinaryPath:     "/bin/echo",
 			Models:         []ModelConfig{},
 			MaxConcurrency: 0, // Test with zero concurrency
 		}
-		
+
 		coordinator, err := NewLlamaCppProvider(config, mockLogger)
 		if err != nil {
 			t.Errorf("Expected no error for zero concurrency, got: %v", err)
@@ -306,7 +306,7 @@ func TestStartWorkerPool(t *testing.T) {
 		if coordinator == nil {
 			t.Error("Expected coordinator to be created with zero concurrency")
 		}
-		
+
 		coordinator.Shutdown(context.Background())
 	})
 }
@@ -330,7 +330,7 @@ func TestNewLlamaCppProvider(t *testing.T) {
 				},
 			},
 		}
-		
+
 		coordinator, err := NewLlamaCppProvider(config, mockLogger)
 		if err == nil {
 			t.Error("Expected error for invalid binary path")
@@ -346,10 +346,10 @@ func TestNewLlamaCppProvider(t *testing.T) {
 
 	t.Run("empty_models", func(t *testing.T) {
 		config := LlamaCppProviderConfig{
-			BinaryPath: "/bin/echo", // Use a common binary that exists
+			BinaryPath: "/bin/echo",     // Use a common binary that exists
 			Models:     []ModelConfig{}, // Empty models
 		}
-		
+
 		coordinator, err := NewLlamaCppProvider(config, mockLogger)
 		if err != nil {
 			t.Errorf("Expected no error for empty models, got: %v", err)
@@ -454,13 +454,13 @@ func TestMultiLLMCoordinatorSimpleMethods(t *testing.T) {
 		if len(models) != 2 {
 			t.Errorf("GetAvailableModels() returned %d models, want 2", len(models))
 		}
-		
+
 		// Since map iteration order is not guaranteed, check that both models are present
 		foundModels := make(map[string]bool)
 		for _, model := range models {
 			foundModels[model.ModelName] = true
 		}
-		
+
 		if !foundModels["model1"] || !foundModels["model2"] {
 			t.Errorf("GetAvailableModels() returned incorrect models: %v", models)
 		}
@@ -470,16 +470,16 @@ func TestMultiLLMCoordinatorSimpleMethods(t *testing.T) {
 // TestBuildPrompt tests the buildPrompt function
 func TestBuildPrompt(t *testing.T) {
 	coordinator := &MultiLLMCoordinator{}
-	
+
 	t.Run("basic_translation", func(t *testing.T) {
 		task := TranslationTask{
 			FromLang: "en",
 			ToLang:   "sr",
 			Text:     "Hello world",
 		}
-		
+
 		prompt := coordinator.buildPrompt(task)
-		
+
 		// Check that the prompt contains expected elements
 		if !strings.Contains(prompt, "English") {
 			t.Error("Prompt should contain 'English'")
@@ -494,16 +494,16 @@ func TestBuildPrompt(t *testing.T) {
 			t.Error("Prompt should end with 'Translation:'")
 		}
 	})
-	
+
 	t.Run("unknown_languages", func(t *testing.T) {
 		task := TranslationTask{
 			FromLang: "xx",
 			ToLang:   "yy",
 			Text:     "Test text",
 		}
-		
+
 		prompt := coordinator.buildPrompt(task)
-		
+
 		// Should use the language codes directly when unknown
 		if !strings.Contains(prompt, "xx") {
 			t.Error("Prompt should contain 'xx' when language is unknown")
@@ -512,16 +512,16 @@ func TestBuildPrompt(t *testing.T) {
 			t.Error("Prompt should contain 'yy' when language is unknown")
 		}
 	})
-	
+
 	t.Run("empty_text", func(t *testing.T) {
 		task := TranslationTask{
 			FromLang: "en",
 			ToLang:   "ru",
 			Text:     "",
 		}
-		
+
 		prompt := coordinator.buildPrompt(task)
-		
+
 		// Should still include all prompt structure even with empty text
 		if !strings.Contains(prompt, "English") {
 			t.Error("Prompt should contain 'English'")
@@ -538,7 +538,7 @@ func TestBuildPrompt(t *testing.T) {
 // TestParseOutput tests the parseOutput function
 func TestParseOutput(t *testing.T) {
 	coordinator := &MultiLLMCoordinator{}
-	
+
 	t.Run("simple_translation", func(t *testing.T) {
 		output := "Some prompt text\nTranslation:Hola mundo\nMore text"
 		result := coordinator.parseOutput(output)
@@ -547,7 +547,7 @@ func TestParseOutput(t *testing.T) {
 			t.Errorf("parseOutput() = %q, want %q", result, expected)
 		}
 	})
-	
+
 	t.Run("translation_on_same_line", func(t *testing.T) {
 		output := "Some text Translation:Bonjour le monde More text"
 		result := coordinator.parseOutput(output)
@@ -556,7 +556,7 @@ func TestParseOutput(t *testing.T) {
 			t.Errorf("parseOutput() = %q, want %q", result, expected)
 		}
 	})
-	
+
 	t.Run("multiline_translation", func(t *testing.T) {
 		output := "Prompt text\nTranslation:Line 1\nLine 2\nLine 3\nMore text"
 		result := coordinator.parseOutput(output)
@@ -565,7 +565,7 @@ func TestParseOutput(t *testing.T) {
 			t.Errorf("parseOutput() = %q, want %q", result, expected)
 		}
 	})
-	
+
 	t.Run("no_translation_marker", func(t *testing.T) {
 		output := "Some text without translation marker\nMore text"
 		result := coordinator.parseOutput(output)
@@ -574,7 +574,7 @@ func TestParseOutput(t *testing.T) {
 			t.Errorf("parseOutput() = %q, want %q", result, expected)
 		}
 	})
-	
+
 	t.Run("empty_translation", func(t *testing.T) {
 		output := "Text Translation: More text"
 		result := coordinator.parseOutput(output)

@@ -58,7 +58,7 @@ func TestTranslationSessionWithNilEndTime(t *testing.T) {
 	session := TranslationSession{
 		ID:              "incomplete-session",
 		Status:          "in_progress",
-		PercentComplete:  50.0,
+		PercentComplete: 50.0,
 		CurrentChapter:  5,
 		TotalChapters:   10,
 		ItemsCompleted:  5,
@@ -82,7 +82,7 @@ func TestTranslationSessionWithError(t *testing.T) {
 	session := TranslationSession{
 		ID:              "failed-session",
 		Status:          "failed",
-		PercentComplete:  25.0,
+		PercentComplete: 25.0,
 		CurrentChapter:  2,
 		TotalChapters:   10,
 		ItemsCompleted:  2,
@@ -104,16 +104,16 @@ func TestTranslationSessionWithError(t *testing.T) {
 // TestTranslationCacheStructure tests the TranslationCache struct
 func TestTranslationCacheStructure(t *testing.T) {
 	cache := TranslationCache{
-		ID:              "cache-123",
-		SourceText:      "Hello world",
-		TargetText:      "Привет мир",
-		SourceLanguage:  "en",
-		TargetLanguage:  "ru",
-		Provider:        "openai",
-		Model:           "gpt-4",
-		CreatedAt:       time.Now().Add(-1 * time.Hour),
-		AccessCount:     5,
-		LastAccessedAt:  time.Now().Add(-10 * time.Minute),
+		ID:             "cache-123",
+		SourceText:     "Hello world",
+		TargetText:     "Привет мир",
+		SourceLanguage: "en",
+		TargetLanguage: "ru",
+		Provider:       "openai",
+		Model:          "gpt-4",
+		CreatedAt:      time.Now().Add(-1 * time.Hour),
+		AccessCount:    5,
+		LastAccessedAt: time.Now().Add(-10 * time.Minute),
 	}
 
 	assert.Equal(t, "cache-123", cache.ID)
@@ -131,16 +131,16 @@ func TestTranslationCacheStructure(t *testing.T) {
 func TestTranslationCacheZeroAccess(t *testing.T) {
 	now := time.Now()
 	cache := TranslationCache{
-		ID:              "new-cache",
-		SourceText:      "Test text",
-		TargetText:      "Текст теста",
-		SourceLanguage:  "en",
-		TargetLanguage:  "ru",
-		Provider:        "openai",
-		Model:           "gpt-4",
-		CreatedAt:       now,
-		AccessCount:     0,
-		LastAccessedAt:  now,
+		ID:             "new-cache",
+		SourceText:     "Test text",
+		TargetText:     "Текст теста",
+		SourceLanguage: "en",
+		TargetLanguage: "ru",
+		Provider:       "openai",
+		Model:          "gpt-4",
+		CreatedAt:      now,
+		AccessCount:    0,
+		LastAccessedAt: now,
 	}
 
 	assert.Equal(t, 0, cache.AccessCount)
@@ -166,7 +166,7 @@ func TestStatisticsStructure(t *testing.T) {
 	assert.Equal(t, int64(10000), stats.TotalTranslations)
 	assert.Equal(t, 0.75, stats.CacheHitRate)
 	assert.Equal(t, 120.5, stats.AverageDuration)
-	
+
 	// Test that completed + failed + in_progress equals total
 	total := stats.CompletedSessions + stats.FailedSessions + stats.InProgressSessions
 	assert.Equal(t, stats.TotalSessions, total)
@@ -178,7 +178,7 @@ func TestStatisticsEmpty(t *testing.T) {
 		TotalSessions:      0,
 		CompletedSessions:  0,
 		FailedSessions:     0,
-		InProgressSessions:  0,
+		InProgressSessions: 0,
 		TotalTranslations:  0,
 		CacheHitRate:       0.0,
 		AverageDuration:    0.0,
@@ -203,10 +203,10 @@ func TestConfigStructure(t *testing.T) {
 		Username:        "user",
 		Password:        "password",
 		SSLMode:         "disable",
-		EncryptionKey:    "encryption-key-123",
+		EncryptionKey:   "encryption-key-123",
 		MaxOpenConns:    25,
 		MaxIdleConns:    5,
-		ConnMaxLifetime:  5 * time.Minute,
+		ConnMaxLifetime: 5 * time.Minute,
 	}
 
 	assert.Equal(t, "sqlite", config.Type)
@@ -232,10 +232,10 @@ func TestConfigPostgres(t *testing.T) {
 		Username:        "admin",
 		Password:        "secure_password",
 		SSLMode:         "require",
-		EncryptionKey:    "", // Not used for PostgreSQL
+		EncryptionKey:   "", // Not used for PostgreSQL
 		MaxOpenConns:    50,
 		MaxIdleConns:    10,
-		ConnMaxLifetime:  10 * time.Minute,
+		ConnMaxLifetime: 10 * time.Minute,
 	}
 
 	assert.Equal(t, "postgres", config.Type)
@@ -257,10 +257,10 @@ func TestConfigRedis(t *testing.T) {
 		Username:        "",
 		Password:        "redis_password",
 		SSLMode:         "", // Not used for Redis
-		EncryptionKey:    "", // Not used for Redis
+		EncryptionKey:   "", // Not used for Redis
 		MaxOpenConns:    100,
 		MaxIdleConns:    20,
-		ConnMaxLifetime:  30 * time.Second,
+		ConnMaxLifetime: 30 * time.Second,
 	}
 
 	assert.Equal(t, "redis", config.Type)
@@ -280,10 +280,10 @@ func TestStorageInterfaceMethods(t *testing.T) {
 	storage := &mockStorage{}
 
 	assert.NotNil(t, storage)
-	
+
 	// Verify all methods exist by calling them with context
 	ctx := context.Background()
-	
+
 	// Test that all methods exist and can be called (should not panic)
 	assert.NotPanics(t, func() {
 		storage.CreateSession(ctx, &TranslationSession{ID: "test"})

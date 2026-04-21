@@ -48,8 +48,8 @@ func TestRAMDetection(t *testing.T) {
 	}
 
 	// Test total RAM is reasonable (at least 1GB, less than 1TB)
-	minRAM := uint64(1 * 1024 * 1024 * 1024)      // 1 GB
-	maxRAM := uint64(1024 * 1024 * 1024 * 1024)   // 1 TB
+	minRAM := uint64(1 * 1024 * 1024 * 1024)    // 1 GB
+	maxRAM := uint64(1024 * 1024 * 1024 * 1024) // 1 TB
 
 	if caps.TotalRAM < minRAM {
 		t.Errorf("TotalRAM too small: %d bytes (< 1GB)", caps.TotalRAM)
@@ -145,8 +145,8 @@ func TestMaxModelSizeCalculation(t *testing.T) {
 	}
 
 	// MaxModelSize should be reasonable (1B to 70B parameters)
-	minSize := uint64(1_000_000_000)   // 1B parameters
-	maxSize := uint64(70_000_000_000)  // 70B parameters
+	minSize := uint64(1_000_000_000)  // 1B parameters
+	maxSize := uint64(70_000_000_000) // 70B parameters
 
 	if caps.MaxModelSize < minSize {
 		t.Errorf("MaxModelSize too small: %d (< 1B)", caps.MaxModelSize)
@@ -181,9 +181,9 @@ func TestCanRunModel(t *testing.T) {
 	}
 
 	tests := []struct {
-		name       string
-		modelSize  uint64
-		shouldRun  bool
+		name      string
+		modelSize uint64
+		shouldRun bool
 	}{
 		{
 			name:      "Small model (1B)",

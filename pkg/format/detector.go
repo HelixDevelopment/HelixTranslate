@@ -155,7 +155,7 @@ func (d *Detector) disambiguateZipFormat(filename string, ext string) (Format, e
 	if d.isAZW3File(filename) {
 		return FormatAZW3, nil
 	}
-	
+
 	// Debug: Let's see what's happening
 	// For ZIP files with PK magic but no specific AZW3 indicators, treat as EPUB
 	// This catches cases where EPUB files are being incorrectly detected as AZW3
@@ -210,7 +210,7 @@ func (d *Detector) isAZW3File(filename string) bool {
 	}
 
 	hasSpecific := false
-	
+
 	for _, f := range r.File {
 		// Check for AZW3-specific indicators
 		for _, specific := range azw3Specific {

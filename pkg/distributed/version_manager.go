@@ -618,13 +618,6 @@ func (vm *VersionManager) CheckWorkerVersion(ctx context.Context, service *Remot
 	// Compare versions
 	isUpToDate := vm.compareVersions(vm.localVersion, workerVersion)
 
-	// Record metrics
-	if isUpToDate {
-		// This will be counted in drift detection
-	} else {
-		// Could add per-worker metrics here if needed
-	}
-
 	// Emit event
 	event := events.Event{
 		Type:      "worker_version_checked",
@@ -1063,6 +1056,8 @@ func (vm *VersionManager) waitForRollbackCompletion(ctx context.Context, service
 }
 
 // cleanupExpiredBackups removes old backups that are no longer needed
+//
+//nolint:unused
 func (vm *VersionManager) cleanupExpiredBackups() error {
 	// Remove backups older than 24 hours that are not active
 	cutoff := time.Now().Add(-24 * time.Hour)
@@ -1071,7 +1066,7 @@ func (vm *VersionManager) cleanupExpiredBackups() error {
 		if backup.Timestamp.Before(cutoff) && backup.Status != "active" {
 			if err := os.RemoveAll(backup.BackupPath); err != nil {
 				// Log error but continue cleanup
-				fmt.Printf("Failed to remove backup %s: %v\n", backup.BackupPath, err)
+				fmt.Printf("Failed to remove backup %s: %v\n", backup.BackupPath, err) //nolint:forbidigo
 			}
 			delete(vm.backups, workerID)
 		}
@@ -1344,7 +1339,7 @@ func (vm *VersionManager) CheckVersionDrift(ctx context.Context, services []*Rem
 			// Send alert through alert manager
 			if err := vm.alertManager.SendAlert(alert); err != nil {
 				// Log error but don't fail the drift check
-				fmt.Printf("Failed to send alert for worker %s: %v\n", service.WorkerID, err)
+				fmt.Printf("Failed to send alert for worker %s: %v\n", service.WorkerID, err) //nolint:forbidigo
 			}
 		}
 	}

@@ -54,9 +54,9 @@ func TestMainFunctionComprehensive(t *testing.T) {
 				assert.NotPanics(t, func() {
 					oldArgs := os.Args
 					defer func() { os.Args = oldArgs }()
-					
+
 					os.Args = append([]string{"translate-ssh"}, tt.args...)
-					
+
 					defer func() {
 						if r := recover(); r != nil {
 							// Expected due to os.Exit
@@ -121,11 +121,11 @@ func TestMainFunctionComprehensive(t *testing.T) {
 // TestSSHServerConfiguration tests SSH server configuration
 func TestSSHServerConfiguration(t *testing.T) {
 	tests := []struct {
-		name          string
-		config        SSHTestConfig
-		expectError   bool
-		expectedHost  string
-		expectedPort  int
+		name         string
+		config       SSHTestConfig
+		expectError  bool
+		expectedHost string
+		expectedPort int
 	}{
 		{
 			name: "valid config",
@@ -138,8 +138,8 @@ func TestSSHServerConfiguration(t *testing.T) {
 			expectedPort: 2222,
 		},
 		{
-			name: "default config",
-			config: SSHTestConfig{},
+			name:         "default config",
+			config:       SSHTestConfig{},
 			expectError:  false,
 			expectedHost: "0.0.0.0",
 			expectedPort: 2222,
@@ -180,21 +180,21 @@ func TestSSHServerConfiguration(t *testing.T) {
 // TestSSHKeyGeneration tests SSH key generation
 func TestSSHKeyGeneration(t *testing.T) {
 	tests := []struct {
-		name          string
+		name         string
 		keyType      string
 		bits         int
 		expectError  bool
 		expectedType string
 	}{
 		{
-			name:          "RSA 2048",
+			name:         "RSA 2048",
 			keyType:      "rsa",
 			bits:         2048,
 			expectError:  false,
 			expectedType: "ssh-rsa",
 		},
 		{
-			name:          "RSA 4096",
+			name:         "RSA 4096",
 			keyType:      "rsa",
 			bits:         4096,
 			expectError:  false,
@@ -215,10 +215,10 @@ func TestSSHKeyGeneration(t *testing.T) {
 			expectedType: "ssh-ed25519",
 		},
 		{
-			name:         "invalid key type",
-			keyType:      "invalid",
-			bits:         2048,
-			expectError:  true,
+			name:        "invalid key type",
+			keyType:     "invalid",
+			bits:        2048,
+			expectError: true,
 		},
 	}
 
@@ -350,7 +350,7 @@ func TestSSHServerStartup(t *testing.T) {
 func TestSSHClientConnection(t *testing.T) {
 	// This test is simplified to avoid SSH handshake complexities
 	// Instead, we test the individual components
-	
+
 	// Generate test keys
 	tmpDir := t.TempDir()
 	serverKeyFile := filepath.Join(tmpDir, "server_key")
@@ -407,10 +407,10 @@ func TestSSHClientConnection(t *testing.T) {
 // TestSSHCommandHandling tests SSH command processing
 func TestSSHCommandHandling(t *testing.T) {
 	tests := []struct {
-		name          string
-		command       string
+		name           string
+		command        string
 		expectedOutput string
-		expectedError bool
+		expectedError  bool
 	}{
 		{
 			name:           "simple translate command",
@@ -448,7 +448,7 @@ func TestSSHCommandHandling(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create mock translator
 			mockTranslator := &mocks.MockTranslator{}
-			
+
 			// Only set expectation if GetName will be called
 			if tt.command == "status" {
 				mockTranslator.On("GetName").Return("mock-translator")
@@ -475,10 +475,10 @@ func TestSSHCommandHandling(t *testing.T) {
 // TestSSHAuthentication tests SSH authentication mechanisms
 func TestSSHAuthentication(t *testing.T) {
 	tests := []struct {
-		name         string
-		authMethod   string
-		expectError  bool
-		setupKeys    bool
+		name        string
+		authMethod  string
+		expectError bool
+		setupKeys   bool
 	}{
 		{
 			name:        "public key authentication",
@@ -577,7 +577,7 @@ func TestSSHSessionManagement(t *testing.T) {
 func TestSSHIntegrationWithTranslator(t *testing.T) {
 	// Create mock translator
 	mockTranslator := &mocks.MockTranslator{}
-	
+
 	// Only set GetName expectation since that's what's called
 	mockTranslator.On("GetName").Return("mock-translator")
 
@@ -654,7 +654,7 @@ func TestSSHErrorHandling(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Simulate error conditions
 			var err error
-			
+
 			switch tt.errorType {
 			case "timeout":
 				_, err = net.DialTimeout("tcp", "localhost:9999", 1*time.Millisecond)
@@ -877,19 +877,19 @@ func TestParseFlags(t *testing.T) {
 func TestTranslationProgress(t *testing.T) {
 	t.Run("ProgressInitialization", func(t *testing.T) {
 		progress := &TranslationProgress{
-			StartTime:      time.Now(),
-			TotalSteps:     6,
-			CompletedSteps: 3,
-			CurrentStep:    "Translating",
-			InputFile:      "/path/to/input.fb2",
-			OutputFile:     "/path/to/output.epub",
-			HashMatch:      true,
-			CodeUpdated:    false,
-			FilesCreated:   []string{"/tmp/test.md"},
-			FilesDownloaded: []string{"/tmp/test_translated.md"},
+			StartTime:        time.Now(),
+			TotalSteps:       6,
+			CompletedSteps:   3,
+			CurrentStep:      "Translating",
+			InputFile:        "/path/to/input.fb2",
+			OutputFile:       "/path/to/output.epub",
+			HashMatch:        true,
+			CodeUpdated:      false,
+			FilesCreated:     []string{"/tmp/test.md"},
+			FilesDownloaded:  []string{"/tmp/test_translated.md"},
 			TranslationStats: map[string]interface{}{"progress": "50%"},
 		}
-		
+
 		assert.NotZero(t, progress.StartTime)
 		assert.Equal(t, 6, progress.TotalSteps)
 		assert.Equal(t, 3, progress.CompletedSteps)
@@ -908,18 +908,18 @@ func TestTranslationProgress(t *testing.T) {
 func TestPrintFinalReport(t *testing.T) {
 	t.Run("SuccessfulTranslation", func(t *testing.T) {
 		progress := &TranslationProgress{
-			StartTime:      time.Now().Add(-1 * time.Hour),
-			CompletedSteps: 6,
-			TotalSteps:     6,
-			CurrentStep:    "Completed",
-			InputFile:      "/path/to/test.fb2",
-			OutputFile:     "/path/to/test_sr.epub",
-			HashMatch:      true,
-			CodeUpdated:    true,
-			FilesCreated:   []string{"/tmp/test_original.md", "/tmp/test_translated.md", "/tmp/test_sr.epub"},
+			StartTime:        time.Now().Add(-1 * time.Hour),
+			CompletedSteps:   6,
+			TotalSteps:       6,
+			CurrentStep:      "Completed",
+			InputFile:        "/path/to/test.fb2",
+			OutputFile:       "/path/to/test_sr.epub",
+			HashMatch:        true,
+			CodeUpdated:      true,
+			FilesCreated:     []string{"/tmp/test_original.md", "/tmp/test_translated.md", "/tmp/test_sr.epub"},
 			TranslationStats: map[string]interface{}{"total_chunks": 100, "translated": 95},
 		}
-		
+
 		// Capture stdout
 		oldStdout := os.Stdout
 		r, w, _ := os.Pipe()
@@ -928,15 +928,15 @@ func TestPrintFinalReport(t *testing.T) {
 			os.Stdout = oldStdout
 			w.Close()
 		}()
-		
+
 		go func() {
 			printFinalReport(progress)
 			w.Close()
 		}()
-		
+
 		var buf bytes.Buffer
 		buf.ReadFrom(r)
-		
+
 		output := buf.String()
 		assert.Contains(t, output, "SSH TRANSLATION WORKFLOW COMPLETED")
 		assert.Contains(t, output, "Translation completed successfully")
@@ -948,19 +948,19 @@ func TestPrintFinalReport(t *testing.T) {
 // TestCalculateEssentialFilesHash tests the calculateEssentialFilesHash function
 func TestCalculateEssentialFilesHash(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	// Create mock essential files
 	binaryFile := filepath.Join(tmpDir, "translator-ssh")
 	scriptFile := filepath.Join(tmpDir, "python_translation.sh")
-	
+
 	require.NoError(t, os.WriteFile(binaryFile, []byte("mock binary content"), 0755))
 	require.NoError(t, os.WriteFile(scriptFile, []byte("mock script content"), 0755))
-	
+
 	// Temporarily change working directory
 	oldWd, _ := os.Getwd()
 	defer os.Chdir(oldWd)
 	os.Chdir(tmpDir)
-	
+
 	hash, err := calculateEssentialFilesHash()
 	assert.NoError(t, err)
 	assert.NotEmpty(t, hash)
@@ -972,10 +972,10 @@ func TestGetProjectRoot(t *testing.T) {
 	// Test with environment variable
 	oldRoot := os.Getenv("PROJECT_ROOT")
 	defer os.Setenv("PROJECT_ROOT", oldRoot)
-	
+
 	os.Setenv("PROJECT_ROOT", "/test/path")
 	assert.Equal(t, "/test/path", getProjectRoot())
-	
+
 	// Test without environment variable
 	os.Unsetenv("PROJECT_ROOT")
 	root := getProjectRoot()

@@ -304,7 +304,7 @@ func TestPreparationPromptBuilder_DifferentPassNumbers(t *testing.T) {
 	pass3Builder := NewPreparationPromptBuilder("en", "es", 3)
 
 	_ = pass1Builder.BuildInitialAnalysisPrompt(content)
-	
+
 	// Set previous analysis for pass 2
 	previousAnalysis := &ContentAnalysis{
 		AnalysisVersion: 1,
@@ -313,7 +313,7 @@ func TestPreparationPromptBuilder_DifferentPassNumbers(t *testing.T) {
 		Genre:           "science_fiction",
 	}
 	pass2Builder.WithPreviousAnalysis(previousAnalysis)
-	
+
 	pass2Prompt := pass2Builder.BuildRefinementPrompt(content)
 	pass3Prompt := pass3Builder.BuildConsolidationPrompt([]ContentAnalysis{})
 

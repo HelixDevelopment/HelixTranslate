@@ -17,15 +17,15 @@ import (
 func TestConfigStruct(t *testing.T) {
 	t.Run("Config fields", func(t *testing.T) {
 		config := &Config{
-			InputFile:  "test.epub",
-			OutputFile: "test_sr.epub",
-			SSHHost:    "localhost",
-			SSHUser:    "user",
+			InputFile:   "test.epub",
+			OutputFile:  "test_sr.epub",
+			SSHHost:     "localhost",
+			SSHUser:     "user",
 			SSHPassword: "pass",
-			SSHPort:    22,
-			RemoteDir:  "/tmp/translate-ssh",
+			SSHPort:     22,
+			RemoteDir:   "/tmp/translate-ssh",
 		}
-		
+
 		assert.Equal(t, "test.epub", config.InputFile)
 		assert.Equal(t, "test_sr.epub", config.OutputFile)
 		assert.Equal(t, "localhost", config.SSHHost)
@@ -34,22 +34,22 @@ func TestConfigStruct(t *testing.T) {
 		assert.Equal(t, 22, config.SSHPort)
 		assert.Equal(t, "/tmp/translate-ssh", config.RemoteDir)
 	})
-	
+
 	t.Run("JSON marshaling", func(t *testing.T) {
 		config := &Config{
-			InputFile:  "test.epub",
-			OutputFile: "test_sr.epub",
-			SSHHost:    "localhost",
-			SSHUser:    "user",
+			InputFile:   "test.epub",
+			OutputFile:  "test_sr.epub",
+			SSHHost:     "localhost",
+			SSHUser:     "user",
 			SSHPassword: "pass",
-			SSHPort:    22,
+			SSHPort:     22,
 		}
-		
+
 		// Convert to JSON for SSH transmission
 		jsonData, err := json.Marshal(config)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, jsonData)
-		
+
 		// Verify it can be unmarshaled back
 		var unmarshaled Config
 		err = json.Unmarshal(jsonData, &unmarshaled)
@@ -63,27 +63,27 @@ func TestConfigStruct(t *testing.T) {
 func TestProgressTracking(t *testing.T) {
 	t.Run("TranslationProgress initialization", func(t *testing.T) {
 		progress := &TranslationProgress{
-			StartTime:     time.Now(),
-			TotalSteps:     5,
-			CurrentStep:    "Test step",
+			StartTime:   time.Now(),
+			TotalSteps:  5,
+			CurrentStep: "Test step",
 		}
-		
+
 		assert.False(t, progress.StartTime.IsZero())
 		assert.Equal(t, 5, progress.TotalSteps)
 		assert.Equal(t, "Test step", progress.CurrentStep)
 	})
-	
+
 	t.Run("UpdateProgress", func(t *testing.T) {
 		progress := &TranslationProgress{
-			StartTime:     time.Now(),
-			TotalSteps:     5,
-			CurrentStep:    "Initial step",
+			StartTime:   time.Now(),
+			TotalSteps:  5,
+			CurrentStep: "Initial step",
 		}
-		
+
 		// Update progress
 		progress.CurrentStep = "New step"
 		progress.CompletedSteps++
-		
+
 		assert.Equal(t, "New step", progress.CurrentStep)
 		assert.Equal(t, 1, progress.CompletedSteps)
 	})
@@ -95,42 +95,42 @@ func TestConfigValidation(t *testing.T) {
 		tempFile := filepath.Join(t.TempDir(), "test.epub")
 		_, err := os.Create(tempFile)
 		require.NoError(t, err)
-		
+
 		config := &Config{
-			InputFile:  tempFile,
-			OutputFile: tempFile,
-			SSHHost:    "localhost",
-			SSHUser:    "user",
+			InputFile:   tempFile,
+			OutputFile:  tempFile,
+			SSHHost:     "localhost",
+			SSHUser:     "user",
 			SSHPassword: "pass",
 		}
-		
+
 		err = validateConfig(config)
 		assert.NoError(t, err)
 	})
-	
+
 	t.Run("missing input file", func(t *testing.T) {
 		config := &Config{
-			InputFile:  "",
-			OutputFile: "output.epub",
-			SSHHost:    "localhost",
-			SSHUser:    "user",
+			InputFile:   "",
+			OutputFile:  "output.epub",
+			SSHHost:     "localhost",
+			SSHUser:     "user",
 			SSHPassword: "pass",
 		}
-		
+
 		err := validateConfig(config)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "input file is required")
 	})
-	
+
 	t.Run("nonexistent input file", func(t *testing.T) {
 		config := &Config{
-			InputFile:  "/nonexistent/file.epub",
-			OutputFile: "output.epub",
-			SSHHost:    "localhost",
-			SSHUser:    "user",
+			InputFile:   "/nonexistent/file.epub",
+			OutputFile:  "output.epub",
+			SSHHost:     "localhost",
+			SSHUser:     "user",
 			SSHPassword: "pass",
 		}
-		
+
 		err := validateConfig(config)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "input file not found")
@@ -141,26 +141,26 @@ func TestConfigValidation(t *testing.T) {
 func TestSessionIDGeneration(t *testing.T) {
 	// Reset flag.CommandLine to avoid redefinition errors
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	
+
 	t.Run("generateSessionID", func(t *testing.T) {
 		// Create a mock config
 		config := &Config{
-			InputFile:  "test.epub",
-			OutputFile: "test_sr.epub",
-			SSHHost:    "localhost",
-			SSHUser:    "user",
+			InputFile:   "test.epub",
+			OutputFile:  "test_sr.epub",
+			SSHHost:     "localhost",
+			SSHUser:     "user",
 			SSHPassword: "pass",
 		}
-		
+
 		// Simulate session ID generation
-		sessionData := fmt.Sprintf("%s_%s_%s_%d", 
-			config.SSHHost, 
-			config.SSHUser, 
+		sessionData := fmt.Sprintf("%s_%s_%s_%d",
+			config.SSHHost,
+			config.SSHUser,
 			config.InputFile,
 			time.Now().Unix(),
 		)
 		sessionID := fmt.Sprintf("%x", sessionData)
-		
+
 		assert.NotEmpty(t, sessionID)
 		assert.NotEqual(t, sessionID, fmt.Sprintf("%x", "")) // Ensure it's not empty hash
 	})

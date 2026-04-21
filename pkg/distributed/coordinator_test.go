@@ -13,7 +13,7 @@ func TestDistributedCoordinator(t *testing.T) {
 	t.Run("Constructor", func(t *testing.T) {
 		eventBus := events.NewEventBus()
 		apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
-		
+
 		coordinator := NewDistributedCoordinator(
 			nil, // localCoordinator
 			nil, // sshPool
@@ -23,25 +23,25 @@ func TestDistributedCoordinator(t *testing.T) {
 			eventBus,
 			apiLogger,
 		)
-		
+
 		if coordinator == nil {
 			t.Errorf("Expected coordinator to be created")
 		}
-		
+
 		// Verify default configuration
 		if coordinator.maxRetries != 3 {
 			t.Errorf("Expected maxRetries 3, got %d", coordinator.maxRetries)
 		}
-		
+
 		if coordinator.retryDelay != 2*time.Second {
 			t.Errorf("Expected retryDelay 2s, got %v", coordinator.retryDelay)
 		}
 	})
-	
+
 	t.Run("DiscoverRemoteInstances", func(t *testing.T) {
 		eventBus := events.NewEventBus()
 		apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
-		
+
 		coordinator := NewDistributedCoordinator(
 			nil,
 			nil,
@@ -51,7 +51,7 @@ func TestDistributedCoordinator(t *testing.T) {
 			eventBus,
 			apiLogger,
 		)
-		
+
 		// Test with nil pairing manager (should handle gracefully)
 		// Since we know this will panic due to nil pointer, let's recover and expect the panic
 		defer func() {
@@ -59,15 +59,15 @@ func TestDistributedCoordinator(t *testing.T) {
 				t.Errorf("Expected panic when pairing manager is nil")
 			}
 		}()
-		
+
 		err := coordinator.DiscoverRemoteInstances(context.Background())
 		t.Errorf("Should have panicked before this point, but got err: %v", err)
 	})
-	
+
 	t.Run("GetPriorityForProvider", func(t *testing.T) {
 		eventBus := events.NewEventBus()
 		apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
-		
+
 		coordinator := NewDistributedCoordinator(
 			nil,
 			nil,
@@ -77,10 +77,10 @@ func TestDistributedCoordinator(t *testing.T) {
 			eventBus,
 			apiLogger,
 		)
-		
+
 		tests := []struct {
-			provider  string
-			expected  int
+			provider string
+			expected int
 		}{
 			{"openai", 10},
 			{"anthropic", 10},
@@ -90,20 +90,20 @@ func TestDistributedCoordinator(t *testing.T) {
 			{"llamacpp", 5},
 			{"unknown", 1},
 		}
-		
+
 		for _, test := range tests {
 			priority := coordinator.getPriorityForProvider(test.provider)
 			if priority != test.expected {
-				t.Errorf("Expected priority %d for provider %s, got %d", 
+				t.Errorf("Expected priority %d for provider %s, got %d",
 					test.expected, test.provider, priority)
 			}
 		}
 	})
-	
+
 	t.Run("GetInstanceCountForPriority", func(t *testing.T) {
 		eventBus := events.NewEventBus()
 		apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
-		
+
 		coordinator := NewDistributedCoordinator(
 			nil,
 			nil,
@@ -113,7 +113,7 @@ func TestDistributedCoordinator(t *testing.T) {
 			eventBus,
 			apiLogger,
 		)
-		
+
 		tests := []struct {
 			priority      int
 			maxConcurrent int
@@ -124,11 +124,11 @@ func TestDistributedCoordinator(t *testing.T) {
 			{5, 5, 2},  // OAuth providers
 			{1, 5, 1},  // Free/local providers
 		}
-		
+
 		for _, test := range tests {
 			count := coordinator.getInstanceCountForPriority(test.priority, test.maxConcurrent)
 			if count != test.expected {
-				t.Errorf("Expected count %d for priority %d with maxConcurrent %d, got %d", 
+				t.Errorf("Expected count %d for priority %d with maxConcurrent %d, got %d",
 					test.expected, test.priority, test.maxConcurrent, count)
 			}
 		}
@@ -139,7 +139,7 @@ func TestDistributedCoordinator_getNextRemoteInstance(t *testing.T) {
 	t.Run("getNextRemoteInstance_Empty", func(t *testing.T) {
 		eventBus := events.NewEventBus()
 		apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
-		
+
 		coordinator := NewDistributedCoordinator(
 			nil,
 			nil,
@@ -149,7 +149,7 @@ func TestDistributedCoordinator_getNextRemoteInstance(t *testing.T) {
 			eventBus,
 			apiLogger,
 		)
-		
+
 		// With no instances, should return nil
 		instance := coordinator.getNextRemoteInstance()
 		if instance != nil {
@@ -163,7 +163,7 @@ func TestDistributedCoordinator_validateWorkerForWork(t *testing.T) {
 		eventBus := events.NewEventBus()
 		apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
 		pairingManager := NewPairingManager(nil, eventBus)
-		
+
 		coordinator := NewDistributedCoordinator(
 			nil, // localCoordinator
 			nil, // sshPool
@@ -173,20 +173,20 @@ func TestDistributedCoordinator_validateWorkerForWork(t *testing.T) {
 			eventBus,
 			apiLogger,
 		)
-		
+
 		// When version manager is nil, should skip validation
 		err := coordinator.validateWorkerForWork(context.Background(), "worker1")
 		if err != nil {
 			t.Errorf("Expected no error when version manager is nil (skips validation), got %v", err)
 		}
 	})
-	
+
 	t.Run("validateWorkerForWork_WorkerNotFound", func(t *testing.T) {
 		eventBus := events.NewEventBus()
 		apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
 		pairingManager := NewPairingManager(nil, eventBus)
 		versionManager := NewVersionManager(eventBus)
-		
+
 		coordinator := NewDistributedCoordinator(
 			nil, // localCoordinator
 			nil, // sshPool
@@ -196,7 +196,7 @@ func TestDistributedCoordinator_validateWorkerForWork(t *testing.T) {
 			eventBus,
 			apiLogger,
 		)
-		
+
 		// Should return error for non-existent worker
 		err := coordinator.validateWorkerForWork(context.Background(), "nonexistent-worker")
 		if err == nil {

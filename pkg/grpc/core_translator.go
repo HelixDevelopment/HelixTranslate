@@ -22,9 +22,9 @@ import (
 
 // CoreTranslatorImpl implements the CoreTranslator interface
 type CoreTranslatorImpl struct {
-	logger     logger.Logger
-	sessions   map[string]*TranslationJob
-	mutex      sync.RWMutex
+	logger   logger.Logger
+	sessions map[string]*TranslationJob
+	mutex    sync.RWMutex
 }
 
 // TranslationJob represents an active translation job
@@ -35,11 +35,11 @@ type TranslationJob struct {
 	Step       string
 	StartTime  time.Time
 	UpdateTime time.Time
-	
-	Request    *proto.TranslationRequest
-	Steps      []*proto.TranslationStep
-	Files      []*proto.GeneratedFile
-	
+
+	Request *proto.TranslationRequest
+	Steps   []*proto.TranslationStep
+	Files   []*proto.GeneratedFile
+
 	Context    context.Context
 	CancelFunc context.CancelFunc
 }
@@ -59,10 +59,10 @@ func (ct *CoreTranslatorImpl) Translate(ctx context.Context, req *proto.Translat
 		"input_file": req.InputFile,
 		"provider":   req.ProviderConfig.Type,
 	})
-	
+
 	// Create job context with cancellation
 	jobCtx, cancel := context.WithCancel(ctx)
-	
+
 	// Create translation job
 	job := &TranslationJob{
 		ID:         req.SessionId,
@@ -77,22 +77,22 @@ func (ct *CoreTranslatorImpl) Translate(ctx context.Context, req *proto.Translat
 		Context:    jobCtx,
 		CancelFunc: cancel,
 	}
-	
+
 	// Store job
 	ct.mutex.Lock()
 	ct.sessions[req.SessionId] = job
 	ct.mutex.Unlock()
-	
+
 	// Execute translation pipeline
 	result, err := ct.executeTranslationPipeline(job, eventBus)
-	
+
 	// Update job status
 	ct.mutex.Lock()
 	if err != nil {
 		job.Status = "failed"
 		ct.logger.Error("Translation failed", map[string]interface{}{
 			"session_id": req.SessionId,
-			"error": err.Error(),
+			"error":      err.Error(),
 		})
 	} else {
 		job.Status = "completed"
@@ -104,107 +104,107 @@ func (ct *CoreTranslatorImpl) Translate(ctx context.Context, req *proto.Translat
 	}
 	job.UpdateTime = time.Now()
 	ct.mutex.Unlock()
-	
+
 	return result, err
 }
 
 // executeTranslationPipeline runs the full translation pipeline
 func (ct *CoreTranslatorImpl) executeTranslationPipeline(job *TranslationJob, eventBus *events.EventBus) (*proto.TranslationStatusResponse, error) {
 	req := job.Request
-	
+
 	// Step 1: Parse input ebook
 	step := ct.createStep("parsing", "Parsing input ebook")
 	ct.updateJobStep(job, step)
-	
+
 	content, format, err := ct.parseInputFile(req.InputFile)
 	if err != nil {
 		ct.failStep(step, err)
 		return ct.createErrorResponse(job, step), err
 	}
 	ct.completeStep(step)
-	
+
 	// Step 2: Convert to markdown
 	step = ct.createStep("markdown_conversion", "Converting to markdown")
 	ct.updateJobStep(job, step)
-	
+
 	originalMarkdown, err := ct.convertToMarkdown(content, format)
 	if err != nil {
 		ct.failStep(step, err)
 		return ct.createErrorResponse(job, step), err
 	}
-	
+
 	// Save original markdown
 	originalMDPath := ct.generatePath(req.InputFile, "_original.md")
 	if err := os.WriteFile(originalMDPath, []byte(originalMarkdown), 0644); err != nil {
 		ct.failStep(step, fmt.Errorf("failed to save original markdown: %w", err))
 		return ct.createErrorResponse(job, step), err
 	}
-	
+
 	ct.addGeneratedFile(job, originalMDPath, "original_md", int64(len(originalMarkdown)), true, "Saved successfully")
 	ct.completeStep(step)
-	
+
 	// Step 3: Translate content
 	step = ct.createStep("translation", fmt.Sprintf("Translating with %s", req.ProviderConfig.Type))
 	ct.updateJobStep(job, step)
-	
+
 	translatedMarkdown, err := ct.executeTranslation(job, originalMarkdown, eventBus)
 	if err != nil {
 		ct.failStep(step, err)
 		return ct.createErrorResponse(job, step), err
 	}
-	
+
 	// Save translated markdown
 	translatedMDPath := ct.generatePath(req.InputFile, "_translated.md")
 	if err := os.WriteFile(translatedMDPath, []byte(translatedMarkdown), 0644); err != nil {
 		ct.failStep(step, fmt.Errorf("failed to save translated markdown: %w", err))
 		return ct.createErrorResponse(job, step), err
 	}
-	
+
 	verified := ct.verifyTranslation(translatedMarkdown, req.TargetLang, req.Script)
 	ct.addGeneratedFile(job, translatedMDPath, "translated_md", int64(len(translatedMarkdown)), verified,
 		map[bool]string{true: "Translation quality verified", false: "Translation needs review"}[verified])
 	ct.completeStep(step)
-	
+
 	// Step 4: Generate EPUB
 	step = ct.createStep("epub_generation", "Generating EPUB")
 	ct.updateJobStep(job, step)
-	
+
 	outputPath := req.OutputFile
 	if err := ct.generateEPUB(translatedMarkdown, outputPath, req.InputFile); err != nil {
 		ct.failStep(step, err)
 		return ct.createErrorResponse(job, step), err
 	}
-	
+
 	// Verify EPUB
 	epubVerified := ct.verifyEPUB(outputPath)
 	epubSize := ct.getFileSize(outputPath)
 	ct.addGeneratedFile(job, outputPath, "epub", epubSize, epubVerified,
 		map[bool]string{true: "Valid EPUB format", false: "Invalid EPUB format"}[epubVerified])
 	ct.completeStep(step)
-	
+
 	// Generate session report
 	if req.Options.EnableMonitoring {
 		ct.generateSessionReport(job)
 	}
-	
+
 	// Return success response
 	return &proto.TranslationStatusResponse{
-		SessionId:           job.ID,
-		Status:              "completed",
-		ProgressPercentage:   100,
-		CurrentStep:         "completed",
-		Message:             "Translation completed successfully",
-		StartedAt:           timeToProto(job.StartTime),
-		UpdatedAt:           timeToProto(time.Now()),
-		Files:               job.Files,
-		Steps:               job.Steps,
+		SessionId:          job.ID,
+		Status:             "completed",
+		ProgressPercentage: 100,
+		CurrentStep:        "completed",
+		Message:            "Translation completed successfully",
+		StartedAt:          timeToProto(job.StartTime),
+		UpdatedAt:          timeToProto(time.Now()),
+		Files:              job.Files,
+		Steps:              job.Steps,
 	}, nil
 }
 
 // executeTranslation handles translation based on provider type
 func (ct *CoreTranslatorImpl) executeTranslation(job *TranslationJob, text string, eventBus *events.EventBus) (string, error) {
 	req := job.Request
-	
+
 	switch req.ProviderConfig.Type {
 	case "ssh":
 		return ct.executeSSHTranslation(job, text, eventBus)
@@ -219,12 +219,12 @@ func (ct *CoreTranslatorImpl) executeTranslation(job *TranslationJob, text strin
 func (ct *CoreTranslatorImpl) executeSSHTranslation(job *TranslationJob, text string, eventBus *events.EventBus) (string, error) {
 	req := job.Request
 	ctx := job.Context
-	
+
 	ct.logger.Info("Executing SSH translation", map[string]interface{}{
 		"session_id": job.ID,
 		"host":       req.ProviderConfig.SshHost,
 	})
-	
+
 	// Initialize SSH worker
 	workerConfig := sshworker.SSHWorkerConfig{
 		Host:              req.ProviderConfig.SshHost,
@@ -235,39 +235,39 @@ func (ct *CoreTranslatorImpl) executeSSHTranslation(job *TranslationJob, text st
 		ConnectionTimeout: 30 * time.Second,
 		CommandTimeout:    time.Duration(req.ProviderConfig.TimeoutSeconds) * time.Second,
 	}
-	
+
 	worker, err := sshworker.NewSSHWorker(workerConfig, ct.logger)
 	if err != nil {
 		return "", fmt.Errorf("failed to create SSH worker: %w", err)
 	}
 	defer worker.Close()
-	
+
 	if err := worker.Connect(ctx); err != nil {
 		return "", fmt.Errorf("failed to connect to SSH worker: %w", err)
 	}
-	
+
 	// Upload text to remote
 	remoteTextPath := filepath.Join(req.ProviderConfig.RemoteDir, "input.md")
 	if err := worker.UploadData(ctx, []byte(text), remoteTextPath); err != nil {
 		return "", fmt.Errorf("failed to upload text to remote: %w", err)
 	}
-	
+
 	// Emit progress
 	ct.emitProgress(eventBus, job.ID, "upload_complete", "translation", 10, "Text uploaded to remote worker")
-	
+
 	// Execute translation using remote llama.cpp
 	remoteOutputPath := filepath.Join(req.ProviderConfig.RemoteDir, "output.md")
 	cmd := ct.buildSSHCommand(req.ProviderConfig, remoteTextPath, remoteOutputPath)
-	
+
 	result, err := worker.ExecuteCommand(ctx, cmd)
 	if err != nil {
 		return "", fmt.Errorf("failed to execute remote translation: %w", err)
 	}
-	
+
 	if result.ExitCode != 0 {
 		return "", fmt.Errorf("remote translation failed: %s", result.Stderr)
 	}
-	
+
 	// Emit progress
 	ct.emitProgress(eventBus, job.ID, "translation_complete", "translation", 80, "Translation completed on remote worker")
 	// Download result to temp file
@@ -287,13 +287,13 @@ func (ct *CoreTranslatorImpl) executeSSHTranslation(job *TranslationJob, text st
 // executeLlamaCppTranslation uses local llama.cpp
 func (ct *CoreTranslatorImpl) executeLlamaCppTranslation(job *TranslationJob, text string, eventBus *events.EventBus) (string, error) {
 	req := job.Request
-	
+
 	ct.logger.Info("Executing local llama.cpp translation", map[string]interface{}{
 		"session_id": job.ID,
 		"binary":     req.ProviderConfig.LlamaBinary,
 		"model":      req.ProviderConfig.LlamaModel,
 	})
-	
+
 	// Create LLM translator
 	llmConfig := translator.TranslationConfig{
 		SourceLang:  req.SourceLang,
@@ -309,35 +309,35 @@ func (ct *CoreTranslatorImpl) executeLlamaCppTranslation(job *TranslationJob, te
 			"context_size": req.ProviderConfig.ContextSize,
 		},
 	}
-	
+
 	llmTranslator, err := llm.NewLLMTranslator(llmConfig)
 	if err != nil {
 		return "", fmt.Errorf("failed to create LLM translator: %w", err)
 	}
-	
+
 	ct.emitProgress(eventBus, job.ID, "llm_ready", "translation", 10, "LLM translator initialized")
-	
+
 	// Translate
 	result, err := llmTranslator.TranslateWithProgress(job.Context, text, "Ebook content", eventBus, job.ID)
 	if err != nil {
 		return "", fmt.Errorf("LLM translation failed: %w", err)
 	}
-	
+
 	ct.emitProgress(eventBus, job.ID, "translation_complete", "translation", 90, "Translation completed")
-	
+
 	return result, nil
 }
 
 // executeAPITranslation uses API-based providers
 func (ct *CoreTranslatorImpl) executeAPITranslation(job *TranslationJob, text string, eventBus *events.EventBus) (string, error) {
 	req := job.Request
-	
+
 	ct.logger.Info("Executing API translation", map[string]interface{}{
 		"session_id": job.ID,
 		"provider":   req.ProviderConfig.Type,
 		"model":      req.ProviderConfig.Model,
 	})
-	
+
 	// Create LLM translator
 	llmConfig := translator.TranslationConfig{
 		SourceLang:  req.SourceLang,
@@ -350,22 +350,22 @@ func (ct *CoreTranslatorImpl) executeAPITranslation(job *TranslationJob, text st
 		APIKey:      req.ProviderConfig.ApiKey,
 		BaseURL:     req.ProviderConfig.BaseUrl,
 	}
-	
+
 	llmTranslator, err := llm.NewLLMTranslator(llmConfig)
 	if err != nil {
 		return "", fmt.Errorf("failed to create LLM translator: %w", err)
 	}
-	
+
 	ct.emitProgress(eventBus, job.ID, "api_ready", "translation", 10, "API client initialized")
-	
+
 	// Translate
 	result, err := llmTranslator.TranslateWithProgress(job.Context, text, "Ebook content", eventBus, job.ID)
 	if err != nil {
 		return "", fmt.Errorf("API translation failed: %w", err)
 	}
-	
+
 	ct.emitProgress(eventBus, job.ID, "translation_complete", "translation", 90, "Translation completed")
-	
+
 	return result, nil
 }
 
@@ -446,13 +446,13 @@ func (ct *CoreTranslatorImpl) verifyEPUB(path string) bool {
 		return false
 	}
 	defer file.Close()
-	
+
 	buffer := make([]byte, 1024)
 	n, err := file.Read(buffer)
 	if err != nil {
 		return false
 	}
-	
+
 	content := string(buffer[:n])
 	return strings.Contains(content, "application/epub+zip") && string(buffer[:2]) == "PK"
 }
@@ -474,21 +474,21 @@ func (ct *CoreTranslatorImpl) buildSSHCommand(config *proto.ProviderConfig, inpu
 
 func (ct *CoreTranslatorImpl) generateSessionReport(job *TranslationJob) {
 	reportPath := ct.generatePath(job.Request.OutputFile, "_session_report.md")
-	
+
 	file, err := os.Create(reportPath)
 	if err != nil {
 		return
 	}
 	defer file.Close()
-	
+
 	// Basic report generation - this could be enhanced
-	file.WriteString(fmt.Sprintf("# Translation Session Report\n\n"))
+	file.WriteString("# Translation Session Report\n\n")
 	file.WriteString(fmt.Sprintf("**Session ID:** %s\n", job.ID))
 	file.WriteString(fmt.Sprintf("**Status:** %s\n", job.Status))
 	file.WriteString(fmt.Sprintf("**Provider:** %s\n", job.Request.ProviderConfig.Type))
 	file.WriteString(fmt.Sprintf("**Duration:** %s\n", time.Since(job.StartTime).String()))
 	file.WriteString(fmt.Sprintf("**Files Generated:** %d\n\n", len(job.Files)))
-	
+
 	for i, step := range job.Steps {
 		file.WriteString(fmt.Sprintf("## Step %d: %s\n", i+1, step.Name))
 		file.WriteString(fmt.Sprintf("- **Status:** %s\n", step.Status))
@@ -504,17 +504,17 @@ func (ct *CoreTranslatorImpl) generateSessionReport(job *TranslationJob) {
 
 func (ct *CoreTranslatorImpl) createStep(name, description string) *proto.TranslationStep {
 	return &proto.TranslationStep{
-		Name:        name,
-		Status:      "running",
-		StartedAt:   timeToProto(time.Now()),
-		Message:     description,
+		Name:      name,
+		Status:    "running",
+		StartedAt: timeToProto(time.Now()),
+		Message:   description,
 	}
 }
 
 func (ct *CoreTranslatorImpl) updateJobStep(job *TranslationJob, step *proto.TranslationStep) {
 	job.Step = step.Name
 	job.Steps = append(job.Steps, step)
-	
+
 	// Calculate progress based on step index
 	stepIndex := len(job.Steps)
 	job.Progress = float64(stepIndex-1) / 4.0 * 100 // 4 total steps
@@ -534,13 +534,13 @@ func (ct *CoreTranslatorImpl) failStep(step *proto.TranslationStep, err error) {
 
 func (ct *CoreTranslatorImpl) addGeneratedFile(job *TranslationJob, path, fileType string, size int64, verified bool, verification string) {
 	file := &proto.GeneratedFile{
-		Path:              path,
-		Type:              fileType,
-		Size:              size,
-		ContentType:        ct.getContentType(fileType),
-		Verified:          verified,
+		Path:                path,
+		Type:                fileType,
+		Size:                size,
+		ContentType:         ct.getContentType(fileType),
+		Verified:            verified,
 		VerificationMessage: verification,
-		CreatedAt:         timeToProto(time.Now()),
+		CreatedAt:           timeToProto(time.Now()),
 	}
 	job.Files = append(job.Files, file)
 }
@@ -560,17 +560,17 @@ func (ct *CoreTranslatorImpl) getContentType(fileType string) string {
 
 func (ct *CoreTranslatorImpl) createErrorResponse(job *TranslationJob, failedStep *proto.TranslationStep) *proto.TranslationStatusResponse {
 	return &proto.TranslationStatusResponse{
-		SessionId:      job.ID,
-		Status:         "failed",
+		SessionId:          job.ID,
+		Status:             "failed",
 		ProgressPercentage: job.Progress,
-		CurrentStep:    failedStep.Name,
-		Message:        failedStep.ErrorMessage,
-		StartedAt:      timeToProto(job.StartTime),
-		UpdatedAt:      timeToProto(time.Now()),
-		Files:          job.Files,
-		Steps:          job.Steps,
-		ErrorMessage:   failedStep.ErrorMessage,
-		ErrorCode:      500,
+		CurrentStep:        failedStep.Name,
+		Message:            failedStep.ErrorMessage,
+		StartedAt:          timeToProto(job.StartTime),
+		UpdatedAt:          timeToProto(time.Now()),
+		Files:              job.Files,
+		Steps:              job.Steps,
+		ErrorMessage:       failedStep.ErrorMessage,
+		ErrorCode:          500,
 	}
 }
 
@@ -578,11 +578,11 @@ func (ct *CoreTranslatorImpl) emitProgress(eventBus *events.EventBus, sessionID,
 	if eventBus == nil {
 		return
 	}
-	
+
 	event := events.NewEvent(events.EventType(eventType), message, map[string]interface{}{
-		"session_id":   sessionID,
-		"step_name":    stepName,
-		"progress":     progress,
+		"session_id": sessionID,
+		"step_name":  stepName,
+		"progress":   progress,
 	})
 	event.SessionID = sessionID
 	eventBus.Publish(event)
@@ -594,20 +594,20 @@ func (ct *CoreTranslatorImpl) Cancel(sessionID string) error {
 	ct.mutex.RLock()
 	job, exists := ct.sessions[sessionID]
 	ct.mutex.RUnlock()
-	
+
 	if !exists {
 		return fmt.Errorf("translation session not found: %s", sessionID)
 	}
-	
+
 	if job.CancelFunc != nil {
 		job.CancelFunc()
 	}
-	
+
 	ct.mutex.Lock()
 	job.Status = "cancelled"
 	job.UpdateTime = time.Now()
 	ct.mutex.Unlock()
-	
+
 	return nil
 }
 
@@ -615,19 +615,19 @@ func (ct *CoreTranslatorImpl) GetStatus(sessionID string) (*proto.TranslationSta
 	ct.mutex.RLock()
 	job, exists := ct.sessions[sessionID]
 	ct.mutex.RUnlock()
-	
+
 	if !exists {
 		return nil, fmt.Errorf("translation session not found: %s", sessionID)
 	}
-	
+
 	return &proto.TranslationStatusResponse{
-		SessionId:           job.ID,
-		Status:              job.Status,
+		SessionId:          job.ID,
+		Status:             job.Status,
 		ProgressPercentage: job.Progress,
-		CurrentStep:         job.Step,
-		StartedAt:           timeToProto(job.StartTime),
-		UpdatedAt:           timeToProto(job.UpdateTime),
-		Files:               job.Files,
-		Steps:               job.Steps,
+		CurrentStep:        job.Step,
+		StartedAt:          timeToProto(job.StartTime),
+		UpdatedAt:          timeToProto(job.UpdateTime),
+		Files:              job.Files,
+		Steps:              job.Steps,
 	}, nil
 }

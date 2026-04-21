@@ -109,7 +109,7 @@ func TestPDFParser_ParseWithContext(t *testing.T) {
 
 func TestPDFParser_ContextCancellation(t *testing.T) {
 	parser := NewPDFParser(nil)
-	
+
 	// Create a context that's already cancelled
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -158,12 +158,12 @@ func TestPDFConfig_Defaults(t *testing.T) {
 
 func TestPDFParser_WithConfig(t *testing.T) {
 	config := &PDFConfig{
-		ExtractImages:   false,
-		ImageFormat:     "jpeg",
-		ExtractTables:   false,
+		ExtractImages:  false,
+		ImageFormat:    "jpeg",
+		ExtractTables:  false,
 		OcrEnabled:     true,
 		OcrLanguage:    "spa",
-		MinTextLength:   50,
+		MinTextLength:  50,
 		PreserveLayout: false,
 	}
 
@@ -239,9 +239,9 @@ func TestPDFParser_SignatureDetection(t *testing.T) {
 
 	invalidSignatures := [][]byte{
 		[]byte("%PDF-1.8\n"), // Invalid version
-		[]byte("%PDf-1.4\n"),  // Case sensitive
-		[]byte("PDF-1.4\n"),   // Missing %
-		[]byte("%PDF-1.4"),    // Missing newline
+		[]byte("%PDf-1.4\n"), // Case sensitive
+		[]byte("PDF-1.4\n"),  // Missing %
+		[]byte("%PDF-1.4"),   // Missing newline
 	}
 
 	for i, sig := range validSignatures {

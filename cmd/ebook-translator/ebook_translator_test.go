@@ -15,6 +15,9 @@ import (
 
 // TestEBookTranslationWorkflow provides comprehensive testing for ebook translation
 func TestEBookTranslationWorkflow(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
 	// Create temporary directory for testing
 	tempDir, err := os.MkdirTemp("", "ebook_test")
 	if err != nil {
@@ -188,8 +191,8 @@ Regular text continues after the epigraph.`
 func testCodebaseHashing(t *testing.T, tempDir string) {
 	// Create test files
 	testFiles := map[string]string{
-		"main.go":    "package main\n\nfunc main() { println(\"test\") }",
-		"utils.go":   "package main\n\nfunc test() { println(\"utils\") }",
+		"main.go":     "package main\n\nfunc main() { println(\"test\") }",
+		"utils.go":    "package main\n\nfunc test() { println(\"utils\") }",
 		"config.json": `{"test": "value"}`,
 		"README.md":   "# Test Project\n\nThis is a test project",
 	}
@@ -208,8 +211,13 @@ func testCodebaseHashing(t *testing.T, tempDir string) {
 	// Change to temp directory for hashing
 	os.Chdir(tempDir)
 
+	// Create relevant directories and files for hasher
+	os.MkdirAll("cmd", 0755)
+	os.WriteFile("cmd/main.go", []byte("package main\n"), 0644)
+
 	// Test codebase hashing
 	hasher := version.NewCodebaseHasher()
+	hasher.RelevantDirectories = []string{"."}
 	hash1, err := hasher.CalculateHash()
 	if err != nil {
 		t.Fatalf("Failed to calculate codebase hash: %v", err)
@@ -252,7 +260,7 @@ func testFileVerification(t *testing.T, tempDir string) {
 	// Create test files
 	emptyFile := filepath.Join(tempDir, "empty.txt")
 	smallFile := filepath.Join(tempDir, "small.txt")
-	validFile := filepath.Join(tempDir, "valid.txt")
+	validFile := filepath.Join(tempDir, "valid.md")
 	cyrillicFile := filepath.Join(tempDir, "cyrillic.txt")
 
 	if err := os.WriteFile(emptyFile, []byte{}, 0644); err != nil {
@@ -263,7 +271,8 @@ func testFileVerification(t *testing.T, tempDir string) {
 		t.Fatalf("Failed to create small file: %v", err)
 	}
 
-	validContent := "This is a valid test file with sufficient content for verification.\n"
+	validContent := "# Valid Test File\n\n"
+	validContent += "This is a valid test file with sufficient content for verification.\n"
 	validContent += "It contains multiple lines and enough characters to pass validation.\n"
 	validContent += "The content should be meaningful and properly formatted.\n"
 	if err := os.WriteFile(validFile, []byte(validContent), 0644); err != nil {
@@ -277,7 +286,7 @@ func testFileVerification(t *testing.T, tempDir string) {
 
 	// Create translator instance for testing
 	translator := &EBookTranslator{
-		logger:        logger.NewLogger(logger.LoggerConfig{Level: "debug", Format: "text"}),
+		logger:         logger.NewLogger(logger.LoggerConfig{Level: "debug", Format: "text"}),
 		targetLanguage: "sr-cyrl",
 	}
 
@@ -357,7 +366,8 @@ func testCompleteWorkflow(t *testing.T, testLogger logger.Logger, tempDir string
 
 	// Test FB2 to Markdown conversion
 	originalMdPath := filepath.Join(tempDir, "complete_test_original.md")
-	if err := os.WriteFile(originalMdPath, []byte("# Complete Test Book\n\nThis is the content."), 0644); err != nil {
+	originalContent := "# Complete Test Book\n\nThis is the content. " + strings.Repeat("More content here. ", 10)
+	if err := os.WriteFile(originalMdPath, []byte(originalContent), 0644); err != nil {
 		t.Fatalf("Failed to create dummy original markdown: %v", err)
 	}
 
@@ -381,11 +391,11 @@ func testCompleteWorkflow(t *testing.T, testLogger logger.Logger, tempDir string
 		t.Errorf("Cyrillic verification failed: %v", err)
 	}
 
-	// Create dummy EPUB file
+	// Create dummy EPUB file (must be >= 1000 bytes and valid ZIP)
 	epubPath := filepath.Join(tempDir, "complete_test_original_translated.epub")
-	// Create a minimal EPUB structure (just ZIP with mimetype)
-	epubContent := []byte("PK\x03\x04") // ZIP magic number
-	epubContent = append(epubContent, []byte("mimetypeapplication/epub+zip")...)
+	epubContent := make([]byte, 1024)
+	copy(epubContent, []byte("PK\x03\x04")) // ZIP magic number
+	copy(epubContent[4:], []byte("mimetypeapplication/epub+zip"))
 	if err := os.WriteFile(epubPath, epubContent, 0644); err != nil {
 		t.Fatalf("Failed to create dummy EPUB file: %v", err)
 	}
@@ -515,8 +525,8 @@ func BenchmarkCodebaseHashing(b *testing.B) {
 
 	// Create test files
 	testFiles := map[string]string{
-		"main.go":    "package main\n\nfunc main() { println(\"benchmark\") }",
-		"utils.go":   "package main\n\nfunc test() { println(\"utils\") }",
+		"main.go":     "package main\n\nfunc main() { println(\"benchmark\") }",
+		"utils.go":    "package main\n\nfunc test() { println(\"utils\") }",
 		"config.json": `{"benchmark": "value"}`,
 		"README.md":   "# Benchmark Project\n\nThis is a benchmark test project",
 	}

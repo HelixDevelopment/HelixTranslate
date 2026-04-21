@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/deployment"
+	"digital.vasic.translator/pkg/events"
 )
 
 func TestDistributedCoordinator_DiscoverRemoteInstancesSuccess(t *testing.T) {
@@ -37,18 +37,18 @@ func TestDistributedCoordinator_DiscoverRemoteInstancesSuccess(t *testing.T) {
 	// Parse the mock server URL to get host and port
 	var host string
 	var port int
-	
+
 	parts := strings.Split(mockServer.URL, ":")
 	if len(parts) < 3 {
 		t.Fatalf("Invalid mock server URL: %s", mockServer.URL)
 	}
-	
+
 	// Extract host and port from URL like "http://127.0.0.1:12345"
 	host = strings.Join(parts[1:len(parts)-1], ":")
 	if strings.HasPrefix(host, "//") {
 		host = host[2:] // Remove "//"
 	}
-	
+
 	portNum, err := strconv.Atoi(parts[len(parts)-1])
 	if err != nil {
 		t.Fatalf("Failed to parse port from URL: %v", err)
@@ -58,19 +58,19 @@ func TestDistributedCoordinator_DiscoverRemoteInstancesSuccess(t *testing.T) {
 	// Create event bus and logger
 	eventBus := events.NewEventBus()
 	apiLogger, _ := deployment.NewAPICommunicationLogger("/tmp/test-api.log")
-	
+
 	// Create pairing manager with a paired service
 	sshPool := NewSSHPool()
 	pairingManager := NewPairingManager(sshPool, eventBus)
-	
+
 	// Add a paired service manually
 	service := &RemoteService{
-		WorkerID:     "test-worker-1",
-		Name:         "Test Worker",
-		Host:         host,
-		Port:         port,
-		Protocol:     "http",
-		Status:       "paired",
+		WorkerID: "test-worker-1",
+		Name:     "Test Worker",
+		Host:     host,
+		Port:     port,
+		Protocol: "http",
+		Status:   "paired",
 		Capabilities: ServiceCapabilities{
 			MaxConcurrent: 5,
 		},
@@ -82,13 +82,13 @@ func TestDistributedCoordinator_DiscoverRemoteInstancesSuccess(t *testing.T) {
 			Components:      make(map[string]string),
 			LastUpdated:     time.Now(),
 		},
-		LastSeen:     time.Now(),
+		LastSeen: time.Now(),
 	}
-	
+
 	// Use reflection or expose a method to add the service
 	pairingManager.services = make(map[string]*RemoteService)
 	pairingManager.services[service.WorkerID] = service
-	
+
 	// Create coordinator
 	coordinator := NewDistributedCoordinator(
 		nil,
@@ -99,25 +99,25 @@ func TestDistributedCoordinator_DiscoverRemoteInstancesSuccess(t *testing.T) {
 		eventBus,
 		apiLogger,
 	)
-	
+
 	// Test successful discovery
 	ctx := context.Background()
 	err = coordinator.DiscoverRemoteInstances(ctx)
-	
+
 	if err != nil {
 		t.Fatalf("Unexpected error during discovery: %v", err)
 	}
-	
+
 	// Verify remote instances were created
 	coordinator.mu.Lock()
 	instances := coordinator.remoteInstances
 	coordinator.mu.Unlock()
-	
+
 	// Should have instances created for each provider/model combination
 	if len(instances) == 0 {
 		t.Error("Expected remote instances to be created, but got none")
 	}
-	
+
 	// Check first instance
 	if len(instances) > 0 {
 		instance := instances[0]

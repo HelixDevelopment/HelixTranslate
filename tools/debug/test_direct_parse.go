@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"digital.vasic.translator/pkg/markdown"
 	"digital.vasic.translator/pkg/ebook"
+	"digital.vasic.translator/pkg/markdown"
+	"fmt"
 )
 
 func main() {

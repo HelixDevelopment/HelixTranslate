@@ -70,11 +70,7 @@ func (eb *EventBus) Publish(event Event) {
 	if handlers, ok := eb.handlers[event.Type]; ok {
 		for _, handler := range handlers {
 			go func(h EventHandler) {
-				defer func() {
-					if r := recover(); r != nil {
-						// Handler panicked, but we continue
-					}
-				}()
+				defer func() { recover() }()
 				h(event)
 			}(handler)
 		}
@@ -83,11 +79,7 @@ func (eb *EventBus) Publish(event Event) {
 	// Send to all-event handlers
 	for _, handler := range eb.allEvents {
 		go func(h EventHandler) {
-			defer func() {
-				if r := recover(); r != nil {
-					// Handler panicked, but we continue
-				}
-			}()
+			defer func() { recover() }()
 			h(event)
 		}(handler)
 	}

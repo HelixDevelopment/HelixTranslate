@@ -50,7 +50,7 @@ func LoadPreparationResult(inputPath string) (*PreparationResult, error) {
 func FormatPreparationSummary(result *PreparationResult) string {
 	var summary string
 
-	summary += fmt.Sprintf("=== PREPARATION ANALYSIS SUMMARY ===\n\n")
+	summary += "=== PREPARATION ANALYSIS SUMMARY ===\n\n"
 	summary += fmt.Sprintf("Languages: %s → %s\n", result.SourceLanguage, result.TargetLanguage)
 	summary += fmt.Sprintf("Duration: %.2f seconds\n", result.TotalDuration.Seconds())
 	summary += fmt.Sprintf("Passes: %d\n", result.PassCount)
@@ -58,7 +58,7 @@ func FormatPreparationSummary(result *PreparationResult) string {
 
 	analysis := result.FinalAnalysis
 
-	summary += fmt.Sprintf("--- CONTENT CLASSIFICATION ---\n")
+	summary += "--- CONTENT CLASSIFICATION ---\n"
 	summary += fmt.Sprintf("Type: %s\n", analysis.ContentType)
 	summary += fmt.Sprintf("Genre: %s\n", analysis.Genre)
 	if len(analysis.Subgenres) > 0 {
@@ -67,7 +67,7 @@ func FormatPreparationSummary(result *PreparationResult) string {
 	summary += fmt.Sprintf("Tone: %s\n", analysis.Tone)
 	summary += fmt.Sprintf("Target Audience: %s\n\n", analysis.TargetAudience)
 
-	summary += fmt.Sprintf("--- KEY FINDINGS ---\n")
+	summary += "--- KEY FINDINGS ---\n"
 	summary += fmt.Sprintf("Untranslatable Terms: %d\n", len(analysis.UntranslatableTerms))
 	summary += fmt.Sprintf("Footnotes Needed: %d\n", len(analysis.FootnoteGuidance))
 	summary += fmt.Sprintf("Characters: %d\n", len(analysis.Characters))
@@ -76,7 +76,7 @@ func FormatPreparationSummary(result *PreparationResult) string {
 	summary += fmt.Sprintf("Chapters Analyzed: %d\n\n", len(analysis.ChapterAnalyses))
 
 	if len(analysis.KeyThemes) > 0 {
-		summary += fmt.Sprintf("--- KEY THEMES ---\n")
+		summary += "--- KEY THEMES ---\n"
 		for _, theme := range analysis.KeyThemes {
 			summary += fmt.Sprintf("• %s\n", theme)
 		}
@@ -84,7 +84,7 @@ func FormatPreparationSummary(result *PreparationResult) string {
 	}
 
 	if len(analysis.UntranslatableTerms) > 0 {
-		summary += fmt.Sprintf("--- UNTRANSLATABLE TERMS (showing first 10) ---\n")
+		summary += "--- UNTRANSLATABLE TERMS (showing first 10) ---\n"
 		count := len(analysis.UntranslatableTerms)
 		if count > 10 {
 			count = 10
@@ -100,7 +100,7 @@ func FormatPreparationSummary(result *PreparationResult) string {
 	}
 
 	if len(analysis.Characters) > 0 {
-		summary += fmt.Sprintf("--- CHARACTERS ---\n")
+		summary += "--- CHARACTERS ---\n"
 		for _, char := range analysis.Characters {
 			summary += fmt.Sprintf("• %s (%s)\n", char.Name, char.Role)
 			if char.SpeechPattern != "" {
@@ -111,7 +111,7 @@ func FormatPreparationSummary(result *PreparationResult) string {
 	}
 
 	if len(analysis.FootnoteGuidance) > 0 {
-		summary += fmt.Sprintf("--- HIGH PRIORITY FOOTNOTES ---\n")
+		summary += "--- HIGH PRIORITY FOOTNOTES ---\n"
 		for _, footnote := range analysis.FootnoteGuidance {
 			if footnote.Priority == "high" {
 				summary += fmt.Sprintf("• %s\n", footnote.Term)
@@ -121,7 +121,7 @@ func FormatPreparationSummary(result *PreparationResult) string {
 		summary += "\n"
 	}
 
-	summary += fmt.Sprintf("=== END SUMMARY ===\n")
+	summary += "=== END SUMMARY ===\n"
 
 	return summary
 }
@@ -131,7 +131,7 @@ func FormatPreparationSummary(result *PreparationResult) string {
 func GetTranslationContext(analysis *ContentAnalysis, chapterNum int) string {
 	var context string
 
-	context += fmt.Sprintf("## TRANSLATION CONTEXT\n\n")
+	context += "## TRANSLATION CONTEXT\n\n"
 
 	// Content type and style
 	context += fmt.Sprintf("**Content Type**: %s\n", analysis.ContentType)
@@ -140,7 +140,7 @@ func GetTranslationContext(analysis *ContentAnalysis, chapterNum int) string {
 
 	// Untranslatable terms
 	if len(analysis.UntranslatableTerms) > 0 {
-		context += fmt.Sprintf("**Terms to Keep in Original**:\n")
+		context += "**Terms to Keep in Original**:\n"
 		for _, term := range analysis.UntranslatableTerms {
 			context += fmt.Sprintf("- %s: %s\n", term.Term, term.Reason)
 		}
@@ -149,7 +149,7 @@ func GetTranslationContext(analysis *ContentAnalysis, chapterNum int) string {
 
 	// Characters for this chapter
 	if len(analysis.Characters) > 0 {
-		context += fmt.Sprintf("**Character Speech Patterns**:\n")
+		context += "**Character Speech Patterns**:\n"
 		for _, char := range analysis.Characters {
 			if char.SpeechPattern != "" {
 				context += fmt.Sprintf("- %s: %s\n", char.Name, char.SpeechPattern)
@@ -164,7 +164,7 @@ func GetTranslationContext(analysis *ContentAnalysis, chapterNum int) string {
 		context += fmt.Sprintf("**Chapter %d Context**:\n", chapterNum)
 		context += fmt.Sprintf("Summary: %s\n", chapterAnalysis.Summary)
 		if len(chapterAnalysis.Caveats) > 0 {
-			context += fmt.Sprintf("Translation Caveats:\n")
+			context += "Translation Caveats:\n"
 			for _, caveat := range chapterAnalysis.Caveats {
 				context += fmt.Sprintf("- %s\n", caveat)
 			}

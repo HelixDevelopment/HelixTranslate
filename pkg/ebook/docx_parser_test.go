@@ -101,7 +101,7 @@ func TestDOCXParser_ParseWithContext(t *testing.T) {
 
 func TestDOCXParser_ContextCancellation(t *testing.T) {
 	parser := NewDOCXParser(nil)
-	
+
 	// Create a context that's already cancelled
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -119,9 +119,9 @@ func TestDOCXParser_ContextCancellation(t *testing.T) {
 }
 
 func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) && 
-		(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr || 
-		 findSubstring(s, substr)))
+	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) &&
+		(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr ||
+			findSubstring(s, substr)))
 }
 
 func findSubstring(s, substr string) bool {
@@ -156,11 +156,11 @@ func TestDOCXConfig_Defaults(t *testing.T) {
 
 func TestDOCXParser_WithConfig(t *testing.T) {
 	config := &DOCXConfig{
-		ExtractImages:      false,
-		ImageFormat:       "jpeg",
-		ExtractTables:      false,
-		MinTextLength:      10,
-		IgnoreStyles:       []string{"Title", "Heading"},
+		ExtractImages: false,
+		ImageFormat:   "jpeg",
+		ExtractTables: false,
+		MinTextLength: 10,
+		IgnoreStyles:  []string{"Title", "Heading"},
 	}
 
 	parser := NewDOCXParser(config)

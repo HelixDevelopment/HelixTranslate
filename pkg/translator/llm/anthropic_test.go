@@ -9,6 +9,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAnthropicClient(t *testing.T) {
@@ -295,28 +298,16 @@ func TestAnthropicRequestErrorPaths(t *testing.T) {
 			APIKey:   "test-api-key",
 			Model:    "claude-3-haiku-20240307",
 		})
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		// Create cancelled context
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel() // Cancel immediately
 
 		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
-		if err != nil {
-			// Expected error path
-			if result != "" {
-				t.Error("Result should be empty when context is cancelled")
-			}
-			// Check for context-related error
-			if !strings.Contains(err.Error(), "context") && 
-			   !strings.Contains(err.Error(), "canceled") && 
-			   !strings.Contains(err.Error(), "deadline") {
-				t.Logf("Error may not be context-related: %v", err)
-			}
-		}
+		require.Error(t, err)
+		require.Empty(t, result)
 	})
 
 	t.Run("very_long_text", func(t *testing.T) {
@@ -325,33 +316,16 @@ func TestAnthropicRequestErrorPaths(t *testing.T) {
 			APIKey:   "test-api-key",
 			Model:    "claude-3-haiku-20240307",
 		})
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		// Create very long text that might trigger size limits
-		longText := ""
-		for i := 0; i < 1000; i++ {
-			longText += "Hello world. "
-		}
-		
-		result, err := client.Translate(ctx, longText, "Translate to Russian")
-		if err != nil {
-			// Expected error path - text too long
-			if result != "" {
-				t.Error("Result should be empty when text is too long")
-			}
-			// Check for size-related error
-			if !strings.Contains(err.Error(), "too large") && 
-			   !strings.Contains(err.Error(), "size") && 
-			   !strings.Contains(err.Error(), "limit") {
-				t.Logf("Error may not be size-related: %v", err)
-			}
-		}
+		longText := strings.Repeat("Hello world. ", 1000)
+
+		_, err = client.Translate(ctx, longText, "Translate to Russian")
+		require.Error(t, err)
 	})
 
 	t.Run("temperature_option_validation", func(t *testing.T) {
@@ -363,26 +337,14 @@ func TestAnthropicRequestErrorPaths(t *testing.T) {
 				"temperature": 2.5, // Too high (should be 0.0-1.0)
 			},
 		})
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
-		if err != nil {
-			// Expected error path - invalid temperature
-			if result != "" {
-				t.Error("Result should be empty when temperature is invalid")
-			}
-			// Check for temperature-related error
-			if !strings.Contains(err.Error(), "temperature") &&
-			   !strings.Contains(err.Error(), "invalid") {
-				t.Logf("Error may not be temperature-related: %v", err)
-			}
-		}
+		_, err = client.Translate(ctx, "Hello", "Translate to Russian")
+		require.Error(t, err)
 	})
 
 	t.Run("max_tokens_option_validation", func(t *testing.T) {
@@ -394,26 +356,14 @@ func TestAnthropicRequestErrorPaths(t *testing.T) {
 				"max_tokens": -1, // Invalid max_tokens
 			},
 		})
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
-		if err != nil {
-			// Expected error path - invalid max_tokens
-			if result != "" {
-				t.Error("Result should be empty when max_tokens is invalid")
-			}
-			// Check for max_tokens-related error
-			if !strings.Contains(err.Error(), "max_tokens") &&
-			   !strings.Contains(err.Error(), "invalid") {
-				t.Logf("Error may not be max_tokens-related: %v", err)
-			}
-		}
+		_, err = client.Translate(ctx, "Hello", "Translate to Russian")
+		require.Error(t, err)
 	})
 
 	t.Run("invalid_base_url", func(t *testing.T) {
@@ -423,27 +373,14 @@ func TestAnthropicRequestErrorPaths(t *testing.T) {
 			Model:    "claude-3-haiku-20240307",
 			BaseURL:  "invalid-url://invalid", // Invalid URL
 		})
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
-		if err != nil {
-			// Expected error path - invalid URL
-			if result != "" {
-				t.Error("Result should be empty when URL is invalid")
-			}
-			// Check for URL-related error
-			if !strings.Contains(err.Error(), "url") && 
-			   !strings.Contains(err.Error(), "scheme") &&
-			   !strings.Contains(err.Error(), "invalid") {
-				t.Logf("Error may not be URL-related: %v", err)
-			}
-		}
+		_, err = client.Translate(ctx, "Hello", "Translate to Russian")
+		require.Error(t, err)
 	})
 }
 
@@ -464,7 +401,7 @@ func TestAnthropicTranslateUncoveredPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    "http://localhost:99999", // Invalid port to prevent actual requests
 		}
-		
+
 		ctx := context.Background()
 		// The request should fail at JSON marshaling or request creation stage
 		_, err := client.Translate(ctx, "test text", "test prompt")
@@ -473,7 +410,7 @@ func TestAnthropicTranslateUncoveredPaths(t *testing.T) {
 			t.Logf("Expected error (JSON marshal or request creation): %v", err)
 		}
 	})
-	
+
 	t.Run("http_request_error", func(t *testing.T) {
 		client := &AnthropicClient{
 			config: TranslationConfig{
@@ -484,19 +421,19 @@ func TestAnthropicTranslateUncoveredPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    "invalid://invalid-url", // Invalid URL scheme
 		}
-		
+
 		ctx := context.Background()
 		_, err := client.Translate(ctx, "test text", "test prompt")
 		if err == nil {
 			t.Error("Expected HTTP request creation error")
 		}
-		
+
 		// Should get an error about unsupported protocol scheme
 		if !strings.Contains(err.Error(), "failed to create request") {
 			t.Logf("Error may not be request creation related: %v", err)
 		}
 	})
-	
+
 	t.Run("response_reading_error", func(t *testing.T) {
 		client := &AnthropicClient{
 			config: TranslationConfig{
@@ -507,16 +444,16 @@ func TestAnthropicTranslateUncoveredPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    "http://localhost:99999", // Invalid port
 		}
-		
+
 		ctx := context.Background()
 		_, err := client.Translate(ctx, "test text", "test prompt")
 		if err == nil {
 			t.Error("Expected connection error")
 		}
-		
+
 		t.Logf("Expected connection error: %v", err)
 	})
-	
+
 	t.Run("invalid_response_json", func(t *testing.T) {
 		// Create a mock server that returns invalid JSON
 		mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -531,7 +468,7 @@ func TestAnthropicTranslateUncoveredPaths(t *testing.T) {
 				}`))
 		}))
 		defer mockServer.Close()
-		
+
 		client := &AnthropicClient{
 			config: TranslationConfig{
 				Provider: "anthropic",
@@ -541,18 +478,18 @@ func TestAnthropicTranslateUncoveredPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    mockServer.URL,
 		}
-		
+
 		ctx := context.Background()
 		_, err := client.Translate(ctx, "test text", "test prompt")
 		if err == nil {
 			t.Error("Expected error for invalid JSON")
 		}
-		
+
 		if !strings.Contains(err.Error(), "failed to unmarshal response") {
 			t.Errorf("Expected JSON unmarshal error, got: %v", err)
 		}
 	})
-	
+
 	t.Run("max_tokens_option_handling", func(t *testing.T) {
 		client := &AnthropicClient{
 			config: TranslationConfig{
@@ -566,7 +503,7 @@ func TestAnthropicTranslateUncoveredPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    "http://localhost:99999", // Invalid port
 		}
-		
+
 		ctx := context.Background()
 		_, err := client.Translate(ctx, "test text", "test prompt")
 		if err != nil {
@@ -575,7 +512,7 @@ func TestAnthropicTranslateUncoveredPaths(t *testing.T) {
 		}
 		// The important thing is that option was processed during request creation
 	})
-	
+
 	t.Run("temperature_option_handling", func(t *testing.T) {
 		client := &AnthropicClient{
 			config: TranslationConfig{
@@ -589,7 +526,7 @@ func TestAnthropicTranslateUncoveredPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    "http://localhost:99999", // Invalid port
 		}
-		
+
 		ctx := context.Background()
 		_, err := client.Translate(ctx, "test text", "test prompt")
 		if err != nil {
@@ -607,11 +544,9 @@ func TestAnthropicTranslateUncoveredPaths(t *testing.T) {
 			Model:    "claude-3-haiku-20240307",
 			BaseURL:  "invalid://test", // Invalid URL to force error path
 		})
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
-		
+		require.NoError(t, err)
+		require.NotNil(t, client)
+
 		// Create a mock server that returns empty content
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Return valid response structure but with empty content
@@ -630,17 +565,11 @@ func TestAnthropicTranslateUncoveredPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    server.URL,
 		}
-		
+
 		ctx := context.Background()
-		result, err := client.Translate(ctx, "test text", "test prompt")
-		if err != nil {
-			// Expected error for empty content
-			if !strings.Contains(err.Error(), "no content in response") {
-				t.Errorf("Expected 'no content in response' error, got: %v", err)
-			}
-		} else {
-			t.Error("Expected error for empty content response, got:", result)
-		}
+		_, err = client.Translate(ctx, "test text", "test prompt")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "no content in response")
 	})
 }
 

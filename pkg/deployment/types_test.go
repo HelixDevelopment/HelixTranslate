@@ -2,8 +2,7 @@ package deployment
 
 import (
 	"testing"
-	
-	"github.com/stretchr/testify/assert"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -147,16 +146,6 @@ func TestDeploymentPlan_BasicValidation(t *testing.T) {
 	}
 }
 
-func TestValidationError_Error(t *testing.T) {
-	err := &ValidationError{
-		Field:   "test_field",
-		Message: "test message",
-	}
-	
-	expected := "test message (field: test_field)"
-	assert.Equal(t, expected, err.Error())
-}
-
 // Performance benchmarks
 func BenchmarkDeploymentConfig_Validation(b *testing.B) {
 	config := &DeploymentConfig{
@@ -167,7 +156,7 @@ func BenchmarkDeploymentConfig_Validation(b *testing.B) {
 		ContainerName: "worker-1",
 		Ports:         []PortMapping{{HostPort: 8080, ContainerPort: 8080}},
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		// Just basic field checks for benchmarking

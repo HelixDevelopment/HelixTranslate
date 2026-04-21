@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/pkg/translator"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 // TestNewServer tests server creation
@@ -72,11 +72,11 @@ func TestServer_Start_Stop(t *testing.T) {
 // TestDistributedTranslator_Translate tests that Translate method exists
 func TestDistributedTranslator_Translate(t *testing.T) {
 	dt := &distributedTranslator{}
-	
+
 	// Just test that method exists and has correct signature
 	// We can't actually call it without proper distributed manager setup
 	assert.NotNil(t, dt.Translate)
-	
+
 	// Verify return types match expected translator interface
 	var _ translator.Translator = dt
 }
@@ -84,7 +84,7 @@ func TestDistributedTranslator_Translate(t *testing.T) {
 // TestDistributedTranslator_TranslateWithProgress tests that TranslateWithProgress method exists
 func TestDistributedTranslator_TranslateWithProgress(t *testing.T) {
 	dt := &distributedTranslator{}
-	
+
 	// Just test that method exists and has correct signature
 	// We can't actually call it without proper distributed manager setup
 	assert.NotNil(t, dt.TranslateWithProgress)
@@ -118,7 +118,7 @@ func TestSecurityConfigStructure(t *testing.T) {
 // TestDistributedTranslator_GetName tests GetName method
 func TestDistributedTranslator_GetName(t *testing.T) {
 	dt := &distributedTranslator{}
-	
+
 	name := dt.GetName()
 	assert.Equal(t, "distributed", name)
 }
@@ -126,7 +126,7 @@ func TestDistributedTranslator_GetName(t *testing.T) {
 // TestDistributedTranslator_GetStats tests GetStats method
 func TestDistributedTranslator_GetStats(t *testing.T) {
 	dt := &distributedTranslator{}
-	
+
 	stats := dt.GetStats()
 	// Should return empty stats as per implementation
 	assert.Equal(t, 0, stats.Total)
@@ -203,7 +203,7 @@ func TestAuthMiddleware_FromComprehensive(t *testing.T) {
 	})
 
 	config := ServerConfig{
-		Port: 8080,
+		Port:   8080,
 		Logger: mockLogger,
 		Security: &SecurityConfig{
 			APIKey:      "test-key",
@@ -243,10 +243,10 @@ func TestHealthCheck_FromComprehensive(t *testing.T) {
 func TestTranslateTextHandler(t *testing.T) {
 	// This test focuses on translateText handler function from handler.go
 	// We'll test by creating a mock gin context and calling the validation paths
-	
+
 	t.Run("Missing text field", func(t *testing.T) {
 		gin.SetMode(gin.TestMode)
-		
+
 		// Test JSON validation
 		router := gin.New()
 		router.POST("/translate", func(c *gin.Context) {
@@ -260,12 +260,12 @@ func TestTranslateTextHandler(t *testing.T) {
 			}
 			c.JSON(http.StatusOK, gin.H{"result": "ok"})
 		})
-		
+
 		// Test with invalid JSON (missing required text field)
 		req, _ := http.NewRequest("POST", "/translate", strings.NewReader(`{"context":"test"}`))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
-		
+
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
@@ -276,7 +276,7 @@ func TestBatchTranslateHandler_Comprehensive(t *testing.T) {
 	// Test basic validation - missing required texts field
 	t.Run("Missing texts array", func(t *testing.T) {
 		gin.SetMode(gin.TestMode)
-		
+
 		router := gin.New()
 		router.POST("/batch", func(c *gin.Context) {
 			// Simulate binding error path from batchTranslate handler
@@ -289,19 +289,19 @@ func TestBatchTranslateHandler_Comprehensive(t *testing.T) {
 			}
 			c.JSON(http.StatusOK, gin.H{"result": "ok"})
 		})
-		
+
 		// Test with invalid JSON (missing required texts field)
 		req, _ := http.NewRequest("POST", "/batch", strings.NewReader(`{"context":"test"}`))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
-		
+
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
-	
+
 	t.Run("Empty texts array", func(t *testing.T) {
 		gin.SetMode(gin.TestMode)
-		
+
 		router := gin.New()
 		router.POST("/batch", func(c *gin.Context) {
 			// Test with valid empty array
@@ -314,12 +314,12 @@ func TestBatchTranslateHandler_Comprehensive(t *testing.T) {
 			}
 			c.JSON(http.StatusOK, gin.H{"result": "ok", "count": len(req.Texts)})
 		})
-		
+
 		// Test with valid empty array
 		req, _ := http.NewRequest("POST", "/batch", strings.NewReader(`{"texts":[]}`))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
-		
+
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
 	})
@@ -330,7 +330,7 @@ func TestTranslateFB2Handler(t *testing.T) {
 	// Test file upload validation - missing file
 	t.Run("Missing file upload", func(t *testing.T) {
 		gin.SetMode(gin.TestMode)
-		
+
 		router := gin.New()
 		router.POST("/translate/fb2", func(c *gin.Context) {
 			// Simulate file validation path from translateFB2 handler
@@ -342,12 +342,12 @@ func TestTranslateFB2Handler(t *testing.T) {
 			file.Close()
 			c.JSON(http.StatusOK, gin.H{"result": "ok"})
 		})
-		
+
 		// Test with no file
 		req, _ := http.NewRequest("POST", "/translate/fb2", nil)
 		req.Header.Set("Content-Type", "multipart/form-data")
 		w := httptest.NewRecorder()
-		
+
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
@@ -358,7 +358,7 @@ func TestBatchTranslateDirectoryHandler(t *testing.T) {
 	// Test invalid target language
 	t.Run("Invalid target language", func(t *testing.T) {
 		gin.SetMode(gin.TestMode)
-		
+
 		router := gin.New()
 		router.POST("/translate/directory", func(c *gin.Context) {
 			// Simulate language validation from HandleTranslateDirectory
@@ -369,28 +369,28 @@ func TestBatchTranslateDirectoryHandler(t *testing.T) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
-			
+
 			// Simulate invalid language parsing
 			if req.TargetLanguage == "invalid-lang" {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "invalid target language: invalid language"})
 				return
 			}
-			
+
 			c.JSON(http.StatusOK, gin.H{"result": "ok"})
 		})
-		
+
 		req, _ := http.NewRequest("POST", "/translate/directory", strings.NewReader(`{"target_language":"invalid-lang"}`))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
-		
+
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
-	
+
 	// Test invalid source language
 	t.Run("Invalid source language", func(t *testing.T) {
 		gin.SetMode(gin.TestMode)
-		
+
 		router := gin.New()
 		router.POST("/translate/directory", func(c *gin.Context) {
 			// Simulate language validation from HandleTranslateDirectory
@@ -402,20 +402,20 @@ func TestBatchTranslateDirectoryHandler(t *testing.T) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
-			
+
 			// Simulate invalid language parsing
 			if req.SourceLanguage == "invalid-source" {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "invalid source language: invalid language"})
 				return
 			}
-			
+
 			c.JSON(http.StatusOK, gin.H{"result": "ok"})
 		})
-		
+
 		req, _ := http.NewRequest("POST", "/translate/directory", strings.NewReader(`{"source_language":"invalid-source","target_language":"en"}`))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
-		
+
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
@@ -426,7 +426,7 @@ func TestHandleTranslateStringHandler(t *testing.T) {
 	// Test validation errors
 	t.Run("Missing texts array", func(t *testing.T) {
 		gin.SetMode(gin.TestMode)
-		
+
 		router := gin.New()
 		router.POST("/translate/string", func(c *gin.Context) {
 			// Simulate binding error from HandleTranslateString
@@ -439,11 +439,11 @@ func TestHandleTranslateStringHandler(t *testing.T) {
 			}
 			c.JSON(http.StatusOK, gin.H{"result": "ok"})
 		})
-		
+
 		req, _ := http.NewRequest("POST", "/translate/string", strings.NewReader(`{"target_language":"en"}`))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
-		
+
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
@@ -453,7 +453,7 @@ func TestHandleTranslateStringHandler(t *testing.T) {
 func TestAuthMiddleware_Comprehensive(t *testing.T) {
 	t.Run("No security config - should pass through", func(t *testing.T) {
 		config := ServerConfig{
-			Port:   8080,
+			Port:     8080,
 			Security: nil, // No security config
 		}
 

@@ -1,18 +1,18 @@
 package main
 
 import (
-	"fmt"
-	"os"
 	"archive/zip"
-	"strings"
-	"io"
 	"digital.vasic.translator/pkg/format"
+	"fmt"
+	"io"
+	"os"
+	"strings"
 )
 
 func main() {
 	// Create a simple test EPUB using the createEPUB approach from MarkdownToEPUBConverter
 	epubPath := "/tmp/test_epub.epub"
-	
+
 	// Create EPUB file
 	epubFile, err := os.Create(epubPath)
 	if err != nil {
@@ -20,10 +20,10 @@ func main() {
 		return
 	}
 	defer epubFile.Close()
-	
+
 	// Create ZIP writer
 	zipWriter := zip.NewWriter(epubFile)
-	
+
 	// Write mimetype (must be uncompressed)
 	mimeWriter, err := zipWriter.CreateHeader(&zip.FileHeader{
 		Name:   "mimetype",
@@ -34,7 +34,7 @@ func main() {
 		return
 	}
 	mimeWriter.Write([]byte("application/epub+zip"))
-	
+
 	// Write container.xml
 	containerWriter, err := zipWriter.Create("META-INF/container.xml")
 	if err != nil {
@@ -48,7 +48,7 @@ func main() {
   </rootfiles>
 </container>`
 	containerWriter.Write([]byte(containerXML))
-	
+
 	// Write content.opf
 	contentWriter, err := zipWriter.Create("OEBPS/content.opf")
 	if err != nil {
@@ -69,7 +69,7 @@ func main() {
   </spine>
 </package>`
 	contentWriter.Write([]byte(contentOPF))
-	
+
 	// Write chapter
 	chapterWriter, err := zipWriter.Create("OEBPS/chapter1.xhtml")
 	if err != nil {
@@ -88,10 +88,10 @@ func main() {
 </body>
 </html>`
 	chapterWriter.Write([]byte(chapterXHTML))
-	
+
 	// Close ZIP writer
 	zipWriter.Close()
-	
+
 	// Now check the detected format
 	detector := format.NewDetector()
 	detectedFormat, err := detector.DetectFile(epubPath)
@@ -99,9 +99,9 @@ func main() {
 		fmt.Printf("Error detecting format: %v\n", err)
 		return
 	}
-	
+
 	fmt.Printf("Detected format: %s\n", detectedFormat)
-	
+
 	// Debug: check what mimetype the file has
 	r2, err := zip.OpenReader(epubPath)
 	if err != nil {
@@ -109,7 +109,7 @@ func main() {
 		return
 	}
 	defer r2.Close()
-	
+
 	for _, f := range r2.File {
 		if f.Name == "mimetype" {
 			rc, err := f.Open()
@@ -118,18 +118,18 @@ func main() {
 				return
 			}
 			defer rc.Close()
-			
+
 			data, err := io.ReadAll(rc)
 			if err != nil {
 				fmt.Printf("Error reading mimetype: %v\n", err)
 				return
 			}
-			
+
 			fmt.Printf("Mimetype content: %q\n", string(data))
 			break
 		}
 	}
-	
+
 	// List files in the EPUB and check indicators
 	r, err := zip.OpenReader(epubPath)
 	if err != nil {
@@ -137,19 +137,19 @@ func main() {
 		return
 	}
 	defer r.Close()
-	
+
 	fmt.Println("Files in EPUB:")
 	for _, f := range r.File {
 		fmt.Printf("  %s\n", f.Name)
 	}
-	
+
 	// Debug: check what the isAZW3File function looks for
 	generalIndicators := []string{
 		"mimetype",
 		"OEBPS",
 		"META-INF",
 	}
-	
+
 	azw3Specific := []string{
 		"kindle:embed",
 		"amzn-eastock",
@@ -157,10 +157,10 @@ func main() {
 		"kindle:enclosure",
 		"kindle:meta",
 	}
-	
+
 	hasGeneral := 0
 	hasSpecific := false
-	
+
 	for _, f := range r.File {
 		fmt.Printf("Checking file: %s\n", f.Name)
 		// Check for general indicators
@@ -171,7 +171,7 @@ func main() {
 				break
 			}
 		}
-		
+
 		// Check for AZW3-specific indicators
 		for _, specific := range azw3Specific {
 			if strings.Contains(f.Name, specific) {
@@ -181,7 +181,7 @@ func main() {
 			}
 		}
 	}
-	
+
 	fmt.Printf("General indicators: %d, AZW3 specific: %v\n", hasGeneral, hasSpecific)
 	fmt.Printf("Would be detected as AZW3: %v\n", hasGeneral >= 2 && hasSpecific)
 }

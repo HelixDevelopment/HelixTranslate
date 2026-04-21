@@ -22,7 +22,7 @@ func main() {
 		ConnectionTimeout: 30 * time.Second,
 		CommandTimeout:    60 * time.Second,
 	}
-	
+
 	log := logger.NewNoOpLogger()
 	worker, err := sshworker.NewSSHWorker(config, log)
 	if err != nil {
@@ -53,7 +53,7 @@ python3 translate_llm_only.py test_sample.txt test_output.txt`
 	}
 
 	fmt.Printf("Conversion test output:\n%s\n", result.Stdout)
-	
+
 	if result.Stderr != "" {
 		fmt.Printf("Stderr:\n%s\n", result.Stderr)
 	}

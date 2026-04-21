@@ -28,19 +28,19 @@ type APIServer struct {
 	// gRPC client
 	grpcClient proto.TranslationServiceClient
 	conn       *grpc.ClientConn
-	
+
 	// WebSocket hub
-	wsHub      *websocket.Hub
-	
+	wsHub *websocket.Hub
+
 	// HTTP server
-	server     *http.Server
-	router     *gin.Engine
-	
+	server *http.Server
+	router *gin.Engine
+
 	// Configuration
-	config     *APIConfig
-	
+	config *APIConfig
+
 	// Logger
-	logger     logger.Logger
+	logger logger.Logger
 }
 
 // APIConfig holds API server configuration
@@ -69,22 +69,22 @@ type TranslationRequest struct {
 
 // ProviderRequestConfig represents provider configuration from REST API
 type ProviderRequestConfig struct {
-	Type         string            `json:"type" binding:"required"`
-	Model        string            `json:"model"`
-	Temperature  float64           `json:"temperature"`
-	MaxTokens    int               `json:"max_tokens"`
-	TimeoutSec   int               `json:"timeout_seconds"`
-	APIKey       string            `json:"api_key"`
-	BaseURL      string            `json:"base_url"`
-	SSHHost      string            `json:"ssh_host"`
-	SSHUser      string            `json:"ssh_user"`
-	SSHPassword  string            `json:"ssh_password"`
-	SSHPort      int               `json:"ssh_port"`
-	RemoteDir    string            `json:"remote_dir"`
-	LlamaBinary  string            `json:"llama_binary"`
-	LlamaModel   string            `json:"llama_model"`
-	ContextSize  int               `json:"context_size"`
-	Options      map[string]string `json:"options"`
+	Type        string            `json:"type" binding:"required"`
+	Model       string            `json:"model"`
+	Temperature float64           `json:"temperature"`
+	MaxTokens   int               `json:"max_tokens"`
+	TimeoutSec  int               `json:"timeout_seconds"`
+	APIKey      string            `json:"api_key"`
+	BaseURL     string            `json:"base_url"`
+	SSHHost     string            `json:"ssh_host"`
+	SSHUser     string            `json:"ssh_user"`
+	SSHPassword string            `json:"ssh_password"`
+	SSHPort     int               `json:"ssh_port"`
+	RemoteDir   string            `json:"remote_dir"`
+	LlamaBinary string            `json:"llama_binary"`
+	LlamaModel  string            `json:"llama_model"`
+	ContextSize int               `json:"context_size"`
+	Options     map[string]string `json:"options"`
 }
 
 // WebSocketMessage represents a WebSocket message
@@ -116,18 +116,18 @@ type ErrorResponse struct {
 func main() {
 	// Load configuration
 	config := loadAPIConfig()
-	
+
 	// Initialize logger
 	logLevel := logger.INFO
 	if config.Debug {
 		logLevel = logger.DEBUG
 	}
-	
+
 	logger := logger.NewLogger(logger.LoggerConfig{
 		Level:  logLevel,
 		Format: logger.FORMAT_JSON,
 	})
-	
+
 	// Create API server
 	server, err := NewAPIServer(config, logger)
 	if err != nil {
@@ -135,7 +135,7 @@ func main() {
 			"error": err.Error(),
 		})
 	}
-	
+
 	// Start server
 	if err := server.Start(); err != nil {
 		logger.Fatal("Failed to start API server", map[string]interface{}{
@@ -147,26 +147,26 @@ func main() {
 // NewAPIServer creates a new API server
 func NewAPIServer(config *APIConfig, logger logger.Logger) (*APIServer, error) {
 	// Connect to gRPC server
-	conn, err := grpc.Dial(config.GRPCAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(config.GRPCAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to gRPC server: %w", err)
 	}
-	
+
 	grpcClient := proto.NewTranslationServiceClient(conn)
-	
+
 	// Create WebSocket hub
 	wsHub := websocket.NewHub(nil)
-	
+
 	// Create Gin router
 	if config.Debug {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	
+
 	router := gin.New()
 	router.Use(gin.Logger(), gin.Recovery())
-	
+
 	// Create API server
 	apiServer := &APIServer{
 		grpcClient: grpcClient,
@@ -176,10 +176,10 @@ func NewAPIServer(config *APIConfig, logger logger.Logger) (*APIServer, error) {
 		config:     config,
 		logger:     logger,
 	}
-	
+
 	// Setup routes
 	apiServer.setupRoutes()
-	
+
 	// Create HTTP server
 	apiServer.server = &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", config.HTTPAddress, config.HTTPPort),
@@ -188,10 +188,10 @@ func NewAPIServer(config *APIConfig, logger logger.Logger) (*APIServer, error) {
 		WriteTimeout: config.WriteTimeout,
 		IdleTimeout:  config.IdleTimeout,
 	}
-	
+
 	// Start WebSocket hub
 	go wsHub.Run()
-	
+
 	return apiServer, nil
 }
 
@@ -202,7 +202,7 @@ func (s *APIServer) Start() error {
 		"http_port":    s.config.HTTPPort,
 		"grpc_address": s.config.GRPCAddress,
 	})
-	
+
 	// Start server in goroutine
 	errChan := make(chan error, 1)
 	go func() {
@@ -210,11 +210,11 @@ func (s *APIServer) Start() error {
 			errChan <- err
 		}
 	}()
-	
+
 	// Wait for interrupt signal
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	
+
 	select {
 	case err := <-errChan:
 		return err
@@ -228,21 +228,21 @@ func (s *APIServer) Start() error {
 func (s *APIServer) Shutdown() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	
+
 	// Shutdown HTTP server
 	if err := s.server.Shutdown(ctx); err != nil {
 		s.logger.Error("Error during server shutdown", map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
-	
+
 	// Close gRPC connection
 	if err := s.conn.Close(); err != nil {
 		s.logger.Error("Error closing gRPC connection", map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
-	
+
 	s.logger.Info("API server shutdown complete", nil)
 	return nil
 }
@@ -258,22 +258,22 @@ func (s *APIServer) setupRoutes() {
 		v1.GET("/translations", s.listTranslations)
 		v1.DELETE("/translations/:session_id", s.cancelTranslation)
 		v1.GET("/translations/:session_id/stream", s.streamTranslationProgress)
-		
+
 		// Provider endpoints
 		v1.GET("/providers", s.getProviders)
-		
+
 		// System endpoints
 		v1.GET("/health", s.healthCheck)
 		v1.GET("/metrics", s.getMetrics)
 	}
-	
+
 	// WebSocket endpoint
 	s.router.GET("/ws", s.handleWebSocket)
-	
+
 	// Serve static files
 	s.router.Static("/static", "./web/static")
 	s.router.LoadHTMLGlob("web/templates/*")
-	
+
 	// Serve dashboard
 	s.router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "dashboard.html", gin.H{
@@ -290,56 +290,56 @@ func (s *APIServer) startTranslation(c *gin.Context) {
 		s.sendErrorResponse(c, http.StatusBadRequest, "Invalid request", err.Error())
 		return
 	}
-	
+
 	// Convert to gRPC request
 	grpcReq := s.convertToGRPCRequest(req)
-	
+
 	// Call gRPC service
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
 	defer cancel()
-	
+
 	resp, err := s.grpcClient.StartTranslation(ctx, grpcReq)
 	if err != nil {
 		s.logger.Error("Failed to start translation", map[string]interface{}{
 			"session_id": req.SessionID,
-			"error": err.Error(),
+			"error":      err.Error(),
 		})
 		s.sendErrorResponse(c, http.StatusInternalServerError, "Failed to start translation", err.Error())
 		return
 	}
-	
+
 	s.sendSuccessResponse(c, resp)
 }
 
 func (s *APIServer) getTranslationStatus(c *gin.Context) {
 	sessionID := c.Param("session_id")
-	
+
 	req := &proto.TranslationStatusRequest{
 		SessionId: sessionID,
 	}
-	
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
-	
+
 	resp, err := s.grpcClient.GetTranslationStatus(ctx, req)
 	if err != nil {
 		s.logger.Error("Failed to get translation status", map[string]interface{}{
 			"session_id": sessionID,
-			"error": err.Error(),
+			"error":      err.Error(),
 		})
 		s.sendErrorResponse(c, http.StatusInternalServerError, "Failed to get translation status", err.Error())
 		return
 	}
-	
+
 	s.sendSuccessResponse(c, resp)
 }
 
 func (s *APIServer) listTranslations(c *gin.Context) {
 	req := &emptypb.Empty{}
-	
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
-	
+
 	resp, err := s.grpcClient.ListTranslations(ctx, req)
 	if err != nil {
 		s.logger.Error("Failed to list translations", map[string]interface{}{
@@ -348,36 +348,36 @@ func (s *APIServer) listTranslations(c *gin.Context) {
 		s.sendErrorResponse(c, http.StatusInternalServerError, "Failed to list translations", err.Error())
 		return
 	}
-	
+
 	s.sendSuccessResponse(c, resp)
 }
 
 func (s *APIServer) cancelTranslation(c *gin.Context) {
 	sessionID := c.Param("session_id")
-	
+
 	var reason struct {
 		Reason string `json:"reason"`
 	}
 	c.ShouldBindJSON(&reason)
-	
+
 	req := &proto.CancelTranslationRequest{
 		SessionId: sessionID,
 		Reason:    reason.Reason,
 	}
-	
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
-	
+
 	resp, err := s.grpcClient.CancelTranslation(ctx, req)
 	if err != nil {
 		s.logger.Error("Failed to cancel translation", map[string]interface{}{
 			"session_id": sessionID,
-			"error": err.Error(),
+			"error":      err.Error(),
 		})
 		s.sendErrorResponse(c, http.StatusInternalServerError, "Failed to cancel translation", err.Error())
 		return
 	}
-	
+
 	s.sendSuccessResponse(c, resp)
 }
 
@@ -387,14 +387,14 @@ func (s *APIServer) streamTranslationProgress(c *gin.Context) {
 	if clientID == "" {
 		clientID = fmt.Sprintf("web-%d", time.Now().UnixNano())
 	}
-	
+
 	// Upgrade to WebSocket
 	upgrader := gorillaws.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true // Allow all origins for development
 		},
 	}
-	
+
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		s.logger.Error("Failed to upgrade to WebSocket", map[string]interface{}{
@@ -403,53 +403,53 @@ func (s *APIServer) streamTranslationProgress(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
-	
+
 	// Create gRPC stream request
 	req := &proto.TranslationStreamRequest{
 		SessionId: sessionID,
 		ClientId:  clientID,
 	}
-	
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Hour) // Long streaming timeout
 	defer cancel()
-	
+
 	// Create gRPC stream
 	stream, err := s.grpcClient.StreamTranslationProgress(ctx, req)
 	if err != nil {
 		s.logger.Error("Failed to create gRPC stream", map[string]interface{}{
 			"session_id": sessionID,
-			"error": err.Error(),
+			"error":      err.Error(),
 		})
 		return
 	}
-	
+
 	// Forward events to WebSocket
 	for {
 		event, err := stream.Recv()
 		if err != nil {
 			s.logger.Debug("Stream ended", map[string]interface{}{
 				"session_id": sessionID,
-				"error": err.Error(),
+				"error":      err.Error(),
 			})
 			break
 		}
-		
+
 		// Convert to WebSocket message
 		wsMessage := WebSocketMessage{
 			Type:      event.EventType,
 			SessionID: event.SessionId,
 			Data: map[string]interface{}{
 				"progress_percentage": event.ProgressPercentage,
-				"current_step":       event.StepName,
-				"message":           event.Message,
-				"metadata":          event.Metadata,
-				"current_item":      event.CurrentItem,
-				"total_items":       event.TotalItems,
-				"current_operation":  event.CurrentOperation,
+				"current_step":        event.StepName,
+				"message":             event.Message,
+				"metadata":            event.Metadata,
+				"current_item":        event.CurrentItem,
+				"total_items":         event.TotalItems,
+				"current_operation":   event.CurrentOperation,
 			},
 			Timestamp: time.Now().Unix(),
 		}
-		
+
 		if err := conn.WriteJSON(wsMessage); err != nil {
 			s.logger.Debug("Failed to send WebSocket message", map[string]interface{}{
 				"error": err.Error(),
@@ -461,10 +461,10 @@ func (s *APIServer) streamTranslationProgress(c *gin.Context) {
 
 func (s *APIServer) getProviders(c *gin.Context) {
 	req := &emptypb.Empty{}
-	
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
-	
+
 	resp, err := s.grpcClient.GetProviders(ctx, req)
 	if err != nil {
 		s.logger.Error("Failed to get providers", map[string]interface{}{
@@ -473,15 +473,15 @@ func (s *APIServer) getProviders(c *gin.Context) {
 		s.sendErrorResponse(c, http.StatusInternalServerError, "Failed to get providers", err.Error())
 		return
 	}
-	
+
 	s.sendSuccessResponse(c, resp)
 }
 
 func (s *APIServer) healthCheck(c *gin.Context) {
 	s.sendSuccessResponse(c, map[string]interface{}{
-		"status":     "healthy",
-		"timestamp":  time.Now().Unix(),
-		"version":    "3.0.0",
+		"status":         "healthy",
+		"timestamp":      time.Now().Unix(),
+		"version":        "3.0.0",
 		"grpc_connected": s.conn.GetState().String(),
 	})
 }
@@ -491,18 +491,18 @@ func (s *APIServer) getMetrics(c *gin.Context) {
 		s.sendErrorResponse(c, http.StatusNotFound, "Metrics not enabled", "")
 		return
 	}
-	
+
 	// Basic metrics - this could be enhanced with proper metrics collection
 	metrics := map[string]interface{}{
-		"active_sessions":     0, // This would be tracked
-		"total_translations":   0, // This would be tracked
+		"active_sessions":    0, // This would be tracked
+		"total_translations": 0, // This would be tracked
 		"success_rate":       0.0,
-		"average_duration":    0,
+		"average_duration":   0,
 		"grpc_connection":    s.conn.GetState().String(),
 		"uptime_seconds":     0, // This would be tracked
 		"timestamp":          time.Now().Unix(),
 	}
-	
+
 	s.sendSuccessResponse(c, metrics)
 }
 
@@ -513,7 +513,7 @@ func (s *APIServer) handleWebSocket(c *gin.Context) {
 			return true // Allow all origins for development
 		},
 	}
-	
+
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		s.logger.Error("Failed to upgrade to WebSocket", map[string]interface{}{
@@ -521,7 +521,7 @@ func (s *APIServer) handleWebSocket(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// Get session ID from query
 	sessionID := c.Query("session_id")
 	if sessionID == "" {
@@ -533,12 +533,12 @@ func (s *APIServer) handleWebSocket(c *gin.Context) {
 		conn.Close()
 		return
 	}
-	
+
 	clientID := c.Query("client_id")
 	if clientID == "" {
 		clientID = fmt.Sprintf("ws-%d", time.Now().UnixNano())
 	}
-	
+
 	// Create WebSocket client
 	client := &websocket.Client{
 		ID:        clientID,
@@ -547,10 +547,10 @@ func (s *APIServer) handleWebSocket(c *gin.Context) {
 		Send:      make(chan []byte, 256),
 		Hub:       s.wsHub,
 	}
-	
+
 	// Register client
 	s.wsHub.Register(client)
-	
+
 	// Start client routines
 	go client.WritePump()
 	go client.ReadPump()
@@ -567,11 +567,11 @@ func (s *APIServer) convertToGRPCRequest(req TranslationRequest) *proto.Translat
 		TargetLang: req.TargetLang,
 		Script:     req.Script,
 		ProviderConfig: &proto.ProviderConfig{
-			Type:               req.ProviderConfig.Type,
-			Model:              req.ProviderConfig.Model,
-			Temperature:        req.ProviderConfig.Temperature,
-			MaxTokens:          int32(req.ProviderConfig.MaxTokens),
-			TimeoutSeconds:     int32(req.ProviderConfig.TimeoutSec),
+			Type:              req.ProviderConfig.Type,
+			Model:             req.ProviderConfig.Model,
+			Temperature:       req.ProviderConfig.Temperature,
+			MaxTokens:         int32(req.ProviderConfig.MaxTokens),
+			TimeoutSeconds:    int32(req.ProviderConfig.TimeoutSec),
 			ApiKey:            req.ProviderConfig.APIKey,
 			BaseUrl:           req.ProviderConfig.BaseURL,
 			SshHost:           req.ProviderConfig.SSHHost,
@@ -585,11 +585,11 @@ func (s *APIServer) convertToGRPCRequest(req TranslationRequest) *proto.Translat
 			AdditionalOptions: req.ProviderConfig.Options,
 		},
 		Options: &proto.TranslationOptions{
-			Workers:         1, // Default values
-			ChunkSize:       2000,
-			Concurrency:     4,
-			VerifyOutput:    true,
-			Verbose:         false,
+			Workers:          1, // Default values
+			ChunkSize:        2000,
+			Concurrency:      4,
+			VerifyOutput:     true,
+			Verbose:          false,
 			EnableMonitoring: true,
 		},
 		CreatedAt: timestamppb.New(time.Now()),
@@ -620,15 +620,15 @@ func (s *APIServer) sendErrorResponse(c *gin.Context, statusCode int, message, e
 func loadAPIConfig() *APIConfig {
 	config := &APIConfig{
 		GRPCAddress:   getEnv("GRPC_ADDRESS", "localhost:50051"),
-		HTTPAddress:    getEnv("HTTP_ADDRESS", "0.0.0.0"),
-		HTTPPort:       getEnvInt("HTTP_PORT", 8080),
-		ReadTimeout:    getEnvDuration("HTTP_READ_TIMEOUT", 30*time.Second),
-		WriteTimeout:   getEnvDuration("HTTP_WRITE_TIMEOUT", 30*time.Second),
-		IdleTimeout:    getEnvDuration("HTTP_IDLE_TIMEOUT", 120*time.Second),
-		EnableMetrics:  getEnvBool("ENABLE_METRICS", true),
-		Debug:          getEnvBool("DEBUG", false),
+		HTTPAddress:   getEnv("HTTP_ADDRESS", "0.0.0.0"),
+		HTTPPort:      getEnvInt("HTTP_PORT", 8080),
+		ReadTimeout:   getEnvDuration("HTTP_READ_TIMEOUT", 30*time.Second),
+		WriteTimeout:  getEnvDuration("HTTP_WRITE_TIMEOUT", 30*time.Second),
+		IdleTimeout:   getEnvDuration("HTTP_IDLE_TIMEOUT", 120*time.Second),
+		EnableMetrics: getEnvBool("ENABLE_METRICS", true),
+		Debug:         getEnvBool("DEBUG", false),
 	}
-	
+
 	return config
 }
 

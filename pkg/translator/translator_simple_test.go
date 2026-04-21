@@ -17,20 +17,20 @@ import (
 // TestUniversalTranslator_BasicFunctionality tests basic translator functionality
 func TestUniversalTranslator_BasicFunctionalitySimple(t *testing.T) {
 	mockTranslator := &MockTranslator{}
-	
+
 	// Set up mock expectations
 	mockTranslator.On("TranslateWithProgress", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("Translated", nil)
-	
+
 	sourceLang := language.Language{Code: "en", Name: "English"}
 	targetLang := language.Language{Code: "ru", Name: "Russian"}
-	
+
 	ut := NewUniversalTranslator(mockTranslator, nil, sourceLang, targetLang)
-	
+
 	t.Run("Basic book translation", func(t *testing.T) {
 		ctx := context.Background()
 		eventBus := events.NewEventBus()
 		sessionID := "test-session"
-		
+
 		book := &ebook.Book{
 			Metadata: ebook.Metadata{Title: "Test Book"},
 			Chapters: []ebook.Chapter{
@@ -42,7 +42,7 @@ func TestUniversalTranslator_BasicFunctionalitySimple(t *testing.T) {
 				},
 			},
 		}
-		
+
 		// Test that translation doesn't return errors
 		err := ut.TranslateBook(ctx, book, eventBus, sessionID)
 		assert.NoError(t, err)
@@ -53,20 +53,20 @@ func TestUniversalTranslator_BasicFunctionalitySimple(t *testing.T) {
 // TestUniversalTranslator_ErrorHandling tests error scenarios
 func TestUniversalTranslator_ErrorHandlingSimple(t *testing.T) {
 	mockTranslator := &MockTranslator{}
-	
+
 	// Set up mock to return error
 	mockTranslator.On("TranslateWithProgress", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("", assert.AnError)
-	
+
 	sourceLang := language.Language{Code: "en", Name: "English"}
 	targetLang := language.Language{Code: "ru", Name: "Russian"}
-	
+
 	ut := NewUniversalTranslator(mockTranslator, nil, sourceLang, targetLang)
-	
+
 	t.Run("Translation error handling", func(t *testing.T) {
 		ctx := context.Background()
 		eventBus := events.NewEventBus()
 		sessionID := "test-session"
-		
+
 		book := &ebook.Book{
 			Chapters: []ebook.Chapter{
 				{
@@ -77,7 +77,7 @@ func TestUniversalTranslator_ErrorHandlingSimple(t *testing.T) {
 				},
 			},
 		}
-		
+
 		// Test that translation errors are properly handled
 		err := ut.TranslateBook(ctx, book, eventBus, sessionID)
 		assert.Error(t, err)
@@ -87,23 +87,23 @@ func TestUniversalTranslator_ErrorHandlingSimple(t *testing.T) {
 // TestUniversalTranslator_ContextCancellation tests context cancellation
 func TestUniversalTranslator_ContextCancellationSimple(t *testing.T) {
 	mockTranslator := &MockTranslator{}
-	
+
 	sourceLang := language.Language{Code: "en", Name: "English"}
 	targetLang := language.Language{Code: "ru", Name: "Russian"}
-	
+
 	ut := NewUniversalTranslator(mockTranslator, nil, sourceLang, targetLang)
-	
+
 	t.Run("Cancelled context", func(t *testing.T) {
 		// Create cancelled context
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel() // Cancel immediately
-		
+
 		// Set up mock to return error for cancelled context
 		mockTranslator.On("TranslateWithProgress", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("", context.Canceled)
-		
+
 		eventBus := events.NewEventBus()
 		sessionID := "test-session"
-		
+
 		book := &ebook.Book{
 			Chapters: []ebook.Chapter{
 				{
@@ -114,7 +114,7 @@ func TestUniversalTranslator_ContextCancellationSimple(t *testing.T) {
 				},
 			},
 		}
-		
+
 		// Test that cancelled context returns error
 		err := ut.TranslateBook(ctx, book, eventBus, sessionID)
 		assert.Error(t, err)
@@ -125,26 +125,26 @@ func TestUniversalTranslator_ContextCancellationSimple(t *testing.T) {
 // TestUniversalTranslator_ProgressTracking tests progress event emission
 func TestUniversalTranslator_ProgressTrackingSimple(t *testing.T) {
 	mockTranslator := &MockTranslator{}
-	
+
 	// Set up mock expectations
 	mockTranslator.On("TranslateWithProgress", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("Translated", nil)
-	
+
 	sourceLang := language.Language{Code: "en", Name: "English"}
 	targetLang := language.Language{Code: "ru", Name: "Russian"}
-	
+
 	ut := NewUniversalTranslator(mockTranslator, nil, sourceLang, targetLang)
-	
+
 	t.Run("Progress events emitted", func(t *testing.T) {
 		ctx := context.Background()
 		eventBus := events.NewEventBus()
 		sessionID := "test-session"
-		
+
 		// Subscribe to progress events
 		progressReceived := false
 		eventBus.Subscribe(events.EventTranslationProgress, func(event events.Event) {
 			progressReceived = true
 		})
-		
+
 		book := &ebook.Book{
 			Chapters: []ebook.Chapter{
 				{
@@ -155,13 +155,13 @@ func TestUniversalTranslator_ProgressTrackingSimple(t *testing.T) {
 				},
 			},
 		}
-		
+
 		err := ut.TranslateBook(ctx, book, eventBus, sessionID)
 		assert.NoError(t, err)
-		
+
 		// Wait a bit for async events
 		time.Sleep(time.Millisecond * 10)
-		
+
 		// Verify progress events were emitted
 		assert.True(t, progressReceived, "Progress events should be emitted")
 	})
@@ -172,9 +172,9 @@ func TestNewUniversalTranslatorSimple(t *testing.T) {
 	mockTranslator := &MockTranslator{}
 	sourceLang := language.Language{Code: "en", Name: "English"}
 	targetLang := language.Language{Code: "ru", Name: "Russian"}
-	
+
 	ut := NewUniversalTranslator(mockTranslator, nil, sourceLang, targetLang)
-	
+
 	require.NotNil(t, ut)
 	assert.Equal(t, mockTranslator, ut.translator)
 	assert.Nil(t, ut.langDetector)
@@ -187,7 +187,7 @@ func BenchmarkUniversalTranslator_NewSimple(b *testing.B) {
 	mockTranslator := &MockTranslator{}
 	sourceLang := language.Language{Code: "en", Name: "English"}
 	targetLang := language.Language{Code: "ru", Name: "Russian"}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		NewUniversalTranslator(mockTranslator, nil, sourceLang, targetLang)
@@ -198,16 +198,16 @@ func BenchmarkUniversalTranslator_NewSimple(b *testing.B) {
 func BenchmarkUniversalTranslator_TranslateBookSimple(b *testing.B) {
 	mockTranslator := &MockTranslator{}
 	mockTranslator.On("TranslateWithProgress", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("Translated", nil)
-	
+
 	sourceLang := language.Language{Code: "en", Name: "English"}
 	targetLang := language.Language{Code: "ru", Name: "Russian"}
-	
+
 	ut := NewUniversalTranslator(mockTranslator, nil, sourceLang, targetLang)
-	
+
 	ctx := context.Background()
 	eventBus := events.NewEventBus()
 	sessionID := "bench-session"
-	
+
 	book := &ebook.Book{
 		Metadata: ebook.Metadata{Title: "Test"},
 		Chapters: []ebook.Chapter{
@@ -219,7 +219,7 @@ func BenchmarkUniversalTranslator_TranslateBookSimple(b *testing.B) {
 			},
 		},
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ut.TranslateBook(ctx, book, eventBus, sessionID)
@@ -233,9 +233,9 @@ func TestBaseTranslator_New(t *testing.T) {
 		Model:    "test-model",
 		APIKey:   "test-key",
 	}
-	
+
 	bt := NewBaseTranslator(config)
-	
+
 	require.NotNil(t, bt)
 	assert.Equal(t, config, bt.config)
 	assert.NotNil(t, bt.stats)
@@ -249,9 +249,9 @@ func TestBaseTranslator_GetStats(t *testing.T) {
 		Model:    "test-model",
 		APIKey:   "test-key",
 	}
-	
+
 	bt := NewBaseTranslator(config)
-	
+
 	// Initial stats should be empty
 	stats := bt.GetStats()
 	assert.Equal(t, 0, stats.Translated)
@@ -265,22 +265,22 @@ func TestBaseTranslator_CheckCache(t *testing.T) {
 		Model:    "test-model",
 		APIKey:   "test-key",
 	}
-	
+
 	bt := NewBaseTranslator(config)
-	
+
 	// Test cache miss
 	translated, found := bt.CheckCache("test text")
 	assert.Equal(t, "", translated)
 	assert.False(t, found)
-	
+
 	// Add to cache manually
 	bt.cache["test text"] = "cached translation"
-	
+
 	// Test cache hit
 	translated, found = bt.CheckCache("test text")
 	assert.Equal(t, "cached translation", translated)
 	assert.True(t, found)
-	
+
 	// Check stats update
 	stats := bt.GetStats()
 	assert.Equal(t, 1, stats.Cached)
@@ -293,12 +293,12 @@ func TestBaseTranslator_AddToCache(t *testing.T) {
 		Model:    "test-model",
 		APIKey:   "test-key",
 	}
-	
+
 	bt := NewBaseTranslator(config)
-	
+
 	// Add to cache
 	bt.AddToCache("test text", "cached translation")
-	
+
 	// Verify it was added
 	assert.Equal(t, "cached translation", bt.cache["test text"])
 }
@@ -306,12 +306,12 @@ func TestBaseTranslator_AddToCache(t *testing.T) {
 // TestUniversalTranslator_GetSourceLanguage tests GetSourceLanguage function
 func TestUniversalTranslator_GetSourceLanguage(t *testing.T) {
 	mockTranslator := &MockTranslator{}
-	
+
 	sourceLang := language.Language{Code: "en", Name: "English"}
 	targetLang := language.Language{Code: "ru", Name: "Russian"}
-	
+
 	ut := NewUniversalTranslator(mockTranslator, nil, sourceLang, targetLang)
-	
+
 	// Test GetSourceLanguage
 	result := ut.GetSourceLanguage()
 	assert.Equal(t, sourceLang, result)
@@ -320,12 +320,12 @@ func TestUniversalTranslator_GetSourceLanguage(t *testing.T) {
 // TestUniversalTranslator_GetTargetLanguage tests GetTargetLanguage function
 func TestUniversalTranslator_GetTargetLanguage(t *testing.T) {
 	mockTranslator := &MockTranslator{}
-	
+
 	sourceLang := language.Language{Code: "en", Name: "English"}
 	targetLang := language.Language{Code: "ru", Name: "Russian"}
-	
+
 	ut := NewUniversalTranslator(mockTranslator, nil, sourceLang, targetLang)
-	
+
 	// Test GetTargetLanguage
 	result := ut.GetTargetLanguage()
 	assert.Equal(t, targetLang, result)
@@ -336,10 +336,10 @@ func TestUniversalTranslator_CreatePromptForLanguages(t *testing.T) {
 	sourceLang := "en"
 	targetLang := "ru"
 	context := "Literary text"
-	
+
 	// Test prompt creation
 	prompt := CreatePromptForLanguages("Hello world", sourceLang, targetLang, context)
-	
+
 	assert.NotEmpty(t, prompt)
 	assert.Contains(t, prompt, "Hello world")
 	assert.Contains(t, prompt, "en")
@@ -351,19 +351,19 @@ func TestUniversalTranslator_CreatePromptForLanguages(t *testing.T) {
 func TestBaseTranslator_EmitError(t *testing.T) {
 	// Set up event bus
 	eventBus := events.NewEventBus()
-	
+
 	// Track error events
 	errorReceived := false
 	eventBus.Subscribe(events.EventTranslationError, func(event events.Event) {
 		errorReceived = true
 		assert.Contains(t, event.Message, "Test error")
 	})
-	
+
 	// Emit error
 	EmitError(eventBus, "test-session", "Test error", nil)
-	
+
 	// Wait for async event
 	time.Sleep(time.Millisecond * 10)
-	
+
 	assert.True(t, errorReceived, "Error event should be emitted")
 }

@@ -33,7 +33,7 @@ func (c *MarkdownToEPUBConverter) ConvertMarkdownToEPUB(mdPath, epubPath string)
 		return fmt.Errorf("failed to read markdown: %w", err)
 	}
 
-		// Parse markdown into chapters
+	// Parse markdown into chapters
 	chapters, metadata, coverPath, err := c.parseMarkdown(string(content), filepath.Dir(mdPath))
 	if err != nil {
 		return fmt.Errorf("failed to parse markdown: %w", err)
@@ -107,13 +107,13 @@ func (c *MarkdownToEPUBConverter) parseMarkdown(content string, mdDir string) ([
 		// Chapter marker (# or ## followed by text)
 		if (strings.HasPrefix(line, "# ") || strings.HasPrefix(line, "## ")) &&
 			strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(line, "##"), "#")) != "" {
-			
+
 			// If this is the first H1 and we don't have a title yet, extract it as book title
 			if strings.HasPrefix(line, "# ") && metadata.Title == "" && len(chapters) == 0 {
 				metadata.Title = strings.TrimSpace(strings.TrimPrefix(line, "# "))
 				continue
 			}
-			
+
 			// Save previous chapter
 			if currentChapter != nil {
 				currentChapter.Sections = []ebook.Section{
@@ -236,7 +236,7 @@ func (c *MarkdownToEPUBConverter) createEPUB(chapters []ebook.Chapter, outputPat
 	if err != nil {
 		return fmt.Errorf("failed to create mimetype entry: %w", err)
 	}
-	
+
 	if _, err := mimeTypeWriter.Write([]byte("application/epub+zip")); err != nil {
 		return fmt.Errorf("failed to write mimetype: %w", err)
 	}
@@ -273,14 +273,14 @@ func (c *MarkdownToEPUBConverter) createEPUB(chapters []ebook.Chapter, outputPat
 				content.WriteString("\n\n")
 			}
 		}
-		
+
 		// Convert chapter content to valid XHTML
 		xhtml := c.convertMarkdownToXHTML(content.String())
 		if _, err := writer.Write([]byte(xhtml)); err != nil {
 			return fmt.Errorf("failed to write chapter content: %w", err)
 		}
 	}
-	
+
 	// Write cover image if present
 	if len(c.metadata.Cover) > 0 {
 		coverWriter, err := zipWriter.Create("OEBPS/cover.jpg")
@@ -338,7 +338,7 @@ func (c *MarkdownToEPUBConverter) writeContentOPF(zw *zip.Writer, chapters []ebo
 		opf.WriteString(fmt.Sprintf("    <dc:publisher>%s</dc:publisher>\n", c.escapeXML(c.metadata.Publisher)))
 	}
 	opf.WriteString(fmt.Sprintf("    <dc:language>%s</dc:language>\n", c.metadata.Language))
-	
+
 	// Use ISBN as identifier if available, otherwise generate UUID
 	if c.metadata.ISBN != "" {
 		opf.WriteString(fmt.Sprintf("    <dc:identifier id=\"BookID\">%s</dc:identifier>\n", c.escapeXML(c.metadata.ISBN)))
@@ -348,23 +348,23 @@ func (c *MarkdownToEPUBConverter) writeContentOPF(zw *zip.Writer, chapters []ebo
 	if c.metadata.Date != "" {
 		opf.WriteString(fmt.Sprintf("    <dc:date>%s</dc:date>\n", c.escapeXML(c.metadata.Date)))
 	}
-	
+
 	// Add cover meta tag if cover is present (helps with cover detection)
 	if len(c.metadata.Cover) > 0 {
 		opf.WriteString("    <meta name=\"cover\" content=\"cover\"/>\n")
 	}
-	
+
 	opf.WriteString("  </metadata>\n")
 
 	// Manifest
 	opf.WriteString("  <manifest>\n")
 	opf.WriteString("    <item id=\"ncx\" href=\"toc.ncx\" media-type=\"application/x-dtbncx+xml\"/>\n")
-	
+
 	// Add cover if present
 	if len(c.metadata.Cover) > 0 {
 		opf.WriteString("    <item id=\"cover\" href=\"cover.jpg\" media-type=\"image/jpeg\"/>\n")
 	}
-	
+
 	for i := 1; i <= len(chapters); i++ {
 		opf.WriteString(fmt.Sprintf("    <item id=\"chapter%d\" href=\"chapter%d.xhtml\" media-type=\"application/xhtml+xml\"/>\n", i, i))
 	}
@@ -415,6 +415,8 @@ func (c *MarkdownToEPUBConverter) writeTOC(zw *zip.Writer, chapters []ebook.Chap
 }
 
 // writeChapterHTML writes a chapter as XHTML
+//
+//nolint:unused
 func (c *MarkdownToEPUBConverter) writeChapterHTML(zw *zip.Writer, chapter ebook.Chapter, chapterNum int) error {
 	writer, err := zw.Create(fmt.Sprintf("OEBPS/chapter%d.xhtml", chapterNum))
 	if err != nil {
@@ -626,7 +628,7 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		
+
 		// Headers
 		if strings.HasPrefix(line, "# ") {
 			if inParagraph {

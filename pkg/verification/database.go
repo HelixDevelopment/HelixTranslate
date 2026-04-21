@@ -326,6 +326,9 @@ func (pdb *PolishingDatabase) GetNotesForSection(sectionID string) ([]*LiteraryN
 
 		notes = append(notes, note)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 
 	return notes, nil
 }
@@ -372,6 +375,9 @@ func (pdb *PolishingDatabase) GetNotesForPass(passID string) ([]*LiteraryNote, e
 		json.Unmarshal([]byte(examplesJSON), &note.Examples)
 
 		notes = append(notes, note)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return notes, nil
@@ -487,6 +493,9 @@ func (pdb *PolishingDatabase) GetResultsForPass(passID string) ([]*PolishingResu
 
 		results = append(results, result)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 
 	return results, nil
 }
@@ -584,6 +593,9 @@ func (pdb *PolishingDatabase) ExportSession(sessionID string) (map[string]interf
 		passData["results"] = results
 
 		passes = append(passes, passData)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	export["passes"] = passes

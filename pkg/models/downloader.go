@@ -54,13 +54,13 @@ func (d *Downloader) DownloadModel(model *ModelInfo) (string, error) {
 
 	// Check if already downloaded
 	if _, err := os.Stat(modelPath); err == nil {
-		fmt.Printf("[DOWNLOADER] Model already exists: %s\n", modelPath)
+		fmt.Printf("[DOWNLOADER] Model already exists: %s\n", modelPath) //nolint:forbidigo
 		return modelPath, nil
 	}
 
 	// Download model
-	fmt.Printf("[DOWNLOADER] Downloading %s from %s\n", model.Name, model.SourceURL)
-	fmt.Printf("[DOWNLOADER] This may take several minutes...\n")
+	fmt.Printf("[DOWNLOADER] Downloading %s from %s\n", model.Name, model.SourceURL) //nolint:forbidigo
+	fmt.Printf("[DOWNLOADER] This may take several minutes...\n")                    //nolint:forbidigo
 
 	// Create temporary file
 	tmpPath := modelPath + ".tmp"
@@ -83,7 +83,7 @@ func (d *Downloader) DownloadModel(model *ModelInfo) (string, error) {
 		return "", fmt.Errorf("downloaded file too small: %d bytes (expected > 100MB)", stat.Size())
 	}
 
-	fmt.Printf("[DOWNLOADER] Download complete: %.1f GB\n", float64(stat.Size())/(1024*1024*1024))
+	fmt.Printf("[DOWNLOADER] Download complete: %.1f GB\n", float64(stat.Size())/(1024*1024*1024)) //nolint:forbidigo
 
 	// Move to final location
 	err = os.Rename(tmpPath, modelPath)
@@ -91,7 +91,7 @@ func (d *Downloader) DownloadModel(model *ModelInfo) (string, error) {
 		return "", fmt.Errorf("failed to move downloaded file: %w", err)
 	}
 
-	fmt.Printf("[DOWNLOADER] Model ready: %s\n", modelPath)
+	fmt.Printf("[DOWNLOADER] Model ready: %s\n", modelPath) //nolint:forbidigo
 
 	return modelPath, nil
 }
@@ -119,7 +119,7 @@ func (d *Downloader) downloadWithProgress(url, destPath string) error {
 	}
 	if hfToken != "" && strings.Contains(url, "huggingface.co") {
 		req.Header.Set("Authorization", "Bearer "+hfToken)
-		fmt.Printf("[DOWNLOADER] Using Hugging Face authentication\n")
+		fmt.Printf("[DOWNLOADER] Using Hugging Face authentication\n") //nolint:forbidigo
 	}
 
 	// Get the data
@@ -157,7 +157,7 @@ func (d *Downloader) downloadWithProgress(url, destPath string) error {
 
 	// Final progress update
 	writer.printProgress(true)
-	fmt.Println() // New line after progress
+	fmt.Println() //nolint:forbidigo //  New line after progress
 
 	return nil
 }
@@ -191,7 +191,7 @@ func (pw *progressWriter) Write(p []byte) (int, error) {
 func (pw *progressWriter) printProgress(final bool) {
 	if pw.total <= 0 {
 		// Unknown size, just show downloaded amount
-		fmt.Printf("\r[DOWNLOADER] Downloaded: %.1f MB", float64(pw.downloaded)/(1024*1024))
+		fmt.Printf("\r[DOWNLOADER] Downloaded: %.1f MB", float64(pw.downloaded)/(1024*1024)) //nolint:forbidigo
 		return
 	}
 
@@ -207,14 +207,14 @@ func (pw *progressWriter) printProgress(final bool) {
 		remainingSec := int(remaining) % 60
 
 		if final {
-			fmt.Printf("\r[DOWNLOADER] Complete: %.1f GB downloaded in %.0fs (%.1f MB/s)",
+			fmt.Printf("\r[DOWNLOADER] Complete: %.1f GB downloaded in %.0fs (%.1f MB/s)", //nolint:forbidigo
 				float64(pw.total)/(1024*1024*1024), elapsed, speed)
 		} else {
-			fmt.Printf("\r[DOWNLOADER] Progress: %.1f%% (%.1f MB/s, ~%dm%ds remaining)",
+			fmt.Printf("\r[DOWNLOADER] Progress: %.1f%% (%.1f MB/s, ~%dm%ds remaining)", //nolint:forbidigo
 				percent, speed, remainingMin, remainingSec)
 		}
 	} else {
-		fmt.Printf("\r[DOWNLOADER] Progress: %.1f%%", percent)
+		fmt.Printf("\r[DOWNLOADER] Progress: %.1f%%", percent) //nolint:forbidigo
 	}
 }
 
@@ -259,7 +259,7 @@ func (d *Downloader) DeleteModel(modelID string) error {
 		return err
 	}
 
-	fmt.Printf("[DOWNLOADER] Deleted model: %s\n", modelID)
+	fmt.Printf("[DOWNLOADER] Deleted model: %s\n", modelID) //nolint:forbidigo
 	return nil
 }
 
@@ -312,7 +312,7 @@ func (d *Downloader) CleanCache() error {
 		return fmt.Errorf("errors during cache cleaning: %s", strings.Join(errors, "; "))
 	}
 
-	fmt.Println("[DOWNLOADER] Cache cleaned")
+	fmt.Println("[DOWNLOADER] Cache cleaned") //nolint:forbidigo
 	return nil
 }
 

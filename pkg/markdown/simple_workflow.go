@@ -27,9 +27,9 @@ type ProgressCallback func(current, total int, message string)
 
 // SimpleWorkflow handles ebook → markdown → translation → ebook workflow
 type SimpleWorkflow struct {
-	config     WorkflowConfig
-	logger     logger.Logger
-	callback   ProgressCallback
+	config   WorkflowConfig
+	logger   logger.Logger
+	callback ProgressCallback
 }
 
 // NewSimpleWorkflow creates a new simple markdown workflow
@@ -54,7 +54,7 @@ func (sw *SimpleWorkflow) ConvertToMarkdown(ctx context.Context, inputPath, outp
 
 	// Determine file type and convert accordingly
 	ext := strings.ToLower(filepath.Ext(inputPath))
-	
+
 	switch ext {
 	case ".epub":
 		return sw.convertEPUBToMarkdown(ctx, inputPath, outputPath)
@@ -120,7 +120,7 @@ func (sw *SimpleWorkflow) ConvertFromMarkdown(ctx context.Context, inputPath, ou
 
 	// Determine output format and convert accordingly
 	ext := strings.ToLower(filepath.Ext(outputPath))
-	
+
 	switch ext {
 	case ".epub":
 		return sw.convertMarkdownToEPUB(ctx, inputPath, outputPath)
@@ -132,11 +132,11 @@ func (sw *SimpleWorkflow) ConvertFromMarkdown(ctx context.Context, inputPath, ou
 // ExecuteFullWorkflow executes the complete conversion workflow
 func (sw *SimpleWorkflow) ExecuteFullWorkflow(ctx context.Context, inputPath, outputPath, fromLang, toLang string) error {
 	startTime := time.Now()
-	
+
 	// Generate intermediate file paths
 	ext := strings.ToLower(filepath.Ext(inputPath))
 	baseName := strings.TrimSuffix(inputPath, ext)
-	
+
 	originalMarkdownPath := baseName + "_original.md"
 	translatedMarkdownPath := baseName + "_translated.md"
 
@@ -157,8 +157,8 @@ func (sw *SimpleWorkflow) ExecuteFullWorkflow(ctx context.Context, inputPath, ou
 
 	duration := time.Since(startTime)
 	sw.logger.Info("Full workflow completed successfully", map[string]interface{}{
-		"duration": duration.String(),
-		"input_path": inputPath,
+		"duration":    duration.String(),
+		"input_path":  inputPath,
 		"output_path": outputPath,
 	})
 
@@ -179,7 +179,7 @@ func (sw *SimpleWorkflow) convertEPUBToMarkdown(ctx context.Context, inputPath, 
 func (sw *SimpleWorkflow) convertFB2ToMarkdown(ctx context.Context, inputPath, outputPath string) error {
 	// For now, create a simple text extraction
 	// In a real implementation, you'd parse the FB2 XML properly
-	
+
 	content, err := os.ReadFile(inputPath)
 	if err != nil {
 		return fmt.Errorf("failed to read FB2 file: %w", err)
@@ -187,10 +187,10 @@ func (sw *SimpleWorkflow) convertFB2ToMarkdown(ctx context.Context, inputPath, o
 
 	// Simple text extraction (this is very basic)
 	text := string(content)
-	
+
 	// Create basic markdown
 	markdownContent := fmt.Sprintf("# Book Content\n\n%s\n", text)
-	
+
 	return os.WriteFile(outputPath, []byte(markdownContent), 0644)
 }
 
@@ -365,7 +365,7 @@ func convertMarkdownToXHTML(markdown string) string {
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		
+
 		// Headers
 		if strings.HasPrefix(line, "# ") {
 			if inParagraph {

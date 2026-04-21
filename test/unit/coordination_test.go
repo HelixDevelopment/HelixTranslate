@@ -383,22 +383,22 @@ func TestConsensusMode(t *testing.T) {
 	t.Run("ConsensusWithInsufficientInstances", func(t *testing.T) {
 		// Clear all API keys to avoid making real HTTP requests
 		oldKeys := map[string]string{
-			"OPENAI_API_KEY":      os.Getenv("OPENAI_API_KEY"),
-			"ANTHROPIC_API_KEY":   os.Getenv("ANTHROPIC_API_KEY"),
-			"ZHIPU_API_KEY":       os.Getenv("ZHIPU_API_KEY"),
-			"DEEPSEEK_API_KEY":    os.Getenv("DEEPSEEK_API_KEY"),
-			"QWEN_API_KEY":        os.Getenv("QWEN_API_KEY"),
-			"OLLAMA_ENABLED":      os.Getenv("OLLAMA_ENABLED"),
+			"OPENAI_API_KEY":    os.Getenv("OPENAI_API_KEY"),
+			"ANTHROPIC_API_KEY": os.Getenv("ANTHROPIC_API_KEY"),
+			"ZHIPU_API_KEY":     os.Getenv("ZHIPU_API_KEY"),
+			"DEEPSEEK_API_KEY":  os.Getenv("DEEPSEEK_API_KEY"),
+			"QWEN_API_KEY":      os.Getenv("QWEN_API_KEY"),
+			"OLLAMA_ENABLED":    os.Getenv("OLLAMA_ENABLED"),
 		}
-		
+
 		// Unset all API keys
 		for key := range oldKeys {
 			os.Unsetenv(key)
 		}
-		
+
 		// Set environment variable to skip OAuth initialization which causes hanging
 		os.Setenv("SKIP_QWEN_OAUTH", "true")
-		
+
 		// Restore environment after test
 		defer func() {
 			os.Unsetenv("SKIP_QWEN_OAUTH")
@@ -408,7 +408,7 @@ func TestConsensusMode(t *testing.T) {
 				}
 			}
 		}()
-		
+
 		coordinator := coordination.NewMultiLLMCoordinator(coordination.CoordinatorConfig{
 			SessionID: "test",
 		})
@@ -423,22 +423,22 @@ func TestConsensusMode(t *testing.T) {
 	t.Run("ConsensusWithZeroRequired", func(t *testing.T) {
 		// Clear all API keys to avoid making real HTTP requests
 		oldKeys := map[string]string{
-			"OPENAI_API_KEY":      os.Getenv("OPENAI_API_KEY"),
-			"ANTHROPIC_API_KEY":   os.Getenv("ANTHROPIC_API_KEY"),
-			"ZHIPU_API_KEY":       os.Getenv("ZHIPU_API_KEY"),
-			"DEEPSEEK_API_KEY":    os.Getenv("DEEPSEEK_API_KEY"),
-			"QWEN_API_KEY":        os.Getenv("QWEN_API_KEY"),
-			"OLLAMA_ENABLED":      os.Getenv("OLLAMA_ENABLED"),
+			"OPENAI_API_KEY":    os.Getenv("OPENAI_API_KEY"),
+			"ANTHROPIC_API_KEY": os.Getenv("ANTHROPIC_API_KEY"),
+			"ZHIPU_API_KEY":     os.Getenv("ZHIPU_API_KEY"),
+			"DEEPSEEK_API_KEY":  os.Getenv("DEEPSEEK_API_KEY"),
+			"QWEN_API_KEY":      os.Getenv("QWEN_API_KEY"),
+			"OLLAMA_ENABLED":    os.Getenv("OLLAMA_ENABLED"),
 		}
-		
+
 		// Unset all API keys
 		for key := range oldKeys {
 			os.Unsetenv(key)
 		}
-		
+
 		// Set environment variable to skip OAuth initialization which causes hanging
 		os.Setenv("SKIP_QWEN_OAUTH", "true")
-		
+
 		// Restore environment after test
 		defer func() {
 			os.Unsetenv("SKIP_QWEN_OAUTH")
@@ -448,7 +448,7 @@ func TestConsensusMode(t *testing.T) {
 				}
 			}
 		}()
-		
+
 		coordinator := coordination.NewMultiLLMCoordinator(coordination.CoordinatorConfig{
 			SessionID: "test",
 		})
@@ -462,6 +462,9 @@ func TestConsensusMode(t *testing.T) {
 }
 
 func TestEventEmission(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
 	t.Run("EmitWarningEvents", func(t *testing.T) {
 		eventBus := events.NewEventBus()
 		warnings := make([]events.Event, 0)
@@ -501,6 +504,9 @@ func TestEventEmission(t *testing.T) {
 			SessionID: "test",
 		})
 
+		// Wait for async event delivery
+		time.Sleep(100 * time.Millisecond)
+
 		if len(initEvents) == 0 {
 			t.Error("Expected init events to be emitted")
 		}
@@ -537,6 +543,9 @@ func TestEventEmission(t *testing.T) {
 			t.Error("Expected instances with API key, got 0")
 		}
 
+		// Wait for async event delivery
+		time.Sleep(100 * time.Millisecond)
+
 		if !strings.Contains(initMessage, "local LLMs disabled") {
 			t.Errorf("Expected init message to contain 'local LLMs disabled', got: %s", initMessage)
 		}
@@ -561,6 +570,9 @@ func TestEventEmission(t *testing.T) {
 			SessionID:         "test",
 			PreferDistributed: true,
 		})
+
+		// Wait for async event delivery
+		time.Sleep(100 * time.Millisecond)
 
 		if !strings.Contains(initMessage, "preferring distributed workers") {
 			t.Errorf("Expected init message to contain 'preferring distributed workers', got: %s", initMessage)

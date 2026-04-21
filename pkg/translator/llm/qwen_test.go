@@ -19,8 +19,93 @@ import (
 )
 
 func TestQwenProvider(t *testing.T) {
-	// Test placeholder - provider implementation needed
-	t.Log("Qwen provider test placeholder")
+	t.Run("provider_name", func(t *testing.T) {
+		client, err := NewQwenClient(TranslationConfig{
+			Provider: "qwen",
+			APIKey:   "test-key",
+		})
+		require.NoError(t, err)
+		require.NotNil(t, client)
+		assert.Equal(t, "qwen", client.GetProviderName())
+	})
+
+	t.Run("missing_api_key", func(t *testing.T) {
+		t.Setenv("HOME", t.TempDir())
+		client, err := NewQwenClient(TranslationConfig{
+			Provider: "qwen",
+			APIKey:   "",
+		})
+		require.Error(t, err)
+		require.Nil(t, client)
+		assert.Contains(t, err.Error(), "no API key")
+	})
+
+	t.Run("default_base_url", func(t *testing.T) {
+		client, err := NewQwenClient(TranslationConfig{
+			Provider: "qwen",
+			APIKey:   "test-key",
+		})
+		require.NoError(t, err)
+		require.NotNil(t, client)
+	})
+
+	t.Run("custom_base_url", func(t *testing.T) {
+		client, err := NewQwenClient(TranslationConfig{
+			Provider: "qwen",
+			APIKey:   "test-key",
+			BaseURL:  "https://custom.qwen.com",
+		})
+		require.NoError(t, err)
+		require.NotNil(t, client)
+	})
+
+	t.Run("mock_translate_success", func(t *testing.T) {
+		mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{
+				"choices": [{"message": {"content": "Привет"}}]
+			}`))
+		}))
+		defer mockServer.Close()
+
+		client := &QwenClient{
+			config: TranslationConfig{
+				Provider: "qwen",
+				APIKey:   "test-key",
+				Model:    "qwen-turbo",
+			},
+			httpClient: &http.Client{},
+			baseURL:    mockServer.URL,
+		}
+
+		ctx := context.Background()
+		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
+		require.NoError(t, err)
+		assert.Equal(t, "Привет", result)
+	})
+
+	t.Run("mock_translate_empty_choices", func(t *testing.T) {
+		mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"choices": []}`))
+		}))
+		defer mockServer.Close()
+
+		client := &QwenClient{
+			config: TranslationConfig{
+				Provider: "qwen",
+				APIKey:   "test-key",
+				Model:    "qwen-turbo",
+			},
+			httpClient: &http.Client{},
+			baseURL:    mockServer.URL,
+		}
+
+		ctx := context.Background()
+		_, err := client.Translate(ctx, "Hello", "Translate to Russian")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "no choices")
+	})
 }
 
 // TestSaveOAuthToken tests saving OAuth tokens to file
@@ -142,7 +227,7 @@ func TestSaveOAuthTokenErrorPaths(t *testing.T) {
 		}
 		// Override the credentials file path
 		client.credFilePath = invalidPath
-		
+
 		token := &QwenOAuthToken{
 			AccessToken: "test_token",
 			TokenType:   "Bearer",
@@ -181,7 +266,7 @@ func TestSaveOAuthTokenErrorPaths(t *testing.T) {
 		}
 		// Override the credentials file path
 		client.credFilePath = credFile
-		
+
 		token := &QwenOAuthToken{
 			AccessToken: "test_token",
 			TokenType:   "Bearer",
@@ -254,16 +339,16 @@ func TestRefreshToken(t *testing.T) {
 
 	tests := []struct {
 		name          string
-		clientID       string
-		clientSecret   string
-		refreshToken   string
-		mockResponse   string
-		mockStatus     int
-		expectError    bool
-		errorContains  string
+		clientID      string
+		clientSecret  string
+		refreshToken  string
+		mockResponse  string
+		mockStatus    int
+		expectError   bool
+		errorContains string
 	}{
 		{
-			name:         "missing_client_id",
+			name:          "missing_client_id",
 			clientID:      "",
 			clientSecret:  "test_secret",
 			refreshToken:  "refresh_token",
@@ -271,7 +356,7 @@ func TestRefreshToken(t *testing.T) {
 			errorContains: "QWEN_CLIENT_ID environment variable not set",
 		},
 		{
-			name:         "missing_client_secret",
+			name:          "missing_client_secret",
 			clientID:      "test_client",
 			clientSecret:  "",
 			refreshToken:  "refresh_token",
@@ -279,7 +364,7 @@ func TestRefreshToken(t *testing.T) {
 			errorContains: "QWEN_CLIENT_SECRET environment variable not set",
 		},
 		{
-			name:         "no_refresh_token_available",
+			name:          "no_refresh_token_available",
 			clientID:      "test_client",
 			clientSecret:  "test_secret",
 			refreshToken:  "", // Empty refresh token
@@ -287,7 +372,7 @@ func TestRefreshToken(t *testing.T) {
 			errorContains: "no refresh token available",
 		},
 		{
-			name:         "nil_oauth_token",
+			name:          "nil_oauth_token",
 			clientID:      "test_client",
 			clientSecret:  "test_secret",
 			refreshToken:  "refresh_token",
@@ -739,7 +824,7 @@ func TestRefreshTokenUncoveredPaths(t *testing.T) {
 		if err != nil {
 			t.Logf("Expected error (network/request structure tested): %v", err)
 			// Should contain some error about refresh failing
-			assert.True(t, strings.Contains(err.Error(), "refresh") || 
+			assert.True(t, strings.Contains(err.Error(), "refresh") ||
 				strings.Contains(err.Error(), "request") ||
 				strings.Contains(err.Error(), "connection"))
 		}
@@ -985,22 +1070,11 @@ func TestQwenRequestErrorPaths(t *testing.T) {
 			Model:    "qwen-turbo",
 		}
 
+		t.Setenv("HOME", t.TempDir())
 		client, err := NewQwenClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
-		if err == nil {
-			t.Log("Request succeeded with empty API key - may be using mock")
-		}
-		if result != "" && err != nil {
-			t.Error("Result should be empty when error occurs")
-		}
+		require.Error(t, err)
+		require.Nil(t, client)
+		assert.Contains(t, err.Error(), "no API key")
 	})
 
 	t.Run("invalid_model", func(t *testing.T) {
@@ -1011,21 +1085,14 @@ func TestQwenRequestErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewQwenClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
-		if err == nil {
-			t.Log("Request succeeded with invalid model - may be using mock")
-		}
-		if result != "" && err != nil {
-			t.Error("Result should be empty when error occurs")
-		}
+		_, err = client.Translate(ctx, "Hello", "Translate to Russian")
+		require.Error(t, err)
 	})
 
 	t.Run("context_cancellation", func(t *testing.T) {
@@ -1036,28 +1103,19 @@ func TestQwenRequestErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewQwenClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		// Create cancelled context
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel() // Cancel immediately
 
 		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
-		if err != nil {
-			// Expected error path
-			if result != "" {
-				t.Error("Result should be empty when context is cancelled")
-			}
-			// Check for context-related error
-			if !contains(err.Error(), "context") && 
-			   !contains(err.Error(), "canceled") && 
-			   !contains(err.Error(), "deadline") {
-				t.Logf("Error may not be context-related: %v", err)
-			}
-		}
+		require.Error(t, err)
+		assert.Empty(t, result)
+		assert.True(t, contains(err.Error(), "context") ||
+			contains(err.Error(), "canceled") ||
+			contains(err.Error(), "deadline"))
 	})
 
 	t.Run("empty_text_input", func(t *testing.T) {
@@ -1068,19 +1126,15 @@ func TestQwenRequestErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewQwenClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		result, err := client.Translate(ctx, "", "Translate to Russian")
-		if err == nil && result == "" {
-			t.Log("Empty input returned empty result - this is acceptable")
-		}
-		// Either should work - some APIs handle empty text, others don't
+		_ = result
+		_ = err
 	})
 
 	t.Run("very_long_text", func(t *testing.T) {
@@ -1091,33 +1145,16 @@ func TestQwenRequestErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewQwenClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		// Create very long text that might trigger size limits
-		longText := ""
-		for i := 0; i < 1000; i++ {
-			longText += "Hello world. "
-		}
-		
-		result, err := client.Translate(ctx, longText, "Translate to Russian")
-		if err != nil {
-			// Expected error path - text too long
-			if result != "" {
-				t.Error("Result should be empty when text is too long")
-			}
-			// Check for size-related error
-			if !contains(err.Error(), "too large") && 
-			   !contains(err.Error(), "size") && 
-			   !contains(err.Error(), "limit") {
-				t.Logf("Error may not be size-related: %v", err)
-			}
-		}
+		longText := strings.Repeat("Hello world. ", 1000)
+
+		_, err = client.Translate(ctx, longText, "Translate to Russian")
+		require.Error(t, err)
 	})
 
 	t.Run("invalid_base_url", func(t *testing.T) {
@@ -1129,27 +1166,14 @@ func TestQwenRequestErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewQwenClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
-		if err != nil {
-			// Expected error path - invalid URL
-			if result != "" {
-				t.Error("Result should be empty when URL is invalid")
-			}
-			// Check for URL-related error
-			if !contains(err.Error(), "url") && 
-			   !contains(err.Error(), "scheme") &&
-			   !contains(err.Error(), "invalid") {
-				t.Logf("Error may not be URL-related: %v", err)
-			}
-		}
+		_, err = client.Translate(ctx, "Hello", "Translate to Russian")
+		require.Error(t, err)
 	})
 }
 
@@ -1170,7 +1194,7 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    "http://localhost:99999", // Invalid port to prevent actual requests
 		}
-		
+
 		ctx := context.Background()
 		// The request should fail at JSON marshaling or request creation stage
 		_, err := client.Translate(ctx, "test text", "test prompt")
@@ -1179,7 +1203,7 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 			t.Logf("Expected error (JSON marshal or request creation): %v", err)
 		}
 	})
-	
+
 	t.Run("no_credentials_error", func(t *testing.T) {
 		// Test with no API key and no OAuth token
 		client := &QwenClient{
@@ -1192,19 +1216,19 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 			baseURL:    "http://localhost:99999", // Invalid port to prevent actual requests
 			// No oauthToken set
 		}
-		
+
 		ctx := context.Background()
 		_, err := client.Translate(ctx, "test text", "test prompt")
 		if err == nil {
 			t.Error("Expected error with no credentials")
 		}
-		
+
 		// Should get error about no authentication credentials
 		if !strings.Contains(err.Error(), "no authentication credentials available") {
 			t.Errorf("Expected 'no authentication credentials' error, got: %v", err)
 		}
 	})
-	
+
 	t.Run("http_request_error", func(t *testing.T) {
 		client := &QwenClient{
 			config: TranslationConfig{
@@ -1215,19 +1239,19 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    "invalid://invalid-url", // Invalid URL scheme
 		}
-		
+
 		ctx := context.Background()
 		_, err := client.Translate(ctx, "test text", "test prompt")
 		if err == nil {
 			t.Error("Expected HTTP request creation error")
 		}
-		
+
 		// Should get an error about unsupported protocol scheme
 		if !strings.Contains(err.Error(), "failed to create request") {
 			t.Logf("Error may not be request creation related: %v", err)
 		}
 	})
-	
+
 	t.Run("response_reading_error", func(t *testing.T) {
 		client := &QwenClient{
 			config: TranslationConfig{
@@ -1238,16 +1262,16 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    "http://localhost:99999", // Invalid port
 		}
-		
+
 		ctx := context.Background()
 		_, err := client.Translate(ctx, "test text", "test prompt")
 		if err == nil {
 			t.Error("Expected connection error")
 		}
-		
+
 		t.Logf("Expected connection error: %v", err)
 	})
-	
+
 	t.Run("unauthorized_with_token_refresh", func(t *testing.T) {
 		// Create a mock server that returns 401 once, then succeeds
 		callCount := 0
@@ -1270,7 +1294,7 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 			}
 		}))
 		defer mockServer.Close()
-		
+
 		// Create client with expired token
 		client := &QwenClient{
 			config: TranslationConfig{
@@ -1286,25 +1310,25 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 				ExpiryDate:   time.Now().Add(-time.Hour).Unix(), // Expired
 			},
 		}
-		
+
 		// We can't easily mock the refreshToken method, so we'll just test the 401 handling
 		// The actual refresh will fail due to missing environment variables, but that's expected
 		ctx := context.Background()
 		_, err := client.Translate(ctx, "test text", "test prompt")
-		
+
 		// Should get an error (either from refresh failure or from the API)
 		if err == nil {
 			t.Error("Expected error with expired token")
 		} else {
 			t.Logf("Expected error with expired token: %v", err)
 		}
-		
+
 		// Should have made at least 1 call (the initial request)
 		if callCount < 1 {
 			t.Errorf("Expected at least 1 call, got: %d", callCount)
 		}
 	})
-	
+
 	t.Run("successful_token_refresh_with_retry", func(t *testing.T) {
 		// Create a mock server that simulates successful token refresh and retry
 		callCount := 0
@@ -1327,7 +1351,7 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 			}
 		}))
 		defer mockServer.Close()
-		
+
 		// Also mock the token refresh endpoint
 		refreshServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
@@ -1339,7 +1363,7 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 			}`))
 		}))
 		defer refreshServer.Close()
-		
+
 		// Temporarily set environment variables for refresh
 		oldClientID := os.Getenv("QWEN_CLIENT_ID")
 		oldClientSecret := os.Getenv("QWEN_CLIENT_SECRET")
@@ -1349,7 +1373,7 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 			os.Setenv("QWEN_CLIENT_ID", oldClientID)
 			os.Setenv("QWEN_CLIENT_SECRET", oldClientSecret)
 		}()
-		
+
 		// Create client with expired token
 		client := &QwenClient{
 			config: TranslationConfig{
@@ -1365,26 +1389,26 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 				ExpiryDate:   time.Now().Add(-time.Hour).Unix(), // Expired
 			},
 		}
-		
+
 		// Override the refresh URL to use our mock
 		// This is tricky because the URL is hardcoded in the method
 		// So we'll just accept that the refresh might fail and test the retry logic
-		
+
 		ctx := context.Background()
 		result, err := client.Translate(ctx, "test text", "test prompt")
-		
+
 		if err != nil {
 			t.Logf("Expected failure due to refresh URL mismatch: %v", err)
 		} else {
 			t.Logf("Unexpected success: %s", result)
 		}
-		
+
 		// Should have made at least 1 call (the initial request)
 		if callCount < 1 {
 			t.Errorf("Expected at least 1 call, got: %d", callCount)
 		}
 	})
-	
+
 	t.Run("no_choices_in_response", func(t *testing.T) {
 		mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
@@ -1394,7 +1418,7 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 			}`))
 		}))
 		defer mockServer.Close()
-		
+
 		client := &QwenClient{
 			config: TranslationConfig{
 				Provider: "qwen",
@@ -1404,18 +1428,18 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    mockServer.URL,
 		}
-		
+
 		ctx := context.Background()
 		_, err := client.Translate(ctx, "test text", "test prompt")
 		if err == nil {
 			t.Error("Expected error for no choices in response")
 		}
-		
+
 		if !strings.Contains(err.Error(), "no choices in response") {
 			t.Errorf("Expected 'no choices' error, got: %v", err)
 		}
 	})
-	
+
 	t.Run("response_unmarshal_error", func(t *testing.T) {
 		// Create a mock server that returns invalid JSON
 		mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1429,7 +1453,7 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 				}`))
 		}))
 		defer mockServer.Close()
-		
+
 		client := &QwenClient{
 			config: TranslationConfig{
 				Provider: "qwen",
@@ -1439,18 +1463,18 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    mockServer.URL,
 		}
-		
+
 		ctx := context.Background()
 		_, err := client.Translate(ctx, "test text", "test prompt")
 		if err == nil {
 			t.Error("Expected error for invalid JSON")
 		}
-		
+
 		if !strings.Contains(err.Error(), "failed to unmarshal response") {
 			t.Errorf("Expected JSON unmarshal error, got: %v", err)
 		}
 	})
-	
+
 	t.Run("max_tokens_option_validation", func(t *testing.T) {
 		client := &QwenClient{
 			config: TranslationConfig{
@@ -1464,7 +1488,7 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    "http://localhost:99999", // Invalid port
 		}
-		
+
 		ctx := context.Background()
 		_, err := client.Translate(ctx, "test text", "test prompt")
 		if err != nil {
@@ -1473,7 +1497,7 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 		}
 		// The important thing is that option was processed during request creation
 	})
-	
+
 	t.Run("temperature_option_validation", func(t *testing.T) {
 		client := &QwenClient{
 			config: TranslationConfig{
@@ -1487,7 +1511,7 @@ func TestQwenTranslateUncoveredPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    "http://localhost:99999", // Invalid port
 		}
-		
+
 		ctx := context.Background()
 		_, err := client.Translate(ctx, "test text", "test prompt")
 		if err != nil {

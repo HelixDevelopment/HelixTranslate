@@ -69,25 +69,25 @@ func TestSplitText(t *testing.T) {
 	lt := &LLMTranslator{}
 
 	tests := []struct {
-		name          string
-		text          string
+		name           string
+		text           string
 		expectedChunks int
 		maxChunkSize   int
 	}{
 		{
-			name:          "small text",
-			text:          "This is a small text.",
+			name:           "small text",
+			text:           "This is a small text.",
 			expectedChunks: 1,
 		},
 		{
-			name:          "text with paragraphs under limit",
-			text:          strings.Repeat("First paragraph.\n\nSecond paragraph.\n\n", 100),
+			name:           "text with paragraphs under limit",
+			text:           strings.Repeat("First paragraph.\n\nSecond paragraph.\n\n", 100),
 			expectedChunks: 1, // Still under 20KB limit
 		},
 		{
-			name:          "very large text",
-			text:          strings.Repeat("This is a sentence. ", 2000), // ~40KB
-			expectedChunks: 2, // Should split into 2+ chunks (maxChunkSize = 20KB)
+			name:           "very large text",
+			text:           strings.Repeat("This is a sentence. ", 2000), // ~40KB
+			expectedChunks: 2,                                            // Should split into 2+ chunks (maxChunkSize = 20KB)
 		},
 	}
 
@@ -314,7 +314,7 @@ func TestSplitTextMissingCoverage(t *testing.T) {
 		// might be modified during sentence splitting of large paragraphs
 		// The important thing is that no content is lost
 		combined := strings.Join(chunks, "")
-		
+
 		// Check that all major content segments are present (even if format changes)
 		if !strings.Contains(combined, smallPara1) {
 			t.Error("First paragraph content is missing")
@@ -325,7 +325,7 @@ func TestSplitTextMissingCoverage(t *testing.T) {
 		if !strings.Contains(combined, "very large paragraph") {
 			t.Error("Large paragraph content is missing")
 		}
-		
+
 		// Verify length is reasonable (within 10% of original)
 		if len(combined) < int(float64(len(text))*0.9) || len(combined) > int(float64(len(text))*1.1) {
 			t.Errorf("Combined length %d is too different from original %d", len(combined), len(text))
@@ -335,7 +335,7 @@ func TestSplitTextMissingCoverage(t *testing.T) {
 	t.Run("multiple_paragraph_boundary_handling", func(t *testing.T) {
 		// Test exact boundary conditions with multiple paragraphs
 		para1 := strings.Repeat("Sentence. ", 500) // ~10KB
-		para2 := strings.Repeat("Sentence. ", 500) // ~10KB  
+		para2 := strings.Repeat("Sentence. ", 500) // ~10KB
 		para3 := strings.Repeat("Sentence. ", 500) // ~10KB
 		text := para1 + "\n\n" + para2 + "\n\n" + para3
 
@@ -383,7 +383,7 @@ func TestSplitTextMissingCoverage(t *testing.T) {
 	t.Run("oversized_single_sentence", func(t *testing.T) {
 		// Test with a single sentence that's larger than maxChunkSize
 		longSentence := strings.Repeat("word ", 10000) // ~50KB single sentence
-		text := longSentence + "." // Make it a single sentence
+		text := longSentence + "."                     // Make it a single sentence
 
 		chunks := lt.splitText(text)
 
@@ -448,77 +448,75 @@ func TestSplitBySentences(t *testing.T) {
 	}
 }
 
-
-
 // TestTranslateWithRetry tests the retry logic with text splitting
 func TestTranslateWithRetry(t *testing.T) {
 	tests := []struct {
-		name           string
-		text           string
-		shouldFail     bool
-		sizeError      bool
-		expectedError  bool
+		name            string
+		text            string
+		shouldFail      bool
+		sizeError       bool
+		expectedError   bool
 		expectedRetries int
 	}{
 		{
-			name:           "successful translation",
-			text:           "Hello world",
-			shouldFail:     false,
-			sizeError:      false,
-			expectedError:  false,
+			name:            "successful translation",
+			text:            "Hello world",
+			shouldFail:      false,
+			sizeError:       false,
+			expectedError:   false,
 			expectedRetries: 0,
 		},
 		{
-			name:           "size error with retry success",
-			text:           strings.Repeat("This is a sentence. ", 2000), // Large enough to split (40KB)
-			shouldFail:     true,
-			sizeError:      true,
-			expectedError:  false,
+			name:            "size error with retry success",
+			text:            strings.Repeat("This is a sentence. ", 2000), // Large enough to split (40KB)
+			shouldFail:      true,
+			sizeError:       true,
+			expectedError:   false,
 			expectedRetries: 1,
 		},
 		{
-			name:           "non-size error",
-			text:           "Hello world",
-			shouldFail:     true,
-			sizeError:      false,
-			expectedError:  true,
+			name:            "non-size error",
+			text:            "Hello world",
+			shouldFail:      true,
+			sizeError:       false,
+			expectedError:   true,
 			expectedRetries: 0,
 		},
 	}
 
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				mockClient := NewMockLLMClient()
-				if tt.shouldFail {
-					// For non-size errors, we need at least 1 failure
-					maxFailures := tt.expectedRetries
-					if !tt.sizeError {
-						maxFailures = 1
-					}
-					mockClient.SetFailure(true, maxFailures)
-					mockClient.SetSizeError(tt.sizeError)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockClient := NewMockLLMClient()
+			if tt.shouldFail {
+				// For non-size errors, we need at least 1 failure
+				maxFailures := tt.expectedRetries
+				if !tt.sizeError {
+					maxFailures = 1
 				}
+				mockClient.SetFailure(true, maxFailures)
+				mockClient.SetSizeError(tt.sizeError)
+			}
 
-				lt := &LLMTranslator{
-					client: mockClient,
-				}
+			lt := &LLMTranslator{
+				client: mockClient,
+			}
 
-				prompt := "Translate this text"
-				result, err := lt.translateWithRetry(context.Background(), tt.text, prompt, "test context")
+			prompt := "Translate this text"
+			result, err := lt.translateWithRetry(context.Background(), tt.text, prompt, "test context")
 
-				if tt.expectedError && err == nil {
-					t.Error("Expected error but got none")
-				}
+			if tt.expectedError && err == nil {
+				t.Error("Expected error but got none")
+			}
 
-				if !tt.expectedError && err != nil {
-					t.Errorf("Unexpected error: %v", err)
-				}
+			if !tt.expectedError && err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
 
-				if !tt.expectedError && result == "" {
-					t.Error("Expected non-empty result")
-				}
-			})
-		}
+			if !tt.expectedError && result == "" {
+				t.Error("Expected non-empty result")
+			}
+		})
+	}
 }
 
 // Benchmark text splitting performance
@@ -542,8 +540,8 @@ func TestOpenAIClientDetailed(t *testing.T) {
 		{
 			name: "valid config with delegation",
 			config: TranslationConfig{
-				APIKey:  "test-key",
-				Model:   "gpt-4",
+				APIKey:   "test-key",
+				Model:    "gpt-4",
 				Provider: "deepseek", // This is delegation
 			},
 			expectError: false,
@@ -551,7 +549,7 @@ func TestOpenAIClientDetailed(t *testing.T) {
 		{
 			name: "empty model with delegation",
 			config: TranslationConfig{
-				APIKey:  "test-key",
+				APIKey:   "test-key",
 				Provider: "deepseek",
 			},
 			expectError: false,
@@ -561,7 +559,7 @@ func TestOpenAIClientDetailed(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			client, err := NewOpenAIClient(tt.config)
-			
+
 			if tt.expectError {
 				if err == nil {
 					t.Error("Expected error but got none")
@@ -573,7 +571,7 @@ func TestOpenAIClientDetailed(t *testing.T) {
 				if client == nil {
 					t.Error("Expected non-nil client")
 				}
-				
+
 				// Test GetProviderName
 				if client.GetProviderName() != "openai" {
 					t.Errorf("Expected provider name 'openai', got '%s'", client.GetProviderName())
@@ -597,8 +595,8 @@ func TestLLMTranslatorErrorHandling(t *testing.T) {
 				mockClient.SetFailure(true, 1)
 				return &LLMTranslator{
 					BaseTranslator: NewBaseTranslator(TranslationConfig{}),
-					client:        mockClient,
-					provider:      ProviderOpenAI,
+					client:         mockClient,
+					provider:       ProviderOpenAI,
 				}
 			},
 			expectError: true,
@@ -610,8 +608,8 @@ func TestLLMTranslatorErrorHandling(t *testing.T) {
 				mockClient.SetFailure(true, 1)
 				return &LLMTranslator{
 					BaseTranslator: NewBaseTranslator(TranslationConfig{}),
-					client:        mockClient,
-					provider:      ProviderOpenAI,
+					client:         mockClient,
+					provider:       ProviderOpenAI,
 				}
 			},
 			expectError: true,
@@ -621,9 +619,9 @@ func TestLLMTranslatorErrorHandling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			lt := tt.setupClient()
-			
+
 			_, err := lt.Translate(context.Background(), "test", "context")
-			
+
 			if tt.expectError && err == nil {
 				t.Error("Expected error but got none")
 			}
@@ -745,7 +743,7 @@ func TestLLMTranslatorGetName(t *testing.T) {
 			if tt.provider == "llamacpp" {
 				t.Skip("LlamaCpp requires actual models to be installed")
 			}
-			
+
 			config := translator.TranslationConfig{
 				Provider: tt.provider,
 				Model:    tt.model,
@@ -768,7 +766,7 @@ func TestLLMTranslatorGetName(t *testing.T) {
 // TestLLMTranslatorTranslate tests the main translate functionality
 func TestLLMTranslatorTranslate(t *testing.T) {
 	mockClient := NewMockLLMClient()
-	
+
 	// Set up expected responses
 	mockClient.SetResponse("Hello world", "HELLO WORLD")
 	mockClient.SetResponse("", "")
@@ -776,8 +774,8 @@ func TestLLMTranslatorTranslate(t *testing.T) {
 
 	lt := &LLMTranslator{
 		BaseTranslator: NewBaseTranslator(TranslationConfig{}),
-		client:        mockClient,
-		provider:      ProviderOpenAI,
+		client:         mockClient,
+		provider:       ProviderOpenAI,
 	}
 
 	tests := []struct {
@@ -824,7 +822,7 @@ func TestLLMTranslatorTranslate(t *testing.T) {
 // TestLLMTranslatorTranslateWithProgress tests progress reporting
 func TestLLMTranslatorTranslateWithProgress(t *testing.T) {
 	mockClient := NewMockLLMClient()
-	
+
 	// Set up expected response
 	mockClient.SetResponse("Hello world", "HELLO WORLD")
 
@@ -882,8 +880,8 @@ func TestLLMTranslatorCaching(t *testing.T) {
 
 	lt := &LLMTranslator{
 		BaseTranslator: NewBaseTranslator(TranslationConfig{}),
-		client:        mockClient,
-		provider:      ProviderOpenAI,
+		client:         mockClient,
+		provider:       ProviderOpenAI,
 	}
 
 	text := "Hello world"
@@ -920,17 +918,17 @@ func TestLLMTranslatorCaching(t *testing.T) {
 // TestConvertFromTranslatorConfig tests config conversion
 func TestConvertFromTranslatorConfig(t *testing.T) {
 	originalConfig := translator.TranslationConfig{
-		SourceLang:     "en",
-		TargetLang:     "ru",
-		Provider:       "openai",
-		Model:          "gpt-4",
-		Temperature:    0.7,
-		MaxTokens:      1000,
-		Timeout:        30 * time.Second,
-		APIKey:         "test-key",
-		BaseURL:        "https://api.openai.com/v1",
-		Script:         "latin",
-		Options:        map[string]interface{}{"temperature": 0.5},
+		SourceLang:  "en",
+		TargetLang:  "ru",
+		Provider:    "openai",
+		Model:       "gpt-4",
+		Temperature: 0.7,
+		MaxTokens:   1000,
+		Timeout:     30 * time.Second,
+		APIKey:      "test-key",
+		BaseURL:     "https://api.openai.com/v1",
+		Script:      "latin",
+		Options:     map[string]interface{}{"temperature": 0.5},
 	}
 
 	convertedConfig := ConvertFromTranslatorConfig(originalConfig)
@@ -1095,10 +1093,10 @@ func TestEmitFunctions(t *testing.T) {
 
 	t.Run("EmitProgress", func(t *testing.T) {
 		EmitProgress(eventBus, sessionID, "test message", map[string]interface{}{"key": "value"})
-		
+
 		// Give some time for async processing
 		time.Sleep(10 * time.Millisecond)
-		
+
 		if !progressReceived {
 			t.Error("Expected progress event to be received")
 		}
@@ -1107,10 +1105,10 @@ func TestEmitFunctions(t *testing.T) {
 	t.Run("EmitError", func(t *testing.T) {
 		testErr := errors.New("test error")
 		EmitError(eventBus, sessionID, "test error message", testErr)
-		
+
 		// Give some time for async processing
 		time.Sleep(10 * time.Millisecond)
-		
+
 		if !errorReceived {
 			t.Error("Expected error event to be received")
 		}
@@ -1180,7 +1178,7 @@ func TestOllamaProviderName(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error creating client: %v", err)
 	}
-	
+
 	if client.GetProviderName() != "ollama" {
 		t.Errorf("Expected provider name \"ollama\", got \"%s\"", client.GetProviderName())
 	}
@@ -1193,7 +1191,7 @@ func TestNewLLMTranslatorWithConfigErrorPaths(t *testing.T) {
 			// No provider specified
 			Model: "test-model",
 		}
-		
+
 		translator, err := NewLLMTranslatorWithConfig(config)
 		if err == nil {
 			t.Error("Expected error for missing provider")
@@ -1201,18 +1199,18 @@ func TestNewLLMTranslatorWithConfigErrorPaths(t *testing.T) {
 		if translator != nil {
 			t.Error("Translator should be nil when error occurs")
 		}
-		
+
 		if !strings.Contains(err.Error(), "provider must be specified") {
 			t.Errorf("Expected provider validation error, got: %v", err)
 		}
 	})
-	
+
 	t.Run("invalid_model_for_provider", func(t *testing.T) {
 		config := TranslationConfig{
 			Provider: "openai",
 			Model:    "invalid-model-name",
 		}
-		
+
 		translator, err := NewLLMTranslatorWithConfig(config)
 		if err == nil {
 			t.Error("Expected error for invalid model")
@@ -1220,18 +1218,18 @@ func TestNewLLMTranslatorWithConfigErrorPaths(t *testing.T) {
 		if translator != nil {
 			t.Error("Translator should be nil when error occurs")
 		}
-		
+
 		if !strings.Contains(err.Error(), "is not valid for provider") {
 			t.Errorf("Expected model validation error, got: %v", err)
 		}
 	})
-	
+
 	t.Run("unsupported_provider", func(t *testing.T) {
 		config := TranslationConfig{
 			Provider: "nonexistent-provider",
 			Model:    "test-model",
 		}
-		
+
 		translator, err := NewLLMTranslatorWithConfig(config)
 		if err == nil {
 			t.Error("Expected error for unsupported provider")
@@ -1239,18 +1237,18 @@ func TestNewLLMTranslatorWithConfigErrorPaths(t *testing.T) {
 		if translator != nil {
 			t.Error("Translator should be nil when error occurs")
 		}
-		
+
 		if !strings.Contains(err.Error(), "unsupported LLM provider") {
 			t.Errorf("Expected unsupported provider error, got: %v", err)
 		}
 	})
-	
+
 	t.Run("ollama_valid_model", func(t *testing.T) {
 		config := TranslationConfig{
 			Provider: "ollama",
 			Model:    "llama2", // Valid model in the list
 		}
-		
+
 		translator, err := NewLLMTranslatorWithConfig(config)
 		if err != nil {
 			t.Errorf("Expected success with valid Ollama model, got error: %v", err)
@@ -1259,13 +1257,13 @@ func TestNewLLMTranslatorWithConfigErrorPaths(t *testing.T) {
 			t.Error("Translator should not be nil with valid config")
 		}
 	})
-	
+
 	t.Run("llamacpp_valid_model", func(t *testing.T) {
 		config := TranslationConfig{
 			Provider: "llamacpp",
 			Model:    "llama2", // Valid model in the list
 		}
-		
+
 		translator, err := NewLLMTranslatorWithConfig(config)
 		// This might fail if llama2 model doesn't exist locally, but that's expected
 		if err != nil {
@@ -1276,4 +1274,3 @@ func TestNewLLMTranslatorWithConfigErrorPaths(t *testing.T) {
 		}
 	})
 }
-

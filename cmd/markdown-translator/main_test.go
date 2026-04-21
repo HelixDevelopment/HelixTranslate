@@ -160,7 +160,7 @@ func TestFileOperations(t *testing.T) {
 
 func TestProviderValidation(t *testing.T) {
 	validProviders := []string{"openai", "anthropic", "zhipu", "deepseek", "qwen", "gemini", "ollama"}
-	
+
 	tests := []struct {
 		name     string
 		provider string
@@ -186,7 +186,7 @@ func TestProviderValidation(t *testing.T) {
 					break
 				}
 			}
-			
+
 			if isValid != tt.valid {
 				t.Errorf("Provider validation for %s: got %v, want %v", tt.provider, isValid, tt.valid)
 			}

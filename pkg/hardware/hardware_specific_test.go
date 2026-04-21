@@ -11,10 +11,10 @@ import (
 // TestCPUModelSpecific tests getCPUModel with specific OS handling
 func TestCPUModelSpecific(t *testing.T) {
 	detector := NewDetector()
-	
+
 	t.Run("getCPUModel on current OS", func(t *testing.T) {
 		model, err := detector.getCPUModel()
-		
+
 		// We should get either a valid model or a meaningful error
 		if err != nil {
 			assert.Contains(t, err.Error(), "not implemented")
@@ -22,7 +22,7 @@ func TestCPUModelSpecific(t *testing.T) {
 			assert.NotEmpty(t, model)
 		}
 	})
-	
+
 	t.Run("Test command execution paths", func(t *testing.T) {
 		// Test different OS-specific commands
 		if runtime.GOOS == "darwin" {
@@ -56,10 +56,10 @@ func TestCPUModelSpecific(t *testing.T) {
 // TestCPUCoresSpecific tests getCPUCores with specific OS handling
 func TestCPUCoresSpecific(t *testing.T) {
 	detector := NewDetector()
-	
+
 	t.Run("getCPUCores on current OS", func(t *testing.T) {
 		cores, err := detector.getCPUCores()
-		
+
 		// We should get either valid cores or a meaningful error
 		if err != nil {
 			assert.Contains(t, err.Error(), "not implemented")
@@ -67,7 +67,7 @@ func TestCPUCoresSpecific(t *testing.T) {
 			assert.Greater(t, cores, 0)
 		}
 	})
-	
+
 	t.Run("Test different OS paths", func(t *testing.T) {
 		// Test the various OS-specific paths
 		cores, err := detector.getCPUCores()
@@ -89,14 +89,14 @@ func TestCPUCoresSpecific(t *testing.T) {
 // TestGPUDetectionSpecific tests detectGPU with specific scenarios
 func TestGPUDetectionSpecific(t *testing.T) {
 	detector := NewDetector()
-	
+
 	t.Run("detectGPU basic functionality", func(t *testing.T) {
 		hasGPU, gpuType := detector.detectGPU()
-		
+
 		// Should return a boolean and string type (possibly empty)
 		assert.IsType(t, false, hasGPU)
 		assert.IsType(t, "", gpuType)
-		
+
 		// If GPU is detected, type should be valid
 		if hasGPU {
 			assert.NotEmpty(t, gpuType)
@@ -106,7 +106,7 @@ func TestGPUDetectionSpecific(t *testing.T) {
 			assert.True(t, validTypes[gpuType], "GPU type should be valid")
 		}
 	})
-	
+
 	t.Run("GPU detection on macOS", func(t *testing.T) {
 		if runtime.GOOS == "darwin" {
 			hasGPU, gpuType := detector.detectGPU()
@@ -118,10 +118,10 @@ func TestGPUDetectionSpecific(t *testing.T) {
 			}
 		}
 	})
-	
+
 	t.Run("GPU detection with nvidia-smi", func(t *testing.T) {
 		hasGPU, gpuType := detector.detectGPU()
-		
+
 		if !hasGPU {
 			t.Logf("No GPU detected or nvidia-smi not available")
 		} else {
@@ -137,27 +137,27 @@ func TestGPUDetectionSpecific(t *testing.T) {
 // TestRAMDetectionSpecific tests specific RAM detection methods
 func TestRAMDetectionSpecific(t *testing.T) {
 	detector := NewDetector()
-	
+
 	t.Run("getTotalRAM on current OS", func(t *testing.T) {
 		ram, err := detector.getTotalRAM()
-		
+
 		if err != nil {
 			t.Logf("Total RAM detection failed: %v", err)
 		} else {
 			assert.Greater(t, ram, uint64(0))
 		}
 	})
-	
+
 	t.Run("getAvailableRAM on current OS", func(t *testing.T) {
 		ram, err := detector.getAvailableRAM()
-		
+
 		if err != nil {
 			t.Logf("Available RAM detection failed: %v", err)
 		} else {
 			assert.Greater(t, ram, uint64(0))
 		}
 	})
-	
+
 	t.Run("OS-specific RAM detection", func(t *testing.T) {
 		switch runtime.GOOS {
 		case "darwin":
@@ -190,9 +190,9 @@ func TestLinuxSpecificCommandPaths(t *testing.T) {
 	if runtime.GOOS != "linux" {
 		t.Skip("Skipping Linux-specific tests on non-Linux system")
 	}
-	
+
 	detector := NewDetector()
-	
+
 	t.Run("Linux CPU detection", func(t *testing.T) {
 		// Test CPU model detection on Linux
 		model, err := detector.getCPUModel()
@@ -201,11 +201,11 @@ func TestLinuxSpecificCommandPaths(t *testing.T) {
 		} else {
 			assert.NotEmpty(t, model)
 			// Should contain typical CPU info
-			assert.True(t, strings.Contains(model, "Intel") || 
-				strings.Contains(model, "AMD") || 
+			assert.True(t, strings.Contains(model, "Intel") ||
+				strings.Contains(model, "AMD") ||
 				strings.Contains(model, "ARM"))
 		}
-		
+
 		// Test CPU cores detection on Linux
 		cores, err := detector.getCPUCores()
 		if err != nil {
@@ -214,7 +214,7 @@ func TestLinuxSpecificCommandPaths(t *testing.T) {
 			assert.Greater(t, cores, 0)
 		}
 	})
-	
+
 	t.Run("Linux RAM detection", func(t *testing.T) {
 		ram, err := detector.getLinuxRAM()
 		if err != nil {
@@ -230,9 +230,9 @@ func TestMacOSSpecificCommandPaths(t *testing.T) {
 	if runtime.GOOS != "darwin" {
 		t.Skip("Skipping macOS-specific tests on non-macOS system")
 	}
-	
+
 	detector := NewDetector()
-	
+
 	t.Run("macOS CPU detection", func(t *testing.T) {
 		// Test CPU model detection on macOS
 		model, err := detector.getCPUModel()
@@ -241,10 +241,10 @@ func TestMacOSSpecificCommandPaths(t *testing.T) {
 		} else {
 			assert.NotEmpty(t, model)
 			// Should contain typical CPU info
-			assert.True(t, strings.Contains(model, "Intel") || 
+			assert.True(t, strings.Contains(model, "Intel") ||
 				strings.Contains(model, "Apple"))
 		}
-		
+
 		// Test CPU cores detection on macOS
 		cores, err := detector.getCPUCores()
 		if err != nil {
@@ -253,7 +253,7 @@ func TestMacOSSpecificCommandPaths(t *testing.T) {
 			assert.Greater(t, cores, 0)
 		}
 	})
-	
+
 	t.Run("macOS RAM detection", func(t *testing.T) {
 		ram, err := detector.getMacOSRAM()
 		if err != nil {
@@ -262,7 +262,7 @@ func TestMacOSSpecificCommandPaths(t *testing.T) {
 			assert.Greater(t, ram, uint64(0))
 		}
 	})
-	
+
 	t.Run("macOS GPU detection", func(t *testing.T) {
 		if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
 			// Apple Silicon
@@ -279,9 +279,9 @@ func TestWindowsSpecificCommandPaths(t *testing.T) {
 	if runtime.GOOS != "windows" {
 		t.Skip("Skipping Windows-specific tests on non-Windows system")
 	}
-	
+
 	detector := NewDetector()
-	
+
 	t.Run("Windows CPU detection", func(t *testing.T) {
 		// Test CPU model detection on Windows
 		model, err := detector.getCPUModel()
@@ -290,7 +290,7 @@ func TestWindowsSpecificCommandPaths(t *testing.T) {
 		} else {
 			assert.NotEmpty(t, model)
 		}
-		
+
 		// Test CPU cores detection on Windows
 		cores, err := detector.getCPUCores()
 		if err != nil {
@@ -299,7 +299,7 @@ func TestWindowsSpecificCommandPaths(t *testing.T) {
 			assert.Greater(t, cores, 0)
 		}
 	})
-	
+
 	t.Run("Windows RAM detection", func(t *testing.T) {
 		ram, err := detector.getWindowsRAM()
 		if err != nil {
@@ -313,14 +313,14 @@ func TestWindowsSpecificCommandPaths(t *testing.T) {
 // TestUnsupportedOSHandling tests how the detector handles unsupported OS
 func TestUnsupportedOSHandling(t *testing.T) {
 	detector := NewDetector()
-	
+
 	// We can't easily mock runtime.GOOS, but we can test that
 	// the current OS is handled properly
 	t.Run("Current OS handling", func(t *testing.T) {
 		// Test CPU model detection
 		model, err := detector.getCPUModel()
-		if runtime.GOOS == "darwin" || runtime.GOOS == "linux" || 
-			runtime.GOOS == "windows" || 
+		if runtime.GOOS == "darwin" || runtime.GOOS == "linux" ||
+			runtime.GOOS == "windows" ||
 			strings.Contains(runtime.GOOS, "bsd") {
 			// Supported OS - should work or fail with a meaningful error
 			if err != nil {
@@ -332,10 +332,10 @@ func TestUnsupportedOSHandling(t *testing.T) {
 			assert.Contains(t, err.Error(), "not implemented")
 			assert.Empty(t, model)
 		}
-		
+
 		// Test CPU cores detection
 		cores, err := detector.getCPUCores()
-		if runtime.GOOS == "darwin" || runtime.GOOS == "linux" || 
+		if runtime.GOOS == "darwin" || runtime.GOOS == "linux" ||
 			runtime.GOOS == "windows" {
 			// Supported OS
 			if err != nil {

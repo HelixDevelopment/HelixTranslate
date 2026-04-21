@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 	"time"
-	
+
 	"digital.vasic.translator/pkg/events"
 	"github.com/stretchr/testify/assert"
 )
@@ -52,10 +52,10 @@ func TestEdgeCaseAPIResponses(t *testing.T) {
 // TestGeminiParseResponse tests parseResponse function
 func TestGeminiParseResponse(t *testing.T) {
 	tests := []struct {
-		name            string
-		response        *GeminiResponse
-		wantErr         bool
-		expectedResult  string
+		name           string
+		response       *GeminiResponse
+		wantErr        bool
+		expectedResult string
 	}{
 		{
 			name: "valid response",
@@ -67,13 +67,13 @@ func TestGeminiParseResponse(t *testing.T) {
 					FinishReason: "STOP",
 				}},
 			},
-			wantErr: false,
+			wantErr:        false,
 			expectedResult: "Hola mundo",
 		},
 		{
-			name: "nil response",
+			name:     "nil response",
 			response: nil,
-			wantErr: true,
+			wantErr:  true,
 		},
 		{
 			name: "empty candidates",
@@ -92,8 +92,8 @@ func TestGeminiParseResponse(t *testing.T) {
 					FinishReason: "STOP",
 				}},
 			},
-			wantErr: false, // Function returns empty string, not error
-			expectedResult: "", // Expect empty result
+			wantErr:        false, // Function returns empty string, not error
+			expectedResult: "",    // Expect empty result
 		},
 	}
 
@@ -101,7 +101,7 @@ func TestGeminiParseResponse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a gemini client to test parseResponse
 			client := &GeminiClient{}
-			
+
 			// Handle nil response case separately
 			if tt.response == nil {
 				// This should panic, recover and check that it panicked
@@ -113,7 +113,7 @@ func TestGeminiParseResponse(t *testing.T) {
 				client.parseResponse(tt.response)
 				return
 			}
-			
+
 			result, err := client.parseResponse(tt.response)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseResponse() error = %v, wantErr %v", err, tt.wantErr)
@@ -141,7 +141,7 @@ func TestOllamaTranslate(t *testing.T) {
 		if r.Method != "POST" {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
-		
+
 		// Return mock response
 		response := map[string]interface{}{
 			"response": "Bonjour le monde",
@@ -253,41 +253,41 @@ func TestNewQwenClientWithOAuthToken(t *testing.T) {
 	// Test with empty HOME directory and no API key
 	origHome := os.Getenv("HOME")
 	defer os.Setenv("HOME", origHome)
-	
+
 	// Set HOME to empty
 	os.Setenv("HOME", "")
-	
+
 	// Create temporary directory structure
 	tempDir := t.TempDir()
 	os.Setenv("HOME", tempDir)
-	
+
 	// Test 1: No API key and no OAuth token should error
 	config := TranslationConfig{
 		Provider: "qwen",
 		// No API key provided
 	}
-	
+
 	_, err := NewQwenClient(config)
 	if err == nil {
 		t.Error("Expected error when no API key and no OAuth token available")
 	}
-	
+
 	// Test 2: Invalid OAuth token file should error
 	translatorCredsDir := filepath.Join(tempDir, ".translator")
 	if err := os.MkdirAll(translatorCredsDir, 0700); err != nil {
 		t.Fatalf("Failed to create credentials directory: %v", err)
 	}
-	
+
 	invalidCredFile := filepath.Join(translatorCredsDir, "qwen_credentials.json")
 	if err := os.WriteFile(invalidCredFile, []byte("invalid json"), 0600); err != nil {
 		t.Fatalf("Failed to write invalid credentials file: %v", err)
 	}
-	
+
 	_, err = NewQwenClient(config)
 	if err == nil {
 		t.Error("Expected error when OAuth token file contains invalid JSON")
 	}
-	
+
 	// Test 3: Valid OAuth token file should succeed
 	validToken := QwenOAuthToken{
 		AccessToken:  "test_access_token",
@@ -296,21 +296,21 @@ func TestNewQwenClientWithOAuthToken(t *testing.T) {
 		ResourceURL:  "https://test.com",
 		ExpiryDate:   time.Now().Add(3600 * time.Second).UnixMilli(),
 	}
-	
+
 	tokenData, _ := json.Marshal(validToken)
 	if err := os.WriteFile(invalidCredFile, tokenData, 0600); err != nil {
 		t.Fatalf("Failed to write valid credentials file: %v", err)
 	}
-	
+
 	client, err := NewQwenClient(config)
 	if err != nil {
 		t.Errorf("Expected success with valid OAuth token, got error: %v", err)
 	}
-	
+
 	if client.oauthToken == nil {
 		t.Error("Expected OAuth token to be loaded")
 	}
-	
+
 	if client.oauthToken.AccessToken != "test_access_token" {
 		t.Errorf("Expected access token 'test_access_token', got %s", client.oauthToken.AccessToken)
 	}
@@ -319,15 +319,13 @@ func TestNewQwenClientWithOAuthToken(t *testing.T) {
 // TestQwenRefreshToken tests refreshToken function when no token is available
 func TestQwenRefreshToken(t *testing.T) {
 	client := &QwenClient{}
-	
+
 	// Test with no OAuth token - should error
 	err := client.refreshToken()
 	if err == nil {
 		t.Error("Expected error when no OAuth token available")
 	}
 }
-
-
 
 // TestNewZhipuClient tests Zhipu client initialization and validation
 func TestNewZhipuClient(t *testing.T) {
@@ -336,77 +334,77 @@ func TestNewZhipuClient(t *testing.T) {
 			APIKey: "test_key",
 			Model:  "glm-4",
 		}
-		
+
 		client, err := NewZhipuClient(config)
 		if err != nil {
 			t.Errorf("NewZhipuClient() error = %v, wantErr false", err)
 			return
 		}
-		
+
 		if client == nil {
 			t.Error("Expected client to be created")
 			return
 		}
-		
+
 		// Test GetProviderName
 		if got := client.GetProviderName(); got != "zhipu" {
 			t.Errorf("GetProviderName() = %v, want %v", got, "zhipu")
 		}
-		
+
 		// Check that base URL is set correctly
 		if client.baseURL != "https://open.bigmodel.cn/api/paas/v4" {
 			t.Errorf("BaseURL = %v, want default URL", client.baseURL)
 		}
 	})
-	
+
 	t.Run("Zhipu config with custom base URL", func(t *testing.T) {
 		config := TranslationConfig{
 			APIKey:  "test_key",
 			Model:   "glm-4",
 			BaseURL: "https://custom.api.com",
 		}
-		
+
 		client, err := NewZhipuClient(config)
 		if err != nil {
 			t.Errorf("NewZhipuClient() error = %v, wantErr false", err)
 			return
 		}
-		
+
 		// Check that custom base URL is used
 		if client.baseURL != "https://custom.api.com" {
 			t.Errorf("BaseURL = %v, want custom URL", client.baseURL)
 		}
 	})
-	
+
 	t.Run("Invalid Zhipu config - no API key", func(t *testing.T) {
 		config := TranslationConfig{
 			Model: "glm-4",
 			// No API key provided
 		}
-		
+
 		_, err := NewZhipuClient(config)
 		if err == nil {
 			t.Error("Expected error when no API key is provided")
 			return
 		}
-		
+
 		if !strings.Contains(err.Error(), "Zhipu API key is required") {
 			t.Errorf("Expected API key error, got: %v", err)
 		}
 	})
-	
+
 	t.Run("Zhipu config with default model", func(t *testing.T) {
 		config := TranslationConfig{
 			APIKey: "test_key",
 			// No model specified - should use default
 		}
-		
+
 		client, err := NewZhipuClient(config)
 		if err != nil {
 			t.Errorf("NewZhipuClient() error = %v, wantErr false", err)
 			return
 		}
-		
+
 		// Check that default model will be used in Translate
 		// We can't directly check config.Model since it's private,
 		// but we can verify the client was created successfully
@@ -427,7 +425,7 @@ func TestQwenTranslateErrorPaths(t *testing.T) {
 			},
 			httpClient: &http.Client{},
 		}
-		
+
 		ctx := context.Background()
 		_, err := client.Translate(ctx, "test text", "test prompt")
 		if err == nil {
@@ -437,7 +435,7 @@ func TestQwenTranslateErrorPaths(t *testing.T) {
 			t.Errorf("Expected authentication error, got: %v", err)
 		}
 	})
-	
+
 	t.Run("Marshal request error", func(t *testing.T) {
 		client := &QwenClient{
 			config: TranslationConfig{
@@ -446,7 +444,7 @@ func TestQwenTranslateErrorPaths(t *testing.T) {
 			},
 			httpClient: &http.Client{},
 		}
-		
+
 		ctx := context.Background()
 		// Use an invalid prompt that might cause JSON marshaling issues
 		invalidPrompt := string([]byte{0, 1, 2, 3}) // Invalid UTF-8
@@ -455,7 +453,7 @@ func TestQwenTranslateErrorPaths(t *testing.T) {
 			t.Error("Expected error for invalid prompt")
 		}
 	})
-	
+
 	t.Run("OAuth token authentication", func(t *testing.T) {
 		// Mock server that always succeeds
 		mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -464,22 +462,22 @@ func TestQwenTranslateErrorPaths(t *testing.T) {
 			if authHeader == "" {
 				t.Error("Expected Authorization header to be set")
 			}
-			
+
 			// Verify it's Bearer token
 			if !strings.HasPrefix(authHeader, "Bearer ") {
 				t.Errorf("Expected Bearer token, got: %s", authHeader)
 			}
-			
+
 			response := QwenResponse{
 				Choices: []QwenChoice{
 					{Message: QwenMessage{Content: "Test translation"}},
 				},
 			}
-			
+
 			json.NewEncoder(w).Encode(response)
 		}))
 		defer mockServer.Close()
-		
+
 		client := &QwenClient{
 			config: TranslationConfig{
 				Provider: "qwen",
@@ -494,19 +492,19 @@ func TestQwenTranslateErrorPaths(t *testing.T) {
 				ExpiryDate:   time.Now().Add(1 * time.Hour).UnixMilli(), // Valid
 			},
 		}
-		
+
 		ctx := context.Background()
 		result, err := client.Translate(ctx, "test text", "test prompt")
-		
+
 		if err != nil {
 			t.Errorf("Expected success with valid OAuth token, got error: %v", err)
 		}
-		
+
 		if result != "Test translation" {
 			t.Errorf("Expected 'Test translation', got: %s", result)
 		}
 	})
-	
+
 	t.Run("API key authentication", func(t *testing.T) {
 		// Mock server that always succeeds
 		mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -515,22 +513,22 @@ func TestQwenTranslateErrorPaths(t *testing.T) {
 			if authHeader == "" {
 				t.Error("Expected Authorization header to be set")
 			}
-			
+
 			// Verify it's Bearer token
 			if !strings.HasPrefix(authHeader, "Bearer test_api_key") {
 				t.Errorf("Expected 'Bearer test_api_key', got: %s", authHeader)
 			}
-			
+
 			response := QwenResponse{
 				Choices: []QwenChoice{
 					{Message: QwenMessage{Content: "Test translation"}},
 				},
 			}
-			
+
 			json.NewEncoder(w).Encode(response)
 		}))
 		defer mockServer.Close()
-		
+
 		client := &QwenClient{
 			config: TranslationConfig{
 				Provider: "qwen",
@@ -540,14 +538,14 @@ func TestQwenTranslateErrorPaths(t *testing.T) {
 			httpClient: &http.Client{},
 			baseURL:    mockServer.URL,
 		}
-		
+
 		ctx := context.Background()
 		result, err := client.Translate(ctx, "test text", "test prompt")
-		
+
 		if err != nil {
 			t.Errorf("Expected success with valid API key, got error: %v", err)
 		}
-		
+
 		if result != "Test translation" {
 			t.Errorf("Expected 'Test translation', got: %s", result)
 		}
@@ -557,12 +555,12 @@ func TestQwenTranslateErrorPaths(t *testing.T) {
 // TestQwenTranslateWithOptions tests Qwen Translate with custom options
 func TestQwenTranslateWithOptions(t *testing.T) {
 	var requestReceived QwenRequest
-	
+
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
-		
+
 		// Decode and capture the request
 		var req QwenRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -570,17 +568,17 @@ func TestQwenTranslateWithOptions(t *testing.T) {
 			return
 		}
 		requestReceived = req
-		
+
 		response := QwenResponse{
 			Choices: []QwenChoice{
 				{Message: QwenMessage{Content: "Test translation"}},
 			},
 		}
-		
+
 		json.NewEncoder(w).Encode(response)
 	}))
 	defer mockServer.Close()
-	
+
 	// Test with custom temperature and max_tokens
 	client := &QwenClient{
 		config: TranslationConfig{
@@ -595,19 +593,19 @@ func TestQwenTranslateWithOptions(t *testing.T) {
 		httpClient: &http.Client{},
 		baseURL:    mockServer.URL,
 	}
-	
+
 	ctx := context.Background()
 	_, err := client.Translate(ctx, "test text", "test prompt")
-	
+
 	if err != nil {
 		t.Errorf("Translate() failed: %v", err)
 	}
-	
+
 	// Verify custom options were applied
 	if requestReceived.Temperature != 0.8 {
 		t.Errorf("Expected temperature 0.8, got: %f", requestReceived.Temperature)
 	}
-	
+
 	if requestReceived.MaxTokens != 2000 {
 		t.Errorf("Expected max_tokens 2000, got: %d", requestReceived.MaxTokens)
 	}
@@ -618,17 +616,17 @@ func TestQwenTranslateWithContext(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Simulate slow response
 		time.Sleep(100 * time.Millisecond)
-		
+
 		response := QwenResponse{
 			Choices: []QwenChoice{
 				{Message: QwenMessage{Content: "Test translation"}},
 			},
 		}
-		
+
 		json.NewEncoder(w).Encode(response)
 	}))
 	defer mockServer.Close()
-	
+
 	client := &QwenClient{
 		config: TranslationConfig{
 			Provider: "qwen",
@@ -638,16 +636,16 @@ func TestQwenTranslateWithContext(t *testing.T) {
 		httpClient: &http.Client{},
 		baseURL:    mockServer.URL,
 	}
-	
+
 	// Test with context that gets cancelled
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
 	defer cancel()
-	
+
 	_, err := client.Translate(ctx, "test text", "test prompt")
 	if err == nil {
 		t.Error("Expected error due to context cancellation")
 	}
-	
+
 	// Verify it's a context error
 	if !strings.Contains(err.Error(), "context") {
 		t.Errorf("Expected context error, got: %v", err)
@@ -661,7 +659,7 @@ func TestZhipuTranslate(t *testing.T) {
 		if r.Method != "POST" {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
-		
+
 		// Return mock response
 		response := map[string]interface{}{
 			"choices": []map[string]interface{}{{
@@ -704,7 +702,7 @@ func TestDeepSeekTranslate(t *testing.T) {
 		if r.Method != "POST" {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
-		
+
 		// Return mock response
 		response := map[string]interface{}{
 			"choices": []map[string]interface{}{{
@@ -719,9 +717,9 @@ func TestDeepSeekTranslate(t *testing.T) {
 	defer mockServer.Close()
 
 	config := TranslationConfig{
-		APIKey:  "test-key",
-		BaseURL: mockServer.URL,
-		Model:   "deepseek-chat",
+		APIKey:   "test-key",
+		BaseURL:  mockServer.URL,
+		Model:    "deepseek-chat",
 		Provider: "deepseek",
 	}
 
@@ -748,7 +746,7 @@ func TestGeminiTranslate(t *testing.T) {
 		if r.Method != "POST" {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
-		
+
 		// Return mock response
 		response := map[string]interface{}{
 			"candidates": []map[string]interface{}{{
@@ -792,7 +790,7 @@ func TestGeminiTranslateErrorPaths(t *testing.T) {
 	t.Run("empty_text_error", func(t *testing.T) {
 		config := TranslationConfig{
 			APIKey: "test-key",
-			Model:   "gemini-pro",
+			Model:  "gemini-pro",
 		}
 
 		client, err := NewGeminiClient(config)
@@ -927,7 +925,7 @@ func TestAnthropicTranslate(t *testing.T) {
 		if r.Method != "POST" {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
-		
+
 		// Return mock response
 		response := map[string]interface{}{
 			"content": []map[string]interface{}{{
@@ -1043,16 +1041,16 @@ func TestClientValidation(t *testing.T) {
 		{
 			name: "invalid Anthropic config - no API key",
 			config: TranslationConfig{
-				Model:   "claude-3-opus-20240229",
-				APIKey:  "",
+				Model:  "claude-3-opus-20240229",
+				APIKey: "",
 			},
 			wantErr: true,
 		},
 		{
 			name: "invalid Gemini config - no API key",
 			config: TranslationConfig{
-				Model:   "gemini-pro",
-				APIKey:  "",
+				Model:  "gemini-pro",
+				APIKey: "",
 			},
 			wantErr: true,
 		},
@@ -1149,7 +1147,7 @@ func TestResponseParsing(t *testing.T) {
 
 			ctx := context.Background()
 			_, err = client.Translate(ctx, "test", "translate")
-			
+
 			if (err != nil) != tt.expectError {
 				t.Errorf("Translate() error = %v, expectError %v", err, tt.expectError)
 			}
@@ -1229,7 +1227,7 @@ func TestProviderErrorHandling(t *testing.T) {
 
 			ctx := context.Background()
 			_, err = client.Translate(ctx, "test", "translate")
-			
+
 			if (err != nil) != tt.expectError {
 				t.Errorf("Translate() error = %v, expectError %v", err, tt.expectError)
 			}
@@ -1328,7 +1326,7 @@ func TestAPIResponseStructures(t *testing.T) {
 		},
 		{
 			name:     "Gemini with safety settings",
-			provider: "gemini", 
+			provider: "gemini",
 			response: `{
 				"candidates": [
 					{"content": {"parts": [{"text": "Safe content"}], "role": "model"}, "finishReason": "STOP"}
@@ -1420,7 +1418,7 @@ func TestAPIResponseStructures(t *testing.T) {
 
 			ctx := context.Background()
 			_, err = client.Translate(ctx, "test", "translate")
-			
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Translate() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -1525,38 +1523,38 @@ func TestFinalCoverage(t *testing.T) {
 		expectError bool
 	}{
 		{
-			name:     "OpenAI malformed response",
-			provider: "openai",
-			response: `{"invalid": "json"}`,
-			statusCode: http.StatusOK,
+			name:        "OpenAI malformed response",
+			provider:    "openai",
+			response:    `{"invalid": "json"}`,
+			statusCode:  http.StatusOK,
 			expectError: true,
 		},
 		{
-			name:     "Gemini malformed response",
-			provider: "gemini",
-			response: `{"invalid": "json"}`,
-			statusCode: http.StatusOK,
+			name:        "Gemini malformed response",
+			provider:    "gemini",
+			response:    `{"invalid": "json"}`,
+			statusCode:  http.StatusOK,
 			expectError: true,
 		},
 		{
-			name:     "Ollama error response", 
-			provider: "ollama",
-			response: `{"error": "Invalid request"}`,
-			statusCode: http.StatusBadRequest,
+			name:        "Ollama error response",
+			provider:    "ollama",
+			response:    `{"error": "Invalid request"}`,
+			statusCode:  http.StatusBadRequest,
 			expectError: true,
 		},
 		{
-			name:     "Qwen malformed response",
-			provider: "qwen",
-			response: `{"invalid": "json"}`,
-			statusCode: http.StatusOK,
+			name:        "Qwen malformed response",
+			provider:    "qwen",
+			response:    `{"invalid": "json"}`,
+			statusCode:  http.StatusOK,
 			expectError: true,
 		},
 		{
-			name:     "Anthropic malformed response",
-			provider: "anthropic",
-			response: `{"invalid": "json"}`,
-			statusCode: http.StatusOK,
+			name:        "Anthropic malformed response",
+			provider:    "anthropic",
+			response:    `{"invalid": "json"}`,
+			statusCode:  http.StatusOK,
 			expectError: true,
 		},
 	}
@@ -1619,7 +1617,7 @@ func TestFinalCoverage(t *testing.T) {
 
 			ctx := context.Background()
 			_, err = client.Translate(ctx, "test", "translate")
-			
+
 			if (err != nil) != tt.expectError {
 				t.Errorf("Translate() error = %v, expectError %v", err, tt.expectError)
 			}
@@ -1642,7 +1640,7 @@ func TestMilestone60(t *testing.T) {
 				w.WriteHeader(http.StatusServiceUnavailable)
 				w.Write([]byte("Service Unavailable"))
 			},
-			provider: "openai",
+			provider:    "openai",
 			expectError: true,
 		},
 		{
@@ -1651,7 +1649,7 @@ func TestMilestone60(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(`{"choices": [{"message": {"content": ""}}]}`))
 			},
-			provider: "openai",
+			provider:    "openai",
 			expectError: false, // Empty content is valid
 		},
 		{
@@ -1660,7 +1658,7 @@ func TestMilestone60(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(`{"candidates": [{"content": {"parts": [{"text": null}]}, "finishReason": "STOP"}]}`))
 			},
-			provider: "gemini",
+			provider:    "gemini",
 			expectError: false, // Should handle null text gracefully and return empty string
 		},
 		{
@@ -1669,7 +1667,7 @@ func TestMilestone60(t *testing.T) {
 				w.WriteHeader(http.StatusUnauthorized)
 				w.Write([]byte(`{"error": "Invalid API key"}`))
 			},
-			provider: "anthropic",
+			provider:    "anthropic",
 			expectError: true,
 		},
 		{
@@ -1678,7 +1676,7 @@ func TestMilestone60(t *testing.T) {
 				w.WriteHeader(http.StatusTooManyRequests)
 				w.Write([]byte(`{"error": "Rate limit exceeded"}`))
 			},
-			provider: "qwen",
+			provider:    "qwen",
 			expectError: true,
 		},
 	}
@@ -1731,12 +1729,12 @@ func TestMilestone60(t *testing.T) {
 
 			ctx := context.Background()
 			result, err := client.Translate(ctx, "test text", "translate")
-			
+
 			if (err != nil) != tt.expectError {
 				t.Errorf("Translate() error = %v, expectError %v", err, tt.expectError)
 				return
 			}
-			
+
 			if !tt.expectError && err == nil {
 				// For successful cases, just ensure we get some result
 				if tt.name == "Response with empty content" && result != "" {
@@ -1756,7 +1754,7 @@ func TestFinalPush(t *testing.T) {
 		config   TranslationConfig
 	}{
 		{
-			name: "Zhipu with all options",
+			name:     "Zhipu with all options",
 			provider: "zhipu",
 			config: TranslationConfig{
 				APIKey:  "test-key",
@@ -1769,11 +1767,11 @@ func TestFinalPush(t *testing.T) {
 			},
 		},
 		{
-			name: "DeepSeek with configuration",
+			name:     "DeepSeek with configuration",
 			provider: "deepseek",
 			config: TranslationConfig{
-				APIKey:  "test-key",
-				Model:   "deepseek-chat",
+				APIKey:   "test-key",
+				Model:    "deepseek-chat",
 				Provider: "deepseek",
 				Options: map[string]interface{}{
 					"temperature": 0.5,
@@ -1781,13 +1779,13 @@ func TestFinalPush(t *testing.T) {
 			},
 		},
 		{
-			name: "Gemini with safety settings",
+			name:     "Gemini with safety settings",
 			provider: "gemini",
 			config: TranslationConfig{
-				APIKey:  "test-key",
-				Model:   "gemini-pro",
+				APIKey: "test-key",
+				Model:  "gemini-pro",
 				Options: map[string]interface{}{
-					"temperature": 0.7,
+					"temperature":       0.7,
 					"max_output_tokens": 1000,
 				},
 			},
@@ -1912,25 +1910,25 @@ func TestQwenClientValidation(t *testing.T) {
 			if strings.Contains(tt.name, "no API key and no OAuth token") {
 				origHome := os.Getenv("HOME")
 				defer os.Setenv("HOME", origHome)
-				
+
 				// Set HOME to a temporary directory with no OAuth tokens
 				tempDir := t.TempDir()
 				os.Setenv("HOME", tempDir)
 			}
-			
+
 			client, err := NewQwenClient(tt.config)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewQwenClient() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			
+
 			if !tt.wantErr {
 				// Test that client was initialized correctly
 				if client == nil {
 					t.Error("Expected client to be created")
 					return
 				}
-				
+
 				// Test GetProviderName
 				if got := client.GetProviderName(); got != "qwen" {
 					t.Errorf("GetProviderName() = %v, want %v", got, "qwen")
@@ -1964,13 +1962,13 @@ func TestQwenIsTokenExpired(t *testing.T) {
 		client := &QwenClient{
 			// No oauthToken set
 		}
-		
+
 		expired := client.isTokenExpired()
 		if !expired {
 			t.Error("Expected token to be expired when nil")
 		}
 	})
-	
+
 	t.Run("Token expired", func(t *testing.T) {
 		client := &QwenClient{
 			oauthToken: &QwenOAuthToken{
@@ -1978,13 +1976,13 @@ func TestQwenIsTokenExpired(t *testing.T) {
 				ExpiryDate:  time.Now().Add(-1 * time.Hour).UnixMilli(), // Expired 1 hour ago
 			},
 		}
-		
+
 		expired := client.isTokenExpired()
 		if !expired {
 			t.Error("Expected token to be expired when expiry date is in past")
 		}
 	})
-	
+
 	t.Run("Token still valid", func(t *testing.T) {
 		client := &QwenClient{
 			oauthToken: &QwenOAuthToken{
@@ -1992,13 +1990,13 @@ func TestQwenIsTokenExpired(t *testing.T) {
 				ExpiryDate:  time.Now().Add(1 * time.Hour).UnixMilli(), // Expires in 1 hour
 			},
 		}
-		
+
 		expired := client.isTokenExpired()
 		if expired {
 			t.Error("Expected token to be valid when expiry date is in future")
 		}
 	})
-	
+
 	t.Run("Token within 5-minute grace period", func(t *testing.T) {
 		client := &QwenClient{
 			oauthToken: &QwenOAuthToken{
@@ -2006,13 +2004,13 @@ func TestQwenIsTokenExpired(t *testing.T) {
 				ExpiryDate:  time.Now().Add(2 * time.Minute).UnixMilli(), // Expires in 2 minutes
 			},
 		}
-		
+
 		expired := client.isTokenExpired()
 		if !expired {
 			t.Error("Expected token to be expired when within 5-minute grace period")
 		}
 	})
-	
+
 	t.Run("Token exactly at 5-minute boundary", func(t *testing.T) {
 		client := &QwenClient{
 			oauthToken: &QwenOAuthToken{
@@ -2020,7 +2018,7 @@ func TestQwenIsTokenExpired(t *testing.T) {
 				ExpiryDate:  time.Now().Add(5 * time.Minute).UnixMilli(), // Expires in exactly 5 minutes
 			},
 		}
-		
+
 		expired := client.isTokenExpired()
 		if expired {
 			t.Error("Expected token to be valid when exactly at 5-minute boundary")
@@ -2039,12 +2037,12 @@ func TestQwenRefreshTokenErrorPaths(t *testing.T) {
 	}()
 
 	tests := []struct {
-		name               string
-		client             *QwenClient
-		envClientID        string
-		envClientSecret    string
-		wantErr            bool
-		errContains        string
+		name            string
+		client          *QwenClient
+		envClientID     string
+		envClientSecret string
+		wantErr         bool
+		errContains     string
 	}{
 		{
 			name: "no oauth token",
@@ -2103,7 +2101,7 @@ func TestQwenRefreshTokenErrorPaths(t *testing.T) {
 			// Set environment variables for this test
 			os.Setenv("QWEN_CLIENT_ID", tt.envClientID)
 			os.Setenv("QWEN_CLIENT_SECRET", tt.envClientSecret)
-			
+
 			err := tt.client.refreshToken()
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -2121,7 +2119,7 @@ func TestQwenRefreshTokenErrorPaths(t *testing.T) {
 func TestQwenRefreshTokenNetworkErrorPaths(t *testing.T) {
 	// This test is limited by the fact that refreshToken uses a hardcoded URL
 	// We can still test the basic error handling logic
-	
+
 	// Test JSON marshaling error path
 	client := &QwenClient{
 		oauthToken: &QwenOAuthToken{
@@ -2131,11 +2129,11 @@ func TestQwenRefreshTokenNetworkErrorPaths(t *testing.T) {
 			ExpiryDate:   time.Now().Add(3600 * time.Second).UnixMilli(),
 		},
 	}
-	
+
 	// Create a custom function to test error paths by modifying the environment
 	// We can't easily test the HTTP errors without refactoring the function
 	// but we can at least verify the error handling structure
-	
+
 	// Test with invalid environment setup
 	originalClientID := os.Getenv("QWEN_CLIENT_ID")
 	originalClientSecret := os.Getenv("QWEN_CLIENT_SECRET")
@@ -2143,11 +2141,11 @@ func TestQwenRefreshTokenNetworkErrorPaths(t *testing.T) {
 		os.Setenv("QWEN_CLIENT_ID", originalClientID)
 		os.Setenv("QWEN_CLIENT_SECRET", originalClientSecret)
 	}()
-	
+
 	// Set invalid values to trigger error paths
 	os.Setenv("QWEN_CLIENT_ID", "")
 	os.Setenv("QWEN_CLIENT_SECRET", "")
-	
+
 	err := client.refreshToken()
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "QWEN_CLIENT_ID environment variable not set")
@@ -2155,6 +2153,9 @@ func TestQwenRefreshTokenNetworkErrorPaths(t *testing.T) {
 
 // TestNewLlamaCppClientErrorPaths tests error paths in NewLlamaCppClient
 func TestNewLlamaCppClientErrorPaths(t *testing.T) {
+	if _, err := findLlamaCppExecutable(); err != nil {
+		t.Skip("llama.cpp not installed")
+	}
 	tests := []struct {
 		name          string
 		config        TranslationConfig
@@ -2171,7 +2172,7 @@ func TestNewLlamaCppClientErrorPaths(t *testing.T) {
 			errorContains: "model not found",
 		},
 		{
-			name: "valid_config_with_auto_selection",
+			name:   "valid_config_with_auto_selection",
 			config: TranslationConfig{
 				// No model specified - should auto-select
 			},
@@ -2210,6 +2211,9 @@ func TestNewLlamaCppClientErrorPaths(t *testing.T) {
 
 // TestNewLlamaCppClientUncoveredPaths tests additional error paths in NewLlamaCppClient
 func TestNewLlamaCppClientUncoveredPaths(t *testing.T) {
+	if _, err := findLlamaCppExecutable(); err != nil {
+		t.Skip("llama.cpp not installed")
+	}
 	// Test 1: Invalid model name that doesn't exist
 	// This tests the model validation path
 	t.Run("insufficient_resources_for_model", func(t *testing.T) {
@@ -2217,10 +2221,10 @@ func TestNewLlamaCppClientUncoveredPaths(t *testing.T) {
 		config := TranslationConfig{
 			Model: "non-existent-model-12345",
 		}
-		
+
 		// Test NewLlamaCppClient - it should fail with model not found error
 		client, err := NewLlamaCppClient(config)
-		
+
 		// This should definitely fail with a model not found error
 		if err == nil {
 			t.Errorf("Expected error for non-existent model, but got none")
@@ -2234,26 +2238,26 @@ func TestNewLlamaCppClientUncoveredPaths(t *testing.T) {
 			}
 		}
 	})
-	
+
 	// Test 2: Auto-selection path without specifying model
 	// This tests the auto-selection and download paths
 	t.Run("auto_selection_and_download_paths", func(t *testing.T) {
 		config := TranslationConfig{
 			// No model specified - should trigger auto-selection
 		}
-		
+
 		// This will test auto-selection, model downloading, and configuration paths
 		client, err := NewLlamaCppClient(config)
-		
+
 		if err != nil {
 			t.Logf("Auto-selection failed (might be expected): %v", err)
-			
+
 			// Verify error is meaningful
-			if !strings.Contains(err.Error(), "hardware") && 
-			   !strings.Contains(err.Error(), "model") &&
-			   !strings.Contains(err.Error(), "not found") &&
-			   !strings.Contains(err.Error(), "llama.cpp") &&
-			   !strings.Contains(err.Error(), "download") {
+			if !strings.Contains(err.Error(), "hardware") &&
+				!strings.Contains(err.Error(), "model") &&
+				!strings.Contains(err.Error(), "not found") &&
+				!strings.Contains(err.Error(), "llama.cpp") &&
+				!strings.Contains(err.Error(), "download") {
 				t.Errorf("Unexpected error type in auto-selection: %v", err)
 			}
 		} else {
@@ -2266,21 +2270,21 @@ func TestNewLlamaCppClientUncoveredPaths(t *testing.T) {
 			t.Logf("Auto-selection success: using model at %s", client.modelPath)
 		}
 	})
-	
+
 	// Test 3: Test with minimum threads and context size calculation
 	// This tests the configuration calculation paths
 	t.Run("configuration_calculation_paths", func(t *testing.T) {
 		// Test auto-selection to exercise configuration calculations
 		config := TranslationConfig{}
-		
+
 		client, err := NewLlamaCppClient(config)
-		
+
 		if err == nil {
 			// Verify configuration calculations
 			assert.NotNil(t, client)
-			assert.GreaterOrEqual(t, client.threads, 1) // Should be at least 1
+			assert.GreaterOrEqual(t, client.threads, 1)     // Should be at least 1
 			assert.GreaterOrEqual(t, client.contextSize, 1) // Should be at least 1
-			
+
 			// Verify context size follows expected patterns (common values: 2048, 4096, 8192, etc.)
 			validContextSizes := []int{2048, 4096, 8192, 16384, 32768}
 			validSize := false
@@ -2293,8 +2297,8 @@ func TestNewLlamaCppClientUncoveredPaths(t *testing.T) {
 			if !validSize {
 				t.Logf("Unusual context size: %d (might be custom)", client.contextSize)
 			}
-			
-			t.Logf("Configuration: %d threads, %d context size, GPU: %v", 
+
+			t.Logf("Configuration: %d threads, %d context size, GPU: %v",
 				client.threads, client.contextSize, client.hardwareCaps.HasGPU)
 		}
 	})
@@ -2305,17 +2309,17 @@ func TestQwenLoadOAuthTokenErrorPaths(t *testing.T) {
 	// Test with valid file but invalid JSON
 	tempDir := t.TempDir()
 	invalidJSONFile := filepath.Join(tempDir, "invalid_token.json")
-	
+
 	// Write invalid JSON to file
 	err := os.WriteFile(invalidJSONFile, []byte("{ invalid json }"), 0644)
 	if err != nil {
 		t.Fatalf("Failed to write invalid JSON file: %v", err)
 	}
-	
+
 	client := &QwenClient{
 		credFilePath: invalidJSONFile,
 	}
-	
+
 	err = client.loadOAuthToken()
 	if err == nil {
 		t.Error("Expected error when loading invalid JSON")
@@ -2326,7 +2330,7 @@ func TestQwenLoadOAuthTokenErrorPaths(t *testing.T) {
 func TestLLMRetryPath(t *testing.T) {
 	// Mock client that always returns text size error
 	mockClient := &MockSizeErrorClient{}
-	
+
 	config := TranslationConfig{
 		Model:  "test-model",
 		APIKey: "test-key",
@@ -2339,10 +2343,10 @@ func TestLLMRetryPath(t *testing.T) {
 
 	// Large text that would trigger size error
 	largeText := strings.Repeat("This is a test sentence. ", 1000)
-	
+
 	ctx := context.Background()
 	_, err := translator.Translate(ctx, largeText, "test context")
-	
+
 	// Should return error due to retries being exhausted
 	if err == nil {
 		t.Error("Expected error after retries exhausted")
@@ -2353,7 +2357,7 @@ func TestLLMRetryPath(t *testing.T) {
 func TestTranslateWithProgress(t *testing.T) {
 	// Mock successful client
 	mockClient := NewMockLLMClient()
-	
+
 	config := TranslationConfig{
 		Model:  "test-model",
 		APIKey: "test-key",
@@ -2367,13 +2371,13 @@ func TestTranslateWithProgress(t *testing.T) {
 	eventBus := events.NewEventBus()
 	sessionID := "test-session"
 	ctx := context.Background()
-	
+
 	result, err := translator.TranslateWithProgress(ctx, "test text", "test context", eventBus, sessionID)
 	if err != nil {
 		t.Errorf("TranslateWithProgress() error = %v", err)
 		return
 	}
-	
+
 	if result == "" {
 		t.Error("TranslateWithProgress() returned empty result")
 	}
@@ -2383,7 +2387,7 @@ func TestTranslateWithProgress(t *testing.T) {
 func TestTranslateWithProgressError(t *testing.T) {
 	// Mock client that always returns error
 	mockClient := &MockSizeErrorClient{}
-	
+
 	config := TranslationConfig{
 		Model:  "test-model",
 		APIKey: "test-key",
@@ -2397,7 +2401,7 @@ func TestTranslateWithProgressError(t *testing.T) {
 	eventBus := events.NewEventBus()
 	sessionID := "test-session"
 	ctx := context.Background()
-	
+
 	_, err := translator.TranslateWithProgress(ctx, "test text", "test context", eventBus, sessionID)
 	if err == nil {
 		t.Error("Expected error from TranslateWithProgress")
@@ -2409,21 +2413,21 @@ func TestQwenClientWithEnvVar(t *testing.T) {
 	// Save original HOME
 	originalHome := os.Getenv("HOME")
 	defer os.Setenv("HOME", originalHome)
-	
+
 	// Test with HOME unset
 	os.Unsetenv("HOME")
-	
+
 	config := TranslationConfig{
 		APIKey: "test_key",
 		Model:  "qwen-max",
 	}
-	
+
 	client, err := NewQwenClient(config)
 	if err != nil {
 		t.Errorf("NewQwenClient() error = %v", err)
 		return
 	}
-	
+
 	// Should still work with fallback directory
 	if client == nil {
 		t.Error("Expected client to be created even without HOME env var")
@@ -2436,13 +2440,13 @@ func TestLlamaCppClientErrorPaths(t *testing.T) {
 	config := TranslationConfig{
 		Model: "non-existent-model-that-should-not-exist",
 	}
-	
+
 	// This should return an error because the model doesn't exist
 	client, err := NewLlamaCppClient(config)
 	if err == nil {
 		t.Error("Expected error for non-existent model")
 	}
-	
+
 	if client != nil {
 		t.Error("Expected nil client when model doesn't exist")
 	}
@@ -2455,7 +2459,7 @@ func TestLlamaCppClientConfiguration(t *testing.T) {
 	config := TranslationConfig{
 		// No model specified - let it auto-select
 	}
-	
+
 	client, err := NewLlamaCppClient(config)
 	// We don't care if this succeeds or fails (depends on system)
 	// We just want to exercise the configuration code path
@@ -2488,7 +2492,7 @@ func TestZhipuTranslateWithOptions(t *testing.T) {
 				},
 			},
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	}))
@@ -2501,7 +2505,7 @@ func TestZhipuTranslateWithOptions(t *testing.T) {
 		BaseURL: mockServer.URL,
 		Options: map[string]interface{}{
 			"temperature": 0.7,
-			"max_tokens": 2000,
+			"max_tokens":  2000,
 		},
 	}
 
@@ -2545,7 +2549,7 @@ func TestQwenTranslateWithValidToken(t *testing.T) {
 				},
 				"usage": map[string]interface{}{
 					"prompt_tokens":     10,
-					"completion_tokens":  10,
+					"completion_tokens": 10,
 					"total_tokens":      20,
 				},
 			}
@@ -2569,7 +2573,7 @@ func TestQwenTranslateWithValidToken(t *testing.T) {
 				},
 				"usage": map[string]interface{}{
 					"prompt_tokens":     10,
-					"completion_tokens":  10,
+					"completion_tokens": 10,
 					"total_tokens":      20,
 				},
 			}
@@ -2582,7 +2586,7 @@ func TestQwenTranslateWithValidToken(t *testing.T) {
 	// Set environment variables for OAuth
 	os.Setenv("QWEN_CLIENT_ID", "test_client_id")
 	os.Setenv("QWEN_CLIENT_SECRET", "test_client_secret")
-	
+
 	// Set HOME for token storage before client creation
 	originalHome := os.Getenv("HOME")
 	defer func() {
@@ -2602,7 +2606,7 @@ func TestQwenTranslateWithValidToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error creating Qwen client: %v", err)
 	}
-	
+
 	err = client.SetOAuthToken("test_token", "refresh_token", "resource_url", time.Now().Add(3600*time.Second).UnixMilli())
 	if err != nil {
 		t.Skipf("Skipping test due to token setup failure: %v", err)
@@ -2626,7 +2630,7 @@ func TestQwenTranslateWithValidToken(t *testing.T) {
 func TestLLMTranslatorRetrySuccess(t *testing.T) {
 	// Mock client that succeeds immediately
 	mockClient := NewMockLLMClient()
-	
+
 	config := TranslationConfig{
 		Model:  "test-model",
 		APIKey: "test-key",
@@ -2643,7 +2647,7 @@ func TestLLMTranslatorRetrySuccess(t *testing.T) {
 		t.Errorf("Translate() error = %v", err)
 		return
 	}
-	
+
 	// Should get a result
 	if result == "" {
 		t.Error("Expected non-empty result")
@@ -2654,7 +2658,7 @@ func TestLLMTranslatorRetrySuccess(t *testing.T) {
 func TestQwenLoadOAuthTokenValidFile(t *testing.T) {
 	tempDir := t.TempDir()
 	validTokenFile := filepath.Join(tempDir, "valid_token.json")
-	
+
 	// Create a valid OAuth token JSON
 	validToken := &QwenOAuthToken{
 		AccessToken:  "test_access_token",
@@ -2663,33 +2667,33 @@ func TestQwenLoadOAuthTokenValidFile(t *testing.T) {
 		ResourceURL:  "https://test.com",
 		ExpiryDate:   time.Now().Add(3600 * time.Second).UnixMilli(),
 	}
-	
+
 	tokenData, err := json.Marshal(validToken)
 	if err != nil {
 		t.Fatalf("Failed to marshal valid token: %v", err)
 	}
-	
+
 	err = os.WriteFile(validTokenFile, tokenData, 0644)
 	if err != nil {
 		t.Fatalf("Failed to write valid token file: %v", err)
 	}
-	
+
 	client := &QwenClient{
 		credFilePath: validTokenFile,
 	}
-	
+
 	err = client.loadOAuthToken()
 	if err != nil {
 		t.Errorf("loadOAuthToken() error = %v", err)
 		return
 	}
-	
+
 	// Verify token was loaded correctly
 	if client.oauthToken == nil {
 		t.Error("Expected oauthToken to be loaded")
 		return
 	}
-	
+
 	if client.oauthToken.AccessToken != "test_access_token" {
 		t.Errorf("Expected access token 'test_access_token', got %s", client.oauthToken.AccessToken)
 	}
@@ -2704,11 +2708,11 @@ func TestQwenRefreshTokenWithEnvVars(t *testing.T) {
 		os.Setenv("QWEN_CLIENT_ID", origClientID)
 		os.Setenv("QWEN_CLIENT_SECRET", origClientSecret)
 	}()
-	
+
 	// Set environment variables
 	os.Setenv("QWEN_CLIENT_ID", "test_client_id")
 	os.Setenv("QWEN_CLIENT_SECRET", "test_client_secret")
-	
+
 	client := &QwenClient{
 		httpClient: &http.Client{Timeout: 30 * time.Second},
 		oauthToken: &QwenOAuthToken{
@@ -2719,17 +2723,18 @@ func TestQwenRefreshTokenWithEnvVars(t *testing.T) {
 			ExpiryDate:   time.Now().Add(3600 * time.Second).UnixMilli(),
 		},
 	}
-	
+
 	// Test refreshToken - this should make an HTTP request and fail
 	// but it will exercise the code path that checks environment variables
 	err := client.refreshToken()
-	
+
 	// We expect this to fail because we're using a mock refresh token with invalid URL
 	// but we're testing that the environment variable validation works
 	if err == nil {
 		t.Error("Expected error when trying to refresh with mock data")
 	}
 }
+
 // TestQwenRefreshTokenSuccess tests successful token refresh with mock server
 func TestQwenRefreshTokenSuccess(t *testing.T) {
 	// Save original environment variables
@@ -2739,11 +2744,11 @@ func TestQwenRefreshTokenSuccess(t *testing.T) {
 		os.Setenv("QWEN_CLIENT_ID", origClientID)
 		os.Setenv("QWEN_CLIENT_SECRET", origClientSecret)
 	}()
-	
+
 	// Set environment variables
 	os.Setenv("QWEN_CLIENT_ID", "test_client_id")
 	os.Setenv("QWEN_CLIENT_SECRET", "test_client_secret")
-	
+
 	// Create a mock server for token refresh
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Return a successful refresh response
@@ -2753,13 +2758,13 @@ func TestQwenRefreshTokenSuccess(t *testing.T) {
 			"refresh_token": "new_refresh_token",
 			"expires_in":    3600,
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(refreshResponse)
 	}))
 	defer mockServer.Close()
-	
+
 	client := &QwenClient{
 		httpClient: &http.Client{Timeout: 30 * time.Second},
 		oauthToken: &QwenOAuthToken{
@@ -2770,15 +2775,13 @@ func TestQwenRefreshTokenSuccess(t *testing.T) {
 			ExpiryDate:   time.Now().Add(3600 * time.Second).UnixMilli(),
 		},
 	}
-	
+
 	// Test with valid token but network error (this will exercise request creation code path)
 	err := client.refreshToken()
 	if err == nil {
 		t.Error("Expected network error when refreshing token")
 	}
 }
-
-
 
 // TestGeminiMakeRequestErrorPaths tests error paths in makeRequest
 func TestGeminiMakeRequestErrorPaths(t *testing.T) {
@@ -2802,7 +2805,7 @@ func TestGeminiMakeRequestErrorPaths(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	
+
 	// This should fail during marshaling
 	_, err = client.makeRequest(ctx, invalidReq)
 	if err == nil {
@@ -2822,7 +2825,7 @@ func TestGeminiMakeRequestErrorPaths(t *testing.T) {
 
 	canceledCtx, cancel := context.WithCancel(ctx)
 	cancel() // Cancel immediately
-	
+
 	_, err = client.makeRequest(canceledCtx, validReq)
 	if err == nil {
 		t.Error("Expected error with canceled context")
@@ -2859,7 +2862,7 @@ func TestGeminiMakeRequestUncoveredPaths(t *testing.T) {
 		}
 
 		ctx := context.Background()
-		
+
 		// This should attempt to use the default model
 		// It will likely fail with network error, but we're testing the model defaulting path
 		_, err = client.makeRequest(ctx, req)
@@ -2896,7 +2899,7 @@ func TestGeminiMakeRequestUncoveredPaths(t *testing.T) {
 		}
 
 		ctx := context.Background()
-		
+
 		// This should fail with some error, exercising various error paths
 		_, err = client.makeRequest(ctx, req)
 		if err != nil {
@@ -2926,7 +2929,7 @@ func TestGeminiMakeRequestUncoveredPaths(t *testing.T) {
 		}
 
 		ctx := context.Background()
-		
+
 		// This should fail with network error, but we're testing the overall structure
 		_, err = client.makeRequest(ctx, req)
 		if err != nil {
@@ -2942,20 +2945,20 @@ func TestNewLlamaCppClientHardwareAndModelPaths(t *testing.T) {
 		config := TranslationConfig{
 			// No model specified - should trigger auto-selection and all its error paths
 		}
-		
+
 		// Test NewLlamaCppClient - will test auto-selection, model finding, and hardware detection paths
 		client, err := NewLlamaCppClient(config)
-		
+
 		if err != nil {
 			t.Logf("Auto-selection failed (expected behavior): %v", err)
-			
+
 			// Verify error is meaningful
-			if !strings.Contains(err.Error(), "hardware") && 
-			   !strings.Contains(err.Error(), "model") &&
-			   !strings.Contains(err.Error(), "not found") &&
-			   !strings.Contains(err.Error(), "llama.cpp") &&
-			   !strings.Contains(err.Error(), "download") &&
-			   !strings.Contains(err.Error(), "token") {
+			if !strings.Contains(err.Error(), "hardware") &&
+				!strings.Contains(err.Error(), "model") &&
+				!strings.Contains(err.Error(), "not found") &&
+				!strings.Contains(err.Error(), "llama.cpp") &&
+				!strings.Contains(err.Error(), "download") &&
+				!strings.Contains(err.Error(), "token") {
 				t.Errorf("Unexpected error type in auto-selection: %v", err)
 			}
 		} else {
@@ -2965,29 +2968,29 @@ func TestNewLlamaCppClientHardwareAndModelPaths(t *testing.T) {
 			assert.NotEmpty(t, client.executable)
 			assert.Greater(t, client.threads, 0)
 			assert.Greater(t, client.contextSize, 0)
-			t.Logf("Auto-selection success: model=%s, threads=%d, context=%d", 
+			t.Logf("Auto-selection success: model=%s, threads=%d, context=%d",
 				client.modelInfo.Name, client.threads, client.contextSize)
 		}
 	})
-	
+
 	// Test 2: Test with specific model that might not exist
 	t.Run("specific_model_resource_check", func(t *testing.T) {
 		// Try with a model name that might trigger resource validation errors
 		config := TranslationConfig{
 			Model: "nonexistent-model-xyz-999b", // Very large model name that likely doesn't exist
 		}
-		
+
 		client, err := NewLlamaCppClient(config)
-		
+
 		if err != nil {
 			t.Logf("Specific model test failed as expected: %v", err)
-			
+
 			// Should fail with appropriate error about model not found or resource issues
-			assert.True(t, 
+			assert.True(t,
 				strings.Contains(err.Error(), "model not found") ||
-				strings.Contains(err.Error(), "insufficient") ||
-				strings.Contains(err.Error(), "hardware") ||
-				strings.Contains(err.Error(), "llama.cpp"),
+					strings.Contains(err.Error(), "insufficient") ||
+					strings.Contains(err.Error(), "hardware") ||
+					strings.Contains(err.Error(), "llama.cpp"),
 				"Unexpected error: %v", err)
 		} else {
 			// If somehow succeeds, verify structure
@@ -2995,19 +2998,19 @@ func TestNewLlamaCppClientHardwareAndModelPaths(t *testing.T) {
 			t.Logf("Unexpected success with model %s", config.Model)
 		}
 	})
-	
+
 	// Test 3: Test with multiple config variations to exercise calculation paths
 	t.Run("configuration_calculation_variations", func(t *testing.T) {
 		// Test different config scenarios
 		testConfigs := []TranslationConfig{
-			{}, // Empty config
+			{},          // Empty config
 			{Model: ""}, // Empty model explicitly
 		}
-		
+
 		for i, config := range testConfigs {
 			t.Run(fmt.Sprintf("config_variation_%d", i), func(t *testing.T) {
 				client, err := NewLlamaCppClient(config)
-				
+
 				if err != nil {
 					t.Logf("Config variation %d failed: %v", i, err)
 				} else {
@@ -3015,9 +3018,9 @@ func TestNewLlamaCppClientHardwareAndModelPaths(t *testing.T) {
 					assert.Greater(t, client.threads, 0, "Threads should be positive")
 					assert.Greater(t, client.contextSize, 0, "Context size should be positive")
 					assert.NotEmpty(t, client.executable, "Executable should be set")
-					
-					t.Logf("Config %d: threads=%d, context=%d, model=%s", 
-						i, client.threads, client.contextSize, 
+
+					t.Logf("Config %d: threads=%d, context=%d, model=%s",
+						i, client.threads, client.contextSize,
 						func() string {
 							if client.modelInfo != nil {
 								return client.modelInfo.Name
@@ -3032,35 +3035,38 @@ func TestNewLlamaCppClientHardwareAndModelPaths(t *testing.T) {
 
 // TestNewLlamaCppClientDownloadPaths tests model download and caching paths in NewLlamaCppClient
 func TestNewLlamaCppClientDownloadPaths(t *testing.T) {
+	if _, err := findLlamaCppExecutable(); err != nil {
+		t.Skip("llama.cpp not installed")
+	}
 	// Test 1: Model selection and caching behavior
 	t.Run("model_caching_behavior", func(t *testing.T) {
 		config := TranslationConfig{
 			Provider: "llamacpp",
 			// No model specified - should trigger auto-selection and caching paths
 		}
-		
+
 		// Call NewLlamaCppClient multiple times to test caching behavior
 		results := make([]struct {
 			client *LlamaCppClient
 			err    error
 		}, 2)
-		
+
 		for i := 0; i < 2; i++ {
 			results[i].client, results[i].err = NewLlamaCppClient(config)
 		}
-		
+
 		// Both calls should behave consistently
 		for i, result := range results {
 			if result.err != nil {
 				t.Logf("Call %d failed as expected: %v", i, result.err)
-				
+
 				// Verify error is meaningful (likely download or model selection error)
-				assert.True(t, 
+				assert.True(t,
 					strings.Contains(result.err.Error(), "hardware") ||
-					strings.Contains(result.err.Error(), "model") ||
-					strings.Contains(result.err.Error(), "download") ||
-					strings.Contains(result.err.Error(), "token") ||
-					strings.Contains(result.err.Error(), "llama.cpp"),
+						strings.Contains(result.err.Error(), "model") ||
+						strings.Contains(result.err.Error(), "download") ||
+						strings.Contains(result.err.Error(), "token") ||
+						strings.Contains(result.err.Error(), "llama.cpp"),
 					"Unexpected error: %v", result.err)
 			} else {
 				// If successful, verify structure
@@ -3069,12 +3075,12 @@ func TestNewLlamaCppClientDownloadPaths(t *testing.T) {
 				assert.NotEmpty(t, result.client.executable, "Executable should be set")
 				assert.Greater(t, result.client.threads, 0, "Threads should be positive")
 				assert.Greater(t, result.client.contextSize, 0, "Context should be positive")
-				
-				t.Logf("Call %d success: model=%s, path=%s", 
+
+				t.Logf("Call %d success: model=%s, path=%s",
 					i, result.client.modelInfo.Name, result.client.modelPath)
 			}
 		}
-		
+
 		// If both succeeded, verify consistency
 		if results[0].err == nil && results[1].err == nil {
 			assert.Equal(t, results[0].client.modelInfo.Name, results[1].client.modelInfo.Name,
@@ -3083,7 +3089,7 @@ func TestNewLlamaCppClientDownloadPaths(t *testing.T) {
 				"Model path should be consistent")
 		}
 	})
-	
+
 	// Test 2: Model path validation and download error handling
 	t.Run("download_error_scenarios", func(t *testing.T) {
 		// Use a model that exists but might cause download issues
@@ -3091,57 +3097,57 @@ func TestNewLlamaCppClientDownloadPaths(t *testing.T) {
 			Provider: "llamacpp",
 			Model:    "Hunyuan-MT 7B (Q4)", // This model exists but requires auth
 		}
-		
+
 		client, err := NewLlamaCppClient(config)
-		
+
 		if err != nil {
 			t.Logf("Download error scenario triggered: %v", err)
-			
+
 			// Verify error structure
-			assert.True(t, 
+			assert.True(t,
 				strings.Contains(err.Error(), "failed to download") ||
-				strings.Contains(err.Error(), "model not found") ||
-				strings.Contains(err.Error(), "insufficient") ||
-				strings.Contains(err.Error(), "unauthorized") ||
-				strings.Contains(err.Error(), "token"),
+					strings.Contains(err.Error(), "model not found") ||
+					strings.Contains(err.Error(), "insufficient") ||
+					strings.Contains(err.Error(), "unauthorized") ||
+					strings.Contains(err.Error(), "token"),
 				"Error should be download-related: %v", err)
-			
+
 			// Client should be nil on download failure
 			assert.Nil(t, client, "Client should be nil when download fails")
 		} else {
 			t.Logf("Download scenario succeeded (model was cached)")
-			
+
 			// If download succeeded (due to caching), verify structure
 			assert.NotNil(t, client)
 			assert.NotEmpty(t, client.modelPath, "Model path should be set")
 			t.Logf("Download scenario success: using cached model at %s", client.modelPath)
 		}
 	})
-	
+
 	// Test 3: Model information validation and hardware checking
 	t.Run("model_info_and_hardware_validation", func(t *testing.T) {
 		// Test with different scenarios to exercise validation paths
 		testModels := []string{
 			"", // Auto-selection
 		}
-		
+
 		for i, modelName := range testModels {
 			config := TranslationConfig{
 				Provider: "llamacpp",
 				Model:    modelName,
 			}
-			
+
 			client, err := NewLlamaCppClient(config)
-			
+
 			if err != nil {
 				t.Logf("Test %d (%s) failed as expected: %v", i, modelName, err)
-				
+
 				// Should fail with appropriate error
 				assert.True(t,
 					strings.Contains(err.Error(), "hardware") ||
-					strings.Contains(err.Error(), "model") ||
-					strings.Contains(err.Error(), "download") ||
-					strings.Contains(err.Error(), "resources"),
+						strings.Contains(err.Error(), "model") ||
+						strings.Contains(err.Error(), "download") ||
+						strings.Contains(err.Error(), "resources"),
 					"Error should be validation-related: %v", err)
 			} else {
 				// If succeeds, validate model info structure
@@ -3150,40 +3156,40 @@ func TestNewLlamaCppClientDownloadPaths(t *testing.T) {
 				assert.NotEmpty(t, client.modelInfo.ID, "Model ID should be set")
 				assert.NotEmpty(t, client.modelInfo.Name, "Model name should be set")
 				assert.Greater(t, client.modelInfo.Parameters, uint64(0), "Parameters should be positive")
-				
-				t.Logf("Test %d success: model=%s (%dB params)", 
+
+				t.Logf("Test %d success: model=%s (%dB params)",
 					i, client.modelInfo.Name, client.modelInfo.Parameters)
 			}
 		}
 	})
-	
+
 	// Test 4: Download retry and caching behavior
 	t.Run("download_retry_behavior", func(t *testing.T) {
 		config := TranslationConfig{
 			Provider: "llamacpp",
 			// Auto-select a model to exercise download/retry paths
 		}
-		
+
 		// Test multiple rapid calls to see if caching is working
 		callResults := make([]error, 3)
 		for i := 0; i < 3; i++ {
 			_, callResults[i] = NewLlamaCppClient(config)
 		}
-		
+
 		// Results should be consistent (all fail or all succeed)
 		firstSucceeded := callResults[0] == nil
 		for i, err := range callResults {
 			succeeded := err == nil
 			if succeeded != firstSucceeded {
-				t.Errorf("Inconsistent behavior across calls: call 0 succeeded=%v, call %d succeeded=%v", 
+				t.Errorf("Inconsistent behavior across calls: call 0 succeeded=%v, call %d succeeded=%v",
 					firstSucceeded, i, succeeded)
 			}
-			
+
 			if err != nil {
 				t.Logf("Call %d failed: %v", i, err)
 			}
 		}
-		
+
 		if firstSucceeded {
 			t.Log("All calls succeeded - caching is working properly")
 		} else {
@@ -3195,11 +3201,11 @@ func TestNewLlamaCppClientDownloadPaths(t *testing.T) {
 // TestZhipuTranslateErrorPaths tests error paths in Zhipu Translate function
 func TestZhipuTranslateErrorPaths(t *testing.T) {
 	tests := []struct {
-		name             string
-		serverResponse   string
-		statusCode       int
-		expectError      bool
-		errorContains    string
+		name           string
+		serverResponse string
+		statusCode     int
+		expectError    bool
+		errorContains  string
 	}{
 		{
 			name:           "api_error_response",
@@ -3322,11 +3328,11 @@ func TestZhipuTranslateWithContext(t *testing.T) {
 // TestAnthropicTranslateErrorPaths tests error paths in Anthropic Translate function
 func TestAnthropicTranslateErrorPaths(t *testing.T) {
 	tests := []struct {
-		name             string
-		serverResponse   string
-		statusCode       int
-		expectError      bool
-		errorContains    string
+		name           string
+		serverResponse string
+		statusCode     int
+		expectError    bool
+		errorContains  string
 	}{
 		{
 			name:           "api_error_response",
@@ -3469,9 +3475,9 @@ func TestAnthropicTranslateWithOptions(t *testing.T) {
 	defer server.Close()
 
 	config := TranslationConfig{
-		APIKey: "test-api-key",
+		APIKey:  "test-api-key",
 		BaseURL: server.URL,
-		Model: "claude-3-sonnet-20240229",
+		Model:   "claude-3-sonnet-20240229",
 		Options: map[string]interface{}{
 			"temperature": 0.8,
 			"max_tokens":  3000,
@@ -3492,11 +3498,11 @@ func TestAnthropicTranslateWithOptions(t *testing.T) {
 // TestOllamaTranslateErrorPaths tests error paths in Ollama Translate function
 func TestOllamaTranslateErrorPaths(t *testing.T) {
 	tests := []struct {
-		name             string
-		serverResponse   string
-		statusCode       int
-		expectError      bool
-		errorContains    string
+		name           string
+		serverResponse string
+		statusCode     int
+		expectError    bool
+		errorContains  string
 	}{
 		{
 			name:           "api_error_response",
@@ -3633,9 +3639,9 @@ func TestOllamaTranslateWithCustomModel(t *testing.T) {
 	defer server.Close()
 
 	config := TranslationConfig{
-		APIKey: "test-api-key",
+		APIKey:  "test-api-key",
 		BaseURL: server.URL,
-		Model: "custom-model:latest",
+		Model:   "custom-model:latest",
 	}
 
 	client, err := NewOllamaClient(config)

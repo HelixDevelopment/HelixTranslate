@@ -20,10 +20,10 @@ type PolishingConfig struct {
 	MinConsensus int
 
 	// Verification dimensions
-	VerifySpirit      bool // Verify if translation preserves the spirit of original
-	VerifyLanguage    bool // Verify target language quality and naturalness
-	VerifyContext     bool // Verify context and deep meanings
-	VerifyVocabulary  bool // Verify word choice and vocabulary richness
+	VerifySpirit     bool // Verify if translation preserves the spirit of original
+	VerifyLanguage   bool // Verify target language quality and naturalness
+	VerifyContext    bool // Verify context and deep meanings
+	VerifyVocabulary bool // Verify word choice and vocabulary richness
 
 	// Translation configurations for each provider
 	TranslationConfigs map[string]translator.TranslationConfig
@@ -32,8 +32,8 @@ type PolishingConfig struct {
 // PolishingResult contains detailed results of the polishing process
 type PolishingResult struct {
 	// Section identification
-	SectionID      string
-	Location       string
+	SectionID string
+	Location  string
 
 	// Content
 	OriginalText   string
@@ -41,38 +41,38 @@ type PolishingResult struct {
 	PolishedText   string
 
 	// Changes made
-	Changes        []Change
+	Changes []Change
 
 	// Consensus details
-	Consensus      int     // Number of LLMs that agreed on changes
-	Confidence     float64 // Confidence score (0.0-1.0)
+	Consensus  int     // Number of LLMs that agreed on changes
+	Confidence float64 // Confidence score (0.0-1.0)
 
 	// Issues found
-	Issues         []Issue
-	Suggestions    []Suggestion
+	Issues      []Issue
+	Suggestions []Suggestion
 
 	// Quality scores per dimension
-	SpiritScore      float64
-	LanguageScore    float64
-	ContextScore     float64
-	VocabularyScore  float64
-	OverallScore     float64
+	SpiritScore     float64
+	LanguageScore   float64
+	ContextScore    float64
+	VocabularyScore float64
+	OverallScore    float64
 }
 
 // Change represents a modification made during polishing
 type Change struct {
-	Location    string  // Where in the text
-	Original    string  // Original translated text
-	Polished    string  // Polished version
-	Reason      string  // Why the change was made
-	Agreement   int     // How many LLMs agreed
-	Confidence  float64 // Confidence in this change
+	Location   string  // Where in the text
+	Original   string  // Original translated text
+	Polished   string  // Polished version
+	Reason     string  // Why the change was made
+	Agreement  int     // How many LLMs agreed
+	Confidence float64 // Confidence in this change
 }
 
 // Issue represents a problem found during verification
 type Issue struct {
-	Type        string  // "spirit", "language", "context", "vocabulary"
-	Severity    string  // "critical", "major", "minor"
+	Type        string // "spirit", "language", "context", "vocabulary"
+	Severity    string // "critical", "major", "minor"
 	Description string
 	Location    string
 	Suggestion  string
@@ -80,7 +80,7 @@ type Issue struct {
 
 // Suggestion represents an improvement suggestion
 type Suggestion struct {
-	Type        string  // Type of suggestion
+	Type        string // Type of suggestion
 	Description string
 	Location    string
 	Example     string
@@ -88,22 +88,22 @@ type Suggestion struct {
 
 // LLMVerification holds verification from a single LLM
 type llmVerification struct {
-	Provider       string
-	SpiritScore    float64
-	LanguageScore  float64
-	ContextScore   float64
+	Provider        string
+	SpiritScore     float64
+	LanguageScore   float64
+	ContextScore    float64
 	VocabularyScore float64
-	Suggestions    []string
-	PolishedText   string
-	Issues         []Issue
+	Suggestions     []string
+	PolishedText    string
+	Issues          []Issue
 }
 
 // BookPolisher performs multi-LLM verification and polishing
 type BookPolisher struct {
-	config       PolishingConfig
-	translators  map[string]*llm.LLMTranslator
-	eventBus     *events.EventBus
-	sessionID    string
+	config      PolishingConfig
+	translators map[string]*llm.LLMTranslator
+	eventBus    *events.EventBus
+	sessionID   string
 }
 
 // NewBookPolisher creates a new multi-LLM book polisher

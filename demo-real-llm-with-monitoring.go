@@ -19,23 +19,23 @@ import (
 )
 
 type WebSocketEvent struct {
-	Type         string                 `json:"type"`
-	SessionID    string                 `json:"session_id"`
-	Step         string                 `json:"step,omitempty"`
-	Message      string                 `json:"message,omitempty"`
-	Progress     float64                `json:"progress,omitempty"`
-	Error        string                 `json:"error,omitempty"`
-	CurrentItem  string                 `json:"current_item,omitempty"`
-	TotalItems   int                    `json:"total_items,omitempty"`
-	Timestamp    int64                  `json:"timestamp"`
-	Data         map[string]interface{} `json:"data,omitempty"`
+	Type        string                 `json:"type"`
+	SessionID   string                 `json:"session_id"`
+	Step        string                 `json:"step,omitempty"`
+	Message     string                 `json:"message,omitempty"`
+	Progress    float64                `json:"progress,omitempty"`
+	Error       string                 `json:"error,omitempty"`
+	CurrentItem string                 `json:"current_item,omitempty"`
+	TotalItems  int                    `json:"total_items,omitempty"`
+	Timestamp   int64                  `json:"timestamp"`
+	Data        map[string]interface{} `json:"data,omitempty"`
 }
 
 // WebSocketEventBus wraps an EventBus and forwards events to WebSocket
 type WebSocketEventBus struct {
 	*events.EventBus
-	wsConn     *websocket.Conn
-	sessionID  string
+	wsConn    *websocket.Conn
+	sessionID string
 }
 
 func NewWebSocketEventBus(wsConn *websocket.Conn, sessionID string) *WebSocketEventBus {
@@ -50,19 +50,19 @@ func NewWebSocketEventBus(wsConn *websocket.Conn, sessionID string) *WebSocketEv
 func (wseb *WebSocketEventBus) Publish(event events.Event) {
 	// Publish to internal event bus first
 	wseb.EventBus.Publish(event)
-	
+
 	// Forward to WebSocket if connected
 	if wseb.wsConn != nil {
 		wsEvent := WebSocketEvent{
-			Type:       string(event.Type),
-			SessionID:  wseb.sessionID,
-			Step:       getStepFromEvent(event),
-			Message:    event.Message,
-			Progress:   getProgressFromEvent(event),
-			Data:       event.Data,
-			Timestamp:  time.Now().Unix(),
+			Type:      string(event.Type),
+			SessionID: wseb.sessionID,
+			Step:      getStepFromEvent(event),
+			Message:   event.Message,
+			Progress:  getProgressFromEvent(event),
+			Data:      event.Data,
+			Timestamp: time.Now().Unix(),
 		}
-		
+
 		// Extract additional fields from data
 		if event.Data != nil {
 			if step, ok := event.Data["step"].(string); ok {
@@ -81,11 +81,11 @@ func (wseb *WebSocketEventBus) Publish(event events.Event) {
 				wsEvent.Error = errMsg
 			}
 		}
-		
+
 		if err := wseb.wsConn.WriteJSON(wsEvent); err != nil {
 			log.Printf("Failed to send WebSocket event: %v", err)
 		}
-		
+
 		fmt.Printf("📤 Event: %s (%.1f%%) - %s\n", wsEvent.Type, wsEvent.Progress, wsEvent.Message)
 	}
 }
@@ -126,7 +126,7 @@ func main() {
 	} else {
 		defer ws.Close()
 		fmt.Printf("✅ Connected to monitoring server\n")
-		
+
 		// Start listening for messages in background
 		go listenForWebSocketEvents(ws)
 	}
@@ -134,7 +134,7 @@ func main() {
 	// Create WebSocket-enabled event bus
 	var eventBus *events.EventBus
 	baseEventBus := events.NewEventBus()
-	
+
 	if ws != nil {
 		wsEventBus := NewWebSocketEventBus(ws, sessionID)
 		// Use the wrapped event bus for publishing
@@ -146,7 +146,7 @@ func main() {
 
 	// Initialize real LLM translator
 	fmt.Printf("🤖 Initializing LLM translator...\n")
-	
+
 	// Check for API key in environment
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
@@ -217,10 +217,10 @@ func main() {
 
 	if eventBus != nil {
 		data := map[string]interface{}{
-			"progress":    10,
-			"step":        "reading",
+			"progress":     10,
+			"step":         "reading",
 			"current_item": "file_read",
-			"total_items": totalLines,
+			"total_items":  totalLines,
 		}
 		event := events.NewEvent(events.EventStepCompleted, fmt.Sprintf("File read successfully (%d lines)", totalLines), data)
 		event.SessionID = sessionID
@@ -240,7 +240,7 @@ func main() {
 
 	ctx := context.Background()
 	translatedLines := make([]string, 0, len(lines))
-	
+
 	for i, line := range lines {
 		if strings.TrimSpace(line) == "" {
 			translatedLines = append(translatedLines, "")
@@ -248,14 +248,14 @@ func main() {
 		}
 
 		// Calculate progress (15% to 85% for translation phase)
-		progress := 15.0 + (float64(i+1)/float64(totalLines) * 70.0)
-		
+		progress := 15.0 + (float64(i+1) / float64(totalLines) * 70.0)
+
 		if eventBus != nil {
 			data := map[string]interface{}{
-				"progress":    progress,
-				"step":        "translation",
+				"progress":     progress,
+				"step":         "translation",
 				"current_item": fmt.Sprintf("line_%d", i+1),
-				"total_items": totalLines,
+				"total_items":  totalLines,
 			}
 			event := events.NewEvent(events.EventTranslationProgress, fmt.Sprintf("Translating line %d/%d", i+1, totalLines), data)
 			event.SessionID = sessionID
@@ -269,9 +269,9 @@ func main() {
 			// Fall back to demo translation
 			translatedLine = translateDemoText(line)
 		}
-		
+
 		translatedLines = append(translatedLines, translatedLine)
-		
+
 		fmt.Printf("🔄 Line %d/%d: %s\n", i+1, totalLines, translatedLine)
 	}
 
@@ -305,10 +305,10 @@ func main() {
 	stats := translator.GetStats()
 	if eventBus != nil {
 		data := map[string]interface{}{
-			"progress":    100,
+			"progress":     100,
 			"current_item": "output_generated",
-			"total_items": totalLines,
-			"stats":       stats,
+			"total_items":  totalLines,
+			"stats":        stats,
 		}
 		event := events.NewEvent(events.EventTranslationCompleted, fmt.Sprintf("Translation completed successfully! Output saved to %s", outputFile), data)
 		event.SessionID = sessionID
@@ -319,7 +319,7 @@ func main() {
 	fmt.Printf("📁 Output file: %s\n", outputFile)
 	fmt.Printf("📊 View progress at: http://localhost:8090/monitor\n")
 	fmt.Printf("🔗 Monitor this session: ws://localhost:8090/ws?session_id=%s\n", sessionID)
-	fmt.Printf("📈 Stats: Total=%d, Translated=%d, Cached=%d, Errors=%d\n", 
+	fmt.Printf("📈 Stats: Total=%d, Translated=%d, Cached=%d, Errors=%d\n",
 		stats.Total, stats.Translated, stats.Cached, stats.Errors)
 
 	// Keep running to allow monitoring
@@ -333,7 +333,7 @@ func main() {
 
 func runDemoMode(sessionID, inputFile, outputFile string, eventBus *events.EventBus) {
 	fmt.Printf("🎭 Running in demo mode with simulated LLM responses\n")
-	
+
 	// Read input file
 	content, err := os.ReadFile(inputFile)
 	if err != nil {
@@ -365,14 +365,14 @@ func runDemoMode(sessionID, inputFile, outputFile string, eventBus *events.Event
 	// Translate line by line (demo mode)
 	translatedLines := make([]string, 0, len(lines))
 	for i, line := range lines {
-		progress := 10.0 + (float64(i+1)/float64(totalLines) * 80.0)
-		
+		progress := 10.0 + (float64(i+1) / float64(totalLines) * 80.0)
+
 		if eventBus != nil {
 			data := map[string]interface{}{
-				"progress":    progress,
-				"step":        "translation",
+				"progress":     progress,
+				"step":         "translation",
 				"current_item": fmt.Sprintf("line_%d", i+1),
-				"total_items": totalLines,
+				"total_items":  totalLines,
 			}
 			event := events.NewEvent(events.EventTranslationProgress, fmt.Sprintf("Translating line %d/%d (demo)", i+1, totalLines), data)
 			event.SessionID = sessionID
@@ -382,7 +382,7 @@ func runDemoMode(sessionID, inputFile, outputFile string, eventBus *events.Event
 		time.Sleep(500 * time.Millisecond) // Simulate LLM processing time
 		translatedLine := translateDemoText(line)
 		translatedLines = append(translatedLines, translatedLine)
-		
+
 		fmt.Printf("🔄 Line %d/%d (demo): %s\n", i+1, totalLines, translatedLine)
 	}
 
@@ -395,9 +395,9 @@ func runDemoMode(sessionID, inputFile, outputFile string, eventBus *events.Event
 
 	if eventBus != nil {
 		data := map[string]interface{}{
-			"progress":    100,
+			"progress":     100,
 			"current_item": "output_generated",
-			"total_items": totalLines,
+			"total_items":  totalLines,
 		}
 		event := events.NewEvent(events.EventTranslationCompleted, fmt.Sprintf("Demo translation completed! Output saved to %s", outputFile), data)
 		event.SessionID = sessionID
@@ -411,12 +411,12 @@ func runDemoMode(sessionID, inputFile, outputFile string, eventBus *events.Event
 
 func connectWebSocket(sessionID string) (*websocket.Conn, error) {
 	u := fmt.Sprintf("ws://localhost:8090/ws?session_id=%s&client_id=real-llm-translator", sessionID)
-	
+
 	conn, _, err := websocket.DefaultDialer.Dial(u, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to WebSocket: %w", err)
 	}
-	
+
 	return conn, nil
 }
 
@@ -428,7 +428,7 @@ func listenForWebSocketEvents(ws *websocket.Conn) {
 			log.Printf("WebSocket read error: %v", err)
 			return
 		}
-		
+
 		log.Printf("📩 Received WebSocket message: %+v", msg)
 	}
 }
@@ -437,34 +437,34 @@ func listenForWebSocketEvents(ws *websocket.Conn) {
 func translateDemoText(text string) string {
 	// This is a simplified demo - in reality this would use LLM APIs
 	replacements := map[string]string{
-		"Это":         "Ово",
-		"образец":     "пример",
-		"русского":    "руског",
-		"текста":      "текста",
-		"для":         "за",
-		"проверки":    "проверу",
-		"функции":     "функције",
-		"перевода":    "превода",
-		"Он":          "Он",
-		"содержит":    "садржи",
-		"несколько":   "неколико",
-		"предложений": "реченица",
-		"и":           "и",
-		"подходит":    "одговара",
+		"Это":          "Ово",
+		"образец":      "пример",
+		"русского":     "руског",
+		"текста":       "текста",
+		"для":          "за",
+		"проверки":     "проверу",
+		"функции":      "функције",
+		"перевода":     "превода",
+		"Он":           "Он",
+		"содержит":     "садржи",
+		"несколько":    "неколико",
+		"предложений":  "реченица",
+		"и":            "и",
+		"подходит":     "одговара",
 		"тестирования": "тестирања",
-		"Текст":       "Текст",
-		"включает":    "укључује",
-		"различные":   "различите",
-		"знаки":      "знакове",
-		"препинания":  "знаке",
-		"структуры":   "структуре",
-		".":           ".",
+		"Текст":        "Текст",
+		"включает":     "укључује",
+		"различные":    "различите",
+		"знаки":        "знакове",
+		"препинания":   "знаке",
+		"структуры":    "структуре",
+		".":            ".",
 	}
-	
+
 	result := text
 	for russian, serbian := range replacements {
 		result = strings.ReplaceAll(result, russian, serbian)
 	}
-	
+
 	return result
 }

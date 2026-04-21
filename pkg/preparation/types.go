@@ -5,14 +5,14 @@ import "time"
 // ContentAnalysis represents the complete analysis of content to be translated
 type ContentAnalysis struct {
 	// Content classification
-	ContentType    string   `json:"content_type"`    // Novel, poem, technical, legal, medical, etc.
-	Genre          string   `json:"genre"`           // Main genre
-	Subgenres      []string `json:"subgenres"`       // Detailed subgenres
+	ContentType string   `json:"content_type"` // Novel, poem, technical, legal, medical, etc.
+	Genre       string   `json:"genre"`        // Main genre
+	Subgenres   []string `json:"subgenres"`    // Detailed subgenres
 
 	// Language and style
-	Tone           string   `json:"tone"`            // Formal, informal, poetic, technical, etc.
-	LanguageStyle  string   `json:"language_style"`  // Literary devices, sentence structure, etc.
-	TargetAudience string   `json:"target_audience"` // Expected reader demographics
+	Tone           string `json:"tone"`            // Formal, informal, poetic, technical, etc.
+	LanguageStyle  string `json:"language_style"`  // Literary devices, sentence structure, etc.
+	TargetAudience string `json:"target_audience"` // Expected reader demographics
 
 	// Translation-specific guidance
 	UntranslatableTerms []UntranslatableTerm `json:"untranslatable_terms"`
@@ -32,11 +32,11 @@ type ContentAnalysis struct {
 
 // UntranslatableTerm represents a term that should be kept in original language
 type UntranslatableTerm struct {
-	Term           string   `json:"term"`
-	OriginalScript string   `json:"original_script"` // Cyrillic, Latin, etc.
-	Reason         string   `json:"reason"`          // Why it shouldn't be translated
-	Context        []string `json:"context"`         // Where it appears
-	Transliteration string  `json:"transliteration"` // Optional transliteration
+	Term            string   `json:"term"`
+	OriginalScript  string   `json:"original_script"` // Cyrillic, Latin, etc.
+	Reason          string   `json:"reason"`          // Why it shouldn't be translated
+	Context         []string `json:"context"`         // Where it appears
+	Transliteration string   `json:"transliteration"` // Optional transliteration
 }
 
 // FootnoteGuidance suggests where footnotes/clarifications are needed
@@ -51,8 +51,8 @@ type FootnoteGuidance struct {
 type Character struct {
 	Name            string            `json:"name"`
 	AlternateNames  []string          `json:"alternate_names"`
-	Role            string            `json:"role"`            // Protagonist, antagonist, etc.
-	SpeechPattern   string            `json:"speech_pattern"`  // Dialect, formality, quirks
+	Role            string            `json:"role"`           // Protagonist, antagonist, etc.
+	SpeechPattern   string            `json:"speech_pattern"` // Dialect, formality, quirks
 	KeyTraits       []string          `json:"key_traits"`
 	NameTranslation map[string]string `json:"name_translation"` // How name should be handled per language
 }
@@ -67,31 +67,31 @@ type CulturalReference struct {
 
 // ChapterAnalysis contains analysis for a specific chapter/section
 type ChapterAnalysis struct {
-	ChapterID   string   `json:"chapter_id"`
-	ChapterNum  int      `json:"chapter_num"`
-	Title       string   `json:"title"`
-	Summary     string   `json:"summary"`
-	KeyPoints   []string `json:"key_points"`
-	Caveats     []string `json:"caveats"`     // Translation warnings
-	Tone        string   `json:"tone"`        // Chapter-specific tone
-	Complexity  string   `json:"complexity"`  // Simple, moderate, complex
-	SpecialNotes string  `json:"special_notes"` // Any other important notes
+	ChapterID    string   `json:"chapter_id"`
+	ChapterNum   int      `json:"chapter_num"`
+	Title        string   `json:"title"`
+	Summary      string   `json:"summary"`
+	KeyPoints    []string `json:"key_points"`
+	Caveats      []string `json:"caveats"`       // Translation warnings
+	Tone         string   `json:"tone"`          // Chapter-specific tone
+	Complexity   string   `json:"complexity"`    // Simple, moderate, complex
+	SpecialNotes string   `json:"special_notes"` // Any other important notes
 }
 
 // PreparationPass represents a single analysis pass
 type PreparationPass struct {
-	PassNumber int              `json:"pass_number"`
-	Provider   string           `json:"provider"`
-	Model      string           `json:"model"`
-	Analysis   ContentAnalysis  `json:"analysis"`
-	Duration   time.Duration    `json:"duration"`
-	TokensUsed int              `json:"tokens_used"`
+	PassNumber int             `json:"pass_number"`
+	Provider   string          `json:"provider"`
+	Model      string          `json:"model"`
+	Analysis   ContentAnalysis `json:"analysis"`
+	Duration   time.Duration   `json:"duration"`
+	TokensUsed int             `json:"tokens_used"`
 }
 
 // PreparationResult represents the final preparation output
 type PreparationResult struct {
-	SourceLanguage string            `json:"source_language"`
-	TargetLanguage string            `json:"target_language"`
+	SourceLanguage string `json:"source_language"`
+	TargetLanguage string `json:"target_language"`
 
 	// Multiple passes of analysis
 	Passes []PreparationPass `json:"passes"`
@@ -100,27 +100,27 @@ type PreparationResult struct {
 	FinalAnalysis ContentAnalysis `json:"final_analysis"`
 
 	// Statistics
-	TotalDuration  time.Duration `json:"total_duration"`
-	TotalTokens    int           `json:"total_tokens"`
-	PassCount      int           `json:"pass_count"`
+	TotalDuration time.Duration `json:"total_duration"`
+	TotalTokens   int           `json:"total_tokens"`
+	PassCount     int           `json:"pass_count"`
 
 	// Meta
-	StartedAt  time.Time `json:"started_at"`
+	StartedAt   time.Time `json:"started_at"`
 	CompletedAt time.Time `json:"completed_at"`
 }
 
 // PreparationConfig configures the preparation phase
 type PreparationConfig struct {
 	// Multi-pass configuration
-	PassCount      int      `json:"pass_count"`       // Number of analysis passes
-	Providers      []string `json:"providers"`        // LLM providers to use
+	PassCount int      `json:"pass_count"` // Number of analysis passes
+	Providers []string `json:"providers"`  // LLM providers to use
 
 	// Analysis focus
-	AnalyzeContentType  bool `json:"analyze_content_type"`
-	AnalyzeCharacters   bool `json:"analyze_characters"`
-	AnalyzeTerminology  bool `json:"analyze_terminology"`
-	AnalyzeCulture      bool `json:"analyze_culture"`
-	AnalyzeChapters     bool `json:"analyze_chapters"`
+	AnalyzeContentType bool `json:"analyze_content_type"`
+	AnalyzeCharacters  bool `json:"analyze_characters"`
+	AnalyzeTerminology bool `json:"analyze_terminology"`
+	AnalyzeCulture     bool `json:"analyze_culture"`
+	AnalyzeChapters    bool `json:"analyze_chapters"`
 
 	// Depth control
 	DetailLevel string `json:"detail_level"` // Basic, standard, comprehensive
@@ -128,7 +128,7 @@ type PreparationConfig struct {
 	// Languages
 	SourceLanguage string `json:"source_language"`
 	TargetLanguage string `json:"target_language"`
-	
+
 	// API configuration
-	APIKey        string `json:"api_key"`        // API key for LLM providers
+	APIKey string `json:"api_key"` // API key for LLM providers
 }

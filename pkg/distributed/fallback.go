@@ -305,7 +305,7 @@ func (fm *FallbackManager) recordSuccess(componentID string) {
 		}
 		fm.failureCounts[componentID] = tracker
 	}
-	
+
 	tracker.mu.Lock()
 	tracker.TotalRequests++
 	tracker.mu.Unlock()
@@ -450,28 +450,25 @@ func (fm *FallbackManager) monitorFailures() {
 	ticker := time.NewTicker(fm.config.RecoveryCheckInterval)
 	defer ticker.Stop()
 
-	for {
-		select {
-		case <-ticker.C:
-			fm.mu.Lock()
+	for range ticker.C {
+		fm.mu.Lock()
 
-			// Check if we should exit degraded mode
-			if fm.degradedMode {
-				shouldExit := true
-				for componentID := range fm.failureCounts {
-					if fm.getFailureRate(componentID) >= fm.config.DegradationThreshold {
-						shouldExit = false
-						break
-					}
-				}
-
-				if shouldExit {
-					fm.exitDegradedMode()
+		// Check if we should exit degraded mode
+		if fm.degradedMode {
+			shouldExit := true
+			for componentID := range fm.failureCounts {
+				if fm.getFailureRate(componentID) >= fm.config.DegradationThreshold {
+					shouldExit = false
+					break
 				}
 			}
 
-			fm.mu.Unlock()
+			if shouldExit {
+				fm.exitDegradedMode()
+			}
 		}
+
+		fm.mu.Unlock()
 	}
 }
 
@@ -480,30 +477,27 @@ func (fm *FallbackManager) monitorRecovery() {
 	ticker := time.NewTicker(fm.config.RecoveryCheckInterval)
 	defer ticker.Stop()
 
-	for {
-		select {
-		case <-ticker.C:
-			fm.mu.Lock()
+	for range ticker.C {
+		fm.mu.Lock()
 
-			now := time.Now()
-			for componentID, tracker := range fm.recoveryState {
-				tracker.mu.Lock()
+		now := time.Now()
+		for componentID, tracker := range fm.recoveryState {
+			tracker.mu.Lock()
 
-				// Reset recovery state if no recent successes
-				if tracker.InRecovery && now.Sub(tracker.LastSuccess) > fm.config.RecoveryWindow {
-					tracker.ConsecutiveSuccesses = 0
-					tracker.InRecovery = false
+			// Reset recovery state if no recent successes
+			if tracker.InRecovery && now.Sub(tracker.LastSuccess) > fm.config.RecoveryWindow {
+				tracker.ConsecutiveSuccesses = 0
+				tracker.InRecovery = false
 
-					fm.logger.Info("Recovery timeout expired", map[string]interface{}{
-						"component_id": componentID,
-					})
-				}
-
-				tracker.mu.Unlock()
+				fm.logger.Info("Recovery timeout expired", map[string]interface{}{
+					"component_id": componentID,
+				})
 			}
 
-			fm.mu.Unlock()
+			tracker.mu.Unlock()
 		}
+
+		fm.mu.Unlock()
 	}
 }
 

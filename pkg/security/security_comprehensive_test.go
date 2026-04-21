@@ -14,7 +14,7 @@ func TestNewAuthService(t *testing.T) {
 	// Test valid creation
 	jwtSecret := "this-is-a-valid-secret-key-for-testing"
 	tokenTTL := 24 * time.Hour
-	
+
 	auth := NewAuthService(jwtSecret, tokenTTL)
 	require.NotNil(t, auth)
 	assert.Equal(t, []byte(jwtSecret), auth.jwtSecret)
@@ -29,7 +29,7 @@ func TestNewAuthService(t *testing.T) {
 // TestAuthService_GenerateToken tests token generation
 func TestAuthService_GenerateToken(t *testing.T) {
 	auth := NewAuthService("test-secret-key-16-chars", time.Hour)
-	
+
 	// Test successful token generation
 	token, err := auth.GenerateToken("user123", "testuser", []string{"user", "admin"})
 	require.NoError(t, err)
@@ -61,7 +61,7 @@ func TestAuthService_GenerateToken(t *testing.T) {
 // TestAuthService_ValidateToken tests token validation
 func TestAuthService_ValidateToken(t *testing.T) {
 	auth := NewAuthService("test-secret-key-16-chars", time.Hour)
-	
+
 	// Generate a valid token
 	token, err := auth.GenerateToken("user123", "testuser", []string{"user", "admin"})
 	require.NoError(t, err)
@@ -88,7 +88,7 @@ func TestAuthService_ValidateToken(t *testing.T) {
 	otherAuth := NewAuthService("different-secret-key-16", time.Hour)
 	token2, err := otherAuth.GenerateToken("user456", "otheruser", []string{"user"})
 	require.NoError(t, err)
-	
+
 	_, err = auth.ValidateToken(token2)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "signature is invalid")
@@ -97,7 +97,7 @@ func TestAuthService_ValidateToken(t *testing.T) {
 	authExpired := NewAuthService("test-secret-key-16-chars", 1*time.Millisecond)
 	expiredToken, err := authExpired.GenerateToken("user123", "testuser", []string{"user"})
 	require.NoError(t, err)
-	
+
 	time.Sleep(10 * time.Millisecond) // Wait for token to expire
 	_, err = authExpired.ValidateToken(expiredToken)
 	assert.Error(t, err)
@@ -107,20 +107,20 @@ func TestAuthService_ValidateToken(t *testing.T) {
 // TestAuthService_RefreshToken tests token refresh
 func TestAuthService_RefreshToken(t *testing.T) {
 	auth := NewAuthService("test-secret-key-16-chars", time.Hour)
-	
+
 	// Generate original token
 	originalToken, err := auth.GenerateToken("user123", "testuser", []string{"user", "admin"})
 	require.NoError(t, err)
-	
+
 	// Validate original token to get claims
 	originalClaims, err := auth.ValidateToken(originalToken)
 	require.NoError(t, err)
-	
+
 	// Test successful refresh
 	newToken, err := auth.RefreshToken(originalClaims)
 	require.NoError(t, err)
 	assert.NotEmpty(t, newToken)
-	
+
 	// Validate new token
 	newClaims, err := auth.ValidateToken(newToken)
 	require.NoError(t, err)
@@ -192,14 +192,14 @@ func TestAPIKeyStore(t *testing.T) {
 // TestAPIKeyStore_Expiration tests key expiration
 func TestAPIKeyStore_Expiration(t *testing.T) {
 	store := NewAPIKeyStore()
-	
+
 	apiKey := "test-expiring-key"
 	expiredTime := time.Now().Add(-1 * time.Hour) // Already expired
 	info := APIKeyInfo{
 		Key:       apiKey,
 		UserID:    "user123",
 		Name:      "Expired Key",
-		CreatedAt:  time.Now(),
+		CreatedAt: time.Now(),
 		ExpiresAt: &expiredTime,
 		Active:    true,
 	}
@@ -216,7 +216,7 @@ func TestAPIKeyStore_Expiration(t *testing.T) {
 		Key:       nonExpiringKey,
 		UserID:    "user456",
 		Name:      "Non-Expiring Key",
-		CreatedAt:  time.Now(),
+		CreatedAt: time.Now(),
 		ExpiresAt: nil, // No expiration
 		Active:    true,
 	}
@@ -229,13 +229,13 @@ func TestAPIKeyStore_Expiration(t *testing.T) {
 // TestAPIKeyStore_InactiveKeys tests inactive key validation
 func TestAPIKeyStore_InactiveKeys(t *testing.T) {
 	store := NewAPIKeyStore()
-	
+
 	apiKey := "test-inactive-key"
 	info := APIKeyInfo{
 		Key:       apiKey,
 		UserID:    "user123",
 		Name:      "Inactive Key",
-		CreatedAt:  time.Now(),
+		CreatedAt: time.Now(),
 		Active:    false, // Inactive from creation
 	}
 
@@ -248,7 +248,7 @@ func TestAPIKeyStore_InactiveKeys(t *testing.T) {
 	// Test activating key
 	info.Active = true
 	store.AddKey(apiKey, info)
-	
+
 	retrievedInfo, valid := store.ValidateKey(apiKey)
 	assert.True(t, valid)
 	assert.True(t, retrievedInfo.Active)
@@ -300,7 +300,7 @@ func TestAPIKeyInfo(t *testing.T) {
 // Benchmark tests for performance
 func BenchmarkAuthService_GenerateToken(b *testing.B) {
 	auth := NewAuthService("test-secret-key-16-chars", time.Hour)
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = auth.GenerateToken("user123", "testuser", []string{"user", "admin"})
@@ -310,7 +310,7 @@ func BenchmarkAuthService_GenerateToken(b *testing.B) {
 func BenchmarkAuthService_ValidateToken(b *testing.B) {
 	auth := NewAuthService("test-secret-key-16-chars", time.Hour)
 	token, _ := auth.GenerateToken("user123", "testuser", []string{"user", "admin"})
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = auth.ValidateToken(token)
@@ -331,11 +331,11 @@ func BenchmarkAPIKeyStore_ValidateKey(b *testing.B) {
 		Key:       apiKey,
 		UserID:    "user123",
 		Name:      "Benchmark Key",
-		CreatedAt:  time.Now(),
+		CreatedAt: time.Now(),
 		Active:    true,
 	}
 	store.AddKey(apiKey, info)
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = store.ValidateKey(apiKey)

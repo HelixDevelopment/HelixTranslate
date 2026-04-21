@@ -188,7 +188,7 @@ func TestPreparationAwareTranslator_TranslateBook_WithPreparation(t *testing.T) 
 		PassCount:      1,
 		SourceLanguage: "en",
 		TargetLanguage: "es",
-		Providers:      []string{"openai"},  // Use a valid provider
+		Providers:      []string{"openai"}, // Use a valid provider
 		APIKey:         "test-key-for-testing",
 	}
 

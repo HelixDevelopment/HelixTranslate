@@ -58,7 +58,7 @@ func TestPreparationWorkflow(t *testing.T) {
 		It has multiple lines.
 		Some lines have leading/trailing spaces.   
 		There are also  multiple   spaces between words.`
-		
+
 		inputFile := filepath.Join(tempDir, "input.txt")
 		err := os.WriteFile(inputFile, []byte(inputText), 0644)
 		if err != nil {
@@ -118,7 +118,7 @@ func TestPreparationWorkflow(t *testing.T) {
 				// Simple detection logic (would be more sophisticated in real implementation)
 				detected := "text" // default
 				contentStr := string(content)
-				
+
 				if contentStr[0] == '<' {
 					detected = "html"
 				} else if contentStr[0] == '#' {
@@ -193,7 +193,7 @@ func TestSegmentation(t *testing.T) {
 		// Test sentence segmentation
 		inputContent := `This is the first sentence. This is the second sentence! 
 		Is this the third sentence? Yes, it is.`
-		
+
 		inputFile := filepath.Join(tempDir, "sentences.txt")
 		err := os.WriteFile(inputFile, []byte(inputContent), 0644)
 		if err != nil {
@@ -209,7 +209,7 @@ func TestSegmentation(t *testing.T) {
 		contentStr := string(content)
 		sentenceCount := 0
 		sentenceEnds := []string{". ", "! ", "? ", ".\n", "!\n", "?\n"}
-		
+
 		for _, ending := range sentenceEnds {
 			sentenceCount += strings.Count(contentStr, ending)
 		}
@@ -229,7 +229,7 @@ Second paragraph after empty line.
 Third paragraph.
 
 Final paragraph.`
-		
+
 		inputFile := filepath.Join(tempDir, "paragraphs.txt")
 		err := os.WriteFile(inputFile, []byte(inputContent), 0644)
 		if err != nil {
@@ -290,7 +290,7 @@ func TestLanguageDetection(t *testing.T) {
 				// Simple language detection based on character sets
 				content := tc.content
 				detected := "en" // default
-				
+
 				// Check for Serbian-specific characters first (more specific)
 				if strings.ContainsAny(content, "ћђЋЂ") {
 					// These characters are unique to Serbian
@@ -321,7 +321,7 @@ func TestPreparationOptions(t *testing.T) {
 		// Test different split options
 		testContent := "Sentence one. Sentence two. Sentence three. Sentence four."
 		splitOptions := []string{"sentence", "paragraph", "word", "character"}
-		
+
 		for _, option := range splitOptions {
 			t.Run(option, func(t *testing.T) {
 				inputFile := filepath.Join(tempDir, "split_"+option+".txt")
@@ -348,7 +348,7 @@ func TestPreparationOptions(t *testing.T) {
 	t.Run("FormatOptions", func(t *testing.T) {
 		// Test different format options
 		formatOptions := []string{"txt", "json", "xml", "csv"}
-		
+
 		for _, format := range formatOptions {
 			t.Run(format, func(t *testing.T) {
 				// Test format option validation
@@ -395,7 +395,7 @@ func TestErrorHandling(t *testing.T) {
 		// Test handling of large files
 		largeFile := filepath.Join(tempDir, "large.txt")
 		largeContent := strings.Repeat("This is a test sentence. ", 10000)
-		
+
 		err := os.WriteFile(largeFile, []byte(largeContent), 0644)
 		if err != nil {
 			t.Fatalf("Failed to create large file: %v", err)

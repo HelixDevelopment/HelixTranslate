@@ -130,7 +130,7 @@ func (bp *BatchProcessor) processString(ctx context.Context) ([]ProcessingResult
 		}
 	} else {
 		// Print to stdout
-		fmt.Println(translated)
+		fmt.Println(translated) //nolint:forbidigo
 	}
 
 	return []ProcessingResult{{
@@ -182,7 +182,7 @@ func (bp *BatchProcessor) processStdin(ctx context.Context) ([]ProcessingResult,
 			}}, err
 		}
 	} else {
-		fmt.Println(translated)
+		fmt.Println(translated) //nolint:forbidigo
 	}
 
 	return []ProcessingResult{{

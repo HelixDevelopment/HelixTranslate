@@ -13,21 +13,21 @@ import (
 func main() {
 	// Initialize SSH worker
 	config := sshworker.SSHWorkerConfig{
-		Host:       "thinker.local",
-		Port:       22,
-		Username:   "milosvasic",
-		Password:   "WhiteSnake8587",
-		RemoteDir:  "/tmp/translate-ssh",
+		Host:              "thinker.local",
+		Port:              22,
+		Username:          "milosvasic",
+		Password:          "WhiteSnake8587",
+		RemoteDir:         "/tmp/translate-ssh",
 		ConnectionTimeout: 30 * time.Second,
-		CommandTimeout: 120 * time.Second, // Longer timeout for translation
+		CommandTimeout:    120 * time.Second, // Longer timeout for translation
 	}
 
 	loggerConfig := logger.LoggerConfig{
-		Level: logger.INFO,
+		Level:  logger.INFO,
 		Format: logger.FORMAT_TEXT,
 	}
 	log := logger.NewLogger(loggerConfig)
-	
+
 	worker, err := sshworker.NewSSHWorker(config, log)
 	if err != nil {
 		fmt.Printf("Failed to create SSH worker: %v\n", err)
@@ -35,7 +35,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	
+
 	// Connect to worker
 	if err := worker.Connect(ctx); err != nil {
 		fmt.Printf("Failed to connect: %v\n", err)
@@ -46,7 +46,7 @@ func main() {
 	// Fix permissions first
 	fmt.Println("Fixing llama.cpp permissions...")
 	chmodCmd := "chmod +x /home/milosvasic/llama.cpp/build/tools/main"
-	result, err := worker.ExecuteCommand(ctx, chmodCmd)
+	_, err = worker.ExecuteCommand(ctx, chmodCmd)
 	if err != nil {
 		fmt.Printf("Failed to chmod: %v\n", err)
 		os.Exit(1)
@@ -68,7 +68,7 @@ This is a test paragraph in Russian. Переведите меня на серб
 ## Section 2
 
 Here is another paragraph with Russian text: Я хочу перевести этот текст на сербский язык.`
-	
+
 	fmt.Println("Uploading test input file...")
 	if err := worker.UploadData(ctx, []byte(testInput), "/tmp/translate-ssh/test_input.md"); err != nil {
 		fmt.Printf("Failed to upload test input: %v\n", err)
@@ -78,7 +78,7 @@ Here is another paragraph with Russian text: Я хочу перевести эт
 	// Run translation
 	fmt.Println("Running translation...")
 	translateCmd := "cd /tmp/translate-ssh && python3 translate_llm_only.py test_input.md test_output.md"
-	result, err = worker.ExecuteCommand(ctx, translateCmd)
+	result, err := worker.ExecuteCommand(ctx, translateCmd)
 	if err != nil {
 		fmt.Printf("Failed to run translation: %v\n", err)
 		os.Exit(1)

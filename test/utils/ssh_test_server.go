@@ -239,12 +239,12 @@ func (s *TestSSHServer) handleExec(channel ssh.Channel, req *ssh.Request) {
 
 	// Send response
 	req.Reply(true, nil)
-	
+
 	// Write output
 	channel.Write([]byte(output))
-	
+
 	// Send exit status
-	channel.SendRequest("exit-status", false, ssh.Marshal(struct{ Status uint32 }{ Status: 0 }))
+	channel.SendRequest("exit-status", false, ssh.Marshal(struct{ Status uint32 }{Status: 0}))
 	channel.Close()
 }
 
@@ -252,13 +252,13 @@ func (s *TestSSHServer) handleExec(channel ssh.Channel, req *ssh.Request) {
 func (s *TestSSHServer) handleShell(channel ssh.Channel) {
 	// Simple shell simulation
 	buffer := make([]byte, 1024)
-	
+
 	for {
 		n, err := channel.Read(buffer)
 		if err != nil {
 			break
 		}
-		
+
 		// Echo back input with prefix
 		response := fmt.Sprintf("shell: %s", string(buffer[:n]))
 		channel.Write([]byte(response))
@@ -295,7 +295,7 @@ func (s *TestSSHServer) SSHClientConfig(username string) *ssh.ClientConfig {
 // ExecuteCommand executes a command on the test server
 func (s *TestSSHServer) ExecuteCommand(command string) (string, error) {
 	config := s.SSHClientConfig("testuser")
-	
+
 	conn, err := ssh.Dial("tcp", s.GetAddress(), config)
 	if err != nil {
 		return "", err
@@ -333,7 +333,7 @@ func (s *TestSSHServer) GetPort() int {
 func (s *TestSSHServer) GetCommands() []SSHCommand {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	
+
 	commands := make([]SSHCommand, len(s.commands))
 	copy(commands, s.commands)
 	return commands

@@ -16,10 +16,10 @@ func TestTranslationNotes_AddNote(t *testing.T) {
 	notes := NewTranslationNotes()
 
 	tests := []struct {
-		name     string
-		noteType NoteType
-		content  string
-		metadata map[string]interface{}
+		name        string
+		noteType    NoteType
+		content     string
+		metadata    map[string]interface{}
 		expectError bool
 	}{
 		{
@@ -32,24 +32,24 @@ func TestTranslationNotes_AddNote(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name:     "empty content",
-			noteType: NoteTypeStyle,
-			content:  "",
-			metadata: map[string]interface{}{},
+			name:        "empty content",
+			noteType:    NoteTypeStyle,
+			content:     "",
+			metadata:    map[string]interface{}{},
 			expectError: true,
 		},
 		{
-			name:     "invalid note type",
-			noteType: NoteType("invalid"),
-			content:  "Test note",
-			metadata: map[string]interface{}{},
+			name:        "invalid note type",
+			noteType:    NoteType("invalid"),
+			content:     "Test note",
+			metadata:    map[string]interface{}{},
 			expectError: true,
 		},
 		{
-			name:     "nil metadata",
-			noteType: NoteTypeStyle,
-			content:  "Test note with nil metadata",
-			metadata: nil,
+			name:        "nil metadata",
+			noteType:    NoteTypeStyle,
+			content:     "Test note with nil metadata",
+			metadata:    nil,
 			expectError: false,
 		},
 	}
@@ -94,41 +94,41 @@ func TestTranslationNotes_GetNotesByType(t *testing.T) {
 	anotherStyleNoteID, _ := notes.AddNote(NoteTypeStyle, "Another style issue", map[string]interface{}{"severity": "medium"})
 
 	tests := []struct {
-		name         string
-		noteType     NoteType
+		name          string
+		noteType      NoteType
 		expectedCount int
-		expectedIDs  []string
+		expectedIDs   []string
 	}{
 		{
-			name:         "style notes",
-			noteType:     NoteTypeStyle,
+			name:          "style notes",
+			noteType:      NoteTypeStyle,
 			expectedCount: 2,
-			expectedIDs:  []string{styleNoteID, anotherStyleNoteID},
+			expectedIDs:   []string{styleNoteID, anotherStyleNoteID},
 		},
 		{
-			name:         "grammar notes",
-			noteType:     NoteTypeGrammar,
+			name:          "grammar notes",
+			noteType:      NoteTypeGrammar,
 			expectedCount: 1,
-			expectedIDs:  []string{grammarNoteID},
+			expectedIDs:   []string{grammarNoteID},
 		},
 		{
-			name:         "terminology notes",
-			noteType:     NoteTypeTerminology,
+			name:          "terminology notes",
+			noteType:      NoteTypeTerminology,
 			expectedCount: 1,
-			expectedIDs:  []string{terminologyNoteID},
+			expectedIDs:   []string{terminologyNoteID},
 		},
 		{
-			name:         "missing type",
-			noteType:     NoteType("missing"),
+			name:          "missing type",
+			noteType:      NoteType("missing"),
 			expectedCount: 0,
-			expectedIDs:  []string{},
+			expectedIDs:   []string{},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			foundNotes := notes.GetNotesByType(tt.noteType)
-			
+
 			if len(foundNotes) != tt.expectedCount {
 				t.Errorf("Expected %d notes, got %d", tt.expectedCount, len(foundNotes))
 			}
@@ -203,7 +203,7 @@ func TestTranslationNotes_UpdateNote(t *testing.T) {
 					if note.Content != tt.newContent {
 						t.Errorf("Expected content %s, got %s", tt.newContent, note.Content)
 					}
-					
+
 					if tt.newMetadata != nil {
 						if val, ok := note.Metadata["updated"]; !ok || val != "value" {
 							t.Error("Updated metadata not found")
@@ -257,9 +257,9 @@ func TestTranslationNotes_FilterNotes(t *testing.T) {
 	_, _ = notes.AddNote(NoteTypeTerminology, "High priority", map[string]interface{}{"severity": "high", "category": "terminology"})
 
 	tests := []struct {
-		name           string
-		filter         NoteFilter
-		expectedCount  int
+		name          string
+		filter        NoteFilter
+		expectedCount int
 	}{
 		{
 			name: "filter by severity high",
@@ -278,7 +278,7 @@ func TestTranslationNotes_FilterNotes(t *testing.T) {
 		{
 			name: "filter by type and severity",
 			filter: NoteFilter{
-				Type: func() *NoteType { t := NoteTypeStyle; return &t }(),
+				Type:     func() *NoteType { t := NoteTypeStyle; return &t }(),
 				Severity: stringPtr("high"),
 			},
 			expectedCount: 1,
@@ -286,15 +286,15 @@ func TestTranslationNotes_FilterNotes(t *testing.T) {
 		{
 			name: "filter by multiple criteria",
 			filter: NoteFilter{
-				Type: func() *NoteType { t := NoteTypeStyle; return &t }(),
+				Type:     func() *NoteType { t := NoteTypeStyle; return &t }(),
 				Severity: stringPtr("low"),
 				Category: stringPtr("style"),
 			},
 			expectedCount: 1,
 		},
 		{
-			name: "no filter",
-			filter: NoteFilter{},
+			name:          "no filter",
+			filter:        NoteFilter{},
 			expectedCount: 4,
 		},
 	}
@@ -302,7 +302,7 @@ func TestTranslationNotes_FilterNotes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			filteredNotes := notes.FilterNotes(tt.filter)
-			
+
 			if len(filteredNotes) != tt.expectedCount {
 				t.Errorf("Expected %d notes, got %d", tt.expectedCount, len(filteredNotes))
 			}
@@ -344,7 +344,7 @@ func TestTranslationNotes_GetStatistics(t *testing.T) {
 
 	expectedCounts := map[NoteType]int{
 		NoteTypeStyle:       2,
-		NoteTypeGrammar:      1,
+		NoteTypeGrammar:     1,
 		NoteTypeTerminology: 1,
 	}
 
@@ -479,13 +479,13 @@ func TestTranslationNotes_NoteTypes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			notes := NewTranslationNotes()
-			
+
 			_, err := notes.AddNote(tt.noteType, "Test content", map[string]interface{}{})
-			
+
 			if tt.valid && err != nil {
 				t.Errorf("Expected no error for valid note type %v, got: %v", tt.noteType, err)
 			}
-			
+
 			if !tt.valid && err == nil {
 				t.Errorf("Expected error for invalid note type %v", tt.noteType)
 			}

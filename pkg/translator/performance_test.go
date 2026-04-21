@@ -71,8 +71,8 @@ func BenchmarkTranslation(b *testing.B) {
 	}
 
 	config := translator.TranslationConfig{
-		Provider:       "deepseek",
-		Model:          "deepseek-chat",
+		Provider:   "deepseek",
+		Model:      "deepseek-chat",
 		SourceLang: "ru",
 		TargetLang: "sr",
 	}
@@ -101,7 +101,7 @@ func TestStressTranslation(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping stress test in short mode")
 	}
-	
+
 	t.Skip("Skipping stress tests that require API keys")
 
 	apiKey := os.Getenv("DEEPSEEK_API_KEY")
@@ -110,8 +110,8 @@ func TestStressTranslation(t *testing.T) {
 	}
 
 	config := translator.TranslationConfig{
-		Provider:       "deepseek",
-		Model:          "deepseek-chat",
+		Provider:   "deepseek",
+		Model:      "deepseek-chat",
 		SourceLang: "ru",
 		TargetLang: "sr",
 	}
@@ -174,7 +174,7 @@ func TestLargeTextTranslation(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping large text test in short mode")
 	}
-	
+
 	t.Skip("Skipping large text tests that require API keys")
 
 	apiKey := os.Getenv("DEEPSEEK_API_KEY")
@@ -183,8 +183,8 @@ func TestLargeTextTranslation(t *testing.T) {
 	}
 
 	config := translator.TranslationConfig{
-		Provider:       "deepseek",
-		Model:          "deepseek-chat",
+		Provider:   "deepseek",
+		Model:      "deepseek-chat",
 		SourceLang: "ru",
 		TargetLang: "sr",
 	}
@@ -263,7 +263,7 @@ func TestResponseTime(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping response time test in short mode")
 	}
-	
+
 	t.Skip("Skipping response time tests that require API keys")
 
 	apiKey := os.Getenv("DEEPSEEK_API_KEY")
@@ -272,8 +272,8 @@ func TestResponseTime(t *testing.T) {
 	}
 
 	config := translator.TranslationConfig{
-		Provider:       "deepseek",
-		Model:          "deepseek-chat",
+		Provider:   "deepseek",
+		Model:      "deepseek-chat",
 		SourceLang: "ru",
 		TargetLang: "sr",
 	}

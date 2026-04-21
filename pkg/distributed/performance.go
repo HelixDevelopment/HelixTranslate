@@ -215,24 +215,21 @@ func (cp *ConnectionPool) cleanup() {
 	ticker := time.NewTicker(cp.config.CacheCleanupInterval)
 	defer ticker.Stop()
 
-	for {
-		select {
-		case <-ticker.C:
-			cp.mu.Lock()
-			now := time.Now()
+	for range ticker.C {
+		cp.mu.Lock()
+		now := time.Now()
 
-			for key, entry := range cp.connections {
-				// Remove connections that are:
-				// 1. Not in use and idle for too long
-				// 2. Exceeded maximum lifetime
-				if (!entry.InUse && now.Sub(entry.LastUsed) > cp.config.ConnectionIdleTimeout) ||
-					now.Sub(entry.CreatedAt) > cp.config.ConnectionMaxLifetime {
-					entry.Connection.Close()
-					delete(cp.connections, key)
-				}
+		for key, entry := range cp.connections {
+			// Remove connections that are:
+			// 1. Not in use and idle for too long
+			// 2. Exceeded maximum lifetime
+			if (!entry.InUse && now.Sub(entry.LastUsed) > cp.config.ConnectionIdleTimeout) ||
+				now.Sub(entry.CreatedAt) > cp.config.ConnectionMaxLifetime {
+				entry.Connection.Close()
+				delete(cp.connections, key)
 			}
-			cp.mu.Unlock()
 		}
+		cp.mu.Unlock()
 	}
 }
 
@@ -361,13 +358,10 @@ func (rc *ResultCache) cleanup(interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
-	for {
-		select {
-		case <-ticker.C:
-			rc.mu.Lock()
-			rc.removeExpired()
-			rc.mu.Unlock()
-		}
+	for range ticker.C {
+		rc.mu.Lock()
+		rc.removeExpired()
+		rc.mu.Unlock()
 	}
 }
 

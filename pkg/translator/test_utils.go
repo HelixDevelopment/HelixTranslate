@@ -3,9 +3,9 @@ package translator
 import (
 	"context"
 
-	"github.com/stretchr/testify/mock"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/language"
+	"github.com/stretchr/testify/mock"
 )
 
 // MockTranslator is a mock implementation of the Translator interface

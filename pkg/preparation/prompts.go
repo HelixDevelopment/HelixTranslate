@@ -8,9 +8,9 @@ import (
 
 // PreparationPromptBuilder builds prompts for content analysis
 type PreparationPromptBuilder struct {
-	sourceLang  string
-	targetLang  string
-	passNumber  int
+	sourceLang       string
+	targetLang       string
+	passNumber       int
 	previousAnalysis *ContentAnalysis
 }
 
@@ -310,7 +310,7 @@ func truncateContent(content string, maxChars int) string {
 		// If nothing is left, just return the truncation indicator
 		return "[... content truncated for analysis ...]"
 	}
-	
+
 	// Only add newlines if content doesn't already end with them
 	if strings.HasSuffix(truncatedContent, "\n\n") {
 		return truncatedContent + "[... content truncated for analysis ...]"

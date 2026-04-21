@@ -234,10 +234,10 @@ func TestFilterByRAM(t *testing.T) {
 	registry := NewRegistry()
 
 	tests := []struct {
-		name           string
-		maxRAM         uint64
-		minExpected    int
-		maxExpected    int
+		name        string
+		maxRAM      uint64
+		minExpected int
+		maxExpected int
 	}{
 		{
 			name:        "Low RAM (4GB)",
@@ -299,7 +299,7 @@ func TestFindBestModel(t *testing.T) {
 		name          string
 		maxRAM        uint64
 		languages     []string
-		hasGPU    bool
+		hasGPU        bool
 		expectError   bool
 		expectedModel string // ID of expected best model (or empty if any is ok)
 	}{
@@ -307,7 +307,7 @@ func TestFindBestModel(t *testing.T) {
 			name:          "Russian-Serbian, 16GB, GPU",
 			maxRAM:        16 * 1024 * 1024 * 1024,
 			languages:     []string{"ru", "sr"},
-			hasGPU:    false,
+			hasGPU:        false,
 			expectError:   false,
 			expectedModel: "hunyuan-mt-7b-q8", // Best translation model for this case
 		},
@@ -315,7 +315,7 @@ func TestFindBestModel(t *testing.T) {
 			name:        "Low RAM (4GB)",
 			maxRAM:      4 * 1024 * 1024 * 1024,
 			languages:   []string{"en"},
-			hasGPU:  false,
+			hasGPU:      false,
 			expectError: false,
 			// Should select phi-3-mini or similar small model
 		},
@@ -323,7 +323,7 @@ func TestFindBestModel(t *testing.T) {
 			name:        "High RAM (32GB)",
 			maxRAM:      32 * 1024 * 1024 * 1024,
 			languages:   []string{"ru", "sr"},
-			hasGPU:  false,
+			hasGPU:      false,
 			expectError: false,
 			// Should select a larger, higher-quality model
 		},
@@ -331,7 +331,7 @@ func TestFindBestModel(t *testing.T) {
 			name:        "Insufficient RAM (1GB)",
 			maxRAM:      1 * 1024 * 1024 * 1024,
 			languages:   []string{"en"},
-			hasGPU:  false,
+			hasGPU:      false,
 			expectError: true, // No model fits
 		},
 	}

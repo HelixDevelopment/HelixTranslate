@@ -2,14 +2,14 @@ package main
 
 import (
 	"context"
-	"digital.vasic.translator/internal/config"
 	"digital.vasic.translator/internal/cache"
+	"digital.vasic.translator/internal/config"
+	"digital.vasic.translator/pkg/api"
+	"digital.vasic.translator/pkg/coordination"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/models"
 	"digital.vasic.translator/pkg/security"
 	"digital.vasic.translator/pkg/websocket"
-	"digital.vasic.translator/pkg/api"
-	"digital.vasic.translator/pkg/coordination"
 	"encoding/json"
 	"flag"
 	"net/http"
@@ -68,9 +68,9 @@ func TestMainFunctionComprehensive(t *testing.T) {
 			assert.NotPanics(t, func() {
 				oldArgs := os.Args
 				defer func() { os.Args = oldArgs }()
-				
+
 				os.Args = append([]string{"server"}, tt.args...)
-				
+
 				defer func() {
 					if r := recover(); r != nil {
 						// Expected due to os.Exit
@@ -92,7 +92,7 @@ func TestHTTPServerSetup(t *testing.T) {
 	configFile := filepath.Join(tempDir, "test-config.json")
 	cfg := config.DefaultConfig()
 	cfg.Server.Host = "127.0.0.1"
-	cfg.Server.Port = 0 // Random port
+	cfg.Server.Port = 0            // Random port
 	cfg.Server.EnableHTTP3 = false // Use HTTP/2 for testing
 	cfg.Security.JWTSecret = "test-secret-key-16-chars"
 
@@ -111,7 +111,7 @@ func TestHTTPServerSetup(t *testing.T) {
 func TestServerComponents(t *testing.T) {
 	// Create test configuration for components
 	cfg := config.DefaultConfig()
-	
+
 	// Test event bus
 	eventBus := events.NewEventBus()
 	assert.NotNil(t, eventBus)
@@ -139,7 +139,7 @@ func TestServerComponents(t *testing.T) {
 	// Create router and register routes
 	router := gin.New()
 	router.Use(gin.Recovery())
-	
+
 	// Add CORS middleware (simplified for test)
 	router.Use(func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
@@ -184,7 +184,7 @@ func TestAPIHandler(t *testing.T) {
 	// Create router and register routes
 	router := gin.New()
 	router.Use(gin.Recovery())
-	
+
 	// Add CORS middleware (simplified for test)
 	router.Use(func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
@@ -219,7 +219,7 @@ func TestServerEndpoints(t *testing.T) {
 	// Create API handler and router
 	apiHandler := api.NewHandler(cfg, eventBus, translationCache, authService, wsHub, nil)
 	router := gin.New()
-	
+
 	// Add basic middleware for test
 	router.Use(func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
@@ -295,7 +295,7 @@ func TestMiddleware(t *testing.T) {
 	// Test CORS middleware
 	t.Run("CORS middleware", func(t *testing.T) {
 		router := gin.New()
-		
+
 		// Simple CORS middleware for test
 		router.Use(func(c *gin.Context) {
 			c.Header("Access-Control-Allow-Origin", "*")
@@ -319,7 +319,7 @@ func TestMiddleware(t *testing.T) {
 	// Test rate limiting middleware
 	t.Run("Rate limiting middleware", func(t *testing.T) {
 		router := gin.New()
-		
+
 		// Simple rate limiting for test
 		requestCount := 0
 		router.Use(func(c *gin.Context) {
@@ -341,7 +341,7 @@ func TestMiddleware(t *testing.T) {
 			req := httptest.NewRequest("GET", "/test", nil)
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
-			
+
 			if i < 5 {
 				assert.Equal(t, 200, w.Code, "Request %d should succeed", i)
 			} else {
@@ -384,8 +384,8 @@ func TestServerLifecycle(t *testing.T) {
 
 	// Create test server
 	server := &http.Server{
-		Addr:    "127.0.0.1:0", // Random port
-		Handler:  router,
+		Addr:         "127.0.0.1:0", // Random port
+		Handler:      router,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
@@ -430,11 +430,11 @@ func TestConfigManagement(t *testing.T) {
 	t.Run("Create default config", func(t *testing.T) {
 		configFile := filepath.Join(tempDir, "new-config.json")
 		cfg, err := loadOrCreateConfig(configFile)
-		
+
 		assert.NoError(t, err)
 		assert.NotNil(t, cfg)
 		assert.FileExists(t, configFile)
-		
+
 		// Check default values
 		assert.Equal(t, "0.0.0.0", cfg.Server.Host)
 		assert.Equal(t, 8443, cfg.Server.Port) // Default port is 8443, not 8080
@@ -442,15 +442,15 @@ func TestConfigManagement(t *testing.T) {
 
 	t.Run("Load existing config", func(t *testing.T) {
 		configFile := filepath.Join(tempDir, "existing-config.json")
-		
+
 		// Create custom config
 		cfg := config.DefaultConfig()
 		cfg.Server.Host = "127.0.0.1"
 		cfg.Server.Port = 9090
-		
+
 		err := config.SaveConfig(configFile, cfg)
 		require.NoError(t, err)
-		
+
 		// Load config
 		loadedCfg, err := loadOrCreateConfig(configFile)
 		assert.NoError(t, err)
@@ -460,16 +460,16 @@ func TestConfigManagement(t *testing.T) {
 
 	t.Run("Validate config", func(t *testing.T) {
 		cfg := config.DefaultConfig()
-		
+
 		// Default config has auth enabled but no JWT secret, so it should fail
 		err := cfg.Validate()
 		assert.Error(t, err) // Should fail due to missing JWT secret
-		
+
 		// Add a proper JWT secret
 		cfg.Security.JWTSecret = "this-is-a-valid-secret-key-16"
 		err = cfg.Validate()
 		assert.NoError(t, err)
-		
+
 		// Now test with empty JWT secret (should fail)
 		cfg.Security.JWTSecret = ""
 		err = cfg.Validate()
@@ -523,12 +523,12 @@ func TestWebSocketFunctionality(t *testing.T) {
 	t.Run("Hub creation and basic operations", func(t *testing.T) {
 		// Hub should be created successfully
 		assert.NotNil(t, wsHub)
-		
+
 		// Test event subscription
 		eventBus.Subscribe(events.EventTranslationProgress, func(event events.Event) {
 			// Handle progress event
 		})
-		
+
 		// Test event publishing
 		event := events.NewEvent(events.EventTranslationProgress, "test", map[string]interface{}{"test": "data"})
 		eventBus.Publish(event)
@@ -540,20 +540,20 @@ func TestDistributedFunctionality(t *testing.T) {
 	t.Run("Distributed mode disabled", func(t *testing.T) {
 		cfg := config.DefaultConfig()
 		cfg.Distributed.Enabled = false
-		
+
 		// When distributed mode is disabled, distributedManager should be nil
 		var distributedManager interface{}
 		if cfg.Distributed.Enabled {
 			t.Error("Distributed mode should be disabled")
 		}
-		
+
 		assert.Nil(t, distributedManager)
 	})
 
 	t.Run("Distributed mode enabled", func(t *testing.T) {
 		cfg := config.DefaultConfig()
 		cfg.Distributed.Enabled = true
-		
+
 		// When distributed mode is enabled, configuration should be valid
 		assert.True(t, cfg.Distributed.Enabled)
 		_ = cfg // Use cfg to avoid unused variable error
@@ -571,7 +571,7 @@ func TestServerHelperFunctions(t *testing.T) {
 			_ = startHTTP3Server
 		})
 	})
-	
+
 	t.Run("startHTTP2Server", func(t *testing.T) {
 		// Test that the function doesn't panic when called
 		assert.NotPanics(t, func() {
@@ -580,7 +580,7 @@ func TestServerHelperFunctions(t *testing.T) {
 			_ = startHTTP2Server
 		})
 	})
-	
+
 	t.Run("handleShutdown", func(t *testing.T) {
 		// Test that the function doesn't panic when called
 		assert.NotPanics(t, func() {
@@ -589,51 +589,51 @@ func TestServerHelperFunctions(t *testing.T) {
 			_ = handleShutdown
 		})
 	})
-	
+
 	t.Run("corsMiddleware", func(t *testing.T) {
 		// Test that the function exists
 		assert.NotPanics(t, func() {
 			_ = corsMiddleware
 		})
 	})
-	
+
 	t.Run("rateLimitMiddleware", func(t *testing.T) {
 		// Create a rate limiter
 		limiter := security.NewRateLimiter(10, 20) // 10 requests per second, burst of 20
-		
+
 		// Create a gin context with request
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Request = httptest.NewRequest("GET", "/", nil)
-		
+
 		// Create a test handler
 		next := func(c *gin.Context) {
 			c.JSON(200, gin.H{"status": "ok"})
 		}
-		
+
 		// Set up a simple gin router with the middleware
 		router := gin.New()
 		router.Use(rateLimitMiddleware(limiter))
 		router.GET("/", next)
-		
+
 		// Make a request through the router
 		router.ServeHTTP(w, c.Request)
-		
+
 		// Should get a successful response (not rate limited)
 		assert.Equal(t, 200, w.Code)
 	})
-	
+
 	t.Run("generateTLSCertificates", func(t *testing.T) {
 		// Create temporary directory for certificates
 		tempDir := t.TempDir()
 		originalDir, _ := os.Getwd()
 		defer os.Chdir(originalDir)
-		
+
 		// Change to temp directory and create certs dir
 		os.Chdir(tempDir)
 		err := os.MkdirAll("certs", 0755)
 		require.NoError(t, err)
-		
+
 		// Try to generate certificates
 		err = generateTLSCertificates()
 		if err != nil {
@@ -658,19 +658,19 @@ func TestHTTPServerFunctions(t *testing.T) {
 	t.Run("startHTTP2Server", func(t *testing.T) {
 		// Create test config
 		cfg := config.DefaultConfig()
-		cfg.Security.EnableAuth = false // Disable auth for test
+		cfg.Security.EnableAuth = false                     // Disable auth for test
 		cfg.Security.JWTSecret = "this-is-a-16-char-secret" // Ensure secret is long enough
-		
+
 		// Create minimal components
 		eventBus := events.NewEventBus()
 		translationCache := cache.NewCache(60*time.Second, true)
 		userRepo := models.NewInMemoryUserRepository()
 		authService := security.NewUserAuthService(cfg.Security.JWTSecret, 24*time.Hour, userRepo)
 		wsHub := websocket.NewHub(eventBus)
-		
+
 		// Create handler
 		apiHandler := api.NewHandler(cfg, eventBus, translationCache, authService, wsHub, nil)
-		
+
 		// Test that startHTTP2Server doesn't panic
 		// The actual server would start, which we don't want in tests
 		// So we just verify the function exists and can be called
@@ -681,7 +681,7 @@ func TestHTTPServerFunctions(t *testing.T) {
 			// The actual function call would be: startHTTP2Server(cfg, apiHandler)
 		})
 	})
-	
+
 	t.Run("startHTTP3Server", func(t *testing.T) {
 		// Similar to HTTP2 test, just verify function exists
 		assert.NotPanics(t, func() {
@@ -695,30 +695,30 @@ func TestMainFunction(t *testing.T) {
 	t.Run("version flag", func(t *testing.T) {
 		// Save original command line args
 		originalArgs := os.Args
-		
+
 		// Reset flag package to avoid redefinition
 		defer func() {
 			os.Args = originalArgs
 			flag.CommandLine = flag.NewFlagSet("test", flag.ContinueOnError)
 		}()
-		
+
 		os.Args = []string{"server", "-version"}
-		
+
 		// This will call os.Exit, so we need to test differently
 		// We can test the version output more directly
 		assert.Contains(t, "v1.0.0", "1.0.0", "version constant should be defined")
 	})
-	
+
 	t.Run("generate-certs flag", func(t *testing.T) {
 		// Create temporary directory for certs
 		tempDir := t.TempDir()
 		originalDir, _ := os.Getwd()
 		defer os.Chdir(originalDir)
 		os.Chdir(tempDir)
-		
+
 		// Reset flag package to avoid redefinition
 		flag.CommandLine = flag.NewFlagSet("test", flag.ContinueOnError)
-		
+
 		// Test that generateTLSCertificates function exists
 		assert.NotPanics(t, func() {
 			_ = generateTLSCertificates
@@ -732,28 +732,28 @@ func TestServerStartup(t *testing.T) {
 		// Test with valid config file
 		tempDir := t.TempDir()
 		configFile := filepath.Join(tempDir, "test-config.json")
-		
+
 		// Create a valid config
 		cfg := config.DefaultConfig()
 		cfg.Security.JWTSecret = "this-is-a-16-char-secret"
 		err := config.SaveConfig(configFile, cfg)
 		require.NoError(t, err)
-		
+
 		// Load config
 		loadedCfg, err := loadOrCreateConfig(configFile)
 		assert.NoError(t, err)
 		assert.NotNil(t, loadedCfg)
 		assert.Equal(t, 8443, loadedCfg.Server.Port)
 	})
-	
+
 	t.Run("handleShutdown", func(t *testing.T) {
 		// Test that handleShutdown can be called without panicking
 		// Note: We can't fully test it since it waits for signals
-		
+
 		// Create a context with timeout to avoid blocking
 		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 		defer cancel()
-		
+
 		done := make(chan struct{})
 		go func() {
 			defer close(done)
@@ -764,7 +764,7 @@ func TestServerStartup(t *testing.T) {
 				return
 			}
 		}()
-		
+
 		// Wait for goroutine to finish
 		<-done
 	})

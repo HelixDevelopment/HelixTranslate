@@ -14,13 +14,13 @@ import (
 
 // EBookTranslator handles the complete ebook translation workflow
 type EBookTranslator struct {
-	logger     logger.Logger
-	sshWorker  *sshworker.SSHWorker
-	sourceFile string
+	logger         logger.Logger
+	sshWorker      *sshworker.SSHWorker
+	sourceFile     string
 	targetLanguage string
-	remoteHost string
-	remoteUser string
-	remotePass string
+	remoteHost     string
+	remoteUser     string
+	remotePass     string
 }
 
 // NewEBookTranslator creates a new ebook translator instance
@@ -60,7 +60,7 @@ func NewEBookTranslator(sourceFile, targetLanguage, remoteHost, remoteUser, remo
 // Execute executes the complete translation workflow
 func (t *EBookTranslator) Execute(ctx context.Context) error {
 	startTime := time.Now()
-	
+
 	t.logger.Info("Starting ebook translation workflow", map[string]interface{}{
 		"source_file":     t.sourceFile,
 		"target_language": t.targetLanguage,
@@ -131,17 +131,17 @@ func (t *EBookTranslator) verifyAndSyncCodebase(ctx context.Context) error {
 		if err := t.updateRemoteCodebase(ctx); err != nil {
 			return fmt.Errorf("failed to update remote codebase: %w", err)
 		}
-		
+
 		// Verify update
 		newRemoteHash, err := t.getRemoteCodebaseHash(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to verify remote update: %w", err)
 		}
-		
+
 		if localHash != newRemoteHash {
 			return fmt.Errorf("remote update verification failed: hashes still differ")
 		}
-		
+
 		t.logger.Info("Remote codebase updated successfully", nil)
 	} else {
 		t.logger.Info("Codebase versions match", nil)
@@ -154,17 +154,17 @@ func (t *EBookTranslator) verifyAndSyncCodebase(ctx context.Context) error {
 func (t *EBookTranslator) getRemoteCodebaseHash(ctx context.Context) (string, error) {
 	// For now, just check if translator binary exists
 	cmd := fmt.Sprintf("cd %s && test -f ./translator && echo 'binary-exists'", t.sshWorker.GetRemoteDir())
-	
+
 	output, err := t.sshWorker.ExecuteCommandWithOutput(ctx, cmd)
 	if err != nil {
 		return "missing-binary", nil // Return a placeholder hash indicating binary is missing
 	}
-	
+
 	if strings.Contains(output, "binary-exists") {
 		// Binary exists, return a placeholder hash
 		return "binary-exists", nil
 	}
-	
+
 	return "missing-binary", nil
 }
 
@@ -180,22 +180,22 @@ func (t *EBookTranslator) updateRemoteCodebase(ctx context.Context) error {
 		{"./build/translator-linux", "translator-amd64"},
 		{"./build/translator-linux-arm64", "translator-arm64"},
 	}
-	
+
 	workingBinary := ""
-	
+
 	for _, arch := range architectures {
 		remotePath := filepath.Join(t.sshWorker.GetRemoteDir(), arch.remoteName)
 		if err := t.sshWorker.TransferFile(ctx, arch.localPath, remotePath); err != nil {
 			return fmt.Errorf("failed to transfer binary %s: %w", arch.remoteName, err)
 		}
-		
+
 		// Make binary executable
 		chmodCmd := fmt.Sprintf("chmod +x %s", remotePath)
 		_, err := t.sshWorker.ExecuteCommandWithOutput(ctx, chmodCmd)
 		if err != nil {
 			return fmt.Errorf("failed to make binary executable %s: %w", arch.remoteName, err)
 		}
-		
+
 		// Test if binary works
 		testCmd := fmt.Sprintf("%s --help", remotePath)
 		_, testErr := t.sshWorker.ExecuteCommandWithOutput(ctx, testCmd)
@@ -207,18 +207,18 @@ func (t *EBookTranslator) updateRemoteCodebase(ctx context.Context) error {
 			break
 		}
 	}
-	
+
 	if workingBinary == "" {
 		return fmt.Errorf("no working binary found for remote architecture")
 	}
-	
+
 	// Create a symlink to the working binary
 	symlinkCmd := fmt.Sprintf("cd %s && ln -sf %s translator", t.sshWorker.GetRemoteDir(), workingBinary)
 	_, err := t.sshWorker.ExecuteCommandWithOutput(ctx, symlinkCmd)
 	if err != nil {
 		return fmt.Errorf("failed to create symlink: %w", err)
 	}
-	
+
 	// Upload the internal/scripts directory needed by translator
 	if err := t.uploadScriptsDirectory(ctx); err != nil {
 		return fmt.Errorf("failed to upload scripts directory: %w", err)
@@ -230,14 +230,14 @@ func (t *EBookTranslator) updateRemoteCodebase(ctx context.Context) error {
 // uploadScriptsDirectory uploads the internal/scripts directory to remote worker
 func (t *EBookTranslator) uploadScriptsDirectory(ctx context.Context) error {
 	t.logger.Info("Uploading scripts directory", nil)
-	
+
 	// Create remote scripts directory structure
 	mkdirCmd := fmt.Sprintf("mkdir -p %s/internal/scripts", t.sshWorker.GetRemoteDir())
 	_, err := t.sshWorker.ExecuteCommandWithOutput(ctx, mkdirCmd)
 	if err != nil {
 		return fmt.Errorf("failed to create remote scripts directory: %w", err)
 	}
-	
+
 	// Upload required scripts
 	scripts := []string{
 		"internal/scripts/fb2_to_markdown.py",
@@ -245,7 +245,7 @@ func (t *EBookTranslator) uploadScriptsDirectory(ctx context.Context) error {
 		"internal/scripts/translate_llm_only.py",
 		"internal/scripts/epub_generator.py",
 	}
-	
+
 	for _, script := range scripts {
 		if _, err := os.Stat(script); err != nil {
 			t.logger.Warn("Script not found locally, skipping", map[string]interface{}{
@@ -253,12 +253,12 @@ func (t *EBookTranslator) uploadScriptsDirectory(ctx context.Context) error {
 			})
 			continue
 		}
-		
+
 		remotePath := filepath.Join(t.sshWorker.GetRemoteDir(), script)
 		if err := t.sshWorker.TransferFile(ctx, script, remotePath); err != nil {
 			return fmt.Errorf("failed to upload script %s: %w", script, err)
 		}
-		
+
 		// Make shell scripts executable
 		if strings.HasSuffix(script, ".sh") {
 			chmodCmd := fmt.Sprintf("chmod +x %s", remotePath)
@@ -267,13 +267,13 @@ func (t *EBookTranslator) uploadScriptsDirectory(ctx context.Context) error {
 				return fmt.Errorf("failed to make script executable %s: %w", script, err)
 			}
 		}
-		
+
 		t.logger.Info("Script uploaded", map[string]interface{}{
-			"script": script,
+			"script":      script,
 			"remote_path": remotePath,
 		})
 	}
-	
+
 	return nil
 }
 
@@ -284,13 +284,13 @@ func (t *EBookTranslator) executeRemoteWorkflow(ctx context.Context) error {
 	// Prepare file paths
 	baseName := strings.TrimSuffix(filepath.Base(t.sourceFile), filepath.Ext(t.sourceFile))
 	localDir := filepath.Dir(t.sourceFile)
-	
+
 	// Step 1: Upload source FB2 file to remote
 	remoteSourcePath := filepath.Join(t.sshWorker.GetRemoteDir(), filepath.Base(t.sourceFile))
 	if err := t.sshWorker.TransferFile(ctx, t.sourceFile, remoteSourcePath); err != nil {
 		return fmt.Errorf("failed to upload source file: %w", err)
 	}
-	
+
 	t.logger.Info("Source file uploaded to remote", map[string]interface{}{
 		"local_path":  t.sourceFile,
 		"remote_path": remoteSourcePath,
@@ -298,65 +298,65 @@ func (t *EBookTranslator) executeRemoteWorkflow(ctx context.Context) error {
 
 	// Step 2: Clean up any stuck processes before starting translation
 	cleanupCmd := fmt.Sprintf("cd %s && pkill -f 'python3.*translate' || true && pkill -f 'llama' || true && echo 'Cleanup completed'", t.sshWorker.GetRemoteDir())
-	
+
 	cleanupOutput, cleanupErr := t.sshWorker.ExecuteCommandWithOutput(ctx, cleanupCmd)
 	t.logger.Info("Cleaning up stuck translation processes", map[string]interface{}{
 		"command": cleanupCmd,
-		"output": cleanupOutput,
-		"error": cleanupErr,
+		"output":  cleanupOutput,
+		"error":   cleanupErr,
 	})
-	
+
 	// Check if llama.cpp is available and perform actual translation
 	// First, check if llama.cpp and models are available
 	checkCmd := fmt.Sprintf("cd %s && python3 -c \"import sys; sys.path.append('internal/scripts'); from translate_llm_only import get_translation_provider; provider, config = get_translation_provider(); print(f'PROVIDER:{provider}')\" 2>/dev/null || echo 'PROVIDER:none'", t.sshWorker.GetRemoteDir())
-	
+
 	checkOutput, checkErr := t.sshWorker.ExecuteCommandWithOutput(ctx, checkCmd)
 	t.logger.Info("Checking translation provider availability", map[string]interface{}{
 		"command": checkCmd,
-		"output": checkOutput,
-		"error": checkErr,
+		"output":  checkOutput,
+		"error":   checkErr,
 	})
-	
+
 	var remoteCmd string
 	if strings.Contains(checkOutput, "PROVIDER:llamacpp") {
 		// First test with just a few paragraphs
 		t.logger.Info("Testing llama.cpp translation with sample paragraphs", nil)
-		
+
 		// Create a test file with just first 5 lines
 		testCmd := fmt.Sprintf("cd %s && head -10 book1_original.md > book1_test.md && echo 'Test file created with $(wc -l < book1_test.md) lines'", t.sshWorker.GetRemoteDir())
-		
+
 		testOutput, testErr := t.sshWorker.ExecuteCommandWithOutput(ctx, testCmd)
 		t.logger.Info("Creating test file with first paragraphs", map[string]interface{}{
 			"command": testCmd,
-			"output": testOutput,
-			"error": testErr,
+			"output":  testOutput,
+			"error":   testErr,
 		})
-		
+
 		// Test translation on small file without timeout, run in background
 		remoteDir := t.sshWorker.GetRemoteDir()
 		testTranslationCmd := fmt.Sprintf("cd %s && nohup python3 internal/scripts/translate_llm_only.py book1_test.md book1_test_translated.md > translation.log 2>&1 & echo 'Translation started in background, PID: $!'", remoteDir)
-		
+
 		t.logger.Info("Starting test translation in background", map[string]interface{}{
 			"command": testTranslationCmd,
 		})
-		
+
 		// Start translation in background
 		startOutput, startErr := t.sshWorker.ExecuteCommandWithOutput(ctx, testTranslationCmd)
 		if startErr != nil {
 			return fmt.Errorf("failed to start translation: %w (output: %s)", startErr, startOutput)
 		}
-		
+
 		t.logger.Info("Translation started", map[string]interface{}{
 			"output": startOutput,
 		})
-		
+
 		// Check if translation completed
 		waitCmd := fmt.Sprintf("cd %s && for i in {1..60}; do if [ -f book1_test_translated.md ]; then echo 'Translation completed after $i checks'; head -5 book1_test_translated.md; break; elif [ -f translation.log ]; then echo 'Check $i: Progress...'; tail -3 translation.log; else echo 'Check $i: Still starting...'; fi; sleep 5; done", remoteDir)
-		
+
 		t.logger.Info("Waiting for translation to complete", map[string]interface{}{
 			"command": waitCmd,
 		})
-		
+
 		testTranslationOutput, testTranslationErr := t.sshWorker.ExecuteCommandWithOutput(ctx, waitCmd)
 		if testTranslationErr != nil {
 			return fmt.Errorf("translation monitoring failed: %w (output: %s)", testTranslationErr, testTranslationOutput)
@@ -364,25 +364,25 @@ func (t *EBookTranslator) executeRemoteWorkflow(ctx context.Context) error {
 		if testTranslationErr != nil {
 			return fmt.Errorf("test translation failed: %w (output: %s)", testTranslationErr, testTranslationOutput)
 		}
-		
+
 		t.logger.Info("Test translation successful, proceeding with full book", map[string]interface{}{
 			"sample_output": testTranslationOutput[:min(500, len(testTranslationOutput))],
 		})
-		
+
 		// Check translated content to confirm it's different
 		checkTranslationCmd := fmt.Sprintf("cd %s && head -5 book1_test_translated.md", t.sshWorker.GetRemoteDir())
 		checkTranslationOutput, checkTranslationErr := t.sshWorker.ExecuteCommandWithOutput(ctx, checkTranslationCmd)
 		t.logger.Info("Sample translated content", map[string]interface{}{
 			"command": checkTranslationCmd,
-			"output": checkTranslationOutput,
-			"error": checkTranslationErr,
+			"output":  checkTranslationOutput,
+			"error":   checkTranslationErr,
 		})
-		
+
 		// Use actual llama.cpp translation for full book without timeout
 		remoteDir = t.sshWorker.GetRemoteDir()
 		remoteCmd = fmt.Sprintf(
 			"cd %s && python3 internal/scripts/translate_llm_only.py book1_original.md book1_original_translated.md && "+
-			"python3 internal/scripts/epub_generator.py book1_original_translated.md book1_original_translated.epub",
+				"python3 internal/scripts/epub_generator.py book1_original_translated.md book1_original_translated.epub",
 			remoteDir,
 		)
 		t.logger.Info("Using llama.cpp for full book translation without timeout", nil)
@@ -390,7 +390,7 @@ func (t *EBookTranslator) executeRemoteWorkflow(ctx context.Context) error {
 		// Use API-based translation
 		remoteCmd = fmt.Sprintf(
 			"cd %s && python3 internal/scripts/translate_llm_only.py book1_original.md book1_original_translated.md && "+
-			"python3 internal/scripts/epub_generator.py book1_original_translated.md book1_original_translated.epub",
+				"python3 internal/scripts/epub_generator.py book1_original_translated.md book1_original_translated.epub",
 			t.sshWorker.GetRemoteDir(),
 		)
 		t.logger.Info("Using API provider for translation", map[string]interface{}{
@@ -405,16 +405,16 @@ func (t *EBookTranslator) executeRemoteWorkflow(ctx context.Context) error {
 	t.logger.Info("Starting remote translation workflow", map[string]interface{}{
 		"command": remoteCmd,
 	})
-	
+
 	// For debugging: test simple command first
 	testCmd := fmt.Sprintf("cd %s && ls -la", t.sshWorker.GetRemoteDir())
 	testOutput, testErr := t.sshWorker.ExecuteCommandWithOutput(ctx, testCmd)
 	t.logger.Info("Remote directory listing", map[string]interface{}{
 		"command": testCmd,
-		"output": testOutput,
-		"error": testErr,
+		"output":  testOutput,
+		"error":   testErr,
 	})
-	
+
 	output, err := t.sshWorker.ExecuteCommandWithOutput(ctx, remoteCmd)
 	if err != nil {
 		return fmt.Errorf("remote workflow execution failed: %w (output: %s)", err, output)
@@ -430,15 +430,15 @@ func (t *EBookTranslator) executeRemoteWorkflow(ctx context.Context) error {
 		baseName + "_original_translated.md",
 		baseName + "_original_translated.epub",
 	}
-	
+
 	for _, filename := range expectedFiles {
 		remotePath := filepath.Join(t.sshWorker.GetRemoteDir(), filename)
 		localPath := filepath.Join(localDir, filename)
-		
+
 		if err := t.sshWorker.DownloadFile(ctx, remotePath, localPath); err != nil {
 			return fmt.Errorf("failed to download output file %s: %w", filename, err)
 		}
-		
+
 		t.logger.Info("Output file downloaded", map[string]interface{}{
 			"filename":    filename,
 			"local_path":  localPath,
@@ -470,7 +470,7 @@ func (t *EBookTranslator) verifyOutputFiles() error {
 		{
 			name:        baseName + "_original_translated.md",
 			description: "Translated Markdown",
-			verifyFunc:  func(path string) error {
+			verifyFunc: func(path string) error {
 				if err := t.verifyMarkdownFile(path); err != nil {
 					return err
 				}
@@ -486,7 +486,7 @@ func (t *EBookTranslator) verifyOutputFiles() error {
 
 	for _, expected := range expectedFiles {
 		filePath := filepath.Join(dir, expected.name)
-		
+
 		if err := t.verifyFileExists(filePath, expected.description); err != nil {
 			return err
 		}
@@ -557,7 +557,7 @@ func (t *EBookTranslator) verifyTargetLanguage(path string) error {
 	if t.targetLanguage == "sr-cyrl" || t.targetLanguage == "sr" {
 		cyrillicChars := []rune{'ћ', 'ђ', 'ч', 'џ', 'ш', 'ж', 'љ', 'њ', 'з', 'с', 'а', 'е', 'и', 'о', 'у'}
 		hasCyrillic := false
-		
+
 		for _, char := range cyrillicChars {
 			if strings.ContainsRune(contentStr, char) {
 				hasCyrillic = true

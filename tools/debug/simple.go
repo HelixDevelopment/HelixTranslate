@@ -1,8 +1,8 @@
 package main
 
 import (
-	"digital.vasic.translator/pkg/markdown"
 	"digital.vasic.translator/pkg/ebook"
+	"digital.vasic.translator/pkg/markdown"
 	"fmt"
 	"os"
 )
@@ -33,7 +33,7 @@ func main() {
 	// Write EPUB
 	epubPath := tmpDir + "/test.epub"
 	converter := markdown.NewMarkdownToEPUBConverter()
-	
+
 	// Create a markdown representation of the book
 	mdContent := `---
 title: Test Book
@@ -51,17 +51,17 @@ cover: cover.jpg
 
 Test content
 `
-	
+
 	if err := os.WriteFile(tmpDir+"/test.md", []byte(mdContent), 0644); err != nil {
 		panic(err)
 	}
-	
+
 	// Create a 4-byte cover image
 	coverPath := tmpDir + "/cover.jpg"
 	if err := os.WriteFile(coverPath, []byte{0xFF, 0xD8, 0xFF, 0xE0}, 0644); err != nil {
 		panic(err)
 	}
-	
+
 	if err := converter.ConvertMarkdownToEPUB(tmpDir+"/test.md", epubPath); err != nil {
 		fmt.Printf("Error creating EPUB: %v\n", err)
 		return

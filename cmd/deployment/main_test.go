@@ -109,7 +109,7 @@ logging:
 		// Basic validation - should contain expected sections
 		contentStr := string(content)
 		requiredSections := []string{"app:", "server:", "database:", "logging:"}
-		
+
 		for _, section := range requiredSections {
 			if !strings.Contains(contentStr, section) {
 				t.Errorf("Config missing required section: %s", section)
@@ -148,7 +148,7 @@ logging:
 		// Basic JSON validation (simplified)
 		contentStr := string(content)
 		if !strings.HasPrefix(strings.TrimSpace(contentStr), "{") ||
-		   !strings.HasSuffix(strings.TrimSpace(contentStr), "}") {
+			!strings.HasSuffix(strings.TrimSpace(contentStr), "}") {
 			t.Errorf("Invalid JSON format")
 		}
 	})
@@ -168,7 +168,7 @@ func TestEnvironmentVariables(t *testing.T) {
 			// Check if we can get the variable (even if empty)
 			value := os.Getenv(varName)
 			t.Logf("Environment variable %s = %s", varName, value)
-			
+
 			// In a real test, we would validate that these are set for production
 			// For this test, we just verify we can check them
 		}
@@ -240,9 +240,9 @@ func TestDatabaseMigration(t *testing.T) {
 	t.Run("MigrationFiles", func(t *testing.T) {
 		// Create sample migration files
 		migrations := []struct {
-			version    string
-			upSQL      string
-			downSQL    string
+			version string
+			upSQL   string
+			downSQL string
 		}{
 			{
 				version: "001_initial_schema",
@@ -295,12 +295,12 @@ func TestLoadBalancing(t *testing.T) {
 	t.Run("RoundRobin", func(t *testing.T) {
 		// Test round-robin load balancing
 		servers := []string{"server1:8080", "server2:8080", "server3:8080"}
-		
+
 		// Simulate round-robin selection
 		for i := 0; i < 10; i++ {
 			selectedServer := servers[i%len(servers)]
 			t.Logf("Request %d assigned to: %s", i, selectedServer)
-			
+
 			// Validate selected server is in the list
 			found := false
 			for _, server := range servers {
@@ -425,7 +425,7 @@ CMD ["./translator"]
 
 		contentStr := string(content)
 		requiredInstructions := []string{"FROM", "WORKDIR", "COPY", "RUN", "EXPOSE", "CMD"}
-		
+
 		for _, instruction := range requiredInstructions {
 			if !strings.Contains(contentStr, instruction) {
 				t.Errorf("Dockerfile missing required instruction: %s", instruction)
@@ -477,7 +477,7 @@ volumes:
 
 		contentStr := string(content)
 		requiredSections := []string{"services:", "translator:", "postgres:", "redis:", "volumes:"}
-		
+
 		for _, section := range requiredSections {
 			if !strings.Contains(contentStr, section) {
 				t.Errorf("docker-compose.yml missing required section: %s", section)
@@ -490,11 +490,11 @@ func TestMonitoringSetup(t *testing.T) {
 	t.Run("MetricsEndpoints", func(t *testing.T) {
 		// Test metrics endpoint configuration
 		metricsConfig := map[string]interface{}{
-			"enabled":   true,
-			"path":      "/metrics",
-			"port":      9090,
-			"format":    "prometheus",
-			"interval":  "30s",
+			"enabled":  true,
+			"path":     "/metrics",
+			"port":     9090,
+			"format":   "prometheus",
+			"interval": "30s",
 		}
 
 		// Validate required configuration

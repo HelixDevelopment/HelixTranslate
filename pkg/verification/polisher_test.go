@@ -11,11 +11,11 @@ import (
 // TestNewBookPolisher tests creation of book polisher
 func TestNewBookPolisher(t *testing.T) {
 	config := PolishingConfig{
-		Providers:    []string{"mock"},
-		MinConsensus: 1,
-		VerifySpirit: true,
-		VerifyLanguage: true,
-		VerifyContext: true,
+		Providers:        []string{"mock"},
+		MinConsensus:     1,
+		VerifySpirit:     true,
+		VerifyLanguage:   true,
+		VerifyContext:    true,
 		VerifyVocabulary: true,
 		TranslationConfigs: map[string]translator.TranslationConfig{
 			"mock": {
@@ -29,8 +29,13 @@ func TestNewBookPolisher(t *testing.T) {
 	eventBus := events.NewEventBus()
 	sessionID := "test-session"
 
-	// This will fail because "mock" provider doesn't exist
-	// But we're testing the structure
+	// Test with an unsupported provider
+	config.Providers = []string{"nonexistent-provider"}
+	config.TranslationConfigs["nonexistent-provider"] = translator.TranslationConfig{
+		Provider:   "nonexistent-provider",
+		SourceLang: "ru",
+		TargetLang: "sr",
+	}
 	_, err := NewBookPolisher(config, eventBus, sessionID)
 
 	// Should fail due to unsupported provider
@@ -42,12 +47,12 @@ func TestNewBookPolisher(t *testing.T) {
 // TestPolishingConfig tests configuration structure
 func TestPolishingConfig(t *testing.T) {
 	config := PolishingConfig{
-		Providers:    []string{"deepseek", "anthropic"},
-		MinConsensus: 2,
-		VerifySpirit: true,
-		VerifyLanguage: true,
-		VerifyContext: true,
-		VerifyVocabulary: true,
+		Providers:          []string{"deepseek", "anthropic"},
+		MinConsensus:       2,
+		VerifySpirit:       true,
+		VerifyLanguage:     true,
+		VerifyContext:      true,
+		VerifyVocabulary:   true,
 		TranslationConfigs: make(map[string]translator.TranslationConfig),
 	}
 
@@ -67,19 +72,19 @@ func TestPolishingConfig(t *testing.T) {
 // TestPolishingResult tests result structure
 func TestPolishingResult(t *testing.T) {
 	result := &PolishingResult{
-		SectionID:      "test_section",
-		Location:       "Chapter 1",
-		OriginalText:   "Привет мир",
-		TranslatedText: "Здраво свет",
-		PolishedText:   "Здраво свете",
-		Changes:        make([]Change, 0),
-		Issues:         make([]Issue, 0),
-		Suggestions:    make([]Suggestion, 0),
-		Consensus:      2,
-		Confidence:     0.95,
-		SpiritScore:    0.90,
-		LanguageScore:  0.92,
-		ContextScore:   0.88,
+		SectionID:       "test_section",
+		Location:        "Chapter 1",
+		OriginalText:    "Привет мир",
+		TranslatedText:  "Здраво свет",
+		PolishedText:    "Здраво свете",
+		Changes:         make([]Change, 0),
+		Issues:          make([]Issue, 0),
+		Suggestions:     make([]Suggestion, 0),
+		Consensus:       2,
+		Confidence:      0.95,
+		SpiritScore:     0.90,
+		LanguageScore:   0.92,
+		ContextScore:    0.88,
 		VocabularyScore: 0.91,
 	}
 

@@ -19,6 +19,9 @@ import (
 )
 
 func TestInputSanitization(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
 	// Test 1: HTML tag sanitization
 	t.Run("HTMLTagSanitization", func(t *testing.T) {
 		mockTranslator := new(mocks.MockTranslator)
@@ -40,7 +43,7 @@ func TestInputSanitization(t *testing.T) {
 			"target_lang": "es"
 		}`, htmlInput)
 
-		req, err := http.NewRequest("POST", testServerURL+"/api/v1/translate", strings.NewReader(reqBody))
+		req, err := http.NewRequest("POST", testServerURL+"/api/translate", strings.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set("Authorization", "Bearer test-key")
 		req.Header.Set("Content-Type", "application/json")
@@ -71,22 +74,28 @@ func TestInputSanitization(t *testing.T) {
 			Level:  logger.ERROR,
 			Format: logger.FORMAT_TEXT,
 		})
+		mockTranslator := new(mocks.MockTranslator)
+		mockTranslator.On("GetName").Return("test-translator")
+		mockTranslator.On("Translate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+			Return("translated text", nil)
+
 		server := api.NewServer(api.ServerConfig{
-			Port:     8090,
-			Logger:   testLogger,
+			Port:   8090,
+			Logger: testLogger,
 			Security: &api.SecurityConfig{
 				APIKey:        "test-key",
 				SanitizeInput: true,
 			},
 		})
+		server.SetTranslator(mockTranslator)
 
 		testServer := httptest.NewServer(server.GetRouter())
 		defer testServer.Close()
 
 		testCases := []struct {
-			name     string
-			field    string
-			value    string
+			name  string
+			field string
+			value string
 		}{
 			{"scriptInText", "text", "<script>window.location='http://evil.com'</script>"},
 			{"scriptInSourceLang", "source_lang", "en<script>alert(1)</script>"},
@@ -133,14 +142,20 @@ func TestInputSanitization(t *testing.T) {
 			Format: logger.FORMAT_TEXT,
 		})
 
+		mockTranslator := new(mocks.MockTranslator)
+		mockTranslator.On("GetName").Return("test-translator")
+		mockTranslator.On("Translate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+			Return("translated text", nil)
+
 		server := api.NewServer(api.ServerConfig{
-			Port:     8091,
-			Logger:    mockLogger,
+			Port:   8091,
+			Logger: mockLogger,
 			Security: &api.SecurityConfig{
 				APIKey:        "test-key",
-				SanitizeInput:  true,
+				SanitizeInput: true,
 			},
 		})
+		server.SetTranslator(mockTranslator)
 
 		testServer := httptest.NewServer(server.GetRouter())
 		defer testServer.Close()
@@ -174,14 +189,20 @@ func TestInputSanitization(t *testing.T) {
 			Format: logger.FORMAT_TEXT,
 		})
 
+		mockTranslator := new(mocks.MockTranslator)
+		mockTranslator.On("GetName").Return("test-translator")
+		mockTranslator.On("Translate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+			Return("translated text", nil)
+
 		server := api.NewServer(api.ServerConfig{
-			Port:     8092,
-			Logger:    mockLogger,
+			Port:   8092,
+			Logger: mockLogger,
 			Security: &api.SecurityConfig{
 				APIKey:        "test-key",
-				SanitizeInput:  true,
+				SanitizeInput: true,
 			},
 		})
+		server.SetTranslator(mockTranslator)
 
 		testServer := httptest.NewServer(server.GetRouter())
 		defer testServer.Close()
@@ -219,11 +240,11 @@ func TestSizeLimitValidation(t *testing.T) {
 		})
 
 		server := api.NewServer(api.ServerConfig{
-			Port:     8093,
-			Logger:    mockLogger,
+			Port:   8093,
+			Logger: mockLogger,
 			Security: &api.SecurityConfig{
-				APIKey:           "test-key",
-				MaxRequestSize:   1024 * 1024, // 1MB
+				APIKey:         "test-key",
+				MaxRequestSize: 1024 * 1024, // 1MB
 			},
 		})
 
@@ -260,11 +281,11 @@ func TestSizeLimitValidation(t *testing.T) {
 		})
 
 		server := api.NewServer(api.ServerConfig{
-			Port:     8094,
-			Logger:    mockLogger,
+			Port:   8094,
+			Logger: mockLogger,
 			Security: &api.SecurityConfig{
-				APIKey:         "test-key",
-				MaxTextLength:  10000, // 10k characters
+				APIKey:        "test-key",
+				MaxTextLength: 10000, // 10k characters
 			},
 		})
 
@@ -296,7 +317,7 @@ func TestSizeLimitValidation(t *testing.T) {
 		var errorResp map[string]interface{}
 		err = json.NewDecoder(resp.Body).Decode(&errorResp)
 		require.NoError(t, err)
-		
+
 		if message, ok := errorResp["error"].(string); ok {
 			assert.Contains(t, message, "text length")
 			assert.Contains(t, message, "exceeds")
@@ -314,8 +335,8 @@ func TestFieldValidation(t *testing.T) {
 		})
 
 		server := api.NewServer(api.ServerConfig{
-			Port:     8095,
-			Logger:    mockLogger,
+			Port:   8095,
+			Logger: mockLogger,
 			Security: &api.SecurityConfig{
 				APIKey: "test-key",
 			},
@@ -372,7 +393,7 @@ func TestFieldValidation(t *testing.T) {
 				var errorResp map[string]interface{}
 				err = json.NewDecoder(resp.Body).Decode(&errorResp)
 				require.NoError(t, err)
-				
+
 				if message, ok := errorResp["error"].(string); ok {
 					assert.NotEmpty(t, message)
 				}
@@ -388,8 +409,8 @@ func TestFieldValidation(t *testing.T) {
 		})
 
 		server := api.NewServer(api.ServerConfig{
-			Port:     8096,
-			Logger:    mockLogger,
+			Port:   8096,
+			Logger: mockLogger,
 			Security: &api.SecurityConfig{
 				APIKey: "test-key",
 			},
@@ -399,10 +420,10 @@ func TestFieldValidation(t *testing.T) {
 		defer testServer.Close()
 
 		testCases := []struct {
-			name    string
-			source  string
-			target  string
-			valid   bool
+			name   string
+			source string
+			target string
+			valid  bool
 		}{
 			{"validCodes", "en", "es", true},
 			{"validCodesWithRegion", "en-US", "es-ES", true},
@@ -455,8 +476,8 @@ func TestContentTypeValidation(t *testing.T) {
 		})
 
 		server := api.NewServer(api.ServerConfig{
-			Port:     8097,
-			Logger:    mockLogger,
+			Port:   8097,
+			Logger: mockLogger,
 			Security: &api.SecurityConfig{
 				APIKey: "test-key",
 			},
@@ -490,7 +511,7 @@ func TestContentTypeValidation(t *testing.T) {
 				req, err := http.NewRequest("POST", testServer.URL+"/api/translate", strings.NewReader(reqBody))
 				require.NoError(t, err)
 				req.Header.Set("Authorization", "Bearer test-key")
-				
+
 				if tc.contentType != "" {
 					req.Header.Set("Content-Type", tc.contentType)
 				}

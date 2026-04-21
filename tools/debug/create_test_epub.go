@@ -24,13 +24,13 @@ func main() {
 			},
 		},
 	}
-	
+
 	// Write EPUB
 	epubPath := "/tmp/test_simple.epub"
 	if err := createSimpleEPUB(book, epubPath); err != nil {
 		fmt.Printf("Failed to create EPUB: %v\n", err)
 		return
 	}
-	
+
 	fmt.Printf("Created EPUB: %s\n", epubPath)
 }

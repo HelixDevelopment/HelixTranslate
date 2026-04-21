@@ -14,33 +14,33 @@ import (
 
 // LlamaCppProviderConfig holds configuration for llama.cpp provider
 type LlamaCppProviderConfig struct {
-	BinaryPath      string            `json:"binary_path" yaml:"binary_path"`
-	Models          []ModelConfig     `json:"models" yaml:"models"`
-	MaxConcurrency  int               `json:"max_concurrency" yaml:"max_concurrency"`
-	RequestTimeout  time.Duration     `json:"request_timeout" yaml:"request_timeout"`
-	Temperature     float64           `json:"temperature" yaml:"temperature"`
-	TopP            float64           `json:"top_p" yaml:"top_p"`
-	TopK            int               `json:"top_k" yaml:"top_k"`
-	RepeatPenalty   float64           `json:"repeat_penalty" yaml:"repeat_penalty"`
-	ContextSize     int               `json:"context_size" yaml:"context_size"`
-	GPULayers       int               `json:"gpu_layers" yaml:"gpu_layers"`
-	AdditionalArgs  map[string]string `json:"additional_args" yaml:"additional_args"`
+	BinaryPath     string            `json:"binary_path" yaml:"binary_path"`
+	Models         []ModelConfig     `json:"models" yaml:"models"`
+	MaxConcurrency int               `json:"max_concurrency" yaml:"max_concurrency"`
+	RequestTimeout time.Duration     `json:"request_timeout" yaml:"request_timeout"`
+	Temperature    float64           `json:"temperature" yaml:"temperature"`
+	TopP           float64           `json:"top_p" yaml:"top_p"`
+	TopK           int               `json:"top_k" yaml:"top_k"`
+	RepeatPenalty  float64           `json:"repeat_penalty" yaml:"repeat_penalty"`
+	ContextSize    int               `json:"context_size" yaml:"context_size"`
+	GPULayers      int               `json:"gpu_layers" yaml:"gpu_layers"`
+	AdditionalArgs map[string]string `json:"additional_args" yaml:"additional_args"`
 }
 
 // ModelConfig defines a single llama.cpp model configuration
 type ModelConfig struct {
-	ID             string            `json:"id" yaml:"id"`
-	Path           string            `json:"path" yaml:"path"`
-	ModelName      string            `json:"model_name" yaml:"model_name"`
-	Size           int64             `json:"size" yaml:"size"`             // Size in bytes
-	Quantization   string            `json:"quantization" yaml:"quantization"` // Q4_0, Q5_K_M, etc.
-	MaxTokens      int               `json:"max_tokens" yaml:"max_tokens"`
-	Capabilities   []string          `json:"capabilities" yaml:"capabilities"` // translation, reasoning, etc.
-	PreferredFor   []string          `json:"preferred_for" yaml:"preferred_for"` // text, code, etc.
-	ModelParams    map[string]string `json:"model_params" yaml:"model_params"`
-	IsDefault      bool              `json:"is_default" yaml:"is_default"`
-	IsAvailable    bool              `json:"is_available" yaml:"is_available"`
-	LastUsed       time.Time         `json:"last_used" yaml:"last_used"`
+	ID           string            `json:"id" yaml:"id"`
+	Path         string            `json:"path" yaml:"path"`
+	ModelName    string            `json:"model_name" yaml:"model_name"`
+	Size         int64             `json:"size" yaml:"size"`                 // Size in bytes
+	Quantization string            `json:"quantization" yaml:"quantization"` // Q4_0, Q5_K_M, etc.
+	MaxTokens    int               `json:"max_tokens" yaml:"max_tokens"`
+	Capabilities []string          `json:"capabilities" yaml:"capabilities"`   // translation, reasoning, etc.
+	PreferredFor []string          `json:"preferred_for" yaml:"preferred_for"` // text, code, etc.
+	ModelParams  map[string]string `json:"model_params" yaml:"model_params"`
+	IsDefault    bool              `json:"is_default" yaml:"is_default"`
+	IsAvailable  bool              `json:"is_available" yaml:"is_available"`
+	LastUsed     time.Time         `json:"last_used" yaml:"last_used"`
 }
 
 // LlamaCppWorker represents a single llama.cpp model worker
@@ -55,15 +55,15 @@ type LlamaCppWorker struct {
 
 // MultiLLMCoordinator manages multiple llama.cpp workers for parallel processing
 type MultiLLMCoordinator struct {
-	Config      LlamaCppProviderConfig
-	Workers     map[string]*LlamaCppWorker
-	WorkQueue   chan TranslationTask
-	Results     chan TranslationResult
-	mu          sync.RWMutex
-	logger      logger.Logger
-	ctx         context.Context
-	cancel      context.CancelFunc
-	wg          sync.WaitGroup
+	Config    LlamaCppProviderConfig
+	Workers   map[string]*LlamaCppWorker
+	WorkQueue chan TranslationTask
+	Results   chan TranslationResult
+	mu        sync.RWMutex
+	logger    logger.Logger
+	ctx       context.Context
+	cancel    context.CancelFunc
+	wg        sync.WaitGroup
 }
 
 // TranslationTask represents a translation request
@@ -79,21 +79,21 @@ type TranslationTask struct {
 
 // TranslationResult represents the result of a translation task
 type TranslationResult struct {
-	ID        string
-	Text      string
-	Success   bool
-	Error     error
-	Metadata  map[string]interface{}
-	WorkerID  string
-	Duration  time.Duration
+	ID         string
+	Text       string
+	Success    bool
+	Error      error
+	Metadata   map[string]interface{}
+	WorkerID   string
+	Duration   time.Duration
 	TokensUsed int
-	ModelUsed string
+	ModelUsed  string
 }
 
 // NewLlamaCppProvider creates a new multi-LLM llama.cpp provider
 func NewLlamaCppProvider(config LlamaCppProviderConfig, logger logger.Logger) (*MultiLLMCoordinator, error) {
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	coordinator := &MultiLLMCoordinator{
 		Config:    config,
 		Workers:   make(map[string]*LlamaCppWorker),
@@ -132,11 +132,11 @@ func (c *MultiLLMCoordinator) initializeWorkers() error {
 
 		// Check if model file exists and is accessible
 		if _, err := os.Stat(modelConfig.Path); err != nil {
-			c.logger.Warn("Model file not found, marking worker unavailable", 
+			c.logger.Warn("Model file not found, marking worker unavailable",
 				map[string]interface{}{
 					"model_id": modelConfig.ID,
-					"path": modelConfig.Path,
-					"error": err.Error(),
+					"path":     modelConfig.Path,
+					"error":    err.Error(),
 				})
 			worker.Config.IsAvailable = false
 		} else {
@@ -144,10 +144,10 @@ func (c *MultiLLMCoordinator) initializeWorkers() error {
 		}
 
 		c.Workers[modelConfig.ID] = worker
-		c.logger.Info("Initialized llama.cpp worker", 
+		c.logger.Info("Initialized llama.cpp worker",
 			map[string]interface{}{
-				"model_id": modelConfig.ID,
-				"path": modelConfig.Path,
+				"model_id":  modelConfig.ID,
+				"path":      modelConfig.Path,
 				"available": modelConfig.IsAvailable,
 			})
 	}
@@ -166,8 +166,8 @@ func (c *MultiLLMCoordinator) startWorkerPool() {
 // worker processes translation tasks from the queue
 func (c *MultiLLMCoordinator) worker(workerIndex int) {
 	defer c.wg.Done()
-	
-	c.logger.Debug("Starting llama.cpp worker", 
+
+	c.logger.Debug("Starting llama.cpp worker",
 		map[string]interface{}{
 			"worker_index": workerIndex,
 		})
@@ -197,12 +197,12 @@ func (c *MultiLLMCoordinator) worker(workerIndex int) {
 // processTask executes a single translation task
 func (c *MultiLLMCoordinator) processTask(task TranslationTask) TranslationResult {
 	startTime := time.Now()
-	
-	c.logger.Debug("Processing translation task", 
+
+	c.logger.Debug("Processing translation task",
 		map[string]interface{}{
-			"task_id": task.ID,
-			"from_lang": task.FromLang,
-			"to_lang": task.ToLang,
+			"task_id":     task.ID,
+			"from_lang":   task.FromLang,
+			"to_lang":     task.ToLang,
 			"text_length": len(task.Text),
 		})
 
@@ -221,26 +221,26 @@ func (c *MultiLLMCoordinator) processTask(task TranslationTask) TranslationResul
 	}
 
 	worker := c.Workers[workerID]
-	
+
 	// Build llama.cpp command
 	cmd := c.buildCommand(worker, task)
-	
+
 	// Execute translation
 	output, err := c.executeCommand(cmd)
 	if err != nil {
-		c.logger.Error("Translation failed", 
+		c.logger.Error("Translation failed",
 			map[string]interface{}{
-				"task_id": task.ID,
+				"task_id":   task.ID,
 				"worker_id": workerID,
-				"error": err.Error(),
+				"error":     err.Error(),
 			})
-		
+
 		return TranslationResult{
-			ID:        task.ID,
-			Success:   false,
-			Error:     err,
-			WorkerID:  workerID,
-			Duration:  time.Since(startTime),
+			ID:       task.ID,
+			Success:  false,
+			Error:    err,
+			WorkerID: workerID,
+			Duration: time.Since(startTime),
 		}
 	}
 
@@ -252,22 +252,22 @@ func (c *MultiLLMCoordinator) processTask(task TranslationTask) TranslationResul
 	worker.Config.LastUsed = time.Now()
 	worker.mu.Unlock()
 
-	c.logger.Debug("Translation completed", 
+	c.logger.Debug("Translation completed",
 		map[string]interface{}{
-			"task_id": task.ID,
-			"worker_id": workerID,
+			"task_id":     task.ID,
+			"worker_id":   workerID,
 			"duration_ms": time.Since(startTime).Milliseconds(),
 		})
 
 	return TranslationResult{
-		ID:         task.ID,
-		Text:       translatedText,
-		Success:    true,
-		WorkerID:   workerID,
-		Duration:   time.Since(startTime),
-		ModelUsed:  worker.Config.ModelName,
+		ID:        task.ID,
+		Text:      translatedText,
+		Success:   true,
+		WorkerID:  workerID,
+		Duration:  time.Since(startTime),
+		ModelUsed: worker.Config.ModelName,
 		Metadata: map[string]interface{}{
-			"model_id": worker.Config.ID,
+			"model_id":     worker.Config.ID,
 			"quantization": worker.Config.Quantization,
 		},
 	}
@@ -377,7 +377,7 @@ Maintain the original formatting, line breaks, and structure.
 Source text:
 %s
 
-Translation:`, 
+Translation:`,
 		c.getLanguageName(task.FromLang),
 		c.getLanguageName(task.ToLang),
 		task.Text)
@@ -391,7 +391,7 @@ func (c *MultiLLMCoordinator) executeCommand(cmd *exec.Cmd) (string, error) {
 	defer cancel()
 
 	cmd = exec.CommandContext(ctx, cmd.Path, cmd.Args[1:]...)
-	
+
 	output, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("llama.cpp execution failed: %w", err)
@@ -404,14 +404,14 @@ func (c *MultiLLMCoordinator) executeCommand(cmd *exec.Cmd) (string, error) {
 func (c *MultiLLMCoordinator) parseOutput(output string) string {
 	// Remove ANSI color codes
 	output = removeAnsiCodes(output)
-	
+
 	// Split into lines and find the translation part
 	lines := strings.Split(output, "\n")
-	
+
 	// Look for the actual translation (after "Translation:" prompt)
 	var translationLines []string
 	foundTranslation := false
-	
+
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if foundTranslation {
@@ -432,13 +432,13 @@ func (c *MultiLLMCoordinator) parseOutput(output string) string {
 // getLanguageName converts language codes to full names
 func (c *MultiLLMCoordinator) getLanguageName(code string) string {
 	languages := map[string]string{
-		"en": "English",
-		"ru": "Russian",
-		"sr": "Serbian",
+		"en":      "English",
+		"ru":      "Russian",
+		"sr":      "Serbian",
 		"sr-cyrl": "Serbian Cyrillic",
 		"sr-latn": "Serbian Latin",
 	}
-	
+
 	if name, exists := languages[code]; exists {
 		return name
 	}
@@ -455,14 +455,14 @@ func removeAnsiCodes(text string) string {
 func (c *MultiLLMCoordinator) Translate(ctx context.Context, text string, prompt string) (string, error) {
 	// Extract language info from prompt if available
 	fromLang, toLang := "en", "sr" // defaults
-	
+
 	if strings.Contains(strings.ToLower(prompt), "russian") || strings.Contains(strings.ToLower(prompt), "ru") {
 		fromLang = "ru"
 	}
 	if strings.Contains(strings.ToLower(prompt), "serbian") || strings.Contains(strings.ToLower(prompt), "sr") {
 		toLang = "sr"
 	}
-	
+
 	return c.TranslateText(ctx, text, fromLang, toLang, "")
 }
 
@@ -520,10 +520,10 @@ func (c *MultiLLMCoordinator) GetAvailableModels() []ModelConfig {
 // Shutdown gracefully shuts down the coordinator and all workers
 func (c *MultiLLMCoordinator) Shutdown(ctx context.Context) error {
 	c.logger.Info("Shutting down multi-LLM coordinator", nil)
-	
+
 	// Cancel context to stop workers
 	c.cancel()
-	
+
 	// Wait for workers to finish
 	done := make(chan struct{})
 	go func() {
@@ -547,11 +547,11 @@ func (c *MultiLLMCoordinator) GetStats() map[string]interface{} {
 	defer c.mu.RUnlock()
 
 	stats := map[string]interface{}{
-		"total_workers":       len(c.Workers),
-		"available_workers":   0,
-		"running_workers":     0,
-		"queue_length":        len(c.WorkQueue),
-		"max_concurrency":     c.Config.MaxConcurrency,
+		"total_workers":     len(c.Workers),
+		"available_workers": 0,
+		"running_workers":   0,
+		"queue_length":      len(c.WorkQueue),
+		"max_concurrency":   c.Config.MaxConcurrency,
 	}
 
 	for _, worker := range c.Workers {

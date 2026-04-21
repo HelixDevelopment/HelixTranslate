@@ -13,14 +13,14 @@ import (
 )
 
 type EventMessage struct {
-	Type         string                 `json:"type"`
-	SessionID    string                 `json:"session_id,omitempty"`
-	Step         string                 `json:"step,omitempty"`
-	Message      string                 `json:"message,omitempty"`
-	Progress     float64                `json:"progress,omitempty"`
-	Error        string                 `json:"error,omitempty"`
-	Data         map[string]interface{} `json:"data,omitempty"`
-	Timestamp    int64                  `json:"timestamp,omitempty"`
+	Type      string                 `json:"type"`
+	SessionID string                 `json:"session_id,omitempty"`
+	Step      string                 `json:"step,omitempty"`
+	Message   string                 `json:"message,omitempty"`
+	Progress  float64                `json:"progress,omitempty"`
+	Error     string                 `json:"error,omitempty"`
+	Data      map[string]interface{} `json:"data,omitempty"`
+	Timestamp int64                  `json:"timestamp,omitempty"`
 }
 
 func main() {
@@ -52,7 +52,7 @@ func main() {
 		Message:   "Demo client connected",
 		Timestamp: time.Now().Unix(),
 	}
-	
+
 	if err := conn.WriteJSON(helloMsg); err != nil {
 		log.Printf("Error sending hello message: %v", err)
 	}
@@ -76,7 +76,7 @@ func main() {
 
 func simulateTranslationProgress(conn *websocket.Conn, sessionID string) {
 	log.Printf("🎬 Starting translation progress simulation...")
-	
+
 	steps := []EventMessage{
 		{Type: "translation_started", SessionID: sessionID, Message: "Translation job started", Timestamp: time.Now().Unix()},
 		{Type: "step_completed", SessionID: sessionID, Step: "parsing", Message: "Input file parsed successfully", Progress: 10, Timestamp: time.Now().Unix()},
@@ -91,14 +91,14 @@ func simulateTranslationProgress(conn *websocket.Conn, sessionID string) {
 
 	for i, step := range steps {
 		time.Sleep(2 * time.Second)
-		
+
 		log.Printf("📤 Sending step %d/%d: %s (progress: %.0f%%)", i+1, len(steps), step.Type, step.Progress)
-		
+
 		if err := conn.WriteJSON(step); err != nil {
 			log.Printf("Error sending step %d: %v", i+1, err)
 			return
 		}
 	}
-	
+
 	log.Printf("🎉 Translation simulation completed!")
 }

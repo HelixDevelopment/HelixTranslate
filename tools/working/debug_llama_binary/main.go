@@ -13,21 +13,21 @@ import (
 func main() {
 	// Initialize SSH worker
 	config := sshworker.SSHWorkerConfig{
-		Host:       "thinker.local",
-		Port:       22,
-		Username:   "milosvasic",
-		Password:   "WhiteSnake8587",
-		RemoteDir:  "/tmp/translate-ssh",
+		Host:              "thinker.local",
+		Port:              22,
+		Username:          "milosvasic",
+		Password:          "WhiteSnake8587",
+		RemoteDir:         "/tmp/translate-ssh",
 		ConnectionTimeout: 30 * time.Second,
-		CommandTimeout: 60 * time.Second,
+		CommandTimeout:    60 * time.Second,
 	}
 
 	loggerConfig := logger.LoggerConfig{
-		Level: logger.INFO,
+		Level:  logger.INFO,
 		Format: logger.FORMAT_TEXT,
 	}
 	log := logger.NewLogger(loggerConfig)
-	
+
 	worker, err := sshworker.NewSSHWorker(config, log)
 	if err != nil {
 		fmt.Printf("Failed to create SSH worker: %v\n", err)
@@ -35,7 +35,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	
+
 	// Connect to worker
 	if err := worker.Connect(ctx); err != nil {
 		fmt.Printf("Failed to connect: %v\n", err)
@@ -61,7 +61,7 @@ print("Testing find_llama_binary function...")
 result = find_llama_binary()
 print(f"Result: {result}")
 `
-	
+
 	fmt.Println("Uploading debug script...")
 	if err := worker.UploadData(ctx, []byte(debugScript), "/tmp/translate-ssh/debug_find_binary.py"); err != nil {
 		fmt.Printf("Failed to upload debug script: %v\n", err)

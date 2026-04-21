@@ -20,10 +20,10 @@ type AnthropicClient struct {
 
 // AnthropicRequest represents Anthropic API request
 type AnthropicRequest struct {
-	Model       string            `json:"model"`
+	Model       string             `json:"model"`
 	Messages    []AnthropicMessage `json:"messages"`
-	MaxTokens   int               `json:"max_tokens"`
-	Temperature float64           `json:"temperature,omitempty"`
+	MaxTokens   int                `json:"max_tokens"`
+	Temperature float64            `json:"temperature,omitempty"`
 }
 
 // AnthropicMessage represents a message in Anthropic format
@@ -34,11 +34,11 @@ type AnthropicMessage struct {
 
 // AnthropicResponse represents Anthropic API response
 type AnthropicResponse struct {
-	ID      string   `json:"id"`
-	Type    string   `json:"type"`
-	Role    string   `json:"role"`
-	Content []Content `json:"content"`
-	Model   string   `json:"model"`
+	ID      string         `json:"id"`
+	Type    string         `json:"type"`
+	Role    string         `json:"role"`
+	Content []Content      `json:"content"`
+	Model   string         `json:"model"`
 	Usage   AnthropicUsage `json:"usage"`
 }
 
@@ -74,7 +74,7 @@ func NewAnthropicClient(config TranslationConfig) (*AnthropicClient, error) {
 			}
 		}
 		if !modelValid {
-			return nil, fmt.Errorf("model '%s' is not valid for Anthropic. Valid models: %v", 
+			return nil, fmt.Errorf("model '%s' is not valid for Anthropic. Valid models: %v",
 				config.Model, validModels)
 		}
 	} else {

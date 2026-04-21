@@ -30,9 +30,9 @@ type MultiPassConfig struct {
 	VerifyVocabulary bool
 
 	// Note-taking configuration
-	EnableNoteTaking     bool
-	MinNoteImportance    ImportanceLevel
-	CarryNotesForward    bool // Carry notes to next pass
+	EnableNoteTaking  bool
+	MinNoteImportance ImportanceLevel
+	CarryNotesForward bool // Carry notes to next pass
 
 	// Database path for persistence
 	DatabasePath string
@@ -51,15 +51,15 @@ type MultiPassPolisher struct {
 
 // PassResult contains results from a single pass
 type PassResult struct {
-	PassNumber   int
-	PassID       string
-	Providers    []string
-	Notes        []*LiteraryNote
-	Results      []*PolishingResult
-	Report       *PolishingReport
-	Duration     time.Duration
-	StartedAt    time.Time
-	CompletedAt  time.Time
+	PassNumber  int
+	PassID      string
+	Providers   []string
+	Notes       []*LiteraryNote
+	Results     []*PolishingResult
+	Report      *PolishingReport
+	Duration    time.Duration
+	StartedAt   time.Time
+	CompletedAt time.Time
 }
 
 // MultiPassResult contains results from all passes
@@ -218,11 +218,11 @@ func (mpp *MultiPassPolisher) PolishBook(
 	}
 
 	mpp.emitProgress("Multi-pass polishing completed", map[string]interface{}{
-		"total_passes":   mpp.config.PassCount,
-		"total_changes":  result.TotalChanges,
-		"total_notes":    len(result.AllNotes.All),
-		"final_score":    result.FinalReport.OverallScore,
-		"duration":       result.Duration.String(),
+		"total_passes":  mpp.config.PassCount,
+		"total_changes": result.TotalChanges,
+		"total_notes":   len(result.AllNotes.All),
+		"final_score":   result.FinalReport.OverallScore,
+		"duration":      result.Duration.String(),
 	})
 
 	return result, nil
@@ -268,12 +268,12 @@ func (mpp *MultiPassPolisher) performPass(
 
 	// Create polishing config for this pass
 	polishingConfig := PolishingConfig{
-		Providers:    providers,
-		MinConsensus: mpp.config.MinConsensus,
-		VerifySpirit:      mpp.config.VerifySpirit,
-		VerifyLanguage:    mpp.config.VerifyLanguage,
-		VerifyContext:     mpp.config.VerifyContext,
-		VerifyVocabulary:  mpp.config.VerifyVocabulary,
+		Providers:          providers,
+		MinConsensus:       mpp.config.MinConsensus,
+		VerifySpirit:       mpp.config.VerifySpirit,
+		VerifyLanguage:     mpp.config.VerifyLanguage,
+		VerifyContext:      mpp.config.VerifyContext,
+		VerifyVocabulary:   mpp.config.VerifyVocabulary,
 		TranslationConfigs: make(map[string]translator.TranslationConfig),
 	}
 

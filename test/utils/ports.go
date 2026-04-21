@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	portMutex   sync.Mutex
-	usedPorts   = make(map[int]bool)
-	nextPort    = 30000 // Start from high port range
+	portMutex sync.Mutex
+	usedPorts = make(map[int]bool)
+	nextPort  = 30000 // Start from high port range
 )
 
 // GetFreePort returns a free port number that can be used for testing
@@ -21,7 +21,7 @@ func GetFreePort() int {
 	for i := 0; i < 100; i++ {
 		port := nextPort
 		nextPort++
-		
+
 		if !isPortUsed(port) {
 			if isPortAvailable(port) {
 				usedPorts[port] = true
@@ -29,19 +29,19 @@ func GetFreePort() int {
 			}
 		}
 	}
-	
+
 	// If we can't find a port in our range, use system-assigned port
 	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
 	if err != nil {
 		panic(err)
 	}
-	
+
 	l, err := net.ListenTCP("tcp", addr)
 	if err != nil {
 		panic(err)
 	}
 	defer l.Close()
-	
+
 	port := l.Addr().(*net.TCPAddr).Port
 	usedPorts[port] = true
 	return port
@@ -65,13 +65,13 @@ func isPortAvailable(port int) bool {
 	if err != nil {
 		return false
 	}
-	
+
 	l, err := net.ListenTCP("tcp", addr)
 	if err != nil {
 		return false
 	}
 	defer l.Close()
-	
+
 	return true
 }
 

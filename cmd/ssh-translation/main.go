@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -23,13 +23,13 @@ import (
 
 // SSHTranslationSystem manages the complete SSH-based translation workflow
 type SSHTranslationSystem struct {
-	logger           logger.Logger
-	sshWorker        *sshworker.SSHWorker
-	versionManager   *version.CodebaseHasher
-	eventManager     *events.EventBus
-	wsHub            *websocket.Hub
-	config           SystemConfig
-	workflowID       string
+	logger         logger.Logger
+	sshWorker      *sshworker.SSHWorker
+	versionManager *version.CodebaseHasher
+	eventManager   *events.EventBus
+	wsHub          *websocket.Hub
+	config         SystemConfig
+	workflowID     string
 }
 
 // SystemConfig holds system configuration
@@ -63,14 +63,14 @@ type LLMProviderConfig struct {
 
 // TranslationProgress tracks translation progress
 type TranslationProgress struct {
-	Phase           string    `json:"phase"`
-	CurrentStep     int       `json:"current_step"`
-	TotalSteps      int       `json:"total_steps"`
-	Message         string    `json:"message"`
-	CurrentFile     string    `json:"current_file"`
-	Timestamp       time.Time `json:"timestamp"`
-	BytesProcessed  int64     `json:"bytes_processed"`
-	TotalBytes      int64     `json:"total_bytes"`
+	Phase          string    `json:"phase"`
+	CurrentStep    int       `json:"current_step"`
+	TotalSteps     int       `json:"total_steps"`
+	Message        string    `json:"message"`
+	CurrentFile    string    `json:"current_file"`
+	Timestamp      time.Time `json:"timestamp"`
+	BytesProcessed int64     `json:"bytes_processed"`
+	TotalBytes     int64     `json:"total_bytes"`
 }
 
 // WorkflowStep represents a step in the translation workflow
@@ -82,19 +82,19 @@ type WorkflowStep struct {
 
 // WorkflowContext contains context for workflow execution
 type WorkflowContext struct {
-	InputFile      string
-	OutputFile     string
-	Workspace      string
-	Progress       *TranslationProgress
-	TempFiles      []string
-	Metadata       map[string]interface{}
+	InputFile  string
+	OutputFile string
+	Workspace  string
+	Progress   *TranslationProgress
+	TempFiles  []string
+	Metadata   map[string]interface{}
 }
 
 func main() {
 	// Initialize logger
 	logFile := filepath.Join("logs", "ssh_translation.log")
 	os.MkdirAll("logs", 0755)
-	
+
 	logger := logger.NewLogger(logger.LoggerConfig{
 		Level:      logger.INFO,
 		Format:     logger.FORMAT_JSON,
@@ -107,7 +107,7 @@ func main() {
 	// Initialize event manager and WebSocket hub if monitoring is enabled
 	var eventManager *events.EventBus
 	var wsHub *websocket.Hub
-	
+
 	eventManager = events.NewEventBus()
 	wsHub = websocket.NewHub(eventManager)
 	go wsHub.Run()
@@ -130,21 +130,21 @@ func main() {
 			MaxRetries: 3,
 			LLMProviders: []LLMProviderConfig{
 				{
-					Name:       "llama.cpp-main",
-					Type:       "llamacpp",
-					BinaryPath: "/usr/local/bin/llama.cpp",
-					ModelPath:  "/models/translation-model.gguf",
-					ModelName:  "translation-model",
-					MaxTokens:  2048,
+					Name:        "llama.cpp-main",
+					Type:        "llamacpp",
+					BinaryPath:  "/usr/local/bin/llama.cpp",
+					ModelPath:   "/models/translation-model.gguf",
+					ModelName:   "translation-model",
+					MaxTokens:   2048,
 					Temperature: 0.3,
 				},
 				{
-					Name:       "llama.cpp-secondary",
-					Type:       "llamacpp",
-					BinaryPath: "/usr/local/bin/llama.cpp",
-					ModelPath:  "/models/translation-model-v2.gguf",
-					ModelName:  "translation-model-v2",
-					MaxTokens:  2048,
+					Name:        "llama.cpp-secondary",
+					Type:        "llamacpp",
+					BinaryPath:  "/usr/local/bin/llama.cpp",
+					ModelPath:   "/models/translation-model-v2.gguf",
+					ModelName:   "translation-model-v2",
+					MaxTokens:   2048,
 					Temperature: 0.4,
 				},
 			},
@@ -190,14 +190,14 @@ func main() {
 			"workflow_id": workflowID,
 			"error":       err.Error(),
 		})
-		
+
 		// Send failure event
 		eventManager.Publish(events.Event{
 			Type:      "workflow_failed",
 			Data:      map[string]interface{}{"error": err.Error()},
 			Timestamp: time.Now(),
 		})
-		
+
 		os.Exit(1)
 	}
 
@@ -252,11 +252,11 @@ func (s *SSHTranslationSystem) ExecuteTranslationWorkflow(ctx context.Context, i
 
 	// Initialize workflow context
 	workflowCtx := &WorkflowContext{
-		InputFile:  inputFile,
-		Workspace:  s.config.Workspace,
-		Progress:   &TranslationProgress{},
-		Metadata:   make(map[string]interface{}),
-		TempFiles:  []string{},
+		InputFile: inputFile,
+		Workspace: s.config.Workspace,
+		Progress:  &TranslationProgress{},
+		Metadata:  make(map[string]interface{}),
+		TempFiles: []string{},
 	}
 
 	// Define workflow steps
@@ -301,7 +301,7 @@ func (s *SSHTranslationSystem) ExecuteTranslationWorkflow(ctx context.Context, i
 	// Execute workflow steps
 	for i, step := range steps {
 		s.updateProgress(step.Name, i, len(steps), step.Description, "")
-		
+
 		s.logger.Info("Executing workflow step", map[string]interface{}{
 			"step":        step.Name,
 			"description": step.Description,
@@ -668,7 +668,7 @@ go build -o markdown-translator ./cmd/markdown-translator
 func (s *SSHTranslationSystem) createCodebaseArchive(outputPath string) error {
 	// Create tar command
 	cmd := fmt.Sprintf("tar -czf %s cmd pkg internal scripts docs go.mod go.sum Makefile VERSION README.md", outputPath)
-	
+
 	// Execute tar command
 	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
 		return err
@@ -834,7 +834,7 @@ func (s *SSHTranslationSystem) translateMarkdownOnRemote(ctx context.Context, wo
 	workflowCtx.Metadata["remote_translated_file"] = remoteTranslatedFile
 
 	s.logger.Info("Remote translation completed", map[string]interface{}{
-		"output": output,
+		"output":      output,
 		"remote_file": remoteTranslatedFile,
 	})
 
@@ -1085,7 +1085,7 @@ func (s *SSHTranslationSystem) verifyOutput(ctx context.Context, workflowCtx *Wo
 	}
 
 	s.logger.Info("Output files verified successfully", map[string]interface{}{
-		"epub_file":    translatedEPUB,
+		"epub_file":     translatedEPUB,
 		"markdown_file": localTranslatedMarkdown,
 	})
 
@@ -1170,7 +1170,7 @@ func (s *SSHTranslationSystem) verifyTranslatedMarkdown(filePath string) error {
 	// Check for Cyrillic characters (Serbian Cyrillic)
 	cyrillicCount := 0
 	totalChars := 0
-	
+
 	for _, r := range contentStr {
 		if r >= 0x0400 && r <= 0x04FF { // Cyrillic range
 			cyrillicCount++
@@ -1182,7 +1182,7 @@ func (s *SSHTranslationSystem) verifyTranslatedMarkdown(filePath string) error {
 
 	// At least 30% of non-ASCII characters should be Cyrillic for Serbian translation
 	if cyrillicCount > 0 && totalChars > 0 {
-		cyrillicRatio := float64(cyrillicCount) / float64(cyrillicCount + totalChars)
+		cyrillicRatio := float64(cyrillicCount) / float64(cyrillicCount+totalChars)
 		if cyrillicRatio < 0.3 {
 			s.logger.Warn("Low Cyrillic character ratio detected", map[string]interface{}{
 				"cyrillic_count": cyrillicCount,
@@ -1257,7 +1257,7 @@ func (s *SSHTranslationSystem) updateProgress(phase string, currentStep, totalSt
 			"message":         s.Progress().Message,
 			"current_file":    s.Progress().CurrentFile,
 			"timestamp":       s.Progress().Timestamp,
-			"bytes_processed":  s.Progress().BytesProcessed,
+			"bytes_processed": s.Progress().BytesProcessed,
 			"total_bytes":     s.Progress().TotalBytes,
 		}
 
@@ -1281,13 +1281,13 @@ func (s *SSHTranslationSystem) Progress() *TranslationProgress {
 	}
 	// For now, create a simple progress object
 	return &TranslationProgress{
-		Phase:           "initialization",
-		CurrentStep:     0,
-		TotalSteps:      7,
-		Message:         "Initializing...",
-		Timestamp:       time.Now(),
-		BytesProcessed:  0,
-		TotalBytes:      0,
+		Phase:          "initialization",
+		CurrentStep:    0,
+		TotalSteps:     7,
+		Message:        "Initializing...",
+		Timestamp:      time.Now(),
+		BytesProcessed: 0,
+		TotalBytes:     0,
 	}
 }
 

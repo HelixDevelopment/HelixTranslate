@@ -44,12 +44,12 @@ func TestPolishingDatabase_SessionLifecycle(t *testing.T) {
 	defer db.Close()
 
 	session := &PolishingSession{
-		SessionID:   "test-session-1",
-		BookID:      "book-123",
-		BookTitle:   "Test Book",
-		StartedAt:   time.Now(),
-		ConfigJSON:  `{"test": "config"}`,
-		Status:      "running",
+		SessionID:  "test-session-1",
+		BookID:     "book-123",
+		BookTitle:  "Test Book",
+		StartedAt:  time.Now(),
+		ConfigJSON: `{"test": "config"}`,
+		Status:     "running",
 	}
 
 	// Test session creation
@@ -113,11 +113,11 @@ func TestPolishingDatabase_PassLifecycle(t *testing.T) {
 
 	// Create session first
 	session := &PolishingSession{
-		SessionID:   "test-session-pass",
-		BookID:      "book-456",
-		BookTitle:   "Pass Test Book",
-		StartedAt:   time.Now(),
-		Status:      "running",
+		SessionID: "test-session-pass",
+		BookID:    "book-456",
+		BookTitle: "Pass Test Book",
+		StartedAt: time.Now(),
+		Status:    "running",
 	}
 	err = db.CreateSession(session)
 	if err != nil {
@@ -190,11 +190,11 @@ func TestPolishingDatabase_Notes(t *testing.T) {
 
 	// Create session and pass
 	session := &PolishingSession{
-		SessionID:   "test-session-notes",
-		BookID:      "book-notes",
-		BookTitle:   "Notes Test Book",
-		StartedAt:   time.Now(),
-		Status:      "running",
+		SessionID: "test-session-notes",
+		BookID:    "book-notes",
+		BookTitle: "Notes Test Book",
+		StartedAt: time.Now(),
+		Status:    "running",
 	}
 	db.CreateSession(session)
 
@@ -208,17 +208,17 @@ func TestPolishingDatabase_Notes(t *testing.T) {
 	db.CreatePass(pass)
 
 	note := &LiteraryNote{
-		ID:          "note-1",
-		SectionID:   "section-123",
-		Location:    "Chapter 1, Page 5",
-		Provider:    "openai",
-		NoteType:    NoteTypeStyle,
-		Importance:  ImportanceCritical,
-		Title:       "Style Issue",
-		Content:     "The style needs improvement",
-		Examples:    []string{"Example 1", "Example 2"},
+		ID:           "note-1",
+		SectionID:    "section-123",
+		Location:     "Chapter 1, Page 5",
+		Provider:     "openai",
+		NoteType:     NoteTypeStyle,
+		Importance:   ImportanceCritical,
+		Title:        "Style Issue",
+		Content:      "The style needs improvement",
+		Examples:     []string{"Example 1", "Example 2"},
 		Implications: "This affects readability",
-		CreatedAt:   time.Now(),
+		CreatedAt:    time.Now(),
 	}
 
 	// Test note saving
@@ -277,11 +277,11 @@ func TestPolishingDatabase_Results(t *testing.T) {
 
 	// Create session and pass
 	session := &PolishingSession{
-		SessionID:   "test-session-results",
-		BookID:      "book-results",
-		BookTitle:   "Results Test Book",
-		StartedAt:   time.Now(),
-		Status:      "running",
+		SessionID: "test-session-results",
+		BookID:    "book-results",
+		BookTitle: "Results Test Book",
+		StartedAt: time.Now(),
+		Status:    "running",
 	}
 	db.CreateSession(session)
 
@@ -368,11 +368,11 @@ func TestPolishingDatabase_SessionStats(t *testing.T) {
 
 	// Create session and pass
 	session := &PolishingSession{
-		SessionID:   "test-session-stats",
-		BookID:      "book-stats",
-		BookTitle:   "Stats Test Book",
-		StartedAt:   time.Now(),
-		Status:      "completed",
+		SessionID: "test-session-stats",
+		BookID:    "book-stats",
+		BookTitle: "Stats Test Book",
+		StartedAt: time.Now(),
+		Status:    "completed",
 	}
 	db.CreateSession(session)
 
@@ -387,22 +387,22 @@ func TestPolishingDatabase_SessionStats(t *testing.T) {
 
 	// Add some test data
 	note := &LiteraryNote{
-		ID:          "note-stats",
-		SectionID:   "section-stats",
-		Provider:    "openai",
-		NoteType:    NoteTypeStyle,
-		Importance:  ImportanceMedium,
-		Title:       "Test Note",
-		Content:     "Test content",
-		CreatedAt:   time.Now(),
+		ID:         "note-stats",
+		SectionID:  "section-stats",
+		Provider:   "openai",
+		NoteType:   NoteTypeStyle,
+		Importance: ImportanceMedium,
+		Title:      "Test Note",
+		Content:    "Test content",
+		CreatedAt:  time.Now(),
 	}
 	db.SaveNote(note, pass.PassID)
 
 	result := &PolishingResult{
-		SectionID:       "section-stats",
-		OverallScore:    8.5,
-		Consensus:       1,
-		Confidence:      0.85,
+		SectionID:    "section-stats",
+		OverallScore: 8.5,
+		Consensus:    1,
+		Confidence:   0.85,
 	}
 	db.SaveResult(result, pass.PassID)
 
@@ -441,12 +441,12 @@ func TestPolishingDatabase_ExportSession(t *testing.T) {
 
 	// Create session and pass
 	session := &PolishingSession{
-		SessionID:   "test-session-export",
-		BookID:      "book-export",
-		BookTitle:   "Export Test Book",
-		StartedAt:   time.Now(),
-		ConfigJSON:  `{"test": "export"}`,
-		Status:      "completed",
+		SessionID:  "test-session-export",
+		BookID:     "book-export",
+		BookTitle:  "Export Test Book",
+		StartedAt:  time.Now(),
+		ConfigJSON: `{"test": "export"}`,
+		Status:     "completed",
 	}
 	db.CreateSession(session)
 
@@ -541,11 +541,11 @@ func BenchmarkPolishingDatabase_CreateSession(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		session := &PolishingSession{
-			SessionID:   fmt.Sprintf("session-%d", i),
-			BookID:      "book-bench",
-			BookTitle:   "Benchmark Book",
-			StartedAt:   time.Now(),
-			Status:      "running",
+			SessionID: fmt.Sprintf("session-%d", i),
+			BookID:    "book-bench",
+			BookTitle: "Benchmark Book",
+			StartedAt: time.Now(),
+			Status:    "running",
 		}
 		db.CreateSession(session)
 	}
@@ -567,11 +567,11 @@ func BenchmarkPolishingDatabase_SaveResult(b *testing.B) {
 
 	// Create session and pass
 	session := &PolishingSession{
-		SessionID:   "bench-session",
-		BookID:      "bench-book",
-		BookTitle:   "Benchmark Book",
-		StartedAt:   time.Now(),
-		Status:      "running",
+		SessionID: "bench-session",
+		BookID:    "bench-book",
+		BookTitle: "Benchmark Book",
+		StartedAt: time.Now(),
+		Status:    "running",
 	}
 	db.CreateSession(session)
 
@@ -588,10 +588,10 @@ func BenchmarkPolishingDatabase_SaveResult(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		result := &PolishingResult{
-			SectionID:       fmt.Sprintf("section-%d", i),
-			OverallScore:    8.5,
-			Consensus:       1,
-			Confidence:      0.85,
+			SectionID:    fmt.Sprintf("section-%d", i),
+			OverallScore: 8.5,
+			Consensus:    1,
+			Confidence:   0.85,
 		}
 		db.SaveResult(result, pass.PassID)
 	}

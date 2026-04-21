@@ -18,7 +18,7 @@ func TestFullPipeline_Integration(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test in short mode")
 	}
-	
+
 	t.Skip("Skipping integration tests that require API keys and model downloads")
 
 	t.Run("Hardware Detection Pipeline", func(t *testing.T) {
@@ -137,7 +137,7 @@ func TestTranslationWorkflow_E2E(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping E2E test in short mode")
 	}
-	
+
 	t.Skip("Skipping E2E tests that require API keys and model downloads")
 
 	t.Run("DeepSeek Translation Workflow", func(t *testing.T) {
@@ -188,10 +188,10 @@ Serbian:`
 	t.Run("LlamaCpp Translation Workflow", func(t *testing.T) {
 		// Try to create client - it will skip if llama.cpp not available
 		config := translator.TranslationConfig{
-			Provider:       "llamacpp",
+			Provider:   "llamacpp",
 			SourceLang: "ru",
 			TargetLang: "sr",
-			Script:         "cyrillic",
+			Script:     "cyrillic",
 		}
 
 		client, err := llm.NewLlamaCppClient(config)
@@ -228,7 +228,7 @@ func TestConfigurationScenarios(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping configuration tests in short mode")
 	}
-	
+
 	t.Skip("Skipping configuration tests that require API keys and model downloads")
 
 	scenarios := []struct {
@@ -240,11 +240,11 @@ func TestConfigurationScenarios(t *testing.T) {
 		{
 			name: "DeepSeek with Cyrillic",
 			config: translator.TranslationConfig{
-				Provider:       "deepseek",
-				Model:          "deepseek-chat",
+				Provider:   "deepseek",
+				Model:      "deepseek-chat",
 				SourceLang: "ru",
 				TargetLang: "sr",
-				Script:         "cyrillic",
+				Script:     "cyrillic",
 			},
 			shouldError: false,
 			skipReason:  "DEEPSEEK_API_KEY",
@@ -252,11 +252,11 @@ func TestConfigurationScenarios(t *testing.T) {
 		{
 			name: "DeepSeek with Latin",
 			config: translator.TranslationConfig{
-				Provider:       "deepseek",
-				Model:          "deepseek-chat",
+				Provider:   "deepseek",
+				Model:      "deepseek-chat",
 				SourceLang: "ru",
 				TargetLang: "sr",
-				Script:         "latin",
+				Script:     "latin",
 			},
 			shouldError: false,
 			skipReason:  "DEEPSEEK_API_KEY",
@@ -264,10 +264,10 @@ func TestConfigurationScenarios(t *testing.T) {
 		{
 			name: "LlamaCpp with Auto Model Selection",
 			config: translator.TranslationConfig{
-				Provider:       "llamacpp",
+				Provider:   "llamacpp",
 				SourceLang: "ru",
 				TargetLang: "sr",
-				Script:         "cyrillic",
+				Script:     "cyrillic",
 			},
 			shouldError: false,
 			skipReason:  "",
@@ -275,7 +275,7 @@ func TestConfigurationScenarios(t *testing.T) {
 		{
 			name: "Invalid Provider",
 			config: translator.TranslationConfig{
-				Provider:       "invalid-provider",
+				Provider:   "invalid-provider",
 				SourceLang: "ru",
 				TargetLang: "sr",
 			},
@@ -362,8 +362,8 @@ func TestErrorHandling(t *testing.T) {
 		}
 
 		config := translator.TranslationConfig{
-			Provider:       "deepseek",
-			Model:          "deepseek-chat",
+			Provider:   "deepseek",
+			Model:      "deepseek-chat",
 			SourceLang: "ru",
 			TargetLang: "sr",
 		}
@@ -391,7 +391,7 @@ func TestConcurrentTranslations(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping concurrent tests in short mode")
 	}
-	
+
 	t.Skip("Skipping concurrent tests that require API keys")
 
 	apiKey := os.Getenv("DEEPSEEK_API_KEY")
@@ -400,8 +400,8 @@ func TestConcurrentTranslations(t *testing.T) {
 	}
 
 	config := translator.TranslationConfig{
-		Provider:       "deepseek",
-		Model:          "deepseek-chat",
+		Provider:   "deepseek",
+		Model:      "deepseek-chat",
 		SourceLang: "ru",
 		TargetLang: "sr",
 	}

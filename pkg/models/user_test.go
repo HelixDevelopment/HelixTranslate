@@ -182,9 +182,9 @@ func TestUserRoles(t *testing.T) {
 		{
 			name: "Admin has admin role",
 			user: User{
-				ID:      "user-123",
-				Email:   "admin@example.com",
-				Roles:   []string{"admin", "user"},
+				ID:       "user-123",
+				Email:    "admin@example.com",
+				Roles:    []string{"admin", "user"},
 				IsActive: true,
 			},
 			role:     "admin",
@@ -193,9 +193,9 @@ func TestUserRoles(t *testing.T) {
 		{
 			name: "Regular user does not have admin role",
 			user: User{
-				ID:      "user-456",
-				Email:   "user@example.com",
-				Roles:   []string{"user"},
+				ID:       "user-456",
+				Email:    "user@example.com",
+				Roles:    []string{"user"},
 				IsActive: true,
 			},
 			role:     "admin",
@@ -204,9 +204,9 @@ func TestUserRoles(t *testing.T) {
 		{
 			name: "User has user role",
 			user: User{
-				ID:      "user-456",
-				Email:   "user@example.com",
-				Roles:   []string{"user"},
+				ID:       "user-456",
+				Email:    "user@example.com",
+				Roles:    []string{"user"},
 				IsActive: true,
 			},
 			role:     "user",
@@ -215,9 +215,9 @@ func TestUserRoles(t *testing.T) {
 		{
 			name: "Inactive user cannot access roles",
 			user: User{
-				ID:      "user-789",
-				Email:   "inactive@example.com",
-				Roles:   []string{"admin", "user"},
+				ID:       "user-789",
+				Email:    "inactive@example.com",
+				Roles:    []string{"admin", "user"},
 				IsActive: false,
 			},
 			role:     "admin",
@@ -244,7 +244,7 @@ func TestUserSession(t *testing.T) {
 
 	// Create session
 	session := CreateUserSession(user, time.Hour)
-	
+
 	assert.NotEmpty(t, session.Token)
 	assert.Equal(t, user.ID, session.UserID)
 	assert.Equal(t, user.Email, session.UserEmail)
@@ -259,7 +259,7 @@ func TestUserSession(t *testing.T) {
 	// Test expired session
 	expiredSession := session
 	expiredSession.ExpiresAt = time.Now().Add(-time.Hour)
-	
+
 	isValid = ValidateSession(expiredSession)
 	assert.False(t, isValid)
 
@@ -271,15 +271,15 @@ func TestUserSession(t *testing.T) {
 
 // Helper function for email validation
 func isValidEmail(email string) bool {
-	return len(email) > 0 && len(email) < 254 && 
-		   len(email) > 3 && 
-		   (email[len(email)-4:] == ".com" || email[len(email)-4:] == ".org" || email[len(email)-4:] == ".net")
+	return len(email) > 0 && len(email) < 254 &&
+		len(email) > 3 &&
+		(email[len(email)-4:] == ".com" || email[len(email)-4:] == ".org" || email[len(email)-4:] == ".net")
 }
 
 // BenchmarkUserCreation benchmarks user creation
 func BenchmarkUserCreation(b *testing.B) {
 	b.ResetTimer()
-	
+
 	for i := 0; i < b.N; i++ {
 		user := User{
 			ID:        "user-" + string(rune(i)),
@@ -291,7 +291,7 @@ func BenchmarkUserCreation(b *testing.B) {
 			UpdatedAt: time.Now(),
 			IsActive:  true,
 		}
-		
+
 		_ = user // Use user to avoid optimization
 	}
 }
@@ -306,7 +306,7 @@ func BenchmarkUserValidation(b *testing.B) {
 	}
 
 	b.ResetTimer()
-	
+
 	for i := 0; i < b.N; i++ {
 		_ = user.ID != "" && user.Username != "" && len(user.Email) > 5
 	}

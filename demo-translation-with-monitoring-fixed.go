@@ -15,15 +15,15 @@ import (
 )
 
 type TranslationEvent struct {
-	Type         string  `json:"type"`
-	SessionID    string  `json:"session_id"`
-	Step         string  `json:"step,omitempty"`
-	Message      string  `json:"message,omitempty"`
-	Progress     float64 `json:"progress,omitempty"`
-	Error        string  `json:"error,omitempty"`
-	CurrentItem  string  `json:"current_item,omitempty"`
-	TotalItems   int     `json:"total_items,omitempty"`
-	Timestamp    int64    `json:"timestamp"`
+	Type        string  `json:"type"`
+	SessionID   string  `json:"session_id"`
+	Step        string  `json:"step,omitempty"`
+	Message     string  `json:"message,omitempty"`
+	Progress    float64 `json:"progress,omitempty"`
+	Error       string  `json:"error,omitempty"`
+	CurrentItem string  `json:"current_item,omitempty"`
+	TotalItems  int     `json:"total_items,omitempty"`
+	Timestamp   int64   `json:"timestamp"`
 }
 
 func main() {
@@ -44,7 +44,7 @@ func main() {
 	} else {
 		defer ws.Close()
 		fmt.Printf("✅ Connected to monitoring server\n")
-		
+
 		// Start listening for messages in background
 		go listenForWebSocketEvents(ws)
 	}
@@ -60,12 +60,12 @@ func main() {
 
 	// Read input file
 	emitEvent(ws, TranslationEvent{
-		Type:       "translation_progress",
-		SessionID:  sessionID,
-		Step:       "reading",
-		Message:    "Reading input file...",
-		Progress:   5,
-		Timestamp:  time.Now().Unix(),
+		Type:      "translation_progress",
+		SessionID: sessionID,
+		Step:      "reading",
+		Message:   "Reading input file...",
+		Progress:  5,
+		Timestamp: time.Now().Unix(),
 	})
 
 	content, err := os.ReadFile(inputFile)
@@ -91,12 +91,12 @@ func main() {
 
 	// Parse and prepare content
 	emitEvent(ws, TranslationEvent{
-		Type:       "translation_progress",
-		SessionID:  sessionID,
-		Step:       "parsing",
-		Message:    "Parsing content structure...",
-		Progress:   15,
-		Timestamp:  time.Now().Unix(),
+		Type:      "translation_progress",
+		SessionID: sessionID,
+		Step:      "parsing",
+		Message:   "Parsing content structure...",
+		Progress:  15,
+		Timestamp: time.Now().Unix(),
 	})
 
 	time.Sleep(1 * time.Second) // Simulate processing time
@@ -114,12 +114,12 @@ func main() {
 
 	// Convert to markdown
 	emitEvent(ws, TranslationEvent{
-		Type:       "translation_progress",
-		SessionID:  sessionID,
-		Step:       "conversion",
-		Message:    "Converting to markdown format...",
-		Progress:   25,
-		Timestamp:  time.Now().Unix(),
+		Type:      "translation_progress",
+		SessionID: sessionID,
+		Step:      "conversion",
+		Message:   "Converting to markdown format...",
+		Progress:  25,
+		Timestamp: time.Now().Unix(),
 	})
 
 	_ = convertToMarkdown(text)
@@ -138,12 +138,12 @@ func main() {
 
 	// Simulate translation progress line by line
 	emitEvent(ws, TranslationEvent{
-		Type:       "translation_progress",
-		SessionID:  sessionID,
-		Step:       "translation",
-		Message:    "Starting translation...",
-		Progress:   35,
-		Timestamp:  time.Now().Unix(),
+		Type:      "translation_progress",
+		SessionID: sessionID,
+		Step:      "translation",
+		Message:   "Starting translation...",
+		Progress:  35,
+		Timestamp: time.Now().Unix(),
 	})
 
 	translatedLines := make([]string, 0, len(lines))
@@ -156,7 +156,7 @@ func main() {
 		translatedLines = append(translatedLines, translatedLine)
 
 		// Calculate progress
-		progress := 35.0 + (float64(i+1)/float64(len(lines)) * 50.0)
+		progress := 35.0 + (float64(i+1) / float64(len(lines)) * 50.0)
 
 		emitEvent(ws, TranslationEvent{
 			Type:        "translation_progress",
@@ -183,12 +183,12 @@ func main() {
 
 	// Generate output
 	emitEvent(ws, TranslationEvent{
-		Type:       "translation_progress",
-		SessionID:  sessionID,
-		Step:       "generation",
-		Message:    "Generating output file...",
-		Progress:   90,
-		Timestamp:  time.Now().Unix(),
+		Type:      "translation_progress",
+		SessionID: sessionID,
+		Step:      "generation",
+		Message:   "Generating output file...",
+		Progress:  90,
+		Timestamp: time.Now().Unix(),
 	})
 
 	translatedMarkdown := strings.Join(translatedLines, "\n")
@@ -226,12 +226,12 @@ func main() {
 
 func connectWebSocket(sessionID string) (*websocket.Conn, error) {
 	u := fmt.Sprintf("ws://localhost:8090/ws?session_id=%s&client_id=demo-translator", sessionID)
-	
+
 	conn, _, err := websocket.DefaultDialer.Dial(u, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to WebSocket: %w", err)
 	}
-	
+
 	return conn, nil
 }
 
@@ -243,7 +243,7 @@ func listenForWebSocketEvents(ws *websocket.Conn) {
 			log.Printf("WebSocket read error: %v", err)
 			return
 		}
-		
+
 		log.Printf("📩 Received WebSocket message: %+v", msg)
 	}
 }
@@ -252,13 +252,13 @@ func emitEvent(ws *websocket.Conn, event TranslationEvent) {
 	if ws == nil {
 		return
 	}
-	
+
 	event.Timestamp = time.Now().Unix()
-	
+
 	if err := ws.WriteJSON(event); err != nil {
 		log.Printf("Failed to emit event: %v", err)
 	}
-	
+
 	fmt.Printf("📤 Event: %s (%.1f%%) - %s\n", event.Type, event.Progress, event.Message)
 }
 
@@ -276,7 +276,7 @@ func emitErrorEvent(ws *websocket.Conn, sessionID, step, message string) {
 func convertToMarkdown(text string) string {
 	lines := strings.Split(text, "\n")
 	var markdownLines []string
-	
+
 	for _, line := range lines {
 		trimmed := strings.TrimSpace(line)
 		if trimmed != "" {
@@ -285,7 +285,7 @@ func convertToMarkdown(text string) string {
 			markdownLines = append(markdownLines, "")
 		}
 	}
-	
+
 	return strings.Join(markdownLines, "\n")
 }
 
@@ -293,34 +293,34 @@ func convertToMarkdown(text string) string {
 func translateDemoText(text string) string {
 	// This is a simplified demo - in reality this would use LLM APIs
 	replacements := map[string]string{
-		"Это":         "Ово",
-		"образец":     "пример",
-		"русского":    "руског",
-		"текста":      "текста",
-		"для":         "за",
-		"проверки":    "проверу",
-		"функции":     "функције",
-		"перевода":    "превода",
-		"Он":          "Он",
-		"содержит":    "садржи",
-		"несколько":   "неколико",
-		"предложений": "реченица",
-		"и":           "и",
-		"подходит":    "одговара",
+		"Это":          "Ово",
+		"образец":      "пример",
+		"русского":     "руског",
+		"текста":       "текста",
+		"для":          "за",
+		"проверки":     "проверу",
+		"функции":      "функције",
+		"перевода":     "превода",
+		"Он":           "Он",
+		"содержит":     "садржи",
+		"несколько":    "неколико",
+		"предложений":  "реченица",
+		"и":            "и",
+		"подходит":     "одговара",
 		"тестирования": "тестирања",
-		"Текст":       "Текст",
-		"включает":    "укључује",
-		"различные":   "различите",
-		"знаки":      "знакове",
-		"препинания":  "знаке",
-		"структуры":   "структуре",
-		".":           ".",
+		"Текст":        "Текст",
+		"включает":     "укључује",
+		"различные":    "различите",
+		"знаки":        "знакове",
+		"препинания":   "знаке",
+		"структуры":    "структуре",
+		".":            ".",
 	}
-	
+
 	result := text
 	for russian, serbian := range replacements {
 		result = strings.ReplaceAll(result, russian, serbian)
 	}
-	
+
 	return result
 }

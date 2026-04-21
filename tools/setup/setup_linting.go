@@ -8,7 +8,7 @@ import (
 
 func main() {
 	fmt.Println("Installing golangci-lint...")
-	
+
 	// Install golangci-lint
 	cmd := exec.Command("go", "install", "github.com/golangci/golangci-lint/cmd/golangci-lint@latest")
 	cmd.Stdout = os.Stdout
@@ -17,9 +17,9 @@ func main() {
 		fmt.Printf("Failed to install golangci-lint: %v\n", err)
 		os.Exit(1)
 	}
-	
+
 	fmt.Println("golangci-lint installed successfully!")
-	
+
 	// Initialize config if not exists
 	if _, err := os.Stat(".golangci.yml"); os.IsNotExist(err) {
 		fmt.Println("Initializing golangci-lint config...")
@@ -30,7 +30,7 @@ func main() {
 			fmt.Printf("Failed to initialize config: %v\n", err)
 		}
 	}
-	
+
 	// Run linting
 	fmt.Println("Running linter...")
 	lintCmd := exec.Command("golangci-lint", "run", "./...")
@@ -40,6 +40,6 @@ func main() {
 		fmt.Printf("Linting found issues: %v\n", err)
 		os.Exit(1)
 	}
-	
+
 	fmt.Println("Linting completed successfully!")
 }

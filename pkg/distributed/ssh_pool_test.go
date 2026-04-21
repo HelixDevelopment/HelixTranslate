@@ -183,7 +183,7 @@ func TestSSHPoolBasicOperations(t *testing.T) {
 	// Test reusing existing connection
 	client2, err := pool.GetConnection(ctx, "test.example.com:22", config)
 	assert.NoError(t, err)
-	_ = client2  // Avoid unused variable warning
+	_ = client2 // Avoid unused variable warning
 	// In mock context, both clients will be nil but represent the same "connection"
 
 	stats = pool.GetStats()

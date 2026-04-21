@@ -119,14 +119,14 @@ func TestSimpleWorkflow_ConvertToMarkdown(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create EPUB: %v", err)
 	}
-	
+
 	// Debug: Save EPUB for inspection
 	debugEPUB := "/tmp/debug_workflow_test.epub"
 	if err := copyFile(inputPath, debugEPUB); err != nil {
 		t.Logf("Warning: Failed to save debug EPUB: %v", err)
 	} else {
 		t.Logf("Debug EPUB saved to: %s", debugEPUB)
-		
+
 		// Check format detection
 		detector := format.NewDetector()
 		if detectedFormat, err := detector.DetectFile(inputPath); err == nil {
@@ -213,9 +213,9 @@ This document contains various elements that should be translated.
 	mockLLM := &MockLLMClient{
 		responses: map[string]string{
 			"This is a test paragraph with some English text.": "Ово је тестни параграф са енглеским текстом.",
-			"Another paragraph for translation testing.":          "Још један параграф за тестирање превода.",
+			"Another paragraph for translation testing.":       "Још један параграф за тестирање превода.",
 			"List item 1": "Ставка 1",
-			"List item 2": "Ставка 2", 
+			"List item 2": "Ставка 2",
 			"List item 3": "Ставка 3",
 			"This document contains various elements that should be translated.": "Овај документ садржи разне елементе који треба превести.",
 		},
@@ -437,11 +437,11 @@ func TestSimpleWorkflow_EndToEndWorkflow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create EPUB: %v", err)
 	}
-	
+
 	// Create mock LLM client
 	mockLLM := &MockLLMClient{
 		responses: map[string]string{
-			"This is a test chapter for end-to-end workflow testing.": "Ово је тестно поглавље за тестирање крај-до-крај радног тока.",
+			"This is a test chapter for end-to-end workflow testing.":           "Ово је тестно поглавље за тестирање крај-до-крај радног тока.",
 			"It contains multiple paragraphs to test the translation pipeline.": "Садржи више пасуса за тестирање линије превода.",
 		},
 	}
@@ -581,9 +581,9 @@ This document contains multiple paragraphs.
 
 	// Create mock LLM client that delays
 	mockLLM := &MockLLMClient{
-		delay:      100 * time.Millisecond,
+		delay: 100 * time.Millisecond,
 		responses: map[string]string{
-			"This is a test paragraph.": "Ово је тестни параграф.",
+			"This is a test paragraph.":      "Ово је тестни параграф.",
 			"Another paragraph for testing.": "Још један параграф за тестирање.",
 		},
 	}
@@ -698,7 +698,7 @@ This document contains multiple paragraphs for benchmarking.
 
 	mockLLM := &MockLLMClient{
 		responses: map[string]string{
-			"This is a test paragraph.": "Ово је тестни параграф.",
+			"This is a test paragraph.":      "Ово је тестни параграф.",
 			"Another paragraph for testing.": "Још један параграф за тестирање.",
 		},
 	}

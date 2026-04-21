@@ -69,12 +69,12 @@ func TestInputValidation(t *testing.T) {
 
 		// Test with special characters
 		specialChars := []string{
-			"model\x00name",     // Null byte
-			"model\nname",        // Newline
-			"model;rm -rf /",     // Command injection attempt
+			"model\x00name",         // Null byte
+			"model\nname",           // Newline
+			"model;rm -rf /",        // Command injection attempt
 			"model|cat /etc/passwd", // Pipe
-			"model`whoami`",      // Backtick
-			"model$(whoami)",     // Command substitution
+			"model`whoami`",         // Backtick
+			"model$(whoami)",        // Command substitution
 		}
 
 		for _, id := range specialChars {
@@ -94,8 +94,8 @@ func TestAPIKeyExposure(t *testing.T) {
 	defer os.Unsetenv("DEEPSEEK_API_KEY")
 
 	config := translator.TranslationConfig{
-		Provider:       "deepseek",
-		Model:          "deepseek-chat",
+		Provider:   "deepseek",
+		Model:      "deepseek-chat",
 		SourceLang: "ru",
 		TargetLang: "sr",
 	}

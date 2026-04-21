@@ -15,15 +15,15 @@ import (
 // TestVerificationConfig tests the VerificationConfig structure
 func TestVerificationConfig(t *testing.T) {
 	config := VerificationConfig{
-		StrictMode:          true,
+		StrictMode:           true,
 		EnableQualityCheck:   true,
 		EnableIssueDetection: true,
 		EnableContext:        true,
 		EnableSpellCheck:     true,
 		EnableGrammarCheck:   true,
-		MinQualityScore:     0.8,
-		MinScore:           0.8, // Alias
-		AllowedLanguages:    []string{"en", "es", "fr"},
+		MinQualityScore:      0.8,
+		MinScore:             0.8, // Alias
+		AllowedLanguages:     []string{"en", "es", "fr"},
 	}
 
 	assert.True(t, config.StrictMode)
@@ -58,14 +58,14 @@ func TestVerificationRequest(t *testing.T) {
 // TestQualityMetrics tests the QualityMetrics structure
 func TestQualityMetrics(t *testing.T) {
 	metrics := QualityMetrics{
-		LengthRatio:        1.2,
-		WordCountRatio:     1.1,
+		LengthRatio:         1.2,
+		WordCountRatio:      1.1,
 		VocabularyDiversity: 0.8,
-		Accuracy:           0.9,
-		Fluency:            0.85,
-		Consistency:        0.95,
-		Completeness:       0.92,
-		Overall:            0.905,
+		Accuracy:            0.9,
+		Fluency:             0.85,
+		Consistency:         0.95,
+		Completeness:        0.92,
+		Overall:             0.905,
 	}
 
 	assert.Equal(t, 1.2, metrics.LengthRatio)
@@ -78,7 +78,7 @@ func TestQualityMetrics(t *testing.T) {
 // TestUntranslatedBlock tests the UntranslatedBlock structure
 func TestUntranslatedBlock(t *testing.T) {
 	block := UntranslatedBlock{
-		Location:    "Chapter 1, Section 2",
+		Location:     "Chapter 1, Section 2",
 		OriginalText: "Hello world",
 		Language:     "en",
 		Length:       11,
@@ -121,13 +121,13 @@ func TestVerificationIssue(t *testing.T) {
 // TestVerificationResult tests the VerificationResult structure
 func TestVerificationResult(t *testing.T) {
 	result := VerificationResult{
-		IsValid:            false,
-		QualityScore:       0.7,
-		Score:              0.7, // Alias
-		ContextConsidered:  true,
+		IsValid:           false,
+		QualityScore:      0.7,
+		Score:             0.7, // Alias
+		ContextConsidered: true,
 		UntranslatedBlocks: []UntranslatedBlock{
 			{
-				Location:    "Chapter 1",
+				Location:     "Chapter 1",
 				OriginalText: "Hello",
 				Language:     "en",
 				Length:       5,
@@ -139,8 +139,8 @@ func TestVerificationResult(t *testing.T) {
 				Type:    "tag",
 			},
 		},
-		Warnings:     []string{"Test warning"},
-		Errors:       []string{"Test error"},
+		Warnings: []string{"Test warning"},
+		Errors:   []string{"Test error"},
 		Issues: []VerificationIssue{
 			{
 				Type:        "test_issue",
@@ -169,8 +169,8 @@ func TestNewVerifierWithConfig(t *testing.T) {
 	eventBus := events.NewEventBus()
 	sessionID := "test-session"
 	config := VerificationConfig{
-		StrictMode:        true,
-		MinQualityScore:   0.9,
+		StrictMode:         true,
+		MinQualityScore:    0.9,
 		EnableSpellCheck:   true,
 		EnableGrammarCheck: true,
 	}
@@ -390,7 +390,7 @@ func TestVerifier_VerifyBook_ContentTranslation(t *testing.T) {
 				Title: "Глава 1", // Russian title
 				Sections: []ebook.Section{
 					{
-						Title:   "Раздел 1", // Russian title
+						Title:   "Раздел 1",                                                                                                                 // Russian title
 						Content: "Это тестовый контент на русском языке, который должен быть обнаружен как непереведенный. Содержит русские буквы ъ, ы, э.", // Russian content with specific letters
 					},
 				},
@@ -401,12 +401,12 @@ func TestVerifier_VerifyBook_ContentTranslation(t *testing.T) {
 	result, err := verifier.VerifyBook(context.Background(), book)
 	require.NoError(t, err)
 	assert.NotNil(t, result)
-	
+
 	// Print result details for debugging
 	t.Logf("Errors: %v", result.Errors)
 	t.Logf("UntranslatedBlocks: %d", len(result.UntranslatedBlocks))
 	t.Logf("Warnings: %d", len(result.Warnings))
-	
+
 	// Check that verification actually detected untranslated content
 	detectedIssues := len(result.Errors) > 0 || len(result.UntranslatedBlocks) > 0 || len(result.Warnings) > 0
 	assert.True(t, detectedIssues, "Should detect untranslated Russian content when translating to Serbian")
@@ -423,7 +423,7 @@ func TestVerifier_DetectHTMLArtifacts(t *testing.T) {
 	artifacts := verifier.detectHTMLArtifacts(content)
 
 	assert.Greater(t, len(artifacts), 0)
-	
+
 	// Check for different types of artifacts
 	hasTags := false
 	hasEntities := false
@@ -441,7 +441,7 @@ func TestVerifier_DetectHTMLArtifacts(t *testing.T) {
 	content = "This &amp; that &lt; these &gt; those"
 	artifacts = verifier.detectHTMLArtifacts(content)
 	assert.Greater(t, len(artifacts), 0)
-	
+
 	for _, artifact := range artifacts {
 		if artifact.Type == "entity" {
 			hasEntities = true
@@ -459,7 +459,7 @@ func TestVerifier_SplitIntoParagraphs(t *testing.T) {
 	// Test normal paragraph splitting
 	content := "First paragraph.\n\nSecond paragraph.\n\n\nThird paragraph."
 	paragraphs := verifier.splitIntoParagraphs(content)
-	
+
 	assert.Len(t, paragraphs, 3)
 	assert.Equal(t, "First paragraph.", paragraphs[0])
 	assert.Equal(t, "Second paragraph.", paragraphs[1])

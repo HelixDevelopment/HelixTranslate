@@ -24,7 +24,7 @@ func (m *MockTranslator) Translate(ctx context.Context, text, context string) (s
 	if m.err != nil {
 		return "", m.err
 	}
-	
+
 	// Check if this is a chapter analysis prompt and extract chapter number
 	if strings.Contains(text, "You are analyzing Chapter") && strings.Contains(text, "for translation preparation") {
 		// Extract chapter number from the first line which contains "Chapter X"
@@ -61,7 +61,7 @@ func (m *MockTranslator) Translate(ctx context.Context, text, context string) (s
 			"special_notes": "special note"
 		}`, nil
 	}
-	
+
 	return m.response, nil
 }
 
@@ -81,7 +81,7 @@ func TestNewPreparationCoordinator(t *testing.T) {
 	// Set API key for testing
 	os.Setenv("OPENAI_API_KEY", "test-key-for-testing")
 	defer os.Unsetenv("OPENAI_API_KEY")
-	
+
 	tests := []struct {
 		name        string
 		config      PreparationConfig
@@ -93,7 +93,7 @@ func TestNewPreparationCoordinator(t *testing.T) {
 				SourceLanguage: "en",
 				TargetLanguage: "es",
 				PassCount:      2,
-				Providers:      []string{"openai"},  // Use a valid provider
+				Providers:      []string{"openai"},     // Use a valid provider
 				APIKey:         "test-key-for-testing", // Set API key in config
 			},
 			expectError: false,
@@ -103,7 +103,7 @@ func TestNewPreparationCoordinator(t *testing.T) {
 			config: PreparationConfig{
 				SourceLanguage: "en",
 				TargetLanguage: "es",
-				Providers:      []string{"openai"},  // Use a valid provider
+				Providers:      []string{"openai"},     // Use a valid provider
 				APIKey:         "test-key-for-testing", // Set API key in config
 			},
 			expectError: false,
@@ -300,7 +300,7 @@ func TestPreparationCoordinator_analyzeChapters(t *testing.T) {
 	for _, analysis := range analyses {
 		chapterNums[analysis.ChapterNum] = true
 	}
-	
+
 	if !chapterNums[1] {
 		t.Error("Missing Chapter 1")
 	}

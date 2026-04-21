@@ -13,21 +13,21 @@ import (
 func main() {
 	// Initialize SSH worker
 	config := sshworker.SSHWorkerConfig{
-		Host:       "thinker.local",
-		Port:       22,
-		Username:   "milosvasic",
-		Password:   "WhiteSnake8587",
-		RemoteDir:  "/tmp/translate-ssh",
+		Host:              "thinker.local",
+		Port:              22,
+		Username:          "milosvasic",
+		Password:          "WhiteSnake8587",
+		RemoteDir:         "/tmp/translate-ssh",
 		ConnectionTimeout: 30 * time.Second,
-		CommandTimeout: 60 * time.Second,
+		CommandTimeout:    60 * time.Second,
 	}
 
 	loggerConfig := logger.LoggerConfig{
-		Level: logger.INFO,
+		Level:  logger.INFO,
 		Format: logger.FORMAT_TEXT,
 	}
 	log := logger.NewLogger(loggerConfig)
-	
+
 	worker, err := sshworker.NewSSHWorker(config, log)
 	if err != nil {
 		fmt.Printf("Failed to create SSH worker: %v\n", err)
@@ -35,7 +35,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	
+
 	// Connect to worker
 	if err := worker.Connect(ctx); err != nil {
 		fmt.Printf("Failed to connect: %v\n", err)
@@ -51,8 +51,8 @@ func main() {
 	}
 
 	// Execute the test command
-	fullCommand := fmt.Sprintf("cd /tmp/translate-ssh && python3 test_translation_debug.py")
-	
+	fullCommand := "cd /tmp/translate-ssh && python3 test_translation_debug.py"
+
 	result, err := worker.ExecuteCommand(ctx, fullCommand)
 	if err != nil {
 		fmt.Printf("Failed to execute command: %v\n", err)

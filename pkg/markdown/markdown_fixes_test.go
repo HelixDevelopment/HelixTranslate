@@ -33,9 +33,9 @@ func copyFile(src, dst string) error {
 // This was the critical bug where HTML tags appeared as literal text in EPUB
 func TestDoubleEscapingBugFix(t *testing.T) {
 	tests := []struct {
-		name           string
-		markdown       string
-		shouldContain  []string
+		name             string
+		markdown         string
+		shouldContain    []string
 		shouldNotContain []string
 	}{
 		{
@@ -132,27 +132,27 @@ func TestCodeBlockHandling(t *testing.T) {
 		wantCode string
 	}{
 		{
-			name: "Simple code block",
+			name:     "Simple code block",
 			markdown: "```\ncode here\n```",
 			wantCode: "<pre><code>code here</code></pre>",
 		},
 		{
-			name: "Code block with language",
+			name:     "Code block with language",
 			markdown: "```go\nfunc main() {}\n```",
 			wantCode: "func main() {}",
 		},
 		{
-			name: "Multiple code blocks",
+			name:     "Multiple code blocks",
 			markdown: "```\nfirst\n```\n\nText\n\n```\nsecond\n```",
 			wantCode: "first",
 		},
 		{
-			name: "Code block with special characters",
+			name:     "Code block with special characters",
 			markdown: "```\n<html>\n  &copy;\n```",
 			wantCode: "&lt;html&gt;",
 		},
 		{
-			name: "Code block should not process markdown",
+			name:     "Code block should not process markdown",
 			markdown: "```\n**this should not be bold**\n*this should not be italic*\n```",
 			wantCode: "**this should not be bold**",
 		},
@@ -246,7 +246,7 @@ func TestEscapingOrder(t *testing.T) {
 				"&lt;strong&gt;", // HTML tags should not be escaped
 			},
 		},
-			// Note: Link conversion to <a> tags is not yet implemented
+		// Note: Link conversion to <a> tags is not yet implemented
 		// Links remain as markdown [text](url) format
 		{
 			name:  "Links should preserve markdown format",
@@ -300,7 +300,7 @@ func createTestEPUB(book *ebook.Book, outputPath string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create mimetype entry: %w", err)
 	}
-	
+
 	if _, err := mimeTypeWriter.Write([]byte("application/epub+zip")); err != nil {
 		return fmt.Errorf("failed to write mimetype: %w", err)
 	}
@@ -337,7 +337,7 @@ func createTestEPUB(book *ebook.Book, outputPath string) error {
 				content.WriteString("\n\n")
 			}
 		}
-		
+
 		// Convert chapter content to valid XHTML
 		xhtml := convertMarkdownToXHTML(content.String())
 		if _, err := writer.Write([]byte(xhtml)); err != nil {
@@ -361,7 +361,7 @@ func writeContainerXML(zw *zip.Writer) error {
     <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
   </rootfiles>
 </container>`
-	
+
 	_, err = writer.Write([]byte(container))
 	return err
 }
@@ -378,7 +378,7 @@ func writeContentOPF(zw *zip.Writer, book *ebook.Book) error {
 <package xmlns="http://www.idpf.org/2007/opf" version="2.0" unique-identifier="BookID">
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
 `)
-	
+
 	// Metadata
 	opf.WriteString(fmt.Sprintf("    <dc:title>%s</dc:title>\n", escapeXML(book.Metadata.Title)))
 	for _, author := range book.Metadata.Authors {
@@ -403,7 +403,7 @@ func writeContentOPF(zw *zip.Writer, book *ebook.Book) error {
 	}
 	opf.WriteString("  </spine>\n")
 	opf.WriteString("</package>")
-	
+
 	_, err = writer.Write([]byte(opf.String()))
 	return err
 }
@@ -432,7 +432,7 @@ func writeTOC(zw *zip.Writer, book *ebook.Book) error {
   </docTitle>
   <navMap>
 `)
-	
+
 	for i, chapter := range book.Chapters {
 		playOrder := i + 1
 		ncx.WriteString(fmt.Sprintf("    <navPoint id=\"navPoint-%d\" playOrder=\"%d\">\n", playOrder, playOrder))
@@ -442,10 +442,10 @@ func writeTOC(zw *zip.Writer, book *ebook.Book) error {
 		ncx.WriteString(fmt.Sprintf("      <content src=\"chapter%d.xhtml\"/>\n", playOrder))
 		ncx.WriteString("    </navPoint>\n")
 	}
-	
+
 	ncx.WriteString(`  </navMap>
 </ncx>`)
-	
+
 	_, err = writer.Write([]byte(ncx.String()))
 	return err
 }
@@ -491,7 +491,7 @@ with special <chars>
 
 Normal paragraph after code.
 `
-	
+
 	if err := os.WriteFile(sourceMD, []byte(mdContent), 0644); err != nil {
 		t.Fatalf("Failed to write source markdown: %v", err)
 	}
@@ -511,7 +511,7 @@ Normal paragraph after code.
 	if err := mdToEpub.ConvertMarkdownToEPUB(translatedMD, outputEPUB); err != nil {
 		t.Fatalf("Failed to convert MD to EPUB: %v", err)
 	}
-	
+
 	// Debug: Save EPUB for inspection
 	debugEPUB := "/tmp/debug_test.epub"
 	if err := copyFile(outputEPUB, debugEPUB); err != nil {
@@ -522,13 +522,13 @@ Normal paragraph after code.
 
 	// Step 4: Parse output and verify formatting
 	parser := ebook.NewUniversalParser()
-	
+
 	// Check what format is detected
 	detector := format.NewDetector()
 	if detectedFormat, err := detector.DetectFile(outputEPUB); err == nil {
 		t.Logf("Detected format: %s", detectedFormat.String())
 	}
-	
+
 	resultBook, err := parser.Parse(outputEPUB)
 	if err != nil {
 		t.Fatalf("Failed to parse output EPUB: %v", err)
@@ -690,22 +690,22 @@ func TestEmptyAndEdgeCasesWithFixes(t *testing.T) {
 func createSimpleEPUBForTest(book *ebook.Book, outputPath string) error {
 	// Use the MarkdownToEPUBConverter which creates valid EPUBs
 	converter := NewMarkdownToEPUBConverter()
-	
+
 	// Create a markdown representation of the book
 	var md strings.Builder
-	
+
 	// Add frontmatter
 	md.WriteString(fmt.Sprintf("---\ntitle: %s\n", book.Metadata.Title))
 	if len(book.Metadata.Authors) > 0 {
 		md.WriteString(fmt.Sprintf("authors: %s\n", strings.Join(book.Metadata.Authors, ", ")))
 	}
 	md.WriteString("---\n\n")
-	
+
 	// Add expected format after frontmatter (title, author, separators)
 	md.WriteString(fmt.Sprintf("# %s\n\n", book.Metadata.Title))
 	md.WriteString(fmt.Sprintf("**%s**\n\n", strings.Join(book.Metadata.Authors, ", ")))
 	md.WriteString("---\n\n")
-	
+
 	// Add chapters
 	for _, chapter := range book.Chapters {
 		md.WriteString(fmt.Sprintf("# %s\n\n", chapter.Title))
@@ -713,18 +713,18 @@ func createSimpleEPUBForTest(book *ebook.Book, outputPath string) error {
 			md.WriteString(fmt.Sprintf("%s\n\n", section.Content))
 		}
 	}
-	
+
 	// Write to temporary markdown file
 	tmpMd := outputPath + ".md"
 	if err := os.WriteFile(tmpMd, []byte(md.String()), 0644); err != nil {
 		return err
 	}
-	
+
 	// Convert markdown to EPUB
 	err := converter.ConvertMarkdownToEPUB(tmpMd, outputPath)
-	
+
 	// Remove temp markdown AFTER conversion
 	os.Remove(tmpMd)
-	
+
 	return err
 }

@@ -140,7 +140,7 @@ func TestMultiLLMTranslatorWrapper_Translate(t *testing.T) {
 
 func TestMultiLLMTranslatorWrapper_TranslateWithProgress(t *testing.T) {
 	eventBus := events.NewEventBus()
-	
+
 	// Create a mock coordinator
 	coordinator := &MultiLLMCoordinator{
 		instances: []*LLMInstance{

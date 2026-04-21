@@ -15,11 +15,11 @@ import (
 
 	"digital.vasic.translator/internal/cache"
 	"digital.vasic.translator/internal/config"
+	"digital.vasic.translator/pkg/events"
+	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/pkg/security"
 	"digital.vasic.translator/pkg/websocket"
-	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/test/mocks"
-	"digital.vasic.translator/pkg/events"
 )
 
 // TestGetStatsHandlerExtended tests the getStats handler to improve coverage
@@ -56,10 +56,10 @@ func TestGetStatsHandlerExtended(t *testing.T) {
 			eventBus := events.NewEventBus()
 			testHub := websocket.NewHub(eventBus)
 			testLogger := logger.NewLogger(logger.LoggerConfig{})
-			
+
 			// Create config for handler
 			cfg := &config.Config{}
-			
+
 			// Create auth service for handler
 			authService := security.NewUserAuthService("test-secret-key-16-chars", 24*time.Hour, nil)
 
@@ -88,11 +88,11 @@ func TestGetStatsHandlerExtended(t *testing.T) {
 				var response map[string]interface{}
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				require.NoError(t, err)
-				
+
 				// Check response structure
 				assert.Contains(t, response, "cache")
 				assert.Contains(t, response, "websocket")
-				
+
 				wsData := response["websocket"].(map[string]interface{})
 				assert.Contains(t, wsData, "connected_clients")
 			}
@@ -134,10 +134,10 @@ func TestWebSocketHandlerExtended(t *testing.T) {
 			eventBus := events.NewEventBus()
 			testHub := websocket.NewHub(eventBus)
 			testLogger := logger.NewLogger(logger.LoggerConfig{})
-			
+
 			// Create config for handler
 			cfg := &config.Config{}
-			
+
 			// Create auth service for handler
 			authService := security.NewUserAuthService("test-secret-key-16-chars", 24*time.Hour, nil)
 
@@ -390,20 +390,20 @@ func TestTranslateTextWithMoreCases(t *testing.T) {
 			cache := cache.NewCache(5*time.Minute, false)
 			eventBus := events.NewEventBus()
 			testHub := websocket.NewHub(eventBus)
-			
+
 			// Create config for handler
 			cfg := &config.Config{}
-			
+
 			// Create auth service for handler
 			authService := security.NewUserAuthService("test-secret-key-16-chars", 24*time.Hour, nil)
-			
+
 			handler := NewHandler(cfg, eventBus, cache, authService, testHub, mockTranslator)
 
 			// Remove the failing SetTranslator call since we're passing it as distributedManager
 			w := httptest.NewRecorder()
 			req := httptest.NewRequest("POST", "/api/translate", strings.NewReader(tt.requestBody))
 			req.Header.Set("Content-Type", "application/json")
-			
+
 			c, _ := gin.CreateTestContext(w)
 			c.Request = req
 
@@ -456,13 +456,13 @@ func TestTranslateFB2WithMoreCases(t *testing.T) {
 			cache := cache.NewCache(5*time.Minute, false)
 			eventBus := events.NewEventBus()
 			testHub := websocket.NewHub(eventBus)
-			
+
 			// Create config for handler
 			cfg := &config.Config{}
-			
+
 			// Create auth service for handler
 			authService := security.NewUserAuthService("test-secret-key-16-chars", 24*time.Hour, nil)
-			
+
 			handler := NewHandler(cfg, eventBus, cache, authService, testHub, mockTranslator)
 
 			w := httptest.NewRecorder()

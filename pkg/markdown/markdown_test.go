@@ -422,12 +422,12 @@ func TestEPUBToMarkdownCoverPreservation(t *testing.T) {
 	if err := createSimpleEPUB(book, epubPath); err != nil {
 		t.Fatalf("Failed to write EPUB: %v", err)
 	}
-	
+
 	// Check if the EPUB is properly created
 	if out, err := exec.Command("unzip", "-l", epubPath).CombinedOutput(); err == nil {
 		t.Logf("EPUB contents:\n%s", string(out))
 	}
-	
+
 	// Check what's inside the temp directory
 	if files, err := os.ReadDir(tmpDir); err == nil {
 		t.Logf("Files in temp dir:")
@@ -442,7 +442,7 @@ func TestEPUBToMarkdownCoverPreservation(t *testing.T) {
 		t.Logf("Warning: Failed to save debug EPUB: %v", err)
 	} else {
 		t.Logf("Debug EPUB saved to: %s", debugEPUB)
-		
+
 		// Check what's inside
 		detector := format.NewDetector()
 		if detectedFormat, err := detector.DetectFile(epubPath); err == nil {
@@ -452,7 +452,7 @@ func TestEPUBToMarkdownCoverPreservation(t *testing.T) {
 			t.Logf("Detected format of copy: %s", detectedFormat.String())
 		}
 	}
-	
+
 	// Check what's actually in the EPUB
 	if err := os.WriteFile("/tmp/debug_cover_filelist.txt", []byte(fmt.Sprintf("Listing files in %s\n", epubPath)), 0644); err == nil {
 		bash := func(cmd string) string {
@@ -467,7 +467,7 @@ func TestEPUBToMarkdownCoverPreservation(t *testing.T) {
 
 	// Convert to markdown
 	converter := NewEPUBToMarkdownConverter(false, "")
-	
+
 	// Debug: Check what UniversalParser sees
 	parser := ebook.NewUniversalParser()
 	detector := format.NewDetector()
@@ -484,7 +484,7 @@ func TestEPUBToMarkdownCoverPreservation(t *testing.T) {
 			t.Log("Parser did not find cover")
 		}
 	}
-	
+
 	if err := converter.ConvertEPUBToMarkdown(epubPath, mdPath); err != nil {
 		t.Fatalf("Failed to convert EPUB to Markdown: %v", err)
 	}
@@ -568,21 +568,21 @@ Test content
 	// if len(book.Metadata.Cover) != 4 {
 	// 	t.Errorf("Cover size mismatch: got %d, want 4", len(book.Metadata.Cover))
 	// }
-	
+
 	// For now, just verify the EPUB file was created and is a valid ZIP
 	epubFile, err := os.Open(epubPath)
 	if err != nil {
 		t.Fatalf("Failed to open output EPUB: %v", err)
 	}
 	defer epubFile.Close()
-	
+
 	// Check ZIP signature
 	sig := make([]byte, 4)
 	_, err = epubFile.Read(sig)
 	if err != nil {
 		t.Fatalf("Failed to read EPUB signature: %v", err)
 	}
-	
+
 	if sig[0] != 0x50 || sig[1] != 0x4B {
 		t.Errorf("Output file is not a valid ZIP/EPUB file")
 	}
@@ -724,10 +724,10 @@ func TestImageDirectoryCreation(t *testing.T) {
 func createSimpleEPUB(book *ebook.Book, outputPath string) error {
 	// Use the MarkdownToEPUBConverter which creates valid EPUBs
 	converter := NewMarkdownToEPUBConverter()
-	
+
 	// Create a markdown representation of the book
 	var md strings.Builder
-	
+
 	// Add frontmatter
 	md.WriteString(fmt.Sprintf("---\ntitle: %s\n", book.Metadata.Title))
 	if len(book.Metadata.Authors) > 0 {
@@ -750,12 +750,12 @@ func createSimpleEPUB(book *ebook.Book, outputPath string) error {
 		md.WriteString("cover: cover.jpg\n")
 	}
 	md.WriteString("---\n\n")
-	
+
 	// Add expected format after frontmatter (title, author, separators)
 	md.WriteString(fmt.Sprintf("# %s\n\n", book.Metadata.Title))
 	md.WriteString(fmt.Sprintf("**%s**\n\n", strings.Join(book.Metadata.Authors, ", ")))
 	md.WriteString("---\n\n")
-	
+
 	// Add chapters
 	for _, chapter := range book.Chapters {
 		md.WriteString(fmt.Sprintf("# %s\n\n", chapter.Title))
@@ -763,13 +763,13 @@ func createSimpleEPUB(book *ebook.Book, outputPath string) error {
 			md.WriteString(fmt.Sprintf("%s\n\n", section.Content))
 		}
 	}
-	
+
 	// Write to temporary markdown file
 	tmpMd := outputPath + ".md"
 	if err := os.WriteFile(tmpMd, []byte(md.String()), 0644); err != nil {
 		return err
 	}
-	
+
 	// Save cover to temporary file if present
 	var coverPath string
 	if len(book.Metadata.Cover) > 0 {
@@ -781,12 +781,12 @@ func createSimpleEPUB(book *ebook.Book, outputPath string) error {
 		// Remove temporary cover file after conversion
 		defer os.Remove(coverPath)
 	}
-	
+
 	// Convert markdown to EPUB
 	err := converter.ConvertMarkdownToEPUB(tmpMd, outputPath)
-	
+
 	// Remove temp markdown AFTER conversion
 	os.Remove(tmpMd)
-	
+
 	return err
 }

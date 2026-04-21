@@ -23,11 +23,11 @@ type FictionBook struct {
 
 // Description contains metadata
 type Description struct {
-	TitleInfo      TitleInfo      `xml:"title-info"`
-	DocumentInfo   DocumentInfo   `xml:"document-info,omitempty"`
-	PublishInfo    PublishInfo    `xml:"publish-info,omitempty"`
-	CustomInfo     []CustomInfo   `xml:"custom-info,omitempty"`
-	SrcTitleInfo   *TitleInfo     `xml:"src-title-info,omitempty"`
+	TitleInfo    TitleInfo    `xml:"title-info"`
+	DocumentInfo DocumentInfo `xml:"document-info,omitempty"`
+	PublishInfo  PublishInfo  `xml:"publish-info,omitempty"`
+	CustomInfo   []CustomInfo `xml:"custom-info,omitempty"`
+	SrcTitleInfo *TitleInfo   `xml:"src-title-info,omitempty"`
 }
 
 // TitleInfo contains book information
@@ -171,9 +171,9 @@ type Poem struct {
 
 // Stanza represents a poem stanza
 type Stanza struct {
-	Title   Title  `xml:"title,omitempty"`
+	Title    Title  `xml:"title,omitempty"`
 	Subtitle string `xml:"subtitle,omitempty"`
-	V       []V    `xml:"v"`
+	V        []V    `xml:"v"`
 }
 
 // V represents a verse line

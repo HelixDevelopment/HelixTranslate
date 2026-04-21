@@ -15,10 +15,10 @@ func TestLinuxRAMDetection(t *testing.T) {
 	}
 
 	detector := NewDetector()
-	
+
 	t.Run("Linux RAM detection", func(t *testing.T) {
 		ram, err := detector.getLinuxRAM()
-		
+
 		// This might fail on non-Linux systems even if we're in the test
 		if err != nil {
 			assert.Contains(t, err.Error(), "failed to detect total RAM")
@@ -35,10 +35,10 @@ func TestWindowsRAMDetection(t *testing.T) {
 	}
 
 	detector := NewDetector()
-	
+
 	t.Run("Windows RAM detection", func(t *testing.T) {
 		ram, err := detector.getWindowsRAM()
-		
+
 		// This might fail on non-Windows systems even if we're in the test
 		if err != nil {
 			assert.Contains(t, err.Error(), "failed to detect total RAM")
@@ -50,16 +50,16 @@ func TestWindowsRAMDetection(t *testing.T) {
 
 // TestBSDRAMDetection tests BSD-specific RAM detection functionality
 func TestBSDRAMDetection(t *testing.T) {
-	if runtime.GOOS != "freebsd" && runtime.GOOS != "openbsd" && 
-	   runtime.GOOS != "netbsd" && runtime.GOOS != "dragonfly" {
+	if runtime.GOOS != "freebsd" && runtime.GOOS != "openbsd" &&
+		runtime.GOOS != "netbsd" && runtime.GOOS != "dragonfly" {
 		t.Skip("Skipping BSD-specific test on non-BSD system")
 	}
 
 	detector := NewDetector()
-	
+
 	t.Run("BSD available RAM detection", func(t *testing.T) {
 		ram, err := detector.getAvailableRAM()
-		
+
 		// This might fail on non-BSD systems even if we're in the test
 		if err != nil {
 			assert.Contains(t, err.Error(), "not implemented")
@@ -75,7 +75,7 @@ func TestCPUDetectionCoverage(t *testing.T) {
 
 	t.Run("CPU model detection", func(t *testing.T) {
 		model, err := detector.getCPUModel()
-		
+
 		// This should work on most systems
 		if err != nil {
 			// Error is acceptable, but should be meaningful
@@ -87,7 +87,7 @@ func TestCPUDetectionCoverage(t *testing.T) {
 
 	t.Run("CPU cores detection", func(t *testing.T) {
 		cores, err := detector.getCPUCores()
-		
+
 		// This should work on most systems
 		if err != nil {
 			// Error is acceptable, but should be meaningful
@@ -104,7 +104,7 @@ func TestGPUDetectionComprehensive(t *testing.T) {
 
 	t.Run("GPU detection with different scenarios", func(t *testing.T) {
 		hasGPU, gpuType := detector.detectGPU()
-		
+
 		// If GPU is detected, type should be valid
 		if hasGPU {
 			assert.NotEmpty(t, gpuType, "GPU type should be set when GPU is detected")
@@ -138,7 +138,7 @@ func TestModelSizeCalculationCoverage(t *testing.T) {
 
 	t.Run("Model size calculation boundary conditions", func(t *testing.T) {
 		// Test exact boundary values for model size calculation
-		
+
 		// Test values that should result in different model sizes
 		testCases := []struct {
 			availableRAM uint64
@@ -164,10 +164,10 @@ func TestModelSizeCalculationCoverage(t *testing.T) {
 	t.Run("Model size calculation with GPU efficiency", func(t *testing.T) {
 		// Test that GPU makes calculation more efficient (allows larger models with same RAM)
 		ram := uint64(16) * 1024 * 1024 * 1024 // 16GB
-		
+
 		withoutGPU := detector.calculateMaxModelSize(ram, false)
 		withGPU := detector.calculateMaxModelSize(ram, true)
-		
+
 		// With GPU, should be able to handle equal or larger model
 		assert.GreaterOrEqual(t, withGPU, withoutGPU, "GPU should allow equal or larger model size")
 	})
@@ -179,7 +179,7 @@ func TestDetectMethodCoverage(t *testing.T) {
 
 	t.Run("Detect method full execution", func(t *testing.T) {
 		caps, err := detector.Detect()
-		
+
 		if err != nil {
 			// If detection fails, error should be meaningful
 			assert.Contains(t, err.Error(), "failed to detect", "Error should be descriptive")
@@ -191,7 +191,7 @@ func TestDetectMethodCoverage(t *testing.T) {
 			assert.GreaterOrEqual(t, caps.AvailableRAM, uint64(0), "Available RAM should be non-negative")
 			assert.Greater(t, caps.CPUCores, 0, "CPU cores should be greater than 0")
 			assert.Greater(t, caps.MaxModelSize, uint64(0), "Max model size should be greater than 0")
-			
+
 			// Test consistency
 			assert.LessOrEqual(t, caps.AvailableRAM, caps.TotalRAM, "Available RAM should not exceed total RAM")
 		}
@@ -201,12 +201,12 @@ func TestDetectMethodCoverage(t *testing.T) {
 		// Test that multiple calls to Detect work consistently
 		for i := 0; i < 3; i++ {
 			caps, err := detector.Detect()
-			
+
 			if err != nil {
 				t.Logf("Detect call %d failed: %v", i+1, err)
 				continue
 			}
-			
+
 			assert.NotNil(t, caps, "Capabilities should not be nil")
 			assert.NotEmpty(t, caps.Architecture, "Architecture should be set")
 		}
@@ -221,7 +221,7 @@ func TestErrorPaths(t *testing.T) {
 		// Test that unsupported OS is handled gracefully
 		// We can't easily mock runtime.GOOS, but we can test the error message format
 		ram, err := detector.getWindowsRAM()
-		
+
 		if runtime.GOOS != "windows" {
 			// On non-Windows, this should fail with a meaningful error
 			if err != nil {
@@ -241,7 +241,7 @@ func TestErrorPaths(t *testing.T) {
 		// Most of the error handling is tested through the main Detect() method
 		// which handles command failures gracefully
 		caps, err := detector.Detect()
-		
+
 		// Even if some commands fail, the method should either succeed or fail gracefully
 		if err != nil {
 			assert.Contains(t, err.Error(), "failed to detect", "Error should be about detection failure")
@@ -302,16 +302,16 @@ func TestStringMethodCoverage(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			str := tc.caps.String()
 			assert.NotEmpty(t, str, "String() should not return empty string")
-			
+
 			// Should contain basic hardware info
 			assert.Contains(t, str, "Hardware Capabilities:")
 			assert.Contains(t, str, tc.caps.Architecture)
 			assert.Contains(t, str, tc.caps.CPUModel)
 			assert.Contains(t, str, fmt.Sprintf("%d cores", tc.caps.CPUCores))
-			
+
 			// Should contain RAM info in GB
 			assert.Contains(t, str, "GB")
-			
+
 			// Should contain GPU info appropriately
 			if tc.caps.HasGPU {
 				assert.Contains(t, str, tc.caps.GPUType)
@@ -319,7 +319,7 @@ func TestStringMethodCoverage(t *testing.T) {
 			} else {
 				assert.Contains(t, str, "GPU: None")
 			}
-			
+
 			// Should contain model size info
 			assert.Contains(t, str, "parameters")
 		})
@@ -337,12 +337,12 @@ func TestCanRunMethodCoverage(t *testing.T) {
 	}{
 		{"Zero size", 0},
 		{"Tiny model", 100},
-		{"Small model", 1_000_000_000},        // 1B
-		{"Medium model", 7_000_000_000},       // 7B
-		{"Large model", 13_000_000_000},       // 13B
-		{"Very large model", 27_000_000_000},  // 27B
-		{"Huge model", 70_000_000_000},        // 70B
-		{"Extreme model", 100_000_000_000},    // 100B
+		{"Small model", 1_000_000_000},       // 1B
+		{"Medium model", 7_000_000_000},      // 7B
+		{"Large model", 13_000_000_000},      // 13B
+		{"Very large model", 27_000_000_000}, // 27B
+		{"Huge model", 70_000_000_000},       // 70B
+		{"Extreme model", 100_000_000_000},   // 100B
 	}
 
 	// Test with detected capabilities first
@@ -365,7 +365,7 @@ func TestCanRunMethodCoverage(t *testing.T) {
 	for _, tc := range testSizes {
 		t.Run("Mock capabilities - "+tc.name, func(t *testing.T) {
 			result := mockCaps.CanRunModel(tc.modelSize)
-			
+
 			// Expected behavior based on 13B max
 			expected := tc.modelSize <= 13_000_000_000
 			assert.Equal(t, expected, result, "CanRunModel result should match expectation")

@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
-	"encoding/base64"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"fmt"
 	"os"
@@ -25,7 +25,7 @@ type SSHWorker struct {
 	host       string
 	username   string
 	password   string
-	privateKey string
+	privateKey string //nolint:unused
 	port       int
 	client     *ssh.Client
 	logger     logger.Logger
@@ -54,7 +54,7 @@ func NewSSHWorker(config SSHWorkerConfig, logger logger.Logger) (*SSHWorker, err
 		logger:   logger,
 		config:   config,
 	}
-	
+
 	return worker, nil
 }
 
@@ -145,7 +145,7 @@ func (w *SSHWorker) ExecuteCommand(ctx context.Context, command string) (*Comman
 				ExitCode: 1,
 				Stdout:   stdout.String(),
 				Stderr:   stderr.String(),
-				Error:     err,
+				Error:    err,
 			}, nil
 		}
 
@@ -153,7 +153,7 @@ func (w *SSHWorker) ExecuteCommand(ctx context.Context, command string) (*Comman
 			ExitCode: 0,
 			Stdout:   stdout.String(),
 			Stderr:   stderr.String(),
-			Error:     nil,
+			Error:    nil,
 		}, nil
 	}
 }
@@ -187,22 +187,22 @@ func (w *SSHWorker) UploadFile(ctx context.Context, localPath, remotePath string
 	contentBase64 := base64.StdEncoding.EncodeToString(content)
 	contentSize := len(contentBase64)
 	chunkSize := 50000 // Split into chunks to avoid command line limits
-	
+
 	w.logger.Debug("Uploading file in chunks", map[string]interface{}{
 		"total_size": contentSize,
 		"chunk_size": chunkSize,
-		"chunks": (contentSize + chunkSize - 1) / chunkSize,
+		"chunks":     (contentSize + chunkSize - 1) / chunkSize,
 	})
-	
+
 	for i := 0; i < contentSize; i += chunkSize {
 		end := i + chunkSize
 		if end > contentSize {
 			end = contentSize
 		}
-		
+
 		chunk := contentBase64[i:end]
 		var writeCmd string
-		
+
 		if i == 0 {
 			// First chunk - create file with first part
 			writeCmd = fmt.Sprintf("echo '%s' | base64 -d > %s", chunk, remotePath)
@@ -210,16 +210,16 @@ func (w *SSHWorker) UploadFile(ctx context.Context, localPath, remotePath string
 			// Subsequent chunks - append to file
 			writeCmd = fmt.Sprintf("echo '%s' | base64 -d >> %s", chunk, remotePath)
 		}
-		
+
 		result, err := w.ExecuteCommand(ctx, writeCmd)
 		if err != nil {
 			return fmt.Errorf("failed to upload file chunk %d: %w", i/chunkSize, err)
 		}
 		if result.ExitCode != 0 {
 			w.logger.Debug("Chunk upload failed", map[string]interface{}{
-				"chunk": i / chunkSize,
-				"command": writeCmd,
-				"stderr": result.Stderr,
+				"chunk":     i / chunkSize,
+				"command":   writeCmd,
+				"stderr":    result.Stderr,
 				"exit_code": result.ExitCode,
 			})
 			return fmt.Errorf("upload failed at chunk %d: %s", i/chunkSize, result.Stderr)
@@ -284,7 +284,7 @@ func (w *SSHWorker) GetRemoteDir() string {
 func (w *SSHWorker) ensureConnection() error {
 	ctx, cancel := context.WithTimeout(context.Background(), w.config.ConnectionTimeout)
 	defer cancel()
-	
+
 	return w.Connect(ctx)
 }
 
@@ -334,7 +334,7 @@ func (w *SSHWorker) UploadData(ctx context.Context, data []byte, remotePath stri
 func (w *SSHWorker) SyncCodebase(ctx context.Context, localBasePath string) error {
 	// Create a consistent archive using git for cross-platform compatibility
 	archivePath := filepath.Join(os.TempDir(), "codebase.tar.gz")
-	
+
 	// Initialize git repository if not already initialized
 	if _, err := os.Stat(filepath.Join(localBasePath, ".git")); os.IsNotExist(err) {
 		initCmd := exec.Command("git", "init")
@@ -345,18 +345,18 @@ func (w *SSHWorker) SyncCodebase(ctx context.Context, localBasePath string) erro
 			})
 			return w.syncCodebaseWithTar(ctx, localBasePath, archivePath)
 		}
-	
-	// Add all files and create a commit
-	addCmd := exec.Command("git", "add", ".")
-	addCmd.Dir = localBasePath
-	if err := addCmd.Run(); err != nil {
-		w.logger.Debug("Git add failed", map[string]interface{}{
-			"error": err,
-		})
-		return w.syncCodebaseWithTar(ctx, localBasePath, archivePath)
+
+		// Add all files and create a commit
+		addCmd := exec.Command("git", "add", ".")
+		addCmd.Dir = localBasePath
+		if err := addCmd.Run(); err != nil {
+			w.logger.Debug("Git add failed", map[string]interface{}{
+				"error": err,
+			})
+			return w.syncCodebaseWithTar(ctx, localBasePath, archivePath)
+		}
 	}
-	}
-	
+
 	// Create archive using git archive for consistency
 	archiveCmd := exec.Command("git", "archive", "--format=tar.gz", "HEAD", "-o", archivePath)
 	archiveCmd.Dir = localBasePath
@@ -366,7 +366,7 @@ func (w *SSHWorker) SyncCodebase(ctx context.Context, localBasePath string) erro
 		})
 		return w.syncCodebaseWithTar(ctx, localBasePath, archivePath)
 	}
-	
+
 	// Verify archive was created
 	if _, err := os.Stat(archivePath); err != nil {
 		return fmt.Errorf("archive creation failed: %w", err)
@@ -386,8 +386,8 @@ func (w *SSHWorker) SyncCodebase(ctx context.Context, localBasePath string) erro
 	}
 	if result.ExitCode != 0 {
 		w.logger.Debug("Archive extraction failed", map[string]interface{}{
-			"command": extractCmd,
-			"stderr": result.Stderr,
+			"command":   extractCmd,
+			"stderr":    result.Stderr,
 			"exit_code": result.ExitCode,
 		})
 		return fmt.Errorf("archive extraction failed: %s", result.Stderr)
@@ -399,12 +399,12 @@ func (w *SSHWorker) SyncCodebase(ctx context.Context, localBasePath string) erro
 	if testErr != nil {
 		w.logger.Debug("Go test failed", map[string]interface{}{
 			"command": testCmd,
-			"error": testErr,
+			"error":   testErr,
 		})
 	} else if testResult.ExitCode != 0 {
 		w.logger.Debug("Go version check failed", map[string]interface{}{
 			"command": testCmd,
-			"stderr": testResult.Stderr,
+			"stderr":  testResult.Stderr,
 		})
 	} else {
 		w.logger.Info("Go setup verified", map[string]interface{}{
@@ -423,7 +423,7 @@ func (w *SSHWorker) syncCodebaseWithTar(ctx context.Context, localBasePath strin
 	// Create archive locally
 	cancelCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	
+
 	var stdout, stderr bytes.Buffer
 	cmd := exec.CommandContext(cancelCtx, "tar", "-czf", archivePath, "--format=ustar",
 		"--exclude=.git", "--exclude=node_modules", "--exclude=__pycache__",
@@ -433,12 +433,12 @@ func (w *SSHWorker) syncCodebaseWithTar(ctx context.Context, localBasePath strin
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	cmd.Dir = localBasePath
-	
+
 	err := cmd.Run()
 	if err != nil {
 		return fmt.Errorf("failed to create archive: %v (stderr: %s)", err, stderr.String())
 	}
-	
+
 	// Verify archive was created
 	if _, err := os.Stat(archivePath); err != nil {
 		return fmt.Errorf("archive creation failed: %w", err)
@@ -458,8 +458,8 @@ func (w *SSHWorker) syncCodebaseWithTar(ctx context.Context, localBasePath strin
 	}
 	if result.ExitCode != 0 {
 		w.logger.Debug("Archive extraction failed", map[string]interface{}{
-			"command": extractCmd,
-			"stderr": result.Stderr,
+			"command":   extractCmd,
+			"stderr":    result.Stderr,
 			"exit_code": result.ExitCode,
 		})
 		return fmt.Errorf("archive extraction failed: %s", result.Stderr)
@@ -471,12 +471,12 @@ func (w *SSHWorker) syncCodebaseWithTar(ctx context.Context, localBasePath strin
 	if testErr != nil {
 		w.logger.Debug("Go test failed", map[string]interface{}{
 			"command": testCmd,
-			"error": testErr,
+			"error":   testErr,
 		})
 	} else if testResult.ExitCode != 0 {
 		w.logger.Debug("Go version check failed", map[string]interface{}{
 			"command": testCmd,
-			"stderr": testResult.Stderr,
+			"stderr":  testResult.Stderr,
 		})
 	} else {
 		w.logger.Info("Go setup verified", map[string]interface{}{
@@ -503,13 +503,13 @@ func (w *SSHWorker) GetRemoteCodebaseHash(ctx context.Context) (string, error) {
 	if checkErr != nil {
 		w.logger.Debug("Directory check failed", map[string]interface{}{
 			"command": checkDirCmd,
-			"error": checkErr,
+			"error":   checkErr,
 		})
 	} else {
 		w.logger.Debug("Directory and binary check", map[string]interface{}{
 			"command": checkDirCmd,
-			"stdout": checkResult.Stdout,
-			"stderr": checkResult.Stderr,
+			"stdout":  checkResult.Stdout,
+			"stderr":  checkResult.Stderr,
 		})
 	}
 
@@ -548,7 +548,7 @@ func (w *SSHWorker) VerifyCodebaseVersion(ctx context.Context) (bool, string, st
 
 	// Compare versions
 	isEqual := localHasher.CompareVersions(localHash, remoteHash)
-	
+
 	return isEqual, localHash, remoteHash, nil
 }
 
@@ -565,7 +565,7 @@ func (w *SSHWorker) UpdateRemoteCodebase(ctx context.Context, localBasePath stri
 	if checkErr != nil {
 		return fmt.Errorf("failed to check binary: %w", checkErr)
 	}
-	
+
 	binaryExists := strings.Contains(checkResult.Stdout, "binary_exists")
 	if binaryExists {
 		// Binary already exists, but we need to rebuild since source code changed
@@ -599,7 +599,7 @@ func (w *SSHWorker) UploadEssentialFiles(ctx context.Context) error {
 	if _, err := os.Stat(binaryPath); err != nil {
 		return fmt.Errorf("binary not found at %s: %w", binaryPath, err)
 	}
-	
+
 	remoteBinaryPath := filepath.Join(w.config.RemoteDir, "translator")
 	if err := w.UploadFile(ctx, binaryPath, remoteBinaryPath); err != nil {
 		return fmt.Errorf("failed to upload binary: %w", err)

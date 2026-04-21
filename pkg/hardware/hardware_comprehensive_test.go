@@ -52,7 +52,7 @@ func TestErrorHandlingComprehensive(t *testing.T) {
 		// This test verifies that detection handles command failures gracefully
 		// We can't easily mock exec.Command here, but we can test the overall error handling
 		caps, err := detector.Detect()
-		
+
 		// Even if some commands fail, Detect() should either succeed or return a meaningful error
 		if err != nil {
 			assert.Contains(t, err.Error(), "failed to detect", "Error should be descriptive")
@@ -475,8 +475,8 @@ func validateCapabilities(caps *Capabilities) error {
 // TestCapabilitiesStringFormattingComprehensive tests comprehensive string formatting
 func TestCapabilitiesStringFormattingComprehensive(t *testing.T) {
 	tests := []struct {
-		name string
-		caps *Capabilities
+		name  string
+		caps  *Capabilities
 		check func(t *testing.T, str string)
 	}{
 		{
@@ -689,7 +689,7 @@ func TestHardwareCapabilitiesEdgeCases(t *testing.T) {
 			caps: &Capabilities{
 				Architecture: "amd64",
 				TotalRAM:     1024 * 1024 * 1024 * 1024, // 1TB
-				AvailableRAM: 768 * 1024 * 1024 * 1024, // 768GB
+				AvailableRAM: 768 * 1024 * 1024 * 1024,  // 768GB
 				CPUModel:     "High-End CPU",
 				CPUCores:     128,
 				HasGPU:       true,

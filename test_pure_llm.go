@@ -21,7 +21,7 @@ func main() {
 		ConnectionTimeout: 30 * time.Second,
 		CommandTimeout:    180 * time.Second,
 	}
-	
+
 	log := logger.NewNoOpLogger()
 	worker, err := sshworker.NewSSHWorker(config, log)
 	if err != nil {
@@ -56,7 +56,7 @@ func main() {
 	}
 
 	fmt.Printf("Pure LLM test output:\n%s\n", result.Stdout)
-	
+
 	if result.Stderr != "" {
 		fmt.Printf("Stderr:\n%s\n", result.Stderr)
 	}

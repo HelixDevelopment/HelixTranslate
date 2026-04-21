@@ -40,7 +40,7 @@ func (ut *UniversalTranslator) TranslateBook(
 	if book == nil {
 		return fmt.Errorf("book cannot be nil")
 	}
-	
+
 	// Detect source language if not specified
 	if ut.sourceLanguage.Code == "" && ut.langDetector != nil {
 		EmitProgress(eventBus, sessionID, "Detecting source language", nil)
@@ -79,9 +79,9 @@ func (ut *UniversalTranslator) TranslateBook(
 		EmitProgress(eventBus, sessionID,
 			fmt.Sprintf("Translating chapter %d/%d", i+1, totalChapters),
 			map[string]interface{}{
-				"chapter":       i + 1,
+				"chapter":        i + 1,
 				"total_chapters": totalChapters,
-				"progress":      float64(i+1) / float64(totalChapters) * 100,
+				"progress":       float64(i+1) / float64(totalChapters) * 100,
 			})
 
 		if err := ut.translateChapter(ctx, &book.Chapters[i], eventBus, sessionID); err != nil {

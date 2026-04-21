@@ -18,28 +18,28 @@ func TestDebugStringTranslation(t *testing.T) {
 
 	// Create a custom gin handler that uses our mock translator
 	router := gin.New()
-	
+
 	// Register our custom translation endpoint
 	router.POST("/api/v1/translate/string", func(c *gin.Context) {
 		mockTrans := &MockTranslator{}
-		
+
 		var req struct {
 			Text           string `json:"text" binding:"required"`
 			TargetLanguage string `json:"target_language" binding:"required"`
 			Provider       string `json:"provider"`
 		}
-		
+
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
-		
+
 		translated, err := mockTrans.Translate(c.Request.Context(), req.Text, "")
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
 			return
 		}
-		
+
 		c.JSON(200, gin.H{
 			"translated_text": translated,
 			"source_language": "en",

@@ -130,7 +130,7 @@ func generateSummaryReport(results []*challenge.Result) string {
 		}
 	}
 
-	report := fmt.Sprintf("# HelixTranslate Challenge Results\n\n")
+	report := "# HelixTranslate Challenge Results\n\n"
 	report += fmt.Sprintf("**Total**: %d | **Passed**: %d | **Failed**: %d | **Skipped**: %d\n\n", len(results), passed, failed, skipped)
 	report += "## Details\n\n"
 	report += "| Challenge | Status | Duration |\n"

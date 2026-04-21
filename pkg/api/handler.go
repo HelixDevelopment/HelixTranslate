@@ -8,10 +8,10 @@ import (
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/language"
+	"digital.vasic.translator/pkg/models"
 	"digital.vasic.translator/pkg/preparation"
 	"digital.vasic.translator/pkg/script"
 	"digital.vasic.translator/pkg/security"
-	"digital.vasic.translator/pkg/models"
 	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/translator/llm"
 	"digital.vasic.translator/pkg/websocket"
@@ -26,10 +26,10 @@ import (
 	"strings"
 	"time"
 
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	gorillaws "github.com/gorilla/websocket"
-	"errors"
 )
 
 // Handler handles API requests
@@ -272,11 +272,6 @@ func (h *Handler) translateFB2(c *gin.Context) {
 	}
 
 	model := c.PostForm("model")
-	scriptType := c.PostForm("script")
-	if scriptType == "" {
-		scriptType = "cyrillic"
-	}
-
 	// Generate session ID
 	sessionID := uuid.New().String()
 

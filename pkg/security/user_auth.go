@@ -20,7 +20,7 @@ type UserAuthService struct {
 func NewUserAuthService(jwtSecret string, tokenTTL time.Duration, userRepo models.UserRepository) *UserAuthService {
 	return &UserAuthService{
 		AuthService: NewAuthService(jwtSecret, tokenTTL),
-		userRepo:   userRepo,
+		userRepo:    userRepo,
 	}
 }
 

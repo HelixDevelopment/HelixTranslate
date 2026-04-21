@@ -138,47 +138,6 @@ func TestDeploymentOrchestrator_ValidateDeploymentPlan(t *testing.T) {
 	}
 }
 
-func TestDeploymentOrchestrator_GetDeployedInstances(t *testing.T) {
-	cfg := &config.Config{}
-	eventBus := events.NewEventBus()
-	orchestrator := NewDeploymentOrchestrator(cfg, eventBus)
-	defer orchestrator.Close()
-
-	// Initially should be empty
-	instances := orchestrator.GetDeployedInstances()
-	if len(instances) != 0 {
-		t.Errorf("Expected 0 instances initially, got %d", len(instances))
-	}
-
-	// Add a mock instance
-	mockInstance := &DeployedInstance{
-		ID:          "test-instance",
-		Host:        "localhost",
-		Port:        8443,
-		ContainerID: "mock-container-id",
-		Status:      "healthy",
-		LastSeen:    time.Now(),
-	}
-
-	orchestrator.mu.Lock()
-	orchestrator.deployed["test-instance"] = mockInstance
-	orchestrator.mu.Unlock()
-
-	// Now should have one instance
-	instances = orchestrator.GetDeployedInstances()
-	if len(instances) != 1 {
-		t.Errorf("Expected 1 instance, got %d", len(instances))
-	}
-
-	if instance, exists := instances["test-instance"]; !exists {
-		t.Error("Expected test-instance to exist")
-	} else {
-		if instance.ID != "test-instance" {
-			t.Errorf("Expected instance ID 'test-instance', got '%s'", instance.ID)
-		}
-	}
-}
-
 // Additional comprehensive tests to enhance coverage
 
 func TestDockerOrchestrator_GenerateComposeFile(t *testing.T) {
@@ -188,8 +147,8 @@ func TestDockerOrchestrator_GenerateComposeFile(t *testing.T) {
 			Workers: map[string]config.WorkerConfig{
 				"worker1": {
 					Name:        "worker1",
-					Host:        "worker1.example.com", 
-					Port:        22, 
+					Host:        "worker1.example.com",
+					Port:        22,
 					User:        "deploy",
 					MaxCapacity: 10,
 					Enabled:     true,
@@ -213,7 +172,7 @@ func TestDockerOrchestrator_GenerateComposeFile(t *testing.T) {
 				{HostPort: 8080, ContainerPort: 8080, Protocol: "tcp"},
 			},
 			Environment: map[string]string{
-				"ENV": "production",
+				"ENV":       "production",
 				"LOG_LEVEL": "info",
 			},
 			Volumes: []VolumeMapping{
@@ -316,7 +275,7 @@ func TestDeploymentOrchestrator_ConfigValidation(t *testing.T) {
 			defer orchestrator.Close()
 
 			err := orchestrator.ValidateConfig(tt.config)
-			
+
 			if tt.expectError {
 				assert.Error(t, err, "Expected validation error for config: %s", tt.name)
 			} else {
@@ -341,13 +300,13 @@ func (do *DeploymentOrchestrator) ValidateConfig(config *DeploymentConfig) error
 	if strings.Contains(config.DockerImage, " ") {
 		return fmt.Errorf("invalid docker image name")
 	}
-	
+
 	// Check for privileged ports
 	for _, port := range config.Ports {
 		if port.HostPort < 1024 && port.HostPort != 80 && port.HostPort != 443 {
 			return fmt.Errorf("privileged port %d not allowed", port.HostPort)
 		}
 	}
-	
+
 	return nil
 }

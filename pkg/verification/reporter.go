@@ -159,6 +159,8 @@ func (pr *PolishingReport) Finalize() {
 }
 
 // GenerateMarkdownReport generates a detailed markdown report
+//
+//nolint:funlen
 func (pr *PolishingReport) GenerateMarkdownReport() string {
 	var sb strings.Builder
 

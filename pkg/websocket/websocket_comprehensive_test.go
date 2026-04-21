@@ -24,7 +24,7 @@ func TestClient_ReadPump(t *testing.T) {
 		upgrader := websocket.Upgrader{}
 		conn, err := upgrader.Upgrade(w, r, nil)
 		require.NoError(t, err)
-		
+
 		client := &Client{
 			ID:        "test-client",
 			SessionID: "test-session",
@@ -33,10 +33,10 @@ func TestClient_ReadPump(t *testing.T) {
 			Hub:       hub,
 		}
 		hub.Register(client)
-		
+
 		// Start read pump in goroutine
 		go client.ReadPump()
-		
+
 		// Wait a bit then write message to trigger disconnect
 		time.Sleep(100 * time.Millisecond)
 		conn.WriteMessage(websocket.CloseMessage, []byte{})
@@ -64,7 +64,7 @@ func TestClient_WritePump(t *testing.T) {
 		upgrader := websocket.Upgrader{}
 		conn, err := upgrader.Upgrade(w, r, nil)
 		require.NoError(t, err)
-		
+
 		client := &Client{
 			ID:        "test-client",
 			SessionID: "test-session",
@@ -73,16 +73,16 @@ func TestClient_WritePump(t *testing.T) {
 			Hub:       hub,
 		}
 		hub.Register(client)
-		
+
 		// Start write pump in goroutine
 		go client.WritePump()
-		
+
 		// Send test message
 		client.Send <- []byte("test message")
-		
+
 		// Send more messages to test queuing
 		client.Send <- []byte("second message")
-		
+
 		// Wait a bit then close channel to trigger shutdown
 		time.Sleep(100 * time.Millisecond)
 		close(client.Send)
@@ -116,7 +116,7 @@ func TestClient_WritePump_ErrorHandling(t *testing.T) {
 		upgrader := websocket.Upgrader{}
 		conn, err := upgrader.Upgrade(w, r, nil)
 		require.NoError(t, err)
-		
+
 		client := &Client{
 			ID:        "test-client",
 			SessionID: "test-session",
@@ -125,14 +125,14 @@ func TestClient_WritePump_ErrorHandling(t *testing.T) {
 			Hub:       hub,
 		}
 		hub.Register(client)
-		
+
 		// Start write pump
 		go client.WritePump()
-		
+
 		// Immediately close connection to trigger error
 		time.Sleep(10 * time.Millisecond)
 		conn.Close()
-		
+
 		// Try to send message (will fail due to closed connection)
 		select {
 		case client.Send <- []byte("test message"):
@@ -148,7 +148,7 @@ func TestClient_WritePump_ErrorHandling(t *testing.T) {
 	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	require.NoError(t, err)
 	conn.Close()
-	
+
 	// Wait for error handling
 	time.Sleep(200 * time.Millisecond)
 }
@@ -164,7 +164,7 @@ func TestClient_WritePump_NextWriterError(t *testing.T) {
 		upgrader := websocket.Upgrader{}
 		conn, err := upgrader.Upgrade(w, r, nil)
 		require.NoError(t, err)
-		
+
 		client := &Client{
 			ID:        "test-client",
 			SessionID: "test-session",
@@ -173,14 +173,14 @@ func TestClient_WritePump_NextWriterError(t *testing.T) {
 			Hub:       hub,
 		}
 		hub.Register(client)
-		
+
 		// Start write pump
 		go client.WritePump()
-		
+
 		// Close connection immediately to trigger NextWriter error
 		time.Sleep(10 * time.Millisecond)
 		conn.Close()
-		
+
 		// Try to send message (will fail on NextWriter)
 		select {
 		case client.Send <- []byte("test message"):
@@ -196,7 +196,7 @@ func TestClient_WritePump_NextWriterError(t *testing.T) {
 	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	require.NoError(t, err)
 	conn.Close()
-	
+
 	// Wait for error handling
 	time.Sleep(200 * time.Millisecond)
 }
@@ -212,7 +212,7 @@ func TestClient_Integration(t *testing.T) {
 		upgrader := websocket.Upgrader{}
 		conn, err := upgrader.Upgrade(w, r, nil)
 		require.NoError(t, err)
-		
+
 		client := &Client{
 			ID:        "integration-client",
 			SessionID: "integration-session",
@@ -221,11 +221,11 @@ func TestClient_Integration(t *testing.T) {
 			Hub:       hub,
 		}
 		hub.Register(client)
-		
+
 		// Start both pumps
 		go client.ReadPump()
 		go client.WritePump()
-		
+
 		// Wait for operations
 		time.Sleep(200 * time.Millisecond)
 	}))
@@ -259,16 +259,16 @@ func TestClient_Integration(t *testing.T) {
 // TestHub_EventSubscription tests hub event subscription
 func TestHub_EventSubscription(t *testing.T) {
 	eventBus := events.NewEventBus()
-	
+
 	// Create hub
 	hub := NewHub(eventBus)
-	
+
 	// Verify event bus subscription (internal implementation)
 	// We can't directly test the subscription, but we can test
 	// that events are handled correctly
-	
+
 	go hub.Run()
-	
+
 	// Create mock client to capture events
 	receivedEvents := make(chan []byte, 10)
 	client := &Client{
@@ -280,7 +280,7 @@ func TestHub_EventSubscription(t *testing.T) {
 	}
 	hub.Register(client)
 	time.Sleep(50 * time.Millisecond)
-	
+
 	// Publish different event types
 	eventTypes := []struct {
 		eventType events.EventType
@@ -291,13 +291,13 @@ func TestHub_EventSubscription(t *testing.T) {
 		{events.EventTranslationCompleted, "Completed"},
 		{events.EventTranslationError, "Error"},
 	}
-	
+
 	for _, eventInfo := range eventTypes {
 		event := events.NewEvent(eventInfo.eventType, eventInfo.message, nil)
 		event.SessionID = "test-session"
 		eventBus.Publish(event)
 	}
-	
+
 	// Verify all events were received
 	for i := 0; i < len(eventTypes); i++ {
 		select {

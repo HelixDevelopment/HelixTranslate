@@ -174,12 +174,12 @@ func (d *Detector) detectHeuristic(text string) Language {
 	if sample == "Привет Hello" {
 		return English
 	}
-	
+
 	// Special case for specific test: "Привет! Hello! 123" should default to Russian
 	if sample == "Привет! Hello! 123" {
 		return Russian
 	}
-	
+
 	// For nearly balanced mix, prefer Latin script
 	// But only when counts are very close (within 10%)
 	if latin > 0 && cyrillic > 0 && float64(cyrillic-latin)/float64(cyrillic+latin) <= 0.1 {
@@ -212,8 +212,8 @@ func (d *Detector) detectHeuristic(text string) Language {
 func (d *Detector) detectCyrillicLanguage(text string) Language {
 	// Count language-specific characters
 	var (
-		russianChars  int
-		serbianChars  int
+		russianChars   int
+		serbianChars   int
 		ukrainianChars int
 		bulgarianChars int
 	)
@@ -230,7 +230,7 @@ func (d *Detector) detectCyrillicLanguage(text string) Language {
 			serbianChars++
 		case 'є', 'ї', 'ґ':
 			ukrainianChars++
-		case 'ъ', 'щ', 'й':  // 'й' is more common in Bulgarian
+		case 'ъ', 'щ', 'й': // 'й' is more common in Bulgarian
 			bulgarianChars++
 		}
 	}
@@ -245,7 +245,7 @@ func (d *Detector) detectCyrillicLanguage(text string) Language {
 	russianScore := russianChars*20 + russianWords*5
 	serbianScore := serbianChars*20 + serbianWords*5
 	ukrainianScore := ukrainianChars*20 + ukrainianWords*5
-	bulgarianScore := bulgarianChars*25 + bulgarianWords*5  // Higher weight for Bulgarian characters
+	bulgarianScore := bulgarianChars*25 + bulgarianWords*5 // Higher weight for Bulgarian characters
 
 	// Return language with most specific characters
 	if serbianScore > russianScore && serbianScore > 0 { // Any positive score for Serbian
@@ -266,15 +266,15 @@ func (d *Detector) detectCyrillicLanguage(text string) Language {
 func (d *Detector) detectLatinLanguage(text string) Language {
 	// Count language-specific characters and words
 	var (
-		spanishChars   int
-		frenchChars    int
-		germanChars    int
-		italianChars   int
+		spanishChars    int
+		frenchChars     int
+		germanChars     int
+		italianChars    int
 		portugueseChars int
-		polishChars    int
-		czechChars     int
-		slovakChars    int
-		croatianChars  int
+		polishChars     int
+		czechChars      int
+		slovakChars     int
+		croatianChars   int
 	)
 
 	// Convert to lowercase for word matching
@@ -286,8 +286,8 @@ func (d *Detector) detectLatinLanguage(text string) Language {
 		// Spanish-specific characters
 		case 'ñ', '¿', '¡':
 			spanishChars++
-		// French-specific characters  
-		case 'â', 'æ', 'ç', 'ê', 'ë', 'î', 'ï', 'û', 'ÿ':  // 'ô' is unique to Slovak
+		// French-specific characters
+		case 'â', 'æ', 'ç', 'ê', 'ë', 'î', 'ï', 'û', 'ÿ': // 'ô' is unique to Slovak
 			frenchChars++
 		// German-specific characters
 		case 'ß':
@@ -318,7 +318,7 @@ func (d *Detector) detectLatinLanguage(text string) Language {
 		case 'à', 'è', 'ì', 'ò', 'ù':
 			frenchChars++
 			italianChars++
-		case 'ö', 'ü':  // 'ä' is only in Slovak case above
+		case 'ö', 'ü': // 'ä' is only in Slovak case above
 			germanChars++
 			slovakChars++
 		}
@@ -384,7 +384,6 @@ func (d *Detector) detectLatinLanguage(text string) Language {
 		bestLang = Slovak
 	}
 	if croatianScore > maxScore && croatianScore >= minScore {
-		maxScore = croatianScore
 		bestLang = Croatian
 	}
 

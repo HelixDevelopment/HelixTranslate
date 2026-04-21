@@ -232,7 +232,7 @@ func TestAPIHandlers_Uncovered(t *testing.T) {
 		var err error
 		err = json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
-		assert.Equal(t, "Update version not specified", response["error"])
+		assert.Equal(t, "Invalid distributed manager", response["error"])
 	})
 
 	t.Run("uploadUpdate_Success", func(t *testing.T) {

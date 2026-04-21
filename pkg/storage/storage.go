@@ -7,40 +7,40 @@ import (
 
 // TranslationSession represents a translation session in storage
 type TranslationSession struct {
-	ID              string    `json:"id"`
-	BookTitle       string    `json:"book_title"`
-	InputFile       string    `json:"input_file"`
-	OutputFile      string    `json:"output_file"`
-	SourceLanguage  string    `json:"source_language"`
-	TargetLanguage  string    `json:"target_language"`
-	Provider        string    `json:"provider"`
-	Model           string    `json:"model"`
-	Status          string    `json:"status"`
-	PercentComplete float64   `json:"percent_complete"`
-	CurrentChapter  int       `json:"current_chapter"`
-	TotalChapters   int       `json:"total_chapters"`
-	ItemsCompleted  int       `json:"items_completed"`
-	ItemsFailed     int       `json:"items_failed"`
-	ItemsTotal      int       `json:"items_total"`
-	StartTime       time.Time `json:"start_time"`
+	ID              string     `json:"id"`
+	BookTitle       string     `json:"book_title"`
+	InputFile       string     `json:"input_file"`
+	OutputFile      string     `json:"output_file"`
+	SourceLanguage  string     `json:"source_language"`
+	TargetLanguage  string     `json:"target_language"`
+	Provider        string     `json:"provider"`
+	Model           string     `json:"model"`
+	Status          string     `json:"status"`
+	PercentComplete float64    `json:"percent_complete"`
+	CurrentChapter  int        `json:"current_chapter"`
+	TotalChapters   int        `json:"total_chapters"`
+	ItemsCompleted  int        `json:"items_completed"`
+	ItemsFailed     int        `json:"items_failed"`
+	ItemsTotal      int        `json:"items_total"`
+	StartTime       time.Time  `json:"start_time"`
 	EndTime         *time.Time `json:"end_time,omitempty"`
-	ErrorMessage    string    `json:"error_message,omitempty"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	ErrorMessage    string     `json:"error_message,omitempty"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
 }
 
 // TranslationCache represents a cached translation
 type TranslationCache struct {
-	ID              string    `json:"id"`
-	SourceText      string    `json:"source_text"`
-	TargetText      string    `json:"target_text"`
-	SourceLanguage  string    `json:"source_language"`
-	TargetLanguage  string    `json:"target_language"`
-	Provider        string    `json:"provider"`
-	Model           string    `json:"model"`
-	CreatedAt       time.Time `json:"created_at"`
-	AccessCount     int       `json:"access_count"`
-	LastAccessedAt  time.Time `json:"last_accessed_at"`
+	ID             string    `json:"id"`
+	SourceText     string    `json:"source_text"`
+	TargetText     string    `json:"target_text"`
+	SourceLanguage string    `json:"source_language"`
+	TargetLanguage string    `json:"target_language"`
+	Provider       string    `json:"provider"`
+	Model          string    `json:"model"`
+	CreatedAt      time.Time `json:"created_at"`
+	AccessCount    int       `json:"access_count"`
+	LastAccessedAt time.Time `json:"last_accessed_at"`
 }
 
 // Storage interface defines the methods for persistence

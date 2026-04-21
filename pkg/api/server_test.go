@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -26,7 +27,7 @@ func TestTranslateEndpoint(t *testing.T) {
 			Return("Hola", nil)
 
 		server := NewServer(ServerConfig{
-			Port:   8080,
+			Port: 8080,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
@@ -67,7 +68,7 @@ func TestTranslateEndpoint(t *testing.T) {
 	// Test 2: Invalid JSON
 	t.Run("InvalidJSON", func(t *testing.T) {
 		server := NewServer(ServerConfig{
-			Port:   8081,
+			Port: 8081,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
@@ -98,7 +99,7 @@ func TestTranslateEndpoint(t *testing.T) {
 	// Test 3: Missing required fields
 	t.Run("MissingRequiredFields", func(t *testing.T) {
 		server := NewServer(ServerConfig{
-			Port:   8082,
+			Port: 8082,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
@@ -148,7 +149,7 @@ func TestTranslateEndpoint(t *testing.T) {
 			Return("", fmt.Errorf("translation service unavailable"))
 
 		server := NewServer(ServerConfig{
-			Port:   8083,
+			Port: 8083,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
@@ -189,7 +190,7 @@ func TestHealthEndpoint(t *testing.T) {
 	// Test 1: Basic health check
 	t.Run("BasicHealthCheck", func(t *testing.T) {
 		server := NewServer(ServerConfig{
-			Port:   8084,
+			Port: 8084,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
@@ -223,11 +224,11 @@ func TestHealthEndpoint(t *testing.T) {
 		mockTranslator.On("GetName").Return("test-translator")
 		mockTranslator.On("GetStats").Return(map[string]interface{}{
 			"total_translations": 100,
-			"cache_hits":       85,
+			"cache_hits":         85,
 		})
 
 		server := NewServer(ServerConfig{
-			Port:   8085,
+			Port: 8085,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
@@ -254,7 +255,7 @@ func TestHealthEndpoint(t *testing.T) {
 
 		assert.Equal(t, "ok", health["status"])
 		assert.NotNil(t, health["translator"])
-		
+
 		if translator, ok := health["translator"].(map[string]interface{}); ok {
 			assert.Equal(t, "test-translator", translator["name"])
 			assert.Equal(t, float64(100), translator["total_translations"])
@@ -276,7 +277,7 @@ func TestLanguagesEndpoint(t *testing.T) {
 		})
 
 		server := NewServer(ServerConfig{
-			Port:   8086,
+			Port: 8086,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
@@ -318,14 +319,14 @@ func TestStatsEndpoint(t *testing.T) {
 		mockTranslator.On("GetName").Return("test-translator")
 		mockTranslator.On("GetStats").Return(map[string]interface{}{
 			"total_translations": 1000,
-			"cache_hits":       850,
-			"cache_misses":     150,
-			"avg_response_time": 150,
-			"uptime":          "48h30m",
+			"cache_hits":         850,
+			"cache_misses":       150,
+			"avg_response_time":  150,
+			"uptime":             "48h30m",
 		})
 
 		server := NewServer(ServerConfig{
-			Port:   8087,
+			Port: 8087,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
@@ -358,65 +359,51 @@ func TestStatsEndpoint(t *testing.T) {
 func TestFileUploadEndpoint(t *testing.T) {
 	// Test 1: File upload translation
 	t.Run("FileUploadTranslation", func(t *testing.T) {
-		mockTranslator := new(mocks.MockTranslator)
-		mockTranslator.On("GetName").Return("test-translator")
-		mockTranslator.On("TranslateFile", mock.Anything, mock.Anything, "en", "es", mock.Anything).
-			Run(func(args mock.Arguments) {
-				// Mock file translation progress
-				progress := args.Get(4).(func(int, int))
-				progress(50, 100)
-				progress(100, 100)
-			}).
-			Return([]byte("translated content"), nil)
-
 		server := NewServer(ServerConfig{
-			Port:   8088,
+			Port: 8088,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
 			}),
 		})
-		server.SetTranslator(mockTranslator)
 
 		testServer := httptest.NewServer(server.GetRouter())
 		defer testServer.Close()
 
 		// Create multipart form request
 		body := &bytes.Buffer{}
-		contentType := "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW"
-		
-		// Add file part
-		fmt.Fprintf(body, "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\n")
-		fmt.Fprintf(body, "Content-Disposition: form-data; name=\"file\"; filename=\"test.txt\"\r\n")
-		fmt.Fprintf(body, "Content-Type: text/plain\r\n\r\n")
-		fmt.Fprintf(body, "Hello world\r\n")
-		fmt.Fprintf(body, "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\n")
-		fmt.Fprintf(body, "Content-Disposition: form-data; name=\"source_lang\"\r\n\r\n")
-		fmt.Fprintf(body, "en\r\n")
-		fmt.Fprintf(body, "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\n")
-		fmt.Fprintf(body, "Content-Disposition: form-data; name=\"target_lang\"\r\n\r\n")
-		fmt.Fprintf(body, "es\r\n")
-		fmt.Fprintf(body, "------WebKitFormBoundary7MA4YWxkTrZu0gW--\r\n")
+		writer := multipart.NewWriter(body)
+
+		part, err := writer.CreateFormFile("file", "test.txt")
+		require.NoError(t, err)
+		_, err = part.Write([]byte("Hello world"))
+		require.NoError(t, err)
+		writer.Close()
 
 		req, err := http.NewRequest("POST", testServer.URL+"/api/upload", body)
 		require.NoError(t, err)
-		req.Header.Set("Content-Type", contentType)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
 
 		client := &http.Client{Timeout: 10 * time.Second}
 		resp, err := client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 
-		assert.Equal(t, http.StatusNotImplemented, resp.StatusCode)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-		// Since it returns "Not implemented", we can't decode JSON
-		// Just verify the endpoint exists and returns the expected status
+		var response map[string]interface{}
+		err = json.NewDecoder(resp.Body).Decode(&response)
+		require.NoError(t, err)
+		assert.Contains(t, response, "path")
+		assert.Contains(t, response, "size")
+		assert.Contains(t, response, "format")
+		assert.Equal(t, "txt", response["format"])
 	})
 
-	// Test 2: Invalid file upload
+	// Test 2: Invalid file upload (no file)
 	t.Run("InvalidFileUpload", func(t *testing.T) {
 		server := NewServer(ServerConfig{
-			Port:   8089,
+			Port: 8089,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
@@ -436,37 +423,113 @@ func TestFileUploadEndpoint(t *testing.T) {
 		require.NoError(t, err)
 		defer resp.Body.Close()
 
-		assert.Equal(t, http.StatusNotImplemented, resp.StatusCode)
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
-		// Since it returns "Not implemented", we can't decode JSON
-		// Just verify the endpoint exists and returns the expected status
+		var errorResponse map[string]interface{}
+		err = json.NewDecoder(resp.Body).Decode(&errorResponse)
+		require.NoError(t, err)
+		assert.Contains(t, errorResponse["error"], "no file provided")
+	})
+
+	// Test 3: File upload size limit
+	t.Run("FileUploadSizeLimit", func(t *testing.T) {
+		server := NewServer(ServerConfig{
+			Port: 8090,
+			Logger: logger.NewLogger(logger.LoggerConfig{
+				Level:  logger.INFO,
+				Format: logger.FORMAT_TEXT,
+			}),
+			Security: &SecurityConfig{
+				MaxRequestSize: 10, // 10 bytes limit
+			},
+		})
+
+		testServer := httptest.NewServer(server.GetRouter())
+		defer testServer.Close()
+
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+
+		part, err := writer.CreateFormFile("file", "test.txt")
+		require.NoError(t, err)
+		_, err = part.Write([]byte("Hello world")) // 11 bytes
+		require.NoError(t, err)
+		writer.Close()
+
+		req, err := http.NewRequest("POST", testServer.URL+"/api/upload", body)
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+
+		client := &http.Client{Timeout: 5 * time.Second}
+		resp, err := client.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+		var errorResponse map[string]interface{}
+		err = json.NewDecoder(resp.Body).Decode(&errorResponse)
+		require.NoError(t, err)
+		assert.Contains(t, errorResponse["error"], "file size exceeds maximum")
+	})
+
+	// Test 4: Unsupported file format
+	t.Run("UnsupportedFormat", func(t *testing.T) {
+		server := NewServer(ServerConfig{
+			Port: 8091,
+			Logger: logger.NewLogger(logger.LoggerConfig{
+				Level:  logger.INFO,
+				Format: logger.FORMAT_TEXT,
+			}),
+		})
+
+		testServer := httptest.NewServer(server.GetRouter())
+		defer testServer.Close()
+
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+
+		part, err := writer.CreateFormFile("file", "test.bin")
+		require.NoError(t, err)
+		_, err = part.Write([]byte{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07})
+		require.NoError(t, err)
+		writer.Close()
+
+		req, err := http.NewRequest("POST", testServer.URL+"/api/upload", body)
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+
+		client := &http.Client{Timeout: 5 * time.Second}
+		resp, err := client.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+		var errorResponse map[string]interface{}
+		err = json.NewDecoder(resp.Body).Decode(&errorResponse)
+		require.NoError(t, err)
+		assert.Contains(t, errorResponse["error"], "unsupported file format")
 	})
 }
 
 func TestBatchTranslationEndpoint(t *testing.T) {
 	// Test 1: Batch translation
 	t.Run("BatchTranslation", func(t *testing.T) {
-		mockTranslator := new(mocks.MockTranslator)
-		mockTranslator.On("GetName").Return("test-translator")
-		mockTranslator.On("Translate", mock.Anything, "Hello", "en->es").Return("Hola", nil)
-		mockTranslator.On("Translate", mock.Anything, "World", "en", "es").Return("Mundo", nil)
-
 		server := NewServer(ServerConfig{
-			Port:   8090,
+			Port: 8092,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
 			}),
 		})
-		server.SetTranslator(mockTranslator)
 
 		testServer := httptest.NewServer(server.GetRouter())
 		defer testServer.Close()
 
-		batchRequest := map[string]interface{}{
-			"texts": []string{"Hello", "World"},
-			"source_lang": "en",
-			"target_lang": "es",
+		batchRequest := []map[string]string{
+			{"text": "Hello", "source_lang": "en", "target_lang": "es"},
+			{"text": "World", "source_lang": "en", "target_lang": "es"},
 		}
 		jsonBody, _ := json.Marshal(batchRequest)
 
@@ -479,38 +542,109 @@ func TestBatchTranslationEndpoint(t *testing.T) {
 		require.NoError(t, err)
 		defer resp.Body.Close()
 
-		assert.Equal(t, http.StatusNotImplemented, resp.StatusCode)
+		assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 
-		// Since it returns "Not implemented", we can't decode JSON
-		// Just verify endpoint exists and returns expected status
+		var response map[string]interface{}
+		err = json.NewDecoder(resp.Body).Decode(&response)
+		require.NoError(t, err)
+		assert.Contains(t, response, "batch_id")
+		assert.Equal(t, "queued", response["status"])
+		assert.Equal(t, float64(2), response["count"])
 	})
 
 	// Test 2: Batch translation size limit
 	t.Run("BatchTranslationSizeLimit", func(t *testing.T) {
 		server := NewServer(ServerConfig{
-			Port:   8091,
+			Port: 8093,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
 			}),
 			Security: &SecurityConfig{
-				MaxBatchSize: 10,
+				MaxBatchSize: 5,
 			},
 		})
 
 		testServer := httptest.NewServer(server.GetRouter())
 		defer testServer.Close()
 
-		// Create batch with 20 texts (exceeds limit of 10)
-		texts := make([]string, 20)
-		for i := range texts {
-			texts[i] = fmt.Sprintf("Text %d", i)
+		// Create batch with 10 requests (exceeds limit of 5)
+		requests := make([]map[string]string, 10)
+		for i := range requests {
+			requests[i] = map[string]string{
+				"text":        fmt.Sprintf("Text %d", i),
+				"source_lang": "en",
+				"target_lang": "es",
+			}
 		}
 
-		batchRequest := map[string]interface{}{
-			"texts": texts,
-			"source_lang": "en",
-			"target_lang": "es",
+		jsonBody, _ := json.Marshal(requests)
+
+		req, err := http.NewRequest("POST", testServer.URL+"/api/batch", bytes.NewBuffer(jsonBody))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{Timeout: 5 * time.Second}
+		resp, err := client.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+		var errorResponse map[string]interface{}
+		err = json.NewDecoder(resp.Body).Decode(&errorResponse)
+		require.NoError(t, err)
+		assert.Contains(t, errorResponse["error"], "batch size exceeds maximum")
+	})
+
+	// Test 3: Empty batch
+	t.Run("EmptyBatch", func(t *testing.T) {
+		server := NewServer(ServerConfig{
+			Port: 8094,
+			Logger: logger.NewLogger(logger.LoggerConfig{
+				Level:  logger.INFO,
+				Format: logger.FORMAT_TEXT,
+			}),
+		})
+
+		testServer := httptest.NewServer(server.GetRouter())
+		defer testServer.Close()
+
+		batchRequest := []map[string]string{}
+		jsonBody, _ := json.Marshal(batchRequest)
+
+		req, err := http.NewRequest("POST", testServer.URL+"/api/batch", bytes.NewBuffer(jsonBody))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{Timeout: 5 * time.Second}
+		resp, err := client.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+		var errorResponse map[string]interface{}
+		err = json.NewDecoder(resp.Body).Decode(&errorResponse)
+		require.NoError(t, err)
+		assert.Contains(t, errorResponse["error"], "batch request array is empty")
+	})
+
+	// Test 4: Invalid batch request (missing required fields)
+	t.Run("InvalidBatchRequest", func(t *testing.T) {
+		server := NewServer(ServerConfig{
+			Port: 8095,
+			Logger: logger.NewLogger(logger.LoggerConfig{
+				Level:  logger.INFO,
+				Format: logger.FORMAT_TEXT,
+			}),
+		})
+
+		testServer := httptest.NewServer(server.GetRouter())
+		defer testServer.Close()
+
+		batchRequest := []map[string]string{
+			{"text": "Hello"}, // missing source_lang and target_lang
 		}
 		jsonBody, _ := json.Marshal(batchRequest)
 
@@ -523,10 +657,7 @@ func TestBatchTranslationEndpoint(t *testing.T) {
 		require.NoError(t, err)
 		defer resp.Body.Close()
 
-		assert.Equal(t, http.StatusNotImplemented, resp.StatusCode)
-
-		// Since it returns "Not implemented", we can't decode JSON
-		// Just verify endpoint exists and returns expected status
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 	})
 }
 
@@ -534,7 +665,7 @@ func TestServerErrorHandling(t *testing.T) {
 	// Test 1: 404 Not Found
 	t.Run("NotFound", func(t *testing.T) {
 		server := NewServer(ServerConfig{
-			Port:   8092,
+			Port: 8092,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
@@ -558,7 +689,7 @@ func TestServerErrorHandling(t *testing.T) {
 	// Test 2: Method Not Allowed
 	t.Run("MethodNotAllowed", func(t *testing.T) {
 		server := NewServer(ServerConfig{
-			Port:   8093,
+			Port: 8093,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
@@ -587,7 +718,7 @@ func TestServerErrorHandling(t *testing.T) {
 			Panic("simulated panic")
 
 		server := NewServer(ServerConfig{
-			Port:   8094,
+			Port: 8094,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,
@@ -631,7 +762,7 @@ func TestConcurrency(t *testing.T) {
 			Return("translated", nil)
 
 		server := NewServer(ServerConfig{
-			Port:   8095,
+			Port: 8095,
 			Logger: logger.NewLogger(logger.LoggerConfig{
 				Level:  logger.INFO,
 				Format: logger.FORMAT_TEXT,

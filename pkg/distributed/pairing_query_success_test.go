@@ -14,7 +14,7 @@ func TestPairingManager_queryServiceInfoSuccess(t *testing.T) {
 	// Create mock server that handles both providers and health requests
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		
+
 		if strings.Contains(r.URL.Path, "/api/v1/providers") {
 			// Return providers response
 			w.WriteHeader(http.StatusOK)
@@ -44,7 +44,7 @@ func TestPairingManager_queryServiceInfoSuccess(t *testing.T) {
 	// Create SSH pool and pairing manager
 	sshPool := NewSSHPool()
 	defer sshPool.Close()
-	
+
 	pairingManager := NewPairingManager(sshPool, events.NewEventBus())
 	defer pairingManager.Close()
 
@@ -80,42 +80,42 @@ func TestPairingManager_queryServiceInfoSuccess(t *testing.T) {
 
 	// Test successful query
 	service, err := pairingManager.queryServiceInfo("test-worker")
-	
+
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	
+
 	if service == nil {
 		t.Fatal("Expected service to be returned, but got nil")
 	}
-	
+
 	// Verify service details
 	if service.WorkerID != "test-worker" {
 		t.Errorf("Expected WorkerID to be 'test-worker', got %s", service.WorkerID)
 	}
-	
+
 	if service.Name != "Test Worker" {
 		t.Errorf("Expected Name to be 'Test Worker', got %s", service.Name)
 	}
-	
+
 	if service.Status != "online" {
 		t.Errorf("Expected Status to be 'online', got %s", service.Status)
 	}
-	
+
 	if service.Capabilities.MaxConcurrent != 10 {
 		t.Errorf("Expected MaxConcurrent to be 10, got %d", service.Capabilities.MaxConcurrent)
 	}
-	
+
 	if !service.Capabilities.SupportsBatch {
 		t.Error("Expected SupportsBatch to be true")
 	}
-	
+
 	// Check that providers were extracted
 	expectedProviders := []string{"openai", "anthropic", "ollama"}
 	if len(service.Capabilities.Providers) != len(expectedProviders) {
 		t.Fatalf("Expected %d providers, got %d", len(expectedProviders), len(service.Capabilities.Providers))
 	}
-	
+
 	for i, provider := range expectedProviders {
 		if service.Capabilities.Providers[i] != provider {
 			t.Errorf("Expected provider %s at index %d, got %s", provider, i, service.Capabilities.Providers[i])
@@ -134,19 +134,19 @@ func (t *customTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if req.URL.RawQuery != "" {
 		newURL += "?" + req.URL.RawQuery
 	}
-	
+
 	newReq, err := http.NewRequestWithContext(req.Context(), req.Method, newURL, req.Body)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Copy headers
 	for key, values := range req.Header {
 		for _, value := range values {
 			newReq.Header.Add(key, value)
 		}
 	}
-	
+
 	// Use the default transport to make the request
 	return http.DefaultTransport.RoundTrip(newReq)
 }

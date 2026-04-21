@@ -86,8 +86,8 @@ func (c *MarkdownConverter) ConvertToMarkdown(inputPath, outputPath string) erro
 	}
 
 	c.logger.Info("FB2 converted to Markdown successfully", map[string]interface{}{
-		"input_file":   inputPath,
-		"output_file":  outputPath,
+		"input_file":  inputPath,
+		"output_file": outputPath,
 		"chars_count": markdown.Len(),
 	})
 
@@ -98,7 +98,7 @@ func (c *MarkdownConverter) ConvertToMarkdown(inputPath, outputPath string) erro
 func (c *MarkdownConverter) processSections(markdown *strings.Builder, sections []Section, level int) {
 	for _, section := range sections {
 		// Process section title if available
-		if section.Title.Paragraphs != nil && len(section.Title.Paragraphs) > 0 {
+		if len(section.Title.Paragraphs) > 0 {
 			title := extractTextFromParagraph(section.Title.Paragraphs[0])
 			if title != "" {
 				markdown.WriteString(strings.Repeat("#", level))
@@ -156,7 +156,7 @@ func (c *MarkdownConverter) processSections(markdown *strings.Builder, sections 
 // processEpigraph processes an epigraph
 func (c *MarkdownConverter) processEpigraph(markdown *strings.Builder, epigraph Epigraph) {
 	markdown.WriteString("> ")
-	
+
 	// Process epigraph paragraphs
 	for i, para := range epigraph.Paragraph {
 		text := extractTextFromParagraph(para)
@@ -168,7 +168,7 @@ func (c *MarkdownConverter) processEpigraph(markdown *strings.Builder, epigraph 
 			markdown.WriteString("\n")
 		}
 	}
-	
+
 	// Process text author if available
 	for _, textAuthor := range epigraph.TextAuthor {
 		if textAuthor != "" {
@@ -177,14 +177,14 @@ func (c *MarkdownConverter) processEpigraph(markdown *strings.Builder, epigraph 
 			markdown.WriteString("\n")
 		}
 	}
-	
+
 	markdown.WriteString("\n")
 }
 
 // processPoem processes a poem
 func (c *MarkdownConverter) processPoem(markdown *strings.Builder, poem Poem) {
 	// Process poem title if available
-	if poem.Title.Paragraphs != nil && len(poem.Title.Paragraphs) > 0 {
+	if len(poem.Title.Paragraphs) > 0 {
 		title := extractTextFromParagraph(poem.Title.Paragraphs[0])
 		if title != "" {
 			markdown.WriteString("### ")
@@ -192,9 +192,9 @@ func (c *MarkdownConverter) processPoem(markdown *strings.Builder, poem Poem) {
 			markdown.WriteString("\n\n")
 		}
 	}
-	
+
 	markdown.WriteString("\n")
-	
+
 	// Process stanzas
 	for _, stanza := range poem.Stanza {
 		for _, verse := range stanza.V {
@@ -211,7 +211,7 @@ func (c *MarkdownConverter) processPoem(markdown *strings.Builder, poem Poem) {
 // processCite processes a citation
 func (c *MarkdownConverter) processCite(markdown *strings.Builder, cite Cite) {
 	markdown.WriteString("> ")
-	
+
 	// Process cite paragraphs
 	for i, para := range cite.Paragraph {
 		text := extractTextFromParagraph(para)
@@ -223,7 +223,7 @@ func (c *MarkdownConverter) processCite(markdown *strings.Builder, cite Cite) {
 			markdown.WriteString("\n")
 		}
 	}
-	
+
 	// Process subtitles if available
 	for _, subtitle := range cite.Subtitle {
 		if subtitle != "" {
@@ -232,7 +232,7 @@ func (c *MarkdownConverter) processCite(markdown *strings.Builder, cite Cite) {
 			markdown.WriteString("\n")
 		}
 	}
-	
+
 	markdown.WriteString("\n")
 }
 
@@ -256,7 +256,7 @@ func extractTextFromParagraph(para Paragraph) string {
 	if para.Text != "" {
 		return para.Text
 	}
-	
+
 	// Extract text from mixed content
 	var textParts []string
 	for _, content := range para.Content {
@@ -264,6 +264,6 @@ func extractTextFromParagraph(para Paragraph) string {
 			textParts = append(textParts, str)
 		}
 	}
-	
+
 	return strings.Join(textParts, "")
 }

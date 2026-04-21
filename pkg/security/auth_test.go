@@ -441,17 +441,17 @@ func TestGenerateToken_EdgeCases(t *testing.T) {
 			roles:    []string{"admin", "user", "moderator"},
 		},
 		{
-			name:     "Empty userID",
-			userID:   "",
-			username: "testuser",
-			roles:    []string{"user"},
+			name:      "Empty userID",
+			userID:    "",
+			username:  "testuser",
+			roles:     []string{"user"},
 			expectErr: true,
 		},
 		{
-			name:     "Empty username",
-			userID:   "user123",
-			username: "",
-			roles:    []string{"user"},
+			name:      "Empty username",
+			userID:    "user123",
+			username:  "",
+			roles:     []string{"user"},
 			expectErr: true,
 		},
 		{
@@ -558,7 +558,7 @@ func TestValidateToken_MalformedTokens(t *testing.T) {
 
 func TestValidateToken_BruteForceProtection(t *testing.T) {
 	auth := NewAuthService("test-secret-key-16", time.Hour)
-	
+
 	// Generate a valid token
 	validToken, err := auth.GenerateToken("user123", "testuser", []string{"user"})
 	require.NoError(t, err)
@@ -580,7 +580,7 @@ func TestValidateToken_BruteForceProtection(t *testing.T) {
 
 			assert.Error(t, err)
 			assert.Nil(t, claims)
-			
+
 			// Should process quickly but not too fast (brute force protection)
 			assert.Greater(t, duration, time.Microsecond)
 			assert.Less(t, duration, time.Second)
@@ -659,26 +659,26 @@ func TestAuthService_TokenExpirationEdgeCases(t *testing.T) {
 		{
 			name:      "Immediate expiration",
 			ttl:       time.Millisecond,
-			waitTime:   time.Millisecond * 2,
-			expectErr:  true,
+			waitTime:  time.Millisecond * 2,
+			expectErr: true,
 		},
 		{
 			name:      "Short TTL",
 			ttl:       time.Second,
-			waitTime:   time.Millisecond * 50, // Further reduced wait time to ensure token is still valid
-			expectErr:  false,
+			waitTime:  time.Millisecond * 50, // Further reduced wait time to ensure token is still valid
+			expectErr: false,
 		},
 		{
 			name:      "Zero TTL",
 			ttl:       0,
-			waitTime:   0,
-			expectErr:  true,
+			waitTime:  0,
+			expectErr: true,
 		},
 		{
 			name:      "Negative TTL",
 			ttl:       -time.Hour,
-			waitTime:   0,
-			expectErr:  true,
+			waitTime:  0,
+			expectErr: true,
 		},
 	}
 
@@ -687,7 +687,7 @@ func TestAuthService_TokenExpirationEdgeCases(t *testing.T) {
 			auth := NewAuthService("test-secret-key-16", tt.ttl)
 
 			token, err := auth.GenerateToken("user123", "testuser", []string{"user"})
-			
+
 			if tt.expectErr {
 				// Some TTL values should cause generation to fail
 				if err == nil {
@@ -730,7 +730,7 @@ func TestAuthService_ConcurrentAccess(t *testing.T) {
 			userID := fmt.Sprintf("user%d", id)
 			username := fmt.Sprintf("user%d", id)
 			token, err := auth.GenerateToken(userID, username, []string{"user"})
-			
+
 			if err != nil {
 				results <- fmt.Errorf("generation failed for user %d: %w", id, err)
 				return
@@ -875,17 +875,17 @@ func TestAuthService_TokenRefresh(t *testing.T) {
 	if originalToken == refreshedToken {
 		t.Log("Tokens are identical - this can happen with fast generation")
 	}
-	
+
 	// Claims should be the same (except timing)
 	assert.Equal(t, originalClaims.UserID, refreshedClaims.UserID)
 	assert.Equal(t, originalClaims.Username, refreshedClaims.Username)
 	assert.Equal(t, originalClaims.Roles, refreshedClaims.Roles)
-	
+
 	// Both tokens should be valid independently
 	originalCheck, err := auth.ValidateToken(originalToken)
 	assert.NoError(t, err)
 	assert.NotNil(t, originalCheck)
-	
+
 	refreshedCheck, err := auth.ValidateToken(refreshedToken)
 	assert.NoError(t, err)
 	assert.NotNil(t, refreshedCheck)

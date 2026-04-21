@@ -176,7 +176,6 @@ func (c *Client) WritePump() {
 	}
 }
 
-
 // StartServer starts an HTTP server with WebSocket endpoint on the given address
 func (h *Hub) StartServer(addr string) error {
 	upgrader := websocket.Upgrader{

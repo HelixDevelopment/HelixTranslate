@@ -42,7 +42,7 @@ func NewDeepSeekClient(config TranslationConfig) (*DeepSeekClient, error) {
 			}
 		}
 		if !modelValid {
-			return nil, fmt.Errorf("model '%s' is not valid for DeepSeek. Valid models: %v", 
+			return nil, fmt.Errorf("model '%s' is not valid for DeepSeek. Valid models: %v",
 				config.Model, validModels)
 		}
 	}

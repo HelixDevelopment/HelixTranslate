@@ -26,7 +26,7 @@ type RemoteLLMInstance struct {
 	Priority  int
 	Available bool
 	LastUsed  time.Time
-	mu        sync.Mutex
+	mu        sync.Mutex //nolint:unused
 }
 
 // DistributedCoordinator manages distributed LLM instances across remote workers
@@ -235,7 +235,7 @@ func (dc *DistributedCoordinator) getPriorityForProvider(provider string) int {
 
 // getInstanceCountForPriority determines how many instances to create based on priority and max concurrent
 func (dc *DistributedCoordinator) getInstanceCountForPriority(priority int, maxConcurrent int) int {
-	baseCount := 1
+	var baseCount int
 
 	switch {
 	case priority >= 10: // API key providers
@@ -357,10 +357,10 @@ func (dc *DistributedCoordinator) TranslateWithDistributedRetry(
 					}
 				}
 
-				result := strings.Join(translatedWords, " ")
+				translated := strings.Join(translatedWords, " ")
 
 				resultMu.Lock()
-				result = result
+				result = translated
 				resultMu.Unlock()
 				return nil
 			},

@@ -30,8 +30,8 @@ type VerificationResult struct {
 	Warnings           []string
 	Errors             []string
 	Issues             []VerificationIssue // Issues as structs for test compatibility
-	StringIssues       []string // String issues for backward compatibility
-	ContextConsidered   bool // For test compatibility
+	StringIssues       []string            // String issues for backward compatibility
+	ContextConsidered  bool                // For test compatibility
 }
 
 // VerificationRequest represents a verification request
@@ -46,19 +46,19 @@ type VerificationRequest struct {
 
 // QualityMetrics represents translation quality metrics
 type QualityMetrics struct {
-	LengthRatio       float64 `json:"length_ratio"`
-	WordCountRatio    float64 `json:"word_count_ratio"`
+	LengthRatio         float64 `json:"length_ratio"`
+	WordCountRatio      float64 `json:"word_count_ratio"`
 	VocabularyDiversity float64 `json:"vocabulary_diversity"`
-	Accuracy          float64 `json:"accuracy"`
-	Fluency           float64 `json:"fluency"`
-	Consistency       float64 `json:"consistency"`
-	Completeness      float64 `json:"completeness"`
-	Overall           float64 `json:"overall"`
+	Accuracy            float64 `json:"accuracy"`
+	Fluency             float64 `json:"fluency"`
+	Consistency         float64 `json:"consistency"`
+	Completeness        float64 `json:"completeness"`
+	Overall             float64 `json:"overall"`
 }
 
 // UntranslatedBlock represents a piece of content that wasn't translated
 type UntranslatedBlock struct {
-	Location    string // e.g., "Chapter 5, Section 2, Paragraph 3"
+	Location     string // e.g., "Chapter 5, Section 2, Paragraph 3"
 	OriginalText string
 	Language     string
 	Length       int
@@ -92,11 +92,11 @@ func NewVerifier(
 		eventBus:       eventBus,
 		sessionID:      sessionID,
 		config: VerificationConfig{
-			StrictMode:          false,
+			StrictMode:           false,
 			EnableQualityCheck:   true,
 			EnableIssueDetection: true,
-			MinQualityScore:     0.5,
-			MinScore:           0.5, // For test compatibility
+			MinQualityScore:      0.5,
+			MinScore:             0.5, // For test compatibility
 		},
 	}
 }
@@ -194,7 +194,7 @@ func (v *Verifier) verifyMetadata(metadata *ebook.Metadata, result *Verification
 	if metadata.Title != "" {
 		if v.isSourceLanguage(metadata.Title) {
 			result.UntranslatedBlocks = append(result.UntranslatedBlocks, UntranslatedBlock{
-				Location:    "Book Title",
+				Location:     "Book Title",
 				OriginalText: metadata.Title,
 				Language:     v.sourceLanguage.Code,
 				Length:       len(metadata.Title),
@@ -206,7 +206,7 @@ func (v *Verifier) verifyMetadata(metadata *ebook.Metadata, result *Verification
 	if metadata.Description != "" {
 		if v.isSourceLanguage(metadata.Description) {
 			result.UntranslatedBlocks = append(result.UntranslatedBlocks, UntranslatedBlock{
-				Location:    "Book Description",
+				Location:     "Book Description",
 				OriginalText: truncate(metadata.Description, 200),
 				Language:     v.sourceLanguage.Code,
 				Length:       len(metadata.Description),
@@ -226,7 +226,7 @@ func (v *Verifier) verifyChapter(chapter *ebook.Chapter, chapterNum int, result 
 	if chapter.Title != "" {
 		if v.isSourceLanguage(chapter.Title) {
 			result.UntranslatedBlocks = append(result.UntranslatedBlocks, UntranslatedBlock{
-				Location:    location + " - Title",
+				Location:     location + " - Title",
 				OriginalText: chapter.Title,
 				Language:     v.sourceLanguage.Code,
 				Length:       len(chapter.Title),
@@ -252,7 +252,7 @@ func (v *Verifier) verifySection(section *ebook.Section, location string, result
 	if section.Title != "" {
 		if v.isSourceLanguage(section.Title) {
 			result.UntranslatedBlocks = append(result.UntranslatedBlocks, UntranslatedBlock{
-				Location:    location + " - Title",
+				Location:     location + " - Title",
 				OriginalText: section.Title,
 				Language:     v.sourceLanguage.Code,
 				Length:       len(section.Title),
@@ -266,7 +266,7 @@ func (v *Verifier) verifySection(section *ebook.Section, location string, result
 		// Check if content is translated
 		if v.isSourceLanguage(section.Content) {
 			result.UntranslatedBlocks = append(result.UntranslatedBlocks, UntranslatedBlock{
-				Location:    location + " - Content",
+				Location:     location + " - Content",
 				OriginalText: truncate(section.Content, 500),
 				Language:     v.sourceLanguage.Code,
 				Length:       len(section.Content),
@@ -288,7 +288,7 @@ func (v *Verifier) verifySection(section *ebook.Section, location string, result
 			if v.isSourceLanguage(para) {
 				paraLoc := fmt.Sprintf("%s, Paragraph %d", location, pi+1)
 				result.UntranslatedBlocks = append(result.UntranslatedBlocks, UntranslatedBlock{
-					Location:    paraLoc,
+					Location:     paraLoc,
 					OriginalText: truncate(para, 200),
 					Language:     v.sourceLanguage.Code,
 					Length:       len(para),
@@ -353,9 +353,9 @@ func (v *Verifier) isSourceLanguage(text string) bool {
 
 	// If we expect Cyrillic but got Latin, or vice versa
 	targetCyrillic := v.targetLanguage.Code == "sr" || v.targetLanguage.Code == "ru" ||
-	                   v.targetLanguage.Code == "bg" || v.targetLanguage.Code == "uk"
+		v.targetLanguage.Code == "bg" || v.targetLanguage.Code == "uk"
 	sourceCyrillic := v.sourceLanguage.Code == "ru" || v.sourceLanguage.Code == "sr" ||
-	                   v.sourceLanguage.Code == "bg" || v.sourceLanguage.Code == "uk"
+		v.sourceLanguage.Code == "bg" || v.sourceLanguage.Code == "uk"
 
 	if sourceCyrillic && !targetCyrillic {
 		// Source is Cyrillic, target is not - if we have Cyrillic, not translated
@@ -428,21 +428,21 @@ func (v *Verifier) calculateQualityScore(result *VerificationResult, book *ebook
 		if !result.IsValid {
 			return 0.0
 		}
-		
+
 		// Deduct points for errors and warnings
 		score := 1.0
 		score -= float64(len(result.Errors)) * 0.2
 		score -= float64(len(result.Warnings)) * 0.1
 		score -= float64(len(result.UntranslatedBlocks)) * 0.15
 		score -= float64(len(result.HTMLArtifacts)) * 0.05
-		
+
 		if score < 0.0 {
 			score = 0.0
 		}
-		
+
 		return score
 	}
-	
+
 	// Count total translatable items
 	totalItems := 0
 	totalChars := 0
@@ -585,7 +585,7 @@ func (v *Verifier) VerifyTranslation(ctx context.Context, req VerificationReques
 	// Check for untranslated content (simple heuristic)
 	if req.Original == req.Translated && req.Original != "" {
 		result.UntranslatedBlocks = append(result.UntranslatedBlocks, UntranslatedBlock{
-			Location:    req.Context,
+			Location:     req.Context,
 			OriginalText: req.Original,
 			Language:     v.sourceLanguage.Code,
 			Length:       len(req.Original),
@@ -605,7 +605,7 @@ func (v *Verifier) VerifyTranslation(ctx context.Context, req VerificationReques
 	if req.Original != "" && req.Translated != "" {
 		originalWords := len(strings.Fields(req.Original))
 		translatedWords := len(strings.Fields(req.Translated))
-		
+
 		// Consider translation incomplete if it's much shorter (less than 50% of original)
 		if translatedWords > 0 && float64(translatedWords)/float64(originalWords) < 0.5 {
 			warnMsg := "Translation appears incomplete"
@@ -627,21 +627,21 @@ func (v *Verifier) VerifyTranslation(ctx context.Context, req VerificationReques
 
 // VerificationConfig represents verification configuration
 type VerificationConfig struct {
-	StrictMode          bool     `json:"strict_mode"`
+	StrictMode           bool     `json:"strict_mode"`
 	EnableQualityCheck   bool     `json:"enable_quality_check"`
 	EnableIssueDetection bool     `json:"enable_issue_detection"`
-	EnableContext       bool     `json:"enable_context"`
-	EnableSpellCheck    bool     `json:"enable_spell_check"`
-	EnableGrammarCheck  bool     `json:"enable_grammar_check"`
-	MinQualityScore     float64  `json:"min_quality_score"`
-	MinScore           float64  `json:"min_score"` // Alias for test compatibility
-	AllowedLanguages    []string `json:"allowed_languages"`
+	EnableContext        bool     `json:"enable_context"`
+	EnableSpellCheck     bool     `json:"enable_spell_check"`
+	EnableGrammarCheck   bool     `json:"enable_grammar_check"`
+	MinQualityScore      float64  `json:"min_quality_score"`
+	MinScore             float64  `json:"min_score"` // Alias for test compatibility
+	AllowedLanguages     []string `json:"allowed_languages"`
 }
 
 // BatchVerify performs batch verification (for test compatibility)
 func (v *Verifier) BatchVerify(ctx context.Context, requests []VerificationRequest) ([]*VerificationResult, error) {
 	results := make([]*VerificationResult, len(requests))
-	
+
 	for i, req := range requests {
 		result, err := v.VerifyTranslation(ctx, req)
 		if err != nil {
@@ -649,7 +649,7 @@ func (v *Verifier) BatchVerify(ctx context.Context, requests []VerificationReque
 		}
 		results[i] = result
 	}
-	
+
 	return results, nil
 }
 
@@ -666,10 +666,10 @@ func (v *Verifier) VerifyWithContext(ctx context.Context, original, translated, 
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Mark context as considered for test compatibility
 	result.ContextConsidered = true
-	
+
 	return result, nil
 }
 
@@ -693,14 +693,14 @@ func NewVerifierWithConfig(sourceLanguage, targetLanguage language.Language, eve
 // calculateQualityMetrics calculates quality metrics (for test compatibility)
 func (v *Verifier) calculateQualityMetrics(original, translated string) QualityMetrics {
 	metrics := QualityMetrics{}
-	
+
 	// Calculate length ratio
 	if len(original) > 0 {
 		metrics.LengthRatio = float64(len(translated)) / float64(len(original))
 	} else {
 		metrics.LengthRatio = 0
 	}
-	
+
 	// Calculate word count ratio
 	originalWords := len(strings.Fields(original))
 	translatedWords := len(strings.Fields(translated))
@@ -709,7 +709,7 @@ func (v *Verifier) calculateQualityMetrics(original, translated string) QualityM
 	} else {
 		metrics.WordCountRatio = 0
 	}
-	
+
 	// Calculate vocabulary diversity (simplified)
 	if translatedWords > 0 {
 		uniqueWords := make(map[string]bool)
@@ -720,23 +720,29 @@ func (v *Verifier) calculateQualityMetrics(original, translated string) QualityM
 	} else {
 		metrics.VocabularyDiversity = 0
 	}
-	
-	// Placeholder values for other metrics
-	metrics.Accuracy = 0.9
-	metrics.Fluency = 0.8
-	metrics.Consistency = 0.85
-	metrics.Completeness = 0.95
-	
+
+	// Calculate accuracy: ratio of valid words for target language
+	metrics.Accuracy = calculateAccuracy(translated, v.targetLanguage.Code)
+
+	// Calculate fluency: sentence endings and punctuation ratio
+	metrics.Fluency = calculateFluency(translated)
+
+	// Calculate consistency: compare term usage frequency diversity
+	metrics.Consistency = calculateConsistency(original, translated)
+
+	// Calculate completeness: length ratio and segment count comparison
+	metrics.Completeness = calculateCompleteness(original, translated)
+
 	// Simple overall calculation
 	metrics.Overall = (metrics.Accuracy + metrics.Fluency + metrics.Consistency + metrics.Completeness) / 4
-	
+
 	return metrics
 }
 
 // detectIssues detects issues in translation (for test compatibility)
 func (v *Verifier) detectIssues(original, translated string) []VerificationIssue {
 	var issues []VerificationIssue
-	
+
 	// Check for empty translation first - return only this issue if found
 	if translated == "" && original != "" {
 		issues = append(issues, VerificationIssue{
@@ -746,7 +752,7 @@ func (v *Verifier) detectIssues(original, translated string) []VerificationIssue
 		})
 		return issues // Return early - only report empty translation
 	}
-	
+
 	// Check for untranslated content
 	if original == translated {
 		issues = append(issues, VerificationIssue{
@@ -755,7 +761,7 @@ func (v *Verifier) detectIssues(original, translated string) []VerificationIssue
 			Severity:    "medium",
 		})
 	}
-	
+
 	// Check for specific test case "length mismatch" - exact match
 	if original == "This is a very long sentence with many words" && translated == "Court" {
 		issues = append(issues, VerificationIssue{
@@ -765,7 +771,7 @@ func (v *Verifier) detectIssues(original, translated string) []VerificationIssue
 		})
 		return issues // Return early - only this issue for this specific test case
 	}
-	
+
 	// Check for general length mismatch only if not empty and not the specific test case
 	if len(original) > 0 && len(translated) == 0 {
 		issues = append(issues, VerificationIssue{
@@ -774,7 +780,7 @@ func (v *Verifier) detectIssues(original, translated string) []VerificationIssue
 			Severity:    "high",
 		})
 	}
-	
+
 	// Check for repetition - only if the text is significantly longer and repetitive
 	if len(translated) > len(original)*2 && strings.Contains(translated, " ") {
 		words := strings.Fields(translated)
@@ -783,7 +789,7 @@ func (v *Verifier) detectIssues(original, translated string) []VerificationIssue
 			for _, word := range words {
 				wordCount[strings.ToLower(word)]++
 			}
-			
+
 			// Check if any non-trivial word appears too many times
 			for word, count := range wordCount {
 				if count >= 5 && len(word) > 2 { // Word appears 5+ times and is meaningful
@@ -792,18 +798,18 @@ func (v *Verifier) detectIssues(original, translated string) []VerificationIssue
 						Description: fmt.Sprintf("Word '%s' appears %d times", word, count),
 						Severity:    "low",
 					})
-					
+
 					// For the specific test case "Hello Hello Hello Hello Hello", only return repetition
 					if original == "Hello" && translated == "Hello Hello Hello Hello Hello" {
 						return issues // Return early - only this issue for this specific test case
 					}
-					
+
 					break // Only report one repetition issue
 				}
 			}
 		}
 	}
-	
+
 	// Simple heuristic for length ratio issues - but skip if we already found major issues
 	if len(issues) == 0 && len(original) > 0 && len(translated) > 0 {
 		ratio := float64(len(translated)) / float64(len(original))
@@ -821,6 +827,171 @@ func (v *Verifier) detectIssues(original, translated string) []VerificationIssue
 			})
 		}
 	}
-	
+
 	return issues
+}
+
+// calculateAccuracy computes the ratio of words that match the expected script for the target language.
+func calculateAccuracy(translated, targetLang string) float64 {
+	words := strings.Fields(translated)
+	if len(words) == 0 {
+		return 0
+	}
+	valid := 0
+	for _, word := range words {
+		if isValidForLanguage(word, targetLang) {
+			valid++
+		}
+	}
+	return float64(valid) / float64(len(words))
+}
+
+// isValidForLanguage checks if a word contains characters appropriate for the target language.
+func isValidForLanguage(word, lang string) bool {
+	hasLetters := false
+	isCyrillicTarget := lang == "ru" || lang == "sr" || lang == "bg" || lang == "uk"
+
+	for _, r := range word {
+		if unicode.IsLetter(r) {
+			hasLetters = true
+			if isCyrillicTarget {
+				if !unicode.Is(unicode.Cyrillic, r) {
+					return false
+				}
+			} else if lang == "zh" || lang == "ja" || lang == "ko" {
+				if unicode.Is(unicode.Latin, r) {
+					continue
+				}
+				if !unicode.Is(unicode.Han, r) && !unicode.Is(unicode.Hiragana, r) &&
+					!unicode.Is(unicode.Katakana, r) && !unicode.Is(unicode.Hangul, r) {
+					return false
+				}
+			} else {
+				if !unicode.Is(unicode.Latin, r) {
+					return false
+				}
+			}
+		}
+	}
+	return hasLetters
+}
+
+// calculateFluency checks sentence endings and punctuation ratio.
+func calculateFluency(text string) float64 {
+	if len(text) == 0 {
+		return 0
+	}
+	sentences := strings.Split(text, ".")
+	validSentences := 0
+	for _, s := range sentences {
+		if len(strings.TrimSpace(s)) > 0 {
+			validSentences++
+		}
+	}
+	if validSentences == 0 {
+		return 0
+	}
+
+	properEndings := 0
+	for i, s := range sentences {
+		trimmed := strings.TrimSpace(s)
+		if len(trimmed) == 0 {
+			continue
+		}
+		if i == len(sentences)-1 {
+			if strings.HasSuffix(text, ".") || strings.HasSuffix(text, "!") || strings.HasSuffix(text, "?") {
+				properEndings++
+			} else if len(trimmed) > 3 {
+				properEndings++
+			}
+		} else {
+			properEndings++
+		}
+	}
+	endingScore := float64(properEndings) / float64(validSentences)
+
+	punctCount := 0
+	letterCount := 0
+	for _, r := range text {
+		if unicode.IsPunct(r) {
+			punctCount++
+		}
+		if unicode.IsLetter(r) {
+			letterCount++
+		}
+	}
+	punctScore := 1.0
+	if letterCount > 0 {
+		punctRatio := float64(punctCount) / float64(letterCount)
+		if punctRatio > 0.2 {
+			punctScore = 1.0 - (punctRatio-0.2)*2
+			if punctScore < 0 {
+				punctScore = 0
+			}
+		} else if punctRatio < 0.02 {
+			punctScore = punctRatio * 50
+		}
+	}
+
+	return (endingScore + punctScore) / 2
+}
+
+// calculateConsistency compares vocabulary diversity between original and translated.
+func calculateConsistency(original, translated string) float64 {
+	origWords := strings.Fields(original)
+	transWords := strings.Fields(translated)
+	if len(origWords) == 0 || len(transWords) == 0 {
+		return 0
+	}
+
+	origUnique := make(map[string]bool)
+	for _, w := range origWords {
+		origUnique[strings.ToLower(w)] = true
+	}
+	transUnique := make(map[string]bool)
+	for _, w := range transWords {
+		transUnique[strings.ToLower(w)] = true
+	}
+
+	origDiv := float64(len(origUnique)) / float64(len(origWords))
+	transDiv := float64(len(transUnique)) / float64(len(transWords))
+
+	ratio := transDiv / origDiv
+	if ratio > 1.0 {
+		ratio = 1.0 / ratio
+	}
+	return 0.5 + ratio*0.5
+}
+
+// calculateCompleteness measures length ratio and segment count comparison.
+func calculateCompleteness(original, translated string) float64 {
+	if len(original) == 0 {
+		return 0
+	}
+	lengthRatio := float64(len(translated)) / float64(len(original))
+	if lengthRatio > 1.0 {
+		lengthRatio = 1.0
+	}
+
+	origWords := len(strings.Fields(original))
+	transWords := len(strings.Fields(translated))
+	wordRatio := 0.0
+	if origWords > 0 {
+		wordRatio = float64(transWords) / float64(origWords)
+	}
+	if wordRatio > 1.0 {
+		wordRatio = 1.0
+	}
+
+	origSegments := len(strings.Split(original, "."))
+	transSegments := len(strings.Split(translated, "."))
+	segmentRatio := 0.0
+	if origSegments > 0 {
+		segmentRatio = float64(transSegments) / float64(origSegments)
+	}
+	if segmentRatio > 1.0 {
+		segmentRatio = 1.0
+	}
+
+	return (lengthRatio + wordRatio + segmentRatio) / 3
 }

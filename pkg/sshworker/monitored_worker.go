@@ -22,15 +22,15 @@ type MonitoredSSHWorker struct {
 
 // ProgressTracker tracks progress of long-running operations
 type ProgressTracker struct {
-	Operation   string                `json:"operation"`
-	Total       int                  `json:"total"`
-	Completed   int                  `json:"completed"`
-	Current     string               `json:"current"`
-	StartTime   time.Time             `json:"start_time"`
-	LastUpdate  time.Time             `json:"last_update"`
-	Status      string               `json:"status"`
-	Details     map[string]interface{} `json:"details"`
-	mu          sync.RWMutex
+	Operation  string                 `json:"operation"`
+	Total      int                    `json:"total"`
+	Completed  int                    `json:"completed"`
+	Current    string                 `json:"current"`
+	StartTime  time.Time              `json:"start_time"`
+	LastUpdate time.Time              `json:"last_update"`
+	Status     string                 `json:"status"`
+	Details    map[string]interface{} `json:"details"`
+	mu         sync.RWMutex
 }
 
 // NewMonitoredSSHWorker creates a new SSH worker with monitoring
@@ -41,11 +41,11 @@ func NewMonitoredSSHWorker(config SSHWorkerConfig, eventBus *events.EventBus, se
 	}
 
 	return &MonitoredSSHWorker{
-		SSHWorker:  worker,
-		eventBus:   eventBus,
-		sessionID:  sessionID,
-		progress:   make(map[string]*ProgressTracker),
-		logger:     logger,
+		SSHWorker: worker,
+		eventBus:  eventBus,
+		sessionID: sessionID,
+		progress:  make(map[string]*ProgressTracker),
+		logger:    logger,
 	}, nil
 }
 
@@ -58,15 +58,15 @@ func (m *MonitoredSSHWorker) ExecuteCommandWithProgress(ctx context.Context, ope
 		StartTime: time.Now(),
 		Details:   make(map[string]interface{}),
 	}
-	
+
 	m.progressMu.Lock()
 	m.progress[operation] = tracker
 	m.progressMu.Unlock()
 
 	// Emit start event
 	m.emitEvent(events.EventTranslationStarted, fmt.Sprintf("Starting %s", operation), map[string]interface{}{
-		"operation": operation,
-		"command":   command,
+		"operation":  operation,
+		"command":    command,
 		"session_id": m.sessionID,
 	})
 
@@ -80,9 +80,9 @@ func (m *MonitoredSSHWorker) ExecuteCommandWithProgress(ctx context.Context, ope
 	tracker.mu.Unlock()
 
 	m.emitEvent(events.EventTranslationProgress, fmt.Sprintf("%s in progress", operation), map[string]interface{}{
-		"operation": operation,
-		"status":    "running",
-		"progress":  tracker.GetProgress(),
+		"operation":  operation,
+		"status":     "running",
+		"progress":   tracker.GetProgress(),
 		"session_id": m.sessionID,
 	})
 
@@ -112,9 +112,9 @@ func (m *MonitoredSSHWorker) ExecuteCommandWithProgress(ctx context.Context, ope
 	eventType := events.EventTranslationCompleted
 	eventMessage := fmt.Sprintf("%s completed", operation)
 	eventData := map[string]interface{}{
-		"operation": operation,
-		"status":    tracker.Status,
-		"progress":  tracker.GetProgress(),
+		"operation":  operation,
+		"status":     tracker.Status,
+		"progress":   tracker.GetProgress(),
 		"session_id": m.sessionID,
 	}
 
@@ -147,11 +147,11 @@ func (m *MonitoredSSHWorker) MonitorLongRunningCommand(ctx context.Context, oper
 		Status:    "starting",
 		StartTime: time.Now(),
 		Details: map[string]interface{}{
-			"command": command,
+			"command":    command,
 			"session_id": m.sessionID,
 		},
 	}
-	
+
 	m.progressMu.Lock()
 	m.progress[operation] = tracker
 	m.progressMu.Unlock()
@@ -159,7 +159,7 @@ func (m *MonitoredSSHWorker) MonitorLongRunningCommand(ctx context.Context, oper
 	// Start command in background
 	resultChan := make(chan *CommandResult, 1)
 	errorChan := make(chan error, 1)
-	
+
 	go func() {
 		result, err := m.SSHWorker.ExecuteCommand(ctx, command)
 		if err != nil {
@@ -181,9 +181,9 @@ func (m *MonitoredSSHWorker) MonitorLongRunningCommand(ctx context.Context, oper
 			tracker.Current = "Operation cancelled"
 			tracker.LastUpdate = time.Now()
 			tracker.mu.Unlock()
-			
+
 			m.emitEvent(events.EventTranslationError, fmt.Sprintf("%s cancelled", operation), map[string]interface{}{
-				"operation": operation,
+				"operation":  operation,
 				"session_id": m.sessionID,
 			})
 			return nil, ctx.Err()
@@ -203,8 +203,8 @@ func (m *MonitoredSSHWorker) MonitorLongRunningCommand(ctx context.Context, oper
 			tracker.mu.Unlock()
 
 			m.emitEvent(events.EventTranslationCompleted, fmt.Sprintf("%s completed", operation), map[string]interface{}{
-				"operation": operation,
-				"progress":  tracker.GetProgress(),
+				"operation":  operation,
+				"progress":   tracker.GetProgress(),
 				"session_id": m.sessionID,
 			})
 
@@ -223,8 +223,8 @@ func (m *MonitoredSSHWorker) MonitorLongRunningCommand(ctx context.Context, oper
 			tracker.mu.Unlock()
 
 			m.emitEvent(events.EventTranslationError, fmt.Sprintf("%s failed", operation), map[string]interface{}{
-				"operation": operation,
-				"error":     err.Error(),
+				"operation":  operation,
+				"error":      err.Error(),
 				"session_id": m.sessionID,
 			})
 
@@ -244,8 +244,8 @@ func (m *MonitoredSSHWorker) MonitorLongRunningCommand(ctx context.Context, oper
 			tracker.mu.Unlock()
 
 			m.emitEvent(events.EventTranslationProgress, fmt.Sprintf("%s in progress", operation), map[string]interface{}{
-				"operation": operation,
-				"progress":  tracker.GetProgress(),
+				"operation":  operation,
+				"progress":   tracker.GetProgress(),
 				"session_id": m.sessionID,
 			})
 		}
@@ -256,7 +256,7 @@ func (m *MonitoredSSHWorker) MonitorLongRunningCommand(ctx context.Context, oper
 func (m *MonitoredSSHWorker) GetProgress() map[string]*ProgressTracker {
 	m.progressMu.RLock()
 	defer m.progressMu.RUnlock()
-	
+
 	progress := make(map[string]*ProgressTracker)
 	for op, tracker := range m.progress {
 		progress[op] = tracker.GetCopy()
@@ -268,7 +268,7 @@ func (m *MonitoredSSHWorker) GetProgress() map[string]*ProgressTracker {
 func (m *MonitoredSSHWorker) GetProgressTracker(operation string) *ProgressTracker {
 	m.progressMu.RLock()
 	defer m.progressMu.RUnlock()
-	
+
 	if tracker, ok := m.progress[operation]; ok {
 		return tracker.GetCopy()
 	}
@@ -288,7 +288,7 @@ func (m *MonitoredSSHWorker) emitEvent(eventType events.EventType, message strin
 func (pt *ProgressTracker) GetProgress() map[string]interface{} {
 	pt.mu.RLock()
 	defer pt.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"operation":   pt.Operation,
 		"total":       pt.Total,
@@ -307,13 +307,13 @@ func (pt *ProgressTracker) GetProgress() map[string]interface{} {
 func (pt *ProgressTracker) GetCopy() *ProgressTracker {
 	pt.mu.RLock()
 	defer pt.mu.RUnlock()
-	
+
 	// Deep copy details
 	detailsCopy := make(map[string]interface{})
 	for k, v := range pt.Details {
 		detailsCopy[k] = v
 	}
-	
+
 	return &ProgressTracker{
 		Operation:  pt.Operation,
 		Total:      pt.Total,

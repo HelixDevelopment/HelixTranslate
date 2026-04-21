@@ -15,15 +15,16 @@ import (
 )
 
 func main() {
+	fs := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	var (
-		configFile = flag.String("config", "config.distributed.json", "Configuration file")
-		action     = flag.String("action", "deploy", "Action: deploy, status, stop, cleanup, update, restart, generate-plan")
-		service    = flag.String("service", "", "Service name for update/restart actions")
-		image      = flag.String("image", "", "New image for update action")
-		planFile   = flag.String("plan", "", "Deployment plan JSON file")
-		verbose    = flag.Bool("verbose", false, "Enable verbose logging")
+		configFile = fs.String("config", "config.distributed.json", "Configuration file")
+		action     = fs.String("action", "deploy", "Action: deploy, status, stop, cleanup, update, restart, generate-plan")
+		service    = fs.String("service", "", "Service name for update/restart actions")
+		image      = fs.String("image", "", "New image for update action")
+		planFile   = fs.String("plan", "", "Deployment plan JSON file")
+		verbose    = fs.Bool("verbose", false, "Enable verbose logging")
 	)
-	flag.Parse()
+	fs.Parse(os.Args[1:])
 
 	// Load configuration
 	cfg, err := config.LoadConfig(*configFile)
@@ -113,8 +114,17 @@ func handleStatus(orchestrator *deployment.DeploymentOrchestrator) {
 func handleStop(orchestrator *deployment.DeploymentOrchestrator) {
 	log.Println("Stopping deployment...")
 
-	// For now, this would need to be implemented in the orchestrator
-	// orchestrator.StopDeployment(context.Background())
+	if orchestrator == nil {
+		log.Println("No orchestrator available, nothing to stop")
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	if err := orchestrator.StopDeployment(ctx); err != nil {
+		log.Fatalf("Failed to stop deployment: %v", err)
+	}
 
 	log.Println("Deployment stopped")
 }

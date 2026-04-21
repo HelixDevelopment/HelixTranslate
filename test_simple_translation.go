@@ -22,7 +22,7 @@ func main() {
 		ConnectionTimeout: 30 * time.Second,
 		CommandTimeout:    120 * time.Second,
 	}
-	
+
 	log := logger.NewNoOpLogger()
 	worker, err := sshworker.NewSSHWorker(config, log)
 	if err != nil {
@@ -64,7 +64,7 @@ Translate this to Serbian: Привет мир
 	}
 
 	fmt.Printf("Translation test output:\n%s\n", result.Stdout)
-	
+
 	if result.Stderr != "" {
 		fmt.Printf("Stderr:\n%s\n", result.Stderr)
 	}

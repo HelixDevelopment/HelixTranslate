@@ -414,7 +414,6 @@ func TestErrorRecovery(t *testing.T) {
 			},
 		}
 
-
 		trans := &MockTranslator{}
 
 		en := language.Language{Code: "en", Name: "English"}
@@ -467,7 +466,6 @@ func TestLargeBookPerformance(t *testing.T) {
 			},
 			Chapters: chapters,
 		}
-
 
 		trans := &MockTranslator{}
 

@@ -398,46 +398,46 @@ func TestSessionID_UniqueConstraint(t *testing.T) {
 // TestCacheKey_Generation tests cache key uniqueness
 func TestCacheKey_Generation(t *testing.T) {
 	tests := []struct {
-		name           string
-		sourceText     string
-		sourceLang     string
-		targetLang     string
-		provider       string
-		model          string
-		shouldBeSame   bool
-		compareWith    *struct{ sourceText, sourceLang, targetLang, provider, model string }
+		name         string
+		sourceText   string
+		sourceLang   string
+		targetLang   string
+		provider     string
+		model        string
+		shouldBeSame bool
+		compareWith  *struct{ sourceText, sourceLang, targetLang, provider, model string }
 	}{
 		{
-			name:       "identical parameters",
-			sourceText: "Hello",
-			sourceLang: "en",
-			targetLang: "sr",
-			provider:   "deepseek",
-			model:      "deepseek-chat",
+			name:         "identical parameters",
+			sourceText:   "Hello",
+			sourceLang:   "en",
+			targetLang:   "sr",
+			provider:     "deepseek",
+			model:        "deepseek-chat",
 			shouldBeSame: true,
 			compareWith: &struct{ sourceText, sourceLang, targetLang, provider, model string }{
 				"Hello", "en", "sr", "deepseek", "deepseek-chat",
 			},
 		},
 		{
-			name:       "different text",
-			sourceText: "Hello",
-			sourceLang: "en",
-			targetLang: "sr",
-			provider:   "deepseek",
-			model:      "deepseek-chat",
+			name:         "different text",
+			sourceText:   "Hello",
+			sourceLang:   "en",
+			targetLang:   "sr",
+			provider:     "deepseek",
+			model:        "deepseek-chat",
 			shouldBeSame: false,
 			compareWith: &struct{ sourceText, sourceLang, targetLang, provider, model string }{
 				"Goodbye", "en", "sr", "deepseek", "deepseek-chat",
 			},
 		},
 		{
-			name:       "different provider",
-			sourceText: "Hello",
-			sourceLang: "en",
-			targetLang: "sr",
-			provider:   "deepseek",
-			model:      "deepseek-chat",
+			name:         "different provider",
+			sourceText:   "Hello",
+			sourceLang:   "en",
+			targetLang:   "sr",
+			provider:     "deepseek",
+			model:        "deepseek-chat",
 			shouldBeSame: false,
 			compareWith: &struct{ sourceText, sourceLang, targetLang, provider, model string }{
 				"Hello", "en", "sr", "openai", "gpt-4",

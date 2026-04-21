@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"sync"
 	"testing"
 	"time"
 
@@ -21,6 +22,9 @@ import (
 
 // TestWebSocketMonitoringSystem comprehensive test suite for WebSocket monitoring
 func TestWebSocketMonitoringSystem(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
 	// Create a test suite
 	suite := &WebSocketMonitoringTestSuite{}
 	suite.Setup(t)
@@ -34,40 +38,41 @@ func TestWebSocketMonitoringSystem(t *testing.T) {
 }
 
 type WebSocketMonitoringTestSuite struct {
-	server      *MonitoringTestServer
-	clients     []*gorillaws.Conn
+	server       *MonitoringTestServer
+	clients      []*gorillaws.Conn
 	eventBus     *events.EventBus
 	testSessions map[string]*TestSession
-	httpServer  *http.Server
+	httpServer   *http.Server
 }
 
 type MonitoringTestServer struct {
 	Port    int
 	Clients map[string]*gorillaws.Conn
 	Hub     *websocket.Hub
+	mu      sync.Mutex
 }
 
 type TestSession struct {
-	ID          string
-	Events      []TestEvent
-	StartTime   time.Time
-	EndTime     time.Time
-	Progress    float64
-	WorkerInfo  *TestWorkerInfo
-	Error       error
+	ID         string
+	Events     []TestEvent
+	StartTime  time.Time
+	EndTime    time.Time
+	Progress   float64
+	WorkerInfo *TestWorkerInfo
+	Error      error
 }
 
 type TestEvent struct {
-	Type       string                 `json:"type"`
-	SessionID  string                 `json:"session_id"`
-	Step       string                 `json:"step,omitempty"`
-	Message    string                 `json:"message,omitempty"`
-	Progress   float64                `json:"progress,omitempty"`
-	Error      string                 `json:"error,omitempty"`
+	Type        string                 `json:"type"`
+	SessionID   string                 `json:"session_id"`
+	Step        string                 `json:"step,omitempty"`
+	Message     string                 `json:"message,omitempty"`
+	Progress    float64                `json:"progress,omitempty"`
+	Error       string                 `json:"error,omitempty"`
 	CurrentItem string                 `json:"current_item,omitempty"`
-	TotalItems int                    `json:"total_items,omitempty"`
-	Timestamp  int64                  `json:"timestamp"`
-	Data       map[string]interface{}   `json:"data,omitempty"`
+	TotalItems  int                    `json:"total_items,omitempty"`
+	Timestamp   int64                  `json:"timestamp"`
+	Data        map[string]interface{} `json:"data,omitempty"`
 }
 
 type TestWorkerInfo struct {
@@ -81,7 +86,7 @@ type TestWorkerInfo struct {
 func (suite *WebSocketMonitoringTestSuite) Setup(t *testing.T) {
 	// Get dynamic port for testing
 	port := utils.GetFreePort()
-	
+
 	// Initialize event bus
 	suite.eventBus = events.NewEventBus()
 
@@ -123,7 +128,7 @@ func (suite *WebSocketMonitoringTestSuite) Teardown() {
 
 func (suite *WebSocketMonitoringTestSuite) startTestServer() {
 	mux := http.NewServeMux()
-	
+
 	// WebSocket endpoint
 	mux.HandleFunc("/ws", suite.handleWebSocket)
 
@@ -131,8 +136,8 @@ func (suite *WebSocketMonitoringTestSuite) startTestServer() {
 	mux.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"status": "running",
-			"clients": len(suite.server.Clients),
+			"status":   "running",
+			"clients":  len(suite.server.Clients),
 			"sessions": len(suite.testSessions),
 		})
 	})
@@ -170,7 +175,9 @@ func (suite *WebSocketMonitoringTestSuite) handleWebSocket(w http.ResponseWriter
 	}
 
 	// Store client
+	suite.server.mu.Lock()
 	suite.server.Clients[clientID] = conn
+	suite.server.mu.Unlock()
 
 	// Create test session if it doesn't exist
 	if _, exists := suite.testSessions[sessionID]; !exists {
@@ -205,11 +212,11 @@ func (suite *WebSocketMonitoringTestSuite) handleClientMessages(clientID, sessio
 		if session, exists := suite.testSessions[sessionID]; exists {
 			session.Events = append(session.Events, event)
 			session.Progress = event.Progress
-			
+
 			if event.Error != "" {
 				session.Error = fmt.Errorf("%s", event.Error)
 			}
-			
+
 			if event.Type == "translation_completed" {
 				session.EndTime = time.Now()
 			}
@@ -221,6 +228,9 @@ func (suite *WebSocketMonitoringTestSuite) handleClientMessages(clientID, sessio
 }
 
 func (suite *WebSocketMonitoringTestSuite) broadcastEvent(event TestEvent, excludeClientID string) {
+	suite.server.mu.Lock()
+	defer suite.server.mu.Unlock()
+
 	for clientID, conn := range suite.server.Clients {
 		if clientID == excludeClientID {
 			continue
@@ -314,11 +324,11 @@ func (suite *WebSocketMonitoringTestSuite) TestMultipleClients(t *testing.T) {
 		go func(clientIndex int) {
 			for j := 0; j < eventCount; j++ {
 				event := TestEvent{
-					Type:       "translation_progress",
-					SessionID:  fmt.Sprintf("test-session-%d", clientIndex),
-					Message:    fmt.Sprintf("Client %d Event %d", clientIndex, j),
-					Progress:   float64(j*10),
-					Timestamp:  time.Now().Unix(),
+					Type:      "translation_progress",
+					SessionID: fmt.Sprintf("test-session-%d", clientIndex),
+					Message:   fmt.Sprintf("Client %d Event %d", clientIndex, j),
+					Progress:  float64(j * 10),
+					Timestamp: time.Now().Unix(),
 				}
 
 				suite.clients[clientIndex].WriteJSON(event)
@@ -379,13 +389,13 @@ func (suite *WebSocketMonitoringTestSuite) TestSessionManagement(t *testing.T) {
 func (suite *WebSocketMonitoringTestSuite) TestErrorHandling(t *testing.T) {
 	// Test error event handling
 	errorEvent := TestEvent{
-		Type:       "translation_error",
-		SessionID:  "test-session",
-		Step:       "translation",
-		Message:    "Test error occurred",
-		Error:      "Simulated error for testing",
-		Progress:   25.0,
-		Timestamp:  time.Now().Unix(),
+		Type:      "translation_error",
+		SessionID: "test-session",
+		Step:      "translation",
+		Message:   "Test error occurred",
+		Error:     "Simulated error for testing",
+		Progress:  25.0,
+		Timestamp: time.Now().Unix(),
 	}
 
 	err := suite.clients[0].WriteJSON(errorEvent)
@@ -413,7 +423,7 @@ func TestSSHWorkerIntegration(t *testing.T) {
 		Password:          "testpass",
 		Port:              22,
 		RemoteDir:         "/tmp/translate-ssh-test",
-		ConnectionTimeout:  5 * time.Second,
+		ConnectionTimeout: 5 * time.Second,
 		CommandTimeout:    10 * time.Second,
 	}
 
@@ -421,7 +431,7 @@ func TestSSHWorkerIntegration(t *testing.T) {
 		// Test SSH worker creation
 		logger := &MockLogger{}
 		worker, err := sshworker.NewSSHWorker(config, logger)
-		
+
 		// Should succeed (connection will fail later)
 		assert.NoError(t, err)
 		assert.NotNil(t, worker)
@@ -461,14 +471,14 @@ func TestSSHWorkerIntegration(t *testing.T) {
 func TestEventBusIntegration(t *testing.T) {
 	t.Run("EventCreation", func(t *testing.T) {
 		data := map[string]interface{}{
-			"progress":   75.0,
-			"step":       "translation",
+			"progress":     75.0,
+			"step":         "translation",
 			"current_item": "test_item",
-			"total_items": 100,
+			"total_items":  100,
 		}
 
 		event := events.NewEvent(events.EventTranslationProgress, "Test event", data)
-		
+
 		assert.Equal(t, events.EventTranslationProgress, event.Type)
 		assert.Equal(t, "Test event", event.Message)
 		assert.Equal(t, data, event.Data)
@@ -478,7 +488,7 @@ func TestEventBusIntegration(t *testing.T) {
 	t.Run("EventSubscription", func(t *testing.T) {
 		eventBus := events.NewEventBus()
 		receivedEvents := make([]events.Event, 0)
-		
+
 		// Subscribe to events
 		eventBus.Subscribe(events.EventTranslationProgress, func(event events.Event) {
 			receivedEvents = append(receivedEvents, event)
@@ -504,9 +514,34 @@ func TestWebSocketPerformance(t *testing.T) {
 	}
 
 	t.Run("HighFrequencyEvents", func(t *testing.T) {
+		// Setup test server
+		port := utils.GetFreePort()
+
+		mux := http.NewServeMux()
+		mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+			upgrader := gorillaws.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
+			conn, err := upgrader.Upgrade(w, r, nil)
+			if err != nil {
+				return
+			}
+			defer conn.Close()
+			// Keep connection open
+			for {
+				_, _, err := conn.ReadMessage()
+				if err != nil {
+					return
+				}
+			}
+		})
+
+		server := &http.Server{Addr: fmt.Sprintf(":%d", port), Handler: mux}
+		go server.ListenAndServe()
+		defer server.Close()
+		time.Sleep(50 * time.Millisecond)
+
 		// Connect test client
 		conn, _, err := gorillaws.DefaultDialer.Dial(
-			"ws://localhost:8091/ws?session_id=perf-test&client_id=perf-client",
+			fmt.Sprintf("ws://localhost:%d/ws?session_id=perf-test&client_id=perf-client", port),
 			nil,
 		)
 		require.NoError(t, err)
@@ -518,11 +553,11 @@ func TestWebSocketPerformance(t *testing.T) {
 		// Send high-frequency events
 		for i := 0; i < eventCount; i++ {
 			event := TestEvent{
-				Type:       "translation_progress",
-				SessionID:  "perf-test",
-				Message:    fmt.Sprintf("Performance test event %d", i),
-				Progress:   float64(i),
-				Timestamp:  time.Now().Unix(),
+				Type:      "translation_progress",
+				SessionID: "perf-test",
+				Message:   fmt.Sprintf("Performance test event %d", i),
+				Progress:  float64(i),
+				Timestamp: time.Now().Unix(),
 			}
 
 			err := conn.WriteJSON(event)
@@ -532,11 +567,11 @@ func TestWebSocketPerformance(t *testing.T) {
 		duration := time.Since(startTime)
 		avgLatency := duration / time.Duration(eventCount)
 
-		t.Logf("Sent %d events in %v (avg: %v per event)", 
+		t.Logf("Sent %d events in %v (avg: %v per event)",
 			eventCount, duration, avgLatency)
 
 		// Performance requirements
-		assert.Less(t, avgLatency, 10*time.Millisecond, 
+		assert.Less(t, avgLatency, 10*time.Millisecond,
 			"Average event latency should be less than 10ms")
 	})
 }
@@ -592,11 +627,11 @@ func BenchmarkWebSocketEventTransmission(b *testing.B) {
 	defer conn.Close()
 
 	testEvent := TestEvent{
-		Type:       "translation_progress",
-		SessionID:  "bench-test",
-		Message:    "Benchmark test",
-		Progress:   50.0,
-		Timestamp:  time.Now().Unix(),
+		Type:      "translation_progress",
+		SessionID: "bench-test",
+		Message:   "Benchmark test",
+		Progress:  50.0,
+		Timestamp: time.Now().Unix(),
 	}
 
 	b.ResetTimer()

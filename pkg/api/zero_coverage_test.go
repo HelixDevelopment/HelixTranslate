@@ -17,13 +17,13 @@ func TestZeroCoverageFunctions(t *testing.T) {
 		err := applyUpdatePackage("/non/existent/package.tar.gz")
 		assert.Error(t, err)
 	})
-	
+
 	// Test createTranslator function (42.9% coverage)
 	t.Run("createTranslator", func(t *testing.T) {
 		// Test with valid config
 		eventBus := events.NewEventBus()
 		wsHub := websocket.NewHub(eventBus)
-		
+
 		validCfg := &config.Config{
 			Translation: config.TranslationConfig{
 				DefaultProvider: "openai",
@@ -35,14 +35,14 @@ func TestZeroCoverageFunctions(t *testing.T) {
 				},
 			},
 		}
-		
+
 		validHandler := &Handler{
 			config:             validCfg,
 			eventBus:           eventBus,
 			wsHub:              wsHub,
 			distributedManager: nil,
 		}
-		
+
 		trans, err := validHandler.createTranslator("openai", "gpt-3.5-turbo")
 		// Should either succeed or fail with expected error
 		if err != nil {

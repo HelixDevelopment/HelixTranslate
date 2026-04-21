@@ -16,15 +16,15 @@ import (
 )
 
 type TranslationEvent struct {
-	Type         string  `json:"type"`
-	SessionID    string  `json:"session_id"`
-	Step         string  `json:"step,omitempty"`
-	Message      string  `json:"message,omitempty"`
-	Progress     float64 `json:"progress,omitempty"`
-	Error        string  `json:"error,omitempty"`
-	CurrentItem  string  `json:"current_item,omitempty"`
-	TotalItems   int     `json:"total_items,omitempty"`
-	Timestamp    int64    `json:"timestamp"`
+	Type        string  `json:"type"`
+	SessionID   string  `json:"session_id"`
+	Step        string  `json:"step,omitempty"`
+	Message     string  `json:"message,omitempty"`
+	Progress    float64 `json:"progress,omitempty"`
+	Error       string  `json:"error,omitempty"`
+	CurrentItem string  `json:"current_item,omitempty"`
+	TotalItems  int     `json:"total_items,omitempty"`
+	Timestamp   int64   `json:"timestamp"`
 }
 
 func main() {
@@ -45,7 +45,7 @@ func main() {
 	} else {
 		defer ws.Close()
 		fmt.Printf("✅ Connected to monitoring server\n")
-		
+
 		// Start listening for messages in background
 		go listenForWebSocketEvents(ws)
 	}
@@ -68,23 +68,23 @@ func main() {
 		SessionID: sessionID,
 		Message:   "Comprehensive translation demo started",
 		Progress:  0,
-		Timestamp:  time.Now().Unix(),
+		Timestamp: time.Now().Unix(),
 	})
 
 	// Emit internal event
-		emitInternalEvent(eventBus, sessionID, "Demo started internally", map[string]interface{}{
-			"progress": 0,
-			"step":     "initialization",
-		})
+	emitInternalEvent(eventBus, sessionID, "Demo started internally", map[string]interface{}{
+		"progress": 0,
+		"step":     "initialization",
+	})
 
 	// Read input file
 	emitEvent(ws, TranslationEvent{
-		Type:       "translation_progress",
-		SessionID:  sessionID,
-		Step:       "reading",
-		Message:    "Reading input file...",
-		Progress:   5,
-		Timestamp:  time.Now().Unix(),
+		Type:      "translation_progress",
+		SessionID: sessionID,
+		Step:      "reading",
+		Message:   "Reading input file...",
+		Progress:  5,
+		Timestamp: time.Now().Unix(),
 	})
 
 	content, err := os.ReadFile(inputFile)
@@ -98,8 +98,8 @@ func main() {
 	totalLines := len(lines)
 
 	emitInternalEvent(eventBus, sessionID, "File read successfully", map[string]interface{}{
-		"progress":    10,
-		"step":        "reading",
+		"progress":     10,
+		"step":         "reading",
 		"current_item": "file_read",
 		"total_items":  totalLines,
 	})
@@ -117,12 +117,12 @@ func main() {
 
 	// Simulate content preparation
 	emitEvent(ws, TranslationEvent{
-		Type:       "translation_progress",
-		SessionID:  sessionID,
-		Step:       "preparation",
-		Message:    "Preparing content for translation...",
-		Progress:   15,
-		Timestamp:  time.Now().Unix(),
+		Type:      "translation_progress",
+		SessionID: sessionID,
+		Step:      "preparation",
+		Message:   "Preparing content for translation...",
+		Progress:  15,
+		Timestamp: time.Now().Unix(),
 	})
 
 	time.Sleep(1 * time.Second) // Simulate processing time
@@ -145,19 +145,19 @@ func main() {
 
 	// Main translation phase with different strategies
 	strategies := []string{"demo", "mock-llm", "ssh-simulation"}
-	
+
 	for _, strategy := range strategies {
 		fmt.Printf("\n🔧 Running translation strategy: %s\n", strategy)
 		runTranslationStrategy(ws, eventBus, sessionID, lines, strategy, totalLines)
-		
+
 		if strategy != strategies[len(strategies)-1] {
 			emitEvent(ws, TranslationEvent{
-				Type:       "translation_progress",
-				SessionID:  sessionID,
-				Step:       "strategy_switch",
-				Message:    fmt.Sprintf("Switching to next strategy: %s", strategy),
-				Progress:   25 + (float64(len(strategies)) * 20),
-				Timestamp:  time.Now().Unix(),
+				Type:      "translation_progress",
+				SessionID: sessionID,
+				Step:      "strategy_switch",
+				Message:   fmt.Sprintf("Switching to next strategy: %s", strategy),
+				Progress:  25 + (float64(len(strategies)) * 20),
+				Timestamp: time.Now().Unix(),
 			})
 			time.Sleep(1 * time.Second)
 		}
@@ -165,12 +165,12 @@ func main() {
 
 	// Generate final output
 	emitEvent(ws, TranslationEvent{
-		Type:       "translation_progress",
-		SessionID:  sessionID,
-		Step:       "generation",
-		Message:    "Generating comprehensive output...",
-		Progress:   90,
-		Timestamp:  time.Now().Unix(),
+		Type:      "translation_progress",
+		SessionID: sessionID,
+		Step:      "generation",
+		Message:   "Generating comprehensive output...",
+		Progress:  90,
+		Timestamp: time.Now().Unix(),
 	})
 
 	// Create comprehensive output with all strategies
@@ -186,8 +186,8 @@ func main() {
 	// Emit completion events
 	emitInternalEvent(eventBus, sessionID, "Demo completed internally", map[string]interface{}{
 		"progress":    100,
-		"strategies":   strategies,
-		"total_lines":  totalLines,
+		"strategies":  strategies,
+		"total_lines": totalLines,
 	})
 
 	emitEvent(ws, TranslationEvent{
@@ -217,7 +217,7 @@ func main() {
 
 func runTranslationStrategy(ws *websocket.Conn, eventBus *events.EventBus, sessionID string, lines []string, strategy string, totalLines int) {
 	translatedLines := make([]string, 0, len(lines))
-	
+
 	for i, line := range lines {
 		if strings.TrimSpace(line) == "" {
 			translatedLines = append(translatedLines, "")
@@ -227,7 +227,7 @@ func runTranslationStrategy(ws *websocket.Conn, eventBus *events.EventBus, sessi
 		// Calculate progress
 		baseProgress := 25.0
 		strategyProgress := 10.0
-		totalProgress := baseProgress + strategyProgress + (float64(i+1)/float64(len(lines)) * 50.0)
+		totalProgress := baseProgress + strategyProgress + (float64(i+1) / float64(len(lines)) * 50.0)
 
 		emitEvent(ws, TranslationEvent{
 			Type:        "translation_progress",
@@ -255,16 +255,16 @@ func runTranslationStrategy(ws *websocket.Conn, eventBus *events.EventBus, sessi
 		}
 
 		translatedLines = append(translatedLines, translatedLine)
-		
+
 		// Emit internal event
-		emitInternalEvent(eventBus, sessionID, 
-			fmt.Sprintf("Line %d translated with %s", i+1, strategy), 
+		emitInternalEvent(eventBus, sessionID,
+			fmt.Sprintf("Line %d translated with %s", i+1, strategy),
 			map[string]interface{}{
-				"progress":    totalProgress,
-				"step":        fmt.Sprintf("translation_%s", strategy),
+				"progress":     totalProgress,
+				"step":         fmt.Sprintf("translation_%s", strategy),
 				"current_item": fmt.Sprintf("line_%d_%s", i+1, strategy),
-				"total_items": len(lines),
-				"strategy":    strategy,
+				"total_items":  len(lines),
+				"strategy":     strategy,
 			})
 
 		fmt.Printf("🔄 [%s] Line %d/%d: %s\n", strategy, i+1, len(lines), translatedLine)
@@ -273,14 +273,14 @@ func runTranslationStrategy(ws *websocket.Conn, eventBus *events.EventBus, sessi
 
 func generateComprehensiveOutput(originalText string, strategies []string) string {
 	lines := strings.Split(originalText, "\n")
-	
+
 	output := "# Comprehensive Translation Demo Results\n\n"
 	output += fmt.Sprintf("**Original Text:**\n%s\n\n", originalText)
 	output += fmt.Sprintf("**Strategies Tested:** %v\n\n", strategies)
-	
+
 	for _, strategy := range strategies {
 		output += fmt.Sprintf("## %s Translation Results\n\n", strings.ToUpper(strategy))
-		
+
 		for i, line := range lines {
 			var translated string
 			switch strategy {
@@ -291,29 +291,29 @@ func generateComprehensiveOutput(originalText string, strategies []string) strin
 			case "ssh-simulation":
 				translated = translateSSHSimulation(line)
 			}
-			
+
 			if translated != "" {
 				output += fmt.Sprintf("%d. %s → %s\n", i+1, line, translated)
 			}
 		}
 		output += "\n"
 	}
-	
+
 	output += "---\n"
 	output += fmt.Sprintf("Generated at: %s\n", time.Now().Format(time.RFC3339))
 	output += "WebSocket Monitoring System Demo\n"
-	
+
 	return output
 }
 
 func connectWebSocket(sessionID string) (*websocket.Conn, error) {
 	u := fmt.Sprintf("ws://localhost:8090/ws?session_id=%s&client_id=comprehensive-demo", sessionID)
-	
+
 	conn, _, err := websocket.DefaultDialer.Dial(u, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to WebSocket: %w", err)
 	}
-	
+
 	return conn, nil
 }
 
@@ -325,7 +325,7 @@ func listenForWebSocketEvents(ws *websocket.Conn) {
 			log.Printf("WebSocket read error: %v", err)
 			return
 		}
-		
+
 		log.Printf("📩 Received WebSocket message: %+v", msg)
 	}
 }
@@ -334,13 +334,13 @@ func emitEvent(ws *websocket.Conn, event TranslationEvent) {
 	if ws == nil {
 		return
 	}
-	
+
 	event.Timestamp = time.Now().Unix()
-	
+
 	if err := ws.WriteJSON(event); err != nil {
 		log.Printf("Failed to emit event: %v", err)
 	}
-	
+
 	fmt.Printf("📤 Event: %s (%.1f%%) - %s\n", event.Type, event.Progress, event.Message)
 }
 
@@ -350,7 +350,7 @@ func emitErrorEvent(ws *websocket.Conn, sessionID, step, message string) {
 		SessionID: sessionID,
 		Step:      step,
 		Error:     message,
-		Timestamp:  time.Now().Unix(),
+		Timestamp: time.Now().Unix(),
 	}
 	emitEvent(ws, event)
 }
@@ -359,7 +359,7 @@ func emitInternalEvent(eventBus *events.EventBus, sessionID, message string, dat
 	if eventBus == nil {
 		return
 	}
-	
+
 	event := events.NewEvent(events.EventTranslationProgress, message, data)
 	event.SessionID = sessionID
 	eventBus.Publish(event)
@@ -376,54 +376,54 @@ func getProgressFromData(data map[string]interface{}) float64 {
 
 func translateDemoText(text string) string {
 	replacements := map[string]string{
-		"Это":         "Ово",
-		"образец":     "пример",
-		"русского":    "руског",
-		"текста":      "текста",
-		"для":         "за",
-		"проверки":    "проверу",
-		"функции":     "функције",
-		"перевода":    "превода",
-		"Он":          "Он",
-		"содержит":    "садржи",
-		"несколько":   "неколико",
-		"предложений": "реченица",
-		"и":           "и",
-		"подходит":    "одговара",
+		"Это":          "Ово",
+		"образец":      "пример",
+		"русского":     "руског",
+		"текста":       "текста",
+		"для":          "за",
+		"проверки":     "проверу",
+		"функции":      "функције",
+		"перевода":     "превода",
+		"Он":           "Он",
+		"содержит":     "садржи",
+		"несколько":    "неколико",
+		"предложений":  "реченица",
+		"и":            "и",
+		"подходит":     "одговара",
 		"тестирования": "тестирања",
-		"Текст":       "Текст",
-		"включает":    "укључује",
-		"различные":   "различите",
-		"знаки":      "знакове",
-		"препинания":  "знаке",
-		"структуры":   "структуре",
-		".":           ".",
+		"Текст":        "Текст",
+		"включает":     "укључује",
+		"различные":    "различите",
+		"знаки":        "знакове",
+		"препинания":   "знаке",
+		"структуры":    "структуре",
+		".":            ".",
 	}
-	
+
 	result := text
 	for russian, serbian := range replacements {
 		result = strings.ReplaceAll(result, russian, serbian)
 	}
-	
+
 	return result
 }
 
 func translateMockLLM(text string) string {
 	// Simulate more sophisticated LLM-like translation
 	prefixes := map[string]string{
-		"Это":    "[LLM] Ово је",
-		"Он":     "[LLM] Он представља",
+		"Это":     "[LLM] Ово је",
+		"Он":      "[LLM] Он представља",
 		"Текст":   "[LLM] Текст садржи",
 		"образец": "[LLM] пример",
 	}
-	
+
 	result := text
 	for original, llmVersion := range prefixes {
 		if strings.Contains(result, original) {
 			result = strings.Replace(result, original, llmVersion, 1)
 		}
 	}
-	
+
 	return result + " [LLM Enhanced]"
 }
 

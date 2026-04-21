@@ -51,9 +51,9 @@ func TestMainFunctionComprehensive(t *testing.T) {
 				assert.NotPanics(t, func() {
 					oldArgs := os.Args
 					defer func() { os.Args = oldArgs }()
-					
+
 					os.Args = append([]string{"markdown-translator"}, tt.args...)
-					
+
 					defer func() {
 						if r := recover(); r != nil {
 							// Expected due to os.Exit
@@ -69,9 +69,9 @@ func TestMainFunctionComprehensive(t *testing.T) {
 				assert.NotPanics(t, func() {
 					oldArgs := os.Args
 					defer func() { os.Args = oldArgs }()
-					
+
 					os.Args = append([]string{"markdown-translator"}, tt.args...)
-					
+
 					defer func() {
 						if r := recover(); r != nil {
 							// Expected due to os.Exit
@@ -146,13 +146,13 @@ func TestPreparationIntegration(t *testing.T) {
 
 	// Test preparation config
 	config := preparation.PreparationConfig{
-		PassCount:  2,
-		Providers:  []string{"deepseek"},
-		DetailLevel: "standard",
+		PassCount:      2,
+		Providers:      []string{"deepseek"},
+		DetailLevel:    "standard",
 		SourceLanguage: "English",
 		TargetLanguage: "Spanish",
 	}
-	
+
 	assert.NotNil(t, config)
 	assert.Equal(t, 2, config.PassCount)
 	assert.Equal(t, "standard", config.DetailLevel)
@@ -187,8 +187,8 @@ func TestPreparationPasses(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			config := preparation.PreparationConfig{
-				PassCount:  tt.count,
-				DetailLevel: tt.passType,
+				PassCount:      tt.count,
+				DetailLevel:    tt.passType,
 				SourceLanguage: "English",
 				TargetLanguage: "Spanish",
 			}
@@ -202,10 +202,10 @@ func TestPreparationPasses(t *testing.T) {
 func TestTranslationPreparation(t *testing.T) {
 	eventBus := events.NewEventBus()
 	_ = eventBus // Avoid unused variable error
-	
+
 	// Create mock translator
 	mockTranslator := &MockMarkdownTranslator{}
-	
+
 	// Test book creation
 	book := &ebook.Book{
 		Metadata: ebook.Metadata{
@@ -224,21 +224,21 @@ func TestTranslationPreparation(t *testing.T) {
 		},
 	}
 	assert.NotNil(t, book)
-	
+
 	// Test source and target languages
 	sourceLang := language.English
 	targetLang := language.Spanish
 	assert.NotNil(t, sourceLang)
 	assert.NotNil(t, targetLang)
-	
+
 	// Test preparation with mock translator
 	config := preparation.PreparationConfig{
-		PassCount: 2,
-		Providers: []string{"deepseek"},
+		PassCount:      2,
+		Providers:      []string{"deepseek"},
 		SourceLanguage: "English",
 		TargetLanguage: "Spanish",
 	}
-	
+
 	assert.NotNil(t, config)
 	_ = mockTranslator
 }
@@ -322,11 +322,11 @@ func TestProviderConfiguration(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			config := preparation.PreparationConfig{
-				Providers: tt.providers,
+				Providers:      tt.providers,
 				SourceLanguage: "English",
 				TargetLanguage: "Spanish",
 			}
-			
+
 			assert.Equal(t, len(tt.providers), len(config.Providers))
 			for i, provider := range tt.providers {
 				assert.Equal(t, provider, config.Providers[i])
@@ -381,7 +381,7 @@ func TestEbookStructure(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equal(t, tt.expected, len(tt.book.Chapters))
-			
+
 			for i, chapter := range tt.book.Chapters {
 				assert.NotEmpty(t, chapter.Title)
 				assert.NotNil(t, chapter.Sections)
@@ -395,7 +395,7 @@ func TestEbookStructure(t *testing.T) {
 func TestPreparationAnalysis(t *testing.T) {
 	eventBus := events.NewEventBus()
 	_ = eventBus // Avoid unused variable error
-	
+
 	// Create test book
 	book := &ebook.Book{
 		Metadata: ebook.Metadata{
@@ -410,7 +410,7 @@ func TestPreparationAnalysis(t *testing.T) {
 			},
 		},
 	}
-	
+
 	// Test preparation configuration
 	config := preparation.PreparationConfig{
 		AnalyzeContentType: true,
@@ -420,16 +420,16 @@ func TestPreparationAnalysis(t *testing.T) {
 		SourceLanguage:     "English",
 		TargetLanguage:     "Spanish",
 	}
-	
+
 	assert.NotNil(t, config)
-	
+
 	// Test analysis creation
 	sourceLang := language.English
 	targetLang := language.Spanish
-	
+
 	// Create mock translator
 	mockTranslator := &MockMarkdownTranslator{}
-	
+
 	// Test preparation with analysis
 	_ = config
 	_ = sourceLang
@@ -448,17 +448,17 @@ func TestErrorHandlingComprehensive(t *testing.T) {
 		{
 			name:        "invalid file path",
 			errorType:   "file",
-			expectError:  true,
+			expectError: true,
 		},
 		{
 			name:        "invalid configuration",
 			errorType:   "config",
-			expectError:  true,
+			expectError: true,
 		},
 		{
 			name:        "missing provider",
 			errorType:   "provider",
-			expectError:  true,
+			expectError: true,
 		},
 	}
 
@@ -473,23 +473,23 @@ func TestErrorHandlingComprehensive(t *testing.T) {
 					assert.Error(t, err)
 					assert.True(t, os.IsNotExist(err))
 				}
-				
+
 			case "config":
 				// Test invalid configuration
 				config := preparation.PreparationConfig{
-					PassCount: 0,
-					Providers: []string{},
+					PassCount:      0,
+					Providers:      []string{},
 					SourceLanguage: "English",
 					TargetLanguage: "Spanish",
 				}
 				assert.Equal(t, 0, config.PassCount)
 				assert.Empty(t, config.Providers)
-				
+
 			case "provider":
 				// Test missing provider
 				providers := []string{"nonexistent-provider"}
 				config := preparation.PreparationConfig{
-					Providers: providers,
+					Providers:      providers,
 					SourceLanguage: "English",
 					TargetLanguage: "Spanish",
 				}
@@ -535,15 +535,15 @@ func TestFileFormats(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ext := strings.ToLower(tt.filename[strings.LastIndex(tt.filename, "."):])
-			
+
 			if tt.isMarkdown {
 				assert.True(t, ext == ".md" || ext == ".markdown")
 			}
-			
+
 			if tt.isEPUB {
 				assert.Equal(t, ".epub", ext)
 			}
-			
+
 			assert.True(t, tt.outputFormat == "md" || tt.outputFormat == "epub")
 		})
 	}
@@ -591,44 +591,44 @@ This is another paragraph with **bold** text.`
 // TestTranslatorConfiguration tests translator configuration
 func TestTranslatorConfiguration(t *testing.T) {
 	tests := []struct {
-		name      string
-		provider  string
-		model     string
+		name       string
+		provider   string
+		model      string
 		targetLang string
-		apiKey    string
-		expectErr bool
+		apiKey     string
+		expectErr  bool
 	}{
 		{
-			name:      "deepseek provider",
-			provider:  "deepseek",
-			model:     "deepseek-chat",
+			name:       "deepseek provider",
+			provider:   "deepseek",
+			model:      "deepseek-chat",
 			targetLang: "es",
-			apiKey:    "test-key",
-			expectErr: false,
+			apiKey:     "test-key",
+			expectErr:  false,
 		},
 		{
-			name:      "openai provider",
-			provider:  "openai",
-			model:     "gpt-4",
+			name:       "openai provider",
+			provider:   "openai",
+			model:      "gpt-4",
 			targetLang: "fr",
-			apiKey:    "test-key",
-			expectErr: false,
+			apiKey:     "test-key",
+			expectErr:  false,
 		},
 		{
-			name:      "anthropic provider",
-			provider:  "anthropic",
-			model:     "claude-3-sonnet-20240229",
+			name:       "anthropic provider",
+			provider:   "anthropic",
+			model:      "claude-3-sonnet-20240229",
 			targetLang: "de",
-			apiKey:    "test-key",
-			expectErr: false,
+			apiKey:     "test-key",
+			expectErr:  false,
 		},
 		{
-			name:      "invalid provider",
-			provider:  "invalid",
-			model:     "model",
+			name:       "invalid provider",
+			provider:   "invalid",
+			model:      "model",
 			targetLang: "es",
-			apiKey:    "test-key",
-			expectErr: true,
+			apiKey:     "test-key",
+			expectErr:  true,
 		},
 	}
 
@@ -641,13 +641,13 @@ func TestTranslatorConfiguration(t *testing.T) {
 				Model:      tt.model,
 				APIKey:     tt.apiKey,
 			}
-			
+
 			assert.Equal(t, "en", config.SourceLang)
 			assert.Equal(t, tt.targetLang, config.TargetLang)
 			assert.Equal(t, tt.provider, config.Provider)
 			assert.Equal(t, tt.model, config.Model)
 			assert.Equal(t, tt.apiKey, config.APIKey)
-			
+
 			// Valid providers check
 			validProviders := []string{"deepseek", "openai", "anthropic", "zhipu", "llamacpp"}
 			isValid := false
@@ -657,7 +657,7 @@ func TestTranslatorConfiguration(t *testing.T) {
 					break
 				}
 			}
-			
+
 			if tt.expectErr {
 				assert.False(t, isValid)
 			} else {
@@ -706,12 +706,12 @@ func (m *MockMarkdownTranslator) SupportsLanguage(lang *language.Language) bool 
 // TestCreateTranslatorFunction tests the createTranslator function
 func TestCreateTranslatorFunction(t *testing.T) {
 	tests := []struct {
-		name            string
-		provider        string
-		model           string
-		setEnvVars      map[string]string
-		expectError     bool
-		expectedError   string
+		name          string
+		provider      string
+		model         string
+		setEnvVars    map[string]string
+		expectError   bool
+		expectedError string
 	}{
 		{
 			name:     "deepseek provider with API key",
@@ -723,23 +723,23 @@ func TestCreateTranslatorFunction(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name:     "deepseek provider without API key",
-			provider: "deepseek",
-			setEnvVars: map[string]string{},
-			expectError: true,
+			name:          "deepseek provider without API key",
+			provider:      "deepseek",
+			setEnvVars:    map[string]string{},
+			expectError:   true,
 			expectedError: "API key not set",
 		},
 		{
-			name:     "llamacpp provider (no API key required)",
-			provider: "llamacpp",
-			setEnvVars: map[string]string{},
+			name:        "llamacpp provider (no API key required)",
+			provider:    "llamacpp",
+			setEnvVars:  map[string]string{},
 			expectError: false,
 		},
 		{
-			name:     "unsupported provider",
-			provider: "unknown",
-			setEnvVars: map[string]string{},
-			expectError: true,
+			name:          "unsupported provider",
+			provider:      "unknown",
+			setEnvVars:    map[string]string{},
+			expectError:   true,
 			expectedError: "unsupported provider",
 		},
 	}

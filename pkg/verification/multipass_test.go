@@ -97,10 +97,10 @@ func TestMergeNotes(t *testing.T) {
 			Examples:   []string{"Example 2"},
 		},
 		{
-			SectionID: "chapter2",
-			NoteType:  NoteTypeTone,
-			Title:     "Dark Mood",
-			Content:   "Different note",
+			SectionID:  "chapter2",
+			NoteType:   NoteTypeTone,
+			Title:      "Dark Mood",
+			Content:    "Different note",
 			Importance: ImportanceLow,
 		},
 	}

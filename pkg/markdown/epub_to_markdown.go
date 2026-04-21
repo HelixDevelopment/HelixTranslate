@@ -68,7 +68,7 @@ func (c *EPUBToMarkdownConverter) ConvertEPUBToMarkdown(epubPath, outputMDPath s
 	if err != nil {
 		return fmt.Errorf("failed to parse EPUB structure: %w", err)
 	}
-	
+
 	// Merge metadata from parseEPUBStructure but preserve cover from UniversalParser
 	if parsedMetadata != nil {
 		originalCover := metadata.Cover // Preserve cover from UniversalParser

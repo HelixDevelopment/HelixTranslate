@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 	"time"
-	
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -59,26 +59,26 @@ func TestFindLlamaCppExecutable(t *testing.T) {
 	t.Run("function_structure_test", func(t *testing.T) {
 		// Test that function has the correct structure and handles candidates
 		// This tests the general structure without needing to mock all paths
-		
+
 		// Test that function doesn't panic with normal inputs
 		defer func() {
 			if r := recover(); r != nil {
 				t.Errorf("findLlamaCppExecutable() panicked: %v", r)
 			}
 		}()
-		
+
 		// Just call the function to ensure it returns something sensible
 		path, err := findLlamaCppExecutable()
-		
+
 		// Either we get a valid path or a proper error
 		if err == nil && path == "" {
 			t.Error("No error and empty path returned")
 		}
-		
+
 		if err != nil && path != "" {
 			t.Error("Error returned but path not empty")
 		}
-		
+
 		if err != nil && !strings.Contains(err.Error(), "not found") {
 			t.Errorf("Expected 'not found' in error, got: %v", err)
 		}
@@ -98,10 +98,10 @@ func TestFindLlamaCppExecutableDetailed(t *testing.T) {
 	t.Run("candidate_path_order_test", func(t *testing.T) {
 		// Test that function checks candidates in expected order
 		// This is a structural test to verify all candidate paths are checked
-		
+
 		// Call function to ensure it doesn't panic and checks all paths
 		path, err := findLlamaCppExecutable()
-		
+
 		// Function should either find an executable or return proper error
 		if err != nil {
 			// Expected if llama.cpp is not installed
@@ -111,17 +111,17 @@ func TestFindLlamaCppExecutableDetailed(t *testing.T) {
 		} else if path == "" {
 			t.Error("No error but empty path returned")
 		}
-		
+
 		// If we found a path, verify it's one of the expected candidates
 		if path != "" && err == nil {
 			expectedPaths := []string{
 				"llama-cli",
 				"/opt/homebrew/bin/llama-cli",
-				"/usr/local/bin/llama-cli", 
+				"/usr/local/bin/llama-cli",
 				"/usr/bin/llama-cli",
 				filepath.Join(originalHome, ".local/bin/llama-cli"),
 			}
-			
+
 			match := false
 			for _, expected := range expectedPaths {
 				if strings.HasSuffix(path, expected) || path == expected {
@@ -129,7 +129,7 @@ func TestFindLlamaCppExecutableDetailed(t *testing.T) {
 					break
 				}
 			}
-			
+
 			if !match {
 				t.Errorf("Found path %q doesn't match expected candidates", path)
 			}
@@ -139,9 +139,9 @@ func TestFindLlamaCppExecutableDetailed(t *testing.T) {
 	t.Run("empty_path_handling", func(t *testing.T) {
 		// Test with empty PATH to ensure it handles gracefully
 		os.Setenv("PATH", "")
-		
+
 		path, err := findLlamaCppExecutable()
-		
+
 		// Should either find in hardcoded paths or return proper error
 		if err != nil {
 			if !strings.Contains(err.Error(), "not found") {
@@ -155,9 +155,9 @@ func TestFindLlamaCppExecutableDetailed(t *testing.T) {
 	t.Run("invalid_home_directory", func(t *testing.T) {
 		// Test with invalid HOME directory
 		os.Setenv("HOME", "/nonexistent/directory/that/should/not/exist")
-		
+
 		path, err := findLlamaCppExecutable()
-		
+
 		// Should handle invalid HOME gracefully
 		if err != nil {
 			if !strings.Contains(err.Error(), "not found") {
@@ -171,14 +171,14 @@ func TestFindLlamaCppExecutableDetailed(t *testing.T) {
 	t.Run("multiple_locations_check", func(t *testing.T) {
 		// Test that function properly checks multiple hardcoded locations
 		// This is a regression test to ensure all locations are still checked
-		
+
 		path, err := findLlamaCppExecutable()
-		
+
 		// Function should be robust and check all candidate paths
 		if err != nil && !strings.Contains(err.Error(), "not found") {
 			t.Errorf("Unexpected error: %v", err)
 		}
-		
+
 		// If successful, should return a valid path
 		if err == nil && path == "" {
 			t.Error("Success case should return non-empty path")
@@ -188,6 +188,10 @@ func TestFindLlamaCppExecutableDetailed(t *testing.T) {
 
 // TestNewLlamaCppClientErrorScenarios tests additional error scenarios in NewLlamaCppClient
 func TestNewLlamaCppClientErrorScenarios(t *testing.T) {
+	if _, err := findLlamaCppExecutable(); err != nil {
+		t.Skip("llama.cpp not installed")
+	}
+
 	// Store original PATH and HOME
 	originalPath := os.Getenv("PATH")
 	originalHome := os.Getenv("HOME")
@@ -206,12 +210,12 @@ func TestNewLlamaCppClientErrorScenarios(t *testing.T) {
 		}
 
 		client, err := NewLlamaCppClient(config)
-		
+
 		// The test should either succeed (hardware works) or fail with appropriate error
 		if err != nil {
-			if !contains(err.Error(), "hardware detection failed") && 
-			   !contains(err.Error(), "download failed") &&
-			   !contains(err.Error(), "model not found") {
+			if !contains(err.Error(), "hardware detection failed") &&
+				!contains(err.Error(), "download failed") &&
+				!contains(err.Error(), "model not found") {
 				t.Errorf("Unexpected error type: %v", err)
 			}
 		}
@@ -244,7 +248,7 @@ func TestNewLlamaCppClientErrorScenarios(t *testing.T) {
 func TestNewLlamaCppClientWithMocks(t *testing.T) {
 	// This test focuses on the model selection and configuration logic
 	// that doesn't depend on actual hardware detection
-	
+
 	// Test 1: Invalid model specification
 	t.Run("invalid_model_specification", func(t *testing.T) {
 		config := TranslationConfig{
@@ -255,9 +259,9 @@ func TestNewLlamaCppClientWithMocks(t *testing.T) {
 		client, err := NewLlamaCppClient(config)
 		if err != nil {
 			// Expected to fail due to model not found
-			if !contains(err.Error(), "model not found") && 
-			   !contains(err.Error(), "hardware detection failed") &&
-			   !contains(err.Error(), "llama.cpp not found") {
+			if !contains(err.Error(), "model not found") &&
+				!contains(err.Error(), "hardware detection failed") &&
+				!contains(err.Error(), "llama.cpp not found") {
 				t.Errorf("Expected model not found error, got: %v", err)
 			}
 		} else {
@@ -284,9 +288,9 @@ func TestNewLlamaCppClientWithMocks(t *testing.T) {
 		client, err := NewLlamaCppClient(config)
 		if err != nil {
 			// Expected to fail if hardware detection or executable not found
-			if !contains(err.Error(), "hardware detection failed") && 
-			   !contains(err.Error(), "llama.cpp not found") &&
-			   !contains(err.Error(), "download failed") {
+			if !contains(err.Error(), "hardware detection failed") &&
+				!contains(err.Error(), "llama.cpp not found") &&
+				!contains(err.Error(), "download failed") {
 				t.Errorf("Unexpected error: %v", err)
 			}
 		} else {
@@ -298,17 +302,17 @@ func TestNewLlamaCppClientWithMocks(t *testing.T) {
 				if client.hardwareCaps == nil {
 					t.Error("Hardware capabilities should be set")
 				}
-				
+
 				// Verify threads configuration (should be based on CPU cores)
 				if client.threads < 1 {
 					t.Errorf("Invalid threads configuration: %d", client.threads)
 				}
-				
+
 				// Verify context size is reasonable
 				if client.contextSize < 512 {
 					t.Errorf("Invalid context size: %d", client.contextSize)
 				}
-				
+
 				// Verify model path is set
 				if client.modelPath == "" {
 					t.Error("Model path should be set")
@@ -335,7 +339,7 @@ func TestNewLlamaCppClientWithMocks(t *testing.T) {
 		if client.threads < 1 {
 			t.Errorf("Thread count should be at least 1, got: %d", client.threads)
 		}
-		
+
 		// Context size should come from model info or default to 8192
 		if client.contextSize < 512 {
 			t.Errorf("Context size should be reasonable, got: %d", client.contextSize)
@@ -354,9 +358,9 @@ func TestNewLlamaCppClientEdgeCases(t *testing.T) {
 		client, err := NewLlamaCppClient(config)
 		if err != nil {
 			// Hardware or executable issues are acceptable
-			if !contains(err.Error(), "hardware detection failed") && 
-			   !contains(err.Error(), "llama.cpp not found") &&
-			   !contains(err.Error(), "download failed") {
+			if !contains(err.Error(), "hardware detection failed") &&
+				!contains(err.Error(), "llama.cpp not found") &&
+				!contains(err.Error(), "download failed") {
 				t.Errorf("Unexpected error: %v", err)
 			}
 		} else if client != nil {
@@ -382,15 +386,15 @@ func TestNewLlamaCppClientEdgeCases(t *testing.T) {
 		if client.config.Provider != "llamacpp" {
 			t.Errorf("Expected provider llamacpp, got: %s", client.config.Provider)
 		}
-		
+
 		if client.hardwareCaps == nil {
 			t.Error("Hardware capabilities should be initialized")
 		}
-		
+
 		if client.modelInfo == nil {
 			t.Error("Model info should be set")
 		}
-		
+
 		if client.executable == "" {
 			t.Error("Executable path should be set")
 		}
@@ -399,8 +403,12 @@ func TestNewLlamaCppClientEdgeCases(t *testing.T) {
 
 // TestNewLlamaCppClientDetailedErrorPaths tests specific error paths in NewLlamaCppClient
 func TestNewLlamaCppClientDetailedErrorPaths(t *testing.T) {
+	if _, err := findLlamaCppExecutable(); err != nil {
+		t.Skip("llama.cpp not installed")
+	}
+
 	// This test focuses on specific error paths that can be tested without hardware dependencies
-	
+
 	t.Run("invalid_model_name", func(t *testing.T) {
 		// Test with clearly invalid model name
 		config := TranslationConfig{
@@ -409,7 +417,7 @@ func TestNewLlamaCppClientDetailedErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewLlamaCppClient(config)
-		
+
 		// Should fail with model not found error
 		if err == nil {
 			t.Error("Expected error for invalid model name")
@@ -431,19 +439,19 @@ func TestNewLlamaCppClientDetailedErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewLlamaCppClient(config)
-		
+
 		// Either succeeds (if model doesn't exist) or fails with appropriate error
 		if err != nil {
 			// Check if it's the expected error types
 			if !strings.Contains(err.Error(), "model not found") &&
-			   !strings.Contains(err.Error(), "insufficient resources") &&
-			   !strings.Contains(err.Error(), "hardware detection failed") &&
-			   !strings.Contains(err.Error(), "llama.cpp not found") &&
-			   !strings.Contains(err.Error(), "failed to download") {
+				!strings.Contains(err.Error(), "insufficient resources") &&
+				!strings.Contains(err.Error(), "hardware detection failed") &&
+				!strings.Contains(err.Error(), "llama.cpp not found") &&
+				!strings.Contains(err.Error(), "failed to download") {
 				t.Errorf("Unexpected error type: %v", err)
 			}
 		}
-		
+
 		// If client created, it should have proper structure
 		if err == nil && client != nil {
 			if client.config.Provider != "llamacpp" {
@@ -459,17 +467,17 @@ func TestNewLlamaCppClientDetailedErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewLlamaCppClient(config)
-		
+
 		// Should either succeed or fail with expected error
 		if err != nil {
 			// Check for acceptable error types
 			acceptableErrors := []string{
 				"hardware detection failed",
-				"llama.cpp not found", 
+				"llama.cpp not found",
 				"failed to download",
 				"download failed",
 			}
-			
+
 			found := false
 			for _, acceptable := range acceptableErrors {
 				if strings.Contains(err.Error(), acceptable) {
@@ -477,7 +485,7 @@ func TestNewLlamaCppClientDetailedErrorPaths(t *testing.T) {
 					break
 				}
 			}
-			
+
 			if !found {
 				t.Errorf("Unexpected error type: %v", err)
 			}
@@ -497,27 +505,27 @@ func TestLlamaCppClientConfigurationValidation(t *testing.T) {
 		}
 
 		client, err := NewLlamaCppClient(config)
-		
+
 		// Handle expected errors due to hardware/download dependencies
 		if err != nil {
 			// Acceptable errors for this environment
 			if !strings.Contains(err.Error(), "hardware detection failed") &&
-			   !strings.Contains(err.Error(), "llama.cpp not found") &&
-			   !strings.Contains(err.Error(), "failed to download") {
+				!strings.Contains(err.Error(), "llama.cpp not found") &&
+				!strings.Contains(err.Error(), "failed to download") {
 				t.Errorf("Unexpected error: %v", err)
 			}
 			return
 		}
-		
+
 		// If client created, verify config preservation
 		if client.config.Provider != "llamacpp" {
 			t.Errorf("Expected provider llamacpp, got: %s", client.config.Provider)
 		}
-		
+
 		if client.threads < 1 {
 			t.Errorf("Expected at least 1 thread, got: %d", client.threads)
 		}
-		
+
 		if client.contextSize < 512 {
 			t.Errorf("Expected reasonable context size, got: %d", client.contextSize)
 		}
@@ -534,18 +542,18 @@ func TestLlamaCppClientStructuralValidation(t *testing.T) {
 		}
 
 		client, err := NewLlamaCppClient(config)
-		
+
 		// Handle expected errors due to hardware/download dependencies
 		if err != nil {
 			// Acceptable errors for this environment
 			if !strings.Contains(err.Error(), "hardware detection failed") &&
-			   !strings.Contains(err.Error(), "llama.cpp not found") &&
-			   !strings.Contains(err.Error(), "failed to download") {
+				!strings.Contains(err.Error(), "llama.cpp not found") &&
+				!strings.Contains(err.Error(), "failed to download") {
 				t.Errorf("Unexpected error: %v", err)
 			}
 			return
 		}
-		
+
 		// If client created, verify it has valid structure
 		if client == nil {
 			t.Error("Client should not be nil when err is nil")
@@ -553,15 +561,15 @@ func TestLlamaCppClientStructuralValidation(t *testing.T) {
 			if client.config.Provider != "llamacpp" {
 				t.Errorf("Expected provider llamacpp, got: %s", client.config.Provider)
 			}
-			
+
 			if client.hardwareCaps == nil {
 				t.Error("Hardware capabilities should be set")
 			}
-			
+
 			if client.modelInfo == nil {
 				t.Error("Model info should be set")
 			}
-			
+
 			if client.executable == "" {
 				t.Error("Executable path should be set")
 			}
@@ -575,18 +583,18 @@ func TestLlamaCppClientStructuralValidation(t *testing.T) {
 		}
 
 		client, err := NewLlamaCppClient(config)
-		
+
 		// Handle expected errors due to hardware/download dependencies
 		if err != nil {
 			// Acceptable errors for this environment
 			if !strings.Contains(err.Error(), "hardware detection failed") &&
-			   !strings.Contains(err.Error(), "llama.cpp not found") &&
-			   !strings.Contains(err.Error(), "failed to download") {
+				!strings.Contains(err.Error(), "llama.cpp not found") &&
+				!strings.Contains(err.Error(), "failed to download") {
 				t.Errorf("Unexpected error: %v", err)
 			}
 			return
 		}
-		
+
 		// Verify all required fields are properly set
 		if client == nil {
 			t.Error("Client should not be nil when err is nil")
@@ -594,23 +602,23 @@ func TestLlamaCppClientStructuralValidation(t *testing.T) {
 			if client.config.Provider != "llamacpp" {
 				t.Errorf("Expected provider llamacpp, got: %s", client.config.Provider)
 			}
-			
+
 			if client.hardwareCaps == nil {
 				t.Error("Hardware capabilities should be initialized")
 			}
-			
+
 			if client.modelInfo == nil {
 				t.Error("Model info should be set")
 			}
-			
+
 			if client.executable == "" {
 				t.Error("Executable path should be set")
 			}
-			
+
 			if client.threads < 1 {
 				t.Errorf("Thread configuration should be valid, got: %d", client.threads)
 			}
-			
+
 			if client.contextSize < 512 {
 				t.Errorf("Context size should be reasonable, got: %d", client.contextSize)
 			}
@@ -670,7 +678,7 @@ func TestValidate(t *testing.T) {
 		// Create client with insufficient RAM
 		insufficientClient := &LlamaCppClient{
 			modelPath:    client.modelPath,
-			modelInfo:    &models.ModelInfo{MinRAM: 100 * 1024 * 1024 * 1024}, // 100GB
+			modelInfo:    &models.ModelInfo{MinRAM: 100 * 1024 * 1024 * 1024},          // 100GB
 			hardwareCaps: &hardware.Capabilities{AvailableRAM: 1 * 1024 * 1024 * 1024}, // 1GB
 			executable:   client.executable,
 		}
@@ -696,14 +704,14 @@ func TestTranslate_Integration(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
 		t.Skip("llama.cpp not installed - install with: brew install llama.cpp")
 	}
-	
+
 	// Check if we have sufficient RAM
 	detector := hardware.NewDetector()
 	caps, _ := detector.Detect()
 	if caps.TotalRAM < 8*1024*1024*1024 { // Less than 8GB
 		t.Skip("Insufficient RAM for integration test - need at least 8GB")
 	}
-	
+
 	// Check if HF_TOKEN is available (required for model download)
 	if os.Getenv("HF_TOKEN") == "" {
 		t.Skip("HF_TOKEN environment variable not set - required for model download")
@@ -821,12 +829,12 @@ func TestGPUAcceleration_Integration(t *testing.T) {
 	if !caps.HasGPU {
 		t.Skip("No GPU detected - skipping GPU acceleration test")
 	}
-	
+
 	// Check if we have sufficient resources
 	if caps.TotalRAM < 8*1024*1024*1024 { // Less than 8GB
 		t.Skip("Insufficient RAM for GPU acceleration test - need at least 8GB")
 	}
-	
+
 	// Check if HF_TOKEN is available (required for model download)
 	if os.Getenv("HF_TOKEN") == "" {
 		t.Skip("HF_TOKEN environment variable not set - required for model download")
@@ -1177,33 +1185,33 @@ func TestExecutableSearch(t *testing.T) {
 func TestFindLlamaCppExecutableBehavior(t *testing.T) {
 	// This test verifies function behavior without complex mocking
 	// It tests both success and potential failure paths
-	
+
 	// Test that function runs without panic
 	path, err := findLlamaCppExecutable()
-	
+
 	// Function should either succeed (if llama-cli is installed) or fail gracefully
 	if err != nil {
 		// If it fails, verify error structure
 		if path != "" {
 			t.Errorf("Expected empty path on error, got: %s", path)
 		}
-		
+
 		// Error should mention llama-cli not found
 		if !strings.Contains(err.Error(), "llama-cli not found") {
 			t.Errorf("Expected 'llama-cli not found' error, got: %v", err)
 		}
-		
+
 		t.Logf("Expected error occurred (no llama-cli): %v", err)
 	} else {
 		// If it succeeds, verify path looks reasonable
 		if path == "" {
 			t.Error("Expected non-empty path on success")
 		}
-		
+
 		if !strings.Contains(path, "llama-cli") {
 			t.Errorf("Expected path to contain 'llama-cli', got: %s", path)
 		}
-		
+
 		t.Logf("Found executable at: %s", path)
 	}
 }
@@ -1212,19 +1220,19 @@ func TestFindLlamaCppExecutableBehavior(t *testing.T) {
 func TestFindLlamaCppExecutableStructure(t *testing.T) {
 	// This test verifies that the function has proper structure
 	// by calling it and checking it handles both return values correctly
-	
+
 	// Call function and verify it doesn't panic
 	path, err := findLlamaCppExecutable()
-	
+
 	// Function should return consistent results (both values set appropriately)
 	if err == nil && path == "" {
 		t.Error("Inconsistent result: no error but empty path")
 	}
-	
+
 	if err != nil && path != "" {
 		t.Error("Inconsistent result: error but non-empty path")
 	}
-	
+
 	t.Logf("Function completed successfully: path=%v, err=%v", path, err)
 }
 
@@ -1233,7 +1241,7 @@ func TestFindLlamaCppExecutableCandidatePaths(t *testing.T) {
 	// This test verifies that the function checks all expected paths
 	// We can't easily mock the actual executable finding, but we can verify
 	// the function structure by checking it doesn't panic and returns appropriate error
-	
+
 	// Save original PATH
 	originalPath := os.Getenv("PATH")
 	defer func() {
@@ -1243,16 +1251,16 @@ func TestFindLlamaCppExecutableCandidatePaths(t *testing.T) {
 	// Set PATH to a directory that definitely doesn't contain llama-cli
 	os.Setenv("PATH", "/nonexistent/directory")
 
-	// Test the function 
+	// Test the function
 	path, err := findLlamaCppExecutable()
 
 	// Function should not panic and should return consistent results
 	// Test validates structure and behavior regardless of whether llama-cli is installed
-	
+
 	if path != "" && err != nil {
 		t.Errorf("Inconsistent results: non-empty path with error - path: %s, err: %v", path, err)
 	}
-	
+
 	if path == "" && err == nil {
 		t.Error("Inconsistent results: empty path with no error")
 	}
@@ -1280,12 +1288,12 @@ func TestFindLlamaCppExecutableWithMockPath(t *testing.T) {
 	// This test creates a fake executable and adds its directory to PATH
 	testDir := t.TempDir()
 	fakeExecutable := filepath.Join(testDir, "llama-cli")
-	
+
 	// Create a fake executable file
 	if runtime.GOOS == "windows" {
 		fakeExecutable += ".exe"
 	}
-	
+
 	// Write a simple script/binary that acts like llama-cli
 	scriptContent := `#!/bin/bash
 echo "llama-cli version 1.0.0"
@@ -1325,6 +1333,10 @@ exit 0
 
 // TestNewLlamaCppClientAdditionalPaths tests additional error paths in NewLlamaCppClient
 func TestNewLlamaCppClientAdditionalPaths(t *testing.T) {
+	if _, err := findLlamaCppExecutable(); err != nil {
+		t.Skip("llama.cpp not installed")
+	}
+
 	t.Run("model_registry_error", func(t *testing.T) {
 		// This test targets the error path around model registry operations
 		config := TranslationConfig{
@@ -1333,7 +1345,7 @@ func TestNewLlamaCppClientAdditionalPaths(t *testing.T) {
 		}
 
 		client, err := NewLlamaCppClient(config)
-		
+
 		// Should fail with model not found error
 		if err == nil {
 			t.Error("Expected error for nonexistent model")
@@ -1341,7 +1353,7 @@ func TestNewLlamaCppClientAdditionalPaths(t *testing.T) {
 		if client != nil {
 			t.Error("Client should be nil when model not found")
 		}
-		
+
 		// Check for specific error message
 		if !strings.Contains(err.Error(), "model not found") {
 			t.Errorf("Expected 'model not found' error, got: %v", err)
@@ -1356,18 +1368,18 @@ func TestNewLlamaCppClientAdditionalPaths(t *testing.T) {
 		}
 
 		client, err := NewLlamaCppClient(config)
-		
+
 		// Either succeeds (if models exist) or fails gracefully
 		if err != nil {
 			// Check for expected failure types
 			if !strings.Contains(err.Error(), "failed to find suitable model") &&
-			   !strings.Contains(err.Error(), "hardware detection failed") &&
-			   !strings.Contains(err.Error(), "llama.cpp not found") &&
-			   !strings.Contains(err.Error(), "failed to download") {
+				!strings.Contains(err.Error(), "hardware detection failed") &&
+				!strings.Contains(err.Error(), "llama.cpp not found") &&
+				!strings.Contains(err.Error(), "failed to download") {
 				t.Errorf("Unexpected error type: %v", err)
 			}
 		}
-		
+
 		if client != nil && client.modelInfo == nil {
 			t.Error("Model info should be set when client creation succeeds")
 		}
@@ -1382,17 +1394,17 @@ func TestNewLlamaCppClientAdditionalPaths(t *testing.T) {
 
 		// Remove any cached model to force download attempt
 		client, err := NewLlamaCppClient(config)
-		
+
 		if err != nil {
 			// Expected error path - download failed
 			if client != nil {
 				t.Error("Client should be nil when download fails")
 			}
-			
+
 			// Check for download-related error
 			if !strings.Contains(err.Error(), "failed to download") &&
-			   !strings.Contains(err.Error(), "model not found") &&
-			   !strings.Contains(err.Error(), "insufficient resources") {
+				!strings.Contains(err.Error(), "model not found") &&
+				!strings.Contains(err.Error(), "insufficient resources") {
 				t.Logf("Error may not be download-related: %v", err)
 			}
 		}
@@ -1405,12 +1417,12 @@ func TestNewLlamaCppClientAdditionalPaths(t *testing.T) {
 		}
 
 		client, err := NewLlamaCppClient(config)
-		
+
 		// Handle expected hardware/download failures
 		if err != nil {
 			if !strings.Contains(err.Error(), "hardware detection failed") &&
-			   !strings.Contains(err.Error(), "llama.cpp not found") &&
-			   !strings.Contains(err.Error(), "failed to download") {
+				!strings.Contains(err.Error(), "llama.cpp not found") &&
+				!strings.Contains(err.Error(), "failed to download") {
 				t.Errorf("Unexpected error: %v", err)
 			}
 			return
@@ -1425,7 +1437,7 @@ func TestNewLlamaCppClientAdditionalPaths(t *testing.T) {
 		if client.threads < 1 {
 			t.Errorf("Thread count should be at least 1, got: %d", client.threads)
 		}
-		
+
 		// For most systems, thread count should be reasonable (not too high)
 		if client.threads > 64 {
 			t.Logf("Warning: High thread count: %d", client.threads)
@@ -1439,12 +1451,12 @@ func TestNewLlamaCppClientAdditionalPaths(t *testing.T) {
 		}
 
 		client, err := NewLlamaCppClient(config)
-		
+
 		// Handle expected hardware/download failures
 		if err != nil {
 			if !strings.Contains(err.Error(), "hardware detection failed") &&
-			   !strings.Contains(err.Error(), "llama.cpp not found") &&
-			   !strings.Contains(err.Error(), "failed to download") {
+				!strings.Contains(err.Error(), "llama.cpp not found") &&
+				!strings.Contains(err.Error(), "failed to download") {
 				t.Errorf("Unexpected error: %v", err)
 			}
 			return
@@ -1459,7 +1471,7 @@ func TestNewLlamaCppClientAdditionalPaths(t *testing.T) {
 		if client.contextSize < 1024 {
 			t.Errorf("Context size should be at least 1024, got: %d", client.contextSize)
 		}
-		
+
 		// Context size should be reasonable (not too high)
 		if client.contextSize > 32768 {
 			t.Logf("Warning: High context size: %d", client.contextSize)
@@ -1478,18 +1490,18 @@ func TestNewLlamaCppClientAdditionalPaths(t *testing.T) {
 		}
 
 		client, err := NewLlamaCppClient(config)
-		
+
 		// Expected to fail with model not found, but should preserve config
 		if err == nil {
 			t.Error("Expected error for test model")
 		}
-		
+
 		// If client creation somehow succeeds, verify config preservation
 		if client != nil {
 			if client.config.Provider != "llamacpp" {
 				t.Errorf("Provider should be preserved, got: %s", client.config.Provider)
 			}
-			
+
 			if client.config.Model != "test-model" {
 				t.Errorf("Model should be preserved, got: %s", client.config.Model)
 			}
@@ -1502,32 +1514,32 @@ func TestFindLlamaCppExecutableErrorPath(t *testing.T) {
 	// This test specifically targets uncovered "not found" error path
 	// We can't easily mock the absence of llama-cli since it's installed on this system
 	// So we'll test function's behavior and structure to ensure consistent behavior
-	
+
 	// Test 1: Call function and analyze return structure
 	t.Run("function_structure_validation", func(t *testing.T) {
 		// The function should always return two values: path and error
 		path, err := findLlamaCppExecutable()
-		
+
 		// Function should never panic or crash
 		assert.NotNil(t, path, "Path should never be nil, even when empty")
-		
+
 		// The return values should be consistent
 		if path != "" && err != nil {
 			t.Errorf("Inconsistent return: non-empty path with error - path: %s, err: %v", path, err)
 		}
-		
+
 		if path == "" && err == nil {
 			t.Error("Inconsistent return: empty path with no error")
 		}
-		
+
 		// Error message should be specific when it occurs
 		if err != nil && path == "" {
-			assert.Contains(t, err.Error(), "not found", 
+			assert.Contains(t, err.Error(), "not found",
 				"Error message should contain 'not found' when executable not found")
-			assert.Contains(t, err.Error(), "llama-cli", 
+			assert.Contains(t, err.Error(), "llama-cli",
 				"Error message should mention 'llama-cli'")
 		}
-		
+
 		// Path should be reasonable when found
 		if path != "" {
 			// Path should contain llama-cli name
@@ -1535,13 +1547,13 @@ func TestFindLlamaCppExecutableErrorPath(t *testing.T) {
 			if runtime.GOOS == "windows" {
 				expectedSuffix = "llama-cli.exe"
 			}
-			assert.True(t, strings.HasSuffix(path, expectedSuffix), 
+			assert.True(t, strings.HasSuffix(path, expectedSuffix),
 				"Path should end with %s, got: %s", expectedSuffix, path)
 		}
-		
+
 		t.Logf("findLlamaCppExecutable returned: path=%q, err=%v", path, err)
 	})
-	
+
 	// Test 2: Test multiple calls for consistency
 	t.Run("consistency_across_calls", func(t *testing.T) {
 		// Call function multiple times to verify consistency
@@ -1549,30 +1561,30 @@ func TestFindLlamaCppExecutableErrorPath(t *testing.T) {
 			path string
 			err  error
 		}, 3)
-		
+
 		for i := 0; i < 3; i++ {
 			results[i].path, results[i].err = findLlamaCppExecutable()
 		}
-		
+
 		// Results should be consistent across calls
 		for i := 1; i < 3; i++ {
 			if results[0].path != results[i].path {
-				t.Errorf("Inconsistent paths across calls: %s vs %s", 
+				t.Errorf("Inconsistent paths across calls: %s vs %s",
 					results[0].path, results[i].path)
 			}
-			
+
 			if (results[0].err == nil) != (results[i].err == nil) {
-				t.Errorf("Inconsistent errors across calls: %v vs %v", 
+				t.Errorf("Inconsistent errors across calls: %v vs %v",
 					results[0].err, results[i].err)
 			}
 		}
-		
+
 		// Test structure of whatever we got
 		if results[0].path != "" {
 			t.Logf("Consistent path found: %s", results[0].path)
 		} else {
 			assert.NotNil(t, results[0].err, "Should have error when path is empty")
-			assert.Contains(t, results[0].err.Error(), "not found", 
+			assert.Contains(t, results[0].err.Error(), "not found",
 				"Error should contain 'not found'")
 			t.Logf("Consistent error: %v", results[0].err)
 		}
@@ -1585,15 +1597,15 @@ func TestNewLlamaCppClientProviderPaths(t *testing.T) {
 	config := TranslationConfig{
 		Provider: "llamacpp",
 	}
-	
+
 	client, err := NewLlamaCppClient(config)
-	
+
 	if err != nil {
 		t.Logf("Expected error (no model/download): %v", err)
 		// Expected to fail due to missing model or download issues
 		return
 	}
-	
+
 	if client != nil {
 		// If client creation succeeds, verify structure
 		assert.NotEmpty(t, client.executable, "Executable should be set")
@@ -1607,17 +1619,17 @@ func TestNewLlamaCppClientProviderPaths(t *testing.T) {
 func TestLlamaCppTranslate(t *testing.T) {
 	// Test by creating a client directly without requiring llama.cpp to be installed
 	client := &LlamaCppClient{
-		executable:  "/fake/path/to/llama-cli",
-		modelPath:   "/fake/path/to/model",
+		executable: "/fake/path/to/llama-cli",
+		modelPath:  "/fake/path/to/model",
 		hardwareCaps: &hardware.Capabilities{
 			HasGPU: false,
 		},
 		threads:     4,
-		contextSize:  2048,
+		contextSize: 2048,
 	}
-	
+
 	ctx := context.Background()
-	
+
 	// Test empty text
 	result, err := client.Translate(ctx, "", "test prompt")
 	if err != nil {
@@ -1625,7 +1637,7 @@ func TestLlamaCppTranslate(t *testing.T) {
 	} else if result != "" {
 		t.Errorf("Empty text should return empty result, got: %s", result)
 	}
-	
+
 	// Test with text but expect error due to fake executable
 	result, err = client.Translate(ctx, "test text", "test prompt")
 	if err != nil {
@@ -1639,17 +1651,17 @@ func TestLlamaCppTranslate(t *testing.T) {
 func TestLlamaCppTranslateErrorPaths(t *testing.T) {
 	// Test stderr case
 	client := &LlamaCppClient{
-		executable:  "/bin/sh",
-		modelPath:   "/fake/path/to/model",
+		executable: "/bin/sh",
+		modelPath:  "/fake/path/to/model",
 		hardwareCaps: &hardware.Capabilities{
 			HasGPU: false,
 		},
 		threads:     4,
-		contextSize:  2048,
+		contextSize: 2048,
 	}
-	
+
 	ctx := context.Background()
-	
+
 	// Test with shell command that produces stderr
 	result, err := client.Translate(ctx, "test text", "test prompt")
 	if err != nil {
@@ -1664,7 +1676,7 @@ func TestLlamaCppTranslateErrorPaths(t *testing.T) {
 	} else {
 		t.Logf("Unexpected success with shell command: %s", result)
 	}
-	
+
 	// Test whitespace-only text
 	result, err = client.Translate(ctx, "   \t\n  ", "test prompt")
 	if err != nil {
@@ -1672,18 +1684,18 @@ func TestLlamaCppTranslateErrorPaths(t *testing.T) {
 	} else if strings.TrimSpace(result) != "" {
 		t.Errorf("Whitespace-only text should return empty result after trimming, got: '%s'", result)
 	}
-	
+
 	// Test prompt removal case
 	client2 := &LlamaCppClient{
-		executable:  "/bin/echo",
-		modelPath:   "/fake/path/to/model",
+		executable: "/bin/echo",
+		modelPath:  "/fake/path/to/model",
 		hardwareCaps: &hardware.Capabilities{
 			HasGPU: false,
 		},
 		threads:     4,
-		contextSize:  2048,
+		contextSize: 2048,
 	}
-	
+
 	// Use echo to simulate output that starts with prompt
 	result, err = client2.Translate(ctx, "test input", "test prompt")
 	if err == nil {
@@ -1701,20 +1713,20 @@ func TestLlamaCppTranslateErrorPaths(t *testing.T) {
 func TestLlamaCppTranslateWithGPU(t *testing.T) {
 	// Test with different GPU types to hit all conditional branches
 	gpuTypes := []string{"metal", "cuda", "rocm", "unknown"}
-	
+
 	for _, gpuType := range gpuTypes {
 		t.Run(fmt.Sprintf("gpu_type_%s", gpuType), func(t *testing.T) {
 			client := &LlamaCppClient{
 				executable: "/fake/path/to/llama-cli",
 				modelPath:  "/fake/path/to/model",
 				hardwareCaps: &hardware.Capabilities{
-					HasGPU: true,
+					HasGPU:  true,
 					GPUType: gpuType,
 				},
 				threads:     4,
-				contextSize:  2048,
+				contextSize: 2048,
 			}
-			
+
 			ctx := context.Background()
 			_, err := client.Translate(ctx, "test text", "test prompt")
 			if err != nil {
@@ -1729,6 +1741,10 @@ func TestLlamaCppTranslateWithGPU(t *testing.T) {
 
 // TestLlamaCppClientPaths tests uncovered paths in NewLlamaCppClient
 func TestLlamaCppClientPaths(t *testing.T) {
+	if _, err := findLlamaCppExecutable(); err != nil {
+		t.Skip("llama.cpp not installed")
+	}
+
 	// Test the model not found error path
 	t.Run("model_not_found", func(t *testing.T) {
 		config := TranslationConfig{
@@ -1757,10 +1773,10 @@ func TestLlamaCppClientPaths(t *testing.T) {
 		// Temporarily modify PATH to remove llama-cli
 		originalPath := os.Getenv("PATH")
 		defer os.Setenv("PATH", originalPath)
-		
+
 		// Set PATH to a directory that doesn't exist
 		os.Setenv("PATH", "/nonexistent/path")
-		
+
 		config := TranslationConfig{
 			Provider: "llamacpp",
 			Model:    "nonexistent-model", // Will fail model check first, but we're testing executable path
@@ -1789,17 +1805,17 @@ func TestLlamaCppSimpleMethods(t *testing.T) {
 			Provider: "llamacpp",
 			Model:    "test-model",
 		},
-		modelPath: "/fake/path/to/model",
+		modelPath:  "/fake/path/to/model",
 		executable: "/fake/path/to/llama-cli",
 		hardwareCaps: &hardware.Capabilities{
 			AvailableRAM: 8 * 1024 * 1024 * 1024, // 8GB
 		},
 		modelInfo: &models.ModelInfo{
-			Name:    "test-model",
-			MinRAM:  4 * 1024 * 1024 * 1024, // 4GB
+			Name:   "test-model",
+			MinRAM: 4 * 1024 * 1024 * 1024, // 4GB
 		},
 		threads:     4,
-		contextSize:  2048,
+		contextSize: 2048,
 	}
 
 	t.Run("GetModelInfo", func(t *testing.T) {
@@ -1868,7 +1884,7 @@ func TestLlamaCppSimpleMethods(t *testing.T) {
 			t.Fatalf("Failed to create test model file: %v", err)
 		}
 		client.modelPath = modelFile
-		
+
 		// Set executable to nonexistent path
 		client.executable = "/nonexistent/executable"
 		err = client.Validate()
@@ -1889,7 +1905,7 @@ func TestLlamaCppSimpleMethods(t *testing.T) {
 			t.Fatalf("Failed to create test model file: %v", err)
 		}
 		client.modelPath = modelFile
-		
+
 		// Set executable to a valid file
 		executable := filepath.Join(tmpDir, "llama-cli")
 		err = os.WriteFile(executable, []byte("#!/bin/sh\necho test"), 0755)
@@ -1897,9 +1913,9 @@ func TestLlamaCppSimpleMethods(t *testing.T) {
 			t.Fatalf("Failed to create test executable: %v", err)
 		}
 		client.executable = executable
-		
+
 		// Set required RAM higher than available
-		client.modelInfo.MinRAM = 16 * 1024 * 1024 * 1024 // 16GB
+		client.modelInfo.MinRAM = 16 * 1024 * 1024 * 1024         // 16GB
 		client.hardwareCaps.AvailableRAM = 4 * 1024 * 1024 * 1024 // 4GB
 
 		err = client.Validate()
@@ -1980,7 +1996,7 @@ func TestNewLlamaCppClientAdditionalCoverage(t *testing.T) {
 
 		// Test with current system (may succeed or fail with expected errors)
 		client, err := NewLlamaCppClient(config)
-		
+
 		// If it fails, check for expected error patterns
 		if err != nil {
 			// Allow for various expected error types
@@ -1988,7 +2004,7 @@ func TestNewLlamaCppClientAdditionalCoverage(t *testing.T) {
 				strings.Contains(err.Error(), "llama.cpp not found") ||
 				strings.Contains(err.Error(), "failed to find suitable model") ||
 				strings.Contains(err.Error(), "download failed")
-			
+
 			if !isExpectedError {
 				t.Logf("Unexpected error (may be acceptable): %v", err)
 			}
@@ -2011,15 +2027,15 @@ func TestNewLlamaCppClientAdditionalCoverage(t *testing.T) {
 		}
 
 		client, err := NewLlamaCppClient(config)
-		
+
 		// If it succeeds, verify the configuration
 		if err == nil && client != nil {
 			// Verify threads configuration
 			assert.Greater(t, client.threads, 0)
-			
-			// Verify context size configuration  
+
+			// Verify context size configuration
 			assert.Greater(t, client.contextSize, 0)
-			
+
 			// Verify hardware capabilities are set
 			assert.NotNil(t, client.hardwareCaps)
 		}
@@ -2033,7 +2049,7 @@ func TestNewLlamaCppClientAdditionalCoverage(t *testing.T) {
 		}
 
 		client, err := NewLlamaCppClient(config)
-		
+
 		// Check various expected outcomes
 		if err != nil {
 			// Should include download-related errors if they occur

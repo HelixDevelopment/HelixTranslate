@@ -32,17 +32,17 @@ const (
 
 // Config holds the configuration for SSH translation
 type Config struct {
-	InputFile     string
-	OutputFile    string
-	SSHHost       string
-	SSHUser       string
-	SSHPassword   string
-	SSHPort       int
-	RemoteDir     string
-	LlamaConfig   llm.LlamaCppProviderConfig
+	InputFile      string
+	OutputFile     string
+	SSHHost        string
+	SSHUser        string
+	SSHPassword    string
+	SSHPort        int
+	RemoteDir      string
+	LlamaConfig    llm.LlamaCppProviderConfig
 	MarkdownConfig markdown.WorkflowConfig
-	Logger        logger.Logger
-	ReportDir     string
+	Logger         logger.Logger
+	ReportDir      string
 }
 
 // TranslationProgress tracks the overall translation progress
@@ -68,34 +68,34 @@ type TranslationProgress struct {
 
 func main() {
 	config := parseFlags()
-	
+
 	if err := validateConfig(config); err != nil {
 		fmt.Fprintf(os.Stderr, "Configuration error: %v\n", err)
 		os.Exit(1)
 	}
 
 	ctx := context.Background()
-	
+
 	// Initialize event bus and WebSocket hub
 	eventBus := events.NewEventBus()
 	wsHub := websocket.NewHub(eventBus)
-	
+
 	// Generate unique session ID
 	sessionID := fmt.Sprintf("ssh-translation-%d", time.Now().UnixNano())
-	
+
 	// Start WebSocket hub in background
 	go wsHub.Run()
-	
+
 	progress := &TranslationProgress{
-		StartTime:      time.Now(),
-		TotalSteps:     6, // Hash check → Update → MD conversion → Translation → Format conversion → Cleanup
-		FilesCreated:   make([]string, 0),
+		StartTime:       time.Now(),
+		TotalSteps:      6, // Hash check → Update → MD conversion → Translation → Format conversion → Cleanup
+		FilesCreated:    make([]string, 0),
 		FilesDownloaded: make([]string, 0),
-		InputFile:      config.InputFile,
-		OutputFile:     config.OutputFile,
-		EventBus:       eventBus,
-		WebSocketHub:   wsHub,
-		SessionID:      sessionID,
+		InputFile:       config.InputFile,
+		OutputFile:      config.OutputFile,
+		EventBus:        eventBus,
+		WebSocketHub:    wsHub,
+		SessionID:       sessionID,
 	}
 
 	// Initialize report generator
@@ -122,16 +122,16 @@ func main() {
 	}
 
 	// Log session start
-	progress.ReportGenerator.AddLogEntry("info", "SSH translation session started", "main", 
+	progress.ReportGenerator.AddLogEntry("info", "SSH translation session started", "main",
 		map[string]interface{}{
-			"input_file": config.InputFile,
+			"input_file":  config.InputFile,
 			"output_file": config.OutputFile,
-			"ssh_host": config.SSHHost,
-			"ssh_user": config.SSHUser,
-			"report_dir": reportDir,
-			"session_id": sessionID,
+			"ssh_host":    config.SSHHost,
+			"ssh_user":    config.SSHUser,
+			"report_dir":  reportDir,
+			"session_id":  sessionID,
 		})
-	
+
 	// Emit session start event
 	eventBus.Publish(events.Event{
 		Type:      events.EventTranslationStarted,
@@ -145,7 +145,7 @@ func main() {
 			"total_steps": progress.TotalSteps,
 		},
 	})
-	
+
 	// Print monitoring information
 	fmt.Printf("\n🔗 WebSocket Monitoring Available:\n")
 	fmt.Printf("   Connect to: ws://localhost:8080/ws?session_id=%s\n", sessionID)
@@ -158,12 +158,12 @@ func main() {
 		progress.Session.Duration = time.Since(progress.StartTime)
 		progress.Session.Success = false
 		progress.Session.ErrorMessage = err.Error()
-		
+
 		// Generate failure report
 		if genErr := generateFinalReport(progress); genErr != nil {
 			fmt.Fprintf(os.Stderr, "Failed to generate report: %v\n", genErr)
 		}
-		
+
 		os.Exit(1)
 	}
 
@@ -199,7 +199,7 @@ func parseFlags() *Config {
 
 	// Initialize default LlamaCpp config
 	config.LlamaConfig = llm.LlamaCppProviderConfig{
-		BinaryPath:     "/usr/local/bin/llama.cpp", // Adjust based on remote setup
+		BinaryPath: "/usr/local/bin/llama.cpp", // Adjust based on remote setup
 		Models: []llm.ModelConfig{
 			{
 				ID:           "translation-model",
@@ -215,11 +215,11 @@ func parseFlags() *Config {
 		MaxConcurrency: 2,
 		RequestTimeout: 5 * time.Minute,
 		Temperature:    0.3,
-		TopP:          0.9,
-		TopK:          40,
-		RepeatPenalty: 1.1,
-		ContextSize:   2048,
-		GPULayers:     35,
+		TopP:           0.9,
+		TopK:           40,
+		RepeatPenalty:  1.1,
+		ContextSize:    2048,
+		GPULayers:      35,
 	}
 
 	// Initialize default markdown workflow config
@@ -273,10 +273,10 @@ func validateConfig(config *Config) error {
 // executeSSHTranslation orchestrates the entire SSH translation process
 func executeSSHTranslation(ctx context.Context, config *Config, progress *TranslationProgress) error {
 	config.Logger.Info("Starting SSH translation workflow", map[string]interface{}{
-		"input_file": config.InputFile,
+		"input_file":  config.InputFile,
 		"output_file": config.OutputFile,
-		"ssh_host": config.SSHHost,
-		"ssh_user": config.SSHUser,
+		"ssh_host":    config.SSHHost,
+		"ssh_user":    config.SSHUser,
 	})
 
 	// Step 1: Initialize SSH worker and verify codebase version
@@ -331,10 +331,10 @@ func executeSSHTranslation(ctx context.Context, config *Config, progress *Transl
 	progress.Session.Success = true
 
 	// Log session completion
-	progress.ReportGenerator.AddLogEntry("info", "SSH translation session completed successfully", "main", 
+	progress.ReportGenerator.AddLogEntry("info", "SSH translation session completed successfully", "main",
 		map[string]interface{}{
-			"duration": progress.Session.Duration.String(),
-			"files_created": len(progress.FilesCreated),
+			"duration":         progress.Session.Duration.String(),
+			"files_created":    len(progress.FilesCreated),
 			"files_downloaded": len(progress.FilesDownloaded),
 		})
 
@@ -351,36 +351,36 @@ func executeSSHTranslation(ctx context.Context, config *Config, progress *Transl
 			})
 		}
 	}
-	
+
 	// Emit session completion event
 	progress.EventBus.Publish(events.Event{
 		Type:      events.EventTranslationCompleted,
 		SessionID: progress.SessionID,
 		Message:   "SSH translation session completed",
 		Data: map[string]interface{}{
-			"duration":          time.Since(progress.StartTime).String(),
-			"files_created":     len(progress.FilesCreated),
+			"duration":         time.Since(progress.StartTime).String(),
+			"files_created":    len(progress.FilesCreated),
 			"files_downloaded": len(progress.FilesDownloaded),
-			"success":           true,
+			"success":          true,
 		},
 	})
-	
+
 	return nil
 }
 
 // step1InitializeAndVerify initializes SSH worker and verifies codebase
 func step1InitializeAndVerify(ctx context.Context, config *Config, progress *TranslationProgress) error {
 	progress.ReportGenerator.AddLogEntry("info", "Starting Step 1: Initialize SSH worker and verify codebase", "step1", nil)
-	
+
 	config.Logger.Info("Step 1: Initializing SSH worker", nil)
 
 	// Create SSH worker configuration
 	workerConfig := sshworker.SSHWorkerConfig{
-		Host:           config.SSHHost,
-		Port:           config.SSHPort,
-		Username:       config.SSHUser,
-		Password:       config.SSHPassword,
-		RemoteDir:      config.RemoteDir,
+		Host:              config.SSHHost,
+		Port:              config.SSHPort,
+		Username:          config.SSHUser,
+		Password:          config.SSHPassword,
+		RemoteDir:         config.RemoteDir,
 		ConnectionTimeout: defaultSSHTimeout,
 		CommandTimeout:    10 * time.Minute,
 	}
@@ -413,8 +413,8 @@ func step1InitializeAndVerify(ctx context.Context, config *Config, progress *Tra
 	config.Logger.Info("Local codebase hash generated", map[string]interface{}{
 		"hash": localHash,
 	})
-	
-	progress.ReportGenerator.AddLogEntry("debug", "Local codebase hash generated", "version_manager", 
+
+	progress.ReportGenerator.AddLogEntry("debug", "Local codebase hash generated", "version_manager",
 		map[string]interface{}{"hash": localHash})
 
 	// Check remote codebase hash
@@ -422,7 +422,7 @@ func step1InitializeAndVerify(ctx context.Context, config *Config, progress *Tra
 	if err != nil {
 		// If remote binary doesn't exist, proceed with upload
 		config.Logger.Info("Remote binary not found, proceeding with upload", map[string]interface{}{})
-		progress.ReportGenerator.AddLogEntry("info", "Remote binary not found, proceeding with upload", "version_manager", 
+		progress.ReportGenerator.AddLogEntry("info", "Remote binary not found, proceeding with upload", "version_manager",
 			map[string]interface{}{})
 	} else {
 		// Compare hashes
@@ -431,22 +431,22 @@ func step1InitializeAndVerify(ctx context.Context, config *Config, progress *Tra
 			config.Logger.Info("Codebase hashes match, no update needed", map[string]interface{}{
 				"hash": localHash,
 			})
-			progress.ReportGenerator.AddLogEntry("info", "Codebase hashes match, no update needed", "version_manager", 
+			progress.ReportGenerator.AddLogEntry("info", "Codebase hashes match, no update needed", "version_manager",
 				map[string]interface{}{"hash": localHash})
-			
+
 			// Emit progress event
 			progress.EventBus.Publish(events.Event{
 				Type:      events.EventTranslationProgress,
 				SessionID: progress.SessionID,
 				Message:   "Codebase verification completed - no update needed",
 				Data: map[string]interface{}{
-					"step":             "codebase_verification",
-					"hash_match":       true,
-					"completed_steps":  1,
-					"total_steps":      progress.TotalSteps,
+					"step":            "codebase_verification",
+					"hash_match":      true,
+					"completed_steps": 1,
+					"total_steps":     progress.TotalSteps,
 				},
 			})
-			
+
 			progress.CompletedSteps = 1
 			return nil
 		}
@@ -456,15 +456,15 @@ func step1InitializeAndVerify(ctx context.Context, config *Config, progress *Tra
 			"local_hash":  localHash,
 			"remote_hash": remoteHash,
 		})
-		progress.ReportGenerator.AddLogEntry("info", "Codebase hashes differ, updating remote", "version_manager", 
+		progress.ReportGenerator.AddLogEntry("info", "Codebase hashes differ, updating remote", "version_manager",
 			map[string]interface{}{
-				"local_hash": localHash,
+				"local_hash":  localHash,
 				"remote_hash": remoteHash,
 			})
 
 		// For faster execution, upload only essential files
 		config.Logger.Info("Uploading essential files for faster execution", map[string]interface{}{})
-		progress.ReportGenerator.AddLogEntry("info", "Uploading essential files for faster execution", "version_manager", 
+		progress.ReportGenerator.AddLogEntry("info", "Uploading essential files for faster execution", "version_manager",
 			map[string]interface{}{})
 
 		// Upload only the built binary and Python translation script
@@ -487,9 +487,9 @@ func step1InitializeAndVerify(ctx context.Context, config *Config, progress *Tra
 				"local_hash":  localHash,
 				"remote_hash": newRemoteHash,
 			})
-			progress.ReportGenerator.AddLogEntry("info", "Remote codebase updated successfully", "version_manager", 
+			progress.ReportGenerator.AddLogEntry("info", "Remote codebase updated successfully", "version_manager",
 				map[string]interface{}{
-					"local_hash": localHash,
+					"local_hash":  localHash,
 					"remote_hash": newRemoteHash,
 				})
 		} else {
@@ -499,9 +499,9 @@ func step1InitializeAndVerify(ctx context.Context, config *Config, progress *Tra
 				"local_hash":  localHash,
 				"remote_hash": newRemoteHash,
 			})
-			progress.ReportGenerator.AddWarning("version_sync", "Remote hash verification failed, continuing anyway", "version_manager", 
+			progress.ReportGenerator.AddWarning("version_sync", "Remote hash verification failed, continuing anyway", "version_manager",
 				map[string]interface{}{
-					"local_hash": localHash,
+					"local_hash":  localHash,
 					"remote_hash": newRemoteHash,
 				})
 		}
@@ -515,16 +515,16 @@ func step1InitializeAndVerify(ctx context.Context, config *Config, progress *Tra
 		progress.ReportGenerator.AddIssue("setup", "error", "Failed to upload translator binary", "sshworker")
 		return fmt.Errorf("failed to upload translator binary: %w", err)
 	}
-	progress.ReportGenerator.AddLogEntry("info", "Binary uploaded successfully", "version_manager", 
+	progress.ReportGenerator.AddLogEntry("info", "Binary uploaded successfully", "version_manager",
 		map[string]interface{}{"size": "27MB"})
-	
+
 	progress.CodeUpdated = true
 
 	progress.HashMatch = true
 	config.Logger.Info("Codebase setup complete", map[string]interface{}{
 		"local_hash": localHash,
 	})
-	progress.ReportGenerator.AddLogEntry("info", "Codebase setup complete", "version_manager", 
+	progress.ReportGenerator.AddLogEntry("info", "Codebase setup complete", "version_manager",
 		map[string]interface{}{
 			"local_hash": localHash,
 		})
@@ -536,7 +536,7 @@ func step1InitializeAndVerify(ctx context.Context, config *Config, progress *Tra
 // step2ConvertToMarkdown uploads input file and converts to markdown
 func step2ConvertToMarkdown(ctx context.Context, config *Config, progress *TranslationProgress) (string, error) {
 	progress.ReportGenerator.AddLogEntry("info", "Starting Step 2: Converting input ebook to markdown", "step2", nil)
-	
+
 	config.Logger.Info("Step 2: Converting input ebook to markdown", nil)
 
 	// Use shared worker from step1
@@ -554,7 +554,7 @@ func step2ConvertToMarkdown(ctx context.Context, config *Config, progress *Trans
 		progress.ReportGenerator.AddIssue("file_operation", "error", "Failed to upload input file", "sshworker")
 		return "", fmt.Errorf("failed to upload input file: %w", err)
 	}
-	
+
 	// Create remote materials directory if needed
 	materialsDir := filepath.Join(config.RemoteDir, "materials/books")
 	mkdirCmd := fmt.Sprintf("mkdir -p %s", materialsDir)
@@ -562,10 +562,10 @@ func step2ConvertToMarkdown(ctx context.Context, config *Config, progress *Trans
 		progress.ReportGenerator.AddIssue("file_operation", "error", "Failed to create materials directory", "sshworker")
 		return "", fmt.Errorf("failed to create materials directory: %w", err)
 	}
-	
-	progress.ReportGenerator.AddLogEntry("info", "Input file uploaded successfully", "sshworker", 
+
+	progress.ReportGenerator.AddLogEntry("info", "Input file uploaded successfully", "sshworker",
 		map[string]interface{}{
-			"local_file": config.InputFile,
+			"local_file":  config.InputFile,
 			"remote_file": remoteInputPath,
 		})
 
@@ -583,7 +583,7 @@ func step2ConvertToMarkdown(ctx context.Context, config *Config, progress *Trans
 		if err != nil {
 			return "", fmt.Errorf("failed to read FB2 conversion script: %w", err)
 		}
-		
+
 		convertCmd = fmt.Sprintf(`cd %s && cat << 'SCRIPT' > convert_to_markdown.sh
 #!/bin/bash
 # FB2 to markdown conversion using Python
@@ -599,11 +599,11 @@ PYEOF
 python3 fb2_to_markdown.py "$input_file" "$output_file"
 SCRIPT
 chmod +x convert_to_markdown.sh
-./convert_to_markdown.sh`, 
-	config.RemoteDir, 
-	remoteInputPath, 
-	markdownOriginalPath,
-	string(fb2Script))
+./convert_to_markdown.sh`,
+			config.RemoteDir,
+			remoteInputPath,
+			markdownOriginalPath,
+			string(fb2Script))
 	case ".epub":
 		convertCmd = fmt.Sprintf(`cd %s && cat << 'SCRIPT' > convert_to_markdown.sh
 #!/bin/bash
@@ -635,9 +635,9 @@ chmod +x convert_to_markdown.sh
 	progress.FilesCreated = append(progress.FilesCreated, markdownOriginalPath)
 	progress.CompletedSteps = 2
 
-	progress.ReportGenerator.AddLogEntry("info", "Ebook converted to markdown successfully", "step2", 
+	progress.ReportGenerator.AddLogEntry("info", "Ebook converted to markdown successfully", "step2",
 		map[string]interface{}{
-			"input_file": remoteInputPath,
+			"input_file":  remoteInputPath,
 			"output_file": markdownOriginalPath,
 		})
 
@@ -647,7 +647,7 @@ chmod +x convert_to_markdown.sh
 // step3TranslateMarkdown translates the markdown using remote llama.cpp
 func step3TranslateMarkdown(ctx context.Context, config *Config, progress *TranslationProgress, markdownOriginal string) (string, error) {
 	progress.ReportGenerator.AddLogEntry("info", "Starting Step 3: Translating markdown using remote llama.cpp", "step3", nil)
-	
+
 	config.Logger.Info("Step 3: Translating markdown using remote llama.cpp", nil)
 
 	// Use shared worker from step1
@@ -683,7 +683,7 @@ func step3TranslateMarkdown(ctx context.Context, config *Config, progress *Trans
 	if err != nil {
 		return "", fmt.Errorf("failed to read LLM-only translation script: %w", err)
 	}
-	
+
 	if err := worker.UploadData(ctx, llamaLLMOnlyScript, filepath.Join(config.RemoteDir, "translate_llm_only.py")); err != nil {
 		return "", fmt.Errorf("failed to upload LLM-only translation script: %w", err)
 	}
@@ -757,7 +757,7 @@ if os.path.exists('/usr/bin/which'):
 	// Check for llama.cpp installation and install if needed
 	if !strings.Contains(checkResult.Stdout, "llama.cpp binary found") {
 		config.Logger.Info("llama.cpp not found, installing automatically", nil)
-		
+
 		// Upload installation script
 		installScript := filepath.Join(getProjectRoot(), "internal/scripts/install_llamacpp.sh")
 		if _, err := os.Stat(installScript); err == nil {
@@ -770,17 +770,17 @@ if os.path.exists('/usr/bin/which'):
 				if _, err := worker.ExecuteCommand(ctx, chmodCmd); err != nil {
 					config.Logger.Warn("Failed to make install script executable", map[string]interface{}{"error": err.Error()})
 				} else {
-					installCmd := fmt.Sprintf("%s", remoteInstallScript)
+					installCmd := remoteInstallScript
 					config.Logger.Info("Running llama.cpp installation", map[string]interface{}{"command": installCmd})
-					
+
 					installResult, err := worker.ExecuteCommand(ctx, installCmd)
 					if err != nil {
 						config.Logger.Warn("llama.cpp installation failed", map[string]interface{}{"error": err.Error()})
 					} else if installResult.ExitCode != 0 {
 						config.Logger.Warn("llama.cpp installation failed", map[string]interface{}{
 							"exit_code": installResult.ExitCode,
-							"stdout": installResult.Stdout,
-							"stderr": installResult.Stderr,
+							"stdout":    installResult.Stdout,
+							"stderr":    installResult.Stderr,
 						})
 					} else {
 						config.Logger.Info("llama.cpp installation completed successfully", nil)
@@ -802,7 +802,7 @@ if os.path.exists('/usr/bin/which'):
 			}
 		}
 	}
-	
+
 	// If we found a local llama.cpp binary, upload it
 	if _, err := os.Stat(llamaBinaryPath); err == nil {
 		config.Logger.Info("Uploading llama.cpp binary", map[string]interface{}{"path": llamaBinaryPath})
@@ -818,8 +818,8 @@ if os.path.exists('/usr/bin/which'):
 		config.RemoteDir, markdownOriginal, markdownTranslatedPath)
 
 	config.Logger.Debug("Executing monitored translation command", map[string]interface{}{
-		"command": translateCmd,
-		"remote_dir": config.RemoteDir,
+		"command":     translateCmd,
+		"remote_dir":  config.RemoteDir,
 		"script_path": filepath.Join(config.RemoteDir, "translate_llamacpp_prod.sh"),
 	})
 
@@ -831,9 +831,9 @@ if os.path.exists('/usr/bin/which'):
 	if result.ExitCode != 0 {
 		config.Logger.Error("Translation script failed", map[string]interface{}{
 			"exit_code": result.ExitCode,
-			"stdout": result.Stdout,
-			"stderr": result.Stderr,
-			"command": translateCmd,
+			"stdout":    result.Stdout,
+			"stderr":    result.Stderr,
+			"command":   translateCmd,
 		})
 		return "", fmt.Errorf("markdown translation failed: %s", result.Stderr)
 	}
@@ -841,9 +841,9 @@ if os.path.exists('/usr/bin/which'):
 	progress.FilesCreated = append(progress.FilesCreated, markdownTranslatedPath)
 	progress.CompletedSteps = 3
 
-	progress.ReportGenerator.AddLogEntry("info", "Markdown translation completed", "step3", 
+	progress.ReportGenerator.AddLogEntry("info", "Markdown translation completed", "step3",
 		map[string]interface{}{
-			"input_file": markdownOriginal,
+			"input_file":  markdownOriginal,
 			"output_file": markdownTranslatedPath,
 		})
 
@@ -872,7 +872,7 @@ func step4ConvertToEPUB(ctx context.Context, config *Config, progress *Translati
 	if err != nil {
 		return fmt.Errorf("failed to read EPUB generator script: %w", err)
 	}
-	
+
 	convertCmd := fmt.Sprintf(`cd %s && cat << 'SCRIPT' > convert_to_epub.sh
 #!/bin/bash
 # Markdown to EPUB conversion using Python
@@ -888,11 +888,11 @@ PYEOF
 python3 epub_generator.py "$input_file" "$output_file"
 SCRIPT
 chmod +x convert_to_epub.sh
-./convert_to_epub.sh`, 
-	config.RemoteDir, 
-	markdownTranslated, 
-	remoteOutputPath,
-	string(epubScript))
+./convert_to_epub.sh`,
+		config.RemoteDir,
+		markdownTranslated,
+		remoteOutputPath,
+		string(epubScript))
 
 	result, err := worker.ExecuteCommandWithProgress(ctx, "epub_conversion", convertCmd)
 	if err != nil {
@@ -911,7 +911,7 @@ chmod +x convert_to_epub.sh
 // step5DownloadFiles downloads all generated files
 func step5DownloadFiles(ctx context.Context, config *Config, progress *TranslationProgress) error {
 	progress.ReportGenerator.AddLogEntry("info", "Starting Step 5: Downloading generated files", "step5", nil)
-	
+
 	config.Logger.Info("Step 5: Downloading generated files", nil)
 
 	// Use shared worker from step1
@@ -923,21 +923,21 @@ func step5DownloadFiles(ctx context.Context, config *Config, progress *Translati
 
 	// Download each file to local directory
 	inputDir := filepath.Dir(config.InputFile)
-	
+
 	for _, remoteFile := range progress.FilesCreated {
 		localFile := filepath.Join(inputDir, filepath.Base(remoteFile))
-		
+
 		if err := worker.DownloadFile(ctx, remoteFile, localFile); err != nil {
 			config.Logger.Warn("Failed to download file", map[string]interface{}{
 				"remote_file": remoteFile,
-				"local_file": localFile,
-				"error": err.Error(),
+				"local_file":  localFile,
+				"error":       err.Error(),
 			})
-			progress.ReportGenerator.AddWarning("file_operation", 
+			progress.ReportGenerator.AddWarning("file_operation",
 				fmt.Sprintf("Failed to download file: %s", err.Error()), "sshworker",
 				map[string]interface{}{
 					"remote_file": remoteFile,
-					"local_file": localFile,
+					"local_file":  localFile,
 				})
 			continue
 		}
@@ -946,12 +946,12 @@ func step5DownloadFiles(ctx context.Context, config *Config, progress *Translati
 
 		config.Logger.Info("Downloaded file", map[string]interface{}{
 			"remote_file": remoteFile,
-			"local_file": localFile,
+			"local_file":  localFile,
 		})
-		progress.ReportGenerator.AddLogEntry("info", "File downloaded successfully", "step5", 
+		progress.ReportGenerator.AddLogEntry("info", "File downloaded successfully", "step5",
 			map[string]interface{}{
 				"remote_file": remoteFile,
-				"local_file": localFile,
+				"local_file":  localFile,
 			})
 	}
 
@@ -962,7 +962,7 @@ func step5DownloadFiles(ctx context.Context, config *Config, progress *Translati
 // step6CleanupRemote removes temporary files from remote system
 func step6CleanupRemote(ctx context.Context, config *Config, progress *TranslationProgress) error {
 	progress.ReportGenerator.AddLogEntry("info", "Starting Step 6: Cleaning up remote files", "step6", nil)
-	
+
 	config.Logger.Info("Step 6: Cleaning up remote files", nil)
 
 	// Use shared worker from step1
@@ -1024,16 +1024,16 @@ func printFinalReport(progress *TranslationProgress) {
 	fmt.Println("\n" + strings.Repeat("=", 80))
 	fmt.Println("SSH TRANSLATION WORKFLOW COMPLETED")
 	fmt.Println(strings.Repeat("=", 80))
-	
+
 	fmt.Printf("Duration: %v\n", duration)
 	fmt.Printf("Steps Completed: %d/%d\n", progress.CompletedSteps, progress.TotalSteps)
 	fmt.Printf("Current Step: %s\n", progress.CurrentStep)
-	
+
 	fmt.Println("\nFile Operations:")
 	fmt.Printf("- Hash Match: %v\n", progress.HashMatch)
 	fmt.Printf("- Code Updated: %v\n", progress.CodeUpdated)
 	fmt.Printf("- Files Created: %d\n", len(progress.FilesCreated))
-	
+
 	for i, file := range progress.FilesCreated {
 		fmt.Printf("  %d. %s\n", i+1, file)
 	}
@@ -1042,11 +1042,11 @@ func printFinalReport(progress *TranslationProgress) {
 	inputDir := filepath.Dir(progress.InputFile)
 	ext := filepath.Ext(progress.InputFile)
 	baseName := strings.TrimSuffix(filepath.Base(progress.InputFile), ext)
-	
+
 	expectedFiles := []string{
 		progress.InputFile,
 		baseName + "_original.md",
-		baseName + "_translated.md", 
+		baseName + "_translated.md",
 		progress.OutputFile,
 	}
 
@@ -1085,25 +1085,25 @@ func calculateEssentialFilesHash() (string, error) {
 	}
 
 	hasher := sha256.New()
-	
+
 	for _, filePath := range essentialFiles {
 		if _, err := os.Stat(filePath); err != nil {
 			// Skip missing files, just use what's available
 			continue
 		}
-		
+
 		file, err := os.Open(filePath)
 		if err != nil {
 			return "", fmt.Errorf("failed to open %s: %w", filePath, err)
 		}
-		
+
 		if _, err := io.Copy(hasher, file); err != nil {
 			file.Close()
 			return "", fmt.Errorf("failed to hash %s: %w", filePath, err)
 		}
 		file.Close()
 	}
-	
+
 	return hex.EncodeToString(hasher.Sum(nil)), nil
 }
 
@@ -1112,11 +1112,11 @@ func getProjectRoot() string {
 	if root := os.Getenv("PROJECT_ROOT"); root != "" {
 		return root
 	}
-	
+
 	// Fallback to current working directory
 	if wd, err := os.Getwd(); err == nil {
 		return wd
 	}
-	
+
 	return "."
 }

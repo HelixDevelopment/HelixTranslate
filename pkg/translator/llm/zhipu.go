@@ -19,10 +19,10 @@ type ZhipuClient struct {
 
 // ZhipuRequest represents Zhipu API request
 type ZhipuRequest struct {
-	Model       string          `json:"model"`
-	Messages    []ZhipuMessage  `json:"messages"`
-	Temperature float64         `json:"temperature,omitempty"`
-	MaxTokens   int             `json:"max_tokens,omitempty"`
+	Model       string         `json:"model"`
+	Messages    []ZhipuMessage `json:"messages"`
+	Temperature float64        `json:"temperature,omitempty"`
+	MaxTokens   int            `json:"max_tokens,omitempty"`
 }
 
 // ZhipuMessage represents a message

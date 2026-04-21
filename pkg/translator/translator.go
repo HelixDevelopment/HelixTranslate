@@ -2,8 +2,8 @@ package translator
 
 import (
 	"context"
-	"errors"
 	"digital.vasic.translator/pkg/events"
+	"errors"
 )
 
 var (
@@ -16,11 +16,11 @@ var (
 
 // TranslationResult holds the result of a translation
 type TranslationResult struct {
-	OriginalText  string
+	OriginalText   string
 	TranslatedText string
-	Provider      string
-	Cached        bool
-	Error         error
+	Provider       string
+	Cached         bool
+	Error          error
 }
 
 // TranslationStats tracks translation statistics

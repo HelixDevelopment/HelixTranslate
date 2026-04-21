@@ -4,12 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/language"
+	"github.com/stretchr/testify/assert"
 )
-
-
 
 // TestBaseTranslator_Cache tests cache functionality
 func TestBaseTranslator_Cache(t *testing.T) {
@@ -30,11 +28,11 @@ func TestBaseTranslator_Cache(t *testing.T) {
 	t.Run("CheckCache returns cached translation", func(t *testing.T) {
 		// Add to cache directly
 		bt.AddToCache("hello", "привет")
-		
+
 		result, found := bt.CheckCache("hello")
 		assert.Equal(t, "привет", result)
 		assert.True(t, found)
-		
+
 		// Check stats
 		stats := bt.GetStats()
 		assert.Equal(t, 1, stats.Cached)
@@ -42,7 +40,7 @@ func TestBaseTranslator_Cache(t *testing.T) {
 
 	t.Run("AddToCache updates cache", func(t *testing.T) {
 		bt.AddToCache("world", "мир")
-		
+
 		result, found := bt.CheckCache("world")
 		assert.Equal(t, "мир", result)
 		assert.True(t, found)
@@ -50,7 +48,7 @@ func TestBaseTranslator_Cache(t *testing.T) {
 
 	t.Run("Cache works with empty strings", func(t *testing.T) {
 		bt.AddToCache("", "")
-		
+
 		result, found := bt.CheckCache("")
 		assert.Equal(t, "", result)
 		assert.True(t, found)
@@ -59,7 +57,7 @@ func TestBaseTranslator_Cache(t *testing.T) {
 	t.Run("Cache overwrites existing entries", func(t *testing.T) {
 		bt.AddToCache("hello", "привет")
 		bt.AddToCache("hello", "здравствуй")
-		
+
 		result, found := bt.CheckCache("hello")
 		assert.Equal(t, "здравствуй", result)
 		assert.True(t, found)
@@ -81,7 +79,7 @@ func TestBaseTranslator_UpdateStats(t *testing.T) {
 
 	t.Run("UpdateStats with success increments total and translated", func(t *testing.T) {
 		bt.UpdateStats(true)
-		
+
 		stats := bt.GetStats()
 		assert.Equal(t, 1, stats.Total)
 		assert.Equal(t, 1, stats.Translated)
@@ -90,7 +88,7 @@ func TestBaseTranslator_UpdateStats(t *testing.T) {
 
 	t.Run("UpdateStats with failure increments total and errors", func(t *testing.T) {
 		bt.UpdateStats(false)
-		
+
 		stats := bt.GetStats()
 		assert.Equal(t, 2, stats.Total)
 		assert.Equal(t, 1, stats.Translated)
@@ -101,7 +99,7 @@ func TestBaseTranslator_UpdateStats(t *testing.T) {
 		bt.UpdateStats(true)
 		bt.UpdateStats(true)
 		bt.UpdateStats(false)
-		
+
 		stats := bt.GetStats()
 		assert.Equal(t, 5, stats.Total)
 		assert.Equal(t, 3, stats.Translated)
@@ -121,7 +119,7 @@ func TestEmitProgress(t *testing.T) {
 	t.Run("EmitProgress publishes event", func(t *testing.T) {
 		eventBus := events.NewEventBus()
 		receivedEvent := false
-		
+
 		// Subscribe to events
 		eventBus.Subscribe(events.EventTranslationProgress, func(event events.Event) {
 			if event.Type == events.EventTranslationProgress {
@@ -130,9 +128,9 @@ func TestEmitProgress(t *testing.T) {
 				assert.Equal(t, "test message", event.Message)
 			}
 		})
-		
+
 		EmitProgress(eventBus, "session1", "test message", map[string]interface{}{"key": "value"})
-		
+
 		// Give time for async processing
 		time.Sleep(10 * time.Millisecond)
 		assert.True(t, receivedEvent)
@@ -141,22 +139,22 @@ func TestEmitProgress(t *testing.T) {
 	t.Run("EmitProgress with complex data", func(t *testing.T) {
 		eventBus := events.NewEventBus()
 		var receivedData map[string]interface{}
-		
+
 		eventBus.Subscribe(events.EventTranslationProgress, func(event events.Event) {
 			if event.Type == events.EventTranslationProgress {
 				receivedData = event.Data
 			}
 		})
-		
+
 		testData := map[string]interface{}{
 			"progress": 50.5,
 			"chapter":  3,
 			"total":    10,
 		}
-		
+
 		EmitProgress(eventBus, "session2", "complex message", testData)
 		time.Sleep(10 * time.Millisecond)
-		
+
 		assert.Equal(t, 50.5, receivedData["progress"])
 		assert.Equal(t, 3, receivedData["chapter"])
 		assert.Equal(t, 10, receivedData["total"])
@@ -176,7 +174,7 @@ func TestEmitError(t *testing.T) {
 		eventBus := events.NewEventBus()
 		receivedEvent := false
 		testError := assert.AnError
-		
+
 		eventBus.Subscribe(events.EventTranslationError, func(event events.Event) {
 			if event.Type == events.EventTranslationError {
 				receivedEvent = true
@@ -184,10 +182,10 @@ func TestEmitError(t *testing.T) {
 				assert.Equal(t, "test error", event.Message)
 			}
 		})
-		
+
 		EmitError(eventBus, "session1", "test error", testError)
 		time.Sleep(10 * time.Millisecond)
-		
+
 		assert.True(t, receivedEvent)
 	})
 
@@ -195,32 +193,32 @@ func TestEmitError(t *testing.T) {
 		eventBus := events.NewEventBus()
 		var receivedData map[string]interface{}
 		testError := assert.AnError
-		
+
 		eventBus.Subscribe(events.EventTranslationError, func(event events.Event) {
 			if event.Type == events.EventTranslationError {
 				receivedData = event.Data
 			}
 		})
-		
+
 		EmitError(eventBus, "session2", "error message", testError)
 		time.Sleep(10 * time.Millisecond)
-		
+
 		assert.Equal(t, testError.Error(), receivedData["error"])
 	})
 
 	t.Run("EmitError with nil error", func(t *testing.T) {
 		eventBus := events.NewEventBus()
 		var receivedData map[string]interface{}
-		
+
 		eventBus.Subscribe(events.EventTranslationError, func(event events.Event) {
 			if event.Type == events.EventTranslationError {
 				receivedData = event.Data
 			}
 		})
-		
+
 		EmitError(eventBus, "session3", "nil error", nil)
 		time.Sleep(10 * time.Millisecond)
-		
+
 		// Should handle nil error gracefully
 		assert.NotNil(t, receivedData["error"])
 	})
@@ -242,7 +240,7 @@ func TestTranslationConfig(t *testing.T) {
 			Script:      "latin",
 			Options:     map[string]interface{}{"option1": "value1"},
 		}
-		
+
 		assert.Equal(t, "en", config.SourceLang)
 		assert.Equal(t, "ru", config.TargetLang)
 		assert.Equal(t, "openai", config.Provider)
@@ -258,7 +256,7 @@ func TestTranslationConfig(t *testing.T) {
 
 	t.Run("Config with zero values", func(t *testing.T) {
 		config := TranslationConfig{}
-		
+
 		assert.Empty(t, config.SourceLang)
 		assert.Empty(t, config.TargetLang)
 		assert.Empty(t, config.Provider)
@@ -278,7 +276,7 @@ func TestTranslationConfig(t *testing.T) {
 			TargetLang: "ru",
 			Options:    nil,
 		}
-		
+
 		assert.Equal(t, "en", config.SourceLang)
 		assert.Equal(t, "ru", config.TargetLang)
 		assert.Nil(t, config.Options)
@@ -289,13 +287,13 @@ func TestTranslationConfig(t *testing.T) {
 func TestUniversalTranslator(t *testing.T) {
 	mockTranslator := &MockTranslator{}
 	mockDetector := NewMockDetector()
-	
+
 	sourceLang := language.Language{Code: "en", Name: "English"}
 	targetLang := language.Language{Code: "ru", Name: "Russian"}
 
 	t.Run("NewUniversalTranslator creates correctly", func(t *testing.T) {
 		ut := NewUniversalTranslator(mockTranslator, mockDetector, sourceLang, targetLang)
-		
+
 		assert.Equal(t, mockTranslator, ut.translator)
 		assert.Equal(t, mockDetector, ut.langDetector)
 		assert.Equal(t, sourceLang, ut.sourceLanguage)
@@ -304,7 +302,7 @@ func TestUniversalTranslator(t *testing.T) {
 
 	t.Run("NewUniversalTranslator with nil detector", func(t *testing.T) {
 		ut := NewUniversalTranslator(mockTranslator, nil, sourceLang, targetLang)
-		
+
 		assert.Equal(t, mockTranslator, ut.translator)
 		assert.Nil(t, ut.langDetector)
 		assert.Equal(t, sourceLang, ut.sourceLanguage)
@@ -327,13 +325,13 @@ func TestErrors(t *testing.T) {
 func BenchmarkBaseTranslator_Cache(b *testing.B) {
 	config := TranslationConfig{}
 	bt := NewBaseTranslator(config)
-	
+
 	b.ResetTimer()
-	
+
 	for i := 0; i < b.N; i++ {
 		key := "test-key-" + string(rune(i))
 		value := "test-value-" + string(rune(i))
-		
+
 		bt.AddToCache(key, value)
 		bt.CheckCache(key)
 	}
@@ -345,9 +343,9 @@ func BenchmarkEmitProgress(b *testing.B) {
 	sessionID := "bench-session"
 	message := "benchmark message"
 	data := map[string]interface{}{"key": "value"}
-	
+
 	b.ResetTimer()
-	
+
 	for i := 0; i < b.N; i++ {
 		EmitProgress(eventBus, sessionID, message, data)
 	}

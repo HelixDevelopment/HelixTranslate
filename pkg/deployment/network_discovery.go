@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"sync"
 	"time"
 
@@ -201,7 +202,7 @@ func (nd *NetworkDiscoverer) handleDiscoveryMessage(data []byte, addr *net.UDPAd
 	}
 
 	// Skip our own broadcasts
-	if nd.isOwnService(message.ServiceID) {
+	if nd.isOwnService(message) {
 		return nil
 	}
 
@@ -226,10 +227,24 @@ func (nd *NetworkDiscoverer) handleDiscoveryMessage(data []byte, addr *net.UDPAd
 	return nil
 }
 
-// isOwnService checks if the service ID belongs to this instance
-func (nd *NetworkDiscoverer) isOwnService(serviceID string) bool {
-	// This would need to be implemented based on how service IDs are generated
-	// For now, we'll assume all services are external
+// isOwnService checks if a discovered service belongs to this host by comparing hostnames/IPs.
+func (nd *NetworkDiscoverer) isOwnService(message BroadcastMessage) bool {
+	hostname, err := os.Hostname()
+	if err == nil && message.Host == hostname {
+		return true
+	}
+
+	addrs, err := net.InterfaceAddrs()
+	if err == nil {
+		for _, addr := range addrs {
+			if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() {
+				if message.Host == ipNet.IP.String() {
+					return true
+				}
+			}
+		}
+	}
+
 	return false
 }
 

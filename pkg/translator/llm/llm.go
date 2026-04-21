@@ -15,19 +15,7 @@ type TranslationConfig = translator.TranslationConfig
 
 // ConvertFromTranslatorConfig converts from parent package config to local config
 func ConvertFromTranslatorConfig(config translator.TranslationConfig) TranslationConfig {
-	return TranslationConfig{
-		SourceLang:     config.SourceLang,
-		TargetLang:     config.TargetLang,
-		Provider:       config.Provider,
-		Model:          config.Model,
-		Temperature:    config.Temperature,
-		MaxTokens:      config.MaxTokens,
-		Timeout:        config.Timeout,
-		APIKey:         config.APIKey,
-		BaseURL:        config.BaseURL,
-		Script:         config.Script,
-		Options:        config.Options,
-	}
+	return config
 }
 
 // Provider represents LLM provider types
@@ -54,7 +42,7 @@ var ValidModels = map[Provider][]string{
 	ProviderQwen:      {"qwen-max", "qwen-plus", "qwen-turbo"},
 	ProviderGemini:    {"gemini-pro", "gemini-pro-vision"},
 	ProviderOllama:    {"llama2", "codellama", "mistral", "vicuna"}, // Common Ollama models
-	ProviderLlamaCpp:  {"llama2", "mistral", "vicuna"}, // Common local models
+	ProviderLlamaCpp:  {"llama2", "mistral", "vicuna"},              // Common local models
 	ProviderMock:      {"mock"},
 }
 
@@ -186,13 +174,13 @@ func NewLLMTranslatorWithConfig(config TranslationConfig) (*LLMTranslator, error
 				}
 			}
 			if !modelValid {
-				return nil, fmt.Errorf("model '%s' is not valid for provider '%s'. Valid models: %v", 
+				return nil, fmt.Errorf("model '%s' is not valid for provider '%s'. Valid models: %v",
 					config.Model, provider, validModels)
 			}
 		}
 		// For Ollama and LlamaCpp, we allow custom models but warn
 		if provider == ProviderOllama || provider == ProviderLlamaCpp {
-			fmt.Printf("Warning: Using custom model '%s' with %s provider\n", config.Model, provider)
+			fmt.Printf("Warning: Using custom model '%s' with %s provider\n", config.Model, provider) //nolint:forbidigo
 		}
 	}
 

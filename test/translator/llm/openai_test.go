@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/translator/llm"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 // MockLLMClient implements LLMClient interface for testing
@@ -30,11 +30,11 @@ func (m *MockLLMClient) GetProviderName() string {
 func TestOpenAIClientCreation(t *testing.T) {
 	config := translator.TranslationConfig{
 		APIKey:     "test-api-key",
-		Provider:    "openai",
+		Provider:   "openai",
 		Model:      "gpt-4",
-		SourceLang:  "en",
-		TargetLang:  "es",
-		BaseURL:     "https://api.openai.com/v1",
+		SourceLang: "en",
+		TargetLang: "es",
+		BaseURL:    "https://api.openai.com/v1",
 		Options: map[string]interface{}{
 			"temperature": 0.3,
 			"max_tokens":  4000,
@@ -205,7 +205,7 @@ func TestLLMTranslatorTranslateWithProgress(t *testing.T) {
 	// This test verifies the function structure works
 	// Actual API call would fail with test API key
 	result, err := trans.TranslateWithProgress(ctx, text, contextStr, eventBus, sessionID)
-	
+
 	// With nil event bus and test API key, we expect an error
 	assert.Error(t, err)
 	assert.Empty(t, result)

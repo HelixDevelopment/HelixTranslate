@@ -1,8 +1,8 @@
 package models
 
 import (
-	"time"
 	"golang.org/x/crypto/bcrypt"
+	"time"
 )
 
 // User represents a user in the system
@@ -81,16 +81,16 @@ func (r *InMemoryUserRepository) Update(user *User) error {
 			break
 		}
 	}
-	
+
 	if oldUsername == "" {
 		return ErrUserNotFound
 	}
-	
+
 	// If username changed, delete old entry and create new one
 	if oldUsername != user.Username {
 		delete(r.users, oldUsername)
 	}
-	
+
 	user.UpdatedAt = time.Now()
 	r.users[user.Username] = user
 	return nil

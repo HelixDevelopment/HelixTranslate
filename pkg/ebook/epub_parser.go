@@ -297,18 +297,18 @@ func (p *EPUBParser) parseContentFile(f *zip.File) (*Chapter, error) {
 
 	// Simple HTML text extraction - remove head/title sections first
 	content := string(data)
-	
+
 	// Remove entire head section including title
 	headRe := regexp.MustCompile(`(?i)<head[^>]*>.*?</head>`)
 	content = headRe.ReplaceAllString(content, " ")
-	
+
 	// Remove tags from remaining content
 	content = removeHTMLTags(content)
-	
+
 	// Clean up multiple spaces
 	spaceRe := regexp.MustCompile(` {2,}`)
 	content = spaceRe.ReplaceAllString(content, " ")
-	
+
 	content = strings.TrimSpace(content)
 
 	if content == "" {
@@ -331,15 +331,15 @@ func (p *EPUBParser) parseContentFile(f *zip.File) (*Chapter, error) {
 func removeHTMLTags(s string) string {
 	// Replace HTML tags with spaces using different logic for opening vs closing tags
 	// This preserves the spacing pattern expected in tests
-	
+
 	// Replace opening tags (like <p>, <b>) with a space
 	openingRe := regexp.MustCompile(`<[a-zA-Z][^>/]*>`)
 	content := openingRe.ReplaceAllString(s, " ")
-	
-	// Replace closing tags (like </p>, </b>) with a space  
+
+	// Replace closing tags (like </p>, </b>) with a space
 	closingRe := regexp.MustCompile(`</[^>]*>`)
 	content = closingRe.ReplaceAllString(content, " ")
-	
+
 	return content
 }
 

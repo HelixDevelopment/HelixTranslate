@@ -33,8 +33,8 @@ type Chapter struct {
 
 // Section represents a chapter section
 type Section struct {
-	Title      string
-	Content    string
+	Title       string
+	Content     string
 	Subsections []Section
 }
 

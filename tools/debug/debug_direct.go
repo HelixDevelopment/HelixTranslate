@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"digital.vasic.translator/pkg/format"
 	"digital.vasic.translator/pkg/markdown"
+	"fmt"
 	"os"
 )
 
@@ -17,12 +17,12 @@ title: Test Book
 
 This is some content.
 `
-	
+
 	// Write to temp file
 	tmpMd := "/tmp/test_direct.md"
 	os.WriteFile(tmpMd, []byte(mdContent), 0644)
 	defer os.Remove(tmpMd)
-	
+
 	// Convert to EPUB using MarkdownToEPUBConverter
 	epubPath := "/tmp/test_direct.epub"
 	converter := markdown.NewMarkdownToEPUBConverter()
@@ -32,7 +32,7 @@ This is some content.
 		return
 	}
 	defer os.Remove(epubPath)
-	
+
 	// Check format
 	detector := format.NewDetector()
 	detectedFormat, err := detector.DetectFile(epubPath)
@@ -40,6 +40,6 @@ This is some content.
 		fmt.Printf("Detection error: %v\n", err)
 		return
 	}
-	
+
 	fmt.Printf("Detected format: %s\n", detectedFormat)
 }

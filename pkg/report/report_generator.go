@@ -24,12 +24,12 @@ type ReportGenerator struct {
 
 // Issue represents a problem discovered during translation
 type Issue struct {
-	Timestamp time.Time
-	Category  string // "setup", "connection", "translation", "conversion", "file_operation"
-	Severity  string // "critical", "error", "warning"
-	Message   string
-	Component string // which component had the issue
-	Resolved  bool
+	Timestamp  time.Time
+	Category   string // "setup", "connection", "translation", "conversion", "file_operation"
+	Severity   string // "critical", "error", "warning"
+	Message    string
+	Component  string // which component had the issue
+	Resolved   bool
 	Resolution string
 }
 
@@ -93,7 +93,7 @@ func (r *ReportGenerator) AddIssue(category, severity, message, component string
 		Resolved:  false,
 	}
 	r.issues = append(r.issues, issue)
-	
+
 	r.logger.Error("Issue recorded", map[string]interface{}{
 		"category":  category,
 		"severity":  severity,
@@ -107,15 +107,15 @@ func (r *ReportGenerator) ResolveIssue(index int, resolution string) error {
 	if index < 0 || index >= len(r.issues) {
 		return fmt.Errorf("invalid issue index: %d", index)
 	}
-	
+
 	r.issues[index].Resolved = true
 	r.issues[index].Resolution = resolution
-	
+
 	r.logger.Info("Issue resolved", map[string]interface{}{
 		"issue_index": index,
 		"resolution":  resolution,
 	})
-	
+
 	return nil
 }
 
@@ -129,7 +129,7 @@ func (r *ReportGenerator) AddWarning(category, message, component string, detail
 		Details:   details,
 	}
 	r.warnings = append(r.warnings, warning)
-	
+
 	r.logger.Warn("Warning recorded", map[string]interface{}{
 		"category":  category,
 		"message":   message,
@@ -181,7 +181,7 @@ func (r *ReportGenerator) CopyLogFiles(ctx context.Context) error {
 		}
 
 		if !copied {
-			r.AddWarning("logging", fmt.Sprintf("Log file not found: %s", logFile), "report_generator", 
+			r.AddWarning("logging", fmt.Sprintf("Log file not found: %s", logFile), "report_generator",
 				map[string]interface{}{"file": logFile})
 		}
 	}
@@ -202,7 +202,7 @@ func (r *ReportGenerator) copyLogFile(sourcePath string) error {
 	}
 
 	r.logger.Info("Log file copied", map[string]interface{}{
-		"source": sourcePath,
+		"source":      sourcePath,
 		"destination": destinationPath,
 	})
 
@@ -210,13 +210,15 @@ func (r *ReportGenerator) copyLogFile(sourcePath string) error {
 }
 
 // GenerateSessionReport generates a markdown report for the translation session
+//
+//nolint:funlen
 func (r *ReportGenerator) GenerateSessionReport(session TranslationSession) error {
 	var report bytes.Buffer
 
 	// Header
 	report.WriteString("# SSH Translation Session Report\n\n")
 	report.WriteString(fmt.Sprintf("**Generated:** %s\n\n", time.Now().Format("2006-01-02 15:04:05")))
-	
+
 	// Session Overview
 	report.WriteString("## Session Overview\n\n")
 	report.WriteString(fmt.Sprintf("- **Start Time:** %s\n", session.StartTime.Format("2006-01-02 15:04:05")))
@@ -255,11 +257,11 @@ func (r *ReportGenerator) GenerateSessionReport(session TranslationSession) erro
 	// Issues Section
 	if len(r.issues) > 0 {
 		report.WriteString("## Issues Encountered\n\n")
-		
+
 		criticalIssues := 0
 		errorIssues := 0
 		warningIssues := 0
-		
+
 		for _, issue := range r.issues {
 			switch issue.Severity {
 			case "critical":
@@ -270,28 +272,28 @@ func (r *ReportGenerator) GenerateSessionReport(session TranslationSession) erro
 				warningIssues++
 			}
 		}
-		
+
 		report.WriteString(fmt.Sprintf("- **Critical Issues:** %d\n", criticalIssues))
 		report.WriteString(fmt.Sprintf("- **Error Issues:** %d\n", errorIssues))
 		report.WriteString(fmt.Sprintf("- **Warning Issues:** %d\n\n", warningIssues))
-		
+
 		for i, issue := range r.issues {
 			status := "❌ Open"
 			if issue.Resolved {
 				status = "✅ Resolved"
 			}
-			
+
 			report.WriteString(fmt.Sprintf("### Issue #%d - %s\n\n", i+1, status))
 			report.WriteString(fmt.Sprintf("- **Category:** %s\n", issue.Category))
 			report.WriteString(fmt.Sprintf("- **Severity:** %s\n", issue.Severity))
 			report.WriteString(fmt.Sprintf("- **Component:** %s\n", issue.Component))
 			report.WriteString(fmt.Sprintf("- **Timestamp:** %s\n", issue.Timestamp.Format("2006-01-02 15:04:05")))
 			report.WriteString(fmt.Sprintf("- **Message:** %s\n", issue.Message))
-			
+
 			if issue.Resolved {
 				report.WriteString(fmt.Sprintf("- **Resolution:** %s\n", issue.Resolution))
 			}
-			
+
 			report.WriteString("\n")
 		}
 	}
@@ -299,21 +301,21 @@ func (r *ReportGenerator) GenerateSessionReport(session TranslationSession) erro
 	// Warnings Section
 	if len(r.warnings) > 0 {
 		report.WriteString("## Warnings\n\n")
-		
+
 		for i, warning := range r.warnings {
 			report.WriteString(fmt.Sprintf("### Warning #%d\n\n", i+1))
 			report.WriteString(fmt.Sprintf("- **Category:** %s\n", warning.Category))
 			report.WriteString(fmt.Sprintf("- **Component:** %s\n", warning.Component))
 			report.WriteString(fmt.Sprintf("- **Timestamp:** %s\n", warning.Timestamp.Format("2006-01-02 15:04:05")))
 			report.WriteString(fmt.Sprintf("- **Message:** %s\n", warning.Message))
-			
+
 			if len(warning.Details) > 0 {
 				report.WriteString("- **Details:**\n")
 				for key, value := range warning.Details {
 					report.WriteString(fmt.Sprintf("  - %s: %v\n", key, value))
 				}
 			}
-			
+
 			report.WriteString("\n")
 		}
 	}
@@ -321,54 +323,54 @@ func (r *ReportGenerator) GenerateSessionReport(session TranslationSession) erro
 	// Log Summary Section
 	if len(r.logs) > 0 {
 		report.WriteString("## Log Summary\n\n")
-		
+
 		logLevels := make(map[string]int)
 		components := make(map[string]int)
-		
+
 		for _, log := range r.logs {
 			logLevels[log.Level]++
 			components[log.Component]++
 		}
-		
+
 		report.WriteString("### Log Levels\n\n")
 		for level, count := range logLevels {
 			report.WriteString(fmt.Sprintf("- **%s:** %d entries\n", strings.ToUpper(level), count))
 		}
-		
+
 		report.WriteString("\n### Components\n\n")
 		for component, count := range components {
 			report.WriteString(fmt.Sprintf("- **%s:** %d entries\n", component, count))
 		}
-		
+
 		report.WriteString(fmt.Sprintf("\n**Total Log Entries:** %d\n\n", len(r.logs)))
 	}
 
 	// Recent Log Entries (last 20)
 	if len(r.logs) > 0 {
 		report.WriteString("## Recent Log Entries (Last 20)\n\n")
-		
+
 		start := len(r.logs) - 20
 		if start < 0 {
 			start = 0
 		}
-		
+
 		for i := start; i < len(r.logs); i++ {
 			log := r.logs[i]
-			report.WriteString(fmt.Sprintf("**[%s]** `%s` - %s\n", 
-				log.Timestamp.Format("15:04:05"), 
-				strings.ToUpper(log.Level), 
+			report.WriteString(fmt.Sprintf("**[%s]** `%s` - %s\n",
+				log.Timestamp.Format("15:04:05"),
+				strings.ToUpper(log.Level),
 				log.Message))
-			
+
 			if log.Component != "" {
 				report.WriteString(fmt.Sprintf("Component: `%s`\n", log.Component))
 			}
-			
+
 			if len(log.Details) > 0 {
 				for key, value := range log.Details {
 					report.WriteString(fmt.Sprintf("- %s: %v\n", key, value))
 				}
 			}
-			
+
 			report.WriteString("\n")
 		}
 	}
@@ -381,7 +383,7 @@ func (r *ReportGenerator) GenerateSessionReport(session TranslationSession) erro
 
 	// Footer
 	report.WriteString("---\n")
-	report.WriteString(fmt.Sprintf("*Report generated by SSH Translation System at %s*\n", 
+	report.WriteString(fmt.Sprintf("*Report generated by SSH Translation System at %s*\n",
 		time.Now().Format("2006-01-02 15:04:05")))
 
 	// Write report to file
@@ -391,10 +393,10 @@ func (r *ReportGenerator) GenerateSessionReport(session TranslationSession) erro
 	}
 
 	r.logger.Info("Translation report generated", map[string]interface{}{
-		"report_path": reportPath,
-		"issues_count": len(r.issues),
+		"report_path":    reportPath,
+		"issues_count":   len(r.issues),
 		"warnings_count": len(r.warnings),
-		"logs_count": len(r.logs),
+		"logs_count":     len(r.logs),
 	})
 
 	return nil
@@ -411,7 +413,7 @@ func (r *ReportGenerator) GenerateLogArchive() error {
 func (r *ReportGenerator) GetStats() map[string]interface{} {
 	stats := map[string]interface{}{
 		"session_start":  r.startTime,
-		"issues_count":  float64(len(r.issues)),
+		"issues_count":   float64(len(r.issues)),
 		"warnings_count": float64(len(r.warnings)),
 		"logs_count":     float64(len(r.logs)),
 	}
@@ -436,7 +438,7 @@ func (r *ReportGenerator) GetStats() map[string]interface{} {
 // ExportLogsToFile exports all collected logs to a structured file
 func (r *ReportGenerator) ExportLogsToFile() error {
 	logPath := filepath.Join(r.destinationDir, "session_logs.json")
-	
+
 	// Create structured log data
 	logData := map[string]interface{}{
 		"session_start": r.startTime,

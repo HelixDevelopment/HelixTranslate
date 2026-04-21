@@ -17,24 +17,24 @@ type DOCXParser struct {
 }
 
 type DOCXConfig struct {
-	ExtractImages     bool     `yaml:"extract_images"`
-	ImageFormat       string   `yaml:"image_format"`
-	ExtractTables     bool     `yaml:"extract_tables"`
-	ExtractFootnotes  bool     `yaml:"extract_footnotes"`
-	ExtractHeaders    bool     `yaml:"extract_headers"`
-	ExtractFooters    bool     `yaml:"extract_footers"`
-	ExtractComments   bool     `yaml:"extract_comments"`
+	ExtractImages      bool     `yaml:"extract_images"`
+	ImageFormat        string   `yaml:"image_format"`
+	ExtractTables      bool     `yaml:"extract_tables"`
+	ExtractFootnotes   bool     `yaml:"extract_footnotes"`
+	ExtractHeaders     bool     `yaml:"extract_headers"`
+	ExtractFooters     bool     `yaml:"extract_footers"`
+	ExtractComments    bool     `yaml:"extract_comments"`
 	PreserveFormatting bool     `yaml:"preserve_formatting"`
-	ExtractMetadata   bool     `yaml:"extract_metadata"`
-	MinTextLength     int      `yaml:"min_text_length"`
-	IgnoreStyles      []string `yaml:"ignore_styles"`
+	ExtractMetadata    bool     `yaml:"extract_metadata"`
+	MinTextLength      int      `yaml:"min_text_length"`
+	IgnoreStyles       []string `yaml:"ignore_styles"`
 }
 
 func NewDOCXParser(config *DOCXConfig) *DOCXParser {
 	if config == nil {
 		config = &DOCXConfig{
 			ExtractImages:      true,
-			ImageFormat:       "png",
+			ImageFormat:        "png",
 			ExtractTables:      true,
 			ExtractFootnotes:   true,
 			ExtractHeaders:     true,
@@ -55,7 +55,7 @@ func (p *DOCXParser) Parse(filename string) (*Book, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
-	
+
 	return p.ParseWithContext(context.Background(), data)
 }
 
@@ -80,24 +80,24 @@ func (p *DOCXParser) ParseWithContext(ctx context.Context, data []byte) (*Book, 
 
 	// Extract content as plain text
 	var allText strings.Builder
-	
+
 	// Simple paragraph extraction
 	paragraphs := doc.Paragraphs()
 	for i := 0; i < len(paragraphs); i++ {
 		para := paragraphs[i]
-		
+
 		// Simple text extraction from paragraph
 		runs := para.Runs()
 		for j := 0; j < len(runs); j++ {
 			run := runs[j]
 			allText.WriteString(run.Text())
 		}
-		
+
 		// Add paragraph separator
 		if i < len(paragraphs)-1 {
 			allText.WriteString("\n\n")
 		}
-		
+
 		// Check for context cancellation
 		if i%10 == 0 {
 			select {
@@ -118,7 +118,7 @@ func (p *DOCXParser) ParseWithContext(ctx context.Context, data []byte) (*Book, 
 			},
 		},
 	}
-	
+
 	book.Chapters = append(book.Chapters, mainChapter)
 	book.Language = book.Metadata.Language
 
@@ -149,7 +149,7 @@ func (p *DOCXParser) GetMetadata(data []byte) (*Metadata, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Return a copy to avoid mutation
 	result := *metadata
 	return &result, nil
@@ -162,21 +162,21 @@ func (p *DOCXParser) GetFormat() format.Format {
 func (p *DOCXParser) extractMetadata(doc *document.Document, book *Book) error {
 	// Extract core properties - simplified implementation
 	props := doc.CoreProperties
-	
+
 	// Try to get title
 	if props.Title() != "" {
 		book.Metadata.Title = props.Title()
 	}
-	
+
 	// Note: The API is different than expected, skip author extraction for now
-	
+
 	// Try to get description
 	if props.Description() != "" {
 		book.Metadata.Description = props.Description()
 	}
-	
+
 	// Note: Skip language extraction due to API differences
-	
+
 	// Try to get creation date
 	if !props.Created().IsZero() {
 		book.Metadata.Date = props.Created().Format(time.RFC3339)

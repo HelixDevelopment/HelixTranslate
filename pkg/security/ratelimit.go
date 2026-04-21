@@ -36,10 +36,10 @@ func NewRateLimiter(rps, burst int) *RateLimiter {
 func (rl *RateLimiter) Allow(key string) bool {
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
-	
+
 	// Update last used time
 	rl.lastUsed[key] = time.Now()
-	
+
 	limiter := rl.getLimiterUnsafe(key)
 	return limiter.Allow()
 }
@@ -47,13 +47,13 @@ func (rl *RateLimiter) Allow(key string) bool {
 // Wait waits until a request is allowed
 func (rl *RateLimiter) Wait(key string) {
 	rl.mu.Lock()
-	
+
 	// Update last used time
 	rl.lastUsed[key] = time.Now()
-	
+
 	limiter := rl.getLimiterUnsafe(key)
 	rl.mu.Unlock()
-	
+
 	limiter.Wait(context.Background())
 }
 
@@ -73,10 +73,10 @@ func (rl *RateLimiter) getLimiterUnsafe(key string) *rate.Limiter {
 func (rl *RateLimiter) getLimiter(key string) *rate.Limiter {
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
-	
+
 	// Update last used time
 	rl.lastUsed[key] = time.Now()
-	
+
 	return rl.getLimiterUnsafe(key)
 }
 
@@ -88,7 +88,7 @@ func (rl *RateLimiter) cleanup() {
 	for range ticker.C {
 		rl.mu.Lock()
 		now := time.Now()
-		
+
 		// Remove limiters not used in the last hour
 		for key, lastUsed := range rl.lastUsed {
 			if now.Sub(lastUsed) > time.Hour {
@@ -96,7 +96,7 @@ func (rl *RateLimiter) cleanup() {
 				delete(rl.lastUsed, key)
 			}
 		}
-		
+
 		rl.mu.Unlock()
 	}
 }

@@ -110,13 +110,13 @@ func TestErrorCategories(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			category := GetErrorCategory(tc.error)
 			assert.Equal(t, tc.category, category)
-			
+
 			isClientSide := IsClientSideError(tc.error)
 			assert.Equal(t, tc.isClientSide, isClientSide)
-			
+
 			isServerSide := IsServerSideError(tc.error)
 			assert.Equal(t, tc.isServerSide, isServerSide)
-			
+
 			isRetryable := IsRetryableError(tc.error)
 			assert.Equal(t, tc.isRetryable, isRetryable)
 		})
@@ -153,7 +153,7 @@ func TestErrorCreation(t *testing.T) {
 // TestErrorWrapping tests error wrapping functionality
 func TestErrorWrapping(t *testing.T) {
 	originalErr := errors.New("original error")
-	
+
 	t.Run("Wrap error with context", func(t *testing.T) {
 		wrappedErr := WrapError(originalErr, "Failed to process user")
 		assert.Contains(t, wrappedErr.Error(), "Failed to process user")
@@ -169,7 +169,7 @@ func TestErrorWrapping(t *testing.T) {
 	t.Run("Wrap error multiple times", func(t *testing.T) {
 		wrappedErr1 := WrapError(originalErr, "Level 1")
 		wrappedErr2 := WrapError(wrappedErr1, "Level 2")
-		
+
 		assert.Contains(t, wrappedErr2.Error(), "Level 2")
 		assert.Contains(t, wrappedErr2.Error(), "Level 1")
 		assert.Contains(t, wrappedErr2.Error(), "original error")
@@ -182,13 +182,13 @@ func TestErrorRecovery(t *testing.T) {
 	t.Run("Recovery from retryable error", func(t *testing.T) {
 		attempt := 0
 		maxAttempts := 3
-		
+
 		var result string
 		var err error
-		
+
 		for attempt < maxAttempts {
 			attempt++
-			
+
 			// Simulate failure on first two attempts
 			if attempt < 3 {
 				err = errors.New("temporary network error")
@@ -198,13 +198,13 @@ func TestErrorRecovery(t *testing.T) {
 					break // Don't retry
 				}
 			}
-			
+
 			// Simulate success on third attempt
 			result = "success"
 			err = nil
 			break
 		}
-		
+
 		assert.Equal(t, 3, attempt)
 		assert.Equal(t, "success", result)
 		assert.NoError(t, err)
@@ -213,13 +213,13 @@ func TestErrorRecovery(t *testing.T) {
 	t.Run("No recovery from non-retryable error", func(t *testing.T) {
 		attempt := 0
 		maxAttempts := 3
-		
+
 		var result string
 		var err error
-		
+
 		for attempt < maxAttempts {
 			attempt++
-			
+
 			err = ErrInvalidCredentials
 			if IsRetryableError(err) {
 				continue // Retry
@@ -227,7 +227,7 @@ func TestErrorRecovery(t *testing.T) {
 				break // Don't retry
 			}
 		}
-		
+
 		assert.Equal(t, 1, attempt) // Only one attempt
 		assert.Empty(t, result)
 		assert.Error(t, err)
@@ -279,7 +279,7 @@ func TestErrorValidation(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			isValid := IsValidError(tc.error)
 			severity := GetErrorSeverity(tc.error)
-			
+
 			assert.Equal(t, tc.isValid, isValid)
 			assert.Equal(t, tc.severity, severity)
 		})
@@ -300,12 +300,12 @@ func TestErrorFormatting(t *testing.T) {
 			// Test basic string formatting
 			str := err.Error()
 			assert.NotEmpty(t, str)
-			
+
 			// Test JSON formatting
 			jsonStr := FormatErrorForJSON(err)
 			assert.NotEmpty(t, jsonStr)
 			assert.Contains(t, jsonStr, err.Error())
-			
+
 			// Test logging formatting
 			logStr := FormatErrorForLogging(err)
 			assert.NotEmpty(t, logStr)
@@ -350,7 +350,7 @@ func TestErrorComparison(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			isSame := errors.Is(tc.error1, tc.error2)
 			isSameType := IsSameErrorType(tc.error1, tc.error2)
-			
+
 			assert.Equal(t, tc.isSame, isSame)
 			assert.Equal(t, tc.isSameType, isSameType)
 		})
@@ -360,7 +360,7 @@ func TestErrorComparison(t *testing.T) {
 // BenchmarkErrorCreation benchmarks error creation
 func BenchmarkErrorCreation(b *testing.B) {
 	b.ResetTimer()
-	
+
 	for i := 0; i < b.N; i++ {
 		err := NewUserNotFoundError(fmt.Sprintf("user-%d", i))
 		_ = err // Use error to avoid optimization
@@ -370,14 +370,14 @@ func BenchmarkErrorCreation(b *testing.B) {
 // BenchmarkErrorValidation benchmarks error validation
 func BenchmarkErrorValidation(b *testing.B) {
 	err := ErrUserNotFound
-	
+
 	b.ResetTimer()
-	
+
 	for i := 0; i < b.N; i++ {
 		isClientSide := IsClientSideError(err)
 		isServerSide := IsServerSideError(err)
 		isRetryable := IsRetryableError(err)
-		
+
 		// Use values to avoid optimization
 		_ = isClientSide || isServerSide || isRetryable
 	}
@@ -418,14 +418,14 @@ func GetErrorCategory(err error) string {
 	if err == nil {
 		return "none"
 	}
-	
-	if errors.Is(err, ErrUserNotFound) || 
-	   errors.Is(err, ErrInvalidCredentials) || 
-	   errors.Is(err, ErrUserAlreadyExists) || 
-	   errors.Is(err, ErrUserInactive) {
+
+	if errors.Is(err, ErrUserNotFound) ||
+		errors.Is(err, ErrInvalidCredentials) ||
+		errors.Is(err, ErrUserAlreadyExists) ||
+		errors.Is(err, ErrUserInactive) {
 		return "client"
 	}
-	
+
 	return "server"
 }
 
@@ -444,7 +444,7 @@ func IsRetryableError(err error) bool {
 	if err == nil {
 		return false
 	}
-	
+
 	// Only server errors are typically retryable
 	return IsServerSideError(err)
 }
@@ -459,11 +459,11 @@ func GetErrorSeverity(err error) string {
 	if err == nil {
 		return "none"
 	}
-	
+
 	if errors.Is(err, ErrInvalidCredentials) || errors.Is(err, ErrUserInactive) {
 		return "error"
 	}
-	
+
 	return "warning"
 }
 
@@ -491,7 +491,7 @@ func IsSameErrorType(err1, err2 error) bool {
 	if err1 == nil || err2 == nil {
 		return false
 	}
-	
+
 	// Simple type comparison by string matching
 	return err1.Error()[:10] == err2.Error()[:10]
 }
@@ -510,7 +510,7 @@ func CreateUserSession(user User, duration time.Duration) UserSession {
 	return UserSession{
 		Token:     GenerateSessionToken(),
 		UserID:    user.ID,
-		UserEmail:  user.Email,
+		UserEmail: user.Email,
 		Username:  user.Username,
 		ExpiresAt: time.Now().Add(duration),
 	}
@@ -531,7 +531,7 @@ func UserHasRole(user User, role string) bool {
 	if !user.IsActive {
 		return false
 	}
-	
+
 	for _, userRole := range user.Roles {
 		if userRole == role {
 			return true

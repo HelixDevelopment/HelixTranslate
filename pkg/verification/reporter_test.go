@@ -10,12 +10,12 @@ import (
 
 func TestNewPolishingReport(t *testing.T) {
 	config := PolishingConfig{
-		Providers: []string{"openai", "zhipu", "deepseek"},
-		MinConsensus: 2,
-		VerifySpirit: true,
-		VerifyLanguage: true,
-		VerifyContext: true,
-		VerifyVocabulary: true,
+		Providers:          []string{"openai", "zhipu", "deepseek"},
+		MinConsensus:       2,
+		VerifySpirit:       true,
+		VerifyLanguage:     true,
+		VerifyContext:      true,
+		VerifyVocabulary:   true,
 		TranslationConfigs: map[string]translator.TranslationConfig{},
 	}
 
@@ -72,7 +72,7 @@ func TestNewPolishingReport(t *testing.T) {
 
 func TestPolishingReport_AddSectionResult(t *testing.T) {
 	config := PolishingConfig{
-		Providers: []string{"openai", "zhipu"},
+		Providers:    []string{"openai", "zhipu"},
 		MinConsensus: 2,
 	}
 
@@ -172,7 +172,7 @@ func TestPolishingReport_AddSectionResult(t *testing.T) {
 
 func TestPolishingReport_Finalize(t *testing.T) {
 	config := PolishingConfig{
-		Providers: []string{"openai", "zhipu", "deepseek"},
+		Providers:    []string{"openai", "zhipu", "deepseek"},
 		MinConsensus: 2,
 	}
 
@@ -263,7 +263,7 @@ func TestPolishingReport_Finalize(t *testing.T) {
 	// Verify consensus calculations
 	// 1 out of 3 sections meet consensus >= 2 (only the first section has consensus 2)
 	expectedConsensusRate := 1.0 / 3.0 * 100.0
-	
+
 	if diff := report.ConsensusRate - expectedConsensusRate; diff < -1.0 || diff > 1.0 {
 		t.Errorf("Expected ConsensusRate=%.1f, got %.1f", expectedConsensusRate, report.ConsensusRate)
 	}
@@ -271,11 +271,11 @@ func TestPolishingReport_Finalize(t *testing.T) {
 
 func TestPolishingReport_GenerateMarkdownReport(t *testing.T) {
 	config := PolishingConfig{
-		Providers: []string{"openai", "zhipu", "deepseek"},
-		MinConsensus: 2,
-		VerifySpirit: true,
-		VerifyLanguage: true,
-		VerifyContext: false,
+		Providers:        []string{"openai", "zhipu", "deepseek"},
+		MinConsensus:     2,
+		VerifySpirit:     true,
+		VerifyLanguage:   true,
+		VerifyContext:    false,
 		VerifyVocabulary: true,
 	}
 
@@ -376,7 +376,7 @@ func TestPolishingReport_GenerateMarkdownReport(t *testing.T) {
 
 func TestPolishingReport_EmptyResults(t *testing.T) {
 	config := PolishingConfig{
-		Providers: []string{"openai"},
+		Providers:    []string{"openai"},
 		MinConsensus: 1,
 	}
 
@@ -411,7 +411,7 @@ func TestPolishingReport_EmptyResults(t *testing.T) {
 
 func TestPolishingReport_IssueSorting(t *testing.T) {
 	config := PolishingConfig{
-		Providers: []string{"openai"},
+		Providers:    []string{"openai"},
 		MinConsensus: 1,
 	}
 
@@ -427,8 +427,8 @@ func TestPolishingReport_IssueSorting(t *testing.T) {
 			{Type: "vocabulary", Severity: "minor"},
 		},
 		Changes: []Change{
-			{Confidence: 0.9}, // High confidence
-			{Confidence: 0.7}, // Medium confidence
+			{Confidence: 0.9},  // High confidence
+			{Confidence: 0.7},  // Medium confidence
 			{Confidence: 0.85}, // High confidence
 		},
 	}
@@ -461,7 +461,7 @@ func TestPolishingReport_IssueSorting(t *testing.T) {
 
 func TestPolishingReport_Limits(t *testing.T) {
 	config := PolishingConfig{
-		Providers: []string{"openai"},
+		Providers:    []string{"openai"},
 		MinConsensus: 1,
 	}
 
@@ -470,8 +470,8 @@ func TestPolishingReport_Limits(t *testing.T) {
 	// Add result with many issues and changes
 	result := &PolishingResult{
 		SectionID: "section-1",
-		Issues: make([]Issue, 60), // More than limit of 50
-		Changes: make([]Change, 150), // More than limit of 100
+		Issues:    make([]Issue, 60),   // More than limit of 50
+		Changes:   make([]Change, 150), // More than limit of 100
 	}
 
 	// Make all issues critical/major so they go to top issues
@@ -504,11 +504,11 @@ func TestPolishingReport_Limits(t *testing.T) {
 // Benchmark tests
 func BenchmarkNewPolishingReport(b *testing.B) {
 	config := PolishingConfig{
-		Providers: []string{"openai", "zhipu", "deepseek"},
-		MinConsensus: 2,
-		VerifySpirit: true,
-		VerifyLanguage: true,
-		VerifyContext: true,
+		Providers:        []string{"openai", "zhipu", "deepseek"},
+		MinConsensus:     2,
+		VerifySpirit:     true,
+		VerifyLanguage:   true,
+		VerifyContext:    true,
 		VerifyVocabulary: true,
 	}
 
@@ -520,7 +520,7 @@ func BenchmarkNewPolishingReport(b *testing.B) {
 
 func BenchmarkPolishingReport_AddSectionResult(b *testing.B) {
 	config := PolishingConfig{
-		Providers: []string{"openai"},
+		Providers:    []string{"openai"},
 		MinConsensus: 1,
 	}
 
@@ -551,13 +551,13 @@ func BenchmarkPolishingReport_AddSectionResult(b *testing.B) {
 
 func BenchmarkPolishingReport_Finalize(b *testing.B) {
 	config := PolishingConfig{
-		Providers: []string{"openai", "zhipu"},
+		Providers:    []string{"openai", "zhipu"},
 		MinConsensus: 2,
 	}
 
 	// Create report with many results
 	report := NewPolishingReport(config)
-	
+
 	for i := 0; i < 100; i++ {
 		result := &PolishingResult{
 			SectionID:       fmt.Sprintf("section-%d", i),
@@ -588,11 +588,11 @@ func BenchmarkPolishingReport_Finalize(b *testing.B) {
 
 func BenchmarkPolishingReport_GenerateMarkdownReport(b *testing.B) {
 	config := PolishingConfig{
-		Providers: []string{"openai", "zhipu", "deepseek"},
-		MinConsensus: 2,
-		VerifySpirit: true,
-		VerifyLanguage: true,
-		VerifyContext: true,
+		Providers:        []string{"openai", "zhipu", "deepseek"},
+		MinConsensus:     2,
+		VerifySpirit:     true,
+		VerifyLanguage:   true,
+		VerifyContext:    true,
 		VerifyVocabulary: true,
 	}
 

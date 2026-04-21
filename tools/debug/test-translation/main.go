@@ -33,7 +33,7 @@ func main() {
 		ConnectionTimeout: 30 * time.Second,
 		CommandTimeout:    60 * time.Second,
 	}
-	
+
 	log := logger.NewNoOpLogger()
 	worker, err := sshworker.NewSSHWorker(config, log)
 	if err != nil {

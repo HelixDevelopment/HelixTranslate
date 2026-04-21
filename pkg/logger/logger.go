@@ -120,7 +120,7 @@ func (l *StandardLogger) formatMessage(level, message string, fields map[string]
 // formatText formats the message in plain text format
 func (l *StandardLogger) formatText(level, message string, fields map[string]interface{}, timestamp string) string {
 	var sb strings.Builder
-	
+
 	// Basic format: [timestamp] LEVEL: message
 	sb.WriteString(fmt.Sprintf("[%s] %s: %s", timestamp, strings.ToUpper(level), message))
 

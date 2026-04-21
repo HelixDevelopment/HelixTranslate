@@ -38,42 +38,42 @@ func TestVerifier_VerifyTranslation(t *testing.T) {
 		expectIssues []string
 	}{
 		{
-			name:       "good translation",
-			original:   "Hello world",
-			translated: "Bonjour le monde",
-			sourceLang: "en",
-			targetLang: "fr",
+			name:        "good translation",
+			original:    "Hello world",
+			translated:  "Bonjour le monde",
+			sourceLang:  "en",
+			targetLang:  "fr",
 			expectError: false,
 			expectScore: 0.9,
 		},
 		{
-			name:       "untranslated text",
-			original:   "Hello world",
-			translated: "Hello world",
-			sourceLang: "en",
-			targetLang: "fr",
-			expectError: false,
-			expectScore: 0.0,
+			name:         "untranslated text",
+			original:     "Hello world",
+			translated:   "Hello world",
+			sourceLang:   "en",
+			targetLang:   "fr",
+			expectError:  false,
+			expectScore:  0.0,
 			expectIssues: []string{"no_translation"},
 		},
 		{
-			name:       "empty translation",
-			original:   "Hello world",
-			translated: "",
-			sourceLang: "en",
-			targetLang: "fr",
-			expectError: false,
-			expectScore: 0.0,
+			name:         "empty translation",
+			original:     "Hello world",
+			translated:   "",
+			sourceLang:   "en",
+			targetLang:   "fr",
+			expectError:  false,
+			expectScore:  0.0,
 			expectIssues: []string{"empty_translation"},
 		},
 		{
-			name:       "partial translation",
-			original:   "The quick brown fox jumps over the lazy dog",
-			translated: "Le rapide renard marron",
-			sourceLang: "en",
-			targetLang: "fr",
-			expectError: false,
-			expectScore: 0.4,
+			name:         "partial translation",
+			original:     "The quick brown fox jumps over the lazy dog",
+			translated:   "Le rapide renard marron",
+			sourceLang:   "en",
+			targetLang:   "fr",
+			expectError:  false,
+			expectScore:  0.4,
 			expectIssues: []string{"incomplete_translation"},
 		},
 	}
@@ -129,19 +129,19 @@ func TestVerifier_BatchVerification(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-		translations := []VerificationRequest{
-			{
-				Original:   "Hello",
-				Translated: "Bonjour",
-				SourceLang: "en",
-				TargetLang: "fr",
-			},
-			{
-				Original:   "Goodbye",
-				Translated: "Au revoir",
-				SourceLang: "en",
-				TargetLang: "fr",
-			},
+	translations := []VerificationRequest{
+		{
+			Original:   "Hello",
+			Translated: "Bonjour",
+			SourceLang: "en",
+			TargetLang: "fr",
+		},
+		{
+			Original:   "Goodbye",
+			Translated: "Au revoir",
+			SourceLang: "en",
+			TargetLang: "fr",
+		},
 		{
 			Original:   "Thank you",
 			Translated: "Merci",
@@ -176,18 +176,18 @@ func TestVerifier_QualityMetrics(t *testing.T) {
 	)
 
 	tests := []struct {
-		name      string
-		original  string
+		name       string
+		original   string
 		translated string
-		expected  QualityMetrics
+		expected   QualityMetrics
 	}{
 		{
 			name:       "length ratio good",
 			original:   "Hello world",
 			translated: "Bonjour le monde",
 			expected: QualityMetrics{
-				LengthRatio:     1.4, // 15/11 = 1.36, rounded to 1.4 within tolerance
-				WordCountRatio:  1.5, // 3/2 = 1.5
+				LengthRatio:         1.4, // 15/11 = 1.36, rounded to 1.4 within tolerance
+				WordCountRatio:      1.5, // 3/2 = 1.5
 				VocabularyDiversity: 1.0, // All unique words
 			},
 		},
@@ -196,8 +196,8 @@ func TestVerifier_QualityMetrics(t *testing.T) {
 			original:   "Hello",
 			translated: "",
 			expected: QualityMetrics{
-				LengthRatio:     0.0, // Empty translation
-				WordCountRatio:  0.0, // No words
+				LengthRatio:         0.0, // Empty translation
+				WordCountRatio:      0.0, // No words
 				VocabularyDiversity: 0.0, // No diversity
 			},
 		},
@@ -206,18 +206,18 @@ func TestVerifier_QualityMetrics(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			metrics := verifier.calculateQualityMetrics(tt.original, tt.translated)
-			
+
 			// Allow some tolerance for floating point comparisons
 			tolerance := 0.1
-			
+
 			if abs(metrics.LengthRatio-tt.expected.LengthRatio) > tolerance {
 				t.Errorf("LengthRatio expected ~%f, got %f", tt.expected.LengthRatio, metrics.LengthRatio)
 			}
-			
+
 			if abs(metrics.WordCountRatio-tt.expected.WordCountRatio) > tolerance {
 				t.Errorf("WordCountRatio expected ~%f, got %f", tt.expected.WordCountRatio, metrics.WordCountRatio)
 			}
-			
+
 			if abs(metrics.VocabularyDiversity-tt.expected.VocabularyDiversity) > tolerance {
 				t.Errorf("VocabularyDiversity expected ~%f, got %f", tt.expected.VocabularyDiversity, metrics.VocabularyDiversity)
 			}
@@ -235,39 +235,39 @@ func TestVerifier_IssueDetection(t *testing.T) {
 	)
 
 	tests := []struct {
-		name       string
-		original   string
-		translated string
+		name           string
+		original       string
+		translated     string
 		expectedIssues []string
 	}{
 		{
-			name:       "no issues",
-			original:   "Hello world",
-			translated: "Bonjour le monde",
+			name:           "no issues",
+			original:       "Hello world",
+			translated:     "Bonjour le monde",
 			expectedIssues: []string{},
 		},
 		{
-			name:       " untranslated",
-			original:   "Hello world",
-			translated: "Hello world",
+			name:           " untranslated",
+			original:       "Hello world",
+			translated:     "Hello world",
 			expectedIssues: []string{"no_translation"},
 		},
 		{
-			name:       "empty translation",
-			original:   "Hello world",
-			translated: "",
+			name:           "empty translation",
+			original:       "Hello world",
+			translated:     "",
 			expectedIssues: []string{"empty_translation"},
 		},
 		{
-			name:       "repeated text",
-			original:   "Hello",
-			translated: "Hello Hello Hello Hello Hello",
+			name:           "repeated text",
+			original:       "Hello",
+			translated:     "Hello Hello Hello Hello Hello",
 			expectedIssues: []string{"repetition"},
 		},
 		{
-			name:       "length mismatch",
-			original:   "This is a very long sentence with many words",
-			translated: "Court",
+			name:           "length mismatch",
+			original:       "This is a very long sentence with many words",
+			translated:     "Court",
 			expectedIssues: []string{"length_mismatch"},
 		},
 	}
@@ -275,11 +275,11 @@ func TestVerifier_IssueDetection(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			issues := verifier.detectIssues(tt.original, tt.translated)
-			
+
 			if len(issues) != len(tt.expectedIssues) {
 				t.Errorf("Expected %d issues, got %d: %v", len(tt.expectedIssues), len(issues), issues)
 			}
-			
+
 			for _, expectedIssue := range tt.expectedIssues {
 				found := false
 				for _, issue := range issues {
@@ -309,7 +309,7 @@ func TestVerifier_ContextAwareVerification(t *testing.T) {
 	defer cancel()
 
 	contextText := "This is a technical document about software development."
-	
+
 	original := "The code is buggy"
 	translated := "Le code contient des erreurs"
 
@@ -330,11 +330,11 @@ func TestVerifier_ContextAwareVerification(t *testing.T) {
 
 func TestVerifier_Configuration(t *testing.T) {
 	config := VerificationConfig{
-		MinScore:         0.8,
-		EnableContext:     true,
-		EnableSpellCheck:  true,
+		MinScore:           0.8,
+		EnableContext:      true,
+		EnableSpellCheck:   true,
 		EnableGrammarCheck: true,
-		StrictMode:        true,
+		StrictMode:         true,
 	}
 
 	verifier := NewVerifierWithConfig(
@@ -368,7 +368,7 @@ func TestVerifier_ConcurrentVerification(t *testing.T) {
 
 	numTranslations := 10
 	translations := make([]VerificationRequest, numTranslations)
-	
+
 	for i := 0; i < numTranslations; i++ {
 		translations[i] = VerificationRequest{
 			Original:   fmt.Sprintf("Text %d", i),
@@ -407,7 +407,7 @@ func TestVerifier_ErrorHandling(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	cancel() // Cancel immediately
 
-		req := VerificationRequest{
+	req := VerificationRequest{
 		Original:   "test",
 		Translated: "test",
 		SourceLang: "en",

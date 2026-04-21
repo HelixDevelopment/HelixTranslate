@@ -19,14 +19,14 @@ type PDFParser struct {
 }
 
 type PDFConfig struct {
-	ExtractImages     bool   `yaml:"extract_images"`
-	ImageFormat       string `yaml:"image_format"`
-	OcrEnabled       bool   `yaml:"ocr_enabled"`
-	OcrLanguage      string `yaml:"ocr_language"`
-	PreserveLayout    bool   `yaml:"preserve_layout"`
-	ExtractMetadata   bool   `yaml:"extract_metadata"`
-	ExtractTables    bool   `yaml:"extract_tables"`
-	MinTextLength     int    `yaml:"min_text_length"`
+	ExtractImages   bool   `yaml:"extract_images"`
+	ImageFormat     string `yaml:"image_format"`
+	OcrEnabled      bool   `yaml:"ocr_enabled"`
+	OcrLanguage     string `yaml:"ocr_language"`
+	PreserveLayout  bool   `yaml:"preserve_layout"`
+	ExtractMetadata bool   `yaml:"extract_metadata"`
+	ExtractTables   bool   `yaml:"extract_tables"`
+	MinTextLength   int    `yaml:"min_text_length"`
 }
 
 func NewPDFParser(config *PDFConfig) *PDFParser {
@@ -34,9 +34,9 @@ func NewPDFParser(config *PDFConfig) *PDFParser {
 		config = &PDFConfig{
 			ExtractImages:   true,
 			ImageFormat:     "png",
-			OcrEnabled:     false,
-			OcrLanguage:    "eng",
-			PreserveLayout: true,
+			OcrEnabled:      false,
+			OcrLanguage:     "eng",
+			PreserveLayout:  true,
 			ExtractMetadata: true,
 			ExtractTables:   true,
 			MinTextLength:   1,
@@ -51,7 +51,7 @@ func (p *PDFParser) Parse(filename string) (*Book, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
-	
+
 	return p.ParseWithContext(context.Background(), data)
 }
 
@@ -123,7 +123,7 @@ func (p *PDFParser) ParseWithContext(ctx context.Context, data []byte) (*Book, e
 			},
 		},
 	}
-	
+
 	book.Chapters = append(book.Chapters, mainChapter)
 	book.Language = book.Metadata.Language
 
@@ -160,7 +160,7 @@ func (p *PDFParser) GetMetadata(data []byte) (*Metadata, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Return a copy to avoid mutation
 	result := *metadata
 	return &result, nil
@@ -173,7 +173,7 @@ func (p *PDFParser) GetFormat() format.Format {
 func (p *PDFParser) extractMetadata(pdfReader *model.PdfReader, book *Book) error {
 	// Note: The API is different than expected, using simplified metadata extraction
 	// Basic PDF structure is valid, that's what matters for now
-	
+
 	// Extract page count
 	if numPages, err := pdfReader.GetNumPages(); err == nil {
 		if book.Metadata.Description != "" {

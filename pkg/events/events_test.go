@@ -276,13 +276,13 @@ func TestEventBus_HandlerPanic(t *testing.T) {
 // TestEvent_DataTypes tests different data types in event data
 func TestEvent_DataTypes(t *testing.T) {
 	data := map[string]interface{}{
-		"string":  "test",
-		"int":     42,
-		"float":   3.14,
-		"bool":    true,
-		"nil":     nil,
-		"slice":   []string{"a", "b", "c"},
-		"map":     map[string]int{"x": 1, "y": 2},
+		"string": "test",
+		"int":    42,
+		"float":  3.14,
+		"bool":   true,
+		"nil":    nil,
+		"slice":  []string{"a", "b", "c"},
+		"map":    map[string]int{"x": 1, "y": 2},
 	}
 
 	event := NewEvent(EventTranslationProgress, "Test", data)

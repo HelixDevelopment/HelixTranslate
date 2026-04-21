@@ -7,16 +7,98 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGeminiProvider(t *testing.T) {
-	// Test placeholder - provider implementation needed
-	t.Log("Gemini provider test placeholder")
-}
+	t.Run("provider_name", func(t *testing.T) {
+		client, err := NewGeminiClient(TranslationConfig{
+			Provider: "gemini",
+			APIKey:   "test-key",
+		})
+		require.NoError(t, err)
+		require.NotNil(t, client)
+		assert.Equal(t, "gemini", client.GetProviderName())
+	})
 
-func TestGeminiProviderConfig(t *testing.T) {
-	// Test placeholder for config testing
-	t.Log("Gemini config test placeholder")
+	t.Run("missing_api_key", func(t *testing.T) {
+		client, err := NewGeminiClient(TranslationConfig{
+			Provider: "gemini",
+			APIKey:   "",
+		})
+		require.Error(t, err)
+		require.Nil(t, client)
+		assert.Contains(t, err.Error(), "API key is required")
+	})
+
+	t.Run("default_base_url", func(t *testing.T) {
+		client, err := NewGeminiClient(TranslationConfig{
+			Provider: "gemini",
+			APIKey:   "test-key",
+		})
+		require.NoError(t, err)
+		require.NotNil(t, client)
+	})
+
+	t.Run("custom_base_url", func(t *testing.T) {
+		client, err := NewGeminiClient(TranslationConfig{
+			Provider: "gemini",
+			APIKey:   "test-key",
+			BaseURL:  "https://custom.googleapis.com",
+		})
+		require.NoError(t, err)
+		require.NotNil(t, client)
+	})
+
+	t.Run("mock_translate_success", func(t *testing.T) {
+		mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{
+				"candidates": [{"content": {"parts": [{"text": "Привет"}]}, "finishReason": "STOP"}]
+			}`))
+		}))
+		defer mockServer.Close()
+
+		client := &GeminiClient{
+			config: TranslationConfig{
+				Provider: "gemini",
+				APIKey:   "test-key",
+				Model:    "gemini-pro",
+			},
+			httpClient: &http.Client{},
+			baseURL:    mockServer.URL,
+		}
+
+		ctx := context.Background()
+		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
+		require.NoError(t, err)
+		assert.Equal(t, "Привет", result)
+	})
+
+	t.Run("mock_translate_empty_candidates", func(t *testing.T) {
+		mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"candidates": []}`))
+		}))
+		defer mockServer.Close()
+
+		client := &GeminiClient{
+			config: TranslationConfig{
+				Provider: "gemini",
+				APIKey:   "test-key",
+				Model:    "gemini-pro",
+			},
+			httpClient: &http.Client{},
+			baseURL:    mockServer.URL,
+		}
+
+		ctx := context.Background()
+		_, err := client.Translate(ctx, "Hello", "Translate to Russian")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "no candidates")
+	})
 }
 
 // TestGeminiRequestErrorPaths tests error paths in gemini makeRequest function
@@ -29,22 +111,9 @@ func TestGeminiRequestErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewGeminiClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		// Test makeRequest indirectly through Translate
-		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
-		if err == nil {
-			t.Log("Request succeeded with empty API key - may be using mock")
-		}
-		if result != "" && err != nil {
-			t.Error("Result should be empty when error occurs")
-		}
+		require.Error(t, err)
+		require.Nil(t, client)
+		assert.Contains(t, err.Error(), "API key is required")
 	})
 
 	t.Run("invalid_model", func(t *testing.T) {
@@ -55,21 +124,14 @@ func TestGeminiRequestErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewGeminiClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
-		if err == nil {
-			t.Log("Request succeeded with invalid model - may be using mock")
-		}
-		if result != "" && err != nil {
-			t.Error("Result should be empty when error occurs")
-		}
+		_, err = client.Translate(ctx, "Hello", "Translate to Russian")
+		require.Error(t, err)
 	})
 
 	t.Run("context_cancellation", func(t *testing.T) {
@@ -80,28 +142,16 @@ func TestGeminiRequestErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewGeminiClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		// Create cancelled context
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel() // Cancel immediately
 
 		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
-		if err != nil {
-			// Expected error path
-			if result != "" {
-				t.Error("Result should be empty when context is cancelled")
-			}
-			// Check for context-related error
-			if !strings.Contains(err.Error(), "context") && 
-			   !strings.Contains(err.Error(), "canceled") && 
-			   !strings.Contains(err.Error(), "deadline") {
-				t.Logf("Error may not be context-related: %v", err)
-			}
-		}
+		require.Error(t, err)
+		assert.Empty(t, result)
 	})
 
 	t.Run("empty_text_input", func(t *testing.T) {
@@ -112,19 +162,15 @@ func TestGeminiRequestErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewGeminiClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		result, err := client.Translate(ctx, "", "Translate to Russian")
-		if err == nil && result == "" {
-			t.Log("Empty input returned empty result - this is acceptable")
-		}
-		// Either should work - some APIs handle empty text, others don't
+		_ = result
+		_ = err
 	})
 
 	t.Run("very_long_text", func(t *testing.T) {
@@ -135,30 +181,16 @@ func TestGeminiRequestErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewGeminiClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		// Create very long text that might trigger size limits
 		longText := strings.Repeat("Hello world. ", 1000)
-		
-		result, err := client.Translate(ctx, longText, "Translate to Russian")
-		if err != nil {
-			// Expected error path - text too long
-			if result != "" {
-				t.Error("Result should be empty when text is too long")
-			}
-			// Check for size-related error
-			if !strings.Contains(err.Error(), "too large") && 
-			   !strings.Contains(err.Error(), "size") && 
-			   !strings.Contains(err.Error(), "limit") {
-				t.Logf("Error may not be size-related: %v", err)
-			}
-		}
+
+		_, err = client.Translate(ctx, longText, "Translate to Russian")
+		require.Error(t, err)
 	})
 }
 
@@ -235,7 +267,7 @@ func TestGeminiParseResponseErrorPaths(t *testing.T) {
 		if result != "" {
 			t.Error("Result should be empty when candidates are empty")
 		}
-		
+
 		if !strings.Contains(err.Error(), "no candidates in response") {
 			t.Errorf("Expected 'no candidates' error, got: %v", err)
 		}
@@ -262,7 +294,7 @@ func TestGeminiParseResponseErrorPaths(t *testing.T) {
 		if result != "" {
 			t.Error("Result should be empty when finish reason is not STOP")
 		}
-		
+
 		if !strings.Contains(err.Error(), "generation did not complete successfully") {
 			t.Errorf("Expected completion error, got: %v", err)
 		}

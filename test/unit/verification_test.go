@@ -23,16 +23,16 @@ func TestVerifier(t *testing.T) {
 
 		book := &ebook.Book{
 			Metadata: ebook.Metadata{
-				Title:       "Преведена књига",    // Serbian
-				Description: "Опис на српском",     // Serbian
+				Title:       "Преведена књига", // Serbian
+				Description: "Опис на српском", // Serbian
 				Language:    "sr",
 			},
 			Chapters: []ebook.Chapter{
 				{
-					Title: "Поглавље 1",           // Serbian
+					Title: "Поглавље 1", // Serbian
 					Sections: []ebook.Section{
 						{
-							Title:   "Одељак 1",   // Serbian
+							Title:   "Одељак 1",                                 // Serbian
 							Content: "Ово је преведен текст на српском језику.", // Serbian
 						},
 					},
@@ -120,7 +120,7 @@ func TestVerifier(t *testing.T) {
 					Title: "Поглавље 1", // Serbian
 					Sections: []ebook.Section{
 						{
-							Title:   "Одељак 1",                      // Serbian
+							Title:   "Одељак 1",                           // Serbian
 							Content: "Мы посмотрели на него внимательно.", // Russian (contains ы)
 						},
 					},
@@ -363,7 +363,7 @@ func TestVerifier(t *testing.T) {
 				{
 					Title: "Поглавље 1",
 					Sections: []ebook.Section{
-						{Title: "Одељак 1", Content: "Српски текст са двадесет карактера."}, // Translated (35 chars)
+						{Title: "Одељак 1", Content: "Српски текст са двадесет карактера."},   // Translated (35 chars)
 						{Title: "Одељак 2", Content: "Это русский текст с буквой э тридцать"}, // Untranslated (contains э)
 					},
 				},

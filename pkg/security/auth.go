@@ -71,7 +71,7 @@ func (as *AuthService) ValidateToken(tokenString string) (*Claims, error) {
 	}
 
 	start := time.Now()
-	
+
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")

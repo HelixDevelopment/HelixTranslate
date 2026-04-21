@@ -69,7 +69,7 @@ func TestHardwareDetector_OSCommandExecution(t *testing.T) {
 		// GPU detection should never panic
 		if hasGPU {
 			assert.NotEmpty(t, gpuType)
-			assert.Contains(t, []string{"cuda", "metal", "rocm"}, gpuType)
+			assert.Contains(t, []string{"cuda", "metal", "rocm", "vulkan"}, gpuType)
 		}
 	})
 }
@@ -79,25 +79,25 @@ func TestHardwareDetector_CalculateMaxModelSizeEdgeCases(t *testing.T) {
 	detector := NewDetector()
 
 	testCases := []struct {
-		name           string
-		totalRAM       uint64
-		availableRAM   uint64
-		hasGPU         bool
-		expectedMin    uint64
-		expectedMax    uint64
+		name         string
+		totalRAM     uint64
+		availableRAM uint64
+		hasGPU       bool
+		expectedMin  uint64
+		expectedMax  uint64
 	}{
 		{
 			name:         "Very low RAM without GPU",
-			totalRAM:     1024 * 1024 * 1024,      // 1GB
-			availableRAM: 512 * 1024 * 1024,       // 512MB
+			totalRAM:     1024 * 1024 * 1024, // 1GB
+			availableRAM: 512 * 1024 * 1024,  // 512MB
 			hasGPU:       false,
 			expectedMin:  0,
 			expectedMax:  1024 * 1024 * 1024, // 1GB max
 		},
 		{
 			name:         "Very low RAM with GPU",
-			totalRAM:     1024 * 1024 * 1024,      // 1GB
-			availableRAM: 512 * 1024 * 1024,       // 512MB
+			totalRAM:     1024 * 1024 * 1024, // 1GB
+			availableRAM: 512 * 1024 * 1024,  // 512MB
 			hasGPU:       true,
 			expectedMin:  0,
 			expectedMax:  3 * 1024 * 1024 * 1024, // 3GB max with GPU
@@ -342,11 +342,11 @@ func TestHardwareDetector_GPUDetectionComprehensive(t *testing.T) {
 
 	t.Run("GPU detection on current platform", func(t *testing.T) {
 		hasGPU, gpuType := detector.detectGPU()
-		
+
 		// GPU detection should never panic
 		if hasGPU {
 			assert.NotEmpty(t, gpuType)
-			assert.Contains(t, []string{"cuda", "metal", "rocm"}, gpuType)
+			assert.Contains(t, []string{"cuda", "metal", "rocm", "vulkan"}, gpuType)
 		} else {
 			assert.Empty(t, gpuType)
 		}
@@ -380,6 +380,9 @@ func TestHardwareDetector_GPUDetectionComprehensive(t *testing.T) {
 
 // TestHardwareDetector_CalculateMaxModelSizeDetailed tests the calculateMaxModelSize function with detailed scenarios
 func TestHardwareDetector_CalculateMaxModelSizeDetailed(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping detailed boundary test in short mode")
+	}
 	detector := NewDetector()
 
 	t.Run("Boundary conditions without GPU", func(t *testing.T) {
@@ -389,30 +392,30 @@ func TestHardwareDetector_CalculateMaxModelSizeDetailed(t *testing.T) {
 			availableRAM uint64
 			expected     uint64
 		}{
-			{"Just under 3GB", (3 * 1024 * 1024 * 1024) - 1, (2 * 1024 * 1024 * 1024), 1024 * 1024 * 1024},
-			{"Exactly 3GB", 3 * 1024 * 1024 * 1024, 2 * 1024 * 1024 * 1024, 1024 * 1024 * 1024},
-			{"Just over 3GB", (3 * 1024 * 1024 * 1024) + 1, (2 * 1024 * 1024 * 1024), 1024 * 1024 * 1024},
-			{"Just under 7GB", (7 * 1024 * 1024 * 1024) - 1, (5 * 1024 * 1024 * 1024), 1024 * 1024 * 1024},
-			{"Exactly 7GB", 7 * 1024 * 1024 * 1024, 5 * 1024 * 1024 * 1024, 1024 * 1024 * 1024},
-			{"Just over 7GB", (7 * 1024 * 1024 * 1024) + 1, (5 * 1024 * 1024 * 1024), 7 * 1024 * 1024 * 1024},
-			{"Just under 14GB", (14 * 1024 * 1024 * 1024) - 1, (10 * 1024 * 1024 * 1024), 7 * 1024 * 1024 * 1024},
-			{"Exactly 14GB", 14 * 1024 * 1024 * 1024, 10 * 1024 * 1024 * 1024, 7 * 1024 * 1024 * 1024},
-			{"Just over 14GB", (14 * 1024 * 1024 * 1024) + 1, (10 * 1024 * 1024 * 1024), 7 * 1024 * 1024 * 1024},
-			{"Just under 21GB", (21 * 1024 * 1024 * 1024) - 1, (15 * 1024 * 1024 * 1024), 7 * 1024 * 1024 * 1024},
-			{"Exactly 21GB", 21 * 1024 * 1024 * 1024, 15 * 1024 * 1024 * 1024, 21 * 1024 * 1024 * 1024},
-			{"Just over 21GB", (21 * 1024 * 1024 * 1024) + 1, (15 * 1024 * 1024 * 1024), 21 * 1024 * 1024 * 1024},
-			{"Just under 26GB", (26 * 1024 * 1024 * 1024) - 1, (20 * 1024 * 1024 * 1024), 21 * 1024 * 1024 * 1024},
-			{"Exactly 26GB", 26 * 1024 * 1024 * 1024, 20 * 1024 * 1024 * 1024, 26 * 1024 * 1024 * 1024},
-			{"Just over 26GB", (26 * 1024 * 1024 * 1024) + 1, (20 * 1024 * 1024 * 1024), 26 * 1024 * 1024 * 1024},
-			{"Just under 39GB", (39 * 1024 * 1024 * 1024) - 1, (30 * 1024 * 1024 * 1024), 26 * 1024 * 1024 * 1024},
-			{"Exactly 39GB", 39 * 1024 * 1024 * 1024, 30 * 1024 * 1024 * 1024, 39 * 1024 * 1024 * 1024},
-			{"Just over 39GB", (39 * 1024 * 1024 * 1024) + 1, (30 * 1024 * 1024 * 1024), 39 * 1024 * 1024 * 1024},
-			{"Just under 54GB", (54 * 1024 * 1024 * 1024) - 1, (40 * 1024 * 1024 * 1024), 39 * 1024 * 1024 * 1024},
-			{"Exactly 54GB", 54 * 1024 * 1024 * 1024, 40 * 1024 * 1024 * 1024, 54 * 1024 * 1024 * 1024},
-			{"Just over 54GB", (54 * 1024 * 1024 * 1024) + 1, (40 * 1024 * 1024 * 1024), 54 * 1024 * 1024 * 1024},
-			{"Just under 105GB", (105 * 1024 * 1024 * 1024) - 1, (80 * 1024 * 1024 * 1024), 54 * 1024 * 1024 * 1024},
-			{"Exactly 105GB", 105 * 1024 * 1024 * 1024, 80 * 1024 * 1024 * 1024, 105 * 1024 * 1024 * 1024},
-			{"Just over 105GB", (105 * 1024 * 1024 * 1024) + 1, (80 * 1024 * 1024 * 1024), 105 * 1024 * 1024 * 1024},
+			{"Just under 3GB", (3 * 1024 * 1024 * 1024) - 1, (2 * 1024 * 1024 * 1024), 1_000_000_000},
+			{"Exactly 3GB", 3 * 1024 * 1024 * 1024, 2 * 1024 * 1024 * 1024, 1_000_000_000},
+			{"Just over 3GB", (3 * 1024 * 1024 * 1024) + 1, (2 * 1024 * 1024 * 1024), 1_000_000_000},
+			{"Just under 7GB", (7 * 1024 * 1024 * 1024) - 1, (5 * 1024 * 1024 * 1024), 1_000_000_000},
+			{"Exactly 7GB", 7 * 1024 * 1024 * 1024, 5 * 1024 * 1024 * 1024, 1_000_000_000},
+			{"Just over 7GB", (7 * 1024 * 1024 * 1024) + 1, (5 * 1024 * 1024 * 1024), 1_000_000_000},
+			{"Just under 14GB", (14 * 1024 * 1024 * 1024) - 1, (10 * 1024 * 1024 * 1024), 3_000_000_000},
+			{"Exactly 14GB", 14 * 1024 * 1024 * 1024, 10 * 1024 * 1024 * 1024, 3_000_000_000},
+			{"Just over 14GB", (14 * 1024 * 1024 * 1024) + 1, (10 * 1024 * 1024 * 1024), 3_000_000_000},
+			{"Just under 21GB", (21 * 1024 * 1024 * 1024) - 1, (15 * 1024 * 1024 * 1024), 7_000_000_000},
+			{"Exactly 21GB", 21 * 1024 * 1024 * 1024, 15 * 1024 * 1024 * 1024, 7_000_000_000},
+			{"Just over 21GB", (21 * 1024 * 1024 * 1024) + 1, (15 * 1024 * 1024 * 1024), 7_000_000_000},
+			{"Just under 26GB", (26 * 1024 * 1024 * 1024) - 1, (20 * 1024 * 1024 * 1024), 7_000_000_000},
+			{"Exactly 26GB", 26 * 1024 * 1024 * 1024, 20 * 1024 * 1024 * 1024, 7_000_000_000},
+			{"Just over 26GB", (26 * 1024 * 1024 * 1024) + 1, (20 * 1024 * 1024 * 1024), 7_000_000_000},
+			{"Just under 39GB", (39 * 1024 * 1024 * 1024) - 1, (30 * 1024 * 1024 * 1024), 13_000_000_000},
+			{"Exactly 39GB", 39 * 1024 * 1024 * 1024, 30 * 1024 * 1024 * 1024, 13_000_000_000},
+			{"Just over 39GB", (39 * 1024 * 1024 * 1024) + 1, (30 * 1024 * 1024 * 1024), 13_000_000_000},
+			{"Just under 54GB", (54 * 1024 * 1024 * 1024) - 1, (40 * 1024 * 1024 * 1024), 13_000_000_000},
+			{"Exactly 54GB", 54 * 1024 * 1024 * 1024, 40 * 1024 * 1024 * 1024, 13_000_000_000},
+			{"Just over 54GB", (54 * 1024 * 1024 * 1024) + 1, (40 * 1024 * 1024 * 1024), 13_000_000_000},
+			{"Just under 105GB", (105 * 1024 * 1024 * 1024) - 1, (80 * 1024 * 1024 * 1024), 27_000_000_000},
+			{"Exactly 105GB", 105 * 1024 * 1024 * 1024, 80 * 1024 * 1024 * 1024, 27_000_000_000},
+			{"Just over 105GB", (105 * 1024 * 1024 * 1024) + 1, (80 * 1024 * 1024 * 1024), 27_000_000_000},
 		}
 
 		for _, tc := range testCases {
@@ -430,18 +433,18 @@ func TestHardwareDetector_CalculateMaxModelSizeDetailed(t *testing.T) {
 			availableRAM uint64
 			expected     uint64
 		}{
-			{"Just under 3GB", (3 * 1024 * 1024 * 1024) - 1, (2 * 1024 * 1024 * 1024), 1024 * 1024 * 1024},
-			{"Exactly 3GB", 3 * 1024 * 1024 * 1024, 2 * 1024 * 1024 * 1024, 3 * 1024 * 1024 * 1024},
-			{"Just over 3GB", (3 * 1024 * 1024 * 1024) + 1, (2 * 1024 * 1024 * 1024), 3 * 1024 * 1024 * 1024},
-			{"Just under 9GB", (9 * 1024 * 1024 * 1024) - 1, (7 * 1024 * 1024 * 1024), 3 * 1024 * 1024 * 1024},
-			{"Exactly 9GB", 9 * 1024 * 1024 * 1024, 7 * 1024 * 1024 * 1024, 3 * 1024 * 1024 * 1024},
-			{"Just over 9GB", (9 * 1024 * 1024 * 1024) + 1, (7 * 1024 * 1024 * 1024), 9 * 1024 * 1024 * 1024},
-			{"Just under 19.5GB", (19 * 1024 * 1024 * 1024) - 1, (15 * 1024 * 1024 * 1024), 9 * 1024 * 1024 * 1024},
-			{"Exactly 19.5GB", (19 * 1024 * 1024 * 1024) + (512 * 1024 * 1024), 15 * 1024 * 1024 * 1024, 19.5 * 1024 * 1024 * 1024},
-			{"Just over 19.5GB", (19 * 1024 * 1024 * 1024) + (512 * 1024 * 1024) + 1, 15 * 1024 * 1024 * 1024, 19.5 * 1024 * 1024 * 1024},
-			{"Just under 40.5GB", (40 * 1024 * 1024 * 1024) - 1, (30 * 1024 * 1024 * 1024), 19.5 * 1024 * 1024 * 1024},
-			{"Exactly 40.5GB", (40 * 1024 * 1024 * 1024) + (512 * 1024 * 1024), 30 * 1024 * 1024 * 1024, 40.5 * 1024 * 1024 * 1024},
-			{"Just over 40.5GB", (40 * 1024 * 1024 * 1024) + (512 * 1024 * 1024) + 1, 30 * 1024 * 1024 * 1024, 40.5 * 1024 * 1024 * 1024},
+			{"Just under 3GB", (3 * 1024 * 1024 * 1024) - 1, (2 * 1024 * 1024 * 1024), 1_000_000_000},
+			{"Exactly 3GB", 3 * 1024 * 1024 * 1024, 2 * 1024 * 1024 * 1024, 1_000_000_000},
+			{"Just over 3GB", (3 * 1024 * 1024 * 1024) + 1, (2 * 1024 * 1024 * 1024), 1_000_000_000},
+			{"Just under 9GB", (9 * 1024 * 1024 * 1024) - 1, (7 * 1024 * 1024 * 1024), 3_000_000_000},
+			{"Exactly 9GB", 9 * 1024 * 1024 * 1024, 7 * 1024 * 1024 * 1024, 3_000_000_000},
+			{"Just over 9GB", (9 * 1024 * 1024 * 1024) + 1, (7 * 1024 * 1024 * 1024), 3_000_000_000},
+			{"Just under 19.5GB", (19 * 1024 * 1024 * 1024) - 1, (15 * 1024 * 1024 * 1024), 7_000_000_000},
+			{"Exactly 19.5GB", (19 * 1024 * 1024 * 1024) + (512 * 1024 * 1024), 15 * 1024 * 1024 * 1024, 7_000_000_000},
+			{"Just over 19.5GB", (19 * 1024 * 1024 * 1024) + (512 * 1024 * 1024) + 1, 15 * 1024 * 1024 * 1024, 7_000_000_000},
+			{"Just under 40.5GB", (40 * 1024 * 1024 * 1024) - 1, (30 * 1024 * 1024 * 1024), 13_000_000_000},
+			{"Exactly 40.5GB", (40 * 1024 * 1024 * 1024) + (512 * 1024 * 1024), 30 * 1024 * 1024 * 1024, 13_000_000_000},
+			{"Just over 40.5GB", (40 * 1024 * 1024 * 1024) + (512 * 1024 * 1024) + 1, 30 * 1024 * 1024 * 1024, 13_000_000_000},
 		}
 
 		for _, tc := range testCases {

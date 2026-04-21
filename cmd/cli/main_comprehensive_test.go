@@ -50,79 +50,79 @@ func TestMainFunctionComprehensive(t *testing.T) {
 		},
 	}
 
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				cleanup := tt.setup()
-				defer cleanup()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cleanup := tt.setup()
+			defer cleanup()
 
-				// For version and help tests, just verify the function works
-				if tt.name == "version flag" || tt.name == "help flag" || tt.name == "no arguments shows help" {
-					// Just test the functionality doesn't panic
-					assert.NotPanics(t, func() {
-						oldArgs := os.Args
-						defer func() { os.Args = oldArgs }()
-						
-						os.Args = append([]string{"translator"}, tt.args...)
-						
-						defer func() {
-							if r := recover(); r != nil {
-								// Expected due to os.Exit
-							}
-						}()
-						main()
-					})
-					return
-				}
+			// For version and help tests, just verify the function works
+			if tt.name == "version flag" || tt.name == "help flag" || tt.name == "no arguments shows help" {
+				// Just test the functionality doesn't panic
+				assert.NotPanics(t, func() {
+					oldArgs := os.Args
+					defer func() { os.Args = oldArgs }()
 
-				// Capture stdout and stderr for other tests
-				oldStdout := os.Stdout
-				oldStderr := os.Stderr
-				oldArgs := os.Args
+					os.Args = append([]string{"translator"}, tt.args...)
 
-				r, w, _ := os.Pipe()
-				os.Stdout = w
-				os.Stderr = w
-
-				defer func() {
-					os.Stdout = oldStdout
-					os.Stderr = oldStderr
-					os.Args = oldArgs
-				}()
-
-				// Set up args
-				os.Args = append([]string{"translator"}, tt.args...)
-
-				// Run main in a goroutine to capture exit
-				done := make(chan bool, 1)
-				go func() {
 					defer func() {
 						if r := recover(); r != nil {
-							// Handle panic from os.Exit
-							done <- true
+							// Expected due to os.Exit
 						}
 					}()
 					main()
-					done <- true
+				})
+				return
+			}
+
+			// Capture stdout and stderr for other tests
+			oldStdout := os.Stdout
+			oldStderr := os.Stderr
+			oldArgs := os.Args
+
+			r, w, _ := os.Pipe()
+			os.Stdout = w
+			os.Stderr = w
+
+			defer func() {
+				os.Stdout = oldStdout
+				os.Stderr = oldStderr
+				os.Args = oldArgs
+			}()
+
+			// Set up args
+			os.Args = append([]string{"translator"}, tt.args...)
+
+			// Run main in a goroutine to capture exit
+			done := make(chan bool, 1)
+			go func() {
+				defer func() {
+					if r := recover(); r != nil {
+						// Handle panic from os.Exit
+						done <- true
+					}
 				}()
+				main()
+				done <- true
+			}()
 
-				// Close pipe and read output
-				w.Close()
-				var buf bytes.Buffer
-				_, _ = buf.ReadFrom(r)
+			// Close pipe and read output
+			w.Close()
+			var buf bytes.Buffer
+			_, _ = buf.ReadFrom(r)
 
-				select {
-				case <-done:
-					// Function completed
-				case <-time.After(5 * time.Second):
-					t.Fatal("Main function timed out")
-				}
+			select {
+			case <-done:
+				// Function completed
+			case <-time.After(5 * time.Second):
+				t.Fatal("Main function timed out")
+			}
 
-				output := buf.String()
-				if tt.expectedOutput != "" {
-					assert.Contains(t, output, tt.expectedOutput)
-				}
-			})
-		}
+			output := buf.String()
+			if tt.expectedOutput != "" {
+				assert.Contains(t, output, tt.expectedOutput)
+			}
+		})
+	}
 }
 
 // TestCreateConfigFile tests config file creation functionality
@@ -263,11 +263,11 @@ func TestGetAPIKeyFromEnvComprehensive(t *testing.T) {
 // TestLanguageParsing tests language parsing from CLI arguments
 func TestLanguageParsingComprehensive(t *testing.T) {
 	tests := []struct {
-		name        string
-		locale      string
-		language    string
+		name         string
+		locale       string
+		language     string
 		expectedLang language.Language
-		expectError bool
+		expectError  bool
 	}{
 		{
 			name:         "valid locale",
@@ -419,7 +419,7 @@ func TestWriteAsTextComprehensive(t *testing.T) {
 // TestGetSupportedLanguagesString tests the languages string formatting
 func TestGetSupportedLanguagesStringComprehensive(t *testing.T) {
 	result := getSupportedLanguagesString()
-	
+
 	// Verify it contains some expected languages
 	assert.Contains(t, result, "English (en)")
 	assert.Contains(t, result, "Spanish (es)")
@@ -462,7 +462,7 @@ func createTestBook(t *testing.T, title, content string) *ebook.Book {
 			Description: "Test description",
 			Authors:     []string{"Test Author"},
 		},
-		Format:  "epub",
+		Format: "epub",
 		Chapters: []ebook.Chapter{
 			{
 				Title: "Test Chapter",
@@ -671,11 +671,11 @@ func TestTranslateEbookFunction(t *testing.T) {
 			false,
 			false,
 		)
-		
+
 		// We expect an error due to missing API key in test environment
 		assert.Error(t, err)
 	})
-	
+
 	t.Run("with_app_config", func(t *testing.T) {
 		// Create app config
 		appConfig := &config.Config{
@@ -689,7 +689,7 @@ func TestTranslateEbookFunction(t *testing.T) {
 				},
 			},
 		}
-		
+
 		err := translateEbook(
 			book,
 			"test_output.epub",
@@ -706,7 +706,7 @@ func TestTranslateEbookFunction(t *testing.T) {
 			false,
 			false,
 		)
-		
+
 		// We expect no error in test environment with mocked/empty translation
 		// The test shows it's actually completing translation even without valid API keys
 		// This might be due to test mode or mock translators being used

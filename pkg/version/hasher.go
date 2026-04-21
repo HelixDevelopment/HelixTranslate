@@ -62,7 +62,7 @@ func NewCodebaseHasher() *CodebaseHasher {
 // CalculateHash computes the comprehensive hash of the codebase
 func (h *CodebaseHasher) CalculateHash() (string, error) {
 	hasher := sha256.New()
-	
+
 	// Note: Removed timestamp to ensure consistent hashes across systems
 
 	// Process each relevant directory
@@ -236,19 +236,19 @@ func (h *CodebaseHasher) GenerateVersionInfo() (*VersionInfo, error) {
 	}
 
 	return &VersionInfo{
-		Hash:      hash,
-		Timestamp: time.Now(),
+		Hash:        hash,
+		Timestamp:   time.Now(),
 		Directories: h.RelevantDirectories,
-		Extensions: h.RelevantExtensions,
+		Extensions:  h.RelevantExtensions,
 	}, nil
 }
 
 // VersionInfo contains detailed version information
 type VersionInfo struct {
-	Hash       string    `json:"hash"`
-	Timestamp  time.Time `json:"timestamp"`
+	Hash        string    `json:"hash"`
+	Timestamp   time.Time `json:"timestamp"`
 	Directories []string  `json:"directories"`
-	Extensions []string  `json:"extensions"`
+	Extensions  []string  `json:"extensions"`
 }
 
 // SaveVersionInfo saves version info to a file

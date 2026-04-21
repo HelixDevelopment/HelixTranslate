@@ -13,21 +13,21 @@ import (
 func main() {
 	// Initialize SSH worker
 	config := sshworker.SSHWorkerConfig{
-		Host:       "thinker.local",
-		Port:       22,
-		Username:   "milosvasic",
-		Password:   "WhiteSnake8587",
-		RemoteDir:  "/tmp/translate-ssh",
+		Host:              "thinker.local",
+		Port:              22,
+		Username:          "milosvasic",
+		Password:          "WhiteSnake8587",
+		RemoteDir:         "/tmp/translate-ssh",
 		ConnectionTimeout: 30 * time.Second,
-		CommandTimeout: 300 * time.Second, // 5 minutes for download
+		CommandTimeout:    300 * time.Second, // 5 minutes for download
 	}
 
 	loggerConfig := logger.LoggerConfig{
-		Level: logger.INFO,
+		Level:  logger.INFO,
 		Format: logger.FORMAT_TEXT,
 	}
 	log := logger.NewLogger(loggerConfig)
-	
+
 	worker, err := sshworker.NewSSHWorker(config, log)
 	if err != nil {
 		fmt.Printf("Failed to create SSH worker: %v\n", err)
@@ -35,7 +35,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	
+
 	// Connect to worker
 	if err := worker.Connect(ctx); err != nil {
 		fmt.Printf("Failed to connect: %v\n", err)
@@ -51,7 +51,7 @@ func main() {
 		wget -O tiny-llama.gguf "https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
 		ls -lh *.gguf
 	`
-	
+
 	result, err := worker.ExecuteCommand(ctx, commands)
 	if err != nil {
 		fmt.Printf("Failed to download model: %v\n", err)
@@ -71,7 +71,7 @@ func main() {
 		-p "Translate Russian to Serbian: Привет мир" \
 		-n 50 \
 		--temp 0.3`
-	
+
 	result, err = worker.ExecuteCommand(ctx, testCmd)
 	if err != nil {
 		fmt.Printf("Failed to test new model: %v\n", err)
@@ -172,7 +172,7 @@ def main():
 if __name__ == "__main__":
     main()
 `
-	
+
 	if err := worker.UploadData(ctx, []byte(updatedScript), "/tmp/translate-ssh/simple_translate.py"); err != nil {
 		fmt.Printf("Failed to upload updated script: %v\n", err)
 		os.Exit(1)

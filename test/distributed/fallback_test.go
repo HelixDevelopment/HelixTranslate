@@ -428,7 +428,7 @@ func (fm *TestFallbackManager) executeEndpoint(ctx context.Context, endpoint, re
 			}, nil
 		}
 	}
-	
+
 	if endpoint == "http://primary:8080" {
 		// Simulate primary failure for other tests
 		return nil, fmt.Errorf("primary endpoint failed")
@@ -487,7 +487,7 @@ func (fm *TestFallbackManager) executeWithPrimaryFailing(request string) (*Fallb
 			start := time.Now()
 			var result *FallbackResult
 			var err error
-			
+
 			if endpoint == "http://primary:8080" {
 				// Primary always fails
 				err = fmt.Errorf("primary endpoint failed")
@@ -525,7 +525,7 @@ func (fm *TestFallbackManager) executeWithAllFailing(request string) (*FallbackR
 			// All endpoints fail
 			lastError := fmt.Errorf("endpoint %s failed", endpoint)
 			fm.index = (i + 1) % len(fm.endpoints)
-			
+
 			if attempt == fm.config.RetryAttempts-1 && i == len(fm.endpoints)-1 {
 				return nil, fmt.Errorf("all endpoints failed, last error: %v", lastError)
 			}

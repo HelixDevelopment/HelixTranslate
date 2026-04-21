@@ -171,7 +171,7 @@ func TestFormatAuthorName(t *testing.T) {
 			expected: "Writer123",
 		},
 		{
-			name: "Empty author",
+			name:     "Empty author",
 			author:   Author{},
 			expected: "",
 		},
@@ -189,9 +189,9 @@ func TestFormatAuthorName(t *testing.T) {
 
 func TestExtractTextFromParagraph(t *testing.T) {
 	tests := []struct {
-		name     string
+		name      string
 		paragraph Paragraph
-		expected string
+		expected  string
 	}{
 		{
 			name: "Simple text",

@@ -48,9 +48,9 @@ func TestMainFunctionComprehensive(t *testing.T) {
 				assert.NotPanics(t, func() {
 					oldArgs := os.Args
 					defer func() { os.Args = oldArgs }()
-					
+
 					os.Args = append([]string{"deployment"}, tt.args...)
-					
+
 					defer func() {
 						if r := recover(); r != nil {
 							// Expected due to os.Exit
@@ -72,7 +72,7 @@ func TestBasicComponents(t *testing.T) {
 
 	// Test deployment orchestrator with basic config
 	cfg := config.DefaultConfig()
-	
+
 	// Create deployment orchestrator
 	deployOrchestrator := deployment.NewDeploymentOrchestrator(cfg, eventBus)
 	assert.NotNil(t, deployOrchestrator)
@@ -86,16 +86,16 @@ func TestBasicComponents(t *testing.T) {
 func TestConfigurationLoading(t *testing.T) {
 	// Test basic configuration handling without loading from file
 	// This avoids the nil map panic in config loading
-	
+
 	// Test creating a default config
 	cfg := config.DefaultConfig()
 	assert.NotNil(t, cfg)
-	
+
 	// Test config validation
 	err := cfg.Validate()
 	// May fail due to missing JWT secret, but validation mechanism works
 	_ = err
-	
+
 	// Test creating config with basic values
 	cfg = &config.Config{
 		Server: config.ServerConfig{
@@ -116,7 +116,7 @@ func TestConfigurationLoading(t *testing.T) {
 func TestDeploymentActions(t *testing.T) {
 	// Mock deployment orchestrator for testing
 	mockOrchestrator := &MockDeploymentOrchestrator{}
-	
+
 	tests := []struct {
 		name        string
 		action      string
@@ -243,18 +243,18 @@ func TestDeploymentActions(t *testing.T) {
 // TestDeploymentIntegration tests deployment integration
 func TestDeploymentIntegration(t *testing.T) {
 	eventBus := events.NewEventBus()
-	
+
 	// Create default config
 	cfg := config.DefaultConfig()
-	
+
 	// Test deployment orchestrator creation
 	deployOrchestrator := deployment.NewDeploymentOrchestrator(cfg, eventBus)
 	assert.NotNil(t, deployOrchestrator)
-	
+
 	// Test docker orchestrator creation
 	dockerOrchestrator := deployment.NewDockerOrchestrator(cfg, eventBus)
 	assert.NotNil(t, dockerOrchestrator)
-	
+
 	// Test network discoverer
 	networkDiscoverer := deployment.NewNetworkDiscoverer(cfg, nil)
 	assert.NotNil(t, networkDiscoverer)
@@ -295,14 +295,14 @@ func TestErrorHandling(t *testing.T) {
 				_, err := config.LoadConfig("/nonexistent/config.json")
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), tt.expectedError)
-				
+
 			case "action":
 				// Test invalid action handling
 				assert.NotPanics(t, func() {
 					// This would normally be caught by flag validation
 					_ = "invalid-action"
 				})
-				
+
 			case "service":
 				// Test missing service parameter
 				serviceName := ""
@@ -317,12 +317,12 @@ func TestTimeoutHandling(t *testing.T) {
 	// Create config with short timeout for testing
 	cfg := config.DefaultConfig()
 	cfg.Distributed.SSHTimeout = 1 // Very short timeout
-	
+
 	// Test deployment orchestrator with timeout
 	eventBus := events.NewEventBus()
 	deployOrchestrator := deployment.NewDeploymentOrchestrator(cfg, eventBus)
 	assert.NotNil(t, deployOrchestrator)
-	
+
 	// The test ensures timeout handling doesn't panic
 	_ = deployOrchestrator
 }
@@ -330,28 +330,28 @@ func TestTimeoutHandling(t *testing.T) {
 // TestEventHandling tests event publishing and handling
 func TestEventHandling(t *testing.T) {
 	eventBus := events.NewEventBus()
-	
+
 	// Subscribe to deployment events
 	eventReceived := false
 	eventBus.Subscribe(events.EventType("deployment.test"), func(event events.Event) {
 		eventReceived = true
 	})
-	
+
 	// Create deployment orchestrator
 	cfg := config.DefaultConfig()
 	deployOrchestrator := deployment.NewDeploymentOrchestrator(cfg, eventBus)
 	assert.NotNil(t, deployOrchestrator)
-	
+
 	// Publish a test event
 	testEvent := events.Event{
-		Type: events.EventType("deployment.test"),
+		Type:    events.EventType("deployment.test"),
 		Message: "test message",
 	}
 	eventBus.Publish(testEvent)
-	
+
 	// Wait a bit for event processing
 	time.Sleep(100 * time.Millisecond)
-	
+
 	// Check that event was handled
 	assert.True(t, eventReceived, "Event should have been received")
 }
@@ -362,13 +362,13 @@ func TestSSHDeployment(t *testing.T) {
 	sshConfig := &deployment.SSHDeployConfig{
 		Host:     "localhost",
 		Port:     22,
-		Username:  "test-user",
-		Password:  "test-pass",
-		Timeout:   30 * time.Second,
+		Username: "test-user",
+		Password: "test-pass",
+		Timeout:  30 * time.Second,
 	}
 	sshDeployer := deployment.NewSSHDeployer(sshConfig)
 	assert.NotNil(t, sshDeployer)
-	
+
 	// Test deployment config creation
 	deployConfig := &deployment.DeploymentConfig{
 		Host:     "localhost",

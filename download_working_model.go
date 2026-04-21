@@ -22,7 +22,7 @@ func main() {
 		ConnectionTimeout: 30 * time.Second,
 		CommandTimeout:    300 * time.Second,
 	}
-	
+
 	log := logger.NewNoOpLogger()
 	worker, err := sshworker.NewSSHWorker(config, log)
 	if err != nil {
@@ -53,7 +53,7 @@ wget -O tiny-llama-working.gguf "https://huggingface.co/TheBloke/TinyLlama-1.1B-
 	}
 
 	fmt.Printf("Model download output:\n%s\n", result.Stdout)
-	
+
 	// Check if model was downloaded successfully
 	cmd = `ls -la /home/milosvasic/models/tiny-llama-working.gguf`
 	result, err = worker.ExecuteCommand(ctx, cmd)
@@ -61,6 +61,6 @@ wget -O tiny-llama-working.gguf "https://huggingface.co/TheBloke/TinyLlama-1.1B-
 		fmt.Printf("Failed to check model: %v\n", err)
 		return
 	}
-	
+
 	fmt.Printf("Model file info:\n%s\n", result.Stdout)
 }

@@ -18,6 +18,9 @@ import (
 )
 
 func TestAuthentication(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
 	// Test 1: Valid API key authentication
 	t.Run("ValidAPIKey", func(t *testing.T) {
 		mockTranslator := new(mocks.MockTranslator)
@@ -31,12 +34,12 @@ func TestAuthentication(t *testing.T) {
 
 		// Get server URL for testing
 		serverURL := httpServer.GetURL()
-		
+
 		// Wait for server to start
 		time.Sleep(100 * time.Millisecond)
 
 		// Test valid API key
-		req, err := http.NewRequest("POST", serverURL+"/api/v1/translate", strings.NewReader(`{
+		req, err := http.NewRequest("POST", serverURL+"/api/translate", strings.NewReader(`{
 			"text": "Hello world",
 			"source_lang": "en",
 			"target_lang": "es"
@@ -55,25 +58,45 @@ func TestAuthentication(t *testing.T) {
 
 	// Test 2: Invalid API key
 	t.Run("InvalidAPIKey", func(t *testing.T) {
-		// Create another test server with different API key
+		mockLogger := logger.NewLogger(logger.LoggerConfig{
+			Level:  logger.DEBUG,
+			Format: logger.FORMAT_TEXT,
+		})
 		mockTranslator := new(mocks.MockTranslator)
 		mockTranslator.On("GetName").Return("test-translator")
 		mockTranslator.On("Translate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 			Return("translated text", nil)
 
-		httpServer2 := utils.NewTestHTTPServer(t)
-		defer httpServer2.Close()
-		
-		serverURL := httpServer2.GetURL()
+		port := utils.GetFreePort()
+		server := api.NewServer(api.ServerConfig{
+			Port:   port,
+			Logger: mockLogger,
+			Security: &api.SecurityConfig{
+				APIKey:      "correct-api-key",
+				RequireAuth: true,
+			},
+		})
+		server.SetTranslator(mockTranslator)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		go func() {
+			if err := server.Start(ctx); err != nil && err != context.Canceled {
+				t.Logf("Server error: %v", err)
+			}
+		}()
+
+		time.Sleep(100 * time.Millisecond)
 
 		// Test invalid API key
-		req, err := http.NewRequest("POST", serverURL+"/api/v1/translate", strings.NewReader(`{
+		req, err := http.NewRequest("POST", fmt.Sprintf("http://localhost:%d/api/translate", port), strings.NewReader(`{
 			"text": "Hello world",
-			"source_lang": "en", 
+			"source_lang": "en",
 			"target_lang": "es"
 		}`))
 		require.NoError(t, err)
-		req.Header.Set("Authorization", "Bearer wrong-api-key")
+		req.Header.Set("X-API-Key", "wrong-api-key")
 		req.Header.Set("Content-Type", "application/json")
 
 		client := &http.Client{Timeout: 5 * time.Second}
@@ -91,34 +114,36 @@ func TestAuthentication(t *testing.T) {
 			Format: logger.FORMAT_TEXT,
 		})
 
+		port := utils.GetFreePort()
 		server := api.NewServer(api.ServerConfig{
-			Port:     8082,
-			Logger:    mockLogger,
+			Port:   port,
+			Logger: mockLogger,
 			Security: &api.SecurityConfig{
-				APIKey: "required-api-key",
+				APIKey:      "required-api-key",
+				RequireAuth: true,
 			},
 		})
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		
+
 		go func() {
 			if err := server.Start(ctx); err != nil && err != context.Canceled {
 				t.Logf("Server error: %v", err)
 			}
 		}()
-		
+
 		time.Sleep(100 * time.Millisecond)
 
 		// Test missing API key
-		req, err := http.NewRequest("POST", "http://localhost:8082/api/translate", strings.NewReader(`{
+		req, err := http.NewRequest("POST", fmt.Sprintf("http://localhost:%d/api/translate", port), strings.NewReader(`{
 			"text": "Hello world",
 			"source_lang": "en",
 			"target_lang": "es"
 		}`))
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
-		// No Authorization header
+		// No API key header
 
 		client := &http.Client{Timeout: 5 * time.Second}
 		resp, err := client.Do(req)
@@ -140,14 +165,14 @@ func TestInputValidation(t *testing.T) {
 
 		mockTranslator := new(mocks.MockTranslator)
 		mockTranslator.On("GetName").Return("test-translator")
-		
+
 		// Should not contain SQL injection patterns
 		mockTranslator.On("Translate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 			Return("", fmt.Errorf("invalid input detected")).Once()
 
 		server := api.NewServer(api.ServerConfig{
-			Port:     8083,
-			Logger:    mockLogger,
+			Port:   8083,
+			Logger: mockLogger,
 			Security: &api.SecurityConfig{
 				APIKey: "test-key",
 			},
@@ -156,13 +181,13 @@ func TestInputValidation(t *testing.T) {
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		
+
 		go func() {
 			if err := server.Start(ctx); err != nil && err != context.Canceled {
 				t.Logf("Server error: %v", err)
 			}
 		}()
-		
+
 		time.Sleep(100 * time.Millisecond)
 
 		// Test SQL injection attempt
@@ -193,8 +218,8 @@ func TestInputValidation(t *testing.T) {
 		})
 
 		server := api.NewServer(api.ServerConfig{
-			Port:     8084,
-			Logger:    mockLogger,
+			Port:   8084,
+			Logger: mockLogger,
 			Security: &api.SecurityConfig{
 				APIKey: "test-key",
 			},
@@ -202,13 +227,13 @@ func TestInputValidation(t *testing.T) {
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		
+
 		go func() {
 			if err := server.Start(ctx); err != nil && err != context.Canceled {
 				t.Logf("Server error: %v", err)
 			}
 		}()
-		
+
 		time.Sleep(100 * time.Millisecond)
 
 		// Test XSS attempt
@@ -231,7 +256,7 @@ func TestInputValidation(t *testing.T) {
 		body := make([]byte, 1024)
 		n, _ := resp.Body.Read(body)
 		responseBody := string(body[:n])
-		
+
 		assert.NotContains(t, responseBody, "<script>")
 		assert.NotContains(t, responseBody, "alert('xss')")
 	})
@@ -244,8 +269,8 @@ func TestInputValidation(t *testing.T) {
 		})
 
 		server := api.NewServer(api.ServerConfig{
-			Port:     8085,
-			Logger:    mockLogger,
+			Port:   8085,
+			Logger: mockLogger,
 			Security: &api.SecurityConfig{
 				APIKey: "test-key",
 			},
@@ -253,13 +278,13 @@ func TestInputValidation(t *testing.T) {
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		
+
 		go func() {
 			if err := server.Start(ctx); err != nil && err != context.Canceled {
 				t.Logf("Server error: %v", err)
 			}
 		}()
-		
+
 		time.Sleep(100 * time.Millisecond)
 
 		// Test path traversal attempt in file parameter
@@ -294,32 +319,32 @@ func TestRateLimiting(t *testing.T) {
 		})
 
 		server := api.NewServer(api.ServerConfig{
-			Port:     8086,
-			Logger:    mockLogger,
+			Port:   8086,
+			Logger: mockLogger,
 			Security: &api.SecurityConfig{
-				APIKey:      "test-key",
-				RateLimit:   5, // 5 requests per minute
-				RateWindow:  time.Minute,
+				APIKey:     "test-key",
+				RateLimit:  5, // 5 requests per minute
+				RateWindow: time.Minute,
 			},
 		})
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		
+
 		go func() {
 			if err := server.Start(ctx); err != nil && err != context.Canceled {
 				t.Logf("Server error: %v", err)
 			}
 		}()
-		
+
 		time.Sleep(100 * time.Millisecond)
 
 		client := &http.Client{Timeout: 5 * time.Second}
-		
+
 		// Make 6 rapid requests (exceeds rate limit of 5)
 		successCount := 0
 		rateLimitedCount := 0
-		
+
 		for i := 0; i < 6; i++ {
 			req, err := http.NewRequest("POST", "http://localhost:8086/api/translate", strings.NewReader(`{
 				"text": "test",
@@ -358,23 +383,23 @@ func TestCSRFProtection(t *testing.T) {
 		})
 
 		server := api.NewServer(api.ServerConfig{
-			Port:     8087,
-			Logger:    mockLogger,
+			Port:   8087,
+			Logger: mockLogger,
 			Security: &api.SecurityConfig{
-				APIKey:       "test-key",
-				EnableCSRF:   true,
+				APIKey:     "test-key",
+				EnableCSRF: true,
 			},
 		})
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		
+
 		go func() {
 			if err := server.Start(ctx); err != nil && err != context.Canceled {
 				t.Logf("Server error: %v", err)
 			}
 		}()
-		
+
 		time.Sleep(100 * time.Millisecond)
 
 		// Test request without CSRF token
@@ -408,8 +433,8 @@ func TestSecureHeaders(t *testing.T) {
 		})
 
 		server := api.NewServer(api.ServerConfig{
-			Port:     8088,
-			Logger:    mockLogger,
+			Port:   8088,
+			Logger: mockLogger,
 			Security: &api.SecurityConfig{
 				APIKey: "test-key",
 			},
@@ -417,13 +442,13 @@ func TestSecureHeaders(t *testing.T) {
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		
+
 		go func() {
 			if err := server.Start(ctx); err != nil && err != context.Canceled {
 				t.Logf("Server error: %v", err)
 			}
 		}()
-		
+
 		time.Sleep(100 * time.Millisecond)
 
 		req, err := http.NewRequest("GET", "http://localhost:8088/health", nil)
@@ -436,20 +461,20 @@ func TestSecureHeaders(t *testing.T) {
 
 		// Check for important security headers
 		headers := resp.Header
-		
+
 		// X-Content-Type-Options
 		assert.Equal(t, "nosniff", headers.Get("X-Content-Type-Options"))
-		
+
 		// X-Frame-Options
 		assert.Equal(t, "DENY", headers.Get("X-Frame-Options"))
-		
+
 		// X-XSS-Protection
 		assert.Equal(t, "1; mode=block", headers.Get("X-XSS-Protection"))
-		
+
 		// Strict-Transport-Security (if HTTPS)
 		// Note: This header is typically only set for HTTPS connections
 		// assert.Contains(t, headers.Get("Strict-Transport-Security"), "max-age=")
-		
+
 		// Content-Security-Policy
 		csp := headers.Get("Content-Security-Policy")
 		assert.NotEmpty(t, csp)

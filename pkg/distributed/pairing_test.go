@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
+	"digital.vasic.translator/pkg/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/ssh"
-	"digital.vasic.translator/pkg/events"
 )
 
 const (
@@ -375,10 +375,10 @@ func TestPairingManagerPairWithService(t *testing.T) {
 		sshPool := NewSSHPool()
 		eventBus := events.NewEventBus()
 		pm := NewPairingManager(sshPool, eventBus)
-		
+
 		// Try to pair with a non-existent worker
 		err := pm.PairWithService("non-existent-worker")
-		
+
 		// Should return error
 		if err == nil {
 			t.Error("Expected error when pairing with non-existent worker")
@@ -388,12 +388,12 @@ func TestPairingManagerPairWithService(t *testing.T) {
 			t.Errorf("Expected error '%s', got '%s'", expectedError, err.Error())
 		}
 	})
-	
+
 	t.Run("PairWithService_DiscoveredWorker", func(t *testing.T) {
 		sshPool := NewSSHPool()
 		eventBus := events.NewEventBus()
 		pm := NewPairingManager(sshPool, eventBus)
-		
+
 		// Add a discovered service
 		service := &RemoteService{
 			WorkerID: "test-worker",
@@ -401,20 +401,20 @@ func TestPairingManagerPairWithService(t *testing.T) {
 			Status:   "discovered",
 		}
 		pm.services["test-worker"] = service
-		
+
 		// Pair with the discovered worker
 		err := pm.PairWithService("test-worker")
-		
+
 		// Should not error
 		if err != nil {
 			t.Errorf("Unexpected error when pairing with discovered worker: %v", err)
 		}
-		
+
 		// Check that status changed to "paired"
 		if service.Status != "paired" {
 			t.Errorf("Expected status 'paired', got '%s'", service.Status)
 		}
-		
+
 		// Check that PairedAt is set
 		if service.PairedAt == nil {
 			t.Error("Expected PairedAt to be set")
@@ -428,10 +428,10 @@ func TestPairingManagerUnpairService(t *testing.T) {
 		sshPool := NewSSHPool()
 		eventBus := events.NewEventBus()
 		pm := NewPairingManager(sshPool, eventBus)
-		
+
 		// Try to unpair a non-existent worker
 		err := pm.UnpairService("non-existent-worker")
-		
+
 		// Should return error
 		if err == nil {
 			t.Error("Expected error when unpairing non-existent worker")
@@ -441,12 +441,12 @@ func TestPairingManagerUnpairService(t *testing.T) {
 			t.Errorf("Expected error '%s', got '%s'", expectedError, err.Error())
 		}
 	})
-	
+
 	t.Run("UnpairService_PairedWorker", func(t *testing.T) {
 		sshPool := NewSSHPool()
 		eventBus := events.NewEventBus()
 		pm := NewPairingManager(sshPool, eventBus)
-		
+
 		// Add a paired service
 		service := &RemoteService{
 			WorkerID: "test-worker",
@@ -454,20 +454,20 @@ func TestPairingManagerUnpairService(t *testing.T) {
 			Status:   "paired",
 		}
 		pm.services["test-worker"] = service
-		
+
 		// Unpair the worker
 		err := pm.UnpairService("test-worker")
-		
+
 		// Should not error
 		if err != nil {
 			t.Errorf("Unexpected error when unpairing worker: %v", err)
 		}
-		
+
 		// Check that status changed to "online"
 		if service.Status != "online" {
 			t.Errorf("Expected status 'online', got '%s'", service.Status)
 		}
-		
+
 		// Check that PairedAt is nil
 		if service.PairedAt != nil {
 			t.Error("Expected PairedAt to be nil")
@@ -481,10 +481,10 @@ func TestPairingManagerDiscoverService(t *testing.T) {
 		sshPool := NewSSHPool()
 		eventBus := events.NewEventBus()
 		pm := NewPairingManager(sshPool, eventBus)
-		
+
 		// Try to discover a non-existent worker
 		_, err := pm.DiscoverService(context.Background(), "non-existent-worker")
-		
+
 		// Should return error
 		if err == nil {
 			t.Error("Expected error when discovering non-existent worker")
@@ -501,137 +501,137 @@ func TestPairingManagerBasic(t *testing.T) {
 	t.Run("Constructor", func(t *testing.T) {
 		sshPool := NewSSHPool()
 		eventBus := events.NewEventBus()
-		
+
 		pm := NewPairingManager(sshPool, eventBus)
-		
+
 		if pm == nil {
 			t.Error("Expected non-nil PairingManager")
 		}
-		
+
 		if pm.services == nil {
 			t.Error("Expected services map to be initialized")
 		}
-		
+
 		if len(pm.services) != 0 {
 			t.Error("Expected empty services map")
 		}
-		
+
 		if pm.httpClient == nil {
 			t.Error("Expected httpClient to be initialized")
 		}
-		
+
 		if pm.checkInterval != 30*time.Second {
 			t.Errorf("Expected checkInterval to be 30s, got %v", pm.checkInterval)
 		}
 	})
-	
+
 	t.Run("GetPairedServices_Empty", func(t *testing.T) {
 		sshPool := NewSSHPool()
 		eventBus := events.NewEventBus()
 		pm := NewPairingManager(sshPool, eventBus)
-		
+
 		paired := pm.GetPairedServices()
-		
+
 		if paired == nil {
 			t.Error("Expected non-nil paired services map")
 		}
-		
+
 		if len(paired) != 0 {
 			t.Error("Expected empty paired services map")
 		}
 	})
-	
+
 	t.Run("GetPairedServices_MixedStatuses", func(t *testing.T) {
 		sshPool := NewSSHPool()
 		eventBus := events.NewEventBus()
 		pm := NewPairingManager(sshPool, eventBus)
-		
+
 		// Add test services with different statuses
 		pm.services["worker1"] = &RemoteService{
 			WorkerID: "worker1",
 			Status:   "paired",
 		}
-		
+
 		pm.services["worker2"] = &RemoteService{
 			WorkerID: "worker2",
 			Status:   "discovered",
 		}
-		
+
 		pm.services["worker3"] = &RemoteService{
 			WorkerID: "worker3",
 			Status:   "paired",
 		}
-		
+
 		paired := pm.GetPairedServices()
-		
+
 		if len(paired) != 2 {
 			t.Errorf("Expected 2 paired services, got %d", len(paired))
 		}
-		
+
 		if _, exists := paired["worker1"]; !exists {
 			t.Error("Expected worker1 to be in paired services")
 		}
-		
+
 		if _, exists := paired["worker2"]; exists {
 			t.Error("Expected worker2 to NOT be in paired services")
 		}
-		
+
 		if _, exists := paired["worker3"]; !exists {
 			t.Error("Expected worker3 to be in paired services")
 		}
 	})
-	
+
 	t.Run("GetServiceStatus_Existing", func(t *testing.T) {
 		sshPool := NewSSHPool()
 		eventBus := events.NewEventBus()
 		pm := NewPairingManager(sshPool, eventBus)
-		
+
 		// Add a test service
 		pm.services["worker1"] = &RemoteService{
 			WorkerID: "worker1",
 			Status:   "paired",
 		}
-		
+
 		status, err := pm.GetServiceStatus("worker1")
-		
+
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
 		}
-		
+
 		if status != "paired" {
 			t.Errorf("Expected status 'paired', got '%s'", status)
 		}
 	})
-	
+
 	t.Run("GetServiceStatus_NonExistent", func(t *testing.T) {
 		sshPool := NewSSHPool()
 		eventBus := events.NewEventBus()
 		pm := NewPairingManager(sshPool, eventBus)
-		
+
 		status, err := pm.GetServiceStatus("nonexistent")
-		
+
 		if err == nil {
 			t.Error("Expected error for non-existent service")
 		}
-		
+
 		if status != "unknown" {
 			t.Errorf("Expected status 'unknown', got '%s'", status)
 		}
-		
+
 		expectedError := "service nonexistent not found"
 		if err.Error() != expectedError {
 			t.Errorf("Expected error '%s', got '%s'", expectedError, err.Error())
 		}
 	})
-	
+
 	t.Run("CloseGracefully", func(t *testing.T) {
 		sshPool := NewSSHPool()
 		eventBus := events.NewEventBus()
 		pm := NewPairingManager(sshPool, eventBus)
-		
+
 		// Should not panic when closing
 		pm.Close()
-		
+
 		// Check that context is cancelled
 		select {
 		case <-pm.ctx.Done():

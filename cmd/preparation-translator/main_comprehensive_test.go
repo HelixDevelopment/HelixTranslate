@@ -50,9 +50,9 @@ func TestMainFunctionComprehensive(t *testing.T) {
 				assert.NotPanics(t, func() {
 					oldArgs := os.Args
 					defer func() { os.Args = oldArgs }()
-					
+
 					os.Args = append([]string{"preparation-translator"}, tt.args...)
-					
+
 					defer func() {
 						if r := recover(); r != nil {
 							// Expected due to os.Exit
@@ -98,16 +98,16 @@ func TestBasicComponents(t *testing.T) {
 func TestPreparationWorkflowComprehensive(t *testing.T) {
 	eventBus := events.NewEventBus()
 	_ = eventBus // Use eventBus to avoid unused variable error
-	
+
 	// Test preparation config
 	config := preparation.PreparationConfig{
-		PassCount:  2,
-		Providers:  []string{"deepseek"},
-		DetailLevel: "standard",
+		PassCount:      2,
+		Providers:      []string{"deepseek"},
+		DetailLevel:    "standard",
 		SourceLanguage: "English",
 		TargetLanguage: "Spanish",
 	}
-	
+
 	assert.NotNil(t, config)
 	assert.Equal(t, 2, config.PassCount)
 	assert.Equal(t, "standard", config.DetailLevel)
@@ -142,8 +142,8 @@ func TestPreparationPasses(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			config := preparation.PreparationConfig{
-				PassCount:  tt.count,
-				DetailLevel: tt.passType,
+				PassCount:      tt.count,
+				DetailLevel:    tt.passType,
 				SourceLanguage: "English",
 				TargetLanguage: "Spanish",
 			}
@@ -157,11 +157,11 @@ func TestPreparationPasses(t *testing.T) {
 func TestTranslationPreparation(t *testing.T) {
 	eventBus := events.NewEventBus()
 	_ = eventBus // Use eventBus to avoid unused variable error
-	
+
 	// Create mock translator
 	mockTranslator := &MockPreparationTranslator{}
 	_ = mockTranslator // Use mockTranslator to avoid unused variable error
-	
+
 	// Test book creation
 	book := &ebook.Book{
 		Metadata: ebook.Metadata{
@@ -180,21 +180,21 @@ func TestTranslationPreparation(t *testing.T) {
 		},
 	}
 	assert.NotNil(t, book)
-	
+
 	// Test source and target languages
 	sourceLang := language.English
 	targetLang := language.Spanish
 	assert.NotNil(t, sourceLang)
 	assert.NotNil(t, targetLang)
-	
+
 	// Test preparation with mock translator
 	config := preparation.PreparationConfig{
-		PassCount: 2,
-		Providers: []string{"deepseek"},
+		PassCount:      2,
+		Providers:      []string{"deepseek"},
 		SourceLanguage: "English",
 		TargetLanguage: "Spanish",
 	}
-	
+
 	assert.NotNil(t, config)
 }
 
@@ -236,7 +236,7 @@ func TestLanguageAnalysis(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			sourceLang := language.English
 			targetLang := language.Spanish
-			
+
 			if tt.expectError {
 				// Test error cases here
 				_ = sourceLang
@@ -278,11 +278,11 @@ func TestProviderConfiguration(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			config := preparation.PreparationConfig{
-				Providers: tt.providers,
+				Providers:      tt.providers,
 				SourceLanguage: "English",
 				TargetLanguage: "Spanish",
 			}
-			
+
 			assert.Equal(t, len(tt.providers), len(config.Providers))
 			for i, provider := range tt.providers {
 				assert.Equal(t, provider, config.Providers[i])
@@ -337,7 +337,7 @@ func TestEbookStructure(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equal(t, tt.expected, len(tt.book.Chapters))
-			
+
 			for i, chapter := range tt.book.Chapters {
 				assert.NotEmpty(t, chapter.Title)
 				assert.NotNil(t, chapter.Sections)
@@ -351,7 +351,7 @@ func TestEbookStructure(t *testing.T) {
 func TestPreparationAnalysis(t *testing.T) {
 	eventBus := events.NewEventBus()
 	_ = eventBus // Use eventBus to avoid unused variable error
-	
+
 	// Create test book
 	book := &ebook.Book{
 		Metadata: ebook.Metadata{
@@ -367,7 +367,7 @@ func TestPreparationAnalysis(t *testing.T) {
 		},
 	}
 	_ = book // Use book to avoid unused variable error
-	
+
 	// Test preparation configuration
 	config := preparation.PreparationConfig{
 		AnalyzeContentType: true,
@@ -377,16 +377,16 @@ func TestPreparationAnalysis(t *testing.T) {
 		SourceLanguage:     "English",
 		TargetLanguage:     "Spanish",
 	}
-	
+
 	assert.NotNil(t, config)
-	
+
 	// Test analysis creation
 	sourceLang := language.English
 	targetLang := language.Spanish
-	
+
 	// Create mock translator
 	mockTranslator := &MockPreparationTranslator{}
-	
+
 	// Test preparation with analysis
 	_ = config
 	_ = sourceLang
@@ -404,17 +404,17 @@ func TestErrorHandlingComprehensive(t *testing.T) {
 		{
 			name:        "invalid file path",
 			errorType:   "file",
-			expectError:  true,
+			expectError: true,
 		},
 		{
 			name:        "invalid configuration",
 			errorType:   "config",
-			expectError:  true,
+			expectError: true,
 		},
 		{
 			name:        "missing provider",
 			errorType:   "provider",
-			expectError:  true,
+			expectError: true,
 		},
 	}
 
@@ -429,23 +429,23 @@ func TestErrorHandlingComprehensive(t *testing.T) {
 					assert.Error(t, err)
 					assert.True(t, os.IsNotExist(err))
 				}
-				
+
 			case "config":
 				// Test invalid configuration
 				config := preparation.PreparationConfig{
-					PassCount: 0,
-					Providers: []string{},
+					PassCount:      0,
+					Providers:      []string{},
 					SourceLanguage: "English",
 					TargetLanguage: "Spanish",
 				}
 				assert.Equal(t, 0, config.PassCount)
 				assert.Empty(t, config.Providers)
-				
+
 			case "provider":
 				// Test missing provider
 				providers := []string{"nonexistent-provider"}
 				config := preparation.PreparationConfig{
-					Providers: providers,
+					Providers:      providers,
 					SourceLanguage: "English",
 					TargetLanguage: "Spanish",
 				}
@@ -484,9 +484,9 @@ func (m *MockPreparationTranslator) GetStats() translator.TranslationStats {
 // TestMainFunctionWithFlags tests main function with various flag combinations
 func TestMainFunctionWithFlags(t *testing.T) {
 	tests := []struct {
-		name          string
-		args          []string
-		validateFunc   func(t *testing.T)
+		name         string
+		args         []string
+		validateFunc func(t *testing.T)
 	}{
 		{
 			name: "invalid input file",

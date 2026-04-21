@@ -29,7 +29,7 @@ func TestDeploymentConfigComprehensive(t *testing.T) {
 				{HostPath: "/host/data", ContainerPath: "/container/data", ReadOnly: false},
 				{HostPath: "/host/config", ContainerPath: "/container/config", ReadOnly: true},
 			},
-			Networks: []string{"network1", "network2"},
+			Networks:      []string{"network1", "network2"},
 			RestartPolicy: "unless-stopped",
 			HealthCheck: &HealthCheckConfig{
 				Test:        []string{"CMD", "curl", "-f", "http://localhost:8080/health"},
@@ -80,38 +80,38 @@ func TestDeploymentConfigComprehensive(t *testing.T) {
 
 	t.Run("Port mapping validation", func(t *testing.T) {
 		tests := []struct {
-			name string
-			port PortMapping
+			name  string
+			port  PortMapping
 			valid bool
 		}{
 			{
-				name: "Valid TCP port",
-				port: PortMapping{HostPort: 8080, ContainerPort: 8080, Protocol: "tcp"},
+				name:  "Valid TCP port",
+				port:  PortMapping{HostPort: 8080, ContainerPort: 8080, Protocol: "tcp"},
 				valid: true,
 			},
 			{
-				name: "Valid UDP port",
-				port: PortMapping{HostPort: 8081, ContainerPort: 8081, Protocol: "udp"},
+				name:  "Valid UDP port",
+				port:  PortMapping{HostPort: 8081, ContainerPort: 8081, Protocol: "udp"},
 				valid: true,
 			},
 			{
-				name: "Port with empty protocol",
-				port: PortMapping{HostPort: 8082, ContainerPort: 8082, Protocol: ""},
+				name:  "Port with empty protocol",
+				port:  PortMapping{HostPort: 8082, ContainerPort: 8082, Protocol: ""},
 				valid: true, // Empty protocol might default to TCP
 			},
 			{
-				name: "Zero host port",
-				port: PortMapping{HostPort: 0, ContainerPort: 8080, Protocol: "tcp"},
+				name:  "Zero host port",
+				port:  PortMapping{HostPort: 0, ContainerPort: 8080, Protocol: "tcp"},
 				valid: false, // Port 0 is typically invalid
 			},
 			{
-				name: "Zero container port",
-				port: PortMapping{HostPort: 8080, ContainerPort: 0, Protocol: "tcp"},
+				name:  "Zero container port",
+				port:  PortMapping{HostPort: 8080, ContainerPort: 0, Protocol: "tcp"},
 				valid: false, // Port 0 is typically invalid
 			},
 			{
-				name: "High-numbered ports",
-				port: PortMapping{HostPort: 65000, ContainerPort: 65000, Protocol: "tcp"},
+				name:  "High-numbered ports",
+				port:  PortMapping{HostPort: 65000, ContainerPort: 65000, Protocol: "tcp"},
 				valid: true,
 			},
 		}
@@ -151,10 +151,10 @@ func TestPortMappingComprehensive(t *testing.T) {
 
 	t.Run("Port mapping edge cases", func(t *testing.T) {
 		testCases := []struct {
-			name           string
-			hostPort       int
-			containerPort  int
-			expectedValid  bool
+			name          string
+			hostPort      int
+			containerPort int
+			expectedValid bool
 		}{
 			{
 				name:          "Minimum valid port",
@@ -398,10 +398,10 @@ func TestDeploymentPlanComprehensive(t *testing.T) {
 
 	t.Run("Deployment plan edge cases", func(t *testing.T) {
 		testCases := []struct {
-			name    string
-			plan    *DeploymentPlan
-			valid   bool
-			reason  string
+			name   string
+			plan   *DeploymentPlan
+			valid  bool
+			reason string
 		}{
 			{
 				name: "Nil main config",
@@ -468,7 +468,7 @@ func TestDeploymentStatusComprehensive(t *testing.T) {
 		}
 
 		capabilities := map[string]interface{}{
-			"cpu":    "4 cores",
+			"cpu":     "4 cores",
 			"memory":  "8GB",
 			"storage": "100GB",
 		}
@@ -842,7 +842,7 @@ func TestAPICommunicationLogComprehensive(t *testing.T) {
 			URL:          "/api/v1/translate",
 			StatusCode:   500,
 			RequestSize:  1024,
-			ResponseSize:  256, // Error response size
+			ResponseSize: 256, // Error response size
 			Duration:     100 * time.Millisecond,
 			UserAgent:    "TranslateClient/1.0",
 			Error:        "Internal server error",
@@ -986,14 +986,14 @@ func TestPerformanceBenchmarksComprehensive(t *testing.T) {
 	t.Run("DeploymentStatus creation benchmark", func(t *testing.T) {
 		now := time.Now()
 		status := &DeploymentStatus{
-			InstanceID:   "instance-123",
-			Status:       "running",
-			Host:         "worker.example.com",
-			Port:         8080,
-			ContainerID:  "container-456",
-			LastSeen:     now,
+			InstanceID:  "instance-123",
+			Status:      "running",
+			Host:        "worker.example.com",
+			Port:        8080,
+			ContainerID: "container-456",
+			LastSeen:    now,
 			Capabilities: map[string]interface{}{
-				"cpu":    "4 cores",
+				"cpu":     "4 cores",
 				"memory":  "8GB",
 				"storage": "100GB",
 			},

@@ -69,7 +69,7 @@ func NewOpenAIClient(config TranslationConfig) (*OpenAIClient, error) {
 		if config.Provider != "" && config.Provider != "openai" {
 			isDelegated = true
 		}
-		
+
 		if !isDelegated {
 			if strings.TrimSpace(config.Model) == "" {
 				return nil, fmt.Errorf("model cannot be empty or whitespace")
@@ -83,7 +83,7 @@ func NewOpenAIClient(config TranslationConfig) (*OpenAIClient, error) {
 				}
 			}
 			if !modelValid {
-				return nil, fmt.Errorf("model '%s' is not valid for OpenAI. Valid models: %v", 
+				return nil, fmt.Errorf("model '%s' is not valid for OpenAI. Valid models: %v",
 					config.Model, validModels)
 			}
 		}

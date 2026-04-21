@@ -19,29 +19,29 @@ import (
 )
 
 type TranslationProgress struct {
-	SessionID        string
-	CurrentStep      string
-	Progress         float64
-	Message          string
-	StartTime        time.Time
-	TotalItems       int
-	CurrentItem      string
-	Error            string
-	WSClients        map[string]*websocket.Conn
+	SessionID   string
+	CurrentStep string
+	Progress    float64
+	Message     string
+	StartTime   time.Time
+	TotalItems  int
+	CurrentItem string
+	Error       string
+	WSClients   map[string]*websocket.Conn
 }
 
 type WebSocketEvent struct {
-	Type         string                 `json:"type"`
-	SessionID    string                 `json:"session_id"`
-	Step         string                 `json:"step,omitempty"`
-	Message      string                 `json:"message,omitempty"`
-	Progress     float64                `json:"progress,omitempty"`
-	Error        string                 `json:"error,omitempty"`
-	CurrentItem  string                 `json:"current_item,omitempty"`
-	TotalItems   int                    `json:"total_items,omitempty"`
-	Timestamp    int64                  `json:"timestamp"`
-	Data         map[string]interface{} `json:"data,omitempty"`
-	WorkerInfo   *WorkerInfo            `json:"worker_info,omitempty"`
+	Type        string                 `json:"type"`
+	SessionID   string                 `json:"session_id"`
+	Step        string                 `json:"step,omitempty"`
+	Message     string                 `json:"message,omitempty"`
+	Progress    float64                `json:"progress,omitempty"`
+	Error       string                 `json:"error,omitempty"`
+	CurrentItem string                 `json:"current_item,omitempty"`
+	TotalItems  int                    `json:"total_items,omitempty"`
+	Timestamp   int64                  `json:"timestamp"`
+	Data        map[string]interface{} `json:"data,omitempty"`
+	WorkerInfo  *WorkerInfo            `json:"worker_info,omitempty"`
 }
 
 type WorkerInfo struct {
@@ -116,7 +116,7 @@ func main() {
 
 	// Initialize SSH worker
 	emitProgressEvent(progress, "translation_progress", "Connecting to SSH worker...", 5)
-	
+
 	sshWorker, err := sshworker.NewSSHWorker(*workerConfig, logger)
 	if err != nil {
 		emitErrorEvent(progress, "worker_connection", fmt.Sprintf("Failed to create SSH worker: %v", err))
@@ -167,15 +167,15 @@ func main() {
 		}
 
 		// Calculate progress (25% to 85% for translation phase)
-		progress.Progress = 25.0 + (float64(i+1)/float64(len(lines)) * 60.0)
+		progress.Progress = 25.0 + (float64(i+1) / float64(len(lines)) * 60.0)
 		progress.CurrentItem = fmt.Sprintf("line_%d", i+1)
 		progress.Message = fmt.Sprintf("Translating line %d/%d via SSH worker", i+1, len(lines))
-		
+
 		emitProgressEventWithWorker(progress, "translation_progress", progress.Message, progress.Progress, workerInfo)
 
 		// Create translation command for remote worker
 		translationCmd := createTranslationCommand(line, "russian", "serbian")
-		
+
 		// Execute command on remote worker
 		result, err := sshWorker.ExecuteCommand(ctx, translationCmd)
 		var translatedLine string
@@ -192,7 +192,7 @@ func main() {
 			}
 			translatedLines = append(translatedLines, translatedLine)
 		}
-		
+
 		fmt.Printf("🔄 Line %d/%d (SSH): %s\n", i+1, len(lines), translatedLine)
 	}
 
@@ -206,8 +206,8 @@ func main() {
 	}
 
 	duration := time.Since(progress.StartTime)
-	emitProgressEventWithWorker(progress, "translation_completed", 
-		fmt.Sprintf("SSH Worker translation completed successfully! Output saved to %s (Duration: %v)", outputFile, duration), 
+	emitProgressEventWithWorker(progress, "translation_completed",
+		fmt.Sprintf("SSH Worker translation completed successfully! Output saved to %s (Duration: %v)", outputFile, duration),
 		100, workerInfo)
 
 	fmt.Printf("\n🎉 SSH Worker Translation completed!\n")
@@ -239,7 +239,7 @@ func runDemoMode(sessionID, inputFile, outputFile string, progress *TranslationP
 
 func runDemoModeWithWorkerInfo(sessionID, inputFile, outputFile string, progress *TranslationProgress, workerInfo *WorkerInfo) {
 	fmt.Printf("🎭 Running in demo mode with simulated SSH worker responses\n")
-	
+
 	// Read input file
 	content, err := os.ReadFile(inputFile)
 	if err != nil {
@@ -261,16 +261,16 @@ func runDemoModeWithWorkerInfo(sessionID, inputFile, outputFile string, progress
 	// Translate line by line (demo mode)
 	translatedLines := make([]string, 0, len(lines))
 	for i, line := range lines {
-		progress.Progress = 10.0 + (float64(i+1)/float64(len(lines)) * 75.0)
+		progress.Progress = 10.0 + (float64(i+1) / float64(len(lines)) * 75.0)
 		progress.CurrentItem = fmt.Sprintf("line_%d", i+1)
 		progress.Message = fmt.Sprintf("Translating line %d/%d via demo SSH worker", i+1, len(lines))
-		
+
 		emitProgressEventWithWorker(progress, "translation_progress", progress.Message, progress.Progress, workerInfo)
 
 		time.Sleep(800 * time.Millisecond) // Simulate SSH + LLM processing time
 		translatedLine := translateDemoText(line)
 		translatedLines = append(translatedLines, translatedLine)
-		
+
 		fmt.Printf("🔄 Line %d/%d (Demo SSH): %s\n", i+1, len(lines), translatedLine)
 	}
 
@@ -281,7 +281,7 @@ func runDemoModeWithWorkerInfo(sessionID, inputFile, outputFile string, progress
 		log.Fatalf("Failed to write output: %v", err)
 	}
 
-	emitProgressEventWithWorker(progress, "translation_completed", 
+	emitProgressEventWithWorker(progress, "translation_completed",
 		fmt.Sprintf("Demo SSH worker translation completed! Output saved to %s", outputFile), 100, workerInfo)
 
 	fmt.Printf("\n🎉 Demo SSH Worker Translation completed!\n")
@@ -323,7 +323,7 @@ func readWorkerFromConfig() *sshworker.SSHWorkerConfig {
 
 	var config struct {
 		Distributed struct {
-			Enabled bool            `json:"enabled"`
+			Enabled bool `json:"enabled"`
 			Workers map[string]struct {
 				Name     string `json:"name"`
 				Host     string `json:"host"`
@@ -358,7 +358,7 @@ func readWorkerFromConfig() *sshworker.SSHWorkerConfig {
 }
 
 func createTranslationCommand(text, sourceLang, targetLang string) string {
-	return fmt.Sprintf("echo '%s' | /path/to/llama.cpp/main -m /path/to/model --color -c 2048 --temp 0.7 -n 256 --repeat-penalty 1.1 -i \"Translate this %s text to %s:\"", 
+	return fmt.Sprintf("echo '%s' | /path/to/llama.cpp/main -m /path/to/model --color -c 2048 --temp 0.7 -n 256 --repeat-penalty 1.1 -i \"Translate this %s text to %s:\"",
 		text, sourceLang, targetLang)
 }
 
@@ -368,14 +368,14 @@ func emitProgressEvent(progress *TranslationProgress, eventType, message string,
 	progress.Progress = progressPercent
 
 	event := WebSocketEvent{
-		Type:       eventType,
-		SessionID:  progress.SessionID,
-		Step:       eventType,
-		Message:    message,
-		Progress:   progressPercent,
+		Type:        eventType,
+		SessionID:   progress.SessionID,
+		Step:        eventType,
+		Message:     message,
+		Progress:    progressPercent,
 		CurrentItem: progress.CurrentItem,
-		TotalItems: progress.TotalItems,
-		Timestamp:  time.Now().Unix(),
+		TotalItems:  progress.TotalItems,
+		Timestamp:   time.Now().Unix(),
 	}
 
 	sendWebSocketEvent(progress, event)
@@ -388,15 +388,15 @@ func emitProgressEventWithWorker(progress *TranslationProgress, eventType, messa
 	progress.Progress = progressPercent
 
 	event := WebSocketEvent{
-		Type:       eventType,
-		SessionID:  progress.SessionID,
-		Step:       eventType,
-		Message:    message,
-		Progress:   progressPercent,
+		Type:        eventType,
+		SessionID:   progress.SessionID,
+		Step:        eventType,
+		Message:     message,
+		Progress:    progressPercent,
 		CurrentItem: progress.CurrentItem,
-		TotalItems: progress.TotalItems,
-		Timestamp:  time.Now().Unix(),
-		WorkerInfo: workerInfo,
+		TotalItems:  progress.TotalItems,
+		Timestamp:   time.Now().Unix(),
+		WorkerInfo:  workerInfo,
 	}
 
 	sendWebSocketEvent(progress, event)
@@ -407,13 +407,13 @@ func emitErrorEvent(progress *TranslationProgress, step, message string) {
 	progress.Error = message
 
 	event := WebSocketEvent{
-		Type:       "translation_error",
-		SessionID:  progress.SessionID,
-		Step:       step,
-		Message:    message,
-		Error:      message,
-		Progress:   progress.Progress,
-		Timestamp:  time.Now().Unix(),
+		Type:      "translation_error",
+		SessionID: progress.SessionID,
+		Step:      step,
+		Message:   message,
+		Error:     message,
+		Progress:  progress.Progress,
+		Timestamp: time.Now().Unix(),
 	}
 
 	sendWebSocketEvent(progress, event)
@@ -432,12 +432,12 @@ func sendWebSocketEvent(progress *TranslationProgress, event WebSocketEvent) {
 
 func connectWebSocket(sessionID string) (*websocket.Conn, error) {
 	u := fmt.Sprintf("ws://localhost:8090/ws?session_id=%s&client_id=ssh-worker-translator", sessionID)
-	
+
 	conn, _, err := websocket.DefaultDialer.Dial(u, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to WebSocket: %w", err)
 	}
-	
+
 	return conn, nil
 }
 
@@ -449,7 +449,7 @@ func listenForWebSocketEvents(ws *websocket.Conn) {
 			log.Printf("WebSocket read error: %v", err)
 			return
 		}
-		
+
 		log.Printf("📩 Received WebSocket message: %+v", msg)
 	}
 }
@@ -464,34 +464,34 @@ func getEnvOrDefault(key, defaultValue string) string {
 // Simple demo translation (Russian to Serbian Cyrillic)
 func translateDemoText(text string) string {
 	replacements := map[string]string{
-		"Это":         "Ово",
-		"образец":     "пример",
-		"русского":    "руског",
-		"текста":      "текста",
-		"для":         "за",
-		"проверки":    "проверу",
-		"функции":     "функције",
-		"перевода":    "превода",
-		"Он":          "Он",
-		"содержит":    "садржи",
-		"несколько":   "неколико",
-		"предложений": "реченица",
-		"и":           "и",
-		"подходит":    "одговара",
+		"Это":          "Ово",
+		"образец":      "пример",
+		"русского":     "руског",
+		"текста":       "текста",
+		"для":          "за",
+		"проверки":     "проверу",
+		"функции":      "функције",
+		"перевода":     "превода",
+		"Он":           "Он",
+		"содержит":     "садржи",
+		"несколько":    "неколико",
+		"предложений":  "реченица",
+		"и":            "и",
+		"подходит":     "одговара",
 		"тестирования": "тестирања",
-		"Текст":       "Текст",
-		"включает":    "укључује",
-		"различные":   "различите",
-		"знаки":      "знакове",
-		"препинания":  "знаке",
-		"структуры":   "структуре",
-		".":           ".",
+		"Текст":        "Текст",
+		"включает":     "укључује",
+		"различные":    "различите",
+		"знаки":        "знакове",
+		"препинания":   "знаке",
+		"структуры":    "структуре",
+		".":            ".",
 	}
-	
+
 	result := text
 	for russian, serbian := range replacements {
 		result = strings.ReplaceAll(result, russian, serbian)
 	}
-	
+
 	return result
 }

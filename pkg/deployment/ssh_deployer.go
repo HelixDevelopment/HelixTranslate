@@ -34,7 +34,7 @@ func (m *MockSSHClient) Dial(ctx context.Context, network, addr string, config *
 	if m.shouldFailAuth {
 		return nil, fmt.Errorf("authentication failed for user %s", config.User)
 	}
-	
+
 	m.connectedServers[addr] = true
 	return &ssh.Client{}, nil
 }
@@ -57,14 +57,14 @@ func (m *MockSSHClient) GetExecutedCommands(addr string) []string {
 
 // SSHDeployConfig represents SSH deployment configuration
 type SSHDeployConfig struct {
-	Host         string        `json:"host"`
-	Port         int           `json:"port"`
-	Username     string        `json:"username"`
-	Password     string        `json:"password,omitempty"`
-	KeyPath      string        `json:"key_path,omitempty"`
-	KeyData      []byte        `json:"key_data,omitempty"`
-	Timeout      time.Duration `json:"timeout"`
-	ConnectRetries int         `json:"connect_retries"`
+	Host           string        `json:"host"`
+	Port           int           `json:"port"`
+	Username       string        `json:"username"`
+	Password       string        `json:"password,omitempty"`
+	KeyPath        string        `json:"key_path,omitempty"`
+	KeyData        []byte        `json:"key_data,omitempty"`
+	Timeout        time.Duration `json:"timeout"`
+	ConnectRetries int           `json:"connect_retries"`
 	CommandTimeout time.Duration `json:"command_timeout"`
 }
 
@@ -87,11 +87,11 @@ func (c *SSHDeployConfig) Validate() error {
 	if c.CommandTimeout == 0 {
 		c.CommandTimeout = 10 * time.Minute
 	}
-	
+
 	if c.Password == "" && c.KeyPath == "" && len(c.KeyData) == 0 {
 		return &ValidationError{Field: "auth", Message: "either password, key_path, or key_data is required"}
 	}
-	
+
 	return nil
 }
 
@@ -137,23 +137,23 @@ func (d *SSHDeployer) Connect(ctx context.Context) error {
 	if err := d.config.Validate(); err != nil {
 		return &ConnectionError{Type: "config_validation", Err: err}
 	}
-	
+
 	// Prepare SSH client configuration
 	sshConfig := &ssh.ClientConfig{
 		User:            d.config.Username,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // Only for testing
 		Timeout:         d.config.Timeout,
 	}
-	
+
 	// Setup authentication
 	if d.config.Password != "" {
 		sshConfig.Auth = append(sshConfig.Auth, ssh.Password(d.config.Password))
 	}
-	
+
 	if d.config.KeyPath != "" || len(d.config.KeyData) > 0 {
 		var keyData []byte
 		var err error
-		
+
 		if len(d.config.KeyData) > 0 {
 			keyData = d.config.KeyData
 		} else if d.config.KeyPath != "" {
@@ -163,26 +163,26 @@ func (d *SSHDeployer) Connect(ctx context.Context) error {
 				return &ConnectionError{Type: "key_read", Err: err}
 			}
 		}
-		
+
 		signer, err := ssh.ParsePrivateKey(keyData)
 		if err != nil {
 			return &ConnectionError{Type: "key_parse", Err: err}
 		}
-		
+
 		sshConfig.Auth = append(sshConfig.Auth, ssh.PublicKeys(signer))
 	}
-	
+
 	// Attempt connection with retries
 	addr := fmt.Sprintf("%s:%d", d.config.Host, d.config.Port)
 	var lastErr error
-	
+
 	for attempt := 1; attempt <= d.config.ConnectRetries; attempt++ {
 		select {
 		case <-ctx.Done():
 			return &ConnectionError{Type: "timeout", Err: ctx.Err()}
 		default:
 		}
-		
+
 		client, err := d.client.Dial(ctx, "tcp", addr, sshConfig)
 		if err == nil {
 			if client != nil {
@@ -190,13 +190,13 @@ func (d *SSHDeployer) Connect(ctx context.Context) error {
 			}
 			return nil
 		}
-		
+
 		lastErr = err
 		if attempt < d.config.ConnectRetries {
 			time.Sleep(time.Duration(attempt) * time.Second)
 		}
 	}
-	
+
 	return &ConnectionError{Type: "connect_failed", Err: lastErr}
 }
 
@@ -219,16 +219,16 @@ func (d *SSHDeployer) ExecuteCommand(ctx context.Context, command string) (*Comm
 	if err := d.Connect(ctx); err != nil {
 		return nil, err
 	}
-	
+
 	// Mock implementation for testing - real implementation would create session
 	result := &CommandResult{
-		Command: command,
+		Command:  command,
 		ExitCode: 0,
 		Stdout:   "Mock command execution successful",
 		Stderr:   "",
 		Duration: time.Millisecond * 100,
 	}
-	
+
 	return result, nil
 }
 
@@ -258,6 +258,11 @@ func (d *SSHDeployer) UpdateInstance(ctx context.Context, instanceID string, con
 
 // RestartInstance restarts a deployed instance
 func (d *SSHDeployer) RestartInstance(ctx context.Context, instanceID string) error {
+	return nil
+}
+
+// StopInstance stops a deployed instance
+func (d *SSHDeployer) StopInstance(ctx context.Context, instanceID string) error {
 	return nil
 }
 

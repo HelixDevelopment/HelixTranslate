@@ -2,8 +2,8 @@ package llm
 
 import (
 	"context"
-	"fmt"
 	"errors"
+	"fmt"
 )
 
 // MockLLMClient implements LLMClient interface for testing
@@ -45,14 +45,14 @@ func (m *MockLLMClient) SetSizeError(sizeError bool) {
 // Translate implements LLMClient interface
 func (m *MockLLMClient) Translate(ctx context.Context, text string, prompt string) (string, error) {
 	m.callCount++
-	
+
 	if m.shouldFail && m.callCount <= m.maxCallsToFail {
 		if m.sizeError {
 			return "", errors.New("max_tokens limit exceeded")
 		}
 		return "", errors.New("mock API error")
 	}
-	
+
 	if response, ok := m.responses[text]; ok {
 		return response, nil
 	}

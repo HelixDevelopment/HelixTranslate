@@ -18,10 +18,10 @@ func TestResultCache_Set(t *testing.T) {
 		config.CacheTTL = time.Second
 		config.MaxCacheSize = 10
 		cache := NewResultCache(config)
-		
+
 		// Set a value
 		cache.Set("test-key", "test-value")
-		
+
 		// Get the value
 		value, exists := cache.Get("test-key")
 		if !exists {
@@ -31,16 +31,16 @@ func TestResultCache_Set(t *testing.T) {
 			t.Errorf("Expected 'test-value', got '%s'", value)
 		}
 	})
-	
+
 	t.Run("Set_Expiration", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		config.CacheTTL = 10 * time.Millisecond
 		config.MaxCacheSize = 10
 		cache := NewResultCache(config)
-		
+
 		// Set a value
 		cache.Set("test-key", "test-value")
-		
+
 		// Should exist immediately
 		value, exists := cache.Get("test-key")
 		if !exists {
@@ -49,36 +49,36 @@ func TestResultCache_Set(t *testing.T) {
 		if value != "test-value" {
 			t.Errorf("Expected 'test-value', got '%s'", value)
 		}
-		
+
 		// Wait for expiration
 		time.Sleep(20 * time.Millisecond)
-		
+
 		// Should not exist after expiration
 		_, exists = cache.Get("test-key")
 		if exists {
 			t.Error("Expected key to be expired")
 		}
 	})
-	
+
 	t.Run("Set_CapacityLimit", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		config.CacheTTL = time.Hour
 		config.MaxCacheSize = 2
 		cache := NewResultCache(config)
-		
+
 		// Fill cache to capacity
 		cache.Set("key1", "value1")
 		cache.Set("key2", "value2")
-		
+
 		// Add one more - should evict oldest
 		cache.Set("key3", "value3")
-		
+
 		// Oldest should be evicted
 		_, exists := cache.Get("key1")
 		if exists {
 			t.Error("Expected key1 to be evicted (oldest)")
 		}
-		
+
 		// Others should exist
 		value, exists := cache.Get("key2")
 		if !exists {
@@ -87,7 +87,7 @@ func TestResultCache_Set(t *testing.T) {
 		if value != "value2" {
 			t.Errorf("Expected 'value2', got '%s'", value)
 		}
-		
+
 		value, exists = cache.Get("key3")
 		if !exists {
 			t.Error("Expected key3 to exist")
@@ -103,49 +103,49 @@ func TestPerformance_ConnectionPool(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		security := DefaultSecurityConfig()
 		auditor := NewSecurityAuditor(false, &MockSecurityLogger{})
-		
+
 		pool := NewConnectionPool(config, security, auditor)
 		if pool == nil {
 			t.Error("Expected non-nil connection pool")
 		}
-		
+
 		// Test GetPoolStats
 		stats := pool.GetPoolStats()
 		if stats == nil {
 			t.Error("Expected non-nil stats")
 		}
-		
+
 		// Check initial stats values
 		if total, ok := stats["total_connections"].(int); !ok || total != 0 {
 			t.Errorf("Expected total_connections to be 0, got %v", stats["total_connections"])
 		}
 	})
-	
+
 	t.Run("GetConnection", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		security := DefaultSecurityConfig()
 		auditor := NewSecurityAuditor(false, &MockSecurityLogger{})
-		
+
 		pool := NewConnectionPool(config, security, auditor)
-		
+
 		workerConfig := NewWorkerConfig("worker1", "Test Worker", "127.0.0.1", "testuser")
-		
+
 		// Try to get connection (should fail since we can't actually connect)
 		_, err := pool.GetConnection("worker1", workerConfig)
 		if err == nil {
 			t.Error("Expected error getting connection with test config")
 		}
 	})
-	
+
 	t.Run("GetConnectionWithExistingConnection", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		security := DefaultSecurityConfig()
 		auditor := NewSecurityAuditor(false, &MockSecurityLogger{})
-		
+
 		pool := NewConnectionPool(config, security, auditor)
-		
+
 		workerConfig := NewWorkerConfig("worker1", "Test Worker", "127.0.0.1", "testuser")
-		
+
 		// Add a connection to pool
 		key := pool.getConnectionKey("worker1")
 		entry := &ConnectionPoolEntry{
@@ -155,7 +155,7 @@ func TestPerformance_ConnectionPool(t *testing.T) {
 			InUse:      false,
 		}
 		pool.connections[key] = entry
-		
+
 		// Get existing connection
 		conn, err := pool.GetConnection("worker1", workerConfig)
 		if err != nil {
@@ -164,74 +164,74 @@ func TestPerformance_ConnectionPool(t *testing.T) {
 		if conn == nil {
 			t.Error("Expected non-nil connection")
 		}
-		
+
 		// Verify connection is marked as in use
 		if !entry.InUse {
 			t.Error("Expected connection to be marked as in use")
 		}
 	})
-	
+
 	t.Run("GetConnectionWithStaleConnection", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		security := DefaultSecurityConfig()
 		auditor := NewSecurityAuditor(false, &MockSecurityLogger{})
-		
+
 		pool := NewConnectionPool(config, security, auditor)
-		
+
 		workerConfig := NewWorkerConfig("worker1", "Test Worker", "127.0.0.1", "testuser")
-		
+
 		// Add a stale connection to pool (created too long ago)
 		key := pool.getConnectionKey("worker1")
 		entry := &ConnectionPoolEntry{
 			Connection: &SSHConnection{Config: workerConfig},
-			LastUsed:   time.Now().Add(-time.Hour), // Last used an hour ago
+			LastUsed:   time.Now().Add(-time.Hour),     // Last used an hour ago
 			CreatedAt:  time.Now().Add(-2 * time.Hour), // Created 2 hours ago
 			InUse:      false,
 		}
 		pool.connections[key] = entry
-		
+
 		// Try to get stale connection (should remove and create new)
 		_, err := pool.GetConnection("worker1", workerConfig)
 		// Should try to create new connection (which will fail)
 		if err == nil {
 			t.Error("Expected error creating new connection for stale connection")
 		}
-		
+
 		// Verify stale connection was removed
 		if _, exists := pool.connections[key]; exists {
 			t.Error("Expected stale connection to be removed")
 		}
 	})
-	
+
 	t.Run("ReturnConnection", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		security := DefaultSecurityConfig()
 		auditor := NewSecurityAuditor(false, &MockSecurityLogger{})
-		
+
 		pool := NewConnectionPool(config, security, auditor)
-		
+
 		// Create a mock connection
 		// Add a connection to pool
 		pool.connections["worker1"] = &ConnectionPoolEntry{
 			Connection: &SSHConnection{
 				Config: NewWorkerConfig("worker1", "Test Worker", "127.0.0.1", "testuser"),
 			},
-			LastUsed:   time.Now(),
-			CreatedAt:  time.Now(),
-			InUse:      false,
+			LastUsed:  time.Now(),
+			CreatedAt: time.Now(),
+			InUse:     false,
 		}
-		
+
 		// Return connection (should not panic)
 		pool.ReturnConnection("worker1")
 	})
-	
+
 	t.Run("RemoveConnection", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		security := DefaultSecurityConfig()
 		auditor := NewSecurityAuditor(false, &MockSecurityLogger{})
-		
+
 		pool := NewConnectionPool(config, security, auditor)
-		
+
 		// Remove connection (should not panic)
 		pool.RemoveConnection("worker1")
 	})
@@ -241,28 +241,28 @@ func TestPerformance_ResultCache(t *testing.T) {
 	t.Run("NewResultCache", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		cache := NewResultCache(config)
-		
+
 		if cache == nil {
 			t.Error("Expected non-nil result cache")
 		}
 	})
-	
+
 	t.Run("CacheOperations", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		cache := NewResultCache(config)
-		
+
 		// Test cache key generation
 		key := cache.GenerateCacheKey("hello", "context", "provider", "model")
 		if key == "" {
 			t.Error("Expected non-empty cache key")
 		}
-		
+
 		// Test getting non-existent key
 		_, found := cache.Get("non-existent")
 		if found {
 			t.Error("Expected not to find non-existent key")
 		}
-		
+
 		// Test setting and getting
 		cache.Set("test-key", "test-value")
 		value, found := cache.Get("test-key")
@@ -278,21 +278,21 @@ func TestPerformance_ResultCache(t *testing.T) {
 func TestPerformance_CircuitBreaker(t *testing.T) {
 	t.Run("NewCircuitBreaker", func(t *testing.T) {
 		cb := NewCircuitBreaker(3, time.Second, 2)
-		
+
 		if cb == nil {
 			t.Error("Expected non-nil circuit breaker")
 		}
-		
+
 		// Test initial state
 		state := cb.GetState()
 		if state != StateClosed {
 			t.Errorf("Expected initial state to be StateClosed, got %v", state)
 		}
 	})
-	
+
 	t.Run("CircuitBreakerStates", func(t *testing.T) {
 		cb := NewCircuitBreaker(1, 100*time.Millisecond, 1)
-		
+
 		// Test successful call
 		err := cb.Call(func() error {
 			return nil
@@ -300,7 +300,7 @@ func TestPerformance_CircuitBreaker(t *testing.T) {
 		if err != nil {
 			t.Errorf("Expected no error for successful call, got %v", err)
 		}
-		
+
 		// Test failed call
 		err = cb.Call(func() error {
 			return &MockError{message: "test error"}
@@ -308,7 +308,7 @@ func TestPerformance_CircuitBreaker(t *testing.T) {
 		if err == nil {
 			t.Error("Expected error for failed call")
 		}
-		
+
 		// State should be OPEN now
 		state := cb.GetState()
 		if state != StateOpen {
@@ -322,38 +322,38 @@ func TestPerformance_BatchProcessor(t *testing.T) {
 		processFn := func(requests []interface{}) error {
 			return nil
 		}
-		
+
 		processor := NewBatchProcessor(10, time.Second, processFn)
 		if processor == nil {
 			t.Error("Expected non-nil batch processor")
 		}
 	})
-	
+
 	t.Run("AddRequest", func(t *testing.T) {
 		processFn := func(requests []interface{}) error {
 			return nil
 		}
-		
+
 		processor := NewBatchProcessor(10, time.Second, processFn)
-		
+
 		// Add request
 		err := processor.AddRequest("batch1", "test-request")
 		if err != nil {
 			t.Errorf("Expected no error adding request, got %v", err)
 		}
 	})
-	
+
 	t.Run("FlushAll", func(t *testing.T) {
 		processFn := func(requests []interface{}) error {
 			return nil
 		}
-		
+
 		processor := NewBatchProcessor(10, time.Second, processFn)
-		
+
 		// Add a request and flush
 		processor.AddRequest("batch1", "test-request")
 		processor.FlushAll()
-		
+
 		// Should not panic
 	})
 }
@@ -371,37 +371,37 @@ func TestResultCache_RemoveExpired(t *testing.T) {
 	t.Run("RemoveExpiredEntries", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		cache := NewResultCache(config)
-		
+
 		// Add some entries with different expiration times
 		cache.Set("key1", "value1")
 		cache.Set("key2", "value2")
-		
+
 		// Manually expire an entry by setting its expiration time in the past
 		if entry, exists := cache.cache["key1"]; exists {
 			entry.ExpiresAt = time.Now().Add(-time.Hour)
 		}
-		
+
 		// Remove expired entries
 		cache.removeExpired()
-		
+
 		// Check that expired entry was removed
 		if _, exists := cache.cache["key1"]; exists {
 			t.Error("Expected expired entry to be removed")
 		}
-		
+
 		// Check that non-expired entry still exists
 		if _, exists := cache.cache["key2"]; !exists {
 			t.Error("Expected non-expired entry to still exist")
 		}
 	})
-	
+
 	t.Run("RemoveFromEmptyCache", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		cache := NewResultCache(config)
-		
+
 		// Remove expired from empty cache (should not panic)
 		cache.removeExpired()
-		
+
 		// Should not panic
 	})
 }
@@ -410,22 +410,22 @@ func TestResultCache_RemoveOldest(t *testing.T) {
 	t.Run("RemoveOldestEntry", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		cache := NewResultCache(config)
-		
+
 		// Add some entries
 		cache.Set("key1", "value1")
 		time.Sleep(time.Millisecond * 10) // Ensure different timestamps
 		cache.Set("key2", "value2")
 		time.Sleep(time.Millisecond * 10) // Ensure different timestamps
 		cache.Set("key3", "value3")
-		
+
 		// Remove oldest entry
 		cache.removeOldest()
-		
+
 		// Check that oldest entry was removed
 		if _, exists := cache.cache["key1"]; exists {
 			t.Error("Expected oldest entry (key1) to be removed")
 		}
-		
+
 		// Check that other entries still exist
 		if _, exists := cache.cache["key2"]; !exists {
 			t.Error("Expected key2 to still exist")
@@ -434,14 +434,14 @@ func TestResultCache_RemoveOldest(t *testing.T) {
 			t.Error("Expected key3 to still exist")
 		}
 	})
-	
+
 	t.Run("RemoveFromEmptyCache", func(t *testing.T) {
 		config := DefaultPerformanceConfig()
 		cache := NewResultCache(config)
-		
+
 		// Remove oldest from empty cache (should not panic)
 		cache.removeOldest()
-		
+
 		// Should not panic
 	})
 }

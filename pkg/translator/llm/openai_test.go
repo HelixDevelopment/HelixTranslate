@@ -5,6 +5,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestOpenAITranslateErrorPaths tests error paths in OpenAI Translate function
@@ -18,30 +21,9 @@ func TestOpenAITranslateErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewOpenAIClient(config)
-		if err != nil {
-			// Expected error path - client creation failed
-			if client != nil {
-				t.Error("Client should be nil when creation fails")
-			}
-			return
-		}
-
-		if client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
-
-		// Test translation with empty API key
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		result, err := client.Translate(ctx, "Hello world", "Translate to Russian")
-		if err == nil {
-			t.Error("Expected error with invalid configuration")
-		}
-		if result != "" {
-			t.Error("Result should be empty when error occurs")
-		}
+		require.Error(t, err)
+		require.Nil(t, client)
+		assert.Contains(t, err.Error(), "API key is required")
 	})
 
 	t.Run("empty_text_input", func(t *testing.T) {
@@ -52,20 +34,15 @@ func TestOpenAITranslateErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewOpenAIClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		// Test with empty text
 		result, err := client.Translate(ctx, "", "Translate to Russian")
-		if err == nil && result == "" {
-			t.Log("Empty input returned empty result - this is acceptable")
-		}
-		// Either should work - some APIs handle empty text, others don't
+		_ = result
+		_ = err
 	})
 
 	t.Run("context_cancellation", func(t *testing.T) {
@@ -76,27 +53,16 @@ func TestOpenAITranslateErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewOpenAIClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		// Create cancelled context
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel() // Cancel immediately
 
 		result, err := client.Translate(ctx, "Hello world", "Translate to Russian")
-		if err != nil {
-			// Expected error path - context cancelled
-			if result != "" {
-				t.Error("Result should be empty when context is cancelled")
-			}
-			// Check for context-related error
-			if !containsContextError(err) {
-				t.Logf("Error may not be context-related: %v", err)
-			}
-		}
-		// It's also possible the request completes before cancellation is detected
+		require.Error(t, err)
+		assert.Empty(t, result)
 	})
 
 	t.Run("malformed_model_name", func(t *testing.T) {
@@ -107,21 +73,14 @@ func TestOpenAITranslateErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewOpenAIClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
-		if err != nil {
-			// Expected error path - invalid model
-			if result != "" {
-				t.Error("Result should be empty when model is invalid")
-			}
-		}
+		_, err = client.Translate(ctx, "Hello", "Translate to Russian")
+		require.Error(t, err)
 	})
 
 	t.Run("temperature_options", func(t *testing.T) {
@@ -135,21 +94,14 @@ func TestOpenAITranslateErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewOpenAIClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
-		if err != nil {
-			// Expected error path - invalid options
-			if result != "" {
-				t.Error("Result should be empty when options are invalid")
-			}
-		}
+		_, err = client.Translate(ctx, "Hello", "Translate to Russian")
+		require.Error(t, err)
 	})
 
 	t.Run("max_tokens_override", func(t *testing.T) {
@@ -163,21 +115,14 @@ func TestOpenAITranslateErrorPaths(t *testing.T) {
 		}
 
 		client, err := NewOpenAIClient(config)
-		if err != nil || client == nil {
-			t.Skip("Skipping test - client creation failed")
-			return
-		}
+		require.NoError(t, err)
+		require.NotNil(t, client)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
-		if err != nil {
-			// Expected error path - invalid max_tokens
-			if result != "" {
-				t.Error("Result should be empty when max_tokens is invalid")
-			}
-		}
+		_, err = client.Translate(ctx, "Hello", "Translate to Russian")
+		require.Error(t, err)
 	})
 }
 
@@ -198,7 +143,7 @@ func TestOpenAIClientCreation(t *testing.T) {
 		if client == nil {
 			t.Error("Client should not be nil even with invalid provider")
 		}
-		
+
 		// The provider name should still be "openai" regardless of config
 		if client != nil && client.GetProviderName() != "openai" {
 			t.Errorf("Expected provider 'openai', got: %s", client.GetProviderName())
@@ -263,7 +208,7 @@ func containsContextError(err error) bool {
 		return false
 	}
 	errStr := err.Error()
-	return strings.Contains(errStr, "context") || 
-	       strings.Contains(errStr, "canceled") || 
-	       strings.Contains(errStr, "deadline")
+	return strings.Contains(errStr, "context") ||
+		strings.Contains(errStr, "canceled") ||
+		strings.Contains(errStr, "deadline")
 }
