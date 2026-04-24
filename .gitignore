@@ -38,3 +38,5 @@ keys.*
 *.log
 *.cache
 .crush/
+
+reports/demos/
