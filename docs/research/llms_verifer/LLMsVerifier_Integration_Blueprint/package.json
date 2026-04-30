@@ -1,0 +1,7 @@
+{
+  "name": "llm-verifier",
+  "version": "1.0.0",
+  "description": "LLM Verifier - Automated LLM testing and verification platform",
+  "private": false,
+  "repository": "https://github.com/your-org/llm-verifier"
+}

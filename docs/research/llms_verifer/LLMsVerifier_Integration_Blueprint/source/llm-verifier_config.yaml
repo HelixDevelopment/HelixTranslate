@@ -1,0 +1,17 @@
+api:
+  enable_cors: true
+  jwt_secret: your-secret-key-change-in-production
+  port: '8080'
+  rate_limit: 100
+concurrency: 5
+database:
+  encryption_key: ''
+  path: ./llm-verifier.db
+global:
+  api_key: ${OPENAI_API_KEY}
+  base_url: https://api.openai.com/v1
+  max_retries: 3
+  request_delay: 1s
+  timeout: 30s
+llms: []
+timeout: 60s

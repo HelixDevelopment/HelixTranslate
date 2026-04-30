@@ -1,0 +1,42 @@
+# LLM Verifier Configuration Example
+# Copy this file to config.yaml and modify as needed
+
+global:
+  base_url: "https://api.openai.com/v1"
+  api_key: "${OPENAI_API_KEY}" # Use environment variable
+  max_retries: 3
+  request_delay: 1s
+  timeout: 30s
+
+database:
+  path: "./llm-verifier.db"
+  encryption_key: ""  # Leave empty for no encryption
+
+api:
+  port: "8080"
+  jwt_secret: "your-secret-key-change-in-production"
+  rate_limit: 100  # requests per minute
+  enable_cors: true
+
+# If no LLMs are specified, tool will automatically discover all available models
+llms: # Uncomment this section to specify specific LLMs to test
+   - name: "OpenAI GPT-4"
+     endpoint: "https://api.openai.com/v1"
+     api_key: "${OPENAI_API_KEY}"
+     model: "gpt-4-turbo"
+     headers:
+       Custom-Header: "value"
+     features:
+       tool_calling: true
+       embeddings: false
+#
+   - name: "OpenAI GPT-3.5"
+     endpoint: "https://api.openai.com/v1"
+     api_key: "${OPENAI_API_KEY}"
+     model: "gpt-3.5-turbo"
+     features:
+       tool_calling: true
+       embeddings: false
+
+concurrency: 5
+timeout: 60s

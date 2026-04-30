@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  llm-verifier:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    mem_limit: 4g
+    memswap_limit: 4g
+    pids_limit: 2048
+    oom_score_adj: 500
+    ports:
+      - "8080:8080"
+    environment:
+      - LLM_DB_PATH=/app/data/llm-verifier.db
+    volumes:
+      - ./data:/app/data
+      - ./exports:/app/exports
+      - ./config.yaml:/app/config.yaml:ro
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - llm-verifier-network
+
+  # Optional: PostgreSQL database (uncomment if you want to use PostgreSQL instead of SQLite)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_DB: llm_verifier
+  #     POSTGRES_USER: llm_user
+  #     POSTGRES_PASSWORD: change_this_password
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - llm-verifier-network
+
+  # Optional: Redis for caching (uncomment if needed)
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - llm-verifier-network
+
+networks:
+  llm-verifier-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
