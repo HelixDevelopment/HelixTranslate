@@ -224,7 +224,7 @@ func TestFullConversionWorkflow(t *testing.T) {
 	// Skip if no test file available
 	testFile := "../../test_book_small.fb2"
 	if _, err := os.Stat(testFile); os.IsNotExist(err) {
-		t.Skip("Test FB2 file not available, skipping integration test")
+		t.Skip("Test FB2 file not available, skipping integration test")  // SKIP-OK: #integration-mode-only
 		return
 	}
 

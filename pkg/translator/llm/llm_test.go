@@ -741,7 +741,7 @@ func TestLLMTranslatorGetName(t *testing.T) {
 		t.Run(tt.provider, func(t *testing.T) {
 			// Skip LlamaCpp test as it requires actual models
 			if tt.provider == "llamacpp" {
-				t.Skip("LlamaCpp requires actual models to be installed")
+				t.Skip("LlamaCpp requires actual models to be installed")  // SKIP-OK: #legacy-untriaged
 			}
 
 			config := translator.TranslationConfig{

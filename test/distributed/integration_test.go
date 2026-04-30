@@ -97,7 +97,7 @@ func TestDistributedManager_Integration(t *testing.T) {
 
 func TestDistributedManager_EventEmission(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	cfg := &config.Config{}

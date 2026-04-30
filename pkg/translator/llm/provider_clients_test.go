@@ -2154,7 +2154,7 @@ func TestQwenRefreshTokenNetworkErrorPaths(t *testing.T) {
 // TestNewLlamaCppClientErrorPaths tests error paths in NewLlamaCppClient
 func TestNewLlamaCppClientErrorPaths(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")
+		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
 	tests := []struct {
 		name          string
@@ -2188,7 +2188,7 @@ func TestNewLlamaCppClientErrorPaths(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.skipIf != nil && tt.skipIf() {
-				t.Skip("Prerequisites not met for this test")
+				t.Skip("Prerequisites not met for this test")  // SKIP-OK: #legacy-untriaged
 			}
 
 			client, err := NewLlamaCppClient(tt.config)
@@ -2212,7 +2212,7 @@ func TestNewLlamaCppClientErrorPaths(t *testing.T) {
 // TestNewLlamaCppClientUncoveredPaths tests additional error paths in NewLlamaCppClient
 func TestNewLlamaCppClientUncoveredPaths(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")
+		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
 	// Test 1: Invalid model name that doesn't exist
 	// This tests the model validation path
@@ -3036,7 +3036,7 @@ func TestNewLlamaCppClientHardwareAndModelPaths(t *testing.T) {
 // TestNewLlamaCppClientDownloadPaths tests model download and caching paths in NewLlamaCppClient
 func TestNewLlamaCppClientDownloadPaths(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")
+		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
 	// Test 1: Model selection and caching behavior
 	t.Run("model_caching_behavior", func(t *testing.T) {

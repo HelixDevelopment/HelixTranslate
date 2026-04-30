@@ -413,7 +413,7 @@ func TestErrorHandling(t *testing.T) {
 
 func TestIntegrationWorkflow(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Test complete CLI workflow

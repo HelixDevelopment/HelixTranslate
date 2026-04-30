@@ -185,7 +185,7 @@ func TestDOCXParser_WithConfig(t *testing.T) {
 // Performance test
 func TestDOCXParser_Performance(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping performance test in short mode")
+		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	parser := NewDOCXParser(nil)

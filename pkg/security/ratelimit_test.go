@@ -177,7 +177,7 @@ func TestRateLimiter_DifferentRates(t *testing.T) {
 // Performance Test: TestRateLimiter_HighConcurrency tests high concurrent load
 func TestRateLimiter_HighConcurrency(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping high concurrency test in short mode")
+		t.Skip("Skipping high concurrency test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	rl := NewRateLimiter(1000, 1000)
@@ -207,7 +207,7 @@ func TestRateLimiter_HighConcurrency(t *testing.T) {
 // Performance Test: TestRateLimiter_ManyClients tests many different clients
 func TestRateLimiter_ManyClients(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping many clients test in short mode")
+		t.Skip("Skipping many clients test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	rl := NewRateLimiter(10, 10)
@@ -237,7 +237,7 @@ func TestRateLimiter_ManyClients(t *testing.T) {
 // Stress Test: TestRateLimiter_ContinuousLoad tests continuous load
 func TestRateLimiter_ContinuousLoad(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping continuous load test in short mode")
+		t.Skip("Skipping continuous load test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	rl := NewRateLimiter(100, 100)
@@ -327,7 +327,7 @@ func BenchmarkRateLimiter_Reset(b *testing.B) {
 // Stress Test: TestRateLimiter_MemoryUsage tests memory under load
 func TestRateLimiter_MemoryUsage(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping memory usage test in short mode")
+		t.Skip("Skipping memory usage test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	rl := NewRateLimiter(1000, 1000)

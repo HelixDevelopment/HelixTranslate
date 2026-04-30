@@ -66,13 +66,13 @@ func TestAnthropicClient(t *testing.T) {
 
 func TestAnthropicClient_Translate(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Skip if no real API key
 	apiKey := getTestAPIKey("ANTHROPIC_API_KEY")
 	if apiKey == "" {
-		t.Skip("No ANTHROPIC_API_KEY provided for integration test")
+		t.Skip("No ANTHROPIC_API_KEY provided for integration test")  // SKIP-OK: #requires-upstream-key
 	}
 
 	client, err := NewAnthropicClient(TranslationConfig{

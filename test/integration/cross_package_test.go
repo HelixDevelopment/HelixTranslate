@@ -89,7 +89,7 @@ func TestCrossPackage_FileProcessingPipeline(t *testing.T) {
 
 func TestCrossPackage_APIAndTranslationIntegration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	gin.SetMode(gin.TestMode)
@@ -133,7 +133,7 @@ func TestCrossPackage_APIAndTranslationIntegration(t *testing.T) {
 
 func TestCrossPackage_ErrorHandlingIntegration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Test error handling across multiple packages
@@ -172,7 +172,7 @@ func TestCrossPackage_ErrorHandlingIntegration(t *testing.T) {
 
 func TestCrossPackage_ResourceManagement(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Test resource management across components

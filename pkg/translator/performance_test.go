@@ -99,14 +99,14 @@ func BenchmarkTranslation(b *testing.B) {
 // TestStressTranslation tests translation under stress
 func TestStressTranslation(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping stress test in short mode")
+		t.Skip("Skipping stress test in short mode")  // SKIP-OK: #short-mode
 	}
 
-	t.Skip("Skipping stress tests that require API keys")
+	t.Skip("Skipping stress tests that require API keys")  // SKIP-OK: #requires-upstream-key
 
 	apiKey := os.Getenv("DEEPSEEK_API_KEY")
 	if apiKey == "" {
-		t.Skip("DEEPSEEK_API_KEY not set")
+		t.Skip("DEEPSEEK_API_KEY not set")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := translator.TranslationConfig{
@@ -172,14 +172,14 @@ func TestStressTranslation(t *testing.T) {
 // TestLargeTextTranslation tests translation of large texts
 func TestLargeTextTranslation(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping large text test in short mode")
+		t.Skip("Skipping large text test in short mode")  // SKIP-OK: #short-mode
 	}
 
-	t.Skip("Skipping large text tests that require API keys")
+	t.Skip("Skipping large text tests that require API keys")  // SKIP-OK: #requires-upstream-key
 
 	apiKey := os.Getenv("DEEPSEEK_API_KEY")
 	if apiKey == "" {
-		t.Skip("DEEPSEEK_API_KEY not set")
+		t.Skip("DEEPSEEK_API_KEY not set")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := translator.TranslationConfig{
@@ -230,7 +230,7 @@ func TestLargeTextTranslation(t *testing.T) {
 // TestMemoryUsage tests memory usage during translation
 func TestMemoryUsage(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping memory test in short mode")
+		t.Skip("Skipping memory test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Test hardware detection memory usage
@@ -261,14 +261,14 @@ func TestMemoryUsage(t *testing.T) {
 // TestResponseTime tests response time consistency
 func TestResponseTime(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping response time test in short mode")
+		t.Skip("Skipping response time test in short mode")  // SKIP-OK: #short-mode
 	}
 
-	t.Skip("Skipping response time tests that require API keys")
+	t.Skip("Skipping response time tests that require API keys")  // SKIP-OK: #requires-upstream-key
 
 	apiKey := os.Getenv("DEEPSEEK_API_KEY")
 	if apiKey == "" {
-		t.Skip("DEEPSEEK_API_KEY not set")
+		t.Skip("DEEPSEEK_API_KEY not set")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := translator.TranslationConfig{

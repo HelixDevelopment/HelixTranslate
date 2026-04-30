@@ -40,7 +40,7 @@ func TestNetworkDiscoverer_sendBroadcastMessage(t *testing.T) {
 		// Skip if broadcast connection cannot be established
 		err := nd.StartBroadcasting(context.Background(), nil)
 		if err != nil {
-			t.Skip("Broadcast connection not available in test environment")
+			t.Skip("Broadcast connection not available in test environment")  // SKIP-OK: #legacy-untriaged
 		}
 
 		err = nd.sendBroadcastMessage(msg)
@@ -194,7 +194,7 @@ func TestNetworkDiscoverer_broadcastServices(t *testing.T) {
 		// Should not panic - need to start broadcasting first
 		err := nd.StartBroadcasting(context.Background(), instances)
 		if err != nil {
-			t.Skip("Broadcast connection not available in test environment")
+			t.Skip("Broadcast connection not available in test environment")  // SKIP-OK: #legacy-untriaged
 		}
 		nd.broadcastServices(instances)
 	})

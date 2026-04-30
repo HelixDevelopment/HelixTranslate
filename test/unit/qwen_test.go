@@ -31,7 +31,7 @@ func TestQwenClientInitialization(t *testing.T) {
 	}
 
 	if apiKey == "" && !hasOAuthCreds {
-		t.Skip("Skipping Qwen test: no API key or OAuth credentials available")
+		t.Skip("Skipping Qwen test: no API key or OAuth credentials available")  // SKIP-OK: #requires-upstream-key
 	}
 
 	config := translator.TranslationConfig{
@@ -54,13 +54,13 @@ func TestQwenClientInitialization(t *testing.T) {
 func TestQwenOAuthCredentials(t *testing.T) {
 	home := os.Getenv("HOME")
 	if home == "" {
-		t.Skip("HOME environment variable not set")
+		t.Skip("HOME environment variable not set")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Check if Qwen Code OAuth credentials exist
 	qwenCodeCredsPath := home + "/.qwen/oauth_creds.json"
 	if _, err := os.Stat(qwenCodeCredsPath); err != nil {
-		t.Skip("Qwen Code OAuth credentials not found")
+		t.Skip("Qwen Code OAuth credentials not found")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Test with empty API key - should fall back to OAuth
@@ -95,7 +95,7 @@ func TestQwenTranslation(t *testing.T) {
 	}
 
 	if apiKey == "" && !hasOAuthCreds {
-		t.Skip("Skipping Qwen translation test: no credentials available")
+		t.Skip("Skipping Qwen translation test: no credentials available")  // SKIP-OK: #legacy-untriaged
 	}
 
 	config := translator.TranslationConfig{
@@ -154,7 +154,7 @@ func TestQwenInMultiLLM(t *testing.T) {
 	}
 
 	if apiKey == "" && !hasOAuthCreds {
-		t.Skip("Skipping multi-LLM Qwen test: no credentials available")
+		t.Skip("Skipping multi-LLM Qwen test: no credentials available")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Set QWEN_API_KEY if OAuth credentials exist but env var is not set
@@ -194,7 +194,7 @@ func TestQwenAPIKeyPriority(t *testing.T) {
 func TestQwenModelDefault(t *testing.T) {
 	apiKey := os.Getenv("QWEN_API_KEY")
 	if apiKey == "" {
-		t.Skip("Skipping: QWEN_API_KEY not set")
+		t.Skip("Skipping: QWEN_API_KEY not set")  // SKIP-OK: #requires-upstream-key
 	}
 
 	// Test with empty model - should use default

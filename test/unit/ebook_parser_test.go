@@ -104,13 +104,13 @@ func TestEbookStructure(t *testing.T) {
 
 func TestEPUBParser(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 	t.Run("ParseValidEPUB", func(t *testing.T) {
 		epubPath := "../../test_output.epub"
 		info, err := os.Stat(epubPath)
 		if os.IsNotExist(err) || info.Size() < 100 {
-			t.Skip("Skipping: no valid test EPUB fixture available")
+			t.Skip("Skipping: no valid test EPUB fixture available")  // SKIP-OK: #legacy-untriaged
 		}
 
 		parser := ebook.NewUniversalParser()

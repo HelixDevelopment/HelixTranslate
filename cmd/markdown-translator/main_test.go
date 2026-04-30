@@ -313,7 +313,7 @@ func TestErrorHandling(t *testing.T) {
 		// Remove read permissions (on Unix systems)
 		err = os.Chmod(testFile, 0000)
 		if err != nil {
-			t.Skip("Cannot change file permissions on this system")
+			t.Skip("Cannot change file permissions on this system")  // SKIP-OK: #legacy-untriaged
 		}
 
 		// Restore permissions after test

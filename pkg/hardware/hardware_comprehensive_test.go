@@ -596,7 +596,7 @@ func TestModelCompatibilityEdgeCases(t *testing.T) {
 // TestConcurrentDetection tests concurrent hardware detection
 func TestConcurrentDetection(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping concurrent test in short mode")
+		t.Skip("Skipping concurrent test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	concurrency := 10
@@ -628,7 +628,7 @@ func TestConcurrentDetection(t *testing.T) {
 // TestDetectorPerformance benchmarks detector performance with different scenarios
 func TestDetectorPerformance(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping performance test in short mode")
+		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	detector := NewDetector()

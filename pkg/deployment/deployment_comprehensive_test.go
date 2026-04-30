@@ -950,7 +950,7 @@ func TestValidationErrorComprehensive(t *testing.T) {
 // TestPerformanceBenchmarksComprehensive tests performance of key operations
 func TestPerformanceBenchmarksComprehensive(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping performance benchmarks in short mode")
+		t.Skip("Skipping performance benchmarks in short mode")  // SKIP-OK: #short-mode
 	}
 
 	t.Run("DeploymentConfig creation benchmark", func(t *testing.T) {

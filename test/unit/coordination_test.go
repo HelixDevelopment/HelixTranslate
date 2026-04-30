@@ -294,7 +294,7 @@ func TestProviderDiscovery(t *testing.T) {
 func TestRoundRobinDistribution(t *testing.T) {
 	t.Run("RoundRobinBehavior", func(t *testing.T) {
 		// Skip this test for now since it requires API keys that trigger network requests
-		t.Skip("Skipping round robin test to avoid network hangs")
+		t.Skip("Skipping round robin test to avoid network hangs")  // SKIP-OK: #requires-network
 	})
 }
 
@@ -373,7 +373,7 @@ func TestErrorHandling(t *testing.T) {
 func TestConcurrency(t *testing.T) {
 	t.Run("ConcurrentTranslations", func(t *testing.T) {
 		// Skip this test for now since it requires API keys that trigger network requests
-		t.Skip("Skipping concurrency test to avoid network hangs")
+		t.Skip("Skipping concurrency test to avoid network hangs")  // SKIP-OK: #requires-network
 	})
 }
 
@@ -463,7 +463,7 @@ func TestConsensusMode(t *testing.T) {
 
 func TestEventEmission(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 	t.Run("EmitWarningEvents", func(t *testing.T) {
 		eventBus := events.NewEventBus()
@@ -581,7 +581,7 @@ func TestEventEmission(t *testing.T) {
 
 	t.Run("EmitTranslationAttemptEvents", func(t *testing.T) {
 		// Skip this test for now since it requires API keys that trigger network requests
-		t.Skip("Skipping translation attempt events test to avoid network hangs")
+		t.Skip("Skipping translation attempt events test to avoid network hangs")  // SKIP-OK: #requires-network
 	})
 }
 

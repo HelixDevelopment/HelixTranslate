@@ -13,12 +13,12 @@ import (
 // TestNewPostgreSQLStorage tests PostgreSQL storage creation
 func TestNewPostgreSQLStorage(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping PostgreSQL test - requires database")
+		t.Skip("Skipping PostgreSQL test - requires database")  // SKIP-OK: #legacy-untriaged
 	}
 
 	config := getPostgreSQLTestConfig(t)
 	if config == nil {
-		t.Skip("PostgreSQL not available for testing")
+		t.Skip("PostgreSQL not available for testing")  // SKIP-OK: #legacy-untriaged
 	}
 
 	storage, err := NewPostgreSQLStorage(config)
@@ -426,13 +426,13 @@ func TestPostgreSQLStorage_InterfaceCompliance(t *testing.T) {
 // setupPostgreSQLTest creates PostgreSQL storage for testing
 func setupPostgreSQLTest(t *testing.T) *PostgreSQLStorage {
 	if testing.Short() {
-		t.Skip("Skipping PostgreSQL test - requires database")
+		t.Skip("Skipping PostgreSQL test - requires database")  // SKIP-OK: #legacy-untriaged
 		return nil
 	}
 
 	config := getPostgreSQLTestConfig(t)
 	if config == nil {
-		t.Skip("PostgreSQL not available for testing")
+		t.Skip("PostgreSQL not available for testing")  // SKIP-OK: #legacy-untriaged
 		return nil
 	}
 

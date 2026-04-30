@@ -279,7 +279,7 @@ func TestSSHWorker_TestConnection(t *testing.T) {
 
 func TestSSHWorker_Integration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// This test would require an actual SSH server

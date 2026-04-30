@@ -484,7 +484,7 @@ func TestPerformanceScalability(t *testing.T) {
 // TestPerformanceUnderStress tests system behavior under extreme stress
 func TestPerformanceUnderStress(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping stress test in short mode")
+		t.Skip("Skipping stress test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Note: This test is now enabled - fix timeout issues with dynamic ports

@@ -346,7 +346,7 @@ func TestSSHDeployer_ExecuteCommand_Failure(t *testing.T) {
 
 func TestSSHDeployer_Integration_RealConfig(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Test with a real configuration structure
@@ -435,7 +435,7 @@ func BenchmarkSSHDeployConfig_Validate(b *testing.B) {
 // Concurrent testing
 func TestSSHDeployer_Concurrent(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping concurrent stress test in short mode")
+		t.Skip("Skipping concurrent stress test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := &SSHDeployConfig{

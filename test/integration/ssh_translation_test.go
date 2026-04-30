@@ -218,7 +218,7 @@ func generateHostKey() (ssh.Signer, error) {
 // TestSSHTranslationIntegration tests the complete SSH translation workflow
 func TestSSHTranslationIntegration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 	// Setup test SSH server with proper infrastructure
 	testServer, err := utils.NewTestSSHServer()
@@ -418,7 +418,7 @@ func TestSSHTranslationIntegration(t *testing.T) {
 
 // TestSSHTranslationEndToEnd tests the complete end-to-end workflow
 func TestSSHTranslationEndToEnd(t *testing.T) {
-	t.Skip("Skipping end-to-end tests that require full infrastructure")
+	t.Skip("Skipping end-to-end tests that require full infrastructure")  // SKIP-OK: #legacy-untriaged
 
 	// This test would require:
 	// 1. A real SSH server setup or more comprehensive mocking
@@ -435,13 +435,13 @@ func TestSSHTranslationEndToEnd(t *testing.T) {
 		// 4. Verify all 4 output files are created correctly
 		// 5. Verify file contents and structure
 
-		t.Skip("End-to-end test requires full mock implementation")
+		t.Skip("End-to-end test requires full mock implementation")  // SKIP-OK: #legacy-untriaged
 	})
 }
 
 // TestSSHTranslationErrorHandling tests error scenarios
 func TestSSHTranslationErrorHandling(t *testing.T) {
-	t.Skip("Skipping error handling tests that require SSH infrastructure")
+	t.Skip("Skipping error handling tests that require SSH infrastructure")  // SKIP-OK: #legacy-untriaged
 	// Test various error scenarios
 	testCases := []struct {
 		name     string
@@ -469,7 +469,7 @@ func TestSSHTranslationErrorHandling(t *testing.T) {
 			testFunc: func(t *testing.T, worker sshworker.SSHWorker, ctx context.Context) {
 				// Test command timeout handling
 				// This would need a worker with very short timeout
-				t.Skip("Timeout test requires worker configuration")
+				t.Skip("Timeout test requires worker configuration")  // SKIP-OK: #legacy-untriaged
 			},
 		},
 		{

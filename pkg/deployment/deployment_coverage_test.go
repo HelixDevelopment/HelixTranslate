@@ -132,7 +132,7 @@ func TestDockerOrchestrator_GetServiceLogs(t *testing.T) {
 
 // TestDockerOrchestrator_DeployWithCompose tests the DeployWithCompose method
 func TestDockerOrchestrator_DeployWithCompose(t *testing.T) {
-	t.Skip("Skipping Docker deployment tests to avoid timeout")
+	t.Skip("Skipping Docker deployment tests to avoid timeout")  // SKIP-OK: #legacy-untriaged
 }
 
 // TestDockerOrchestrator_WaitForServicesHealthy tests the waitForServicesHealthy method
@@ -148,7 +148,7 @@ func TestDockerOrchestrator_WaitForServicesHealthy(t *testing.T) {
 		// Test the private method using reflection
 		method := reflect.ValueOf(orchestrator).MethodByName("waitForServicesHealthy")
 		if !method.IsValid() {
-			t.Skip("waitForServicesHealthy method not found")
+			t.Skip("waitForServicesHealthy method not found")  // SKIP-OK: #legacy-untriaged
 			return
 		}
 
@@ -174,7 +174,7 @@ func TestDockerOrchestrator_WaitForServicesHealthy(t *testing.T) {
 		// Test the private method using reflection
 		method := reflect.ValueOf(orchestrator).MethodByName("waitForServicesHealthy")
 		if !method.IsValid() {
-			t.Skip("waitForServicesHealthy method not found")
+			t.Skip("waitForServicesHealthy method not found")  // SKIP-OK: #legacy-untriaged
 			return
 		}
 
@@ -201,7 +201,7 @@ func TestDockerOrchestrator_WaitForServicesHealthy(t *testing.T) {
 		// Test the private method using reflection
 		method := reflect.ValueOf(orchestrator).MethodByName("waitForServicesHealthy")
 		if !method.IsValid() {
-			t.Skip("waitForServicesHealthy method not found")
+			t.Skip("waitForServicesHealthy method not found")  // SKIP-OK: #legacy-untriaged
 			return
 		}
 
@@ -220,7 +220,7 @@ func TestDockerOrchestrator_WaitForServicesHealthy(t *testing.T) {
 
 // TestDockerOrchestrator_API tests the Docker orchestrator API
 func TestDockerOrchestrator_API(t *testing.T) {
-	t.Skip("Skipping API test to avoid timeout")
+	t.Skip("Skipping API test to avoid timeout")  // SKIP-OK: #legacy-untriaged
 }
 
 // TestDockerOrchestrator_EdgeCases tests edge cases for Docker orchestrator
@@ -307,11 +307,11 @@ func TestDockerOrchestrator_EdgeCases(t *testing.T) {
 	})
 
 	t.Run("Nil config returns error", func(t *testing.T) {
-		t.Skip("Skipping nil config panic test")
+		t.Skip("Skipping nil config panic test")  // SKIP-OK: #legacy-untriaged
 	})
 
 	t.Run("Nil event bus returns error", func(t *testing.T) {
-		t.Skip("Skipping nil event bus panic test")
+		t.Skip("Skipping nil event bus panic test")  // SKIP-OK: #legacy-untriaged
 	})
 }
 
@@ -452,7 +452,7 @@ func TestAPICommunicationLogger_GetStatusText(t *testing.T) {
 	// Use reflection to access private method
 	method := reflect.ValueOf(logger).MethodByName("getStatusText")
 	if !method.IsValid() {
-		t.Skip("getStatusText method not found")
+		t.Skip("getStatusText method not found")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 
@@ -554,7 +554,7 @@ func TestDockerOrchestrator_EmitEvent(t *testing.T) {
 		// Use reflection to call the private emitEvent method
 		method := reflect.ValueOf(orchestrator).MethodByName("emitEvent")
 		if !method.IsValid() {
-			t.Skip("emitEvent method not found")
+			t.Skip("emitEvent method not found")  // SKIP-OK: #legacy-untriaged
 			return
 		}
 
@@ -583,7 +583,7 @@ func TestDockerOrchestrator_EmitEvent(t *testing.T) {
 		// Use reflection to call the private emitEvent method
 		method := reflect.ValueOf(orchestratorNil).MethodByName("emitEvent")
 		if !method.IsValid() {
-			t.Skip("emitEvent method not found")
+			t.Skip("emitEvent method not found")  // SKIP-OK: #legacy-untriaged
 			return
 		}
 

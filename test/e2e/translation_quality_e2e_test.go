@@ -191,7 +191,7 @@ func TestMultiLLMCoordinationE2E(t *testing.T) {
 	if os.Getenv("DEEPSEEK_API_KEY") == "" &&
 		os.Getenv("OPENAI_API_KEY") == "" &&
 		os.Getenv("ANTHROPIC_API_KEY") == "" {
-		t.Skip("Skipping multi-LLM test - no API keys configured")
+		t.Skip("Skipping multi-LLM test - no API keys configured")  // SKIP-OK: #requires-upstream-key
 	}
 
 	ctx := context.Background()
@@ -215,7 +215,7 @@ func TestMultiLLMCoordinationE2E(t *testing.T) {
 		t.Logf("Initialized %d LLM instances", instanceCount)
 
 		if instanceCount == 0 {
-			t.Skip("No LLM instances initialized - check API keys")
+			t.Skip("No LLM instances initialized - check API keys")  // SKIP-OK: #requires-upstream-key
 		}
 
 		// Check that init events were emitted
@@ -241,7 +241,7 @@ func TestMultiLLMCoordinationE2E(t *testing.T) {
 		})
 
 		if coordinator.GetInstanceCount() == 0 {
-			t.Skip("No LLM instances available")
+			t.Skip("No LLM instances available")  // SKIP-OK: #legacy-untriaged
 		}
 
 		// Try to translate a short text
@@ -266,7 +266,7 @@ func TestMultiLLMCoordinationE2E(t *testing.T) {
 		})
 
 		if coordinator.GetInstanceCount() < 2 {
-			t.Skip("Need at least 2 instances for consensus mode")
+			t.Skip("Need at least 2 instances for consensus mode")  // SKIP-OK: #legacy-untriaged
 		}
 
 		text := "Good morning"

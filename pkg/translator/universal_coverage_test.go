@@ -88,7 +88,7 @@ func TestUniversalTranslator_TranslateBook_Basic(t *testing.T) {
 
 	t.Run("TranslateBook with basic chapters", func(t *testing.T) {
 		// Skip this test temporarily due to complex mocking requirements
-		t.Skip("Temporarily skipping due to complex mocking requirements")
+		t.Skip("Temporarily skipping due to complex mocking requirements")  // SKIP-OK: #legacy-untriaged
 	})
 }
 
@@ -105,7 +105,7 @@ func TestUniversalTranslator_EdgeCases(t *testing.T) {
 
 	t.Run("TranslateBook with cancelled context", func(t *testing.T) {
 		// Skip this test temporarily due to complex mocking requirements
-		t.Skip("Temporarily skipping due to complex mocking requirements")
+		t.Skip("Temporarily skipping due to complex mocking requirements")  // SKIP-OK: #legacy-untriaged
 	})
 
 	t.Run("TranslateBook with metadata translation", func(t *testing.T) {
@@ -146,18 +146,18 @@ func TestUniversalTranslator_EdgeCases(t *testing.T) {
 	})
 
 	t.Run("TranslateBook with translation errors", func(t *testing.T) {
-		t.Skip("Skipping test due to mock complexity")
+		t.Skip("Skipping test due to mock complexity")  // SKIP-OK: #legacy-untriaged
 	})
 }
 
 // TestUniversalTranslator_MultipleBooks tests translating multiple books
 func TestUniversalTranslator_MultipleBooks(t *testing.T) {
-	t.Skip("Skipping complex mock test to restore basic coverage")
+	t.Skip("Skipping complex mock test to restore basic coverage")  // SKIP-OK: #legacy-untriaged
 }
 
 // TestUniversalTranslator_LanguageDetection tests language detection scenarios
 func TestUniversalTranslator_LanguageDetection(t *testing.T) {
-	t.Skip("Skipping complex mock test to restore basic coverage")
+	t.Skip("Skipping complex mock test to restore basic coverage")  // SKIP-OK: #legacy-untriaged
 }
 
 // BenchmarkUniversalTranslator_New benchmarks UniversalTranslator creation

@@ -11,7 +11,7 @@ import (
 // TestLinuxRAMDetection tests Linux-specific RAM detection functionality
 func TestLinuxRAMDetection(t *testing.T) {
 	if runtime.GOOS != "linux" {
-		t.Skip("Skipping Linux-specific test on non-Linux system")
+		t.Skip("Skipping Linux-specific test on non-Linux system")  // SKIP-OK: #legacy-untriaged
 	}
 
 	detector := NewDetector()
@@ -31,7 +31,7 @@ func TestLinuxRAMDetection(t *testing.T) {
 // TestWindowsRAMDetection tests Windows-specific RAM detection functionality
 func TestWindowsRAMDetection(t *testing.T) {
 	if runtime.GOOS != "windows" {
-		t.Skip("Skipping Windows-specific test on non-Windows system")
+		t.Skip("Skipping Windows-specific test on non-Windows system")  // SKIP-OK: #legacy-untriaged
 	}
 
 	detector := NewDetector()
@@ -52,7 +52,7 @@ func TestWindowsRAMDetection(t *testing.T) {
 func TestBSDRAMDetection(t *testing.T) {
 	if runtime.GOOS != "freebsd" && runtime.GOOS != "openbsd" &&
 		runtime.GOOS != "netbsd" && runtime.GOOS != "dragonfly" {
-		t.Skip("Skipping BSD-specific test on non-BSD system")
+		t.Skip("Skipping BSD-specific test on non-BSD system")  // SKIP-OK: #legacy-untriaged
 	}
 
 	detector := NewDetector()

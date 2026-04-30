@@ -13,12 +13,12 @@ import (
 // TestNewRedisStorage tests Redis storage creation
 func TestNewRedisStorage(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping Redis test - requires Redis server")
+		t.Skip("Skipping Redis test - requires Redis server")  // SKIP-OK: #requires-infra-port
 	}
 
 	config := getRedisTestConfig(t)
 	if config == nil {
-		t.Skip("Redis not available for testing")
+		t.Skip("Redis not available for testing")  // SKIP-OK: #legacy-untriaged
 	}
 
 	storage, err := NewRedisStorage(config, 24*time.Hour)
@@ -266,12 +266,12 @@ func TestRedisStorage_CacheMiss(t *testing.T) {
 // TestRedisStorage_TTL tests automatic expiration
 func TestRedisStorage_TTL(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping TTL test in short mode")
+		t.Skip("Skipping TTL test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := getRedisTestConfig(t)
 	if config == nil {
-		t.Skip("Redis not available")
+		t.Skip("Redis not available")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Create storage with short TTL
@@ -415,13 +415,13 @@ func TestRedisStorage_InterfaceCompliance(t *testing.T) {
 // setupRedisTest creates Redis storage for testing
 func setupRedisTest(t *testing.T) *RedisStorage {
 	if testing.Short() {
-		t.Skip("Skipping Redis test - requires Redis server")
+		t.Skip("Skipping Redis test - requires Redis server")  // SKIP-OK: #requires-infra-port
 		return nil
 	}
 
 	config := getRedisTestConfig(t)
 	if config == nil {
-		t.Skip("Redis not available for testing")
+		t.Skip("Redis not available for testing")  // SKIP-OK: #legacy-untriaged
 		return nil
 	}
 

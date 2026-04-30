@@ -16,7 +16,7 @@ import (
 // TestEBookTranslationWorkflow provides comprehensive testing for ebook translation
 func TestEBookTranslationWorkflow(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 	// Create temporary directory for testing
 	tempDir, err := os.MkdirTemp("", "ebook_test")

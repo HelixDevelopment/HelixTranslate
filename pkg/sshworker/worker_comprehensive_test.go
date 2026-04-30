@@ -312,7 +312,7 @@ func TestCodebaseHasher_Integration(t *testing.T) {
 			t.Error("Hash should not be equal to different hash")
 		}
 	} else {
-		t.Skip("Skipping hash test - not in project root")
+		t.Skip("Skipping hash test - not in project root")  // SKIP-OK: #legacy-untriaged
 	}
 }
 
@@ -354,7 +354,7 @@ func TestEnvironmentVariables(t *testing.T) {
 // TestSSHWorker_Timeouts tests connection timeout handling
 func TestSSHWorker_Timeouts(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping timeout test in short mode")
+		t.Skip("Skipping timeout test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	config := SSHWorkerConfig{

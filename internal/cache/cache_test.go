@@ -150,7 +150,7 @@ func TestCache_Size(t *testing.T) {
 // TestCache_Expiration tests TTL expiration
 func TestCache_Expiration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping expiration test in short mode")
+		t.Skip("Skipping expiration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	cache := NewCache(200*time.Millisecond, true)
@@ -195,7 +195,7 @@ func TestCache_Stats(t *testing.T) {
 // TestCache_StatsWithExpired tests stats with expired entries
 func TestCache_StatsWithExpired(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping expiration test in short mode")
+		t.Skip("Skipping expiration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	cache := NewCache(100*time.Millisecond, true)
@@ -232,7 +232,7 @@ func TestCache_HashKey(t *testing.T) {
 // TestCache_RemoveExpired tests manual expired entry removal
 func TestCache_RemoveExpired(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping expiration test in short mode")
+		t.Skip("Skipping expiration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	cache := NewCache(100*time.Millisecond, true)

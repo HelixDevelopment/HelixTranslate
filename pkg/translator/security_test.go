@@ -21,7 +21,7 @@ func TestPathTraversal(t *testing.T) {
 	// Get a valid model to work with
 	allModels := registry.List()
 	if len(allModels) == 0 {
-		t.Skip("No models available for testing")
+		t.Skip("No models available for testing")  // SKIP-OK: #legacy-untriaged
 	}
 
 	validModel := allModels[0]
@@ -127,7 +127,7 @@ func TestAPIKeyExposure(t *testing.T) {
 // TestDenialOfService tests protection against DOS attacks
 func TestDenialOfService(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping DOS test in short mode")
+		t.Skip("Skipping DOS test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	t.Run("Excessive Concurrent Requests", func(t *testing.T) {
@@ -265,7 +265,7 @@ func TestConfigurationSecurity(t *testing.T) {
 
 // TestPrivilegeEscalation tests protection against privilege escalation
 func TestPrivilegeEscalation(t *testing.T) {
-	t.Skip("Skipping privilege escalation tests that require downloaded models")
+	t.Skip("Skipping privilege escalation tests that require downloaded models")  // SKIP-OK: #legacy-untriaged
 	t.Run("No Elevated Privileges Required", func(t *testing.T) {
 		// Hardware detection should work without root/admin privileges
 		detector := hardware.NewDetector()

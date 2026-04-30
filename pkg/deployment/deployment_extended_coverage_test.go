@@ -116,7 +116,7 @@ func TestDockerOrchestrator_WaitForServicesHealthyCoverage(t *testing.T) {
 	})
 
 	// Skip the long-running test with temp directory to avoid timeout
-	t.Skip("Skipping long-running test to avoid timeout")
+	t.Skip("Skipping long-running test to avoid timeout")  // SKIP-OK: #legacy-untriaged
 }
 
 // TestDockerOrchestrator_CheckServicesHealthCoverage tests checkServicesHealth method
@@ -346,7 +346,7 @@ func TestDockerOrchestrator_RestartAllServicesCoverage(t *testing.T) {
 // TestDockerOrchestrator_WaitForServiceHealthyCoverage tests waitForServiceHealthy method
 func TestDockerOrchestrator_WaitForServiceHealthyCoverage(t *testing.T) {
 	// Skip all tests to avoid timeout
-	t.Skip("Skipping all tests to avoid timeout")
+	t.Skip("Skipping all tests to avoid timeout")  // SKIP-OK: #legacy-untriaged
 }
 
 // TestDockerOrchestrator_CheckServiceHealthCoverage tests checkServiceHealth method
@@ -389,7 +389,7 @@ func TestDeploymentOrchestrator_DeployMainInstanceCoverage(t *testing.T) {
 	t.Run("deployMainInstance with nil config", func(t *testing.T) {
 		// This test is invalid since deployMainInstance doesn't handle nil config
 		// and will panic. Skip this test as it's not a valid use case.
-		t.Skip("Skipping test for nil config as it causes panic")
+		t.Skip("Skipping test for nil config as it causes panic")  // SKIP-OK: #legacy-untriaged
 	})
 
 	t.Run("deployMainInstance with invalid config", func(t *testing.T) {
@@ -435,7 +435,7 @@ func TestDeploymentOrchestrator_DeployWorkerInstanceCoverage(t *testing.T) {
 	t.Run("deployWorkerInstance with nil config", func(t *testing.T) {
 		// This test is invalid since deployWorkerInstance doesn't handle nil config
 		// and will panic. Skip this test as it's not a valid use case.
-		t.Skip("Skipping test for nil config as it causes panic")
+		t.Skip("Skipping test for nil config as it causes panic")  // SKIP-OK: #legacy-untriaged
 	})
 
 	t.Run("deployWorkerInstance with invalid config", func(t *testing.T) {
@@ -474,7 +474,7 @@ func TestDeploymentOrchestrator_DeployWorkerInstanceCoverage(t *testing.T) {
 // TestDeploymentOrchestrator_WaitForSystemHealthCoverage tests waitForSystemHealth method
 func TestDeploymentOrchestrator_WaitForSystemHealthCoverage(t *testing.T) {
 	// Skip all tests to avoid timeout
-	t.Skip("Skipping all tests to avoid timeout")
+	t.Skip("Skipping all tests to avoid timeout")  // SKIP-OK: #legacy-untriaged
 }
 
 // TestDeploymentOrchestrator_CheckInstanceHealthCoverage tests checkInstanceHealth method
@@ -486,7 +486,7 @@ func TestDeploymentOrchestrator_CheckInstanceHealthCoverage(t *testing.T) {
 	t.Run("checkInstanceHealth with nil config", func(t *testing.T) {
 		// This test is invalid since checkInstanceHealth doesn't handle nil instance
 		// Skip this test as it's not a valid use case.
-		t.Skip("Skipping test for nil instance as it causes panic")
+		t.Skip("Skipping test for nil instance as it causes panic")  // SKIP-OK: #legacy-untriaged
 	})
 
 	t.Run("checkInstanceHealth with invalid config", func(t *testing.T) {
@@ -526,7 +526,7 @@ func TestDeploymentOrchestrator_CheckInstanceHealthCoverage(t *testing.T) {
 // TestDeploymentOrchestrator_InitializeNetworkDiscoveryCoverage tests initializeNetworkDiscovery method
 func TestDeploymentOrchestrator_InitializeNetworkDiscoveryCoverage(t *testing.T) {
 	// Skip all tests to avoid timeout
-	t.Skip("Skipping all tests to avoid timeout")
+	t.Skip("Skipping all tests to avoid timeout")  // SKIP-OK: #legacy-untriaged
 }
 
 // TestDeploymentOrchestrator_GetMainInstanceHostCoverage tests getMainInstanceHost method

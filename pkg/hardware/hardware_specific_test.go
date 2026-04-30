@@ -188,7 +188,7 @@ func TestRAMDetectionSpecific(t *testing.T) {
 // TestLinuxSpecificCommandPaths tests Linux-specific command paths
 func TestLinuxSpecificCommandPaths(t *testing.T) {
 	if runtime.GOOS != "linux" {
-		t.Skip("Skipping Linux-specific tests on non-Linux system")
+		t.Skip("Skipping Linux-specific tests on non-Linux system")  // SKIP-OK: #legacy-untriaged
 	}
 
 	detector := NewDetector()
@@ -228,7 +228,7 @@ func TestLinuxSpecificCommandPaths(t *testing.T) {
 // TestMacOSSpecificCommandPaths tests macOS-specific command paths
 func TestMacOSSpecificCommandPaths(t *testing.T) {
 	if runtime.GOOS != "darwin" {
-		t.Skip("Skipping macOS-specific tests on non-macOS system")
+		t.Skip("Skipping macOS-specific tests on non-macOS system")  // SKIP-OK: #legacy-untriaged
 	}
 
 	detector := NewDetector()
@@ -277,7 +277,7 @@ func TestMacOSSpecificCommandPaths(t *testing.T) {
 // TestWindowsSpecificCommandPaths tests Windows-specific command paths
 func TestWindowsSpecificCommandPaths(t *testing.T) {
 	if runtime.GOOS != "windows" {
-		t.Skip("Skipping Windows-specific tests on non-Windows system")
+		t.Skip("Skipping Windows-specific tests on non-Windows system")  // SKIP-OK: #legacy-untriaged
 	}
 
 	detector := NewDetector()

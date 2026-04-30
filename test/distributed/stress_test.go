@@ -95,7 +95,7 @@ func TestDistributedManager_Stress_ConcurrentOperations(t *testing.T) {
 
 func TestDistributedManager_Stress_MemoryUsage(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping stress test in short mode")
+		t.Skip("Skipping stress test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	cfg := &config.Config{}
@@ -135,7 +135,7 @@ func TestDistributedManager_Stress_MemoryUsage(t *testing.T) {
 
 func TestDistributedManager_Stress_LongRunning(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping stress test in short mode")
+		t.Skip("Skipping stress test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	cfg := &config.Config{}

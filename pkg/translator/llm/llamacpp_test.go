@@ -31,7 +31,7 @@ func TestFindLlamaCppExecutable(t *testing.T) {
 
 		if err != nil {
 			// llama.cpp not installed - skip integration tests
-			t.Skip("llama.cpp not installed - install with: brew install llama.cpp")
+			t.Skip("llama.cpp not installed - install with: brew install llama.cpp")  // SKIP-OK: #legacy-untriaged
 			return
 		}
 
@@ -189,7 +189,7 @@ func TestFindLlamaCppExecutableDetailed(t *testing.T) {
 // TestNewLlamaCppClientErrorScenarios tests additional error scenarios in NewLlamaCppClient
 func TestNewLlamaCppClientErrorScenarios(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")
+		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Store original PATH and HOME
@@ -230,17 +230,17 @@ func TestNewLlamaCppClientErrorScenarios(t *testing.T) {
 
 	// Test 2: Skip problematic executable test for now due to hardware detection dependency
 	t.Run("skip_executable_test_due_to_hardware_dep", func(t *testing.T) {
-		t.Skip("Skipping executable test due to hardware detection dependency")
+		t.Skip("Skipping executable test due to hardware detection dependency")  // SKIP-OK: #legacy-untriaged
 	})
 
 	// Test 3: Skip model not found due to hardware detection dependency
 	t.Run("skip_model_test_due_to_hardware_dep", func(t *testing.T) {
-		t.Skip("Skipping model test due to hardware detection dependency")
+		t.Skip("Skipping model test due to hardware detection dependency")  // SKIP-OK: #legacy-untriaged
 	})
 
 	// Test 4: Skip resources test due to hardware detection dependency
 	t.Run("skip_resources_test_due_to_hardware_dep", func(t *testing.T) {
-		t.Skip("Skipping resources test due to hardware detection dependency")
+		t.Skip("Skipping resources test due to hardware detection dependency")  // SKIP-OK: #legacy-untriaged
 	})
 }
 
@@ -404,7 +404,7 @@ func TestNewLlamaCppClientEdgeCases(t *testing.T) {
 // TestNewLlamaCppClientDetailedErrorPaths tests specific error paths in NewLlamaCppClient
 func TestNewLlamaCppClientDetailedErrorPaths(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")
+		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// This test focuses on specific error paths that can be tested without hardware dependencies
@@ -639,7 +639,7 @@ func TestGetProviderName(t *testing.T) {
 // TestValidate tests client validation
 func TestValidate(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")
+		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Create a client
@@ -697,24 +697,24 @@ func TestValidate(t *testing.T) {
 // INTEGRATION TEST - Requires real llama.cpp and model
 func TestTranslate_Integration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Check if llama.cpp is available
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed - install with: brew install llama.cpp")
+		t.Skip("llama.cpp not installed - install with: brew install llama.cpp")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Check if we have sufficient RAM
 	detector := hardware.NewDetector()
 	caps, _ := detector.Detect()
 	if caps.TotalRAM < 8*1024*1024*1024 { // Less than 8GB
-		t.Skip("Insufficient RAM for integration test - need at least 8GB")
+		t.Skip("Insufficient RAM for integration test - need at least 8GB")  // SKIP-OK: #integration-mode-only
 	}
 
 	// Check if HF_TOKEN is available (required for model download)
 	if os.Getenv("HF_TOKEN") == "" {
-		t.Skip("HF_TOKEN environment variable not set - required for model download")
+		t.Skip("HF_TOKEN environment variable not set - required for model download")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Create client
@@ -812,11 +812,11 @@ Serbian:`
 // INTEGRATION TEST - Test GPU acceleration
 func TestGPUAcceleration_Integration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")
+		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Detect hardware
@@ -827,17 +827,17 @@ func TestGPUAcceleration_Integration(t *testing.T) {
 	}
 
 	if !caps.HasGPU {
-		t.Skip("No GPU detected - skipping GPU acceleration test")
+		t.Skip("No GPU detected - skipping GPU acceleration test")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Check if we have sufficient resources
 	if caps.TotalRAM < 8*1024*1024*1024 { // Less than 8GB
-		t.Skip("Insufficient RAM for GPU acceleration test - need at least 8GB")
+		t.Skip("Insufficient RAM for GPU acceleration test - need at least 8GB")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Check if HF_TOKEN is available (required for model download)
 	if os.Getenv("HF_TOKEN") == "" {
-		t.Skip("HF_TOKEN environment variable not set - required for model download")
+		t.Skip("HF_TOKEN environment variable not set - required for model download")  // SKIP-OK: #legacy-untriaged
 	}
 
 	t.Logf("GPU detected: %s", caps.GPUType)
@@ -880,11 +880,11 @@ func TestGPUAcceleration_Integration(t *testing.T) {
 // INTEGRATION TEST - Test performance metrics
 func TestPerformanceMetrics_Integration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")
+		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
 
 	config := TranslationConfig{
@@ -937,11 +937,11 @@ to provide a reasonable performance metric.`
 // INTEGRATION TEST - Test context length handling
 func TestContextLength_Integration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")
+		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
 
 	config := TranslationConfig{
@@ -986,11 +986,11 @@ func TestContextLength_Integration(t *testing.T) {
 // INTEGRATION TEST - Test cancellation
 func TestTranslateCancellation_Integration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")
+		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
 
 	config := TranslationConfig{
@@ -1025,7 +1025,7 @@ func TestTranslateCancellation_Integration(t *testing.T) {
 // Test GetModelInfo and GetHardwareInfo
 func TestGetters(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")
+		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
 
 	config := TranslationConfig{
@@ -1069,11 +1069,11 @@ func TestGetters(t *testing.T) {
 // TestModelDownloadAndUse - End-to-end test
 func TestModelDownloadAndUse_E2E(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping E2E test in short mode")
+		t.Skip("Skipping E2E test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")
+		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// This test verifies the entire workflow:
@@ -1334,7 +1334,7 @@ exit 0
 // TestNewLlamaCppClientAdditionalPaths tests additional error paths in NewLlamaCppClient
 func TestNewLlamaCppClientAdditionalPaths(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")
+		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
 
 	t.Run("model_registry_error", func(t *testing.T) {
@@ -1742,7 +1742,7 @@ func TestLlamaCppTranslateWithGPU(t *testing.T) {
 // TestLlamaCppClientPaths tests uncovered paths in NewLlamaCppClient
 func TestLlamaCppClientPaths(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")
+		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
 
 	// Test the model not found error path

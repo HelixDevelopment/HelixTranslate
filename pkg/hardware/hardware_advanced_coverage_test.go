@@ -247,7 +247,7 @@ func TestHardwareDetector_PlatformSpecificCommandPaths(t *testing.T) {
 
 	t.Run("Linux command paths", func(t *testing.T) {
 		if runtime.GOOS != "linux" {
-			t.Skip("Skipping Linux-specific test on non-Linux system")
+			t.Skip("Skipping Linux-specific test on non-Linux system")  // SKIP-OK: #legacy-untriaged
 		}
 
 		// Test Linux-specific RAM detection
@@ -280,7 +280,7 @@ func TestHardwareDetector_PlatformSpecificCommandPaths(t *testing.T) {
 
 	t.Run("macOS command paths", func(t *testing.T) {
 		if runtime.GOOS != "darwin" {
-			t.Skip("Skipping macOS-specific test on non-macOS system")
+			t.Skip("Skipping macOS-specific test on non-macOS system")  // SKIP-OK: #legacy-untriaged
 		}
 
 		// Test macOS-specific RAM detection
@@ -304,7 +304,7 @@ func TestHardwareDetector_PlatformSpecificCommandPaths(t *testing.T) {
 
 	t.Run("Windows command paths", func(t *testing.T) {
 		if runtime.GOOS != "windows" {
-			t.Skip("Skipping Windows-specific test on non-Windows system")
+			t.Skip("Skipping Windows-specific test on non-Windows system")  // SKIP-OK: #legacy-untriaged
 		}
 
 		// Test Windows-specific RAM detection
@@ -355,7 +355,7 @@ func TestHardwareDetector_GPUDetectionComprehensive(t *testing.T) {
 	t.Run("GPU detection with nvidia-smi", func(t *testing.T) {
 		// Check if nvidia-smi is available
 		if _, err := os.Stat("/usr/bin/nvidia-smi"); os.IsNotExist(err) {
-			t.Skip("nvidia-smi not available, skipping test")
+			t.Skip("nvidia-smi not available, skipping test")  // SKIP-OK: #legacy-untriaged
 		}
 
 		hasGPU, gpuType := detector.detectGPU()
@@ -366,7 +366,7 @@ func TestHardwareDetector_GPUDetectionComprehensive(t *testing.T) {
 
 	t.Run("GPU detection on macOS", func(t *testing.T) {
 		if runtime.GOOS != "darwin" {
-			t.Skip("Skipping macOS-specific GPU test")
+			t.Skip("Skipping macOS-specific GPU test")  // SKIP-OK: #legacy-untriaged
 		}
 
 		// On macOS, check for Metal support
@@ -381,7 +381,7 @@ func TestHardwareDetector_GPUDetectionComprehensive(t *testing.T) {
 // TestHardwareDetector_CalculateMaxModelSizeDetailed tests the calculateMaxModelSize function with detailed scenarios
 func TestHardwareDetector_CalculateMaxModelSizeDetailed(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping detailed boundary test in short mode")
+		t.Skip("Skipping detailed boundary test in short mode")  // SKIP-OK: #short-mode
 	}
 	detector := NewDetector()
 

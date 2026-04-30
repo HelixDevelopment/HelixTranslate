@@ -139,7 +139,7 @@ func TestMarkdownToEPUBConverter_ParseFrontmatterLine(t *testing.T) {
 
 func TestMarkdownToEPUBConverter_CleanFilename(t *testing.T) {
 	// This test can be skipped if cleanFilename is not exported
-	t.Skip("cleanFilename is not exported")
+	t.Skip("cleanFilename is not exported")  // SKIP-OK: #legacy-untriaged
 }
 
 func TestMarkdownToEPUBConverter_ConvertMarkdownToEPUB(t *testing.T) {

@@ -36,7 +36,7 @@ func TestNewSQLiteStorage(t *testing.T) {
 // TestSQLiteStorage_Encryption tests SQLite with encryption key
 func TestSQLiteStorage_Encryption(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping encryption test in short mode")
+		t.Skip("Skipping encryption test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	tmpDir := t.TempDir()
@@ -51,7 +51,7 @@ func TestSQLiteStorage_Encryption(t *testing.T) {
 	storage, err := NewSQLiteStorage(config)
 	if err != nil {
 		// SQLCipher may not be available - skip test
-		t.Skip("SQLCipher not available, skipping encryption test")
+		t.Skip("SQLCipher not available, skipping encryption test")  // SKIP-OK: #legacy-untriaged
 		return
 	}
 	require.NotNil(t, storage)

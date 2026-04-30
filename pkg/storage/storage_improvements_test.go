@@ -10,7 +10,7 @@ import (
 
 // TestPostgreSQLStorage_Basic tests PostgreSQL storage functionality
 func TestPostgreSQLStorage_Basic(t *testing.T) {
-	t.Skip("Skipping PostgreSQL tests to avoid requiring database setup")
+	t.Skip("Skipping PostgreSQL tests to avoid requiring database setup")  // SKIP-OK: #legacy-untriaged
 
 	// This test would require a PostgreSQL database instance
 	// In a real environment, you would:
@@ -37,7 +37,7 @@ func TestPostgreSQLStorage_Basic(t *testing.T) {
 
 // TestPostgreSQLStorage_ErrorHandling tests error handling paths
 func TestPostgreSQLStorage_ErrorHandling(t *testing.T) {
-	t.Skip("Skipping PostgreSQL tests to avoid requiring database setup")
+	t.Skip("Skipping PostgreSQL tests to avoid requiring database setup")  // SKIP-OK: #legacy-untriaged
 
 	// Test invalid configuration
 	cfg := &Config{
@@ -57,7 +57,7 @@ func TestPostgreSQLStorage_ErrorHandling(t *testing.T) {
 
 // TestRedisStorage_Basic tests Redis storage functionality
 func TestRedisStorage_Basic(t *testing.T) {
-	t.Skip("Skipping Redis tests to avoid requiring Redis setup")
+	t.Skip("Skipping Redis tests to avoid requiring Redis setup")  // SKIP-OK: #legacy-untriaged
 
 	// This test would require a Redis instance
 	// In a real environment, you would:
@@ -82,7 +82,7 @@ func TestRedisStorage_Basic(t *testing.T) {
 
 // TestRedisStorage_ErrorHandling tests error handling paths
 func TestRedisStorage_ErrorHandling(t *testing.T) {
-	t.Skip("Skipping Redis tests to avoid requiring Redis setup")
+	t.Skip("Skipping Redis tests to avoid requiring Redis setup")  // SKIP-OK: #legacy-untriaged
 
 	// Test invalid configuration
 	cfg := &Config{
@@ -134,7 +134,7 @@ func TestRedisStorage_Helpers(t *testing.T) {
 
 // TestStorageComprehensive_CompareImplementations compares different storage implementations
 func TestStorageComprehensive_CompareImplementations(t *testing.T) {
-	t.Skip("Skipping comprehensive storage tests to avoid requiring database setup")
+	t.Skip("Skipping comprehensive storage tests to avoid requiring database setup")  // SKIP-OK: #legacy-untriaged
 
 	// This test would compare behavior across different storage implementations
 	// ensuring they all conform to the Storage interface consistently
@@ -263,7 +263,7 @@ func TestStorageValidation(t *testing.T) {
 
 // TestStorageInterfaceCompliance tests that implementations would meet interface requirements
 func TestStorageInterfaceCompliance(t *testing.T) {
-	t.Skip("Skipping interface compliance tests to avoid requiring database setup")
+	t.Skip("Skipping interface compliance tests to avoid requiring database setup")  // SKIP-OK: #legacy-untriaged
 
 	// This test ensures all storage implementations would meet the interface
 	ctx := context.Background()

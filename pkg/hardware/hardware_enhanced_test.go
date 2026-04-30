@@ -210,7 +210,7 @@ func TestGetLinuxRAM(t *testing.T) {
 
 	// This test will only work on Linux systems
 	if runtime.GOOS != "linux" {
-		t.Skip("Skipping Linux-specific test on non-Linux system")
+		t.Skip("Skipping Linux-specific test on non-Linux system")  // SKIP-OK: #legacy-untriaged
 	}
 
 	ram, err := detector.getLinuxRAM()

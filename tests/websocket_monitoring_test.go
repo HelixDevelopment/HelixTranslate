@@ -23,7 +23,7 @@ import (
 // TestWebSocketMonitoringSystem comprehensive test suite for WebSocket monitoring
 func TestWebSocketMonitoringSystem(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 	// Create a test suite
 	suite := &WebSocketMonitoringTestSuite{}
@@ -413,7 +413,7 @@ func (suite *WebSocketMonitoringTestSuite) TestErrorHandling(t *testing.T) {
 // TestSSHWorkerIntegration tests SSH worker functionality
 func TestSSHWorkerIntegration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping SSH worker integration test in short mode")
+		t.Skip("Skipping SSH worker integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Create test SSH worker configuration
@@ -440,7 +440,7 @@ func TestSSHWorkerIntegration(t *testing.T) {
 	t.Run("SSHWorkerConnection", func(t *testing.T) {
 		// Skip if no SSH server available
 		if !isSSHServerAvailable(config.Host, config.Port) {
-			t.Skip("SSH server not available for integration test")
+			t.Skip("SSH server not available for integration test")  // SKIP-OK: #integration-mode-only
 		}
 
 		logger := &MockLogger{}
@@ -453,7 +453,7 @@ func TestSSHWorkerIntegration(t *testing.T) {
 		// Test connection
 		err = worker.Connect(ctx)
 		if err != nil {
-			t.Skip("SSH connection failed - worker not configured")
+			t.Skip("SSH connection failed - worker not configured")  // SKIP-OK: #legacy-untriaged
 			return
 		}
 
@@ -510,7 +510,7 @@ func TestEventBusIntegration(t *testing.T) {
 // TestWebSocketPerformance tests performance characteristics
 func TestWebSocketPerformance(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping performance test in short mode")
+		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	t.Run("HighFrequencyEvents", func(t *testing.T) {
@@ -648,7 +648,7 @@ func BenchmarkWebSocketEventTransmission(b *testing.B) {
 // Integration test for complete monitoring workflow
 func TestCompleteMonitoringWorkflow(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
+		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
 	}
 
 	// Create a fresh suite for this integration test

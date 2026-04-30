@@ -259,7 +259,7 @@ func TestHandleGeneratePlan(t *testing.T) {
 
 // TestMainFunctionPanic tests that the main function handles errors correctly
 func TestMainFunctionPanic(t *testing.T) {
-	t.Skip("main() calls log.Fatalf which does os.Exit, not panic - cannot test in Go test framework")
+	t.Skip("main() calls log.Fatalf which does os.Exit, not panic - cannot test in Go test framework")  // SKIP-OK: #legacy-untriaged
 	// Save original args and restore after test
 	origArgs := os.Args
 	defer func() { os.Args = origArgs }()
@@ -421,7 +421,7 @@ func TestDeploymentPlanGeneration(t *testing.T) {
 
 // TestFlagParsing tests flag parsing scenarios
 func TestFlagParsing(t *testing.T) {
-	t.Skip("main() redefines flags on global flag.CommandLine causing 'flag redefined' panic when run with other tests")
+	t.Skip("main() redefines flags on global flag.CommandLine causing 'flag redefined' panic when run with other tests")  // SKIP-OK: #legacy-untriaged
 	// Save original args and restore after test
 	origArgs := os.Args
 	defer func() { os.Args = origArgs }()
