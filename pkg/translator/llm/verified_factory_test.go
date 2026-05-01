@@ -17,14 +17,14 @@ func TestVerifiedFactoryRegisterAndList(t *testing.T) {
 	require.Empty(t, factory.ListVerifiedModels())
 
 	factory.RegisterModel(verifier.Model{
-		ID:                   "gpt-4",
-		ProviderID:           "openai",
-		Name:                 "GPT-4",
-		VerificationStatus:   "verified",
-		CanSeeCode:           true,
-		AffirmativeResponse:  true,
-		OverallScore:         0.95,
-		Capabilities:         map[string]bool{"streaming": true},
+		ID:                  "gpt-4",
+		ProviderID:          "openai",
+		Name:                "GPT-4",
+		VerificationStatus:  "verified",
+		CanSeeCode:          true,
+		AffirmativeResponse: true,
+		OverallScore:        0.95,
+		Capabilities:        map[string]bool{"streaming": true},
 	})
 
 	models := factory.ListVerifiedModels()
@@ -38,13 +38,13 @@ func TestVerifiedFactoryKeyResolver(t *testing.T) {
 	factory := NewVerifiedFactory(verifier.DefaultConfig())
 
 	factory.RegisterModel(verifier.Model{
-		ID:                   "gpt-4",
-		ProviderID:           "openai",
-		Name:                 "GPT-4",
-		VerificationStatus:   "verified",
-		CanSeeCode:           true,
-		AffirmativeResponse:  true,
-		OverallScore:         0.95,
+		ID:                  "gpt-4",
+		ProviderID:          "openai",
+		Name:                "GPT-4",
+		VerificationStatus:  "verified",
+		CanSeeCode:          true,
+		AffirmativeResponse: true,
+		OverallScore:        0.95,
 	})
 
 	// Without key resolver, CreateTranslator should fail because APIKey is empty
@@ -79,22 +79,22 @@ func TestVerifiedFactoryCreateTranslatorWithFallback(t *testing.T) {
 	factory := NewVerifiedFactory(verifier.DefaultConfig())
 
 	factory.RegisterModel(verifier.Model{
-		ID:                   "gpt-4",
-		ProviderID:           "openai",
-		Name:                 "GPT-4",
-		VerificationStatus:   "verified",
-		CanSeeCode:           true,
-		AffirmativeResponse:  true,
-		OverallScore:         0.95,
+		ID:                  "gpt-4",
+		ProviderID:          "openai",
+		Name:                "GPT-4",
+		VerificationStatus:  "verified",
+		CanSeeCode:          true,
+		AffirmativeResponse: true,
+		OverallScore:        0.95,
 	})
 	factory.RegisterModel(verifier.Model{
-		ID:                   "claude-3-opus-20240229",
-		ProviderID:           "anthropic",
-		Name:                 "Claude 3 Opus",
-		VerificationStatus:   "verified",
-		CanSeeCode:           true,
-		AffirmativeResponse:  true,
-		OverallScore:         0.92,
+		ID:                  "claude-3-opus-20240229",
+		ProviderID:          "anthropic",
+		Name:                "Claude 3 Opus",
+		VerificationStatus:  "verified",
+		CanSeeCode:          true,
+		AffirmativeResponse: true,
+		OverallScore:        0.92,
 	})
 
 	factory.SetKeyResolver(func(providerID string) string {

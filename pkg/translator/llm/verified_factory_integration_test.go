@@ -28,24 +28,24 @@ func TestVerifiedFactory_LLMsVerifierSSOT_AntiBluff(t *testing.T) {
 		}
 		models := []verifier.Model{
 			{
-				ID:                 "gpt-4",
-				ProviderID:         "openai",
-				Name:               "GPT-4",
-				VerificationStatus: "verified",
-				CanSeeCode:         true,
+				ID:                  "gpt-4",
+				ProviderID:          "openai",
+				Name:                "GPT-4",
+				VerificationStatus:  "verified",
+				CanSeeCode:          true,
 				AffirmativeResponse: true,
-				OverallScore:       0.95,
-				Capabilities:       map[string]bool{"translation": true},
+				OverallScore:        0.95,
+				Capabilities:        map[string]bool{"translation": true},
 			},
 			{
-				ID:                 "claude-3",
-				ProviderID:         "anthropic",
-				Name:               "Claude 3",
-				VerificationStatus: "verified",
-				CanSeeCode:         true,
+				ID:                  "claude-3",
+				ProviderID:          "anthropic",
+				Name:                "Claude 3",
+				VerificationStatus:  "verified",
+				CanSeeCode:          true,
 				AffirmativeResponse: true,
-				OverallScore:       0.92,
-				Capabilities:       map[string]bool{"translation": true},
+				OverallScore:        0.92,
+				Capabilities:        map[string]bool{"translation": true},
 			},
 		}
 		w.Header().Set("Content-Type", "application/json")

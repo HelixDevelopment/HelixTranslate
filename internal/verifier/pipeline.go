@@ -223,8 +223,8 @@ func (p *Pipeline) checkModelExistence(ctx context.Context, provider ProviderCon
 func (p *Pipeline) validateResponseFormat(ctx context.Context, provider ProviderConfig, modelID string) VerificationResult {
 	// Send a minimal chat completion request and verify the response format
 	body, _ := json.Marshal(map[string]interface{}{
-		"model":    modelID,
-		"messages": []map[string]string{{"role": "user", "content": "Hi"}},
+		"model":      modelID,
+		"messages":   []map[string]string{{"role": "user", "content": "Hi"}},
 		"max_tokens": 5,
 	})
 

@@ -141,11 +141,11 @@ func TestVerifierHandler_RegisterVerifierRoutes(t *testing.T) {
 	require.NotEmpty(t, routes)
 
 	expectedPaths := map[string]bool{
-		"/api/v1/verified-models":         false,
-		"/api/v1/verified-models/:id":     false,
-		"/api/v1/verification-status":     false,
-		"/api/v1/verification/refresh":    false,
-		"/api/v1/providers/verified":      false,
+		"/api/v1/verified-models":             false,
+		"/api/v1/verified-models/:id":         false,
+		"/api/v1/verification-status":         false,
+		"/api/v1/verification/refresh":        false,
+		"/api/v1/providers/verified":          false,
 		"/api/v1/translate-with-verification": false,
 	}
 

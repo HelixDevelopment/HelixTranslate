@@ -9,13 +9,13 @@ import (
 
 // Scheduler runs periodic model discovery in the background.
 type Scheduler struct {
-	service   *Service
-	interval  time.Duration
-	mu        sync.Mutex
-	running   bool
-	stopCh    chan struct{}
-	wg        sync.WaitGroup
-	onCycle   func(error) // optional callback after each cycle
+	service  *Service
+	interval time.Duration
+	mu       sync.Mutex
+	running  bool
+	stopCh   chan struct{}
+	wg       sync.WaitGroup
+	onCycle  func(error) // optional callback after each cycle
 }
 
 // NewScheduler creates a background discovery scheduler.

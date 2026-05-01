@@ -11,7 +11,6 @@ import (
 
 	"flag"
 
-	"digital.vasic.translator/internal/config"
 	"digital.vasic.translator/internal/verifier"
 	"digital.vasic.translator/internal/verifier/selection"
 	"digital.vasic.translator/pkg/ebook"
@@ -411,13 +410,7 @@ func executeAPITranslation(ctx context.Context, config *UnifiedConfig, session *
 
 // executeVerifiedTranslation uses VerifiedFactory to select and translate with a verified model.
 func executeVerifiedTranslation(ctx context.Context, config *UnifiedConfig, session *TranslationSession) (*llm.LLMTranslator, error) {
-	vCfg := &verifier.Config{
-		APIURL:            config.VerifierURL,
-		APIKey:            config.VerifierAPIKey,
-		CacheTTL:          time.Hour,
-		MinScoreThreshold: 0.0,
-	}
-
+	vCfg := initVerifierConfig(config)
 	factory := llm.NewVerifiedFactory(vCfg)
 	factory.SetKeyResolver(func(providerID string) string {
 		return resolveProviderAPIKey(config, providerID)
@@ -456,16 +449,16 @@ func resolveProviderAPIKey(config *UnifiedConfig, providerID string) string {
 	}
 	// Fall back to well-known environment variables
 	envMap := map[string]string{
-		"openai":    "OPENAI_API_KEY",
-		"anthropic": "ANTHROPIC_API_KEY",
-		"deepseek":  "DEEPSEEK_API_KEY",
-		"qwen":      "QWEN_API_KEY",
-		"gemini":    "GEMINI_API_KEY",
-		"groq":      "GROQ_API_KEY",
-		"mistral":   "MISTRAL_API_KEY",
-		"xai":       "XAI_API_KEY",
-		"cohere":    "COHERE_API_KEY",
-		"togetherai":"TOGETHER_API_KEY",
+		"openai":     "OPENAI_API_KEY",
+		"anthropic":  "ANTHROPIC_API_KEY",
+		"deepseek":   "DEEPSEEK_API_KEY",
+		"qwen":       "QWEN_API_KEY",
+		"gemini":     "GEMINI_API_KEY",
+		"groq":       "GROQ_API_KEY",
+		"mistral":    "MISTRAL_API_KEY",
+		"xai":        "XAI_API_KEY",
+		"cohere":     "COHERE_API_KEY",
+		"togetherai": "TOGETHER_API_KEY",
 	}
 	if envVar, ok := envMap[providerID]; ok {
 		return os.Getenv(envVar)
@@ -983,13 +976,11 @@ func validateWithVerifier(cfg *UnifiedConfig) error {
 }
 
 // initVerifierConfig loads LLMsVerifier configuration from global config if available.
-func initVerifierConfig() *verifier.Config {
-	cfg := config.DefaultConfig()
+func initVerifierConfig(uc *UnifiedConfig) *verifier.Config {
 	return &verifier.Config{
-		APIURL:            cfg.LLMsVerifier.APIURL,
-		APIKey:            cfg.LLMsVerifier.APIKey,
-		CacheTTL:          cfg.LLMsVerifier.CacheTTL,
-		MinScoreThreshold: cfg.LLMsVerifier.MinScoreThreshold,
-		MaxProviders:      cfg.LLMsVerifier.MaxProviders,
+		APIURL:            uc.VerifierURL,
+		APIKey:            uc.VerifierAPIKey,
+		CacheTTL:          time.Hour,
+		MinScoreThreshold: 0.0,
 	}
 }

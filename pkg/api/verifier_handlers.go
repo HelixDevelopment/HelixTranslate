@@ -82,14 +82,14 @@ func (h *VerifierHandler) listVerifiedModels(c *gin.Context) {
 			continue
 		}
 		result = append(result, gin.H{
-			"id":                 m.ID,
-			"provider_id":        m.ProviderID,
-			"name":               m.Name,
+			"id":                  m.ID,
+			"provider_id":         m.ProviderID,
+			"name":                m.Name,
 			"verification_status": m.VerificationStatus,
-			"overall_score":      m.OverallScore,
-			"capabilities":       m.Capabilities,
-			"pricing":            m.Pricing,
-			"last_verified_at":   m.LastVerifiedAt,
+			"overall_score":       m.OverallScore,
+			"capabilities":        m.Capabilities,
+			"pricing":             m.Pricing,
+			"last_verified_at":    m.LastVerifiedAt,
 		})
 	}
 
@@ -117,20 +117,20 @@ func (h *VerifierHandler) getVerifiedModel(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"id":                   model.ID,
-		"provider_id":          model.ProviderID,
-		"name":                 model.Name,
-		"verification_status":  model.VerificationStatus,
-		"can_see_code":         model.CanSeeCode,
-		"affirmative_response": model.AffirmativeResponse,
-		"overall_score":        model.OverallScore,
-		"responsiveness_score": model.ResponsivenessScore,
-		"code_capability_score": model.CodeCapabilityScore,
+		"id":                     model.ID,
+		"provider_id":            model.ProviderID,
+		"name":                   model.Name,
+		"verification_status":    model.VerificationStatus,
+		"can_see_code":           model.CanSeeCode,
+		"affirmative_response":   model.AffirmativeResponse,
+		"overall_score":          model.OverallScore,
+		"responsiveness_score":   model.ResponsivenessScore,
+		"code_capability_score":  model.CodeCapabilityScore,
 		"feature_richness_score": model.FeatureRichnessScore,
-		"reliability_score":    model.ReliabilityScore,
-		"capabilities":         model.Capabilities,
-		"pricing":              model.Pricing,
-		"last_verified_at":     model.LastVerifiedAt,
+		"reliability_score":      model.ReliabilityScore,
+		"capabilities":           model.Capabilities,
+		"pricing":                model.Pricing,
+		"last_verified_at":       model.LastVerifiedAt,
 	})
 }
 
@@ -165,8 +165,8 @@ func (h *VerifierHandler) refreshVerification(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status":           "refreshed",
-		"last_refresh":     h.adapter.LastRefresh(),
+		"status":       "refreshed",
+		"last_refresh": h.adapter.LastRefresh(),
 	})
 }
 
@@ -215,11 +215,11 @@ func (h *VerifierHandler) listVerifiedProviders(c *gin.Context) {
 // translateWithVerification performs translation using only verified models.
 func (h *VerifierHandler) translateWithVerification(c *gin.Context) {
 	var req struct {
-		Text       string  `json:"text" binding:"required"`
-		SourceLang string  `json:"source_lang" binding:"required"`
-		TargetLang string  `json:"target_lang" binding:"required"`
-		ModelID    string  `json:"model_id,omitempty"`
-		Provider   string  `json:"provider,omitempty"`
+		Text       string `json:"text" binding:"required"`
+		SourceLang string `json:"source_lang" binding:"required"`
+		TargetLang string `json:"target_lang" binding:"required"`
+		ModelID    string `json:"model_id,omitempty"`
+		Provider   string `json:"provider,omitempty"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
