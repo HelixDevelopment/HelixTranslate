@@ -19,6 +19,7 @@ type Config struct {
 	MinScoreThreshold   float64
 	MaxProviders        int
 	ScoringWeights      ScoreWeights
+	Options             map[string]interface{}
 }
 
 // ScoreWeights defines the component weights for model scoring.

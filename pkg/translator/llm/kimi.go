@@ -1,15 +1,13 @@
 package llm
 
 import (
-	"context"
 	"fmt"
+	"strings"
 )
 
-// KimiClient implements LLMClient for Moonshot AI (Kimi) API.
+// KimiClient implements LLMClient for Kimi API (OpenAI-compatible).
 type KimiClient struct {
-	apiKey  string
-	model   string
-	baseURL string
+	*OpenAIClient
 }
 
 // NewKimiClient creates a new Kimi client.
@@ -17,16 +15,46 @@ func NewKimiClient(config TranslationConfig) (*KimiClient, error) {
 	if config.APIKey == "" {
 		return nil, fmt.Errorf("kimi API key is required")
 	}
-	return &KimiClient{
-		apiKey:  config.APIKey,
-		model:   config.Model,
-		baseURL: defaultString(config.BaseURL, "https://api.moonshot.cn/v1"),
-	}, nil
-}
 
-// Translate performs translation via Kimi.
-func (c *KimiClient) Translate(ctx context.Context, text string, prompt string) (string, error) {
-	return "", fmt.Errorf("kimi translation not yet implemented")
+	if config.BaseURL == "" {
+		config.BaseURL = "https://api.moonshot.cn/v1"
+	}
+
+	if config.Model == "" {
+		return nil, fmt.Errorf("kimi model is required")
+	}
+
+	if strings.TrimSpace(config.Model) == "" {
+		return nil, fmt.Errorf("model cannot be empty or whitespace")
+	}
+
+	validModels := ValidModels[ProviderKimi]
+	modelValid := false
+	for _, validModel := range validModels {
+		if config.Model == validModel {
+			modelValid = true
+			break
+		}
+	}
+	if !modelValid {
+		return nil, fmt.Errorf("model '%s' is not valid for Kimi. Valid models: %v",
+			config.Model, validModels)
+	}
+
+	if temp, exists := config.Options["temperature"]; exists {
+		if tempFloat, ok := temp.(float64); ok {
+			if tempFloat < 0.0 || tempFloat > 2.0 {
+				return nil, fmt.Errorf("temperature %.1f is invalid for Kimi. Must be between 0.0 and 2.0", tempFloat)
+			}
+		}
+	}
+
+	openaiClient, err := NewOpenAIClient(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &KimiClient{OpenAIClient: openaiClient}, nil
 }
 
 // GetProviderName returns the provider name.

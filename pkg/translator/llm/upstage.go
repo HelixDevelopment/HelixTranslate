@@ -1,15 +1,13 @@
 package llm
 
 import (
-	"context"
 	"fmt"
+	"strings"
 )
 
-// UpstageClient implements LLMClient for Upstage AI API.
+// UpstageClient implements LLMClient for Upstage API (OpenAI-compatible).
 type UpstageClient struct {
-	apiKey  string
-	model   string
-	baseURL string
+	*OpenAIClient
 }
 
 // NewUpstageClient creates a new Upstage client.
@@ -17,16 +15,46 @@ func NewUpstageClient(config TranslationConfig) (*UpstageClient, error) {
 	if config.APIKey == "" {
 		return nil, fmt.Errorf("upstage API key is required")
 	}
-	return &UpstageClient{
-		apiKey:  config.APIKey,
-		model:   config.Model,
-		baseURL: defaultString(config.BaseURL, "https://api.upstage.ai/v1"),
-	}, nil
-}
 
-// Translate performs translation via Upstage.
-func (c *UpstageClient) Translate(ctx context.Context, text string, prompt string) (string, error) {
-	return "", fmt.Errorf("upstage translation not yet implemented")
+	if config.BaseURL == "" {
+		config.BaseURL = "https://api.upstage.ai/v1"
+	}
+
+	if config.Model == "" {
+		return nil, fmt.Errorf("upstage model is required")
+	}
+
+	if strings.TrimSpace(config.Model) == "" {
+		return nil, fmt.Errorf("model cannot be empty or whitespace")
+	}
+
+	validModels := ValidModels[ProviderUpstage]
+	modelValid := false
+	for _, validModel := range validModels {
+		if config.Model == validModel {
+			modelValid = true
+			break
+		}
+	}
+	if !modelValid {
+		return nil, fmt.Errorf("model '%s' is not valid for Upstage. Valid models: %v",
+			config.Model, validModels)
+	}
+
+	if temp, exists := config.Options["temperature"]; exists {
+		if tempFloat, ok := temp.(float64); ok {
+			if tempFloat < 0.0 || tempFloat > 2.0 {
+				return nil, fmt.Errorf("temperature %.1f is invalid for Upstage. Must be between 0.0 and 2.0", tempFloat)
+			}
+		}
+	}
+
+	openaiClient, err := NewOpenAIClient(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UpstageClient{OpenAIClient: openaiClient}, nil
 }
 
 // GetProviderName returns the provider name.

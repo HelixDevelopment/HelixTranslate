@@ -1,15 +1,13 @@
 package llm
 
 import (
-	"context"
 	"fmt"
+	"strings"
 )
 
-// SarvamClient implements LLMClient for Sarvam AI API.
+// SarvamClient implements LLMClient for Sarvam API (OpenAI-compatible).
 type SarvamClient struct {
-	apiKey  string
-	model   string
-	baseURL string
+	*OpenAIClient
 }
 
 // NewSarvamClient creates a new Sarvam client.
@@ -17,16 +15,46 @@ func NewSarvamClient(config TranslationConfig) (*SarvamClient, error) {
 	if config.APIKey == "" {
 		return nil, fmt.Errorf("sarvam API key is required")
 	}
-	return &SarvamClient{
-		apiKey:  config.APIKey,
-		model:   config.Model,
-		baseURL: defaultString(config.BaseURL, "https://api.sarvam.ai/v1"),
-	}, nil
-}
 
-// Translate performs translation via Sarvam.
-func (c *SarvamClient) Translate(ctx context.Context, text string, prompt string) (string, error) {
-	return "", fmt.Errorf("sarvam translation not yet implemented")
+	if config.BaseURL == "" {
+		config.BaseURL = "https://api.sarvam.ai/v1"
+	}
+
+	if config.Model == "" {
+		return nil, fmt.Errorf("sarvam model is required")
+	}
+
+	if strings.TrimSpace(config.Model) == "" {
+		return nil, fmt.Errorf("model cannot be empty or whitespace")
+	}
+
+	validModels := ValidModels[ProviderSarvam]
+	modelValid := false
+	for _, validModel := range validModels {
+		if config.Model == validModel {
+			modelValid = true
+			break
+		}
+	}
+	if !modelValid {
+		return nil, fmt.Errorf("model '%s' is not valid for Sarvam. Valid models: %v",
+			config.Model, validModels)
+	}
+
+	if temp, exists := config.Options["temperature"]; exists {
+		if tempFloat, ok := temp.(float64); ok {
+			if tempFloat < 0.0 || tempFloat > 2.0 {
+				return nil, fmt.Errorf("temperature %.1f is invalid for Sarvam. Must be between 0.0 and 2.0", tempFloat)
+			}
+		}
+	}
+
+	openaiClient, err := NewOpenAIClient(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &SarvamClient{OpenAIClient: openaiClient}, nil
 }
 
 // GetProviderName returns the provider name.

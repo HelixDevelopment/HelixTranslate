@@ -1,15 +1,13 @@
 package llm
 
 import (
-	"context"
 	"fmt"
+	"strings"
 )
 
-// PublicAIClient implements LLMClient for PublicAI API.
+// PublicAIClient implements LLMClient for PublicAI API (OpenAI-compatible).
 type PublicAIClient struct {
-	apiKey  string
-	model   string
-	baseURL string
+	*OpenAIClient
 }
 
 // NewPublicAIClient creates a new PublicAI client.
@@ -17,16 +15,46 @@ func NewPublicAIClient(config TranslationConfig) (*PublicAIClient, error) {
 	if config.APIKey == "" {
 		return nil, fmt.Errorf("publicai API key is required")
 	}
-	return &PublicAIClient{
-		apiKey:  config.APIKey,
-		model:   config.Model,
-		baseURL: defaultString(config.BaseURL, "https://api.publicai.io/v1"),
-	}, nil
-}
 
-// Translate performs translation via PublicAI.
-func (c *PublicAIClient) Translate(ctx context.Context, text string, prompt string) (string, error) {
-	return "", fmt.Errorf("publicai translation not yet implemented")
+	if config.BaseURL == "" {
+		config.BaseURL = "https://api.publicai.com/v1"
+	}
+
+	if config.Model == "" {
+		return nil, fmt.Errorf("publicai model is required")
+	}
+
+	if strings.TrimSpace(config.Model) == "" {
+		return nil, fmt.Errorf("model cannot be empty or whitespace")
+	}
+
+	validModels := ValidModels[ProviderPublicAI]
+	modelValid := false
+	for _, validModel := range validModels {
+		if config.Model == validModel {
+			modelValid = true
+			break
+		}
+	}
+	if !modelValid {
+		return nil, fmt.Errorf("model '%s' is not valid for PublicAI. Valid models: %v",
+			config.Model, validModels)
+	}
+
+	if temp, exists := config.Options["temperature"]; exists {
+		if tempFloat, ok := temp.(float64); ok {
+			if tempFloat < 0.0 || tempFloat > 2.0 {
+				return nil, fmt.Errorf("temperature %.1f is invalid for PublicAI. Must be between 0.0 and 2.0", tempFloat)
+			}
+		}
+	}
+
+	openaiClient, err := NewOpenAIClient(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &PublicAIClient{OpenAIClient: openaiClient}, nil
 }
 
 // GetProviderName returns the provider name.

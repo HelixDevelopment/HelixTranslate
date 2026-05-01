@@ -350,9 +350,10 @@ func translateEbook(
 		}
 
 	case format.FormatFB2:
-		// Convert to FB2 and write
-		// For now, we'll use EPUB as primary format
-		return fmt.Errorf("FB2 output format not yet implemented")
+		writer := ebook.NewFB2Writer()
+		if err := writer.Write(book, outputFile); err != nil {
+			return fmt.Errorf("failed to write FB2: %w", err)
+		}
 
 	case format.FormatTXT:
 		// Write as plain text

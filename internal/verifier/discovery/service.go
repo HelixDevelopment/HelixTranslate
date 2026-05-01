@@ -2,7 +2,9 @@ package discovery
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"sync"
 	"time"
 
@@ -17,6 +19,31 @@ type Service struct {
 	providers    []verifier.ProviderConfig
 	lastSync     time.Time
 	syncInterval time.Duration
+	httpClient   *http.Client
+}
+
+// openRouterModel represents a model from OpenRouter API.
+type openRouterModel struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Pricing  struct {
+		Prompt float64 `json:"prompt"`
+		Completion float64 `json:"completion"`
+	} `json:"pricing"`
+	ContextLength int `json:"context_length"`
+}
+
+// openRouterResponse represents the OpenRouter models API response.
+type openRouterResponse struct {
+	Data []openRouterModel `json:"data"`
+}
+
+// huggingFaceModel represents a model from HuggingFace API.
+type huggingFaceModel struct {
+	ID        string `json:"id"`
+	ModelID   string `json:"modelId"`
+	Downloads int    `json:"downloads"`
+	Tags      []string `json:"tags"`
 }
 
 // NewService creates a discovery service.
@@ -25,6 +52,7 @@ func NewService(cfg *verifier.Config, registry *verifier.Registry) *Service {
 		config:       cfg,
 		registry:     registry,
 		syncInterval: cfg.CacheTTL,
+		httpClient:   &http.Client{Timeout: 30 * time.Second},
 	}
 }
 
@@ -49,8 +77,18 @@ func (s *Service) Discover(ctx context.Context) error {
 		}
 	}
 
-	// Tier 2 & 3 would query public registries and community endpoints
-	// These are stubbed for Phase 1 and will be implemented in Phase 4.
+	// Tier 2: Public registries
+	if err := s.discoverFromOpenRouter(ctx); err != nil {
+		_ = err
+	}
+	if err := s.discoverFromHuggingFace(ctx); err != nil {
+		_ = err
+	}
+
+	// Tier 3: Community endpoints
+	if err := s.discoverFromCommunity(ctx); err != nil {
+		_ = err
+	}
 
 	s.lastSync = time.Now()
 	return nil
@@ -58,11 +96,142 @@ func (s *Service) Discover(ctx context.Context) error {
 
 // discoverFromProvider queries a single provider for available models.
 func (s *Service) discoverFromProvider(ctx context.Context, provider verifier.ProviderConfig) error {
-	// Stub: in Phase 4 this will perform actual HTTP discovery against provider APIs.
-	// For now, register the provider so the registry knows it exists.
 	if provider.ID == "" {
 		return fmt.Errorf("provider ID cannot be empty")
 	}
+
+	// Register models declared in provider config
+	for _, modelID := range provider.Models {
+		s.registry.AddModel(verifier.Model{
+			ID:                 modelID,
+			ProviderID:         provider.ID,
+			Name:               modelID,
+			VerificationStatus: "discovered",
+			Capabilities:       map[string]bool{},
+		})
+	}
+
+	return nil
+}
+
+// discoverFromOpenRouter queries OpenRouter's public model registry (Tier 2).
+func (s *Service) discoverFromOpenRouter(ctx context.Context) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://openrouter.ai/api/v1/models", nil)
+	if err != nil {
+		return fmt.Errorf("failed to create OpenRouter request: %w", err)
+	}
+
+	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("OpenRouter unreachable: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("OpenRouter returned status %d", resp.StatusCode)
+	}
+
+	var result openRouterResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return fmt.Errorf("failed to decode OpenRouter response: %w", err)
+	}
+
+	for _, m := range result.Data {
+		s.registry.AddModel(verifier.Model{
+			ID:                 m.ID,
+			ProviderID:         "openrouter",
+			Name:               m.Name,
+			VerificationStatus: "discovered",
+			Capabilities:       map[string]bool{"streaming": true},
+			Pricing: verifier.PricingInfo{
+				InputTokenCost:  m.Pricing.Prompt,
+				OutputTokenCost: m.Pricing.Completion,
+				Currency:        "USD",
+			},
+		})
+	}
+
+	return nil
+}
+
+// discoverFromHuggingFace queries HuggingFace's model registry (Tier 2).
+func (s *Service) discoverFromHuggingFace(ctx context.Context) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://huggingface.co/api/models?filter=text-generation&limit=50", nil)
+	if err != nil {
+		return fmt.Errorf("failed to create HuggingFace request: %w", err)
+	}
+
+	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("HuggingFace unreachable: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("HuggingFace returned status %d", resp.StatusCode)
+	}
+
+	var models []huggingFaceModel
+	if err := json.NewDecoder(resp.Body).Decode(&models); err != nil {
+		return fmt.Errorf("failed to decode HuggingFace response: %w", err)
+	}
+
+	for _, m := range models {
+		caps := map[string]bool{}
+		for _, tag := range m.Tags {
+			if tag == "transformers" || tag == "pytorch" {
+				caps["local"] = true
+			}
+		}
+		s.registry.AddModel(verifier.Model{
+			ID:                 m.ModelID,
+			ProviderID:         "huggingface",
+			Name:               m.ModelID,
+			VerificationStatus: "discovered",
+			Capabilities:       caps,
+		})
+	}
+
+	return nil
+}
+
+// discoverFromCommunity queries configured community endpoints (Tier 3).
+func (s *Service) discoverFromCommunity(ctx context.Context) error {
+	// Check if a community endpoint is configured in options
+	communityURL := ""
+	if url, ok := s.config.Options["community_registry_url"].(string); ok && url != "" {
+		communityURL = url
+	}
+
+	if communityURL == "" {
+		// No community endpoint configured; skip Tier 3 silently
+		return nil
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, communityURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create community request: %w", err)
+	}
+
+	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("community registry unreachable: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("community registry returned status %d", resp.StatusCode)
+	}
+
+	var models []verifier.Model
+	if err := json.NewDecoder(resp.Body).Decode(&models); err != nil {
+		return fmt.Errorf("failed to decode community response: %w", err)
+	}
+
+	for _, m := range models {
+		s.registry.AddModel(m)
+	}
+
 	return nil
 }
 

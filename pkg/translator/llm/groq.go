@@ -1,15 +1,13 @@
 package llm
 
 import (
-	"context"
 	"fmt"
+	"strings"
 )
 
-// GroqClient implements LLMClient for Groq API.
+// GroqClient implements LLMClient for Groq API (OpenAI-compatible).
 type GroqClient struct {
-	apiKey string
-	model  string
-	baseURL string
+	*OpenAIClient
 }
 
 // NewGroqClient creates a new Groq client.
@@ -17,18 +15,46 @@ func NewGroqClient(config TranslationConfig) (*GroqClient, error) {
 	if config.APIKey == "" {
 		return nil, fmt.Errorf("groq API key is required")
 	}
-	return &GroqClient{
-		apiKey:  config.APIKey,
-		model:   config.Model,
-		baseURL: defaultString(config.BaseURL, "https://api.groq.com/openai/v1"),
-	}, nil
-}
 
-// Translate performs translation via Groq.
-func (c *GroqClient) Translate(ctx context.Context, text string, prompt string) (string, error) {
-	// Groq is OpenAI-compatible; delegates to generic OpenAI-compatible implementation
-	// Full implementation would use the same HTTP client pattern as OpenAI
-	return "", fmt.Errorf("groq translation not yet implemented")
+	if config.BaseURL == "" {
+		config.BaseURL = "https://api.groq.com/openai/v1"
+	}
+
+	if config.Model == "" {
+		return nil, fmt.Errorf("groq model is required")
+	}
+
+	if strings.TrimSpace(config.Model) == "" {
+		return nil, fmt.Errorf("model cannot be empty or whitespace")
+	}
+
+	validModels := ValidModels[ProviderGroq]
+	modelValid := false
+	for _, validModel := range validModels {
+		if config.Model == validModel {
+			modelValid = true
+			break
+		}
+	}
+	if !modelValid {
+		return nil, fmt.Errorf("model '%s' is not valid for Groq. Valid models: %v",
+			config.Model, validModels)
+	}
+
+	if temp, exists := config.Options["temperature"]; exists {
+		if tempFloat, ok := temp.(float64); ok {
+			if tempFloat < 0.0 || tempFloat > 2.0 {
+				return nil, fmt.Errorf("temperature %.1f is invalid for Groq. Must be between 0.0 and 2.0", tempFloat)
+			}
+		}
+	}
+
+	openaiClient, err := NewOpenAIClient(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &GroqClient{OpenAIClient: openaiClient}, nil
 }
 
 // GetProviderName returns the provider name.

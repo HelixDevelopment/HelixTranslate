@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -119,8 +120,31 @@ type ErrorResponse struct {
 }
 
 func main() {
+	// CLI flags override environment variables
+	var (
+		httpPortFlag    = flag.Int("http-port", 0, "HTTP server port (overrides HTTP_PORT env var)")
+		httpAddrFlag    = flag.String("http-address", "", "HTTP server address (overrides HTTP_ADDRESS env var)")
+		grpcAddrFlag    = flag.String("grpc-address", "", "gRPC server address (overrides GRPC_ADDRESS env var)")
+		debugFlag       = flag.Bool("debug", false, "Enable debug mode")
+	)
+	flag.Parse()
+
 	// Load configuration
 	config := loadAPIConfig()
+
+	// Apply CLI overrides
+	if *httpPortFlag != 0 {
+		config.HTTPPort = *httpPortFlag
+	}
+	if *httpAddrFlag != "" {
+		config.HTTPAddress = *httpAddrFlag
+	}
+	if *grpcAddrFlag != "" {
+		config.GRPCAddress = *grpcAddrFlag
+	}
+	if *debugFlag {
+		config.Debug = true
+	}
 
 	// Initialize logger
 	logLevel := logger.INFO
