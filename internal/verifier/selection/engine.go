@@ -135,6 +135,11 @@ func (e *Engine) calculateTaskScore(model verifier.Model, task TaskRequirements)
 	return baseScore
 }
 
+// GetRegistry returns the underlying model registry.
+func (e *Engine) GetRegistry() *verifier.Registry {
+	return e.registry
+}
+
 // meetsRequirements checks if a model satisfies hard task requirements.
 func (e *Engine) meetsRequirements(model verifier.Model, task TaskRequirements) bool {
 	if task.RequireStreaming && !model.Capabilities["streaming"] {
