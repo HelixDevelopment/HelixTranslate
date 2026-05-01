@@ -4,16 +4,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 )
 
 // Config represents the application configuration
 type Config struct {
-	Server      ServerConfig      `json:"server"`
-	Security    SecurityConfig    `json:"security"`
-	Translation TranslationConfig `json:"translation"`
-	Preparation PreparationConfig `json:"preparation"`
-	Distributed DistributedConfig `json:"distributed"`
-	Logging     LoggingConfig     `json:"logging"`
+	Server       ServerConfig       `json:"server"`
+	Security     SecurityConfig     `json:"security"`
+	Translation  TranslationConfig  `json:"translation"`
+	Preparation  PreparationConfig  `json:"preparation"`
+	Distributed  DistributedConfig  `json:"distributed"`
+	Logging      LoggingConfig      `json:"logging"`
+	LLMsVerifier LLMsVerifierConfig `json:"llmsverifier"`
 }
 
 // ServerConfig represents server configuration
@@ -99,6 +101,29 @@ type PreparationConfig struct {
 	DetailLevel        string   `json:"detail_level"`
 }
 
+// LLMsVerifierConfig holds the LLMsVerifier integration settings
+type LLMsVerifierConfig struct {
+	Enabled             bool          `json:"enabled"`
+	APIURL              string        `json:"api_url"`
+	APIKey              string        `json:"api_key"`
+	DBPath              string        `json:"db_path"`
+	CacheTTL            time.Duration `json:"cache_ttl"`
+	StrictMode          bool          `json:"strict_mode"`
+	VerificationEnabled bool          `json:"verification_enabled"`
+	MinScoreThreshold   float64       `json:"min_score_threshold"`
+	MaxProviders        int           `json:"max_providers"`
+	ScoringWeights      ScoreWeights  `json:"scoring_weights"`
+}
+
+// ScoreWeights defines the component weights for LLMsVerifier scoring
+type ScoreWeights struct {
+	ResponseSpeed     float64 `json:"response_speed"`
+	CostEffectiveness float64 `json:"cost_effectiveness"`
+	ModelEfficiency   float64 `json:"model_efficiency"`
+	Capability        float64 `json:"capability"`
+	Recency           float64 `json:"recency"`
+}
+
 // DefaultConfig returns default configuration
 func DefaultConfig() *Config {
 	return &Config{
@@ -152,6 +177,23 @@ func DefaultConfig() *Config {
 			Format:     "json",
 			OutputFile: "",
 		},
+		LLMsVerifier: LLMsVerifierConfig{
+			Enabled:             false,
+			APIURL:              "http://localhost:8080",
+			DBPath:              "./data/verifier.db",
+			CacheTTL:            time.Hour,
+			StrictMode:          false,
+			VerificationEnabled: true,
+			MinScoreThreshold:   0.0,
+			MaxProviders:        25,
+			ScoringWeights: ScoreWeights{
+				ResponseSpeed:     0.20,
+				CostEffectiveness: 0.30,
+				ModelEfficiency:   0.25,
+				Capability:        0.20,
+				Recency:           0.05,
+			},
+		},
 	}
 }
 
@@ -190,10 +232,32 @@ func SaveConfig(filename string, config *Config) error {
 // loadAPIKeysFromEnv loads API keys from environment variables
 func (c *Config) loadAPIKeysFromEnv() {
 	envMappings := map[string]string{
-		"openai":    "OPENAI_API_KEY",
-		"anthropic": "ANTHROPIC_API_KEY",
-		"zhipu":     "ZHIPU_API_KEY",
-		"deepseek":  "DEEPSEEK_API_KEY",
+		"openai":       "OPENAI_API_KEY",
+		"anthropic":    "ANTHROPIC_API_KEY",
+		"zhipu":        "ZHIPU_API_KEY",
+		"deepseek":     "DEEPSEEK_API_KEY",
+		"qwen":         "QWEN_API_KEY",
+		"gemini":       "GEMINI_API_KEY",
+		"groq":         "GROQ_API_KEY",
+		"cohere":       "COHERE_API_KEY",
+		"mistral":      "MISTRAL_API_KEY",
+		"xai":          "XAI_API_KEY",
+		"replicate":    "REPLICATE_API_KEY",
+		"cerebras":     "CEREBRAS_API_KEY",
+		"cloudflare":   "CLOUDFLARE_API_KEY",
+		"siliconflow":  "SILICONFLOW_API_KEY",
+		"hyperbolic":   "HYPERBOLIC_API_KEY",
+		"togetherai":   "TOGETHER_API_KEY",
+		"sambanova":    "SAMBANOVA_API_KEY",
+		"kimi":         "KIMI_API_KEY",
+		"novita":       "NOVITA_API_KEY",
+		"nlpcloud":     "NLP_CLOUD_API_KEY",
+		"upstage":      "UPSTAGE_API_KEY",
+		"sarvam":       "SARVAM_API_KEY",
+		"modal":        "MODAL_API_KEY",
+		"publicai":     "PUBLICAI_API_KEY",
+		"nia":          "NIA_API_KEY",
+		"vulavula":     "VULAVULA_API_KEY",
 	}
 
 	for provider, envVar := range envMappings {
@@ -213,6 +277,42 @@ func (c *Config) loadAPIKeysFromEnv() {
 	if jwtSecret := os.Getenv("JWT_SECRET"); jwtSecret != "" {
 		c.Security.JWTSecret = jwtSecret
 	}
+
+	// Load LLMsVerifier configuration from environment
+	c.loadLLMsVerifierFromEnv()
+}
+
+// loadLLMsVerifierFromEnv loads LLMsVerifier-specific configuration from environment
+func (c *Config) loadLLMsVerifierFromEnv() {
+	if enabled := os.Getenv("LLMSVERIFIER_ENABLED"); enabled != "" {
+		c.LLMsVerifier.Enabled = enabled == "true"
+	}
+	if apiURL := os.Getenv("LLMSVERIFIER_API_URL"); apiURL != "" {
+		c.LLMsVerifier.APIURL = apiURL
+	}
+	if apiKey := os.Getenv("LLMSVERIFIER_API_KEY"); apiKey != "" {
+		c.LLMsVerifier.APIKey = apiKey
+	}
+	if dbPath := os.Getenv("LLMSVERIFIER_DB_PATH"); dbPath != "" {
+		c.LLMsVerifier.DBPath = dbPath
+	}
+	if cacheTTL := os.Getenv("LLMSVERIFIER_CACHE_TTL"); cacheTTL != "" {
+		if d, err := time.ParseDuration(cacheTTL); err == nil {
+			c.LLMsVerifier.CacheTTL = d
+		}
+	}
+	if strictMode := os.Getenv("LLMSVERIFIER_STRICT_MODE"); strictMode != "" {
+		c.LLMsVerifier.StrictMode = strictMode == "true"
+	}
+	if verificationEnabled := os.Getenv("LLMSVERIFIER_VERIFICATION_ENABLED"); verificationEnabled != "" {
+		c.LLMsVerifier.VerificationEnabled = verificationEnabled == "true"
+	}
+	if minScore := os.Getenv("LLMSVERIFIER_MIN_SCORE"); minScore != "" {
+		var score float64
+		if _, err := fmt.Sscanf(minScore, "%f", &score); err == nil {
+			c.LLMsVerifier.MinScoreThreshold = score
+		}
+	}
 }
 
 // Validate validates the configuration
@@ -231,9 +331,42 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("JWT secret is required when authentication is enabled")
 	}
 
+	// Validate LLMsVerifier configuration
+	if err := c.validateLLMsVerifierConfig(); err != nil {
+		return err
+	}
+
 	// Validate distributed configuration
 	if err := c.validateDistributedConfig(); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// validateLLMsVerifierConfig validates LLMsVerifier-specific configuration
+func (c *Config) validateLLMsVerifierConfig() error {
+	if !c.LLMsVerifier.Enabled {
+		return nil
+	}
+
+	if c.LLMsVerifier.APIURL == "" {
+		return fmt.Errorf("LLMsVerifier API URL is required when verifier is enabled")
+	}
+
+	if c.LLMsVerifier.APIKey == "" {
+		return fmt.Errorf("LLMsVerifier API key is required when verifier is enabled")
+	}
+
+	if c.LLMsVerifier.MinScoreThreshold < 0 {
+		return fmt.Errorf("LLMsVerifier minimum score threshold cannot be negative")
+	}
+
+	// Validate scoring weights sum to approximately 1.0
+	weights := c.LLMsVerifier.ScoringWeights
+	total := weights.ResponseSpeed + weights.CostEffectiveness + weights.ModelEfficiency + weights.Capability + weights.Recency
+	if total > 0 && (total < 0.99 || total > 1.01) {
+		return fmt.Errorf("LLMsVerifier scoring weights must sum to 1.0, got %.2f", total)
 	}
 
 	return nil

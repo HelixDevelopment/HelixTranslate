@@ -1,0 +1,74 @@
+version: "1.0"
+name: "HelixTranslate Full QA - Web Dashboard"
+test_cases:
+  - id: HTQ-WEB-001
+    name: "Dashboard loads without errors"
+    category: functional
+    priority: critical
+    platforms: [web]
+    steps:
+      - name: "Navigate to dashboard"
+        action: "navigate https://localhost:8443/monitor"
+        expected: "Page loads, no console errors"
+    tags: [dashboard, smoke]
+    expected_result: "Dashboard HTML renders with all panels visible"
+
+  - id: HTQ-WEB-002
+    name: "WebSocket events appear in dashboard"
+    category: functional
+    priority: critical
+    platforms: [web]
+    steps:
+      - name: "Start translation and observe dashboard"
+        action: "Start translation via API, observe dashboard WebSocket panel"
+        expected: "Progress events appear in real-time"
+    tags: [websocket, dashboard, events]
+    expected_result: "Translation progress bars update as events arrive"
+
+  - id: HTQ-WEB-003
+    name: "Verified models panel shows only approved models"
+    category: functional
+    priority: high
+    platforms: [web]
+    steps:
+      - name: "Open verified models page"
+        action: "navigate https://localhost:8443/api/v1/verified-models"
+        expected: "JSON response with verified models list"
+    tags: [llmsverifier, dashboard]
+    expected_result: "Only models with verification_status=verified are displayed"
+
+  - id: HTQ-WEB-004
+    name: "Dashboard shows actual translation data not placeholders"
+    category: functional
+    priority: critical
+    platforms: [web]
+    steps:
+      - name: "Complete translation and check dashboard"
+        action: "Complete translation, refresh dashboard sessions panel"
+        expected: "Session shows completed status with actual metrics"
+    tags: [dashboard, translation]
+    expected_result: "No 'Loading...' spinners persist after data is available"
+
+  - id: HTQ-WEB-005
+    name: "Stagnation guard detects frozen UI"
+    category: functional
+    priority: high
+    platforms: [web]
+    steps:
+      - name: "Monitor frame differences"
+        action: "Screenshot every 5 seconds, compare frames"
+        expected: "Frame N+1 differs from N when progress is occurring"
+    tags: [vision, stagnation]
+    expected_result: "If UI is unchanged for >10s during active translation, flag critical failure"
+
+  - id: HTQ-WEB-006
+    name: "Screenshot quality validation passes"
+    category: functional
+    priority: high
+    platforms: [web]
+    steps:
+      - name: "Capture dashboard screenshot"
+        action: "screenshot https://localhost:8443/monitor"
+        expected: "IsBlankScreenshot() returns false"
+    tags: [vision, screenshot]
+    expected_result: "Screenshot contains visible dashboard elements, not blank/black"

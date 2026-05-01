@@ -1,0 +1,18 @@
+{
+  "code": 200,
+  "data": {
+    "description": "",
+    "html": "<html><head><meta name=\"color-scheme\" content=\"light dark\"></head><body><pre style=\"word-wrap: break-word; white-space: pre-wrap;\"># SPDX-FileCopyrightText: 2026 Milos Vasic\n# SPDX-License-Identifier: Apache-2.0\n\n.PHONY: all build test test-race vet lint clean help install\n\n# Default target\nall: vet test build\n\n## Build the helixqa binary\nbuild:\n\tgo build -o bin/helixqa ./cmd/helixqa\n\n## Install the helixqa binary\ninstall:\n\tgo install ./cmd/helixqa\n\n## Run all tests\ntest:\n\tgo test ./... -count=1\n\n## Run all tests with race detection\ntest-race:\n\tgo test ./... -race -count=1\n\n## Run tests with coverage report\ntest-cover:\n\tgo test ./... -coverprofile=coverage.out -count=1\n\tgo tool cover -html=coverage.out -o coverage.html\n\n## Run go vet\nvet:\n\tgo vet ./...\n\n## Run static analysis (requires golangci-lint)\nlint:\n\tgolangci-lint run ./...\n\n## Format all Go files\nfmt:\n\tgofmt -w .\n\n## Tidy go.mod\ntidy:\n\tgo mod tidy\n\n## Clean build artifacts\nclean:\n\trm -rf bin/ coverage.out coverage.html qa-results/ results/ evidence/\n\n## Show help\nhelp:\n\t@echo \"HelixQA - QA Orchestration Framework\"\n\t@echo \"\"\n\t@echo \"Targets:\"\n\t@echo \"  all        Build, vet, and test (default)\"\n\t@echo \"  build      Build the helixqa binary\"\n\t@echo \"  install    Install the helixqa binary\"\n\t@echo \"  test       Run all tests\"\n\t@echo \"  test-race  Run tests with race detection\"\n\t@echo \"  test-cover Run tests with coverage report\"\n\t@echo \"  vet        Run go vet\"\n\t@echo \"  lint       Run golangci-lint\"\n\t@echo \"  fmt        Format Go files\"\n\t@echo \"  tidy       Tidy go.mod\"\n\t@echo \"  clean      Clean build artifacts\"\n\t@echo \"  help       Show this help\"\n</pre></body></html>",
+    "title": "",
+    "url": "https://raw.githubusercontent.com/HelixDevelopment/HelixQA/main/Makefile",
+    "usage": {
+      "tokens": 479
+    }
+  },
+  "meta": {
+    "usage": {
+      "tokens": 479
+    }
+  },
+  "status": 20000
+}

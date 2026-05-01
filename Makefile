@@ -53,6 +53,40 @@ test:
 test-coverage:
 	$(GOTEST) -v -cover ./...
 
+# Run integration tests
+.PHONY: test-integration
+test-integration:
+	$(GOTEST) -tags=integration -v ./test/integration/...
+
+# Run e2e tests
+.PHONY: test-e2e
+test-e2e:
+	$(GOTEST) -tags=e2e -v ./test/e2e/...
+
+# Run security tests
+.PHONY: test-security
+test-security:
+	$(GOTEST) -tags=security -v ./test/security/...
+
+# Run performance benchmarks
+.PHONY: test-performance
+test-performance:
+	$(GOTEST) -tags=performance -v -bench=. ./test/performance/...
+
+# Run stress tests
+.PHONY: test-stress
+test-stress:
+	$(GOTEST) -tags=stress -v ./test/stress/...
+
+# Run all test categories
+.PHONY: test-all
+test-all: test test-integration test-e2e test-security test-performance test-stress
+
+# Run challenges
+.PHONY: challenges
+challenges:
+	bash challenges/scripts/run_all_challenges.sh
+
 # Build all binaries
 .PHONY: build
 build: build-grpc build-api build-cli

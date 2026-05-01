@@ -1,0 +1,65 @@
+version: "1.0"
+name: "HelixTranslate Fixes Validation Bank"
+test_cases:
+  - id: HTQ-FIX-001
+    name: "LLMsVerifier integration compiles and links"
+    category: regression
+    priority: critical
+    platforms: [api, cli]
+    steps:
+      - name: "Build all binaries"
+        action: "make build"
+        expected: "All binaries compile without errors"
+      - name: "Verify verifier symbols in binary"
+        action: "strings ./build/unified-translator | grep -i verifier"
+        expected: "Contains verifier-related strings"
+    tags: [build, llmsverifier, regression]
+    expected_result: "Build succeeds and verifier code is linked"
+
+  - id: HTQ-FIX-002
+    name: "Anti-bluff testing mandate is in Constitution"
+    category: regression
+    priority: critical
+    platforms: [api, cli, web]
+    steps:
+      - name: "Check CONSTITUTION.md for CONST-035"
+        action: "grep CONST-035 CONSTITUTION.md"
+        expected: "Contains Anti-Bluff Testing Constitution"
+    tags: [governance, regression]
+    expected_result: "Constitution mandates anti-bluff testing"
+
+  - id: HTQ-FIX-003
+    name: "API keys loaded from environment variables"
+    category: regression
+    priority: critical
+    platforms: [api, cli]
+    steps:
+      - name: "Set OPENAI_API_KEY and load config"
+        action: "OPENAI_API_KEY=test-key go test -run TestConfig_LoadConfig_LoadsAPIKeys ./test/unit/..."
+        expected: "Test passes"
+    tags: [config, security, regression]
+    expected_result: "Config loader reads all provider API keys from environment"
+
+  - id: HTQ-FIX-004
+    name: "Challenges run without false positives"
+    category: regression
+    priority: critical
+    platforms: [api, cli, web]
+    steps:
+      - name: "Run all challenges"
+        action: "make challenges"
+        expected: "All challenges pass"
+    tags: [challenges, regression]
+    expected_result: "No challenge reports false PASS on broken functionality"
+
+  - id: HTQ-FIX-005
+    name: "Model verification gate rejects unverified models"
+    category: regression
+    priority: critical
+    platforms: [api]
+    steps:
+      - name: "Test registry FilterVerified"
+        action: "go test -run TestRegistry_FilterVerified ./test/unit/..."
+        expected: "Test passes"
+    tags: [llmsverifier, gate, regression]
+    expected_result: "FilterVerified only returns models passing all three criteria"

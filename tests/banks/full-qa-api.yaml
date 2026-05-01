@@ -1,0 +1,143 @@
+version: "1.0"
+name: "HelixTranslate Full QA - API"
+test_cases:
+  - id: HTQ-API-001
+    name: "Health check returns healthy status"
+    category: functional
+    priority: critical
+    platforms: [api]
+    steps:
+      - name: "Send GET /health"
+        action: "GET https://localhost:8443/health"
+        expected: "HTTP 200 with {\"status\":\"healthy\"}"
+    tags: [health, smoke]
+    expected_result: "Health endpoint returns valid JSON with healthy status"
+
+  - id: HTQ-API-002
+    name: "List providers returns all verified providers"
+    category: functional
+    priority: critical
+    platforms: [api]
+    steps:
+      - name: "Send GET /api/v1/providers"
+        action: "GET https://localhost:8443/api/v1/providers"
+        expected: "HTTP 200 with non-empty providers array"
+    tags: [providers, smoke]
+    expected_result: "Providers list contains at least 9 native providers"
+
+  - id: HTQ-API-003
+    name: "List verified models via LLMsVerifier"
+    category: functional
+    priority: critical
+    platforms: [api]
+    steps:
+      - name: "Send GET /api/v1/verified-models"
+        action: "GET https://localhost:8443/api/v1/verified-models"
+        expected: "HTTP 200 with models array and count field"
+    tags: [llmsverifier, models]
+    expected_result: "Only verified models with positive scores are returned"
+
+  - id: HTQ-API-004
+    name: "Get verification status"
+    category: functional
+    priority: high
+    platforms: [api]
+    steps:
+      - name: "Send GET /api/v1/verification-status"
+        action: "GET https://localhost:8443/api/v1/verification-status"
+        expected: "HTTP 200 with llmsverifier_connected boolean"
+    tags: [llmsverifier, status]
+    expected_result: "Status endpoint returns connectivity and cache info"
+
+  - id: HTQ-API-005
+    name: "Translation endpoint with verified model"
+    category: functional
+    priority: critical
+    platforms: [api]
+    steps:
+      - name: "Send POST /api/v1/translate"
+        action: "POST https://localhost:8443/api/v1/translate"
+        body: |
+          {
+            "text": "Hello world",
+            "source_lang": "en",
+            "target_lang": "sr",
+            "provider": "openai",
+            "model": "gpt-4o"
+          }
+        expected: "HTTP 200 with translated text in response"
+    tags: [translation, openai]
+    expected_result: "Response contains actual Serbian translation, not just session ID"
+
+  - id: HTQ-API-006
+    name: "Translate with verification gate rejects unverified model"
+    category: security
+    priority: high
+    platforms: [api]
+    steps:
+      - name: "Send POST /api/v1/translate-with-verification with bad model"
+        action: "POST https://localhost:8443/api/v1/translate-with-verification"
+        body: |
+          {
+            "text": "test",
+            "source_lang": "en",
+            "target_lang": "sr",
+            "model_id": "unverified-model"
+          }
+        expected: "HTTP 400 or 404 with error about unverified model"
+    tags: [llmsverifier, gate, security]
+    expected_result: "Unverified model is rejected by the verification gate"
+
+  - id: HTQ-API-007
+    name: "Batch translation endpoint"
+    category: functional
+    priority: high
+    platforms: [api]
+    steps:
+      - name: "Send POST /api/v1/translate/batch"
+        action: "POST https://localhost:8443/api/v1/translate/batch"
+        body: |
+          {
+            "files": ["test1.txt", "test2.txt"],
+            "source_lang": "en",
+            "target_lang": "sr"
+          }
+        expected: "HTTP 200 with batch job ID"
+    tags: [batch]
+    expected_result: "Batch job is created and returns trackable session ID"
+
+  - id: HTQ-API-008
+    name: "JWT authentication blocks unauthorized requests"
+    category: security
+    priority: critical
+    platforms: [api]
+    steps:
+      - name: "Send GET /api/v1/profile without token"
+        action: "GET https://localhost:8443/api/v1/profile"
+        expected: "HTTP 401 Unauthorized"
+    tags: [auth, security]
+    expected_result: "Unauthenticated request is rejected with 401"
+
+  - id: HTQ-API-009
+    name: "Rate limiting enforces request thresholds"
+    category: security
+    priority: high
+    platforms: [api]
+    steps:
+      - name: "Send 100 rapid requests to /health"
+        action: "GET https://localhost:8443/health (x100 rapid)"
+        expected: "Some requests return HTTP 429 after threshold"
+    tags: [rate-limit, security]
+    expected_result: "Rate limit is enforced after configured RPS threshold"
+
+  - id: HTQ-API-010
+    name: "WebSocket connection accepts and broadcasts events"
+    category: functional
+    priority: high
+    platforms: [api]
+    steps:
+      - name: "Connect to /ws"
+        action: "WebSocket connect wss://localhost:8443/ws"
+        expected: "Connection established, receives events"
+    tags: [websocket, monitoring]
+    expected_result: "WebSocket hub accepts connection and sends translation events"

@@ -40,3 +40,11 @@ keys.*
 .crush/
 
 reports/demos/
+
+# Build artifacts (large binaries)
+build/api-server
+build/grpc-server
+build/unified-translator
+
+# Test outputs
+cmd/cli/test_output.epub

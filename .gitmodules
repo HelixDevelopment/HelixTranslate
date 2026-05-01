@@ -4,3 +4,21 @@
 [submodule "Challenges"]
 	path = Challenges
 	url = git@github.com:vasic-digital/Challenges.git
+[submodule "HelixQA"]
+	path = HelixQA
+	url = git@github.com:HelixDevelopment/HelixQA.git
+[submodule "DocProcessor"]
+	path = DocProcessor
+	url = git@github.com:HelixDevelopment/DocProcessor.git
+[submodule "LLMOrchestrator"]
+	path = LLMOrchestrator
+	url = git@github.com:HelixDevelopment/LLMOrchestrator.git
+[submodule "LLMProvider"]
+	path = LLMProvider
+	url = git@github.com:HelixDevelopment/LLMProvider.git
+[submodule "VisionEngine"]
+	path = VisionEngine
+	url = git@github.com:HelixDevelopment/VisionEngine.git
+[submodule "LLMsVerifier"]
+	path = LLMsVerifier
+	url = git@github.com:HelixDevelopment/LLMsVerifier.git

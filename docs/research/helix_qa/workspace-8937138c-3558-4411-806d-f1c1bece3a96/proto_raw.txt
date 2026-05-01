@@ -1,0 +1,240 @@
+syntax = "proto3";
+
+package translator;
+
+option go_package = "digital.vasic.translator/pkg/grpc";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Translation Service Definition
+service TranslationService {
+  // Start a new translation job
+  rpc StartTranslation(TranslationRequest) returns (TranslationResponse);
+  
+  // Get translation status
+  rpc GetTranslationStatus(TranslationStatusRequest) returns (TranslationStatusResponse);
+  
+  // List all translation sessions
+ rpc ListTranslations(google.protobuf.Empty) returns (TranslationListResponse);
+  
+  // Cancel a translation
+  rpc CancelTranslation(CancelTranslationRequest) returns (CancelTranslationResponse);
+  
+  // Stream translation progress
+  rpc StreamTranslationProgress(TranslationStreamRequest) returns (stream TranslationProgressEvent);
+  
+  // Get available providers and models
+  rpc GetProviders(google.protobuf.Empty) returns (ProvidersResponse);
+  
+  // Subscribe to system events
+  rpc SubscribeEvents(EventSubscriptionRequest) returns (stream SystemEvent);
+}
+
+// Translation Request
+message TranslationRequest {
+  string session_id = 1;
+  string input_file = 2;
+  string output_file = 3;
+  string source_lang = 4;
+  string target_lang = 5;
+  string script = 6;  // cyrillic, latin
+  
+  ProviderConfig provider_config = 7;
+  TranslationOptions options = 8;
+  
+  google.protobuf.Timestamp created_at = 9;
+  string client_id = 10;
+}
+
+// Provider Configuration
+message ProviderConfig {
+  string type = 1;  // openai, anthropic, zhipu, deepseek, qwen, gemini, ollama, llamacpp, ssh
+  string model = 2;
+  double temperature = 3;
+  int32 max_tokens = 4;
+  int32 timeout_seconds = 5;
+  
+  // API Configuration
+  string api_key = 6;
+  string base_url = 7;
+  
+  // SSH Configuration
+  string ssh_host = 8;
+  string ssh_user = 9;
+  string ssh_password = 10;
+  int32 ssh_port = 11;
+  string remote_dir = 12;
+  
+  // Llama.cpp Configuration
+  string llama_binary = 13;
+  string llama_model = 14;
+  int32 context_size = 15;
+  
+  // Additional options
+  map<string, string> additional_options = 16;
+}
+
+// Translation Options
+message TranslationOptions {
+  int32 workers = 1;
+  int32 chunk_size = 2;
+  int32 concurrency = 3;
+  bool verify_output = 4;
+  bool verbose = 5;
+  bool enable_monitoring = 6;
+}
+
+// Translation Response
+message TranslationResponse {
+  string session_id = 1;
+  string status = 2;  // started, queued, error
+  string message = 3;
+  google.protobuf.Timestamp started_at = 4;
+  int32 estimated_duration_seconds = 5;
+}
+
+// Translation Status Request
+message TranslationStatusRequest {
+  string session_id = 1;
+}
+
+// Translation Status Response
+message TranslationStatusResponse {
+  string session_id = 1;
+  string status = 2;  // pending, running, completed, failed, cancelled
+  double progress_percentage = 3;
+  string current_step = 4;
+  string message = 5;
+  
+  google.protobuf.Timestamp started_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  google.protobuf.Timestamp estimated_completion = 8;
+  
+  repeated GeneratedFile files = 9;
+  repeated TranslationStep steps = 10;
+  
+  string error_message = 11;
+  int32 error_code = 12;
+}
+
+// Translation List Response
+message TranslationListResponse {
+  repeated TranslationStatusResponse translations = 1;
+  int32 total_count = 2;
+}
+
+// Cancel Translation Request
+message CancelTranslationRequest {
+  string session_id = 1;
+  string reason = 2;
+}
+
+// Cancel Translation Response
+message CancelTranslationResponse {
+  string session_id = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+// Translation Stream Request
+message TranslationStreamRequest {
+  string session_id = 1;
+  string client_id = 2;
+}
+
+// Translation Progress Event
+message TranslationProgressEvent {
+  string session_id = 1;
+  string event_type = 2;  // step_started, step_completed, progress_update, error, completed
+  string step_name = 3;
+  double progress_percentage = 4;
+  string message = 5;
+  
+  map<string, string> metadata = 6;
+  google.protobuf.Timestamp timestamp = 7;
+  
+  // Step-specific data
+  int32 current_item = 8;
+  int32 total_items = 9;
+  string current_operation = 10;
+  
+  // Error information
+  string error_message = 11;
+  int32 error_code = 12;
+  bool is_recoverable = 13;
+}
+
+// Generated File Information
+message GeneratedFile {
+  string path = 1;
+  string type = 2;  // original_md, translated_md, epub, report
+  int64 size = 3;
+  string content_type = 4;
+  bool verified = 5;
+  string verification_message = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+// Translation Step Information
+message TranslationStep {
+  string name = 1;
+  string status = 2;  // pending, running, completed, failed
+  google.protobuf.Timestamp started_at = 3;
+  google.protobuf.Timestamp ended_at = 4;
+  double progress_percentage = 5;
+  string message = 6;
+  string error_message = 7;
+}
+
+// Providers Response
+message ProvidersResponse {
+  repeated ProviderInfo providers = 1;
+}
+
+// Provider Information
+message ProviderInfo {
+  string name = 1;
+  string type = 2;
+  string description = 3;
+  repeated string available_models = 4;
+  map<string, string> capabilities = 5;
+  bool requires_api_key = 6;
+  bool requires_ssh_config = 7;
+  bool requires_local_binary = 8;
+  ProviderStatus status = 9;
+}
+
+// Provider Status
+message ProviderStatus {
+  bool available = 1;
+  string status_message = 2;
+  google.protobuf.Timestamp last_checked = 3;
+  double response_time_ms = 4;
+}
+
+// Event Subscription Request
+message EventSubscriptionRequest {
+  string client_id = 1;
+  repeated string event_types = 2;  // If empty, subscribe to all events
+  map<string, string> filters = 3;  // Additional filters
+}
+
+// System Event
+message SystemEvent {
+  string event_type = 1;
+  string source = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  map<string, string> data = 4;
+  string session_id = 5;
+  string client_id = 6;
+  Severity severity = 7;
+}
+
+// Event Severity
+enum Severity {
+  INFO = 0;
+  WARNING = 1;
+  ERROR = 2;
+  CRITICAL = 3;
+}

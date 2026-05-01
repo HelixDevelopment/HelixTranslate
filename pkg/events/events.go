@@ -17,6 +17,13 @@ const (
 	EventConversionProgress   EventType = "conversion_progress"
 	EventConversionCompleted  EventType = "conversion_completed"
 	EventConversionError      EventType = "conversion_error"
+
+	// LLMsVerifier model lifecycle events
+	EventModelDiscovered      EventType = "model_discovered"
+	EventModelUpdated         EventType = "model_updated"
+	EventModelRemoved         EventType = "model_removed"
+	EventVerificationCompleted EventType = "verification_completed"
+	EventVerificationFailed   EventType = "verification_failed"
 )
 
 // Event represents a system event

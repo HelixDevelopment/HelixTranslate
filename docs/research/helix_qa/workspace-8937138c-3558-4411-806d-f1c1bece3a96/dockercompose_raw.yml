@@ -1,0 +1,152 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database with encryption support
+  postgres:
+    image: postgres:16-alpine
+    container_name: translator-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-translator}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-translator_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-translator}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-postgres.sh:/docker-entrypoint-initdb.d/init.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-translator}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - translator-network
+    restart: unless-stopped
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: translator-redis
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-redis_secure_password}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - translator-network
+    restart: unless-stopped
+
+  # Translator API server
+  translator-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: translator-api
+    environment:
+      # API Configuration
+      PORT: ${API_PORT:-8443}
+      TLS_CERT: ${TLS_CERT:-/app/certs/server.crt}
+      TLS_KEY: ${TLS_KEY:-/app/certs/server.key}
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-change-me}
+
+      # Database Configuration
+      DB_TYPE: ${DB_TYPE:-postgres}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-translator}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-translator_secure_password}
+      DB_NAME: ${POSTGRES_DB:-translator}
+      DB_SSLMODE: ${DB_SSLMODE:-disable}
+
+      # Redis Configuration
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_secure_password}
+
+      # LLM API Keys (set these in .env file)
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ZHIPU_API_KEY: ${ZHIPU_API_KEY}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+
+      # Application Configuration
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      ENABLE_WEBSOCKET: ${ENABLE_WEBSOCKET:-true}
+      ENABLE_HTTP3: ${ENABLE_HTTP3:-true}
+    ports:
+      - "${API_PORT:-8443}:8443"
+      - "${HTTP_PORT:-8080}:8080"
+    volumes:
+      - ./certs:/app/certs:ro
+      - ./Books:/app/Books:ro
+      - ./output:/app/output
+      - translator_cache:/app/cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-k", "-f", "https://localhost:8443/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - translator-network
+    restart: unless-stopped
+
+  # Optional: Admin panel (Adminer for database management)
+  adminer:
+    image: adminer:latest
+    container_name: translator-adminer
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    ports:
+      - "${ADMINER_PORT:-8081}:8080"
+    depends_on:
+      - postgres
+    networks:
+      - translator-network
+    restart: unless-stopped
+    profiles:
+      - admin
+
+  # Optional: Redis Commander (Redis management UI)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: translator-redis-commander
+    environment:
+      REDIS_HOSTS: "local:redis:6379:0:${REDIS_PASSWORD:-redis_secure_password}"
+    ports:
+      - "${REDIS_COMMANDER_PORT:-8082}:8081"
+    depends_on:
+      - redis
+    networks:
+      - translator-network
+    restart: unless-stopped
+    profiles:
+      - admin
+
+networks:
+  translator-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  translator_cache:
+    driver: local

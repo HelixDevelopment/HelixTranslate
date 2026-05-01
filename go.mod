@@ -66,6 +66,27 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251022142026-3a174f9686a8 // indirect
 )
 
+require (
+	digital.vasic.helixqa v0.0.0
+	digital.vasic.docprocessor v0.0.0
+	digital.vasic.llmorchestrator v0.0.0
+	digital.vasic.llmprovider v0.0.0
+	digital.vasic.visionengine v0.0.0
+	digital.vasic.llmsverifier v0.0.0
+)
+
 replace digital.vasic.challenges => ./Challenges
 
 replace digital.vasic.containers => ./Containers
+
+replace digital.vasic.helixqa => ./HelixQA
+
+replace digital.vasic.docprocessor => ./DocProcessor
+
+replace digital.vasic.llmorchestrator => ./LLMOrchestrator
+
+replace digital.vasic.llmprovider => ./LLMProvider
+
+replace digital.vasic.visionengine => ./VisionEngine
+
+replace digital.vasic.llmsverifier => ./LLMsVerifier

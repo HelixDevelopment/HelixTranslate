@@ -22,28 +22,68 @@ func ConvertFromTranslatorConfig(config translator.TranslationConfig) Translatio
 type Provider string
 
 const (
-	ProviderOpenAI    Provider = "openai"
-	ProviderAnthropic Provider = "anthropic"
-	ProviderZhipu     Provider = "zhipu"
-	ProviderDeepSeek  Provider = "deepseek"
-	ProviderQwen      Provider = "qwen"
-	ProviderGemini    Provider = "gemini"
-	ProviderOllama    Provider = "ollama"
-	ProviderLlamaCpp  Provider = "llamacpp"
-	ProviderMock      Provider = "mock"
+	ProviderOpenAI       Provider = "openai"
+	ProviderAnthropic    Provider = "anthropic"
+	ProviderZhipu        Provider = "zhipu"
+	ProviderDeepSeek     Provider = "deepseek"
+	ProviderQwen         Provider = "qwen"
+	ProviderGemini       Provider = "gemini"
+	ProviderOllama       Provider = "ollama"
+	ProviderLlamaCpp     Provider = "llamacpp"
+	ProviderMock         Provider = "mock"
+	ProviderGroq         Provider = "groq"
+	ProviderCohere       Provider = "cohere"
+	ProviderMistral      Provider = "mistral"
+	ProviderXAI          Provider = "xai"
+	ProviderReplicate    Provider = "replicate"
+	ProviderCerebras     Provider = "cerebras"
+	ProviderCloudflare   Provider = "cloudflare"
+	ProviderSiliconFlow  Provider = "siliconflow"
+	ProviderHyperbolic   Provider = "hyperbolic"
+	ProviderTogetherAI   Provider = "togetherai"
+	ProviderSambaNova    Provider = "sambanova"
+	ProviderKimi         Provider = "kimi"
+	ProviderNovita       Provider = "novita"
+	ProviderNLPCloud     Provider = "nlpcloud"
+	ProviderUpstage      Provider = "upstage"
+	ProviderSarvam       Provider = "sarvam"
+	ProviderModal        Provider = "modal"
+	ProviderPublicAI     Provider = "publicai"
+	ProviderNIA          Provider = "nia"
+	ProviderVulavula     Provider = "vulavula"
 )
 
 // ValidModels defines valid model names for each provider
 var ValidModels = map[Provider][]string{
-	ProviderOpenAI:    {"gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o"},
-	ProviderAnthropic: {"claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"},
-	ProviderZhipu:     {"glm-4", "glm-3-turbo"},
-	ProviderDeepSeek:  {"deepseek-chat", "deepseek-coder"},
-	ProviderQwen:      {"qwen-max", "qwen-plus", "qwen-turbo"},
-	ProviderGemini:    {"gemini-pro", "gemini-pro-vision"},
-	ProviderOllama:    {"llama2", "codellama", "mistral", "vicuna"}, // Common Ollama models
-	ProviderLlamaCpp:  {"llama2", "mistral", "vicuna"},              // Common local models
-	ProviderMock:      {"mock"},
+	ProviderOpenAI:      {"gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o"},
+	ProviderAnthropic:   {"claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"},
+	ProviderZhipu:       {"glm-4", "glm-3-turbo"},
+	ProviderDeepSeek:    {"deepseek-chat", "deepseek-coder"},
+	ProviderQwen:        {"qwen-max", "qwen-plus", "qwen-turbo"},
+	ProviderGemini:      {"gemini-pro", "gemini-pro-vision"},
+	ProviderOllama:      {"llama2", "codellama", "mistral", "vicuna"},
+	ProviderLlamaCpp:    {"llama2", "mistral", "vicuna"},
+	ProviderMock:        {"mock"},
+	ProviderGroq:        {"llama-3.1-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"},
+	ProviderCohere:      {"command-r", "command-r-plus", "command"},
+	ProviderMistral:     {"mistral-large-latest", "mistral-medium-latest", "mistral-small-latest"},
+	ProviderXAI:         {"grok-beta", "grok-vision-beta"},
+	ProviderReplicate:   {"meta/llama-2-70b-chat", "mistralai/mixtral-8x7b-instruct-v0.1"},
+	ProviderCerebras:    {"llama3.1-70b", "llama3.1-8b"},
+	ProviderCloudflare:  {"@cf/meta/llama-2-7b-chat-int8", "@cf/mistral/mistral-7b-instruct-v0.1"},
+	ProviderSiliconFlow: {"deepseek-ai/DeepSeek-V2.5", "Qwen/Qwen2.5-72B-Instruct"},
+	ProviderHyperbolic:  {"meta-llama/Meta-Llama-3.1-70B-Instruct", "meta-llama/Meta-Llama-3.1-8B-Instruct"},
+	ProviderTogetherAI:  {"meta-llama/Llama-3.1-70B-Instruct-Turbo", "mistralai/Mixtral-8x7B-Instruct-v0.1"},
+	ProviderSambaNova:   {"Meta-Llama-3.1-70B-Instruct", "Meta-Llama-3.1-8B-Instruct"},
+	ProviderKimi:        {"moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"},
+	ProviderNovita:      {"meta-llama/llama-3.1-70b-instruct", "mistralai/mixtral-8x7b-instruct"},
+	ProviderNLPCloud:    {"finetuned-llama-3-1-8b", "finetuned-llama-3-1-70b"},
+	ProviderUpstage:     {"solar-pro", "solar-mini"},
+	ProviderSarvam:      {"sarvam-1", "sarvam-2"},
+	ProviderModal:       {"modal-llama-3-1-70b"},
+	ProviderPublicAI:    {"publicai-llama-3-1-70b"},
+	ProviderNIA:         {"nia-llama-3-1-70b"},
+	ProviderVulavula:    {"vulavula-llama-3-1-70b"},
 }
 
 // LLMTranslator implements LLM-based translation
@@ -204,7 +244,47 @@ func NewLLMTranslatorWithConfig(config TranslationConfig) (*LLMTranslator, error
 		client, err = NewOllamaClient(config)
 	case ProviderLlamaCpp:
 		client, err = NewLlamaCppClient(config)
-	case "mock":
+	case ProviderGroq:
+		client, err = NewGroqClient(config)
+	case ProviderCohere:
+		client, err = NewCohereClient(config)
+	case ProviderMistral:
+		client, err = NewMistralClient(config)
+	case ProviderXAI:
+		client, err = NewXAIClient(config)
+	case ProviderReplicate:
+		client, err = NewReplicateClient(config)
+	case ProviderCerebras:
+		client, err = NewCerebrasClient(config)
+	case ProviderCloudflare:
+		client, err = NewCloudflareClient(config)
+	case ProviderSiliconFlow:
+		client, err = NewSiliconFlowClient(config)
+	case ProviderHyperbolic:
+		client, err = NewHyperbolicClient(config)
+	case ProviderTogetherAI:
+		client, err = NewTogetherAIClient(config)
+	case ProviderSambaNova:
+		client, err = NewSambaNovaClient(config)
+	case ProviderKimi:
+		client, err = NewKimiClient(config)
+	case ProviderNovita:
+		client, err = NewNovitaClient(config)
+	case ProviderNLPCloud:
+		client, err = NewNLPCloudClient(config)
+	case ProviderUpstage:
+		client, err = NewUpstageClient(config)
+	case ProviderSarvam:
+		client, err = NewSarvamClient(config)
+	case ProviderModal:
+		client, err = NewModalClient(config)
+	case ProviderPublicAI:
+		client, err = NewPublicAIClient(config)
+	case ProviderNIA:
+		client, err = NewNIAClient(config)
+	case ProviderVulavula:
+		client, err = NewVulavulaClient(config)
+	case ProviderMock:
 		client = NewMockLLMClient()
 		err = nil
 	default:

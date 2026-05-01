@@ -1,0 +1,98 @@
+version: "1.0"
+name: "HelixTranslate Full QA - CLI"
+test_cases:
+  - id: HTQ-CLI-001
+    name: "Unified translator binary exists and runs"
+    category: functional
+    priority: critical
+    platforms: [cli]
+    steps:
+      - name: "Run unified-translator --version"
+        action: "./build/unified-translator --version"
+        expected: "Outputs version string"
+    tags: [binary, smoke]
+    expected_result: "Binary executes and prints version"
+
+  - id: HTQ-CLI-002
+    name: "Unified translator with -use-verifier flag"
+    category: functional
+    priority: critical
+    platforms: [cli]
+    steps:
+      - name: "Run unified-translator --help | grep verifier"
+        action: "./build/unified-translator --help | grep -i verifier"
+        expected: "Shows -use-verifier, -verifier-url, -verifier-api-key flags"
+    tags: [llmsverifier, cli]
+    expected_result: "Verifier flags are documented in help output"
+
+  - id: HTQ-CLI-003
+    name: "Translation produces valid output file"
+    category: functional
+    priority: critical
+    platforms: [cli]
+    steps:
+      - name: "Translate test ebook"
+        action: "./build/unified-translator -i test/fixtures/ebooks/sample.txt -o /tmp/translated.txt -source-lang en -target-lang sr"
+        expected: "Exit code 0, output file exists and contains Serbian text"
+    tags: [translation, ebook]
+    expected_result: "Translated file exists and contains actual translated content"
+
+  - id: HTQ-CLI-004
+    name: "gRPC server starts and responds to health"
+    category: functional
+    priority: high
+    platforms: [cli]
+    steps:
+      - name: "Start grpc-server and check port"
+        action: "./build/grpc-server &; sleep 2; grpcurl -plaintext localhost:50051 list"
+        expected: "Lists translation service methods"
+    tags: [grpc, server]
+    expected_result: "gRPC server starts and exposes service methods"
+
+  - id: HTQ-CLI-005
+    name: "API server starts with TLS"
+    category: functional
+    priority: high
+    platforms: [cli]
+    steps:
+      - name: "Start api-server with certs"
+        action: "./build/api-server -config config.json &; sleep 2; curl -sk https://localhost:8443/health"
+        expected: "Returns healthy JSON"
+    tags: [api, tls]
+    expected_result: "API server starts and serves HTTPS with valid cert"
+
+  - id: HTQ-CLI-006
+    name: "Monitoring server dashboard loads"
+    category: functional
+    priority: high
+    platforms: [cli]
+    steps:
+      - name: "Start monitor-server and fetch dashboard"
+        action: "./build/monitor-server &; sleep 2; curl -s http://localhost:8090/monitor | head"
+        expected: "Returns HTML dashboard content"
+    tags: [monitoring, web]
+    expected_result: "Monitoring dashboard HTML is served"
+
+  - id: HTQ-CLI-007
+    name: "Preparation translator analyzes content"
+    category: functional
+    priority: medium
+    platforms: [cli]
+    steps:
+      - name: "Run preparation analysis"
+        action: "./build/preparation-translator -input test/fixtures/ebooks/sample.txt -output /tmp/analysis.json"
+        expected: "Exit code 0, analysis JSON created"
+    tags: [preparation, analysis]
+    expected_result: "Analysis JSON contains characters, terminology, culture fields"
+
+  - id: HTQ-CLI-008
+    name: "Markdown workflow converts EPUB to Markdown and back"
+    category: functional
+    priority: medium
+    platforms: [cli]
+    steps:
+      - name: "Run markdown-translator"
+        action: "./build/markdown-translator -input test/fixtures/ebooks/sample.epub -output /tmp/output.md"
+        expected: "Exit code 0, markdown file created"
+    tags: [markdown, workflow]
+    expected_result: "Markdown output preserves chapter structure"

@@ -11,6 +11,8 @@ import (
 
 	"flag"
 
+	"digital.vasic.translator/internal/config"
+	"digital.vasic.translator/internal/verifier"
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/fb2"
@@ -69,6 +71,11 @@ type UnifiedConfig struct {
 	// Monitoring
 	EnableMonitoring bool
 	MonitoringPort   int
+
+	// LLMsVerifier Integration
+	VerifierEnabled bool
+	VerifierURL     string
+	VerifierAPIKey  string
 }
 
 // TranslationSession tracks a translation session
@@ -452,6 +459,11 @@ func parseFlags() *UnifiedConfig {
 	flag.BoolVar(&config.EnableMonitoring, "monitoring", false, "Enable web monitoring")
 	flag.IntVar(&config.MonitoringPort, "monitoring-port", 8080, "Monitoring server port")
 
+	// LLMsVerifier options
+	flag.BoolVar(&config.VerifierEnabled, "use-verifier", false, "Use LLMsVerifier as single source of truth for model selection")
+	flag.StringVar(&config.VerifierURL, "verifier-url", "http://localhost:8080", "LLMsVerifier API URL")
+	flag.StringVar(&config.VerifierAPIKey, "verifier-api-key", os.Getenv("LLMSVERIFIER_API_KEY"), "LLMsVerifier API key")
+
 	versionFlag := flag.Bool("version", false, "Show version information")
 	help := flag.Bool("help", false, "Show help information")
 
@@ -494,6 +506,14 @@ func parseFlags() *UnifiedConfig {
 	default:
 		if config.APIKey == "" {
 			fmt.Fprintf(os.Stderr, "Error: API key required for provider=%s\n", config.Provider)
+			os.Exit(1)
+		}
+	}
+
+	// LLMsVerifier model validation (if enabled)
+	if config.VerifierEnabled {
+		if err := validateWithVerifier(config); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: LLMsVerifier validation failed: %v\n", err)
 			os.Exit(1)
 		}
 	}
@@ -841,4 +861,52 @@ func generateSessionReport(session *TranslationSession, err error) {
 	}
 
 	fmt.Printf("Session report generated: %s\n", reportPath)
+}
+
+// validateWithVerifier validates the selected provider and model against LLMsVerifier.
+func validateWithVerifier(cfg *UnifiedConfig) error {
+	vCfg := &verifier.Config{
+		APIURL:            cfg.VerifierURL,
+		APIKey:            cfg.VerifierAPIKey,
+		CacheTTL:          time.Hour,
+		MinScoreThreshold: 0.0,
+	}
+	client := verifier.NewClient(vCfg)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := client.Ping(ctx); err != nil {
+		return fmt.Errorf("LLMsVerifier unreachable: %w", err)
+	}
+
+	model, err := client.GetModel(ctx, cfg.Model)
+	if err != nil {
+		return fmt.Errorf("model %s not verified: %w", cfg.Model, err)
+	}
+
+	if model.VerificationStatus != "verified" {
+		return fmt.Errorf("model %s has status %s, expected verified", cfg.Model, model.VerificationStatus)
+	}
+	if !model.CanSeeCode {
+		return fmt.Errorf("model %s failed code visibility check", cfg.Model)
+	}
+	if !model.AffirmativeResponse {
+		return fmt.Errorf("model %s has no affirmative response", cfg.Model)
+	}
+
+	fmt.Printf("Model %s verified by LLMsVerifier (score: %.2f)\n", cfg.Model, model.OverallScore)
+	return nil
+}
+
+// initVerifierConfig loads LLMsVerifier configuration from global config if available.
+func initVerifierConfig() *verifier.Config {
+	cfg := config.DefaultConfig()
+	return &verifier.Config{
+		APIURL:            cfg.LLMsVerifier.APIURL,
+		APIKey:            cfg.LLMsVerifier.APIKey,
+		CacheTTL:          cfg.LLMsVerifier.CacheTTL,
+		MinScoreThreshold: cfg.LLMsVerifier.MinScoreThreshold,
+		MaxProviders:      cfg.LLMsVerifier.MaxProviders,
+	}
 }

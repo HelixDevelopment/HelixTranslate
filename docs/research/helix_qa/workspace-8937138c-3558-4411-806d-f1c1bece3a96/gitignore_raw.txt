@@ -1,0 +1,42 @@
+materials
+materials/*
+materials/*.*
+
+# Python temporary files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Translation artifacts
+*_sr_*
+*_translated*
+*_template*
+*translation_list*
+translation_list.txt
+translationlist.txt
+
+# Configuration with API keys
+config_with_keys.json
+api_keys.json
+
+# Environment files with secrets
+.env
+.env.*
+secrets.*
+keys.*
+
+# LLM OAuth credentials (user-specific)
+.translator/
+**/qwen_credentials.json
+.qwen/
+**/oauth_creds.json
+
+# Logs and cache
+*.log
+*.cache
+.crush/
+
+reports/demos/

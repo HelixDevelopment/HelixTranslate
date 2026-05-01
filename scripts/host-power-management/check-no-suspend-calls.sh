@@ -68,6 +68,11 @@ EXCLUDE_PATHS=(
   "vtcode.toml.example"
   "/zed-extension/vtcode.toml"
   "/vtcode-config/src/core/commands.rs"
+  # Raw research workspace files (copies of governance docs for analysis):
+  "helix_qa/workspace-"
+  "agents_raw.md"
+  "claude_raw.md"
+  "constitution_raw.md"
 )
 
 # Forbidden grep -E patterns. Real, tight regexes — not bare words.

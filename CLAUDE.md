@@ -115,6 +115,76 @@ Use build tags for selective execution: `//go:build integration`, `//go:build e2
 - `cmd/` files are exempted from `funlen` and `gochecknoinits`; `pkg/` is exempted from `gochecknoinits`.
 - Distributed worker changes must stay version-compatible — bumping the protocol or message shape requires coordinated updates through `pkg/distributed/version_manager.go`.
 
+## HelixQA: Autonomous LLM-Driven Testing
+
+HelixQA is the **sole authorized tool** for all automated UI/UX and API testing. Pipeline: **Learn → Plan → Execute → Curiosity → Analyze**.
+
+### Invariants:
+- **HelixQA-only for Web Dashboard and API testing.** No custom Playwright scripts, no curl-based harnesses outside HelixQA banks.
+- **Vision-driven only.** screenshot → LLM analysis → action decision. No hardcoded selectors, no sleep timers.
+- **Universal Solution Principle.** Fix bugs in HelixQA itself, never in HelixTranslate to make it "testable."
+- **Live log monitoring.** Every session streams API logs, gRPC logs, translation logs.
+- **Screen-state tracking.** Frame N vs N+1. Stagnation >10s = critical failure.
+- **Executable actions in banks**, never prose.
+- **Video mandatory for Web Dashboard sessions.** Screenshots at every step.
+- **Evidence validation.** Post-translation must contain actual translated text, not placeholder.
+- **Validation tests are permanent.** Every fix adds to `tests/banks/fixes-validation.yaml`.
+
+### Vision Architecture
+Phase-specific model selection via LLMsVerifier strategies:
+- `PlanningStrategy` (Learn/Plan): Reasoning-focused chat models
+- `NavigationStrategy` (Execute/Curiosity): JSON-compliant vision models
+- `AnalysisStrategy` (Analyze): Rich-description vision models
+
+### Bank Coverage & Execution
+Banks: `tests/banks/full-qa-{api,web,cli}.yaml` + `tests/banks/fixes-validation.yaml`
+
+```bash
+# Standard QA run
+helixqa run --banks tests/banks/ --platform all
+
+# List tests
+helixqa list --banks tests/banks/ --platform web
+
+# Autonomous QA
+helixqa autonomous --project . --platforms web,api,cli --timeout 2h
+
+# Generate report
+helixqa report --input qa-results --format html
+```
+
+### Platform Configuration for HelixTranslate
+- **Web**: `HELIX_WEB_URL=https://localhost:8443` (dashboard + API)
+- **API**: `HELIX_INFRA_API_SERVICE=translator-api`, `HELIX_INFRA_API_PORT=8443`
+- **CLI**: Tests invoke `./build/unified-translator` directly
+
+## Anti-Bluff Testing — Article XI
+
+Tests MUST assert concrete end-user-visible outcomes. No blind shells. Every test MUST fail when the feature it tests is removed.
+
+**Translation-Specific Anti-Bluff Rules:**
+- A "successful" translation MUST produce verifiable translated text in the target language
+- Translation response MUST contain actual content, not just a session_id or status
+- Downloaded translated file MUST be a valid ebook in the target format
+- Dashboard MUST show actual progress data, not just a loading spinner
+- LLM provider tests MUST verify actual API calls, not just mock responses
+
+**Audit Ritual:** Every QA cycle picks 5 tests + 5 challenges at random, comments out target, re-runs, confirms FAIL.
+
+## LLMsVerifier Integration
+
+LLMsVerifier is the **single source of truth** for all LLM models used by HelixTranslate. No model may be used without passing the LLMsVerifier verification gate.
+
+**Key integration points:**
+- `internal/verifier/client.go` — HTTP client for LLMsVerifier API
+- `internal/verifier/scoring/` — 5-component weighted scoring engine
+- `internal/verifier/discovery/` — 3-tier model discovery service
+- `internal/verifier/selection/` — Score-based model selection with fallback chains
+- `internal/services/llmsverifier_score_adapter.go` — Score normalization bridge
+- `pkg/api/handler.go` — `/api/v1/verified-models` endpoint
+
+**Provider expansion:** 9 native providers → 25+ via LLMsVerifier discovery.
+
 ## Definition of Done
 
 A change is NOT done because code compiles and tests pass. "Done" requires pasted

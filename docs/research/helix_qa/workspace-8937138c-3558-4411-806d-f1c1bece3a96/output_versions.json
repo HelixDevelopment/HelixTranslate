@@ -1,0 +1,18 @@
+{
+  "code": 200,
+  "data": {
+    "description": "",
+    "html": "<html><head><meta name=\"color-scheme\" content=\"light dark\"></head><body><pre style=\"word-wrap: break-word; white-space: pre-wrap;\">{\n  \"schema_version\": 1,\n  \"global\": {\n    \"major\": 2,\n    \"minor\": 3,\n    \"patch\": 0,\n    \"build_number\": 25\n  },\n  \"components\": {\n    \"catalog-api\": {\n      \"last_build_number\": 25,\n      \"last_build_date\": \"2026-04-28T23:35:43Z\",\n      \"last_source_hash\": \"9323333e58d9de275023b9686c667af48d72048c76252d1ad0fa31831419395c\",\n      \"last_git_commit\": \"3935fbde\"\n    },\n    \"catalog-web\": {\n      \"last_build_number\": 25,\n      \"last_build_date\": \"2026-04-28T23:36:38Z\",\n      \"last_source_hash\": \"3867dc2ed964f273db58eb7030e3cbae933d91dc123f3ca2a5df8be9ca06aa0f\",\n      \"last_git_commit\": \"3935fbde\"\n    },\n    \"catalogizer-api-client\": {\n      \"last_build_number\": 25,\n      \"last_build_date\": \"2026-04-28T23:36:53Z\",\n      \"last_source_hash\": \"957b285d421509d69162be4c499631bff0f9a689ad2aee02989e0164b0bcfaf7\",\n      \"last_git_commit\": \"3935fbde\"\n    },\n    \"catalogizer-desktop\": {\n      \"last_build_number\": 25,\n      \"last_build_date\": \"2026-04-28T23:38:43Z\",\n      \"last_source_hash\": \"7a927decf744a1e694fa11a25aaa9db3973d4066c69015e65ae6b6fbf24e9afa\",\n      \"last_git_commit\": \"3935fbde\"\n    },\n    \"installer-wizard\": {\n      \"last_build_number\": 25,\n      \"last_build_date\": \"2026-04-28T23:42:27Z\",\n      \"last_source_hash\": \"e80cef51b058994369678e2d93a8fc040ab3736ee3c67704ac56954134273992\",\n      \"last_git_commit\": \"b15ddcff\"\n    },\n    \"catalogizer-android\": {\n      \"last_build_number\": 25,\n      \"last_build_date\": \"2026-04-28T23:52:47Z\",\n      \"last_source_hash\": \"0fb5758beff0baf2f10a3019db6dd8ec58c463c5747c7b2b06ce81b82e02aad3\",\n      \"last_git_commit\": \"b15ddcff\"\n    },\n    \"catalogizer-androidtv\": {\n      \"last_build_number\": 25,\n      \"last_build_date\": \"2026-04-28T23:56:10Z\",\n      \"last_source_hash\": \"70dddd72a89ca1ff6b176b63ab18800ed44bdb0553bad5b14229380f8b8d45f6\",\n      \"last_git_commit\": \"b15ddcff\"\n    }\n  }\n}\n</pre></body></html>",
+    "title": "",
+    "url": "https://raw.githubusercontent.com/vasic-digital/Catalogizer/main/versions.json",
+    "usage": {
+      "tokens": 755
+    }
+  },
+  "meta": {
+    "usage": {
+      "tokens": 755
+    }
+  },
+  "status": 20000
+}

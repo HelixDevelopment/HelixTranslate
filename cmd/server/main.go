@@ -120,6 +120,13 @@ func main() {
 	apiHandler := api.NewHandler(cfg, eventBus, translationCache, authService, wsHub, distributedManager)
 	apiHandler.RegisterRoutes(router)
 
+	// Register LLMsVerifier routes if enabled
+	if cfg.LLMsVerifier.Enabled {
+		verifierHandler := api.InitVerifierFromConfig(cfg)
+		verifierHandler.RegisterVerifierRoutes(router.Group("/api/v1"))
+		log.Println("LLMsVerifier integration enabled")
+	}
+
 	// Server configuration
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 
