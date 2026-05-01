@@ -48,3 +48,4 @@ build/unified-translator
 
 # Test outputs
 cmd/cli/test_output.epub
+cmd/cli/test_output.epub
