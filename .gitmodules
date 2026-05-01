@@ -21,4 +21,4 @@
 	url = git@github.com:HelixDevelopment/VisionEngine.git
 [submodule "LLMsVerifier"]
 	path = LLMsVerifier
-	url = git@github.com:HelixDevelopment/LLMsVerifier.git
+	url = git@github.com:vasic-digital/LLMsVerifier.git
