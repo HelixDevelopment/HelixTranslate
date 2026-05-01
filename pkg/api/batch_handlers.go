@@ -119,7 +119,7 @@ func (h *Handler) HandleTranslateString(c *gin.Context) {
 	}
 
 	switch provider {
-	case "openai", "anthropic", "zhipu", "deepseek", "ollama", "llamacpp":
+	case "openai", "anthropic", "zhipu", "deepseek", "ollama", "llamacpp", "mock":
 		trans, err = llm.NewLLMTranslator(translatorConfig)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to create translator: %v", err)})
@@ -231,7 +231,7 @@ func (h *Handler) HandleTranslateDirectory(c *gin.Context) {
 	}
 
 	switch provider {
-	case "openai", "anthropic", "zhipu", "deepseek", "ollama", "llamacpp":
+	case "openai", "anthropic", "zhipu", "deepseek", "ollama", "llamacpp", "mock":
 		trans, err = llm.NewLLMTranslator(translatorConfig)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to create translator: %v", err)})

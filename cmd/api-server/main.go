@@ -15,6 +15,8 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"digital.vasic.translator/internal/verifier"
+	"digital.vasic.translator/pkg/api"
 	"digital.vasic.translator/pkg/grpc/proto"
 	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/pkg/websocket"
@@ -41,6 +43,9 @@ type APIServer struct {
 
 	// Logger
 	logger logger.Logger
+
+	// Verifier integration (CONST-034 SSOT)
+	verifierHandler *api.VerifierHandler
 }
 
 // APIConfig holds API server configuration
@@ -167,14 +172,23 @@ func NewAPIServer(config *APIConfig, logger logger.Logger) (*APIServer, error) {
 	router := gin.New()
 	router.Use(gin.Logger(), gin.Recovery())
 
+	// Create verifier handler with default config (CONST-034 SSOT)
+	verifierCfg := &verifier.Config{
+		APIURL:   "http://localhost:8080",
+		APIKey:   os.Getenv("LLMSVERIFIER_API_KEY"),
+		CacheTTL: time.Hour,
+	}
+	verifierHandler := api.NewVerifierHandler(verifierCfg)
+
 	// Create API server
 	apiServer := &APIServer{
-		grpcClient: grpcClient,
-		conn:       conn,
-		wsHub:      wsHub,
-		router:     router,
-		config:     config,
-		logger:     logger,
+		grpcClient:      grpcClient,
+		conn:            conn,
+		wsHub:           wsHub,
+		router:          router,
+		config:          config,
+		logger:          logger,
+		verifierHandler: verifierHandler,
 	}
 
 	// Setup routes
@@ -265,6 +279,11 @@ func (s *APIServer) setupRoutes() {
 		// System endpoints
 		v1.GET("/health", s.healthCheck)
 		v1.GET("/metrics", s.getMetrics)
+
+		// Verifier endpoints (CONST-034 SSOT)
+		if s.verifierHandler != nil {
+			s.verifierHandler.RegisterVerifierRoutes(v1)
+		}
 	}
 
 	// WebSocket endpoint

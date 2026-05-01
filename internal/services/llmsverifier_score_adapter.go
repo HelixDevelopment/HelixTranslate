@@ -91,6 +91,10 @@ func (a *LLMsVerifierScoreAdapter) GetPreferences(ctx context.Context) ([]Provid
 
 	prefs := make([]ProviderPreference, 0, len(models))
 	for i, m := range models {
+		// CONST-034: Only verified models may be used
+		if m.VerificationStatus != "verified" || !m.CanSeeCode || !m.AffirmativeResponse {
+			continue
+		}
 		score := a.GetProviderScore(m.ID)
 		if score < a.config.MinScoreThreshold {
 			continue

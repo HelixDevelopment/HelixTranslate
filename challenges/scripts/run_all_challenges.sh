@@ -21,6 +21,8 @@ CHALLENGES=(
     "embeddings_integration_challenge.sh"
     "rag_integration_challenge.sh"
     "skills_integration_challenge.sh"
+    "verified_model_translation_challenge.sh"
+    "anti_bluff_execution_challenge.sh"
 )
 
 PASSED=0

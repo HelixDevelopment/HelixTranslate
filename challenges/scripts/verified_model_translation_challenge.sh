@@ -22,7 +22,9 @@ for BIN in unified-translator api-server grpc-server; do
         exit 1
     fi
     # Verify verifier integration is compiled into each binary
-    if ! strings "./build/${BIN}" | grep -qi "verifier" >/dev/null 2>&1; then
+    # Use count-based check to avoid SIGPIPE with pipefail + grep -q
+    VERIFIER_COUNT=$(strings "./build/${BIN}" 2>/dev/null | grep -ci "verifier" || true)
+    if [ "${VERIFIER_COUNT}" -eq 0 ]; then
         echo "FAIL: ${BIN} binary missing verifier integration"
         exit 1
     fi
