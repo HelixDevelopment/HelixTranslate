@@ -37,8 +37,10 @@ func NewHub(eventBus *events.EventBus) *Hub {
 		eventBus:   eventBus,
 	}
 
-	// Subscribe to all events
-	eventBus.SubscribeAll(hub.handleEvent)
+	// Subscribe to all events (if event bus is provided)
+	if eventBus != nil {
+		eventBus.SubscribeAll(hub.handleEvent)
+	}
 
 	return hub
 }

@@ -503,6 +503,8 @@ func parseFlags() *UnifiedConfig {
 			fmt.Fprintf(os.Stderr, "Error: llama-model path required for provider=llamacpp\n")
 			os.Exit(1)
 		}
+	case "mock", "ollama":
+		// No API key required for mock or local Ollama
 	default:
 		if config.APIKey == "" {
 			fmt.Fprintf(os.Stderr, "Error: API key required for provider=%s\n", config.Provider)
