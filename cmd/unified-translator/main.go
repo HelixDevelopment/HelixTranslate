@@ -424,19 +424,10 @@ func executeVerifiedTranslation(ctx context.Context, config *UnifiedConfig, sess
 	})
 
 	// Seed registry from local config for offline operation
-	// In production, this would be populated by LLMsVerifier server
-	registry := factory.ListVerifiedModels()
-	if len(registry) == 0 {
-		// No pre-seeded models; try to fetch from verifier server
-		client := verifier.NewClient(vCfg)
-		models, err := client.GetVerifiedModels(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("no verified models available and LLMsVerifier unreachable: %w", err)
-		}
-		for i := range models {
-			factory.RegisterModel(models[i])
-		}
-	}
+	// Wire LLMsVerifier client as the single source of truth (SSOT).
+	// The factory will fetch verified models from LLMsVerifier at runtime.
+	client := verifier.NewClient(vCfg)
+	factory.SetClient(client)
 
 	task := selection.TaskRequirements{
 		SourceLang: config.SourceLang,
