@@ -350,9 +350,8 @@ func TestCanRunMethodCoverage(t *testing.T) {
 	if err == nil {
 		for _, tc := range testSizes {
 			t.Run("Real capabilities - "+tc.name, func(t *testing.T) {
-				result := caps.CanRunModel(tc.modelSize)
-				// Result should be a boolean (no errors)
-				assert.NotNil(t, result, "CanRunModel should return a boolean result")
+				_ = caps.CanRunModel(tc.modelSize)
+				// CanRunModel returns bool; with real caps we just verify it doesn't panic
 			})
 		}
 	}

@@ -87,77 +87,81 @@ func TestUniversalTranslator_TranslateBook_Basic(t *testing.T) {
 	})
 
 	t.Run("TranslateBook with basic chapters", func(t *testing.T) {
-		// Skip this test temporarily due to complex mocking requirements
-		t.Skip("Temporarily skipping due to complex mocking requirements")  // SKIP-OK: #legacy-untriaged
-	})
-}
-
-// TestUniversalTranslator_EdgeCases tests edge cases and error conditions
-func TestUniversalTranslator_EdgeCases(t *testing.T) {
-	mockTranslator := &MockTranslator{}
-	mockLLMDetector := &MockLLMDetector{}
-	mockDetector := language.NewDetector(mockLLMDetector)
-
-	// Set up mock expectations
-	mockTranslator.On("TranslateWithProgress", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("Translated", nil)
-
-	targetLang := language.Language{Code: "ru", Name: "Russian"}
-
-	t.Run("TranslateBook with cancelled context", func(t *testing.T) {
-		// Skip this test temporarily due to complex mocking requirements
-		t.Skip("Temporarily skipping due to complex mocking requirements")  // SKIP-OK: #legacy-untriaged
-	})
-
-	t.Run("TranslateBook with metadata translation", func(t *testing.T) {
-		// Create a new translator with nil source language to trigger language detection
-		utNoSource := NewUniversalTranslator(mockTranslator, mockDetector, language.Language{}, targetLang)
-
 		ctx := context.Background()
 		eventBus := events.NewEventBus()
 		sessionID := "test-session"
 
 		book := &ebook.Book{
-			Metadata: ebook.Metadata{
-				Title:   "Test Book",
-				Authors: []string{"Test Author"},
-			},
+			Metadata: ebook.Metadata{Title: "Test Book", Authors: []string{"Author"}},
 			Chapters: []ebook.Chapter{
-				{
-					Title: "Chapter 1",
-					Sections: []ebook.Section{
-						{Title: "Section 1", Content: "Content 1"},
-					},
-				},
+				{Title: "Ch1", Sections: []ebook.Section{{Title: "Sec1", Content: "Hello"}}},
 			},
 		}
 
-		// Mock language detection
 		mockLLMDetector.On("DetectLanguage", ctx, mock.AnythingOfType("string")).Return("en", nil)
+		mockTranslator.On("TranslateWithProgress", ctx, "Test Book", "Book title", eventBus, sessionID).Return("Книга", nil)
+		mockTranslator.On("TranslateWithProgress", ctx, "Ch1", "Chapter title", eventBus, sessionID).Return("Глава", nil)
+		mockTranslator.On("TranslateWithProgress", ctx, "Hello", "Section content", eventBus, sessionID).Return("Привет", nil)
 
-		// Mock translations
-		mockTranslator.On("TranslateWithProgress", ctx, "Test Book", "Book title", eventBus, sessionID).Return("Тестовая Книга", nil)
-		mockTranslator.On("TranslateWithProgress", ctx, "Chapter 1", "Chapter title", eventBus, sessionID).Return("Глава 1", nil)
-		mockTranslator.On("TranslateWithProgress", ctx, "Content 1", "Section content", eventBus, sessionID).Return("Содержание 1", nil)
-
-		err := utNoSource.TranslateBook(ctx, book, eventBus, sessionID)
-
+		err := ut.TranslateBook(ctx, book, eventBus, sessionID)
 		assert.NoError(t, err)
-		mockTranslator.AssertExpectations(t)
-	})
-
-	t.Run("TranslateBook with translation errors", func(t *testing.T) {
-		t.Skip("Skipping test due to mock complexity")  // SKIP-OK: #legacy-untriaged
+		assert.Equal(t, "ru", book.Metadata.Language)
 	})
 }
 
 // TestUniversalTranslator_MultipleBooks tests translating multiple books
 func TestUniversalTranslator_MultipleBooks(t *testing.T) {
-	t.Skip("Skipping complex mock test to restore basic coverage")  // SKIP-OK: #legacy-untriaged
+	mockTranslator := &MockTranslator{}
+	mockLLMDetector := &MockLLMDetector{}
+	mockDetector := language.NewDetector(mockLLMDetector)
+
+	sourceLang := language.Language{Code: "en", Name: "English"}
+	targetLang := language.Language{Code: "ru", Name: "Russian"}
+	ut := NewUniversalTranslator(mockTranslator, mockDetector, sourceLang, targetLang)
+
+	books := []*ebook.Book{
+		{Metadata: ebook.Metadata{Title: "Book 1"}, Chapters: []ebook.Chapter{{Title: "Ch1", Sections: []ebook.Section{{Content: "Hello"}}}}},
+		{Metadata: ebook.Metadata{Title: "Book 2"}, Chapters: []ebook.Chapter{{Title: "Ch1", Sections: []ebook.Section{{Content: "World"}}}}},
+	}
+
+	ctx := context.Background()
+	eventBus := events.NewEventBus()
+	sessionID := "test-session"
+
+	mockLLMDetector.On("DetectLanguage", ctx, mock.AnythingOfType("string")).Return("en", nil)
+	mockTranslator.On("TranslateWithProgress", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("Translated", nil)
+
+	for _, book := range books {
+		err := ut.TranslateBook(ctx, book, eventBus, sessionID)
+		assert.NoError(t, err)
+		assert.Equal(t, "ru", book.Metadata.Language)
+	}
 }
 
 // TestUniversalTranslator_LanguageDetection tests language detection scenarios
 func TestUniversalTranslator_LanguageDetection(t *testing.T) {
-	t.Skip("Skipping complex mock test to restore basic coverage")  // SKIP-OK: #legacy-untriaged
+	mockTranslator := &MockTranslator{}
+	mockLLMDetector := &MockLLMDetector{}
+	mockDetector := language.NewDetector(mockLLMDetector)
+
+	targetLang := language.Language{Code: "ru", Name: "Russian"}
+	ut := NewUniversalTranslator(mockTranslator, mockDetector, language.Language{}, targetLang)
+
+	ctx := context.Background()
+	eventBus := events.NewEventBus()
+	sessionID := "test-session"
+
+	book := &ebook.Book{
+		Metadata: ebook.Metadata{Title: "Hello World", Language: ""},
+		Chapters: []ebook.Chapter{{Title: "Ch1", Sections: []ebook.Section{{Content: "English text here"}}}},
+	}
+
+	mockLLMDetector.On("DetectLanguage", ctx, mock.AnythingOfType("string")).Return("en", nil)
+	mockTranslator.On("TranslateWithProgress", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("Translated", nil)
+
+	err := ut.TranslateBook(ctx, book, eventBus, sessionID)
+	assert.NoError(t, err)
+	mockLLMDetector.AssertExpectations(t)
 }
 
 // BenchmarkUniversalTranslator_New benchmarks UniversalTranslator creation

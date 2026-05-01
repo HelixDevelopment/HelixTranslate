@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -1427,3 +1428,17 @@ func TestGetDistributedStatus_InvalidManagerType(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "Invalid distributed manager", response["error"])
 }
+
+// MockDistributedManager is a mock implementation for testing
+type MockDistributedManager struct{}
+
+func (m *MockDistributedManager) TranslateDistributed(ctx context.Context, text, contextHint string) (string, error) {
+	return "distributed result", nil
+}
+func (m *MockDistributedManager) Initialize(localCoordinator interface{}) error { return nil }
+func (m *MockDistributedManager) DiscoverAndPairWorkers(ctx context.Context) error { return nil }
+func (m *MockDistributedManager) GetStatus() map[string]interface{} { return map[string]interface{}{} }
+func (m *MockDistributedManager) AddWorker(workerID string, workerCfg interface{}) error { return nil }
+func (m *MockDistributedManager) RemoveWorker(workerID string) error { return nil }
+func (m *MockDistributedManager) PairWorker(workerID string) error { return nil }
+func (m *MockDistributedManager) UnpairWorker(workerID string) error { return nil }

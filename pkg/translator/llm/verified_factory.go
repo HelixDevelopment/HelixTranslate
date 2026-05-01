@@ -12,8 +12,9 @@ import (
 // VerifiedFactory creates LLM translators using LLMsVerifier-verified models.
 // This is the CONST-034-compliant factory that only permits verified models.
 type VerifiedFactory struct {
-	selector *selection.Engine
-	config   *verifier.Config
+	selector    *selection.Engine
+	config      *verifier.Config
+	keyResolver func(providerID string) string
 }
 
 // NewVerifiedFactory creates a verified translator factory.
@@ -34,6 +35,18 @@ func NewVerifiedFactory(cfg *verifier.Config) *VerifiedFactory {
 	}
 }
 
+// SetKeyResolver configures the API key resolver for provider-specific keys.
+func (f *VerifiedFactory) SetKeyResolver(resolver func(providerID string) string) {
+	f.keyResolver = resolver
+}
+
+func (f *VerifiedFactory) resolveAPIKey(providerID string) string {
+	if f.keyResolver != nil {
+		return f.keyResolver(providerID)
+	}
+	return ""
+}
+
 // CreateTranslator builds an LLM translator for the best verified model
 // matching the given task requirements.
 func (f *VerifiedFactory) CreateTranslator(ctx context.Context, task selection.TaskRequirements) (*LLMTranslator, error) {
@@ -46,6 +59,7 @@ func (f *VerifiedFactory) CreateTranslator(ctx context.Context, task selection.T
 	transConfig := TranslationConfig{
 		Provider: model.ProviderID,
 		Model:    model.ID,
+		APIKey:   f.resolveAPIKey(model.ProviderID),
 	}
 
 	return NewLLMTranslatorWithConfig(transConfig)
@@ -61,6 +75,7 @@ func (f *VerifiedFactory) CreateTranslatorWithFallback(ctx context.Context, task
 	transConfig := TranslationConfig{
 		Provider: primary.ProviderID,
 		Model:    primary.ID,
+		APIKey:   f.resolveAPIKey(primary.ProviderID),
 	}
 
 	translator, err := NewLLMTranslatorWithConfig(transConfig)
@@ -87,4 +102,14 @@ func (f *VerifiedFactory) IsModelVerified(modelID string) bool {
 // ListVerifiedModels returns all models that pass verification.
 func (f *VerifiedFactory) ListVerifiedModels() []verifier.Model {
 	return f.selector.GetRegistry().FilterVerified(f.config.MinScoreThreshold)
+}
+
+// RegisterModel adds a verified model to the factory's registry.
+func (f *VerifiedFactory) RegisterModel(model verifier.Model) {
+	f.selector.GetRegistry().AddModel(model)
+}
+
+// RegisterProvider adds a provider configuration to the factory's registry.
+func (f *VerifiedFactory) RegisterProvider(cfg verifier.ProviderConfig) {
+	f.selector.GetRegistry().RegisterProvider(cfg)
 }

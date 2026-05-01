@@ -3,7 +3,8 @@ set -euo pipefail
 
 # Challenge: API Key Provisioning
 # Verifies that API keys are loaded from .env file and NOT git-tracked.
-# Anti-bluff: Checks file permissions, git ignore status, and env loading logic.
+# Anti-bluff: Checks file permissions, git ignore status, env loading logic,
+# AND mutation-tests the env-loading code.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
@@ -52,5 +53,21 @@ if [ "${HARDCOUNT}" -gt 0 ]; then
     exit 1
 fi
 
-echo "PASS: API keys are properly provisioned from .env and protected from git"
+# 6. Mutation test — break env loading and confirm tests fail
+echo ">>> Mutation test: breaking env-based key loading..."
+UNIFIED_GO="${PROJECT_ROOT}/cmd/unified-translator/main.go"
+# Mutate resolveProviderAPIKey to always return empty string
+sed -i.bak '/^func resolveProviderAPIKey/,/^}/ { s/return "flag-key"/return ""/; s/return os.Getenv(envVar)/return ""/; s/return config.APIKey/return ""/; }' "${UNIFIED_GO}"
+MUTATION_FAILED=0
+if go test -run "TestResolveProviderAPIKey" ./cmd/unified-translator/... >/dev/null 2>&1; then
+    echo "FAIL: Mutation test did not fail — API key resolver test is bluffing"
+    MUTATION_FAILED=1
+fi
+mv "${UNIFIED_GO}.bak" "${UNIFIED_GO}"
+
+if [ "${MUTATION_FAILED}" -eq 1 ]; then
+    exit 1
+fi
+
+echo "PASS: API keys are properly provisioned and protected by mutation tests"
 exit 0

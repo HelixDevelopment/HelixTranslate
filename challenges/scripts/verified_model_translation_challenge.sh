@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Challenge: Verified Model Translation
 # Confirms that translation workflows can use verified models.
-# Anti-bluff: Builds the translator and verifies verifier symbols are linked.
+# Anti-bluff: Runs real verified factory tests AND mutation-tests factory logic.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
@@ -12,47 +12,42 @@ echo "=== Verified Model Translation Challenge ==="
 
 cd "${PROJECT_ROOT}"
 
-# Build all main binaries
+# Step 1: Build all main binaries
 make build >/dev/null 2>&1 || go build -o ./build/unified-translator ./cmd/unified-translator
 
-# Verify binaries exist
 for BIN in unified-translator api-server grpc-server; do
     if [ ! -f "./build/${BIN}" ]; then
         echo "FAIL: ${BIN} binary not built"
         exit 1
     fi
-    # Verify verifier integration is compiled into each binary
-    # Use count-based check to avoid SIGPIPE with pipefail + grep -q
-    VERIFIER_COUNT=$(strings "./build/${BIN}" 2>/dev/null | grep -ci "verifier" || true)
-    if [ "${VERIFIER_COUNT}" -eq 0 ]; then
-        echo "FAIL: ${BIN} binary missing verifier integration"
-        exit 1
-    fi
 done
 
-# Verify score adapter exists
-ADAPTER_GO="${PROJECT_ROOT}/internal/services/llmsverifier_score_adapter.go"
-if [ ! -f "${ADAPTER_GO}" ]; then
-    echo "FAIL: Score adapter not found"
+# Step 2: Run real verified factory tests
+if ! go test -v -run "TestVerifiedFactory" ./pkg/translator/llm/... >/dev/null 2>&1; then
+    echo "FAIL: Verified factory tests failed"
     exit 1
 fi
 
-if ! grep -q "GetPreferences" "${ADAPTER_GO}"; then
-    echo "FAIL: Score adapter missing GetPreferences method"
+# Step 3: Run selection engine tests
+if ! go test -v ./internal/verifier/selection/... >/dev/null 2>&1; then
+    echo "FAIL: Selection engine tests failed"
     exit 1
 fi
 
-# Verify selection engine exists
-SELECTION_GO="${PROJECT_ROOT}/internal/verifier/selection/engine.go"
-if [ ! -f "${SELECTION_GO}" ]; then
-    echo "FAIL: Selection engine not found"
+# Step 4: Mutation test — break CreateTranslator and confirm tests fail
+echo ">>> Mutation test: breaking VerifiedFactory.CreateTranslator..."
+FACTORY_GO="${PROJECT_ROOT}/pkg/translator/llm/verified_factory.go"
+sed -i.bak 's/return NewLLMTranslatorWithConfig(transConfig)/return nil, fmt.Errorf("broken factory")/' "${FACTORY_GO}"
+MUTATION_FAILED=0
+if go test -run "TestVerifiedFactoryKeyResolver" ./pkg/translator/llm/... >/dev/null 2>&1; then
+    echo "FAIL: Mutation test did not fail — verified factory test is bluffing"
+    MUTATION_FAILED=1
+fi
+mv "${FACTORY_GO}.bak" "${FACTORY_GO}"
+
+if [ "${MUTATION_FAILED}" -eq 1 ]; then
     exit 1
 fi
 
-if ! grep -q "SelectModel" "${SELECTION_GO}"; then
-    echo "FAIL: Selection engine missing SelectModel method"
-    exit 1
-fi
-
-echo "PASS: Verified model translation pipeline is compiled and linked"
+echo "PASS: Verified model translation works and is protected by mutation tests"
 exit 0

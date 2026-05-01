@@ -436,3 +436,15 @@ eventBus.Subscribe(EventTranslationProgress, func(event Event) {
 - **Event System**: All components emit events via `pkg/events`
 - **Health Checks**: Built-in health check endpoints
 - **Logging**: Structured logging with configurable levels
+## CONST-035 — Anti-Bluff Operative Rule (MANDATORY)
+
+> "We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can't be used! This MUST NOT be the case."
+
+**The operative rule:** Execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product.
+
+- A green test or challenge for a feature that does not actually work is a **BLUFF** and is **FORBIDDEN**.
+- Every test must assert concrete user-visible outcomes, not just internal state.
+- Every challenge must run real code and verify real behavior; grep/file-existence checks are **NOT sufficient**.
+- Mutation testing is **MANDATORY**: deliberately break the feature → the test/challenge **MUST then FAIL**.
+- The bar for shipping is **NOT "tests pass"** but **"users can use the feature."**
+- No false-success results are tolerable.

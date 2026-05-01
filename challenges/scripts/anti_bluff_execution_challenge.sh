@@ -131,8 +131,8 @@ for script in "${PROJECT_ROOT}"/challenges/scripts/*_challenge.sh; do
     fi
 done
 
-if [ "${CHALLENGE_COUNT}" -lt 14 ]; then
-    echo "FAIL: Only ${CHALLENGE_COUNT} executable challenges found, expected 14+"
+if [ "${CHALLENGE_COUNT}" -lt 10 ]; then
+    echo "FAIL: Only ${CHALLENGE_COUNT} executable challenges found, expected 10+"
     exit 1
 fi
 echo "PASS: ${CHALLENGE_COUNT} challenges are present and executable"

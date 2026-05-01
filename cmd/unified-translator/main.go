@@ -13,6 +13,7 @@ import (
 
 	"digital.vasic.translator/internal/config"
 	"digital.vasic.translator/internal/verifier"
+	"digital.vasic.translator/internal/verifier/selection"
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/fb2"
@@ -370,22 +371,33 @@ func executeAPITranslation(ctx context.Context, config *UnifiedConfig, session *
 		"model":    config.Model,
 	})
 
-	// Create LLM translator
-	llmConfig := translator.TranslationConfig{
-		SourceLang:  config.SourceLang,
-		TargetLang:  config.TargetLang,
-		Provider:    config.Provider,
-		Model:       config.Model,
-		Temperature: config.Temperature,
-		MaxTokens:   config.MaxTokens,
-		Timeout:     config.Timeout,
-		APIKey:      config.APIKey,
-		BaseURL:     config.BaseURL,
-	}
+	var llmTranslator *llm.LLMTranslator
+	var err error
 
-	llmTranslator, err := llm.NewLLMTranslator(llmConfig)
-	if err != nil {
-		return "", fmt.Errorf("failed to create LLM translator: %w", err)
+	if config.VerifierEnabled {
+		// CONST-034: Use VerifiedFactory as single source of truth
+		llmTranslator, err = executeVerifiedTranslation(ctx, config, session)
+		if err != nil {
+			return "", fmt.Errorf("verified translation failed: %w", err)
+		}
+	} else {
+		// Legacy direct provider path
+		llmConfig := translator.TranslationConfig{
+			SourceLang:  config.SourceLang,
+			TargetLang:  config.TargetLang,
+			Provider:    config.Provider,
+			Model:       config.Model,
+			Temperature: config.Temperature,
+			MaxTokens:   config.MaxTokens,
+			Timeout:     config.Timeout,
+			APIKey:      config.APIKey,
+			BaseURL:     config.BaseURL,
+		}
+
+		llmTranslator, err = llm.NewLLMTranslator(llmConfig)
+		if err != nil {
+			return "", fmt.Errorf("failed to create LLM translator: %w", err)
+		}
 	}
 
 	// Translate
@@ -395,6 +407,79 @@ func executeAPITranslation(ctx context.Context, config *UnifiedConfig, session *
 	}
 
 	return result, nil
+}
+
+// executeVerifiedTranslation uses VerifiedFactory to select and translate with a verified model.
+func executeVerifiedTranslation(ctx context.Context, config *UnifiedConfig, session *TranslationSession) (*llm.LLMTranslator, error) {
+	vCfg := &verifier.Config{
+		APIURL:            config.VerifierURL,
+		APIKey:            config.VerifierAPIKey,
+		CacheTTL:          time.Hour,
+		MinScoreThreshold: 0.0,
+	}
+
+	factory := llm.NewVerifiedFactory(vCfg)
+	factory.SetKeyResolver(func(providerID string) string {
+		return resolveProviderAPIKey(config, providerID)
+	})
+
+	// Seed registry from local config for offline operation
+	// In production, this would be populated by LLMsVerifier server
+	registry := factory.ListVerifiedModels()
+	if len(registry) == 0 {
+		// No pre-seeded models; try to fetch from verifier server
+		client := verifier.NewClient(vCfg)
+		models, err := client.GetVerifiedModels(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("no verified models available and LLMsVerifier unreachable: %w", err)
+		}
+		for i := range models {
+			factory.RegisterModel(models[i])
+		}
+	}
+
+	task := selection.TaskRequirements{
+		SourceLang: config.SourceLang,
+		TargetLang: config.TargetLang,
+	}
+
+	trans, fallbackIDs, err := factory.CreateTranslatorWithFallback(ctx, task)
+	if err != nil {
+		return nil, err
+	}
+
+	session.Logger.Info("Verified model selected", map[string]interface{}{
+		"provider":   trans.GetName(),
+		"fallbacks":  fallbackIDs,
+		"session_id": session.ID,
+	})
+
+	return trans, nil
+}
+
+// resolveProviderAPIKey returns the API key for a given provider ID.
+func resolveProviderAPIKey(config *UnifiedConfig, providerID string) string {
+	// If user explicitly selected this provider, use their API key
+	if providerID == config.Provider && config.APIKey != "" {
+		return config.APIKey
+	}
+	// Fall back to well-known environment variables
+	envMap := map[string]string{
+		"openai":    "OPENAI_API_KEY",
+		"anthropic": "ANTHROPIC_API_KEY",
+		"deepseek":  "DEEPSEEK_API_KEY",
+		"qwen":      "QWEN_API_KEY",
+		"gemini":    "GEMINI_API_KEY",
+		"groq":      "GROQ_API_KEY",
+		"mistral":   "MISTRAL_API_KEY",
+		"xai":       "XAI_API_KEY",
+		"cohere":    "COHERE_API_KEY",
+		"togetherai":"TOGETHER_API_KEY",
+	}
+	if envVar, ok := envMap[providerID]; ok {
+		return os.Getenv(envVar)
+	}
+	return ""
 }
 
 // Helper functions
@@ -578,6 +663,11 @@ Execution Options:
 Monitoring:
   -monitoring               Enable web monitoring
   -monitoring-port <port>   Monitoring server port (default: 8080)
+
+LLMsVerifier (CONST-034):
+  -use-verifier             Use LLMsVerifier as single source of truth for model selection
+  -verifier-url <url>       LLMsVerifier API URL (default: http://localhost:8080)
+  -verifier-api-key <key>   LLMsVerifier API key
 
 Other:
   -version                  Show version information

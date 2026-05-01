@@ -863,15 +863,7 @@ type SSHTestConfig struct {
 	Port int
 }
 
-// TestValidateConfig tests the validateConfig function - disabled for now due to panic
-func TestValidateConfig(t *testing.T) {
-	t.Skip("Temporarily disabled due to configuration initialization issue")  // SKIP-OK: #legacy-untriaged
-}
 
-// TestParseFlags tests the parseFlags function - disabled due to flag redefinition
-func TestParseFlags(t *testing.T) {
-	t.Skip("Temporarily disabled due to flag redefinition issue")  // SKIP-OK: #legacy-untriaged
-}
 
 // TestTranslationProgress tests the TranslationProgress struct
 func TestTranslationProgress(t *testing.T) {

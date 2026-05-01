@@ -147,8 +147,10 @@ func (c *MarkdownToEPUBConverter) parseMarkdown(content string, mdDir string) ([
 			continue
 		}
 
-		// Add content to current chapter
+		// Add content to current chapter, or to default buffer if no chapter yet
 		if currentChapter != nil {
+			currentContent.WriteString(line + "\n")
+		} else {
 			currentContent.WriteString(line + "\n")
 		}
 	}
@@ -159,6 +161,15 @@ func (c *MarkdownToEPUBConverter) parseMarkdown(content string, mdDir string) ([
 			{Content: strings.TrimSpace(currentContent.String())},
 		}
 		chapters = append(chapters, *currentChapter)
+		currentContent.Reset()
+	}
+
+	// If no chapters were created (no headers found), create a default chapter from all content
+	if len(chapters) == 0 && currentContent.Len() > 0 {
+		chapters = append(chapters, ebook.Chapter{
+			Title:    "Content",
+			Sections: []ebook.Section{{Content: strings.TrimSpace(currentContent.String())}},
+		})
 	}
 
 	if err := scanner.Err(); err != nil {

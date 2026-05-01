@@ -3,41 +3,41 @@ set -euo pipefail
 
 # Challenge: Degraded Mode
 # Verifies graceful degradation when LLMsVerifier is down.
-# Anti-bluff: Confirms fallback behavior is codified in the client.
+# Anti-bluff: Runs real fallback manager tests AND mutation-tests degraded mode.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 echo "=== Degraded Mode Challenge ==="
 
-ERRORS_GO="${PROJECT_ROOT}/internal/verifier/errors.go"
+cd "${PROJECT_ROOT}"
+
+# Step 1: Run real degraded mode / fallback tests
+if ! go test -v ./pkg/distributed/... >/dev/null 2>&1; then
+    echo "FAIL: Distributed/fallback tests failed"
+    exit 1
+fi
+
+# Step 2: Verify ErrLLMsVerifierUnreachable is used in real code paths
+if ! go test -run "TestClientPingUnreachable" ./internal/verifier/ >/dev/null 2>&1; then
+    echo "FAIL: Unreachable error test failed"
+    exit 1
+fi
+
+# Step 3: Mutation test — break the unreachable error and confirm test fails
+echo ">>> Mutation test: breaking unreachable error..."
 CLIENT_GO="${PROJECT_ROOT}/internal/verifier/client.go"
+sed -i.bak 's/ErrLLMsVerifierUnreachable{URL: c.baseURL}/fmt.Errorf("some other error")/' "${CLIENT_GO}"
+MUTATION_FAILED=0
+if go test -run "TestClientPingUnreachable" ./internal/verifier/ >/dev/null 2>&1; then
+    echo "FAIL: Mutation test did not fail — unreachable error test is bluffing"
+    MUTATION_FAILED=1
+fi
+mv "${CLIENT_GO}.bak" "${CLIENT_GO}"
 
-# Verify ErrLLMsVerifierUnreachable is defined
-if ! grep -q "ErrLLMsVerifierUnreachable" "${ERRORS_GO}"; then
-    echo "FAIL: ErrLLMsVerifierUnreachable not defined"
+if [ "${MUTATION_FAILED}" -eq 1 ]; then
     exit 1
 fi
 
-# Verify client returns this error on connection failure
-if ! grep -q "ErrLLMsVerifierUnreachable{URL: c.baseURL}" "${CLIENT_GO}"; then
-    echo "FAIL: Client does not return ErrLLMsVerifierUnreachable on connection failure"
-    exit 1
-fi
-
-# Verify scoring engine can operate on cached data
-ENGINE_GO="${PROJECT_ROOT}/internal/verifier/scoring/engine.go"
-if ! grep -q "GetScore" "${ENGINE_GO}"; then
-    echo "FAIL: scoring engine missing GetScore for cached data"
-    exit 1
-fi
-
-# Verify config has strict mode toggle
-CONFIG_GO="${PROJECT_ROOT}/internal/config/config.go"
-if ! grep -q "StrictMode" "${CONFIG_GO}"; then
-    echo "FAIL: config missing StrictMode toggle for degraded behavior"
-    exit 1
-fi
-
-echo "PASS: Degraded mode handling is properly implemented"
+echo "PASS: Degraded mode handling works and is protected by mutation tests"
 exit 0
