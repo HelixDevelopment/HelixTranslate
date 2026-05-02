@@ -1,7 +1,26 @@
-// Package ssrf provides SSRF (Server-Side Request Forgery) protection.
+// SPDX-FileCopyrightText: 2026 Milos Vasic
+// SPDX-License-Identifier: Apache-2.0
+
+// Package ssrf is the canonical Server-Side Request Forgery guard
+// for the digital.vasic.* ecosystem. It mirrors the
+// tldrsec/awesome-secure-defaults "SSRF Defense" row: block private,
+// loopback, link-local, metadata, ULA, multicast, and unspecified
+// addresses by default; allow opt-in for trusted on-prem endpoints;
+// canonicalise alternative IP encodings that libc/cgo can still dial.
+//
+// Consumers:
+//   - catalog-api internal/services/ssrf_guard.go (Catalogizer)
+//   - HelixQA pkg/nexus/ai/ssrf_guard.go
+//
+// Keep those copies in sync with this one. When either changes, port
+// the change here and run both downstream test suites. A future
+// refactor can migrate both consumers to import this package
+// directly — until then, this file is the source of truth for the
+// algorithm.
 package ssrf
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
@@ -9,123 +28,202 @@ import (
 	"strings"
 )
 
-// ErrBlocked is returned when a URL is rejected by the SSRF guard.
-var ErrBlocked = errors.New("SSRF guard blocked the request")
+// ErrBlocked is returned when the guard rejects a target URL. Wrap
+// with fmt.Errorf("%w: <reason>", ErrBlocked) for a typed reason.
+var ErrBlocked = errors.New("ssrf blocked")
 
-// Config tunes the guard. Zero value is safe: all private ranges rejected.
+// Config tunes guard behaviour. Zero value = safe defaults: public
+// hosts only, http+https only.
 type Config struct {
-	AllowLocalhost   bool     // If true, localhost/127.0.0.1 is permitted
-	AllowPrivateIPs  bool     // If true, RFC1918 addresses are permitted
-	AllowMetadataIPs bool     // If true, cloud metadata endpoints are permitted
-	AllowedSchemes   []string // e.g. ["https"]; empty = allow all
-	BlockedHosts     []string // Additional hostnames to block
+	// AllowPrivateNetworks lets requests reach RFC1918 / loopback /
+	// link-local destinations. Only flip on for a trusted endpoint.
+	AllowPrivateNetworks bool
+
+	// AllowedSchemes lists accepted URI schemes. Empty = http+https.
+	AllowedSchemes []string
+
+	// Resolver overrides the default DNS resolver. Tests inject a
+	// deterministic stub so they run offline.
+	Resolver Resolver
 }
 
-// Resolver is the narrow DNS contract the guard needs.
+// Resolver is the narrow DNS contract the guard needs. *net.Resolver
+// and net.DefaultResolver both satisfy it via LookupIP.
 type Resolver interface {
-	LookupHost(host string) ([]string, error)
+	LookupIP(network, host string) ([]net.IP, error)
 }
 
-// defaultResolver implements Resolver using net.LookupHost.
-type defaultResolver struct{}
+type stdlibResolver struct{}
 
-func (defaultResolver) LookupHost(host string) ([]string, error) {
-	return net.LookupHost(host)
+func (stdlibResolver) LookupIP(network, host string) ([]net.IP, error) {
+	return net.DefaultResolver.LookupIP(context.Background(), network, host)
 }
 
-// Validate parses target and runs every guard check.
-// Returns ErrBlocked (wrapped with a reason) on rejection, nil on pass.
+// Validate parses target and runs every guard check. Returns
+// ErrBlocked (wrapped with a reason) on rejection, nil on pass.
 func Validate(target string, cfg Config) error {
+	if target == "" {
+		return fmt.Errorf("%w: empty url", ErrBlocked)
+	}
 	u, err := url.Parse(target)
 	if err != nil {
-		return fmt.Errorf("%w: invalid URL: %v", ErrBlocked, err)
+		return fmt.Errorf("%w: parse: %v", ErrBlocked, err)
 	}
-
-	if len(cfg.AllowedSchemes) > 0 {
-		schemeOK := false
-		for _, s := range cfg.AllowedSchemes {
-			if strings.EqualFold(u.Scheme, s) {
-				schemeOK = true
-				break
-			}
-		}
-		if !schemeOK {
-			return fmt.Errorf("%w: scheme %q is not allowed", ErrBlocked, u.Scheme)
-		}
+	if err := validateScheme(u.Scheme, cfg); err != nil {
+		return err
 	}
-
 	host := u.Hostname()
-	for _, blocked := range cfg.BlockedHosts {
-		if strings.EqualFold(host, blocked) {
-			return fmt.Errorf("%w: host %q is blocked", ErrBlocked, host)
-		}
+	if host == "" {
+		return fmt.Errorf("%w: empty host", ErrBlocked)
+	}
+	if host == "0.0.0.0" || host == "::" {
+		return fmt.Errorf("%w: unspecified address %q", ErrBlocked, host)
 	}
 
-	ips, err := defaultResolver{}.LookupHost(host)
-	if err != nil {
-		// If we can't resolve, we can't verify — but we also can't safely allow.
-		// Be conservative: block unresolved hosts unless explicitly allowed.
-		if cfg.AllowLocalhost && (host == "localhost" || host == "127.0.0.1") {
-			return nil
-		}
-		return fmt.Errorf("%w: could not resolve host %q: %v", ErrBlocked, host, err)
+	// Direct IP literal — no DNS needed.
+	if ip := net.ParseIP(host); ip != nil {
+		return checkIP(ip, cfg)
 	}
 
-	for _, ipStr := range ips {
-		ip := net.ParseIP(ipStr)
-		if ip == nil {
-			continue
-		}
-
-		if ip.IsLoopback() && !cfg.AllowLocalhost {
-			return fmt.Errorf("%w: loopback address %q is blocked", ErrBlocked, ipStr)
-		}
-		if isMetadata(ip) && !cfg.AllowMetadataIPs {
-			return fmt.Errorf("%w: metadata address %q is blocked", ErrBlocked, ipStr)
-		}
-		if isLinkLocal(ip) && !cfg.AllowPrivateIPs {
-			// Metadata endpoints are link-local; allow them if explicitly permitted
-			if isMetadata(ip) && cfg.AllowMetadataIPs {
-				continue
-			}
-			return fmt.Errorf("%w: link-local address %q is blocked", ErrBlocked, ipStr)
-		}
-		if isPrivate(ip) && !cfg.AllowPrivateIPs {
-			return fmt.Errorf("%w: private address %q is blocked", ErrBlocked, ipStr)
-		}
+	// Alternative IP encodings libc/cgo can still dial even though
+	// net.ParseIP rejects them. Catch before the DNS path.
+	if ip := ParseIntegerIP(host); ip != nil {
+		return checkIP(ip, cfg)
+	}
+	if ip := ParseShortDottedIP(host); ip != nil {
+		return checkIP(ip, cfg)
 	}
 
+	// Hostname path: resolve + reject if any returned IP is private.
+	resolver := cfg.Resolver
+	if resolver == nil {
+		resolver = stdlibResolver{}
+	}
+	ips, lookupErr := resolver.LookupIP("ip", host)
+	if lookupErr != nil {
+		return fmt.Errorf("%w: lookup %s: %v", ErrBlocked, host, lookupErr)
+	}
+	if len(ips) == 0 {
+		return fmt.Errorf("%w: host %q resolves to zero IPs", ErrBlocked, host)
+	}
+	for _, ip := range ips {
+		if err := checkIP(ip, cfg); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
-func isPrivate(ip net.IP) bool {
-	privates := []*net.IPNet{
-		{IP: net.ParseIP("10.0.0.0"), Mask: net.CIDRMask(8, 32)},
-		{IP: net.ParseIP("172.16.0.0"), Mask: net.CIDRMask(12, 32)},
-		{IP: net.ParseIP("192.168.0.0"), Mask: net.CIDRMask(16, 32)},
+func validateScheme(scheme string, cfg Config) error {
+	scheme = strings.ToLower(scheme)
+	allowed := cfg.AllowedSchemes
+	if len(allowed) == 0 {
+		allowed = []string{"http", "https"}
 	}
-	for _, n := range privates {
-		if n.Contains(ip) {
-			return true
+	for _, s := range allowed {
+		if scheme == strings.ToLower(s) {
+			return nil
 		}
 	}
-	return false
+	return fmt.Errorf("%w: scheme %q not in allow list", ErrBlocked, scheme)
 }
 
-func isLinkLocal(ip net.IP) bool {
-	linkLocal := &net.IPNet{IP: net.ParseIP("169.254.0.0"), Mask: net.CIDRMask(16, 32)}
-	return linkLocal.Contains(ip)
-}
-
-func isMetadata(ip net.IP) bool {
-	// AWS, GCP, Azure metadata endpoints
-	metadata := []string{
-		"169.254.169.254",
+func checkIP(ip net.IP, cfg Config) error {
+	if ip.IsUnspecified() {
+		return fmt.Errorf("%w: unspecified address %s", ErrBlocked, ip)
 	}
-	for _, m := range metadata {
-		if ip.Equal(net.ParseIP(m)) {
-			return true
+	if cfg.AllowPrivateNetworks {
+		return nil
+	}
+	if ip.IsLoopback() {
+		return fmt.Errorf("%w: loopback %s", ErrBlocked, ip)
+	}
+	if ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
+		return fmt.Errorf("%w: link-local %s", ErrBlocked, ip)
+	}
+	if ip.IsPrivate() {
+		return fmt.Errorf("%w: private address %s", ErrBlocked, ip)
+	}
+	if isIPv6UniqueLocal(ip) {
+		return fmt.Errorf("%w: ULA fc00::/7 %s", ErrBlocked, ip)
+	}
+	if ip.IsInterfaceLocalMulticast() || ip.IsMulticast() {
+		return fmt.Errorf("%w: multicast %s", ErrBlocked, ip)
+	}
+	return nil
+}
+
+func isIPv6UniqueLocal(ip net.IP) bool {
+	v6 := ip.To16()
+	if v6 == nil || ip.To4() != nil {
+		return false
+	}
+	return v6[0]&0xfe == 0xfc
+}
+
+// ParseIntegerIP treats an all-digit host as a 32-bit IPv4 value
+// (e.g. "2130706433" → 127.0.0.1). Returns nil on non-digit or
+// uint32 overflow — safe against DNS names that end in digits.
+func ParseIntegerIP(host string) net.IP {
+	if host == "" || len(host) > 10 {
+		return nil
+	}
+	var v uint64
+	for _, r := range host {
+		if r < '0' || r > '9' {
+			return nil
+		}
+		v = v*10 + uint64(r-'0')
+		if v > 0xFFFFFFFF {
+			return nil
 		}
 	}
-	return false
+	return net.IPv4(byte(v>>24), byte(v>>16), byte(v>>8), byte(v))
+}
+
+// ParseShortDottedIP expands a two- or three-octet dotted form to
+// the canonical four-octet IPv4 address. "127.1" → 127.0.0.1,
+// "10.1" → 10.0.0.1, "192.168.1" → 192.168.0.1. Returns nil if the
+// form isn't a short dotted IPv4 or any component is out of range.
+func ParseShortDottedIP(host string) net.IP {
+	parts := strings.Split(host, ".")
+	if len(parts) != 2 && len(parts) != 3 {
+		return nil
+	}
+	nums := make([]uint64, len(parts))
+	for i, p := range parts {
+		if p == "" || len(p) > 10 {
+			return nil
+		}
+		var v uint64
+		for _, r := range p {
+			if r < '0' || r > '9' {
+				return nil
+			}
+			v = v*10 + uint64(r-'0')
+			if v > 0xFFFFFFFF {
+				return nil
+			}
+		}
+		nums[i] = v
+	}
+	for i := 0; i < len(nums)-1; i++ {
+		if nums[i] > 0xFF {
+			return nil
+		}
+	}
+	var full uint64
+	switch len(nums) {
+	case 2:
+		if nums[1] > 0xFFFFFF {
+			return nil
+		}
+		full = nums[0]<<24 | nums[1]
+	case 3:
+		if nums[2] > 0xFFFF {
+			return nil
+		}
+		full = nums[0]<<24 | nums[1]<<16 | nums[2]
+	}
+	return net.IPv4(byte(full>>24), byte(full>>16), byte(full>>8), byte(full))
 }
