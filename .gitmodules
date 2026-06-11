@@ -29,3 +29,6 @@
 [submodule "docs_chain"]
 	path = docs_chain
 	url = git@github.com:vasic-digital/docs_chain.git
+[submodule "security"]
+	path = security
+	url = git@github.com:vasic-digital/security.git
