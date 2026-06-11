@@ -52,3 +52,11 @@ cmd/cli/test_output.epub
 cmd/cli/test_output.epub
 api-server
 test_output.epub
+
+# Raw QA evidence + docs_chain runtime (regeneratable; §11.4.128/§11.4.106)
+qa-results/
+.docs_chain/state.json
+.docs_chain/*.docs_chain.tmp
+# mutation-test residue (§11.4.84) — never track
+*.go.backup
+*.go.bak

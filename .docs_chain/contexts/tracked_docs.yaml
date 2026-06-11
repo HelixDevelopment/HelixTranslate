@@ -1,0 +1,17 @@
+context: tracked_docs
+description: helix_translate tracked-doc exports — CONTINUATION + README kept in sync (md -> html -> pdf) per §11.4.106
+nodes:
+  continuation_md:   { kind: markdown, path: docs/CONTINUATION.md }
+  continuation_html: { kind: html,     path: docs/CONTINUATION.html }
+  continuation_pdf:  { kind: pdf,      path: docs/CONTINUATION.pdf }
+  readme_md:         { kind: markdown, path: README.md }
+  readme_html:       { kind: html,     path: README.html }
+  readme_pdf:        { kind: pdf,      path: README.pdf }
+edges:
+  - { type: derive-from, from: continuation_md,   to: continuation_html, transform: md2html }
+  - { type: derive-from, from: continuation_html, to: continuation_pdf,  transform: html2pdf }
+  - { type: derive-from, from: readme_md,         to: readme_html,       transform: md2html }
+  - { type: derive-from, from: readme_html,       to: readme_pdf,        transform: html2pdf }
+transforms:
+  md2html:  { builtin: pandoc-html }
+  html2pdf: { builtin: weasyprint-pdf }

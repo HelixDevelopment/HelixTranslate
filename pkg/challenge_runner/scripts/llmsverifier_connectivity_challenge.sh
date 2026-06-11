@@ -6,7 +6,7 @@ set -euo pipefail
 # Anti-bluff: Actually attempts HTTP connection and validates response structure.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
 API_URL="${LLMSVERIFIER_API_URL:-http://localhost:8080}"
 API_KEY="${LLMSVERIFIER_API_KEY:-}"
@@ -19,7 +19,7 @@ if [ -z "${API_KEY}" ]; then
     echo "WARN: LLMSVERIFIER_API_KEY not set; performing static code validation only"
 
     # Anti-bluff fallback: verify client implementation is real and correct
-    CLIENT_GO="${SCRIPT_DIR}/../../internal/verifier/client.go"
+    CLIENT_GO="${SCRIPT_DIR}/../../../internal/verifier/client.go"
     if [ ! -f "${CLIENT_GO}" ]; then
         echo "FAIL: verifier client not found"
         exit 1

@@ -9,7 +9,7 @@ set -euo pipefail
 # is worse than no tests at all. This challenge enforces that green = usable.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
 echo "=== Anti-Bluff Execution Challenge ==="
 echo "Verifying: build success + test execution + mutation failure"

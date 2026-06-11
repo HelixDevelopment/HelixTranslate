@@ -6,7 +6,7 @@ set -euo pipefail
 # Anti-bluff: Runs real fallback manager tests AND mutation-tests degraded mode.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
 echo "=== Degraded Mode Challenge ==="
 
