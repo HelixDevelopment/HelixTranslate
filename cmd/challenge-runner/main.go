@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"digital.vasic.challenges/pkg/challenge"
-	"digital.vasic.translator/challenges"
+	"digital.vasic.translator/pkg/challenge_runner"
 )
 
 func main() {
@@ -25,7 +25,7 @@ func main() {
 	)
 	flag.Parse()
 
-	config := challenges.OrchestratorConfig{
+	config := challenge_runner.OrchestratorConfig{
 		Parallel:       *parallel,
 		MaxConcurrency: *maxConcurrency,
 		StopOnFailure:  *stopOnFailure,
@@ -39,7 +39,7 @@ func main() {
 		config.Filter = strings.Split(*filter, ",")
 	}
 
-	orchestrator := challenges.NewOrchestrator(config)
+	orchestrator := challenge_runner.NewOrchestrator(config)
 
 	fmt.Println("=== HelixTranslate Challenge Runner ===")
 	fmt.Println("Registering challenges...")

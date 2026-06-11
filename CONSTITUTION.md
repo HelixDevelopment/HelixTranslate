@@ -74,9 +74,9 @@ are unsafe for this host.
    `start.sh` / `setup.sh` / `bootstrap.sh`.
 3. `scripts/host-power-management/check-no-suspend-calls.sh` —
    static scanner. Exits non-zero on any forbidden invocation.
-4. `challenges/scripts/host_no_auto_suspend_challenge.sh` — asserts
+4. `pkg/challenge_runner/scripts/host_no_auto_suspend_challenge.sh` — asserts
    the running host's state matches layer-1 masking.
-5. `challenges/scripts/no_suspend_calls_challenge.sh` — wraps the
+5. `pkg/challenge_runner/scripts/no_suspend_calls_challenge.sh` — wraps the
    scanner as a challenge that runs in CI / `run_all_challenges.sh`.
 
 **Enforcement:** Every project's CI / `run_all_challenges.sh`
@@ -225,7 +225,7 @@ A change is done when:
 
 1. The code change is committed.
 2. All project-level tests pass on a clean clone.
-3. All challenges in `challenges/scripts/` pass on the running host.
+3. All challenges in `pkg/challenge_runner/scripts/` pass on the running host.
 4. Governance docs (`CONSTITUTION.md`, `AGENTS.md`, `CLAUDE.md`) are
    coherent with the change.
 5. All HelixQA banks pass for all configured platforms.

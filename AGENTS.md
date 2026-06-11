@@ -259,8 +259,8 @@ scripts/                # Utility and demonstration scripts
 build/                  # Build artifacts directory
 docs/                   # Project documentation
 Documentation/          # Additional documentation and guides
-Challenges/             # Submodule: challenge framework
-Containers/             # Submodule: container runtime extensions
+challenges/             # Submodule: challenge framework
+containers/             # Submodule: container runtime extensions
 ```
 
 ---
@@ -621,7 +621,7 @@ All submodules are wired via `replace` directives in `go.mod`. If a submodule fa
 [LLM Provider APIs]
 ```
 
-**Canonical type location**: `LLMsVerifier/pkg/api/types.go` defines `Model` and `PricingInfo`. HelixTranslate aliases them in `internal/verifier/client.go` (`type Model = api.Model`).
+**Canonical type location**: `llms_verifier/pkg/api/types.go` defines `Model` and `PricingInfo`. HelixTranslate aliases them in `internal/verifier/client.go` (`type Model = api.Model`).
 
 ---
 
@@ -639,7 +639,7 @@ All submodules are wired via `replace` directives in `go.mod`. If a submodule fa
 | `pkg/events/events.go` | Central pub/sub event system |
 | `pkg/websocket/hub.go` | WebSocket hub for real-time monitoring |
 | `pkg/translator/llm/llm.go` | LLM provider interface and factory (26 providers) |
-| `LLMsVerifier/pkg/api/types.go` | Canonical model verification types (CONST-034 SSOT) |
+| `llms_verifier/pkg/api/types.go` | Canonical model verification types (CONST-034 SSOT) |
 | `api/openapi/openapi.yaml` | OpenAPI 3.0 specification |
 | `VERSION` | Current application version (2.3.0) |
 
@@ -687,7 +687,7 @@ future host or container is exposed.
 **Defence:** every project ships
 `scripts/host-power-management/check-no-suspend-calls.sh` (static
 scanner) and
-`challenges/scripts/no_suspend_calls_challenge.sh` (challenge wrapper).
+`pkg/challenge_runner/scripts/no_suspend_calls_challenge.sh` (challenge wrapper).
 Both MUST be wired into the project's CI / `run_all_challenges.sh`.
 
 **Full background:** `docs/HOST_POWER_MANAGEMENT.md` and `CONSTITUTION.md` (CONST-033).

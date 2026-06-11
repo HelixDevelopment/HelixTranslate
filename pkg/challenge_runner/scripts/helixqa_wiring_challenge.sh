@@ -8,14 +8,14 @@ set -euo pipefail
 echo "=== HelixQA Wiring Challenge ==="
 
 # Step 1: Verify binary exists and is executable
-if [[ ! -x "HelixQA/bin/helixqa" ]]; then
-    echo "FAIL: HelixQA binary not found or not executable at HelixQA/bin/helixqa"
+if [[ ! -x "helix_qa/bin/helixqa" ]]; then
+    echo "FAIL: HelixQA binary not found or not executable at helix_qa/bin/helixqa"
     exit 1
 fi
 echo "PASS: HelixQA binary exists and is executable"
 
 # Step 2: Verify version command works
-version_output=$(HelixQA/bin/helixqa version 2>&1) || true
+version_output=$(helix_qa/bin/helixqa version 2>&1) || true
 if [[ -z "$version_output" ]]; then
     echo "FAIL: HelixQA version command produced no output"
     exit 1
@@ -23,28 +23,28 @@ fi
 echo "PASS: HelixQA version command works: $version_output"
 
 # Step 3: Verify test banks exist as files
-bank_files=$(find HelixQA/banks -type f \( -name "*.json" -o -name "*.yaml" \) | wc -l)
+bank_files=$(find helix_qa/banks -type f \( -name "*.json" -o -name "*.yaml" \) | wc -l)
 if [[ "$bank_files" -eq 0 ]]; then
-    echo "FAIL: No test bank files found in HelixQA/banks"
+    echo "FAIL: No test bank files found in helix_qa/banks"
     exit 1
 fi
 echo "PASS: HelixQA bank files present ($bank_files banks)"
 
 # Step 3b: Attempt to list banks (may fail due to YAML issues in submodule; not a hard failure)
-if HelixQA/bin/helixqa list --banks=HelixQA/banks --json >/dev/null 2>&1; then
+if helix_qa/bin/helixqa list --banks=helix_qa/banks --json >/dev/null 2>&1; then
     echo "PASS: HelixQA banks are parseable"
 else
     echo "WARN: Some HelixQA banks have parse errors (submodule issue; banks exist but YAML malformed)"
 fi
 
 # Step 4: Verify at least one translator-relevant bank exists
-if ! HelixQA/bin/helixqa list --banks=HelixQA/banks --tag=translation --json >/dev/null 2>&1; then
+if ! helix_qa/bin/helixqa list --banks=helix_qa/banks --tag=translation --json >/dev/null 2>&1; then
     # Not a failure if no translation tag exists; just informational
     echo "INFO: No banks tagged 'translation' found"
 fi
 
 # Step 5: Verify the binary can compile from source (anti-bluff: source must build)
-cd HelixQA
+cd helix_qa
 if ! go build -o /tmp/helixqa_build_test ./cmd/helixqa >/dev/null 2>&1; then
     echo "FAIL: HelixQA does not build from source"
     exit 1
@@ -61,7 +61,7 @@ echo "PASS: CONST-036 present in Constitution"
 
 # Step 7: Verify submodule constitutions also reference CONST-036
 missing_const=0
-for dir in HelixQA DocProcessor LLMOrchestrator LLMProvider VisionEngine Challenges Containers; do
+for dir in helix_qa doc_processor llm_orchestrator llm_provider vision_engine challenges containers; do
     if [[ -f "$dir/CONSTITUTION.md" ]] && ! grep -q "CONST-036" "$dir/CONSTITUTION.md"; then
         echo "FAIL: CONST-036 missing from $dir/CONSTITUTION.md"
         missing_const=1

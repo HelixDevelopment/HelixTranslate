@@ -72,18 +72,18 @@ require (
 	digital.vasic.llmsverifier v0.0.0
 )
 
-replace digital.vasic.challenges => ./Challenges
+replace digital.vasic.challenges => ./challenges
 
-replace digital.vasic.containers => ./Containers
+replace digital.vasic.containers => ./containers
 
-replace digital.vasic.helixqa => ./HelixQA
+replace digital.vasic.helixqa => ./helix_qa
 
-replace digital.vasic.docprocessor => ./DocProcessor
+replace digital.vasic.docprocessor => ./doc_processor
 
-replace digital.vasic.llmorchestrator => ./LLMOrchestrator
+replace digital.vasic.llmorchestrator => ./llm_orchestrator
 
-replace digital.vasic.llmprovider => ./LLMProvider
+replace digital.vasic.llmprovider => ./llm_provider
 
-replace digital.vasic.visionengine => ./VisionEngine
+replace digital.vasic.visionengine => ./vision_engine
 
-replace digital.vasic.llmsverifier => ./LLMsVerifier/llm-verifier
+replace digital.vasic.llmsverifier => ./llms_verifier/llm-verifier

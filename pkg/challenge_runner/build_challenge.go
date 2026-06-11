@@ -1,4 +1,4 @@
-package challenges
+package challenge_runner
 
 import (
 	"context"

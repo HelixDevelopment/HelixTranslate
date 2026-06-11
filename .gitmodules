@@ -1,28 +1,31 @@
 [submodule "Containers"]
-	path = Containers
+	path = containers
 	url = git@github.com:vasic-digital/Containers.git
 [submodule "Challenges"]
-	path = Challenges
+	path = challenges
 	url = git@github.com:vasic-digital/Challenges.git
 [submodule "HelixQA"]
-	path = HelixQA
+	path = helix_qa
 	url = git@github.com:HelixDevelopment/HelixQA.git
 [submodule "DocProcessor"]
-	path = DocProcessor
+	path = doc_processor
 	url = git@github.com:HelixDevelopment/DocProcessor.git
 [submodule "LLMOrchestrator"]
-	path = LLMOrchestrator
+	path = llm_orchestrator
 	url = git@github.com:HelixDevelopment/LLMOrchestrator.git
 [submodule "LLMProvider"]
-	path = LLMProvider
+	path = llm_provider
 	url = git@github.com:HelixDevelopment/LLMProvider.git
 [submodule "VisionEngine"]
-	path = VisionEngine
+	path = vision_engine
 	url = git@github.com:HelixDevelopment/VisionEngine.git
 [submodule "LLMsVerifier"]
-	path = LLMsVerifier
+	path = llms_verifier
 	url = git@github.com:vasic-digital/LLMsVerifier.git
 [submodule "constitution"]
 	path = constitution
 	url = git@github.com:HelixDevelopment/HelixConstitution.git
 	branch = main
+[submodule "docs_chain"]
+	path = docs_chain
+	url = git@github.com:vasic-digital/docs_chain.git

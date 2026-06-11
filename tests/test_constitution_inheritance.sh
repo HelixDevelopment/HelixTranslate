@@ -24,8 +24,8 @@ fail() { echo "  FAIL  $1"; FAILS=$((FAILS + 1)); }
 
 # Owned DIRECT submodules that must inherit (scope: parent + 8 direct).
 DIRECT_SUBMODULES=(
-  Challenges Containers DocProcessor HelixQA
-  LLMOrchestrator LLMProvider VisionEngine LLMsVerifier
+  challenges containers doc_processor helix_qa
+  llm_orchestrator llm_provider vision_engine llms_verifier
 )
 POINTER_MARKER='INHERITED FROM Helix Constitution'
 

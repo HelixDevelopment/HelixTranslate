@@ -85,7 +85,7 @@ test-all: test test-integration test-e2e test-security test-performance test-str
 # Run challenges
 .PHONY: challenges
 challenges:
-	bash challenges/scripts/run_all_challenges.sh
+	bash pkg/challenge_runner/scripts/run_all_challenges.sh
 
 # Build all binaries
 .PHONY: build

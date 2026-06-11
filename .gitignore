@@ -25,6 +25,7 @@ api_keys.json
 # Environment files with secrets
 .env
 .env.*
+!.env.example
 secrets.*
 keys.*
 

@@ -251,8 +251,8 @@ allowlist without an explicit non-host-context justification comment.
 **Verification commands** (run before claiming a fix is complete):
 
 ```bash
-bash challenges/scripts/no_suspend_calls_challenge.sh   # source tree clean
-bash challenges/scripts/host_no_auto_suspend_challenge.sh   # host hardened
+bash pkg/challenge_runner/scripts/no_suspend_calls_challenge.sh   # source tree clean
+bash pkg/challenge_runner/scripts/host_no_auto_suspend_challenge.sh   # host hardened
 ```
 
 Both must PASS.
