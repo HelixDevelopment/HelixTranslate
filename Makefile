@@ -89,7 +89,7 @@ challenges:
 
 # Build all binaries
 .PHONY: build
-build: build-grpc build-api build-cli
+build: verify-constitution build-grpc build-api build-cli
 
 # Build gRPC server
 .PHONY: build-grpc
@@ -231,8 +231,20 @@ help:
 .PHONY: quick-test
 quick-test: fmt vet test
 
+.PHONY: verify-constitution
+verify-constitution:
+	@bash tests/constitution_inheritance_gate.sh
+
+.PHONY: verify-constitution-meta
+verify-constitution-meta:
+	@bash scripts/testing/meta_test_constitution_inheritance.sh
+
+.PHONY: test-constitution-inheritance
+test-constitution-inheritance:
+	@bash tests/test_constitution_inheritance.sh
+
 .PHONY: pre-commit
-pre-commit: quick-test
+pre-commit: verify-constitution quick-test
 # Definition of Done gates — portable drop-in from HelixAgent
 .PHONY: no-silent-skips no-silent-skips-warn demo-all demo-all-warn demo-one ci-validate-all
 
@@ -251,5 +263,5 @@ demo-all-warn:
 demo-one:
 	@DEMO_MODULES="$(MOD)" bash scripts/demo-all.sh
 
-ci-validate-all: no-silent-skips-warn demo-all-warn
+ci-validate-all: verify-constitution verify-constitution-meta no-silent-skips-warn demo-all-warn
 	@echo "ci-validate-all: all gates executed"

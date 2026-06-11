@@ -1,5 +1,13 @@
 <!-- AGENTS.md - Universal Multi-Format Multi-Language Ebook Translation System -->
 
+> Base agent rules: `constitution/AGENTS.md` — READ IT FIRST.
+> The base file is authoritative for any topic not covered here.
+> Project-specific rules below extend them; they never weaken them.
+>
+> Locate the constitution submodule from any nested depth with its
+> `constitution/find_constitution.sh` helper.
+> Canonical reference: https://github.com/HelixDevelopment/HelixConstitution
+
 This file contains project-specific information intended for AI coding agents. The reader is expected to know nothing about the project beforehand.
 
 ---

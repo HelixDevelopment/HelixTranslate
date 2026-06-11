@@ -22,3 +22,7 @@
 [submodule "LLMsVerifier"]
 	path = LLMsVerifier
 	url = git@github.com:vasic-digital/LLMsVerifier.git
+[submodule "constitution"]
+	path = constitution
+	url = git@github.com:HelixDevelopment/HelixConstitution.git
+	branch = main

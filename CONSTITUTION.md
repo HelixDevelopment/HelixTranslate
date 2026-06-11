@@ -4,6 +4,17 @@
 > rule set. When a rule here conflicts with `CLAUDE.md`, `AGENTS.md`,
 > or any guide, the Constitution wins.
 
+## INHERITED FROM constitution/Constitution.md
+
+This constitution **extends** the Helix Universal Constitution at
+`constitution/Constitution.md`. All clauses there apply unless
+explicitly overridden below with an explicit `Override §X.Y`
+section. The universal clauses are authoritative for any topic this
+file does not cover; the project-specific rules below (CONST-033 …
+CONST-036 and the Definition of Done) extend them and never weaken
+any universal clause. When this file disagrees with the constitution
+submodule, the constitution wins.
+
 ## Mission
 
 See README.md.
