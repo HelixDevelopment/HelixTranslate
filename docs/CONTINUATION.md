@@ -1,7 +1,7 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 9
-**Last modified:** 2026-06-13T17:30:00Z
+**Revision:** 10
+**Last modified:** 2026-06-13T18:30:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
@@ -12,7 +12,7 @@
 
 ## Live state anchors (moment-valid)
 
-- **Parent HEAD:** `3027da2` on `main`; pushed to BOTH `milos85vasic/Translator` + `HelixDevelopment/HelixTranslate` (verified, fast-forward, no force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67 → 7331c54 → 76677aa → 18c5137 → de256dd → 9004477 → 13d5e30 → af1ef47 → a9b38fa → 218bfa0 → 1f06bf5 → a0930fc → 3027da2.
+- **Parent HEAD:** `6d4ae47` on `main`; pushed to BOTH `milos85vasic/Translator` + `HelixDevelopment/HelixTranslate` (verified, fast-forward, no force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67 → 7331c54 → 76677aa → 18c5137 → de256dd → 9004477 → 13d5e30 → af1ef47 → a9b38fa → 218bfa0 → 1f06bf5 → a0930fc → 3027da2 → b2377af → 6d4ae47.
 - **llm_provider HEAD:** `b3dc7f9` (W7 CONST-036 propagation block + regenerated html/pdf), pushed to `HelixDevelopment/LLMProvider` master.
 - **Constitution HEAD:** `5e671fe` (§11.4.151 added), pushed to all 6 upstreams; parent pointer bumped.
 - **Build:** `go build ./...` = EXIT 0. **Total test coverage = 50.7%** (`go tool cover -func` total; see `docs/testing/coverage_matrix.md`).
@@ -50,7 +50,9 @@
 - **D6** (9004477) **FIXED** verified_factory map-order flake → order-independent ElementsMatch; 10/10.
 - **wave5** (af1ef47): **W14** `scripts/commit_all.sh` wrapper (no-force/multi-upstream/FF-only/quiescence/explicit-pathspec/bg-push) + hermetic selftest 13/0 (conductor-run verified) — NOT yet wired to real remotes (line-by-line review pending); **W2** format 0%→97.6%, markdown 73.9%→80.1%, coordination 0%→92.9% + **GENUINE nil-guard fix** in TranslateWithRetry (mutation-verified: revert→nil-panic). §11.4.147: format+coordination were rate-limit-crashed at report stage; conductor verified+adopted their work (not lost, not blindly trusted).
 
-**Session total: 29 items resolved** (+ wave6: websocket race-fix, hardware/distributed chaos tests, D10#2 api_logger PRODUCT data-race fix)
+**Session total: 31 items resolved** (+ wave7: grpc 0→53.3% bufconn, api 55→62.2% httptest, security +14 adversarial tests — all real-protocol/anti-bluff, auth confirmed hardened)
+
+**Prior: 29 items** (+ wave6: websocket race-fix, hardware/distributed chaos tests, D10#2 api_logger PRODUCT data-race fix)
 
 **Earlier session total: 26 items** (W4-W10,W12 + D2 + W2×6[unified-translator/storage/batch/sshworker/verification/script] + W3 translator + sshworker-leak + D3 + D7 + D5 + D6). Real prod bugs fixed: translator cache race, SMTP no-deadline, dangling step-ptr, sshworker map-leak, event races (D2/D3/D7), note-content loss (D5).
 
@@ -59,7 +61,7 @@
 | # | Item | Type | Notes / evidence |
 |---|---|---|---|
 | W1 | `Models/` divergent `types.go` (60-line lean LLMRequest, absent upstream) | **Operator decision §11.4.122** | Convert needs preserving/discarding the local shape. Not consumed (no replace/import). DO NOT silently remove. Deferred — not blocking; surface to operator before W16. |
-| W2 | Coverage → ~100% (§11.4.27); ongoing | Task | Done: unified-translator 18%, storage 35.3%, batch 90.6%, sshworker 39.7%, verification 73.5%, script(100%+depth), translator/llm(+stress/chaos). In-flight (wave5): format, coordination, markdown. NOTE: gRPC/api-server/server/redis/postgres at 0% are integration-infra-gated (need real daemons) — W15 containers-first unlocks these; honest deferral per package. |
+| W2 | Coverage → ~100% (§11.4.27); ongoing | Task | Done: unified-translator 18%, storage 35.3%, batch 90.6%, sshworker 39.7%, verification 73.5%, script(100%+depth), translator/llm(+stress/chaos). Also grpc 53.3% (bufconn), api 62.2% (httptest), security 84.8%+adversarial, hardware/distributed chaos. NOTE: gRPC/api-server/server/redis/postgres at 0% are integration-infra-gated (need real daemons) — W15 containers-first unlocks these; honest deferral per package. |
 | W3 | Missing test types: chaos, ddos, scaling, ui, ux, full-automation (in-module) | Task | §11.4.85 chaos/stress mandatory. |
 | W11 | Wire more docs_chain contexts (Issues/Fixed/Status once they exist) | Task | docs_chain proven operational. |
 | W13 | `.gitmodules` section labels still PascalCase | Task (cosmetic) | Needs per-submodule `.git/modules/*` gitdir move. |
@@ -71,6 +73,7 @@
 | D8 | ✅ FIXED (218bfa0) `pkg/markdown` bare-leading `---` data-loss | Bug (fixed) | Frontmatter now must begin at first non-blank line; later `---` = HR/chapter separator. RED(1ch)→GREEN(2ch), mutation-verified. Minor `<ol>`→dash numbering remains pinned/unfixed (D-list, low priority). |
 | D9 | `pkg/hardware` foreign-OS exec.Command paths uncoverable on macOS (stuck 44.6%) | Task | Raising needs parser-extraction refactor (extract pure parsers from exec callers); +13 behavioral tests already landed (a0930fc). |
 | D10 | 3 baseline data races (FACT, captured -race) | Bug | #2 api_logger PRODUCT race ✅ FIXED (3027da2, snapshot, mutation-verified). #1 ssh_pool + #3 performance ConnectionPool = TEST-HARNESS races (production-safe; tests mutate cleanup timing post-construction). Fix = configurable constructor. |
+| D11 | `pkg/security` has NO CORS impl despite CLAUDE.md listing it | Task | Doc discrepancy — reconcile (remove from CLAUDE.md or locate/route CORS elsewhere). |
 | W14b | Review `scripts/commit_all.sh` line-by-line, then adopt as the standard commit path | Task | Selftest 13/0 + conductor-run verified; not yet used on real remotes. macOS /bin/sh=bash so arrays OK; if ever run under dash/mksh refactor arrays (subagent flagged). |
 
 ## NEXT phases (priority order)

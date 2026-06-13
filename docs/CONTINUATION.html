@@ -175,8 +175,8 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 9 <strong>Last modified:</strong>
-2026-06-13T17:30:00Z <strong>Purpose:</strong> Single canonical
+<p><strong>Revision:</strong> 10 <strong>Last modified:</strong>
+2026-06-13T18:30:00Z <strong>Purpose:</strong> Single canonical
 out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 /
 §11.4.127). To resume: point a new session at THIS file, run
 <code>git fetch --all</code>, and say <strong>continue</strong>.</p>
@@ -198,12 +198,13 @@ prefixed <code>helix_translate-</code> (§11.4.151). Work subagent-driven
 <h2 id="live-state-anchors-moment-valid">Live state anchors
 (moment-valid)</h2>
 <ul>
-<li><strong>Parent HEAD:</strong> <code>3027da2</code> on
+<li><strong>Parent HEAD:</strong> <code>6d4ae47</code> on
 <code>main</code>; pushed to BOTH <code>milos85vasic/Translator</code> +
 <code>HelixDevelopment/HelixTranslate</code> (verified, fast-forward, no
 force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67
 → 7331c54 → 76677aa → 18c5137 → de256dd → 9004477 → 13d5e30 → af1ef47 →
-a9b38fa → 218bfa0 → 1f06bf5 → a0930fc → 3027da2.</li>
+a9b38fa → 218bfa0 → 1f06bf5 → a0930fc → 3027da2 → b2377af →
+6d4ae47.</li>
 <li><strong>llm_provider HEAD:</strong> <code>b3dc7f9</code> (W7
 CONST-036 propagation block + regenerated html/pdf), pushed to
 <code>HelixDevelopment/LLMProvider</code> master.</li>
@@ -320,9 +321,12 @@ revert→nil-panic). §11.4.147: format+coordination were
 rate-limit-crashed at report stage; conductor verified+adopted their
 work (not lost, not blindly trusted).</li>
 </ul>
-<p><strong>Session total: 29 items resolved</strong> (+ wave6: websocket
-race-fix, hardware/distributed chaos tests, D10#2 api_logger PRODUCT
-data-race fix)</p>
+<p><strong>Session total: 31 items resolved</strong> (+ wave7: grpc
+0→53.3% bufconn, api 55→62.2% httptest, security +14 adversarial tests —
+all real-protocol/anti-bluff, auth confirmed hardened)</p>
+<p><strong>Prior: 29 items</strong> (+ wave6: websocket race-fix,
+hardware/distributed chaos tests, D10#2 api_logger PRODUCT data-race
+fix)</p>
 <p><strong>Earlier session total: 26 items</strong> (W4-W10,W12 + D2 +
 W2×6[unified-translator/storage/batch/sshworker/verification/script] +
 W3 translator + sshworker-leak + D3 + D7 + D5 + D6). Real prod bugs
@@ -362,8 +366,9 @@ surface to operator before W16.</td>
 <td>Task</td>
 <td>Done: unified-translator 18%, storage 35.3%, batch 90.6%, sshworker
 39.7%, verification 73.5%, script(100%+depth),
-translator/llm(+stress/chaos). In-flight (wave5): format, coordination,
-markdown. NOTE: gRPC/api-server/server/redis/postgres at 0% are
+translator/llm(+stress/chaos). Also grpc 53.3% (bufconn), api 62.2%
+(httptest), security 84.8%+adversarial, hardware/distributed chaos.
+NOTE: gRPC/api-server/server/redis/postgres at 0% are
 integration-infra-gated (need real daemons) — W15 containers-first
 unlocks these; honest deferral per package.</td>
 </tr>
@@ -455,6 +460,14 @@ exec callers); +13 behavioral tests already landed (a0930fc).</td>
 mutation-verified). #1 ssh_pool + #3 performance ConnectionPool =
 TEST-HARNESS races (production-safe; tests mutate cleanup timing
 post-construction). Fix = configurable constructor.</td>
+</tr>
+<tr>
+<td>D11</td>
+<td><code>pkg/security</code> has NO CORS impl despite CLAUDE.md listing
+it</td>
+<td>Task</td>
+<td>Doc discrepancy — reconcile (remove from CLAUDE.md or locate/route
+CORS elsewhere).</td>
 </tr>
 <tr>
 <td>W14b</td>
