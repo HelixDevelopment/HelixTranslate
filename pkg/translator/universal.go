@@ -6,7 +6,24 @@ import (
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/language"
 	"fmt"
+	"unicode/utf8"
 )
+
+// truncateOnRuneBoundary returns s limited to at most maxBytes bytes without
+// splitting a multi-byte UTF-8 rune. If a cut at maxBytes would land in the
+// middle of a rune, the trailing partial rune is dropped so the result is
+// always valid UTF-8.
+func truncateOnRuneBoundary(s string, maxBytes int) string {
+	if len(s) <= maxBytes {
+		return s
+	}
+	cut := maxBytes
+	// Back up to the start of the rune that contains byte index cut.
+	for cut > 0 && !utf8.RuneStart(s[cut]) {
+		cut--
+	}
+	return s[:cut]
+}
 
 // UniversalTranslator handles translation of complete ebooks
 type UniversalTranslator struct {
@@ -46,9 +63,11 @@ func (ut *UniversalTranslator) TranslateBook(
 		EmitProgress(eventBus, sessionID, "Detecting source language", nil)
 
 		sample := book.ExtractText()
-		if len(sample) > 2000 {
-			sample = sample[:2000]
-		}
+		// Truncate on a rune boundary, not a byte boundary: ebook text is
+		// overwhelmingly non-ASCII (Cyrillic, CJK, accented Latin), so a raw
+		// byte-index cut routinely splits a multi-byte rune and hands invalid
+		// UTF-8 to the language detector.
+		sample = truncateOnRuneBoundary(sample, 2000)
 
 		detectedLang, err := ut.langDetector.Detect(ctx, sample)
 		if err == nil {
