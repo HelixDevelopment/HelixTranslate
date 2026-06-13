@@ -175,8 +175,8 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 13 <strong>Last modified:</strong>
-2026-06-13T21:45:00Z <strong>Purpose:</strong> Single canonical
+<p><strong>Revision:</strong> 14 <strong>Last modified:</strong>
+2026-06-13T22:30:00Z <strong>Purpose:</strong> Single canonical
 out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 /
 §11.4.127). To resume: point a new session at THIS file, run
 <code>git fetch --all</code>, and say <strong>continue</strong>.</p>
@@ -198,8 +198,9 @@ prefixed <code>helix_translate-</code> (§11.4.151). Work subagent-driven
 <h2 id="live-state-anchors-moment-valid">Live state anchors
 (moment-valid)</h2>
 <ul>
-<li><strong>Parent HEAD:</strong> <code>fc66c62</code> on
-<code>main</code>; pushed to BOTH <code>milos85vasic/Translator</code> +
+<li><strong>Parent HEAD:</strong> see git log (W14b adoption commit via
+commit_all.sh) on <code>main</code>; pushed to BOTH
+<code>milos85vasic/Translator</code> +
 <code>HelixDevelopment/HelixTranslate</code> (verified, fast-forward, no
 force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67
 → 7331c54 → 76677aa → 18c5137 → de256dd → 9004477 → 13d5e30 → af1ef47 →
@@ -495,12 +496,20 @@ mutation-verified.</td>
 </tr>
 <tr>
 <td>W14b</td>
-<td>Review <code>scripts/commit_all.sh</code> line-by-line, then adopt
-as the standard commit path</td>
+<td>✅ DONE — reviewed + adopted</td>
 <td>Task</td>
-<td>Selftest 13/0 + conductor-run verified; not yet used on real
-remotes. macOS /bin/sh=bash so arrays OK; if ever run under dash/mksh
-refactor arrays (subagent flagged).</td>
+<td>Independent review: guards sound (force-reject full-argv, FF-only
+via merge-base –is-ancestor, multi-upstream URL-dedup,
+explicit-pathspec, quiescence). FOUND+FIXED cross-platform hardening:
+mutation grep lacked <code>-I</code> → GNU grep (Linux) false-aborts on
+binary <code>.pdf</code>/<code>.html</code> pathspecs (BSD grep doesn’t;
+§11.4.81). Self-test 13/0. ADOPTED for normal source/doc commits.
+Dogfood surfaced finding #2: the §11.4.84 residue scan false-positives
+on files that legitimately CONTAIN marker strings (the script’s own
+MUTATION_MARKERS def, governance docs, marker-referencing tests) —
+inherent to grep-based detection; §11.4.84 has no escape hatch
+(correct), so commit such files via manual explicit-path git.
+commit_all.sh is for the common case.</td>
 </tr>
 </tbody>
 </table>

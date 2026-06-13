@@ -181,13 +181,17 @@ quiescence_check() {
   # so unrelated working-tree noise never blocks an explicit, scoped commit.
   _hits=""
   for _ps in "${PATHSPECS[@]}"; do
+    # -I (ignore-binary): mutation markers are a TEXT/source concern. Without it a
+    # committed binary artifact (e.g. the .pdf/.html exports §11.4.65 produces) whose
+    # bytes happen to contain a marker like "=======" would false-positive-abort
+    # (W14b review finding — the text-only self-test missed this).
     if [ -f "$_ps" ]; then
-      if LC_ALL=C grep -nE "$MUTATION_MARKERS" "$_ps" >/dev/null 2>&1; then
+      if LC_ALL=C grep -InE "$MUTATION_MARKERS" "$_ps" >/dev/null 2>&1; then
         _hits="$_hits $_ps"
       fi
     elif [ -d "$_ps" ]; then
-      if LC_ALL=C grep -rnE "$MUTATION_MARKERS" "$_ps" >/dev/null 2>&1; then
-        _found="$(LC_ALL=C grep -rlE "$MUTATION_MARKERS" "$_ps" 2>/dev/null | tr '\n' ' ')"
+      if LC_ALL=C grep -rInE "$MUTATION_MARKERS" "$_ps" >/dev/null 2>&1; then
+        _found="$(LC_ALL=C grep -rIlE "$MUTATION_MARKERS" "$_ps" 2>/dev/null | tr '\n' ' ')"
         _hits="$_hits $_found"
       fi
     fi

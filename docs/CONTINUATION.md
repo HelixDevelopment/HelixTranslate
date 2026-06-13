@@ -1,7 +1,7 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 13
-**Last modified:** 2026-06-13T21:45:00Z
+**Revision:** 14
+**Last modified:** 2026-06-13T22:30:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
@@ -12,7 +12,7 @@
 
 ## Live state anchors (moment-valid)
 
-- **Parent HEAD:** `fc66c62` on `main`; pushed to BOTH `milos85vasic/Translator` + `HelixDevelopment/HelixTranslate` (verified, fast-forward, no force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67 → 7331c54 → 76677aa → 18c5137 → de256dd → 9004477 → 13d5e30 → af1ef47 → a9b38fa → 218bfa0 → 1f06bf5 → a0930fc → 3027da2 → b2377af → 6d4ae47.
+- **Parent HEAD:** see git log (W14b adoption commit via commit_all.sh) on `main`; pushed to BOTH `milos85vasic/Translator` + `HelixDevelopment/HelixTranslate` (verified, fast-forward, no force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67 → 7331c54 → 76677aa → 18c5137 → de256dd → 9004477 → 13d5e30 → af1ef47 → a9b38fa → 218bfa0 → 1f06bf5 → a0930fc → 3027da2 → b2377af → 6d4ae47.
 - **llm_provider HEAD:** `b3dc7f9` (W7 CONST-036 propagation block + regenerated html/pdf), pushed to `HelixDevelopment/LLMProvider` master.
 - **Constitution HEAD:** `5e671fe` (§11.4.151 added), pushed to all 6 upstreams; parent pointer bumped.
 - **Build:** `go build ./...` = EXIT 0. **Total test coverage = 50.7%** (`go tool cover -func` total; see `docs/testing/coverage_matrix.md`).
@@ -81,7 +81,7 @@
 | D10 | 3 baseline data races (FACT, captured -race) | Bug | #2 api_logger PRODUCT race ✅ FIXED (3027da2, snapshot, mutation-verified). #1 ssh_pool + #3 performance ConnectionPool. ✅ ALL FIXED (fc66c62): ssh_pool options API, perf locked-map + count-snapshot, FallbackManager.Stop() lifecycle. pkg/distributed now 0 races. |
 | D11 | ✅ FIXED (b8a24f5) CLAUDE.md mislocated CORS under pkg/security | Task | Corrected: CORS is server-layer (cmd/server corsMiddleware + internal/config). |
 | D12 | ✅ FIXED (b8a24f5) **CORS auth-bypass vuln** | Bug(security) | cmd/server corsMiddleware reflected ARBITRARY origin + Allow-Credentials:true under default `["*"]` → any site could make credentialed cross-origin requests. Fixed: wildcard→literal `*` no-creds; creds only for specific allowlist. RED→GREEN, mutation-verified. |
-| W14b | Review `scripts/commit_all.sh` line-by-line, then adopt as the standard commit path | Task | Selftest 13/0 + conductor-run verified; not yet used on real remotes. macOS /bin/sh=bash so arrays OK; if ever run under dash/mksh refactor arrays (subagent flagged). |
+| W14b | ✅ DONE — reviewed + adopted | Task | Independent review: guards sound (force-reject full-argv, FF-only via merge-base --is-ancestor, multi-upstream URL-dedup, explicit-pathspec, quiescence). FOUND+FIXED cross-platform hardening: mutation grep lacked `-I` → GNU grep (Linux) false-aborts on binary `.pdf`/`.html` pathspecs (BSD grep doesn't; §11.4.81). Self-test 13/0. ADOPTED for normal source/doc commits. Dogfood surfaced finding #2: the §11.4.84 residue scan false-positives on files that legitimately CONTAIN marker strings (the script's own MUTATION_MARKERS def, governance docs, marker-referencing tests) — inherent to grep-based detection; §11.4.84 has no escape hatch (correct), so commit such files via manual explicit-path git. commit_all.sh is for the common case. |
 
 ## NEXT phases (priority order)
 - **Phase 4** — drive W2–W8 + W10: per-type test suites to ~100% (§11.4.27), real Challenges + HelixQA bank execution with captured evidence, expand real ebook translations (all formats, whole chapters, anti-bluff §11.4/§11.4.69). Subagent-driven, ≥3 parallel streams.
