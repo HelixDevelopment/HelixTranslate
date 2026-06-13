@@ -2,6 +2,7 @@ package cache
 
 import (
 	"fmt"
+	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -9,6 +10,54 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+// TestCache_CloseStopsCleanupGoroutine is a regression guard for the
+// background-cleanup goroutine leak: every NewCache(_, true) started a
+// time.Ticker-driven goroutine that never terminated, so each cache instance
+// leaked one goroutine (and kept the Cache alive, defeating GC) for the life of
+// the process. A translation server / its test suite creates many caches, so
+// this was an unbounded leak. Close() must stop that goroutine.
+//
+// RED on the pre-fix code: creating 200 enabled caches and Close()-ing them
+// left ~200 goroutines alive. GREEN after Close() joins the cleanup goroutine.
+func TestCache_CloseStopsCleanupGoroutine(t *testing.T) {
+	runtime.GC()
+	time.Sleep(20 * time.Millisecond)
+	before := runtime.NumGoroutine()
+
+	for i := 0; i < 200; i++ {
+		c := NewCache(time.Hour, true)
+		c.Close()
+	}
+
+	runtime.GC()
+	time.Sleep(50 * time.Millisecond)
+	after := runtime.NumGoroutine()
+
+	leaked := after - before
+	assert.LessOrEqual(t, leaked, 5,
+		"Close() must stop cleanup goroutines; leaked=%d (before=%d after=%d)", leaked, before, after)
+}
+
+// TestCache_CloseIdempotent verifies Close is safe to call repeatedly and
+// concurrently (sync.Once guard) and never panics on a double close.
+func TestCache_CloseIdempotent(t *testing.T) {
+	c := NewCache(time.Hour, true)
+
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			c.Close()
+		}()
+	}
+	wg.Wait()
+
+	// A disabled cache (no goroutine) must also be safely closable.
+	d := NewCache(time.Hour, false)
+	d.Close()
+}
 
 // TestNewCache tests cache creation
 func TestNewCache(t *testing.T) {

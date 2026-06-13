@@ -15,10 +15,13 @@ type CacheEntry struct {
 
 // Cache implements thread-safe translation caching
 type Cache struct {
-	mu      sync.RWMutex
-	entries map[string]CacheEntry
-	ttl     time.Duration
-	enabled bool
+	mu        sync.RWMutex
+	entries   map[string]CacheEntry
+	ttl       time.Duration
+	enabled   bool
+	stop      chan struct{}
+	stopOnce  sync.Once
+	cleanupWG sync.WaitGroup
 }
 
 // NewCache creates a new cache
@@ -27,14 +30,29 @@ func NewCache(ttl time.Duration, enabled bool) *Cache {
 		entries: make(map[string]CacheEntry),
 		ttl:     ttl,
 		enabled: enabled,
+		stop:    make(chan struct{}),
 	}
 
 	// Start cleanup goroutine
 	if enabled {
+		c.cleanupWG.Add(1)
 		go c.cleanup()
 	}
 
 	return c
+}
+
+// Close stops the background cleanup goroutine and releases its resources.
+// It is safe to call multiple times and from multiple goroutines. After Close
+// the cache may still be read/written, but expired entries are no longer
+// reaped in the background. Callers that create many Cache instances MUST call
+// Close to avoid leaking one goroutine (and keeping the Cache alive) per
+// instance.
+func (c *Cache) Close() {
+	c.stopOnce.Do(func() {
+		close(c.stop)
+	})
+	c.cleanupWG.Wait()
 }
 
 // Get retrieves a value from cache
@@ -143,13 +161,20 @@ func (c *Cache) hashKey(key string) string {
 	return hex.EncodeToString(hash[:])
 }
 
-// cleanup periodically removes expired entries
+// cleanup periodically removes expired entries until the cache is closed.
 func (c *Cache) cleanup() {
+	defer c.cleanupWG.Done()
+
 	ticker := time.NewTicker(time.Minute * 5)
 	defer ticker.Stop()
 
-	for range ticker.C {
-		c.removeExpired()
+	for {
+		select {
+		case <-c.stop:
+			return
+		case <-ticker.C:
+			c.removeExpired()
+		}
 	}
 }
 
