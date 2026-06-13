@@ -1,10 +1,27 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 22
-**Last modified:** 2026-06-14T00:05:00Z
+**Revision:** 23
+**Last modified:** 2026-06-14T00:45:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
+
+<!-- session 2026-06-13f: parallel bug-hunt wave 4 + FULL-REPO SWEEP GREEN (HEAD de25a98) -->
+
+### Session 2026-06-13f — bug-hunt wave 4 + full-repo sweep GREEN (HEAD de25a98) — 8 real bugs; `go test ./...` = 54 ok / 0 FAIL offline
+
+Mode: §11.4.126 autonomous loop + §11.4.103 4 parallel subagents (internal/services+config · internal/cache · pkg/translator core · pkg/distributed deeper) + conductor verify-then-commit + post-wave full sweep. 4 commits (eeda1ee..de25a98) pushed FF.
+
+- **eeda1ee** — services/config 3 bugs: GetPreferences claimed sorted-by-score but did NO sort (passed only on pre-sorted fixture) → sort desc; FallbackOrder used unfiltered index → first accepted pref got 2 not 1 → contiguous post-filter rank; config all-zero scoring weights fail-open ('total>0 &&' skipped the sum check) → reject. Mutation-proven.
+- **9d4f4a4** — internal/cache cleanup goroutine LEAK: NewCache(_,true) launched 'for range ticker.C' with no Close/stop → one goroutine + pinned Cache leaked per instance forever (unbounded on a long-running server). Added stop chan + Once-guarded Close() + cleanupWG; backward-compatible. Mutation-proven (200 caches→200 leaked).
+- **c1bd61f** — pkg/translator universal.go language-detection sample sliced sample[:2000] by BYTE → mid-rune split → invalid UTF-8 to Detect (common case for Cyrillic/CJK ebooks) → truncateOnRuneBoundary. Mutation-proven, drives real detector.
+- **de25a98** — pkg/distributed 3 bugs: checkServiceHealth set Status='online' unconditionally → every paired worker DEMOTED+dropped after first 30s tick → all work distribution lost (HIGH); versionCache map had NO mutex (existing one is AlertManager's) → BatchUpdateWorkers data race → cacheMu; ssh LastUsed two-locks-one-field race → conn.mu touch()/idleSince(). Mutation-proven, full pkg -race ok.
+
+**STABILITY MILESTONE (re-confirmed):** `go test ./... -count=1` all provider env unset = **54 ok / 0 FAIL**, `go build ./...` exit 0. Evidence: qa-results/full_sweep/fullsweep_20260613T230845.log. SESSION GRAND TOTAL: 32 real bugs (waves 1-4: 7+10+7+8) + 2 reconciliations + §11.4.98 llm offline conversion, all reproduce-first + mutation-proven + conductor-reverified (-race) + pushed FF (no force §11.4.113).
+
+Flagged latent (honest §11.4.6, NOT autonomously fixed — review/larger-blast-radius): PairingManager.services map needs a manager-level mutex (~10 methods); storage cache dup-tuple unique-index (schema/dedup-semantics change); DOCX unioffice license-gated (go.mod); security RefreshToken re-validate (no caller). Operator-gated: G1/G2/G3.
+
+Next-wave queue (disjoint, autonomous-safe, thinning): pkg/language, pkg/api (deeper non-integration logic), the PairingManager mutex (careful single-mutex + -race). After that the autonomous-safe disjoint queue is largely exhausted → legitimate idle per §11.4.94.
 
 <!-- session 2026-06-13e: parallel bug-hunt wave 3 + FULL-REPO SWEEP GREEN (HEAD 8d0b1b6) -->
 
