@@ -1,6 +1,6 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 17
+**Revision:** 18
 **Last modified:** 2026-06-13T00:00:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
@@ -46,6 +46,28 @@ Remaining tracked follow-ups (honest, §11.4.6/§11.4.118):
 - G2: batched full ~30-provider verification sweep (one-pass timed out 600s).
 - G3: add OPENAI/ANTHROPIC/etc keys to api_keys.sh (operator) to include those providers.
 - Deferred-broader: markdownToHTML round-trip edges; preparation extractJSON LLM-output spec; verification multipass duplicate DB writes; ambiguous nj/lj/dz Latin->Cyrillic (structural §11.4.112 won't-fix).
+
+
+<!-- wave3 providers/events/coord/security -->
+
+### Bug-hunt wave 3 (HEAD 6c76c3f) — 6 more real bugs (session total ~23), all mutation-proven + pushed
+- CRITICAL OpenAIClient panic on non-float64 temperature (blast radius = ALL OpenAI-compatible providers) — toFloat64/toInt coercion.
+- CLI -temperature/-max-tokens ignored by openai/anthropic/qwen/zhipu — Options>typed-field>default precedence.
+- Gemini discarded valid MAX_TOKENS partial text (data-loss) — accept STOP/MAX_TOKENS/"" (gemini_test.go reconciled §11.4.120).
+- EventBus.Publish unbounded goroutine-per-handler + RLock-held-across-spawn → explosion + writer-starvation livelock — synchronous dispatch, lock released first (-race clean).
+- LLMInstance.Available/LastUsed data race (mutex in 1/5 sites) — accessors (-race clean).
+- APIKeyStore unsynchronized map → fatal concurrent-map panic (DoS) — RWMutex (-race clean). JWT/rate-limit confirmed already-hardened.
+
+### NEW tracked finding (this wave)
+- **pkg/translator/llm full `go test` HANGS when api_keys.sh is in-env** — a NON-tagged test reaches the network (§11.4.98 violation: unit tests must be deterministic/offline). The wave's new defect tests are httptest/deterministic; the hang is in a pre-existing test. FIX: build-tag or httptest-ize the offending test. (Bounded `go test -run <name>` works fine.)
+
+### Remaining queue (for fresh-session continuation per §11.4.141/§11.4.127)
+- G1: submodule verify-pipeline->server-DB bridge (serial submodule wave; §11.4.119 contends with main builds — conductor-owned, NOT parallel with main-repo subagents).
+- G2: batched full ~30-provider verification sweep (one-pass timed out 600s).
+- NET: fix the non-tagged network-reaching test in pkg/translator/llm (§11.4.98).
+- G3: add OPENAI/ANTHROPIC/etc keys to api_keys.sh (operator) to widen provider coverage.
+- More untouched packages to bug-hunt: pkg/storage (deeper), pkg/progress, pkg/report, pkg/logger, cmd/* entrypoints, pkg/grpc (the flagged send-on-closed-channel at server.go:403 — events pkg has no Unsubscribe; real follow-up).
+- Deferred-broader: markdownToHTML round-trip edges; gemini GenerationConfig hardcoded (same class as fix #2); verification multipass duplicate DB writes.
 
 
 ## SHORT resumption sentence
