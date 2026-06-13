@@ -1,7 +1,7 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 6
-**Last modified:** 2026-06-13T14:30:00Z
+**Revision:** 7
+**Last modified:** 2026-06-13T15:30:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
@@ -48,9 +48,9 @@
 - **wave4** (de256dd): **sshworker progress-map leak** on ctx.Done() fixed (defer cleanup, RED 300/300→GREEN -race); **D3** pkg/translator{,/llm} test-only EventBus races fixed (asyncFlag); **D7** pkg/events TestEventBus_Subscribe race fixed; **W2** verification 64.0%→73.5%; **W2** script (already 100% stmt) +11 behavioral/digraph tests.
 - **D5** (9004477) **FIXED real bug** pkg/verification parseNote: CONTENT-only note (no IMPLICATIONS) silently dropped → finalize Content; RED→GREEN, mutation-verified.
 - **D6** (9004477) **FIXED** verified_factory map-order flake → order-independent ElementsMatch; 10/10.
-- **wave5 (in-flight)**: pkg/format, pkg/coordination, pkg/markdown coverage + **W14 commit_all.sh** wrapper — subagents running.
+- **wave5** (af1ef47): **W14** `scripts/commit_all.sh` wrapper (no-force/multi-upstream/FF-only/quiescence/explicit-pathspec/bg-push) + hermetic selftest 13/0 (conductor-run verified) — NOT yet wired to real remotes (line-by-line review pending); **W2** format 0%→97.6%, markdown 73.9%→80.1%, coordination 0%→92.9% + **GENUINE nil-guard fix** in TranslateWithRetry (mutation-verified: revert→nil-panic). §11.4.147: format+coordination were rate-limit-crashed at report stage; conductor verified+adopted their work (not lost, not blindly trusted).
 
-**Session total: 21 items resolved** (W4-W10,W12 + D2 + W2×6[unified-translator/storage/batch/sshworker/verification/script] + W3 translator + sshworker-leak + D3 + D7 + D5 + D6). Real prod bugs fixed: translator cache race, SMTP no-deadline, dangling step-ptr, sshworker map-leak, event races (D2/D3/D7), note-content loss (D5).
+**Session total: 25 items resolved** (W4-W10,W12 + D2 + W2×6[unified-translator/storage/batch/sshworker/verification/script] + W3 translator + sshworker-leak + D3 + D7 + D5 + D6). Real prod bugs fixed: translator cache race, SMTP no-deadline, dangling step-ptr, sshworker map-leak, event races (D2/D3/D7), note-content loss (D5).
 
 ## OPEN workable items (queue — many parallelizable, disjoint scope)
 
@@ -66,6 +66,8 @@
 | W16 | Convert `Models/`→`models` submodule after W1 resolved | Task | Blocked on W1. |
 | D1 | `docs_chain` + `security` CONSTITUTION.md lack literal `CONST-036` | Task | §11.4.118 discovery. They use §11.4.X cascade scheme (not CONST-NNN); challenge doesn't check them. Governance-design decision needed — do NOT blindly inject CONST-NNN (§11.4.6). |
 | D4 | `pkg/script` Latin→Cyrillic morpheme-boundary mis-transliteration | Bug (open) | konjugacija→коњугација (should be конјугација); injekcija, nadживети similar. Greedy digraph matching; real fix needs morpheme/dictionary model (high blast radius) — operator-aware decision. Pinned with KNOWN-LOSSY tests. |
+| D8 | `pkg/markdown` bare leading `---` misparsed as frontmatter → chapters silently dropped (data loss) | Bug (open) | `markdown_to_epub.go:78-90`: first `---` always treated as frontmatter-open, so MD using `---` as chapter separator w/o a leading frontmatter block loses everything after it. HR-split works only after a real frontmatter block closes. Pinned w/ tests (correct + quirk). Fix: only open frontmatter if `---` is line 1 + a closing `---` exists; reconcile pinned tests (§11.4.120). Also minor: `<ol>`→dash (lossy numbering). |
+| W14b | Review `scripts/commit_all.sh` line-by-line, then adopt as the standard commit path | Task | Selftest 13/0 + conductor-run verified; not yet used on real remotes. macOS /bin/sh=bash so arrays OK; if ever run under dash/mksh refactor arrays (subagent flagged). |
 
 ## NEXT phases (priority order)
 - **Phase 4** — drive W2–W8 + W10: per-type test suites to ~100% (§11.4.27), real Challenges + HelixQA bank execution with captured evidence, expand real ebook translations (all formats, whole chapters, anti-bluff §11.4/§11.4.69). Subagent-driven, ≥3 parallel streams.

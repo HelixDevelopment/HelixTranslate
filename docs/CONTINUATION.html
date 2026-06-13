@@ -175,8 +175,8 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 6 <strong>Last modified:</strong>
-2026-06-13T14:30:00Z <strong>Purpose:</strong> Single canonical
+<p><strong>Revision:</strong> 7 <strong>Last modified:</strong>
+2026-06-13T15:30:00Z <strong>Purpose:</strong> Single canonical
 out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 /
 §11.4.127). To resume: point a new session at THIS file, run
 <code>git fetch --all</code>, and say <strong>continue</strong>.</p>
@@ -308,11 +308,18 @@ dropped → finalize Content; RED→GREEN, mutation-verified.</li>
 <li><strong>D6</strong> (9004477) <strong>FIXED</strong>
 verified_factory map-order flake → order-independent ElementsMatch;
 10/10.</li>
-<li><strong>wave5 (in-flight)</strong>: pkg/format, pkg/coordination,
-pkg/markdown coverage + <strong>W14 commit_all.sh</strong> wrapper —
-subagents running.</li>
+<li><strong>wave5</strong> (af1ef47): <strong>W14</strong>
+<code>scripts/commit_all.sh</code> wrapper
+(no-force/multi-upstream/FF-only/quiescence/explicit-pathspec/bg-push) +
+hermetic selftest 13/0 (conductor-run verified) — NOT yet wired to real
+remotes (line-by-line review pending); <strong>W2</strong> format
+0%→97.6%, markdown 73.9%→80.1%, coordination 0%→92.9% + <strong>GENUINE
+nil-guard fix</strong> in TranslateWithRetry (mutation-verified:
+revert→nil-panic). §11.4.147: format+coordination were
+rate-limit-crashed at report stage; conductor verified+adopted their
+work (not lost, not blindly trusted).</li>
 </ul>
-<p><strong>Session total: 21 items resolved</strong> (W4-W10,W12 + D2 +
+<p><strong>Session total: 25 items resolved</strong> (W4-W10,W12 + D2 +
 W2×6[unified-translator/storage/batch/sshworker/verification/script] +
 W3 translator + sshworker-leak + D3 + D7 + D5 + D6). Real prod bugs
 fixed: translator cache race, SMTP no-deadline, dangling step-ptr,
@@ -417,6 +424,29 @@ mis-transliteration</td>
 similar. Greedy digraph matching; real fix needs morpheme/dictionary
 model (high blast radius) — operator-aware decision. Pinned with
 KNOWN-LOSSY tests.</td>
+</tr>
+<tr>
+<td>D8</td>
+<td><code>pkg/markdown</code> bare leading <code>---</code> misparsed as
+frontmatter → chapters silently dropped (data loss)</td>
+<td>Bug (open)</td>
+<td><code>markdown_to_epub.go:78-90</code>: first <code>---</code>
+always treated as frontmatter-open, so MD using <code>---</code> as
+chapter separator w/o a leading frontmatter block loses everything after
+it. HR-split works only after a real frontmatter block closes. Pinned w/
+tests (correct + quirk). Fix: only open frontmatter if <code>---</code>
+is line 1 + a closing <code>---</code> exists; reconcile pinned tests
+(§11.4.120). Also minor: <code>&lt;ol&gt;</code>→dash (lossy
+numbering).</td>
+</tr>
+<tr>
+<td>W14b</td>
+<td>Review <code>scripts/commit_all.sh</code> line-by-line, then adopt
+as the standard commit path</td>
+<td>Task</td>
+<td>Selftest 13/0 + conductor-run verified; not yet used on real
+remotes. macOS /bin/sh=bash so arrays OK; if ever run under dash/mksh
+refactor arrays (subagent flagged).</td>
 </tr>
 </tbody>
 </table>
