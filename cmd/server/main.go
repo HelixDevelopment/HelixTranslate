@@ -265,23 +265,37 @@ func handleShutdown(http3Server *http3.Server, http2Server *http.Server) {
 }
 
 func corsMiddleware(origins []string) gin.HandlerFunc {
+	// Pre-resolve config once. A literal "*" entry means public/wildcard; any
+	// other entry is a specific allowlisted origin.
+	wildcard := false
+	allow := make(map[string]bool, len(origins))
+	for _, o := range origins {
+		if o == "*" {
+			wildcard = true
+		} else if o != "" {
+			allow[o] = true
+		}
+	}
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
 
-		// Check if origin is allowed
-		allowed := false
-		for _, o := range origins {
-			if o == "*" || o == origin {
-				allowed = true
-				break
-			}
-		}
-
-		if allowed {
+		switch {
+		case origin != "" && allow[origin]:
+			// Specific allowlisted origin → safe to reflect AND permit credentials
+			// (only the configured origin, never arbitrary).
 			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
 			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-			c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key")
-			c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			c.Writer.Header().Add("Vary", "Origin")
+			setCORSAllowHeaders(c)
+		case wildcard:
+			// Public wildcard → emit a LITERAL "*" and DO NOT set Allow-Credentials
+			// (D12 security fix). Reflecting the request's arbitrary origin TOGETHER
+			// with Allow-Credentials:true is a CORS auth-bypass — it lets any site
+			// make credentialed cross-origin requests and read responses, defeating
+			// the browser rule that forbids "*" with credentials. A literal "*"
+			// (no credentials) is the correct public-API posture.
+			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+			setCORSAllowHeaders(c)
 		}
 
 		if c.Request.Method == "OPTIONS" {
@@ -291,6 +305,13 @@ func corsMiddleware(origins []string) gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+// setCORSAllowHeaders sets the shared Allow-Headers/Allow-Methods for a granted
+// CORS response.
+func setCORSAllowHeaders(c *gin.Context) {
+	c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key")
+	c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 }
 
 func rateLimitMiddleware(limiter *security.RateLimiter) gin.HandlerFunc {

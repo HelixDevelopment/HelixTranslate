@@ -96,7 +96,7 @@ Worker-side entry point is `cmd/translate-ssh/`. SSH configs live in `internal/w
 - `pkg/verification/` — multi-pass quality verification and polishing
 - `pkg/script/` — Serbian Cyrillic↔Latin conversion
 - `pkg/markdown/` — EPUB→Markdown→EPUB workflow
-- `pkg/security/` — JWT auth, rate limiting, CORS
+- `pkg/security/` — JWT auth, rate limiting (CORS is **server-layer**, not here: `cmd/server/main.go` `corsMiddleware` + `internal/config` `CORSOrigins`)
 - `pkg/batch/`, `pkg/coordination/` — batch & multi-LLM coordination
 - `pkg/hardware/` — hardware detection for perf tuning
 - `pkg/progress/`, `pkg/report/`, `pkg/logger/`, `pkg/version/`
