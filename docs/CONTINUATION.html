@@ -175,8 +175,8 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 5 <strong>Last modified:</strong>
-2026-06-13T13:30:00Z <strong>Purpose:</strong> Single canonical
+<p><strong>Revision:</strong> 6 <strong>Last modified:</strong>
+2026-06-13T14:30:00Z <strong>Purpose:</strong> Single canonical
 out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 /
 §11.4.127). To resume: point a new session at THIS file, run
 <code>git fetch --all</code>, and say <strong>continue</strong>.</p>
@@ -198,12 +198,11 @@ prefixed <code>helix_translate-</code> (§11.4.151). Work subagent-driven
 <h2 id="live-state-anchors-moment-valid">Live state anchors
 (moment-valid)</h2>
 <ul>
-<li><strong>Parent HEAD:</strong> <code>7331c54</code> (wave2: D2 race
-fix + W2-A/W2-B coverage; prior e775088 batch W4/W5/W6/W8/W9/W10/W12 +
-8a6af67 doc-sync) on <code>main</code>; pushed to BOTH
-<code>milos85vasic/Translator</code> +
-<code>HelixDevelopment/HelixTranslate</code> (verified at 7331c54,
-fast-forward, no force).</li>
+<li><strong>Parent HEAD:</strong> <code>9004477</code> on
+<code>main</code>; pushed to BOTH <code>milos85vasic/Translator</code> +
+<code>HelixDevelopment/HelixTranslate</code> (verified, fast-forward, no
+force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67
+→ 7331c54 → 76677aa → 18c5137 → de256dd → 9004477.</li>
 <li><strong>llm_provider HEAD:</strong> <code>b3dc7f9</code> (W7
 CONST-036 propagation block + regenerated html/pdf), pushed to
 <code>HelixDevelopment/LLMProvider</code> master.</li>
@@ -291,9 +290,33 @@ coverage 3.2%→18.0%, mutation-verified; + latent dangling-pointer fix
 <li><strong>W2-B</strong> ✅ (wave2) <code>pkg/storage</code> coverage
 32.9%→35.3% (Redis cache-key helpers 0%→100%, real SQLite round-trips),
 mutation-verified, daemon paths honest-SKIP.</li>
-<li><strong>W2 (wave3, in-flight)</strong>: pkg/translator stress/chaos
-(W3), pkg/sshworker, pkg/batch coverage — subagents running.</li>
+<li><strong>wave3</strong> (18c5137): <strong>W3</strong>
+pkg/translator/llm stress/chaos + <strong>FIXED real prod data
+race</strong> in BaseTranslator cache+stats (RWMutex, -race ×3);
+<strong>W2</strong> sshworker 19.6%→39.7%; <strong>W2</strong> batch
+77.2%→90.6%.</li>
+<li><strong>wave4</strong> (de256dd): <strong>sshworker progress-map
+leak</strong> on ctx.Done() fixed (defer cleanup, RED 300/300→GREEN
+-race); <strong>D3</strong> pkg/translator{,/llm} test-only EventBus
+races fixed (asyncFlag); <strong>D7</strong> pkg/events
+TestEventBus_Subscribe race fixed; <strong>W2</strong> verification
+64.0%→73.5%; <strong>W2</strong> script (already 100% stmt) +11
+behavioral/digraph tests.</li>
+<li><strong>D5</strong> (9004477) <strong>FIXED real bug</strong>
+pkg/verification parseNote: CONTENT-only note (no IMPLICATIONS) silently
+dropped → finalize Content; RED→GREEN, mutation-verified.</li>
+<li><strong>D6</strong> (9004477) <strong>FIXED</strong>
+verified_factory map-order flake → order-independent ElementsMatch;
+10/10.</li>
+<li><strong>wave5 (in-flight)</strong>: pkg/format, pkg/coordination,
+pkg/markdown coverage + <strong>W14 commit_all.sh</strong> wrapper —
+subagents running.</li>
 </ul>
+<p><strong>Session total: 21 items resolved</strong> (W4-W10,W12 + D2 +
+W2×6[unified-translator/storage/batch/sshworker/verification/script] +
+W3 translator + sshworker-leak + D3 + D7 + D5 + D6). Real prod bugs
+fixed: translator cache race, SMTP no-deadline, dangling step-ptr,
+sshworker map-leak, event races (D2/D3/D7), note-content loss (D5).</p>
 <h2
 id="open-workable-items-queue-many-parallelizable-disjoint-scope">OPEN
 workable items (queue — many parallelizable, disjoint scope)</h2>
@@ -326,10 +349,12 @@ surface to operator before W16.</td>
 <td>W2</td>
 <td>Coverage → ~100% (§11.4.27); ongoing</td>
 <td>Task</td>
-<td>Done: unified-translator 3.2%→18%, storage 32.9%→35.3%. In-flight
-(wave3): sshworker(19.6%), batch. NOTE: many 0% pkgs
-(gRPC/api-server/redis/postgres) are integration-infra-gated — unit
-gains capped; honest deferral per package. Core translator 77–82%.</td>
+<td>Done: unified-translator 18%, storage 35.3%, batch 90.6%, sshworker
+39.7%, verification 73.5%, script(100%+depth),
+translator/llm(+stress/chaos). In-flight (wave5): format, coordination,
+markdown. NOTE: gRPC/api-server/server/redis/postgres at 0% are
+integration-infra-gated (need real daemons) — W15 containers-first
+unlocks these; honest deferral per package.</td>
 </tr>
 <tr>
 <td>W3</td>
@@ -356,7 +381,9 @@ exist)</td>
 <td>No project commit wrapper <code>scripts/commit_all.sh</code>
 (§11.4.22)</td>
 <td>Task</td>
-<td>Multi-upstream push + sibling-doc checks (§11.4.75).</td>
+<td>IN-FLIGHT (wave5): multi-upstream push + no-force §11.4.113 +
+explicit-pathspec + quiescence + background-push §11.4.88 + hermetic
+self-test. Review before wiring to real remotes.</td>
 </tr>
 <tr>
 <td>W15</td>
@@ -380,6 +407,16 @@ literal <code>CONST-036</code></td>
 <td>§11.4.118 discovery. They use §11.4.X cascade scheme (not
 CONST-NNN); challenge doesn’t check them. Governance-design decision
 needed — do NOT blindly inject CONST-NNN (§11.4.6).</td>
+</tr>
+<tr>
+<td>D4</td>
+<td><code>pkg/script</code> Latin→Cyrillic morpheme-boundary
+mis-transliteration</td>
+<td>Bug (open)</td>
+<td>konjugacija→коњугација (should be конјугација); injekcija, nadживети
+similar. Greedy digraph matching; real fix needs morpheme/dictionary
+model (high blast radius) — operator-aware decision. Pinned with
+KNOWN-LOSSY tests.</td>
 </tr>
 </tbody>
 </table>

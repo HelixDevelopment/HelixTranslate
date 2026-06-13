@@ -1,7 +1,7 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 5
-**Last modified:** 2026-06-13T13:30:00Z
+**Revision:** 6
+**Last modified:** 2026-06-13T14:30:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
@@ -12,7 +12,7 @@
 
 ## Live state anchors (moment-valid)
 
-- **Parent HEAD:** `7331c54` (wave2: D2 race fix + W2-A/W2-B coverage; prior e775088 batch W4/W5/W6/W8/W9/W10/W12 + 8a6af67 doc-sync) on `main`; pushed to BOTH `milos85vasic/Translator` + `HelixDevelopment/HelixTranslate` (verified at 7331c54, fast-forward, no force).
+- **Parent HEAD:** `9004477` on `main`; pushed to BOTH `milos85vasic/Translator` + `HelixDevelopment/HelixTranslate` (verified, fast-forward, no force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67 → 7331c54 → 76677aa → 18c5137 → de256dd → 9004477.
 - **llm_provider HEAD:** `b3dc7f9` (W7 CONST-036 propagation block + regenerated html/pdf), pushed to `HelixDevelopment/LLMProvider` master.
 - **Constitution HEAD:** `5e671fe` (§11.4.151 added), pushed to all 6 upstreams; parent pointer bumped.
 - **Build:** `go build ./...` = EXIT 0. **Total test coverage = 50.7%** (`go tool cover -func` total; see `docs/testing/coverage_matrix.md`).
@@ -44,21 +44,28 @@
 - **D2** ✅ (wave2, 7331c54) `test/unit` intermittent FAIL — `TestVerifier/EventEmission` timing race (50ms Sleep vs goroutine-dispatched handler) + data race (proven `-race`). Mutex eventCollector + bounded poll. BEFORE 1/10 FAIL+race → AFTER `-race -count=10` 10/10 PASS.
 - **W2-A** ✅ (wave2) `cmd/unified-translator` coverage 3.2%→18.0%, mutation-verified; + latent dangling-pointer fix (`Steps []TranslationStep`→`[]*TranslationStep`).
 - **W2-B** ✅ (wave2) `pkg/storage` coverage 32.9%→35.3% (Redis cache-key helpers 0%→100%, real SQLite round-trips), mutation-verified, daemon paths honest-SKIP.
-- **W2 (wave3, in-flight)**: pkg/translator stress/chaos (W3), pkg/sshworker, pkg/batch coverage — subagents running.
+- **wave3** (18c5137): **W3** pkg/translator/llm stress/chaos + **FIXED real prod data race** in BaseTranslator cache+stats (RWMutex, -race ×3); **W2** sshworker 19.6%→39.7%; **W2** batch 77.2%→90.6%.
+- **wave4** (de256dd): **sshworker progress-map leak** on ctx.Done() fixed (defer cleanup, RED 300/300→GREEN -race); **D3** pkg/translator{,/llm} test-only EventBus races fixed (asyncFlag); **D7** pkg/events TestEventBus_Subscribe race fixed; **W2** verification 64.0%→73.5%; **W2** script (already 100% stmt) +11 behavioral/digraph tests.
+- **D5** (9004477) **FIXED real bug** pkg/verification parseNote: CONTENT-only note (no IMPLICATIONS) silently dropped → finalize Content; RED→GREEN, mutation-verified.
+- **D6** (9004477) **FIXED** verified_factory map-order flake → order-independent ElementsMatch; 10/10.
+- **wave5 (in-flight)**: pkg/format, pkg/coordination, pkg/markdown coverage + **W14 commit_all.sh** wrapper — subagents running.
+
+**Session total: 21 items resolved** (W4-W10,W12 + D2 + W2×6[unified-translator/storage/batch/sshworker/verification/script] + W3 translator + sshworker-leak + D3 + D7 + D5 + D6). Real prod bugs fixed: translator cache race, SMTP no-deadline, dangling step-ptr, sshworker map-leak, event races (D2/D3/D7), note-content loss (D5).
 
 ## OPEN workable items (queue — many parallelizable, disjoint scope)
 
 | # | Item | Type | Notes / evidence |
 |---|---|---|---|
 | W1 | `Models/` divergent `types.go` (60-line lean LLMRequest, absent upstream) | **Operator decision §11.4.122** | Convert needs preserving/discarding the local shape. Not consumed (no replace/import). DO NOT silently remove. Deferred — not blocking; surface to operator before W16. |
-| W2 | Coverage → ~100% (§11.4.27); ongoing | Task | Done: unified-translator 3.2%→18%, storage 32.9%→35.3%. In-flight (wave3): sshworker(19.6%), batch. NOTE: many 0% pkgs (gRPC/api-server/redis/postgres) are integration-infra-gated — unit gains capped; honest deferral per package. Core translator 77–82%. |
+| W2 | Coverage → ~100% (§11.4.27); ongoing | Task | Done: unified-translator 18%, storage 35.3%, batch 90.6%, sshworker 39.7%, verification 73.5%, script(100%+depth), translator/llm(+stress/chaos). In-flight (wave5): format, coordination, markdown. NOTE: gRPC/api-server/server/redis/postgres at 0% are integration-infra-gated (need real daemons) — W15 containers-first unlocks these; honest deferral per package. |
 | W3 | Missing test types: chaos, ddos, scaling, ui, ux, full-automation (in-module) | Task | §11.4.85 chaos/stress mandatory. |
 | W11 | Wire more docs_chain contexts (Issues/Fixed/Status once they exist) | Task | docs_chain proven operational. |
 | W13 | `.gitmodules` section labels still PascalCase | Task (cosmetic) | Needs per-submodule `.git/modules/*` gitdir move. |
-| W14 | No project commit wrapper `scripts/commit_all.sh` (§11.4.22) | Task | Multi-upstream push + sibling-doc checks (§11.4.75). |
+| W14 | No project commit wrapper `scripts/commit_all.sh` (§11.4.22) | Task | IN-FLIGHT (wave5): multi-upstream push + no-force §11.4.113 + explicit-pathspec + quiescence + background-push §11.4.88 + hermetic self-test. Review before wiring to real remotes. |
 | W15 | Containers-first infra (§11.4.76) — run services via `containers` submodule | Feature | Phase 3/5. |
 | W16 | Convert `Models/`→`models` submodule after W1 resolved | Task | Blocked on W1. |
 | D1 | `docs_chain` + `security` CONSTITUTION.md lack literal `CONST-036` | Task | §11.4.118 discovery. They use §11.4.X cascade scheme (not CONST-NNN); challenge doesn't check them. Governance-design decision needed — do NOT blindly inject CONST-NNN (§11.4.6). |
+| D4 | `pkg/script` Latin→Cyrillic morpheme-boundary mis-transliteration | Bug (open) | konjugacija→коњугација (should be конјугација); injekcija, nadживети similar. Greedy digraph matching; real fix needs morpheme/dictionary model (high blast radius) — operator-aware decision. Pinned with KNOWN-LOSSY tests. |
 
 ## NEXT phases (priority order)
 - **Phase 4** — drive W2–W8 + W10: per-type test suites to ~100% (§11.4.27), real Challenges + HelixQA bank execution with captured evidence, expand real ebook translations (all formats, whole chapters, anti-bluff §11.4/§11.4.69). Subagent-driven, ≥3 parallel streams.
