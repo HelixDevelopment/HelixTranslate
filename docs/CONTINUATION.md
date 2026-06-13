@@ -1,10 +1,21 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 14
-**Last modified:** 2026-06-13T22:30:00Z
+**Revision:** 15
+**Last modified:** 2026-06-13T00:00:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
+
+<!-- W13/W15/W16 wrap-up -->
+
+### Session wrap-up — W13, W15 (api/grpc), W16 all resolved (HEAD 1cc66ac)
+- **W15 api/grpc DONE (real, evidence-backed)** — subagent-driven. Built build-tagged integration suites: `pkg/api/server_realhttp_integration_test.go` (real HTTP via httptest + real JWT + real Postgres via brokertest: health, JWT 401/200, login→token round-trip, /api/v1/verified-models, session persist round-trip) and `pkg/grpc/server_storage_integration_test.go` (real gRPC over bufconn + real Postgres: submit→persist, status, cancel, list-count, 8× concurrent, error-code via status.FromError; §1.1 mutation-proven). LLM-translate leg = honest §11.4.3 SKIP (no provider key). Normal `go test` boots NOTHING; SKIP-clean without podman.
+- **REAL AUTH BUG fixed (W15 api leg, commit 0e2a999)** — `InMemoryUserRepository.Create` stored the caller's pointer; `CreateUser` clears `Password=""` post-Create → blanked the stored bcrypt hash → EVERY user registered via CreateUser could never log in. Fix: repo stores a COPY. Conductor-reproduced RED(401)→GREEN(200) on `TestAPIRealHTTP_LoginTokenRoundTrip` (§11.4.115). Remaining W15: only the pure LLM-translation E2E (operator-gated on a real provider key).
+- **W13 DONE (commit 1cc66ac)** — 8 PascalCase `.gitmodules` section labels → lowercase (paths were already compliant). Done §9.2 backup-first; all 11 submodules verified resolving to identical baseline SHAs after `git submodule sync`, dirty challenges/helix_qa preserved, build exit 0, backup removed post-gate.
+- **W16 RESOLVED = KEEP Models/ as-is** — the `pkg/modelsbridge` bridge already consumes `digital.vasic.models` (functional need met). Converting `Models/` → a git submodule requires creating a NEW upstream repo under an owned org — an operator-gated repo-creation action (§11.4.101 block-only-when-irreversible+undeterminable; §11.4.122 keeping is the safe no-change path). Convert path remains available on operator request.
+
+**Autonomous-safe queue now EMPTY.** Genuinely-remaining = operator-gated only: W15 LLM-translation E2E (real provider key) + W16 convert (new upstream repo decision). Per §11.4.94 this is legitimate idle.
+
 
 ## SHORT resumption sentence
 
