@@ -237,8 +237,13 @@ func TestClient_Integration(t *testing.T) {
 	require.NoError(t, err)
 	defer conn.Close()
 
-	// Verify client is registered
-	assert.Equal(t, 1, hub.GetClientCount())
+	// Verify client is registered.
+	// hub.Register sends the client onto an async channel drained by hub.Run(),
+	// so a returned Dial does NOT guarantee registration has been processed yet.
+	// Poll until the count settles instead of racing the async registration.
+	assert.Eventually(t, func() bool {
+		return hub.GetClientCount() == 1
+	}, 2*time.Second, 5*time.Millisecond, "client should be registered with the hub")
 
 	// Test event broadcasting
 	event := events.NewEvent(events.EventTranslationStarted, "Integration test", map[string]interface{}{
