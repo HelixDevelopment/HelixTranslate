@@ -178,32 +178,45 @@ func (c *Client) WritePump() {
 	}
 }
 
-// StartServer starts an HTTP server with WebSocket endpoint on the given address
-func (h *Hub) StartServer(addr string) error {
+// wsHandler upgrades an HTTP request to a WebSocket connection, builds the
+// Client, registers it with the hub, and starts its pumps. It reads BOTH
+// client_id AND session_id from the query string: session_id populates
+// Client.SessionID, which the hub's per-session fan-out filter (handleEvent)
+// relies on. Without it every dashboard client receives every session's
+// events instead of only its own.
+func (h *Hub) wsHandler(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
 	}
 
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		conn, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			log.Printf("WebSocket upgrade error: %v", err)
-			return
-		}
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("WebSocket upgrade error: %v", err)
+		return
+	}
 
-		client := &Client{
-			ID:   r.URL.Query().Get("client_id"),
-			Conn: conn,
-			Send: make(chan []byte, 256),
-			Hub:  h,
-		}
-		h.Register(client)
+	client := &Client{
+		ID:        r.URL.Query().Get("client_id"),
+		SessionID: r.URL.Query().Get("session_id"),
+		Conn:      conn,
+		Send:      make(chan []byte, 256),
+		Hub:       h,
+	}
+	h.Register(client)
 
-		go client.WritePump()
-		go client.ReadPump()
-	})
+	go client.WritePump()
+	go client.ReadPump()
+}
 
-	return http.ListenAndServe(addr, nil)
+// StartServer starts an HTTP server with WebSocket endpoint on the given address.
+// It registers the handler on a private ServeMux rather than the global
+// http.DefaultServeMux so a second StartServer call (or any other consumer of
+// the default mux in the same process) does not panic with a duplicate "/ws"
+// pattern registration.
+func (h *Hub) StartServer(addr string) error {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/ws", h.wsHandler)
+	return http.ListenAndServe(addr, mux)
 }
