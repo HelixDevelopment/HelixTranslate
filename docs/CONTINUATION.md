@@ -1,7 +1,7 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 10
-**Last modified:** 2026-06-13T18:30:00Z
+**Revision:** 11
+**Last modified:** 2026-06-13T19:45:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
@@ -12,7 +12,7 @@
 
 ## Live state anchors (moment-valid)
 
-- **Parent HEAD:** `6d4ae47` on `main`; pushed to BOTH `milos85vasic/Translator` + `HelixDevelopment/HelixTranslate` (verified, fast-forward, no force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67 → 7331c54 → 76677aa → 18c5137 → de256dd → 9004477 → 13d5e30 → af1ef47 → a9b38fa → 218bfa0 → 1f06bf5 → a0930fc → 3027da2 → b2377af → 6d4ae47.
+- **Parent HEAD:** `58def2b` on `main`; pushed to BOTH `milos85vasic/Translator` + `HelixDevelopment/HelixTranslate` (verified, fast-forward, no force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67 → 7331c54 → 76677aa → 18c5137 → de256dd → 9004477 → 13d5e30 → af1ef47 → a9b38fa → 218bfa0 → 1f06bf5 → a0930fc → 3027da2 → b2377af → 6d4ae47.
 - **llm_provider HEAD:** `b3dc7f9` (W7 CONST-036 propagation block + regenerated html/pdf), pushed to `HelixDevelopment/LLMProvider` master.
 - **Constitution HEAD:** `5e671fe` (§11.4.151 added), pushed to all 6 upstreams; parent pointer bumped.
 - **Build:** `go build ./...` = EXIT 0. **Total test coverage = 50.7%** (`go tool cover -func` total; see `docs/testing/coverage_matrix.md`).
@@ -50,7 +50,9 @@
 - **D6** (9004477) **FIXED** verified_factory map-order flake → order-independent ElementsMatch; 10/10.
 - **wave5** (af1ef47): **W14** `scripts/commit_all.sh` wrapper (no-force/multi-upstream/FF-only/quiescence/explicit-pathspec/bg-push) + hermetic selftest 13/0 (conductor-run verified) — NOT yet wired to real remotes (line-by-line review pending); **W2** format 0%→97.6%, markdown 73.9%→80.1%, coordination 0%→92.9% + **GENUINE nil-guard fix** in TranslateWithRetry (mutation-verified: revert→nil-panic). §11.4.147: format+coordination were rate-limit-crashed at report stage; conductor verified+adopted their work (not lost, not blindly trusted).
 
-**Session total: 31 items resolved** (+ wave7: grpc 0→53.3% bufconn, api 55→62.2% httptest, security +14 adversarial tests — all real-protocol/anti-bluff, auth confirmed hardened)
+**Session total: ~34 items resolved** (+ W15: real Postgres+Redis on-demand integration proven; PG connection-pool DoS bug found+fixed; containers StartRedis helper added)
+
+**Prior: 31 items** (+ wave7: grpc 0→53.3% bufconn, api 55→62.2% httptest, security +14 adversarial tests — all real-protocol/anti-bluff, auth confirmed hardened)
 
 **Prior: 29 items** (+ wave6: websocket race-fix, hardware/distributed chaos tests, D10#2 api_logger PRODUCT data-race fix)
 
@@ -66,7 +68,7 @@
 | W11 | Wire more docs_chain contexts (Issues/Fixed/Status once they exist) | Task | docs_chain proven operational. |
 | W13 | `.gitmodules` section labels still PascalCase | Task (cosmetic) | Needs per-submodule `.git/modules/*` gitdir move. |
 | W14 | No project commit wrapper `scripts/commit_all.sh` (§11.4.22) | Task | IN-FLIGHT (wave5): multi-upstream push + no-force §11.4.113 + explicit-pathspec + quiescence + background-push §11.4.88 + hermetic self-test. Review before wiring to real remotes. |
-| W15 | Containers-first infra (§11.4.76) — boot real Postgres/Redis/services via `containers` submodule → UNLOCKS the W15-deferred coverage (storage redis/postgres 0%, distributed SSH, api/grpc DB-backed pipeline) | Feature | READY: podman 5.8.2 running (applehv VM 4GiB, ~3.2GiB free → container boot is VM-isolated, §12.6-safe re: host RAM); `replace digital.vasic.containers => ./containers` already in go.mod; containers pkgs incl. boot/compose/cache/discovery. STRUCTURE: serial infra-boot first, THEN parallel integration tests (storage/api/grpc). CAUTION: host swap ~95% full after marathon session — prefer a fresh session before heavy integration-test load (§12.6/§11.4.141). |
+| W15 | Containers-first infra (§11.4.76) | Feature | **storage DONE**: real Postgres+Redis on-demand integration via containers/pkg/brokertest (StartPostgres + new StartRedis), build-tagged; pkg/storage CRUD+chaos exercised real DBs; **found+fixed PG unbounded-pool DoS** (default 25/5). REMAINING: api/grpc DB+LLM *pipeline* paths need operator-gated LLM keys/SSH (can't autonomously). Pattern + helpers in place for any future slice. |
 | W16 | Convert `Models/`→`models` submodule after W1 resolved | Task | Blocked on W1. |
 | D1 | `docs_chain` + `security` CONSTITUTION.md lack literal `CONST-036` | Task | §11.4.118 discovery. They use §11.4.X cascade scheme (not CONST-NNN); challenge doesn't check them. Governance-design decision needed — do NOT blindly inject CONST-NNN (§11.4.6). |
 | D4 | `pkg/script` Latin→Cyrillic morpheme-boundary mis-transliteration | Bug (open) | konjugacija→коњугација (should be конјугација); injekcija, nadживети similar. Greedy digraph matching; real fix needs morpheme/dictionary model (high blast radius) — operator-aware decision. Pinned with KNOWN-LOSSY tests. |

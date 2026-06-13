@@ -175,8 +175,8 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 10 <strong>Last modified:</strong>
-2026-06-13T18:30:00Z <strong>Purpose:</strong> Single canonical
+<p><strong>Revision:</strong> 11 <strong>Last modified:</strong>
+2026-06-13T19:45:00Z <strong>Purpose:</strong> Single canonical
 out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 /
 §11.4.127). To resume: point a new session at THIS file, run
 <code>git fetch --all</code>, and say <strong>continue</strong>.</p>
@@ -198,7 +198,7 @@ prefixed <code>helix_translate-</code> (§11.4.151). Work subagent-driven
 <h2 id="live-state-anchors-moment-valid">Live state anchors
 (moment-valid)</h2>
 <ul>
-<li><strong>Parent HEAD:</strong> <code>6d4ae47</code> on
+<li><strong>Parent HEAD:</strong> <code>58def2b</code> on
 <code>main</code>; pushed to BOTH <code>milos85vasic/Translator</code> +
 <code>HelixDevelopment/HelixTranslate</code> (verified, fast-forward, no
 force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67
@@ -321,9 +321,12 @@ revert→nil-panic). §11.4.147: format+coordination were
 rate-limit-crashed at report stage; conductor verified+adopted their
 work (not lost, not blindly trusted).</li>
 </ul>
-<p><strong>Session total: 31 items resolved</strong> (+ wave7: grpc
-0→53.3% bufconn, api 55→62.2% httptest, security +14 adversarial tests —
-all real-protocol/anti-bluff, auth confirmed hardened)</p>
+<p><strong>Session total: ~34 items resolved</strong> (+ W15: real
+Postgres+Redis on-demand integration proven; PG connection-pool DoS bug
+found+fixed; containers StartRedis helper added)</p>
+<p><strong>Prior: 31 items</strong> (+ wave7: grpc 0→53.3% bufconn, api
+55→62.2% httptest, security +14 adversarial tests — all
+real-protocol/anti-bluff, auth confirmed hardened)</p>
 <p><strong>Prior: 29 items</strong> (+ wave6: websocket race-fix,
 hardware/distributed chaos tests, D10#2 api_logger PRODUCT data-race
 fix)</p>
@@ -403,19 +406,15 @@ self-test. Review before wiring to real remotes.</td>
 </tr>
 <tr>
 <td>W15</td>
-<td>Containers-first infra (§11.4.76) — boot real
-Postgres/Redis/services via <code>containers</code> submodule → UNLOCKS
-the W15-deferred coverage (storage redis/postgres 0%, distributed SSH,
-api/grpc DB-backed pipeline)</td>
+<td>Containers-first infra (§11.4.76)</td>
 <td>Feature</td>
-<td>READY: podman 5.8.2 running (applehv VM 4GiB, ~3.2GiB free →
-container boot is VM-isolated, §12.6-safe re: host RAM);
-<code>replace digital.vasic.containers =&gt; ./containers</code> already
-in go.mod; containers pkgs incl. boot/compose/cache/discovery.
-STRUCTURE: serial infra-boot first, THEN parallel integration tests
-(storage/api/grpc). CAUTION: host swap ~95% full after marathon session
-— prefer a fresh session before heavy integration-test load
-(§12.6/§11.4.141).</td>
+<td><strong>storage DONE</strong>: real Postgres+Redis on-demand
+integration via containers/pkg/brokertest (StartPostgres + new
+StartRedis), build-tagged; pkg/storage CRUD+chaos exercised real DBs;
+<strong>found+fixed PG unbounded-pool DoS</strong> (default 25/5).
+REMAINING: api/grpc DB+LLM <em>pipeline</em> paths need operator-gated
+LLM keys/SSH (can’t autonomously). Pattern + helpers in place for any
+future slice.</td>
 </tr>
 <tr>
 <td>W16</td>
