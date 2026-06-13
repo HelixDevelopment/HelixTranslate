@@ -221,6 +221,37 @@ func (p *Paragraph) FullParagraphText() string {
 	return p.Text
 }
 
+// MarshalXML emits the paragraph's full user-visible text as chardata of a
+// <p> element, preserving the id/style attributes.
+//
+// Without this, the Text/FullText fields are tagged `xml:"-"` and the default
+// struct marshaling drops ALL paragraph content on write, so a
+// parse → (translate) → write round-trip through this package produced empty
+// <p></p> elements — total textual data loss for every paragraph. MarshalXML is
+// the write-side counterpart of UnmarshalXML: it serializes FullParagraphText()
+// (the reconstructed mixed-content text, i.e. inline-element + tail text) back
+// out as the paragraph body. The encoder escapes XML special characters
+// automatically, so the text is emitted exactly once, correctly escaped.
+func (p Paragraph) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	start.Name = xml.Name{Local: "p"}
+	start.Attr = start.Attr[:0]
+	if p.ID != "" {
+		start.Attr = append(start.Attr, xml.Attr{Name: xml.Name{Local: "id"}, Value: p.ID})
+	}
+	if p.Style != "" {
+		start.Attr = append(start.Attr, xml.Attr{Name: xml.Name{Local: "style"}, Value: p.Style})
+	}
+	if err := e.EncodeToken(start); err != nil {
+		return err
+	}
+	if text := p.FullParagraphText(); text != "" {
+		if err := e.EncodeToken(xml.CharData(text)); err != nil {
+			return err
+		}
+	}
+	return e.EncodeToken(xml.EndElement{Name: start.Name})
+}
+
 // Emphasis represents emphasized text
 type Emphasis struct {
 	Style string `xml:"style,attr,omitempty"`
