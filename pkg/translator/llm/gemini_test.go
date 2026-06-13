@@ -273,7 +273,12 @@ func TestGeminiParseResponseErrorPaths(t *testing.T) {
 		}
 	})
 
-	t.Run("non_stop_finish_reason", func(t *testing.T) {
+	// MAX_TOKENS returns USABLE partial text per the Gemini API reference
+	// (ai.google.dev/api/generate-content#FinishReason): the candidate contains
+	// all tokens generated up to the limit. Reconciled (§11.4.120) — the prior
+	// version of this test asserted the now-proven-incorrect behavior that
+	// MAX_TOKENS must error + return empty, which discarded valid translations.
+	t.Run("max_tokens_returns_partial_text", func(t *testing.T) {
 		response := &GeminiResponse{
 			Candidates: []GeminiCandidate{
 				{
@@ -288,14 +293,34 @@ func TestGeminiParseResponseErrorPaths(t *testing.T) {
 		}
 
 		result, err := client.parseResponse(response)
-		if err == nil {
-			t.Error("Expected error for non-STOP finish reason")
+		if err != nil {
+			t.Errorf("MAX_TOKENS must not error (usable partial text): %v", err)
 		}
-		if result != "" {
-			t.Error("Result should be empty when finish reason is not STOP")
+		if result != "Partial translation" {
+			t.Errorf("Expected the partial text to be returned, got: %q", result)
+		}
+	})
+
+	// A genuine block reason (SAFETY/RECITATION/...) yields no usable text and
+	// MUST surface as an error — proving the accept-set is not blanket.
+	t.Run("safety_block_finish_reason_is_error", func(t *testing.T) {
+		response := &GeminiResponse{
+			Candidates: []GeminiCandidate{
+				{
+					FinishReason: "SAFETY",
+					Content:      GeminiContent{Parts: []GeminiPart{}},
+				},
+			},
 		}
 
-		if !strings.Contains(err.Error(), "generation did not complete successfully") {
+		result, err := client.parseResponse(response)
+		if err == nil {
+			t.Error("Expected error for SAFETY finish reason")
+		}
+		if result != "" {
+			t.Error("Result should be empty when generation was blocked")
+		}
+		if err != nil && !strings.Contains(err.Error(), "generation did not complete successfully") {
 			t.Errorf("Expected completion error, got: %v", err)
 		}
 	})

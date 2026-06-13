@@ -124,18 +124,29 @@ func (c *OpenAIClient) Translate(ctx context.Context, text string, prompt string
 		model = "gpt-4"
 	}
 
-	temperature := c.config.Options["temperature"]
-	if temperature == nil {
-		temperature = 0.3
+	// Precedence: Options[...] (explicit per-call override) > typed config field
+	// (e.g. the -temperature CLI flag) > hardcoded default.
+	//
+	// temperature may arrive as float64 (literal), int, float32, or json.Number
+	// because Options is map[string]interface{} populated from JSON/config/code.
+	// A bare `.(float64)` assertion panics on any other concrete type, so coerce
+	// defensively (sibling clients anthropic/qwen/zhipu use the checked form).
+	temperature := 0.3
+	if c.config.Temperature > 0 { // typed CLI/config field (0 == unset)
+		temperature = c.config.Temperature
+	}
+	if v, ok := toFloat64(c.config.Options["temperature"]); ok {
+		temperature = v
 	}
 
 	// Increase max_tokens for large translations (book sections can be very long)
 	// DeepSeek/OpenAI compatible models support up to 8192 max_tokens
 	maxTokens := 8192 // Increased from 4000 to handle book chapters (DeepSeek max)
-	if c.config.Options["max_tokens"] != nil {
-		if mt, ok := c.config.Options["max_tokens"].(int); ok {
-			maxTokens = mt
-		}
+	if c.config.MaxTokens > 0 { // typed CLI/config field (0 == unset)
+		maxTokens = c.config.MaxTokens
+	}
+	if v, ok := toInt(c.config.Options["max_tokens"]); ok {
+		maxTokens = v
 	}
 
 	request := OpenAIRequest{
@@ -143,7 +154,7 @@ func (c *OpenAIClient) Translate(ctx context.Context, text string, prompt string
 		Messages: []Message{
 			{Role: "user", Content: prompt},
 		},
-		Temperature: temperature.(float64),
+		Temperature: temperature,
 		MaxTokens:   maxTokens,
 	}
 

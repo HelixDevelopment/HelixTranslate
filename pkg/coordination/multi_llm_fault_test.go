@@ -162,10 +162,7 @@ func TestTranslateWithRetry_RateLimitDisablesInstance(t *testing.T) {
 		t.Fatal("expected error from rate-limited instance")
 	}
 	// After a rate-limit error the instance must have been disabled.
-	c.mu.RLock()
-	available := inst.Available
-	c.mu.RUnlock()
-	if available {
+	if inst.IsAvailable() {
 		t.Fatal("rate-limited instance must be marked Available=false")
 	}
 }
@@ -178,7 +175,7 @@ func TestTranslateWithRetry_429Variant(t *testing.T) {
 	c := newCoordinator(1, 0, inst)
 
 	_, _ = c.TranslateWithRetry(context.Background(), "x", "")
-	if inst.Available {
+	if inst.IsAvailable() {
 		t.Fatal("429 error must disable the instance")
 	}
 }
@@ -310,10 +307,7 @@ func TestReenableInstanceAfterDelay_SetsAvailable(t *testing.T) {
 	inst := &LLMInstance{ID: "cooldown", Available: false}
 	c := &MultiLLMCoordinator{}
 	c.reenableInstanceAfterDelay(inst, time.Millisecond)
-	inst.mu.Lock()
-	available := inst.Available
-	inst.mu.Unlock()
-	if !available {
+	if !inst.IsAvailable() {
 		t.Fatal("instance must be re-enabled after the cooldown delay")
 	}
 }
@@ -392,6 +386,55 @@ func TestStress_ConcurrentTranslateNoDeadlock(t *testing.T) {
 	close(errCh)
 	for err := range errCh {
 		t.Fatalf("concurrent translate failed: %v", err)
+	}
+}
+
+// TestStress_ConcurrentAvailabilityToggleNoRace exercises the Available-field
+// race surface directly: many goroutines concurrently (a) select instances via
+// getNextInstance (reads Available), (b) flip Available via SetAvailable (the
+// rate-limit/re-enable write path), and (c) read via IsAvailable (the consensus
+// path). Before the fix these accesses were unsynchronized; this test FAILs
+// under -race if the instance.mu guard is removed from any accessor. Asserts the
+// final state is observable and consistent (anti-bluff: not a no-op).
+func TestStress_ConcurrentAvailabilityToggleNoRace(t *testing.T) {
+	insts := make([]*LLMInstance, 6)
+	for i := range insts {
+		insts[i] = &LLMInstance{ID: fmt.Sprintf("a%d", i), Available: true}
+	}
+	c := &MultiLLMCoordinator{instances: insts}
+
+	const goroutines = 24
+	const itersEach = 400
+	var wg sync.WaitGroup
+	for g := 0; g < goroutines; g++ {
+		wg.Add(1)
+		go func(g int) {
+			defer wg.Done()
+			for i := 0; i < itersEach; i++ {
+				inst := insts[(g+i)%len(insts)]
+				switch i % 3 {
+				case 0:
+					inst.SetAvailable(i%2 == 0) // write path (rate-limit/re-enable)
+				case 1:
+					_ = inst.IsAvailable() // read path (consensus)
+				default:
+					_ = c.getNextInstance() // read path (round-robin selection)
+				}
+			}
+		}(g)
+	}
+	wg.Wait()
+
+	// Anti-bluff: after the run, force every instance available and confirm the
+	// guarded read observes the guarded write (proves accessors are wired, not
+	// silently no-op).
+	for _, inst := range insts {
+		inst.SetAvailable(true)
+	}
+	for _, inst := range insts {
+		if !inst.IsAvailable() {
+			t.Fatalf("instance %s: SetAvailable(true) not observed by IsAvailable()", inst.ID)
+		}
 	}
 }
 

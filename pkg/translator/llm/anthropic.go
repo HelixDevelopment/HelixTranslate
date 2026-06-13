@@ -108,18 +108,21 @@ func (c *AnthropicClient) Translate(ctx context.Context, text string, prompt str
 		model = "claude-3-sonnet-20240229"
 	}
 
+	// Precedence: Options[...] override > typed config field (CLI flag) > default.
 	temperature := 0.3
-	if c.config.Options["temperature"] != nil {
-		if t, ok := c.config.Options["temperature"].(float64); ok {
-			temperature = t
-		}
+	if c.config.Temperature > 0 {
+		temperature = c.config.Temperature
+	}
+	if t, ok := toFloat64(c.config.Options["temperature"]); ok {
+		temperature = t
 	}
 
 	maxTokens := 4096
-	if c.config.Options["max_tokens"] != nil {
-		if mt, ok := c.config.Options["max_tokens"].(int); ok {
-			maxTokens = mt
-		}
+	if c.config.MaxTokens > 0 {
+		maxTokens = c.config.MaxTokens
+	}
+	if mt, ok := toInt(c.config.Options["max_tokens"]); ok {
+		maxTokens = mt
 	}
 
 	request := AnthropicRequest{

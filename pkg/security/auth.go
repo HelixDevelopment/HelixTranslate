@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -126,8 +127,15 @@ func GenerateAPIKey() (string, error) {
 	return base64.URLEncoding.EncodeToString(bytes), nil
 }
 
-// APIKeyStore manages API keys
+// APIKeyStore manages API keys.
+//
+// It is safe for concurrent use: the underlying map is guarded by an RWMutex
+// (mirroring RateLimiter in this package). Without this lock, concurrent
+// AddKey/RevokeKey (writers) and ValidateKey (readers) race the map and the Go
+// runtime fatally panics ("concurrent map read and map write"), taking down a
+// security-critical surface — see TestAdv_APIKeyStore_ConcurrentAccessNoRace.
 type APIKeyStore struct {
+	mu   sync.RWMutex
 	keys map[string]APIKeyInfo
 }
 
@@ -150,11 +158,15 @@ func NewAPIKeyStore() *APIKeyStore {
 
 // AddKey adds an API key
 func (aks *APIKeyStore) AddKey(key string, info APIKeyInfo) {
+	aks.mu.Lock()
+	defer aks.mu.Unlock()
 	aks.keys[key] = info
 }
 
 // ValidateKey validates an API key
 func (aks *APIKeyStore) ValidateKey(key string) (*APIKeyInfo, bool) {
+	aks.mu.RLock()
+	defer aks.mu.RUnlock()
 	info, ok := aks.keys[key]
 	if !ok {
 		return nil, false
@@ -173,6 +185,8 @@ func (aks *APIKeyStore) ValidateKey(key string) (*APIKeyInfo, bool) {
 
 // RevokeKey revokes an API key
 func (aks *APIKeyStore) RevokeKey(key string) {
+	aks.mu.Lock()
+	defer aks.mu.Unlock()
 	if info, ok := aks.keys[key]; ok {
 		info.Active = false
 		aks.keys[key] = info

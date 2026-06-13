@@ -242,18 +242,26 @@ func (g *GeminiClient) parseResponse(resp *GeminiResponse) (string, error) {
 
 	candidate := resp.Candidates[0]
 
-	// Check finish reason
-	if candidate.FinishReason != "STOP" {
-		return "", fmt.Errorf("generation did not complete successfully: %s", candidate.FinishReason)
-	}
-
-	// Extract text from parts
+	// Extract text from parts first — MAX_TOKENS returns usable partial text per
+	// the Gemini API reference (ai.google.dev/api/generate-content#FinishReason),
+	// so we must not discard it.
 	var translatedText strings.Builder
 	for _, part := range candidate.Content.Parts {
 		translatedText.WriteString(part.Text)
 	}
+	result := strings.TrimSpace(translatedText.String())
 
-	return strings.TrimSpace(translatedText.String()), nil
+	// STOP (natural completion) and MAX_TOKENS (truncated-but-usable) both yield
+	// usable text, so return it. An empty/omitted reason is treated the same way
+	// (some responses omit the field). Any other reason
+	// (SAFETY/RECITATION/OTHER/...) is a genuine block where no usable text was
+	// produced: surface it as an error.
+	switch candidate.FinishReason {
+	case "STOP", "MAX_TOKENS", "":
+		return result, nil
+	default:
+		return "", fmt.Errorf("generation did not complete successfully: %s", candidate.FinishReason)
+	}
 }
 
 // GetProviderName returns the provider name

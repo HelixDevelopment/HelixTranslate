@@ -25,6 +25,30 @@ type LLMInstance struct {
 	mu         sync.Mutex
 }
 
+// IsAvailable reports whether the instance is currently usable. It guards the
+// read with instance.mu so concurrent callers (round-robin selection,
+// consensus fan-out, rate-limit disabling, cooldown re-enable) never race on
+// the Available field.
+func (i *LLMInstance) IsAvailable() bool {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+	return i.Available
+}
+
+// SetAvailable sets the availability flag under instance.mu.
+func (i *LLMInstance) SetAvailable(available bool) {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+	i.Available = available
+}
+
+// MarkUsed records the last-used timestamp under instance.mu.
+func (i *LLMInstance) MarkUsed(t time.Time) {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+	i.LastUsed = t
+}
+
 // MultiLLMCoordinator manages multiple LLM instances for coordinated translation
 type MultiLLMCoordinator struct {
 	instances         []*LLMInstance
@@ -306,7 +330,7 @@ func (c *MultiLLMCoordinator) TranslateWithRetry(
 		translated, err := instance.Translator.Translate(ctx, text, contextHint)
 		if err == nil && translated != "" {
 			// Success!
-			instance.LastUsed = time.Now()
+			instance.MarkUsed(time.Now())
 			c.emitEvent(events.Event{
 				Type:      "translation_success",
 				SessionID: c.sessionID,
@@ -327,7 +351,7 @@ func (c *MultiLLMCoordinator) TranslateWithRetry(
 		// result, no error), which is treated as a failure above but must not
 		// cause a nil-pointer dereference on err.Error() here.
 		if err != nil && (strings.Contains(err.Error(), "rate limit") || strings.Contains(err.Error(), "429")) {
-			instance.Available = false
+			instance.SetAvailable(false)
 			go c.reenableInstanceAfterDelay(instance, 30*time.Second)
 		}
 
@@ -368,7 +392,7 @@ func (c *MultiLLMCoordinator) TranslateWithConsensus(
 
 	for i := 0; i < requiredAgreement && i < len(c.instances); i++ {
 		instance := c.instances[i]
-		if !instance.Available {
+		if !instance.IsAvailable() {
 			continue
 		}
 
@@ -440,7 +464,7 @@ func (c *MultiLLMCoordinator) getNextInstance() *LLMInstance {
 		instance := c.instances[c.currentIndex]
 		c.currentIndex = (c.currentIndex + 1) % len(c.instances)
 
-		if instance.Available {
+		if instance.IsAvailable() {
 			return instance
 		}
 
@@ -454,9 +478,7 @@ func (c *MultiLLMCoordinator) getNextInstance() *LLMInstance {
 // reenableInstanceAfterDelay re-enables an instance after a delay
 func (c *MultiLLMCoordinator) reenableInstanceAfterDelay(instance *LLMInstance, delay time.Duration) {
 	time.Sleep(delay)
-	instance.mu.Lock()
-	instance.Available = true
-	instance.mu.Unlock()
+	instance.SetAvailable(true)
 
 	c.emitEvent(events.Event{
 		Type:      "instance_reenabled",
