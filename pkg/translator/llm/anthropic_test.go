@@ -177,6 +177,17 @@ func TestAnthropicClient_RequestStructure(t *testing.T) {
 }
 
 func TestAnthropicClient_ErrorHandling(t *testing.T) {
+	// "invalid api key" path: a local server returning a non-200 (401) preserves
+	// the assertion (Translate errors on any non-200 status) without dialing the
+	// real api.anthropic.com host — keeping the unit test deterministic and
+	// offline (§11.4.98).
+	unauthorizedServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(`{"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"}}`))
+	}))
+	defer unauthorizedServer.Close()
+
 	tests := []struct {
 		name   string
 		config TranslationConfig
@@ -187,7 +198,7 @@ func TestAnthropicClient_ErrorHandling(t *testing.T) {
 				Provider: "anthropic",
 				APIKey:   "invalid-key",
 				Model:    "claude-3-sonnet-20240229",
-				BaseURL:  "https://api.anthropic.com",
+				BaseURL:  unauthorizedServer.URL,
 			},
 		},
 		{
@@ -310,11 +321,22 @@ func TestAnthropicRequestErrorPaths(t *testing.T) {
 		require.Empty(t, result)
 	})
 
+	// A local server returning a non-200 (400) preserves the "request was sent and
+	// rejected" assertion of the option-validation subtests below without dialing
+	// the real api.anthropic.com host — deterministic and offline (§11.4.98).
+	rejectingServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"type":"error","error":{"type":"invalid_request_error","message":"invalid request"}}`))
+	}))
+	defer rejectingServer.Close()
+
 	t.Run("very_long_text", func(t *testing.T) {
 		client, err := NewAnthropicClient(TranslationConfig{
 			Provider: "anthropic",
 			APIKey:   "test-api-key",
 			Model:    "claude-3-haiku-20240307",
+			BaseURL:  rejectingServer.URL,
 		})
 		require.NoError(t, err)
 		require.NotNil(t, client)
@@ -333,6 +355,7 @@ func TestAnthropicRequestErrorPaths(t *testing.T) {
 			Provider: "anthropic",
 			APIKey:   "test-api-key",
 			Model:    "claude-3-haiku-20240307",
+			BaseURL:  rejectingServer.URL,
 			Options: map[string]interface{}{
 				"temperature": 2.5, // Too high (should be 0.0-1.0)
 			},
@@ -352,6 +375,7 @@ func TestAnthropicRequestErrorPaths(t *testing.T) {
 			Provider: "anthropic",
 			APIKey:   "test-api-key",
 			Model:    "claude-3-haiku-20240307",
+			BaseURL:  rejectingServer.URL,
 			Options: map[string]interface{}{
 				"max_tokens": -1, // Invalid max_tokens
 			},

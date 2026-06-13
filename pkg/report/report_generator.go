@@ -7,16 +7,19 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"digital.vasic.translator/pkg/logger"
 )
 
-// ReportGenerator creates comprehensive reports for translation sessions
+// ReportGenerator creates comprehensive reports for translation sessions.
+// It is safe for concurrent use by multiple goroutines.
 type ReportGenerator struct {
 	destinationDir string
 	logger         logger.Logger
 	startTime      time.Time
+	mu             sync.Mutex
 	issues         []Issue
 	warnings       []Warning
 	logs           []LogEntry
@@ -92,7 +95,9 @@ func (r *ReportGenerator) AddIssue(category, severity, message, component string
 		Component: component,
 		Resolved:  false,
 	}
+	r.mu.Lock()
 	r.issues = append(r.issues, issue)
+	r.mu.Unlock()
 
 	r.logger.Error("Issue recorded", map[string]interface{}{
 		"category":  category,
@@ -104,12 +109,15 @@ func (r *ReportGenerator) AddIssue(category, severity, message, component string
 
 // ResolveIssue marks an issue as resolved
 func (r *ReportGenerator) ResolveIssue(index int, resolution string) error {
+	r.mu.Lock()
 	if index < 0 || index >= len(r.issues) {
+		r.mu.Unlock()
 		return fmt.Errorf("invalid issue index: %d", index)
 	}
 
 	r.issues[index].Resolved = true
 	r.issues[index].Resolution = resolution
+	r.mu.Unlock()
 
 	r.logger.Info("Issue resolved", map[string]interface{}{
 		"issue_index": index,
@@ -128,7 +136,9 @@ func (r *ReportGenerator) AddWarning(category, message, component string, detail
 		Component: component,
 		Details:   details,
 	}
+	r.mu.Lock()
 	r.warnings = append(r.warnings, warning)
+	r.mu.Unlock()
 
 	r.logger.Warn("Warning recorded", map[string]interface{}{
 		"category":  category,
@@ -147,7 +157,9 @@ func (r *ReportGenerator) AddLogEntry(level, message, component string, details 
 		Component: component,
 		Details:   details,
 	}
+	r.mu.Lock()
 	r.logs = append(r.logs, entry)
+	r.mu.Unlock()
 }
 
 // CopyLogFiles copies relevant log files to the destination directory
@@ -213,6 +225,15 @@ func (r *ReportGenerator) copyLogFile(sourcePath string) error {
 //
 //nolint:funlen
 func (r *ReportGenerator) GenerateSessionReport(session TranslationSession) error {
+	// Snapshot shared state under lock so concurrent recorders cannot race
+	// with report generation. The rest of the work (formatting, file I/O)
+	// operates on the immutable snapshot.
+	r.mu.Lock()
+	issues := append([]Issue(nil), r.issues...)
+	warnings := append([]Warning(nil), r.warnings...)
+	logs := append([]LogEntry(nil), r.logs...)
+	r.mu.Unlock()
+
 	var report bytes.Buffer
 
 	// Header
@@ -255,14 +276,14 @@ func (r *ReportGenerator) GenerateSessionReport(session TranslationSession) erro
 	}
 
 	// Issues Section
-	if len(r.issues) > 0 {
+	if len(issues) > 0 {
 		report.WriteString("## Issues Encountered\n\n")
 
 		criticalIssues := 0
 		errorIssues := 0
 		warningIssues := 0
 
-		for _, issue := range r.issues {
+		for _, issue := range issues {
 			switch issue.Severity {
 			case "critical":
 				criticalIssues++
@@ -277,7 +298,7 @@ func (r *ReportGenerator) GenerateSessionReport(session TranslationSession) erro
 		report.WriteString(fmt.Sprintf("- **Error Issues:** %d\n", errorIssues))
 		report.WriteString(fmt.Sprintf("- **Warning Issues:** %d\n\n", warningIssues))
 
-		for i, issue := range r.issues {
+		for i, issue := range issues {
 			status := "❌ Open"
 			if issue.Resolved {
 				status = "✅ Resolved"
@@ -299,10 +320,10 @@ func (r *ReportGenerator) GenerateSessionReport(session TranslationSession) erro
 	}
 
 	// Warnings Section
-	if len(r.warnings) > 0 {
+	if len(warnings) > 0 {
 		report.WriteString("## Warnings\n\n")
 
-		for i, warning := range r.warnings {
+		for i, warning := range warnings {
 			report.WriteString(fmt.Sprintf("### Warning #%d\n\n", i+1))
 			report.WriteString(fmt.Sprintf("- **Category:** %s\n", warning.Category))
 			report.WriteString(fmt.Sprintf("- **Component:** %s\n", warning.Component))
@@ -321,13 +342,13 @@ func (r *ReportGenerator) GenerateSessionReport(session TranslationSession) erro
 	}
 
 	// Log Summary Section
-	if len(r.logs) > 0 {
+	if len(logs) > 0 {
 		report.WriteString("## Log Summary\n\n")
 
 		logLevels := make(map[string]int)
 		components := make(map[string]int)
 
-		for _, log := range r.logs {
+		for _, log := range logs {
 			logLevels[log.Level]++
 			components[log.Component]++
 		}
@@ -342,20 +363,20 @@ func (r *ReportGenerator) GenerateSessionReport(session TranslationSession) erro
 			report.WriteString(fmt.Sprintf("- **%s:** %d entries\n", component, count))
 		}
 
-		report.WriteString(fmt.Sprintf("\n**Total Log Entries:** %d\n\n", len(r.logs)))
+		report.WriteString(fmt.Sprintf("\n**Total Log Entries:** %d\n\n", len(logs)))
 	}
 
 	// Recent Log Entries (last 20)
-	if len(r.logs) > 0 {
+	if len(logs) > 0 {
 		report.WriteString("## Recent Log Entries (Last 20)\n\n")
 
-		start := len(r.logs) - 20
+		start := len(logs) - 20
 		if start < 0 {
 			start = 0
 		}
 
-		for i := start; i < len(r.logs); i++ {
-			log := r.logs[i]
+		for i := start; i < len(logs); i++ {
+			log := logs[i]
 			report.WriteString(fmt.Sprintf("**[%s]** `%s` - %s\n",
 				log.Timestamp.Format("15:04:05"),
 				strings.ToUpper(log.Level),
@@ -394,9 +415,9 @@ func (r *ReportGenerator) GenerateSessionReport(session TranslationSession) erro
 
 	r.logger.Info("Translation report generated", map[string]interface{}{
 		"report_path":    reportPath,
-		"issues_count":   len(r.issues),
-		"warnings_count": len(r.warnings),
-		"logs_count":     len(r.logs),
+		"issues_count":   len(issues),
+		"warnings_count": len(warnings),
+		"logs_count":     len(logs),
 	})
 
 	return nil
@@ -411,6 +432,9 @@ func (r *ReportGenerator) GenerateLogArchive() error {
 
 // GetStats returns statistics about the session
 func (r *ReportGenerator) GetStats() map[string]interface{} {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	stats := map[string]interface{}{
 		"session_start":  r.startTime,
 		"issues_count":   float64(len(r.issues)),
@@ -439,12 +463,20 @@ func (r *ReportGenerator) GetStats() map[string]interface{} {
 func (r *ReportGenerator) ExportLogsToFile() error {
 	logPath := filepath.Join(r.destinationDir, "session_logs.json")
 
+	// Snapshot shared state under lock so concurrent recorders cannot race
+	// with the export.
+	r.mu.Lock()
+	issues := append([]Issue(nil), r.issues...)
+	warnings := append([]Warning(nil), r.warnings...)
+	logs := append([]LogEntry(nil), r.logs...)
+	r.mu.Unlock()
+
 	// Create structured log data
 	logData := map[string]interface{}{
 		"session_start": r.startTime,
-		"issues":        r.issues,
-		"warnings":      r.warnings,
-		"logs":          r.logs,
+		"issues":        issues,
+		"warnings":      warnings,
+		"logs":          logs,
 	}
 
 	// Convert to JSON (in a real implementation, use json.Marshal)
@@ -454,17 +486,17 @@ func (r *ReportGenerator) ExportLogsToFile() error {
 	content.WriteString("===================\n\n")
 	content.WriteString(fmt.Sprintf("Session Start: %s\n\n", r.startTime.Format("2006-01-02 15:04:05")))
 
-	if len(r.issues) > 0 {
+	if len(issues) > 0 {
 		content.WriteString("Issues:\n")
-		for i, issue := range r.issues {
+		for i, issue := range issues {
 			content.WriteString(fmt.Sprintf("  %d. [%s] %s - %s\n", i+1, issue.Severity, issue.Component, issue.Message))
 		}
 		content.WriteString("\n")
 	}
 
-	if len(r.warnings) > 0 {
+	if len(warnings) > 0 {
 		content.WriteString("Warnings:\n")
-		for i, warning := range r.warnings {
+		for i, warning := range warnings {
 			content.WriteString(fmt.Sprintf("  %d. [%s] %s - %s\n", i+1, warning.Category, warning.Component, warning.Message))
 		}
 		content.WriteString("\n")
@@ -472,7 +504,7 @@ func (r *ReportGenerator) ExportLogsToFile() error {
 
 	// Write log entries
 	content.WriteString("Log Entries:\n")
-	for _, log := range r.logs {
+	for _, log := range logs {
 		content.WriteString(fmt.Sprintf("  [%s] %s: %s\n", log.Timestamp.Format("15:04:05"), log.Level, log.Message))
 	}
 

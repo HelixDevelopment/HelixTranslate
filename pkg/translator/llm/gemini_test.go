@@ -103,6 +103,16 @@ func TestGeminiProvider(t *testing.T) {
 
 // TestGeminiRequestErrorPaths tests error paths in gemini makeRequest function
 func TestGeminiRequestErrorPaths(t *testing.T) {
+	// A local server returning a non-200 (400) preserves the "request was sent and
+	// rejected" assertion of the subtests that dial below, without hitting the real
+	// generativelanguage.googleapis.com host — deterministic and offline (§11.4.98).
+	rejectingServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"error":{"code":400,"message":"Invalid request"}}`))
+	}))
+	defer rejectingServer.Close()
+
 	t.Run("invalid_api_key", func(t *testing.T) {
 		config := TranslationConfig{
 			Provider: "gemini",
@@ -126,6 +136,7 @@ func TestGeminiRequestErrorPaths(t *testing.T) {
 		client, err := NewGeminiClient(config)
 		require.NoError(t, err)
 		require.NotNil(t, client)
+		client.baseURL = rejectingServer.URL // offline (§11.4.98)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
@@ -183,6 +194,7 @@ func TestGeminiRequestErrorPaths(t *testing.T) {
 		client, err := NewGeminiClient(config)
 		require.NoError(t, err)
 		require.NotNil(t, client)
+		client.baseURL = rejectingServer.URL // offline (§11.4.98)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()

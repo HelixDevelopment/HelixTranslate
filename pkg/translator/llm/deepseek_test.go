@@ -3,6 +3,7 @@ package llm
 import (
 	"context"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 )
@@ -266,6 +267,17 @@ func TestDeepSeekClient_RequestStructure(t *testing.T) {
 }
 
 func TestDeepSeekClient_ErrorHandling(t *testing.T) {
+	// "invalid api key" path: a local server returning a non-200 (401) preserves
+	// the assertion (DeepSeek embeds OpenAIClient, whose Translate errors on any
+	// non-200 status) without dialing the real api.deepseek.com host — keeping the
+	// unit test deterministic and offline (§11.4.98).
+	unauthorizedServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(`{"error":{"message":"Invalid API key"}}`))
+	}))
+	defer unauthorizedServer.Close()
+
 	tests := []struct {
 		name   string
 		config TranslationConfig
@@ -276,7 +288,7 @@ func TestDeepSeekClient_ErrorHandling(t *testing.T) {
 				Provider: "deepseek",
 				APIKey:   "invalid-key",
 				Model:    "deepseek-chat",
-				BaseURL:  "https://api.deepseek.com",
+				BaseURL:  unauthorizedServer.URL,
 			},
 		},
 		{
