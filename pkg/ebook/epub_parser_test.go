@@ -229,9 +229,20 @@ func TestEPUBParser_CleanXMLData(t *testing.T) {
 			expected: "<root>contentwith invalid</root>",
 		},
 		{
+			// CleanXMLData escapes genuinely-bare ampersands to &amp; and leaves
+			// the following literal characters alone. It MUST NOT guess that a
+			// bare "&q"/"&a"/"&l"/"&g" was meant to be &quot;/&amp;/&lt;/&gt; —
+			// that heuristic corrupted real text ("Q&A", "AT&T") and valid
+			// entities (&amp; → &amp;mp;). Each bare '&' becomes exactly "&amp;".
 			name:     "Invalid entities",
 			input:    "<root>& &< &> &q &a &l &g</root>",
-			expected: "<root>&amp; &lt; &gt; &quot; &amp; &lt; &gt;</root>",
+			expected: "<root>&amp; &amp;< &amp;> &amp;q &amp;a &amp;l &amp;g</root>",
+		},
+		{
+			// Already-valid entities MUST be preserved verbatim (idempotent).
+			name:     "Valid entities preserved",
+			input:    "<root>Tom &amp; Jerry &lt;x&gt; &#233;</root>",
+			expected: "<root>Tom &amp; Jerry &lt;x&gt; &#233;</root>",
 		},
 	}
 

@@ -148,19 +148,46 @@ func (p *EPUBParser) CleanXMLData(data []byte) []byte {
 		}
 	}
 
-	// Fix common XML issues
-	cleanedStr := cleaned.String()
-	// Process entities in specific order to avoid double-processing
-	cleanedStr = strings.ReplaceAll(cleanedStr, "&q", "&quot;")
-	cleanedStr = strings.ReplaceAll(cleanedStr, "&a", "&amp;")
-	cleanedStr = strings.ReplaceAll(cleanedStr, "&l", "&lt;")
-	cleanedStr = strings.ReplaceAll(cleanedStr, "&g", "&gt;")
-	// Process standalone & at the end to avoid double-conversion
-	cleanedStr = strings.ReplaceAll(cleanedStr, "& ", "&amp; ")
-	cleanedStr = strings.ReplaceAll(cleanedStr, "&<", "&lt;")
-	cleanedStr = strings.ReplaceAll(cleanedStr, "&>", "&gt;")
+	// Escape ONLY bare ampersands — a '&' that does not already begin a valid
+	// XML entity reference (&amp; &lt; &gt; &quot; &apos; or a numeric &#...; /
+	// &#x...;). The previous implementation blindly rewrote the 2-char prefixes
+	// "&a"/"&l"/"&g"/"&q" into full entities, which corrupted ALREADY-VALID
+	// entities (e.g. "&amp;" → "&amp;mp;" because "&a" matched inside it) and any
+	// ordinary text containing those sequences ("Q&A", "AT&T", "rock & roll").
+	// This pass is idempotent on valid markup and only fixes the
+	// genuinely-unescaped ampersands that break the XML parse.
+	cleanedStr := escapeBareAmpersands(cleaned.String())
 
 	return []byte(cleanedStr)
+}
+
+// validEntityRe matches a complete, well-formed XML entity reference (named or
+// numeric) anchored at the current position. Go's RE2 has no lookahead, so
+// escapeBareAmpersands scans each '&' and tests whether a valid entity follows.
+var validEntityRe = regexp.MustCompile(`^&(?:[a-zA-Z][a-zA-Z0-9]*|#[0-9]+|#[xX][0-9a-fA-F]+);`)
+
+// escapeBareAmpersands replaces every '&' that does NOT start a well-formed XML
+// entity reference with "&amp;", leaving already-valid entities untouched. This
+// is the actual fix for "invalid character entity" parse failures without
+// corrupting valid markup or ordinary text.
+func escapeBareAmpersands(s string) string {
+	var b strings.Builder
+	b.Grow(len(s))
+	for i := 0; i < len(s); i++ {
+		if s[i] == '&' && validEntityRe.MatchString(s[i:]) {
+			// Copy the whole valid entity verbatim.
+			loc := validEntityRe.FindStringIndex(s[i:])
+			b.WriteString(s[i : i+loc[1]])
+			i += loc[1] - 1
+			continue
+		}
+		if s[i] == '&' {
+			b.WriteString("&amp;")
+			continue
+		}
+		b.WriteByte(s[i])
+	}
+	return b.String()
 }
 
 // parseOPF parses content.opf for metadata and content files
@@ -327,20 +354,24 @@ func (p *EPUBParser) parseContentFile(f *zip.File) (*Chapter, error) {
 	return chapter, nil
 }
 
-// removeHTMLTags removes HTML tags from text
+// htmlTagRe matches any HTML/XML tag form: opening (<p>), closing (</p>),
+// self-closing / void (<br/>, <img .../>, <hr/>), comments (<!-- ... -->),
+// doctype / declarations (<!DOCTYPE ...>), and processing instructions
+// (<?xml ...?>). Each is replaced with a single space so adjacent words are not
+// glued together.
+var htmlTagRe = regexp.MustCompile(`(?s)<!--.*?-->|<[^>]*>`)
+
+// removeHTMLTags removes HTML tags from text, replacing each with a single space.
+//
+// The previous implementation used `<[a-zA-Z][^>/]*>` for opening tags and
+// `</[^>]*>` for closing tags. That pattern EXCLUDED self-closing / void tags
+// (`<br/>`, `<img .../>`, `<hr/>`) — the most common tags in EPUB content — so
+// they leaked through as literal markup into the extracted chapter text, and
+// HTML comments / doctype declarations also survived. This single pass removes
+// every tag form (and HTML comments), each replaced with a space to preserve
+// word boundaries.
 func removeHTMLTags(s string) string {
-	// Replace HTML tags with spaces using different logic for opening vs closing tags
-	// This preserves the spacing pattern expected in tests
-
-	// Replace opening tags (like <p>, <b>) with a space
-	openingRe := regexp.MustCompile(`<[a-zA-Z][^>/]*>`)
-	content := openingRe.ReplaceAllString(s, " ")
-
-	// Replace closing tags (like </p>, </b>) with a space
-	closingRe := regexp.MustCompile(`</[^>]*>`)
-	content = closingRe.ReplaceAllString(content, " ")
-
-	return content
+	return htmlTagRe.ReplaceAllString(s, " ")
 }
 
 // extractCoverImage extracts cover image bytes from a zip file
