@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"digital.vasic.translator/pkg/events"
@@ -46,8 +47,18 @@ type VersionInfo struct {
 	LastUpdated     time.Time         `json:"last_updated"`
 }
 
-// PairingManager manages pairing with remote services
+// PairingManager manages pairing with remote services.
+//
+// Concurrency contract: mu guards the services map AND the mutable fields
+// (Status, LastSeen, PairedAt) of every *RemoteService it owns. Those services
+// are mutated by DiscoverService / PairWithService / UnpairService and by the
+// background health-check goroutines, while read by GetPairedServices /
+// GetServiceStatus — so every access to services or a contained service's
+// mutable fields MUST happen under mu (writes under Lock, reads under RLock).
+// mu is NEVER held across a blocking call (HTTP, channel send, sleep): the
+// blocking work is done unlocked and only the shared-state read/write is locked.
 type PairingManager struct {
+	mu            sync.RWMutex
 	services      map[string]*RemoteService
 	sshPool       *SSHPool
 	eventBus      *events.EventBus
@@ -90,6 +101,14 @@ func NewPairingManager(sshPool *SSHPool, eventBus *events.EventBus) *PairingMana
 	return manager
 }
 
+// addService records (or replaces) a discovered service in the registry.
+// It acquires the write lock; callers MUST NOT already hold pm.mu.
+func (pm *PairingManager) addService(workerID string, service *RemoteService) {
+	pm.mu.Lock()
+	pm.services[workerID] = service
+	pm.mu.Unlock()
+}
+
 // DiscoverService discovers a remote service via SSH
 func (pm *PairingManager) DiscoverService(ctx context.Context, workerID string) (*RemoteService, error) {
 	conn, err := pm.sshPool.GetConnection(workerID)
@@ -129,7 +148,7 @@ func (pm *PairingManager) DiscoverService(ctx context.Context, workerID string) 
 		}
 	}
 
-	pm.services[workerID] = service
+	pm.addService(workerID, service)
 	return service, nil
 }
 
@@ -222,8 +241,12 @@ func (pm *PairingManager) queryServiceInfo(workerID string) (*RemoteService, err
 
 // PairWithService pairs with a discovered remote service
 func (pm *PairingManager) PairWithService(workerID string) error {
+	// Mutate the shared state under the lock, then snapshot the fields the
+	// event needs and release the lock BEFORE the (potentially blocking) emit.
+	pm.mu.Lock()
 	service, exists := pm.services[workerID]
 	if !exists {
+		pm.mu.Unlock()
 		return fmt.Errorf("service %s not discovered", workerID)
 	}
 
@@ -231,16 +254,21 @@ func (pm *PairingManager) PairWithService(workerID string) error {
 	service.Status = "paired"
 	service.PairedAt = &now
 
-	// Emit pairing event
+	name := service.Name
+	host := service.Host
+	capabilities := service.Capabilities
+	pm.mu.Unlock()
+
+	// Emit pairing event (unlocked — Publish may block on subscribers).
 	pm.emitEvent(events.Event{
 		Type:      "distributed_worker_paired",
 		SessionID: "system",
 		Message:   fmt.Sprintf("Successfully paired with remote worker %s", workerID),
 		Data: map[string]interface{}{
 			"worker_id":    workerID,
-			"worker_name":  service.Name,
-			"host":         service.Host,
-			"capabilities": service.Capabilities,
+			"worker_name":  name,
+			"host":         host,
+			"capabilities": capabilities,
 		},
 	})
 
@@ -249,22 +277,27 @@ func (pm *PairingManager) PairWithService(workerID string) error {
 
 // UnpairService unpairs from a remote service
 func (pm *PairingManager) UnpairService(workerID string) error {
+	pm.mu.Lock()
 	service, exists := pm.services[workerID]
 	if !exists {
+		pm.mu.Unlock()
 		return fmt.Errorf("service %s not found", workerID)
 	}
 
 	service.Status = "online"
 	service.PairedAt = nil
 
-	// Emit unpairing event
+	name := service.Name
+	pm.mu.Unlock()
+
+	// Emit unpairing event (unlocked — Publish may block on subscribers).
 	pm.emitEvent(events.Event{
 		Type:      "distributed_worker_unpaired",
 		SessionID: "system",
 		Message:   fmt.Sprintf("Unpaired from remote worker %s", workerID),
 		Data: map[string]interface{}{
 			"worker_id":   workerID,
-			"worker_name": service.Name,
+			"worker_name": name,
 		},
 	})
 
@@ -275,23 +308,29 @@ func (pm *PairingManager) UnpairService(workerID string) error {
 func (pm *PairingManager) GetPairedServices() map[string]*RemoteService {
 	paired := make(map[string]*RemoteService)
 
+	pm.mu.RLock()
 	for id, service := range pm.services {
 		if service.Status == "paired" {
 			paired[id] = service
 		}
 	}
+	pm.mu.RUnlock()
 
 	return paired
 }
 
 // GetServiceStatus returns the status of a service
 func (pm *PairingManager) GetServiceStatus(workerID string) (string, error) {
+	pm.mu.RLock()
 	service, exists := pm.services[workerID]
 	if !exists {
+		pm.mu.RUnlock()
 		return "unknown", fmt.Errorf("service %s not found", workerID)
 	}
+	status := service.Status
+	pm.mu.RUnlock()
 
-	return service.Status, nil
+	return status, nil
 }
 
 // healthCheckLoop periodically checks health of paired services
@@ -310,22 +349,51 @@ func (pm *PairingManager) healthCheckLoop() {
 	}
 }
 
-// performHealthChecks checks health of all known services
+// performHealthChecks checks health of all known services.
+//
+// It snapshots the (workerID, service) pairs under the read lock, releases the
+// lock, and only then spawns the per-service health-check goroutines — the lock
+// is never held across the goroutine spawn or the HTTP calls they perform.
 func (pm *PairingManager) performHealthChecks() {
+	type target struct {
+		workerID string
+		service  *RemoteService
+	}
+
+	pm.mu.RLock()
+	targets := make([]target, 0, len(pm.services))
 	for workerID, service := range pm.services {
-		go pm.checkServiceHealth(workerID, service)
+		targets = append(targets, target{workerID: workerID, service: service})
+	}
+	pm.mu.RUnlock()
+
+	for _, t := range targets {
+		go pm.checkServiceHealth(t.workerID, t.service)
 	}
 }
 
-// checkServiceHealth checks the health of a single service
+// checkServiceHealth checks the health of a single service.
+//
+// The HTTP probe (a blocking network call) runs with NO lock held. The shared
+// state (service.Status / service.LastSeen, read by GetPairedServices /
+// GetServiceStatus and written by Pair/Unpair) is read+mutated only inside a
+// short critical section, and the resulting event is emitted AFTER the lock is
+// released. service.Protocol/Host/Port are immutable after discovery, so they
+// are read without the lock when building the URL.
 func (pm *PairingManager) checkServiceHealth(workerID string, service *RemoteService) {
 	url := fmt.Sprintf("%s://%s:%d/health", service.Protocol, service.Host, service.Port)
 
-	resp, err := pm.httpClient.Get(url)
+	resp, err := pm.httpClient.Get(url) // blocking — MUST be unlocked
 	if err != nil {
-		// Service is unreachable
-		if service.Status != "offline" {
+		// Service is unreachable.
+		pm.mu.Lock()
+		emit := service.Status != "offline"
+		if emit {
 			service.Status = "offline"
+		}
+		pm.mu.Unlock()
+
+		if emit {
 			pm.emitEvent(events.Event{
 				Type:      "distributed_worker_offline",
 				SessionID: "system",
@@ -344,11 +412,13 @@ func (pm *PairingManager) checkServiceHealth(workerID string, service *RemoteSer
 	// check must NOT demote a paired worker to "online", otherwise
 	// GetPairedServices() (which filters by Status == "paired") would silently
 	// drop it after the first health-check tick, losing work distribution.
+	pm.mu.Lock()
 	wasOffline := service.Status == "offline"
 	if service.Status != "paired" {
 		service.Status = "online"
 	}
 	service.LastSeen = time.Now()
+	pm.mu.Unlock()
 
 	if wasOffline {
 		pm.emitEvent(events.Event{
