@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"sync"
 	"time"
@@ -102,13 +103,75 @@ func (c *Client) GetVerifiedModels(ctx context.Context) ([]Model, error) {
 		return nil, fmt.Errorf("LLMsVerifier models endpoint returned %d", resp.StatusCode)
 	}
 
-	var models []Model
-	if err := json.NewDecoder(resp.Body).Decode(&models); err != nil {
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read models response: %w", err)
+	}
+
+	models, err := decodeModelsResponse(body)
+	if err != nil {
 		return nil, fmt.Errorf("failed to decode models response: %w", err)
 	}
 
 	c.models = models
 	c.lastFetch = time.Now()
+	return models, nil
+}
+
+// serverModel mirrors the field shape the LLMsVerifier server's /api/models
+// endpoint emits (envelope object + per-model field names that differ from
+// api.Model). The server is the decoupled SSOT; the System adapts to it here.
+type serverModel struct {
+	ID           int64           `json:"id"`
+	ModelID      string          `json:"model_id"`
+	Name         string          `json:"name"`
+	Provider     string          `json:"provider"`
+	ProviderID   int64           `json:"provider_id"`
+	Status       string          `json:"status"`
+	Score        float64         `json:"score"`
+	Capabilities []string        `json:"capabilities"`
+	Description  string          `json:"description"`
+	Version      string          `json:"version"`
+	Deprecated   bool            `json:"deprecated"`
+}
+
+// decodeModelsResponse accepts BOTH the server's documented envelope
+// ({"models":[...],"count":N}) with its server-side field names AND a bare
+// []api.Model array (forward-compatible), mapping either onto []Model.
+func decodeModelsResponse(body []byte) ([]Model, error) {
+	// Preferred: the server envelope with server-side field names.
+	var env struct {
+		Models []serverModel `json:"models"`
+		Count  int           `json:"count"`
+	}
+	if err := json.Unmarshal(body, &env); err == nil && env.Models != nil {
+		out := make([]Model, 0, len(env.Models))
+		for _, sm := range env.Models {
+			caps := make(map[string]bool, len(sm.Capabilities))
+			for _, cap := range sm.Capabilities {
+				caps[cap] = true
+			}
+			id := sm.ModelID
+			if id == "" {
+				id = fmt.Sprintf("%d", sm.ID)
+			}
+			out = append(out, Model{
+				ID:                 id,
+				ProviderID:         fmt.Sprintf("%d", sm.ProviderID),
+				Name:               sm.Name,
+				VerificationStatus: sm.Status,
+				OverallScore:       sm.Score,
+				Capabilities:       caps,
+			})
+		}
+		return out, nil
+	}
+
+	// Forward-compatible fallback: a bare []api.Model array.
+	var models []Model
+	if err := json.Unmarshal(body, &models); err != nil {
+		return nil, err
+	}
 	return models, nil
 }
 

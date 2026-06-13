@@ -1,0 +1,175 @@
+{
+  "count": 89,
+  "models": [
+    {
+      "capabilities": [
+        "text"
+      ],
+      "created_at": "2026-06-13T15:22:38Z",
+      "deprecated": false,
+      "description": "",
+      "id": 20,
+      "model_id": "allam-2-7b",
+      "name": "allam-2-7b",
+      "provider": "Groq",
+      "provider_id": 3,
+      "score": 94,
+      "status": "verified",
+      "updated_at": "2026-06-13T15:22:38Z",
+      "version": "live"
+    },
+    {
+      "capabilities": [
+        "text"
+      ],
+      "created_at": "2026-06-13T15:22:38Z",
+      "deprecated": false,
+      "description": "",
+      "id": 11,
+      "model_id": "canopylabs/orpheus-arabic-saudi",
+      "name": "canopylabs/orpheus-arabic-saudi",
+      "provider": "Groq",
+      "provider_id": 3,
+      "score": 94,
+      "status": "verified",
+      "updated_at": "2026-06-13T15:22:38Z",
+      "version": "live"
+    },
+    {
+      "capabilities": [
+        "text"
+      ],
+      "created_at": "2026-06-13T15:22:38Z",
+      "deprecated": false,
+      "description": "",
+      "id": 5,
+      "model_id": "canopylabs/orpheus-v1-english",
+      "name": "canopylabs/orpheus-v1-english",
+      "provider": "Groq",
+      "provider_id": 3,
+      "score": 94,
+      "status": "verified",
+      "updated_at": "2026-06-13T15:22:38Z",
+      "version": "live"
+    },
+    {
+      "capabilities": [
+        "text"
+      ],
+      "created_at": "2026-06-13T15:22:38Z",
+      "deprecated": false,
+      "description": "",
+      "id": 27,
+      "model_id": "codestral-2508",
+      "name": "codestral-2508",
+      "provider": "Mistral",
+      "provider_id": 4,
+      "score": 92,
+      "status": "verified",
+      "updated_at": "2026-06-13T15:22:38Z",
+      "version": "live"
+    },
+    {
+      "capabilities": [
+        "text"
+      ],
+      "created_at": "2026-06-13T15:22:38Z",
+      "deprecated": false,
+      "description": "",
+      "id": 76,
+      "model_id": "codestral-embed",
+      "name": "codestral-embed",
+      "provider": "Mistral",
+      "provider_id": 4,
+      "score": 92,
+      "status": "verified",
+      "updated_at": "2026-06-13T15:22:38Z",
+      "version": "live"
+    },
+    {
+      "capabilities": [
+        "text"
+      ],
+      "created_at": "2026-06-13T15:22:38Z",
+      "deprecated": false,
+      "description": "",
+      "id": 77,
+      "model_id": "codestral-embed-2505",
+      "name": "codestral-embed-2505",
+      "provider": "Mistral",
+      "provider_id": 4,
+      "score": 92,
+      "status": "verified",
+      "updated_at": "2026-06-13T15:22:38Z",
+      "version": "live"
+    },
+    {
+      "capabilities": [
+        "text"
+      ],
+      "created_at": "2026-06-13T15:22:38Z",
+      "deprecated": false,
+      "description": "",
+      "id": 28,
+      "model_id": "codestral-latest",
+      "name": "codestral-latest",
+      "provider": "Mistral",
+      "provider_id": 4,
+      "score": 92,
+      "status": "verified",
+      "updated_at": "2026-06-13T15:22:38Z",
+      "version": "live"
+    },
+    {
+      "capabilities": [
+        "text"
+      ],
+      "created_at": "2026-06-13T15:22:37Z",
+      "deprecated": false,
+      "description": "",
+      "id": 1,
+      "model_id": "deepseek-v4-flash",
+      "name": "deepseek-v4-flash",
+      "provider": "DeepSeek",
+      "provider_id": 1,
+      "score": 95,
+      "status": "verified",
+      "updated_at": "2026-06-13T15:22:37Z",
+      "version": "live"
+    },
+    {
+      "capabilities": [
+        "text"
+      ],
+      "created_at": "2026-06-13T15:22:37Z",
+      "deprecated": false,
+      "description": "",
+      "id": 2,
+      "model_id": "deepseek-v4-pro",
+      "name": "deepseek-v4-pro",
+      "provider": "DeepSeek",
+      "provider_id": 1,
+      "score": 95,
+      "status": "verified",
+      "updated_at": "2026-06-13T15:22:37Z",
+      "version": "live"
+    },
+    {
+      "capabilities": [
+        "text"
+      ],
+      "created_at": "2026-06-13T15:22:38Z",
+      "deprecated": false,
+      "description": "",
+      "id": 31,
+      "model_id": "devstral-2512",
+      "name": "devstral-2512",
+      "provider": "Mistral",
+      "provider_id": 4,
+      "score": 92,
+      "status": "verified",
+      "updated_at": "2026-06-13T15:22:38Z",
+      "version": "live"
+    }
+  ]
+}
