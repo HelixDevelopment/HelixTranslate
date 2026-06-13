@@ -88,7 +88,7 @@ type TranslationSession struct {
 	EventBus  *events.EventBus
 	Logger    logger.Logger
 	Files     []GeneratedFile
-	Steps     []TranslationStep
+	Steps     []*TranslationStep
 }
 
 // GeneratedFile tracks files generated during translation
@@ -136,7 +136,7 @@ func main() {
 		EventBus:  eventBus,
 		Logger:    logger,
 		Files:     make([]GeneratedFile, 0),
-		Steps:     make([]TranslationStep, 0),
+		Steps:     make([]*TranslationStep, 0),
 	}
 
 	// Start monitoring server if requested
@@ -722,13 +722,16 @@ func generateTranslatedMDPath(inputFile string) string {
 }
 
 func addStep(session *TranslationSession, name string) *TranslationStep {
-	step := TranslationStep{
+	step := &TranslationStep{
 		Name:      name,
 		StartTime: time.Now(),
 		Success:   false,
 	}
+	// Append the pointer (not a value): a subsequent append may reallocate the
+	// backing array, but the *TranslationStep we returned keeps pointing at the
+	// same heap object, so a step held across a later addStep stays live.
 	session.Steps = append(session.Steps, step)
-	return &session.Steps[len(session.Steps)-1]
+	return step
 }
 
 func stepComplete(step *TranslationStep) {

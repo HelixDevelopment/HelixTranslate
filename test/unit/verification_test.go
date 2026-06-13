@@ -2,6 +2,7 @@ package unit
 
 import (
 	"context"
+	"sync"
 	"testing"
 	"time"
 
@@ -10,6 +11,74 @@ import (
 	"digital.vasic.translator/pkg/language"
 	"digital.vasic.translator/pkg/verification"
 )
+
+// eventCollector is a thread-safe sink for events delivered via
+// EventBus.SubscribeAll. EventBus.Publish dispatches every handler in its own
+// goroutine (see pkg/events/events.go), so the handler runs concurrently with
+// the test goroutine. Collecting into a plain slice from the handler is a data
+// race AND offers no happens-before guarantee that appended events are visible
+// to the test goroutine. eventCollector serialises append/read under a mutex
+// and exposes waitForType to poll deterministically for an expected event
+// instead of sleeping a fixed (and load-sensitive) duration.
+type eventCollector struct {
+	mu     sync.Mutex
+	events []events.Event
+}
+
+func (c *eventCollector) handler(event events.Event) {
+	c.mu.Lock()
+	c.events = append(c.events, event)
+	c.mu.Unlock()
+}
+
+func (c *eventCollector) snapshot() []events.Event {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	out := make([]events.Event, len(c.events))
+	copy(out, c.events)
+	return out
+}
+
+func (c *eventCollector) count() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return len(c.events)
+}
+
+// waitForType polls until at least one event of eventType has been collected or
+// the timeout elapses. Returns true if found. Deterministic across load: a slow
+// dispatch goroutine just makes the loop iterate more, it never produces a false
+// negative the way a fixed sleep does.
+func (c *eventCollector) waitForType(eventType events.EventType, timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		for _, e := range c.snapshot() {
+			if e.Type == eventType {
+				return true
+			}
+		}
+		time.Sleep(time.Millisecond)
+	}
+	// Final check after the deadline in case the last event landed just now.
+	for _, e := range c.snapshot() {
+		if e.Type == eventType {
+			return true
+		}
+	}
+	return false
+}
+
+// waitForCount polls until at least n events have been collected or timeout.
+func (c *eventCollector) waitForCount(n int, timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if c.count() >= n {
+			return true
+		}
+		time.Sleep(time.Millisecond)
+	}
+	return c.count() >= n
+}
 
 func TestVerifier(t *testing.T) {
 	ctx := context.Background()
@@ -405,11 +474,9 @@ func TestVerifier(t *testing.T) {
 
 	t.Run("EventEmission", func(t *testing.T) {
 		eventBus := events.NewEventBus()
-		receivedEvents := make([]events.Event, 0)
+		collector := &eventCollector{}
 
-		eventBus.SubscribeAll(func(event events.Event) {
-			receivedEvents = append(receivedEvents, event)
-		})
+		eventBus.SubscribeAll(collector.handler)
 
 		verifier := verification.NewVerifier(ru, sr, eventBus, "test-session")
 
@@ -433,23 +500,23 @@ func TestVerifier(t *testing.T) {
 			t.Fatalf("Verification failed: %v", err)
 		}
 
-		// Wait briefly for async events to be processed
-		time.Sleep(50 * time.Millisecond)
+		// Events are dispatched on separate goroutines by EventBus.Publish, so
+		// poll deterministically for the completion event rather than sleeping a
+		// fixed (load-sensitive) duration. 2s is generously above the observed
+		// dispatch latency and the loop exits the instant the event arrives.
+		hasCompleted := collector.waitForType("verification_completed", 2*time.Second)
 
-		// Check that events were emitted
-		if len(receivedEvents) == 0 {
+		// Check that events were emitted at all.
+		if collector.count() == 0 {
 			t.Error("Expected events to be emitted")
 		}
 
-		// Check for specific event types
+		// Check for the started event (informational — see note below).
 		hasStarted := false
-		hasCompleted := false
-		for _, event := range receivedEvents {
+		for _, event := range collector.snapshot() {
 			if event.Type == "verification_started" {
 				hasStarted = true
-			}
-			if event.Type == "verification_completed" {
-				hasCompleted = true
+				break
 			}
 		}
 
@@ -463,11 +530,11 @@ func TestVerifier(t *testing.T) {
 
 	t.Run("WarningEventsForUntranslated", func(t *testing.T) {
 		eventBus := events.NewEventBus()
-		receivedWarnings := make([]events.Event, 0)
+		warnings := &eventCollector{}
 
 		eventBus.SubscribeAll(func(event events.Event) {
 			if event.Type == "verification_warning" {
-				receivedWarnings = append(receivedWarnings, event)
+				warnings.handler(event)
 			}
 		})
 
@@ -486,10 +553,10 @@ func TestVerifier(t *testing.T) {
 			t.Fatalf("Verification failed: %v", err)
 		}
 
-		// Wait briefly for async events to be processed
-		time.Sleep(50 * time.Millisecond)
-
-		if len(receivedWarnings) == 0 {
+		// Poll deterministically for the warning event(s) rather than sleeping a
+		// fixed (load-sensitive) duration; events are dispatched async by
+		// EventBus.Publish.
+		if !warnings.waitForCount(1, 2*time.Second) {
 			t.Error("Expected warning events for untranslated content")
 		}
 	})
