@@ -62,13 +62,14 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.43.0 // indirect
 	golang.org/x/arch v0.20.0 // indirect
 	golang.org/x/image v0.24.0 // indirect
-	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260401024825-9d38bb4040a9 // indirect
 )
 
 require (
 	digital.vasic.challenges v0.0.0
+	digital.vasic.containers v0.0.0-00010101000000-000000000000
 	digital.vasic.llmsverifier v0.0.0
 )
 
