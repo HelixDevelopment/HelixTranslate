@@ -1,10 +1,29 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 18
-**Last modified:** 2026-06-13T00:00:00Z
+**Revision:** 19
+**Last modified:** 2026-06-13T20:00:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
+
+<!-- session 2026-06-13b: parallel subagent bug-hunt wave -->
+
+### Session 2026-06-13b — parallel subagent bug-hunt wave (HEAD 86175d0) — ~15 real bugs, all reproduce-first + mutation-proven + -race + pushed FF (no force §11.4.113)
+
+Mode: §11.4.126 autonomous loop + §11.4.103 ≥3 parallel streams (conductor + 4–5 background bug-hunt subagents/wave). §11.4.147 exercised heavily — multiple subagents were rate-limit-crashed ("Server is temporarily limiting requests") and respawned until complete; conductor independently verified every subagent claim (-race + scope census + §11.4.142 diff review) BEFORE committing. Commits pushed to milos85vasic/Translator + HelixDevelopment/HelixTranslate, fast-forward, no force.
+
+- **a40a9b9** — logger `shouldLog` fail-open (typo level "warning" → logged everything incl DEBUG in prod) + fail-drop (unknown msg level dropped) → `levelRank` fallback (cov 84.3→91.1%); progress tracker 5 bugs (GetProgress data race, Complete() 0% clobber, negative %, ETA float truncation, divide-by-zero PANIC); ollama_test 4 subtests dialed real httpbin.org → httptest (6.6s→0.3s offline) §11.4.98.
+- **3a7ae78** — gRPC EventBus handler LEAK (SubscribeEvents never unsubscribed → unbounded `allEvents` growth) → added `SubscriptionID`+`Unsubscribe`+`HandlerCount`, defer Unsubscribe, drop close; + pre-existing session-field DATA RACE (sessionsMutex guarded only the map) → locked Status writes, snapshot-under-RLock GetTranslationStatus, fixed latent recursive-RLock deadlock in ListTranslations. Mutation-proven (events + real bufconn leak test), -race ×3.
+- **a2aa3da** — report ReportGenerator data race (unsynced appends) → sync.Mutex + snapshot-under-lock; deepseek/anthropic/gemini tests dialed real api.* → httptest (package 30.6s→19.2s offline) §11.4.98.
+- **ef0a60f** — verification multipass O(n²) DUPLICATE DB WRITES (polishWithNotes re-saved the whole accumulated report.SectionResults each chapter → polishing_changes got 1+2+…+N dup rows; section_results PK-conflict inserts failed silently) → `saveNewResults` cursor. Mutation: 15 change rows for 5 chapters vs 5.
+- **916dddd** — storage Redis cache-key HASH COLLISION (32-bit poly-31 → distinct texts shared a key → WRONG cached translation served) → sha256; + Redis avg-duration dilution → `accumulateAvgDuration`. Mutation-proven.
+- **86175d0** — markdown→EPUB ROUND-TRIP DATA LOSS: links/images/blockquotes left literal in HTML AND the production `convertMarkdownToXHTML` chapter path (readers got `[text](url)` / `&gt;`) → blockquote accumulation + image/link inline conv (image-before-link). `<ol>` start renumber pinned KNOWN-LOSSY. 4 bugs mutation-proven.
+
+Honest clean-verifications (§11.4.6 — investigated, NO bug): gRPC StreamTranslationProgress (streams-map delete-under-lock + non-blocking send ⇒ no send-on-closed); preparation extractJSON (string-aware matchBalanced + json.Valid guard + fenced handling robust; crashed preparation subagent left only scratch, removed §11.4.84).
+
+REMAINING NET §11.4.98 offenders (still dial real api.* — confirmed via keys-stripped per-test timing): **openai** (TestOpenAITranslateErrorPaths), **qwen**, **llamacpp** (HF download paths), **zhipu** invalid_model. Same httptest pattern → strong next-wave item.
+
+Next-session queue (disjoint, autonomous-safe): finish NET httptest-ization (openai/qwen/zhipu/llamacpp); bug-hunt cmd/* entrypoints, pkg/websocket, pkg/coordination, pkg/batch, pkg/fb2, pkg/ebook parsers/writers, pkg/distributed deeper, internal/verifier. Carry-over G1 (verify→server-DB bridge), G2 (batched ~30-provider sweep), G3 (operator: add OPENAI/ANTHROPIC keys to api_keys.sh).
 
 <!-- W13/W15/W16 wrap-up -->
 
