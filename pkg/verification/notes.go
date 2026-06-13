@@ -743,6 +743,12 @@ func (tn *TranslationNotes) Export() ([]ExportedNote, error) {
 
 // Import imports notes from exported data
 func (tn *TranslationNotes) Import(data []ExportedNote) error {
+	// Import mutates tn.notes and tn.nextID and MUST hold the write lock,
+	// like every other mutator (AddNote/UpdateNote/DeleteNote). Without it,
+	// a concurrent Import + AddNote is a data race on the map and counter.
+	tn.mu.Lock()
+	defer tn.mu.Unlock()
+
 	for _, exported := range data {
 		id := exported.ID
 		if id == "" {

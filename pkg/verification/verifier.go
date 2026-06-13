@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
@@ -537,7 +538,14 @@ func truncate(text string, maxLen int) string {
 	if len(text) <= maxLen {
 		return text
 	}
-	return text[:maxLen] + "..."
+	// Truncate on a rune boundary, not a byte boundary: this system's
+	// source text is routinely Cyrillic (multi-byte UTF-8), and slicing
+	// text[:maxLen] mid-rune would emit invalid UTF-8 into reports.
+	cut := maxLen
+	for cut > 0 && !utf8.RuneStart(text[cut]) {
+		cut--
+	}
+	return text[:cut] + "..."
 }
 
 // VerifyTranslation performs verification of a single translation (for test compatibility)

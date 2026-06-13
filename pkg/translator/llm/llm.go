@@ -533,14 +533,114 @@ func (lt *LLMTranslator) TranslateWithProgress(
 	return result, nil
 }
 
-// createTranslationPrompt creates the translation prompt
+// languageName maps an ISO-639-1 / short language code (or already-spelled
+// language name) to a human-readable English language name used in the
+// translation prompt. Unknown / empty codes return the empty string so the
+// caller can decide on a sensible fallback (never emit a broken prompt).
+func languageName(code string) string {
+	c := strings.ToLower(strings.TrimSpace(code))
+	if c == "" {
+		return ""
+	}
+	names := map[string]string{
+		"ru": "Russian", "russian": "Russian",
+		"sr": "Serbian", "serbian": "Serbian",
+		"en": "English", "english": "English",
+		"fr": "French", "french": "French",
+		"es": "Spanish", "spanish": "Spanish",
+		"de": "German", "german": "German",
+		"it": "Italian", "italian": "Italian",
+		"pt": "Portuguese", "portuguese": "Portuguese",
+		"nl": "Dutch", "dutch": "Dutch",
+		"pl": "Polish", "polish": "Polish",
+		"uk": "Ukrainian", "ukrainian": "Ukrainian",
+		"bg": "Bulgarian", "bulgarian": "Bulgarian",
+		"cs": "Czech", "czech": "Czech",
+		"sk": "Slovak", "slovak": "Slovak",
+		"sl": "Slovenian", "slovenian": "Slovenian",
+		"hr": "Croatian", "croatian": "Croatian",
+		"mk": "Macedonian", "macedonian": "Macedonian",
+		"el": "Greek", "greek": "Greek",
+		"tr": "Turkish", "turkish": "Turkish",
+		"ro": "Romanian", "romanian": "Romanian",
+		"hu": "Hungarian", "hungarian": "Hungarian",
+		"sv": "Swedish", "swedish": "Swedish",
+		"no": "Norwegian", "norwegian": "Norwegian",
+		"da": "Danish", "danish": "Danish",
+		"fi": "Finnish", "finnish": "Finnish",
+		"ar": "Arabic", "arabic": "Arabic",
+		"he": "Hebrew", "hebrew": "Hebrew",
+		"zh": "Chinese", "chinese": "Chinese",
+		"ja": "Japanese", "japanese": "Japanese",
+		"ko": "Korean", "korean": "Korean",
+		"hi": "Hindi", "hindi": "Hindi",
+	}
+	if name, ok := names[c]; ok {
+		return name
+	}
+	return code // unknown but non-empty: pass through the operator-supplied label
+}
+
+// isRussianToSerbian reports whether the configured language pair is the
+// project's primary Russian→Serbian path, which carries the rich Ekavica /
+// Cyrillic literary guidance. An unset (empty) source AND target also resolve
+// here so the historical default behaviour is preserved when no pair is
+// configured (e.g. a zero-value LLMTranslator).
+func isRussianToSerbian(sourceLang, targetLang string) bool {
+	src := languageName(sourceLang)
+	tgt := languageName(targetLang)
+	if src == "" && tgt == "" {
+		// No pair configured at all → preserve the legacy Russian→Serbian default.
+		return true
+	}
+	srcRU := src == "Russian" || src == ""
+	tgtSR := tgt == "Serbian" || tgt == ""
+	return srcRU && tgtSR
+}
+
+// scriptInstruction returns a script-specific guideline line for the target
+// language. Serbian Cyrillic↔Latin is fully supported via the configured
+// Script value; for other targets the instruction is generic.
+func scriptInstruction(targetName, script string) string {
+	s := strings.ToLower(strings.TrimSpace(script))
+	switch s {
+	case "latin":
+		return fmt.Sprintf("Write the %s translation using the Latin script.", targetName)
+	case "cyrillic":
+		return fmt.Sprintf("Write the %s translation using the Cyrillic script.", targetName)
+	default:
+		return fmt.Sprintf("Use the standard, natural writing system for %s.", targetName)
+	}
+}
+
+// createTranslationPrompt creates the translation prompt honouring the
+// configured SourceLang / TargetLang / Script. The primary Russian→Serbian
+// path keeps its exact Ekavica + pure-Serbian-vocabulary + Cyrillic guidance;
+// every other configured pair receives a correct generic professional-literary
+// prompt for that pair and script.
 func (lt *LLMTranslator) createTranslationPrompt(text string, contextStr string) string {
 	context := contextStr
 	if context == "" {
 		context = "Literary text"
 	}
 
-	return fmt.Sprintf(`You are a professional literary translator specializing in Russian to Serbian translation.
+	var sourceLang, targetLang, script string
+	if lt.BaseTranslator != nil {
+		sourceLang = lt.config.SourceLang
+		targetLang = lt.config.TargetLang
+		script = lt.config.Script
+	}
+
+	// Primary path — Russian → Serbian (also the no-config default). Preserve
+	// the existing rich Ekavica guidance EXACTLY (§11.4.124 no-regression).
+	if isRussianToSerbian(sourceLang, targetLang) {
+		// Honour an explicit Latin-script override for the Serbian target while
+		// keeping every other guideline identical to the historical prompt.
+		scriptLine := "6. Use Serbian Cyrillic script (ћирилица)"
+		if strings.EqualFold(strings.TrimSpace(script), "latin") {
+			scriptLine = "6. Use Serbian Latin script (latinica)"
+		}
+		return fmt.Sprintf(`You are a professional literary translator specializing in Russian to Serbian translation.
 Your task is to translate the following Russian text into natural, idiomatic Serbian.
 
 Guidelines:
@@ -549,7 +649,7 @@ Guidelines:
 3. Maintain cultural nuances and idioms
 4. Keep names of people and places unchanged unless they have standard Serbian equivalents
 5. Preserve formatting, punctuation, and paragraph structure
-6. Use Serbian Cyrillic script (ћирилица)
+%s
 7. **CRITICAL**: Use ONLY Ekavica dialect (екавица) - the standard Serbian dialect used in Serbia
    - Use "е" instead of "ије/је": mleko (not mlijeko), dete (not dijete), pesma (not pjesma)
    - Ekavica examples: hteo (not htio), lepo (not lijepo), reka (not rijeka)
@@ -563,7 +663,45 @@ Context: %s
 Russian text:
 %s
 
-Serbian translation (Ekavica only):`, context, text)
+Serbian translation (Ekavica only):`, scriptLine, context, text)
+	}
+
+	// Generic path — any other configured language pair.
+	srcName := languageName(sourceLang)
+	if srcName == "" {
+		srcName = "the source language"
+	}
+	tgtName := languageName(targetLang)
+	if tgtName == "" {
+		tgtName = "the target language"
+	}
+
+	return fmt.Sprintf(`You are a professional literary translator specializing in %s to %s translation.
+Your task is to translate the following %s text into natural, idiomatic %s.
+
+Guidelines:
+1. Preserve the literary style and tone
+2. Use appropriate %s vocabulary and grammar
+3. Maintain cultural nuances and idioms
+4. Keep names of people and places unchanged unless they have standard %s equivalents
+5. Preserve formatting, punctuation, and paragraph structure
+6. %s
+
+Context: %s
+
+%s text:
+%s
+
+%s translation:`,
+		srcName, tgtName,
+		srcName, tgtName,
+		tgtName,
+		tgtName,
+		scriptInstruction(tgtName, script),
+		context,
+		srcName,
+		text,
+		tgtName)
 }
 
 // enhanceTranslation post-processes the translation

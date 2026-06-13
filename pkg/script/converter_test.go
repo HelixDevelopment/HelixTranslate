@@ -24,7 +24,9 @@ func TestToLatin(t *testing.T) {
 		cyrillic string
 		latin    string
 	}{
-		{"АБВГДЂЕЖЗИЈКЛЉМНЊОПРСТЋУФХЦЧЏШ", "ABVGDĐEŽZIJKLLjMNNjOPRSTĆUFHCČDžŠ"},
+		// All-caps Cyrillic: digraphs Љ/Њ/Џ each sit before an uppercase letter,
+		// so they correctly transliterate all-caps (LJ/NJ/DŽ), not title case.
+		{"АБВГДЂЕЖЗИЈКЛЉМНЊОПРСТЋУФХЦЧЏШ", "ABVGDĐEŽZIJKLLJMNNJOPRSTĆUFHCČDŽŠ"},
 		{"абвгдђежзијклљмнњопрстћуфхцчџш", "abvgdđežzijklljmnnjoprstćufhcčdžš"},
 		{"Пример текста на српском", "Primer teksta na srpskom"},
 		{"Љубав је лепа ствар", "Ljubav je lepa stvar"},

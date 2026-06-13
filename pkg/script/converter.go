@@ -1,6 +1,20 @@
 package script
 
-import "strings"
+import (
+	"strings"
+	"unicode"
+)
+
+// upperDigraphs maps each uppercase Cyrillic digraph rune to its all-caps Latin
+// form. Standard Serbian transliteration renders an uppercase digraph in title
+// case (Lj/Nj/Dž) before a lowercase letter or in isolation, but all-caps
+// (LJ/NJ/DŽ) when it sits inside an all-caps run (followed by an uppercase
+// letter), so "ЉУБАВ" -> "LJUBAV" not "LjUBAV".
+var upperDigraphs = map[rune]string{
+	'Љ': "LJ",
+	'Њ': "NJ",
+	'Џ': "DŽ",
+}
 
 // ScriptType represents the script type
 type ScriptType string
@@ -50,7 +64,23 @@ func (c *Converter) ToLatin(text string) string {
 	var result strings.Builder
 	result.Grow(len(text))
 
-	for _, char := range text {
+	runes := []rune(text)
+	for i, char := range runes {
+		// Uppercase digraphs (Љ/Њ/Џ) render all-caps inside an all-caps run.
+		// The digraph is all-caps when the NEXT letter is uppercase (clearly
+		// mid-all-caps-word), OR when the next position is NOT a lowercase
+		// letter (word end / non-letter) AND the PREVIOUS letter was uppercase
+		// (the digraph closes an all-caps run, e.g. "ВИДИ Љ." -> "VIDI LJ.").
+		// Otherwise (lowercase next, or isolated) keep title case Lj/Nj/Dž.
+		if allCaps, ok := upperDigraphs[char]; ok {
+			if digraphIsAllCaps(runes, i) {
+				result.WriteString(allCaps)
+			} else {
+				result.WriteString(c.cyrlToLatn[char])
+			}
+			continue
+		}
+
 		if latin, ok := c.cyrlToLatn[char]; ok {
 			result.WriteString(latin)
 		} else {
@@ -59,6 +89,38 @@ func (c *Converter) ToLatin(text string) string {
 	}
 
 	return result.String()
+}
+
+// digraphIsAllCaps decides whether the uppercase digraph at index i should
+// render all-caps, by inspecting its letter neighbours.
+func digraphIsAllCaps(runes []rune, i int) bool {
+	nextUpper := isUpperLetterAt(runes, i+1)
+	nextLower := isLowerLetterAt(runes, i+1)
+	if nextUpper {
+		return true
+	}
+	// Next is not a lowercase letter (word end or punctuation): fall back to the
+	// preceding letter to tell an all-caps run from an isolated title-case form.
+	if !nextLower && isUpperLetterAt(runes, i-1) {
+		return true
+	}
+	return false
+}
+
+func isUpperLetterAt(runes []rune, i int) bool {
+	if i < 0 || i >= len(runes) {
+		return false
+	}
+	r := runes[i]
+	return unicode.IsLetter(r) && unicode.IsUpper(r)
+}
+
+func isLowerLetterAt(runes []rune, i int) bool {
+	if i < 0 || i >= len(runes) {
+		return false
+	}
+	r := runes[i]
+	return unicode.IsLetter(r) && unicode.IsLower(r)
 }
 
 // ToCyrillic converts Latin Serbian to Cyrillic

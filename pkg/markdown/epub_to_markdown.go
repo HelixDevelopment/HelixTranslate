@@ -463,18 +463,18 @@ func (c *EPUBToMarkdownConverter) convertNode(n *html.Node, md *strings.Builder,
 			md.WriteString("\n\n")
 		case "ul":
 			md.WriteString("\n\n")
-			c.convertChildren(n, md, depth+1)
+			c.convertListItems(n, md, depth+1, false)
 			md.WriteString("\n\n")
 		case "ol":
 			md.WriteString("\n\n")
-			c.convertChildren(n, md, depth+1)
+			c.convertListItems(n, md, depth+1, true)
 			md.WriteString("\n\n")
 		case "li":
+			// A bare <li> reached here is outside any <ul>/<ol> (orphan) — the
+			// real list items are emitted by convertListItems. Keep the legacy
+			// behaviour: render only the inline content, no marker.
 			if depth > 0 {
-				md.WriteString(strings.Repeat("  ", depth-1))
-				md.WriteString("- ")
 				c.convertChildren(n, md, depth)
-				md.WriteString("\n")
 			}
 		case "a":
 			href := c.getAttribute(n, "href")
@@ -502,6 +502,35 @@ func (c *EPUBToMarkdownConverter) convertNode(n *html.Node, md *strings.Builder,
 // convertChildren converts all child nodes
 func (c *EPUBToMarkdownConverter) convertChildren(n *html.Node, md *strings.Builder, depth int) {
 	for child := n.FirstChild; child != nil; child = child.NextSibling {
+		c.convertNode(child, md, depth)
+	}
+}
+
+// convertListItems emits the direct <li> children of a <ul>/<ol> with the
+// correct marker. Unordered lists use "- "; ordered lists use a monotonic
+// "1. ", "2. ", ... counter so the numbering survives the HTML->Markdown
+// conversion (a plain "- " for <ol> silently loses the user's ordering).
+// Non-<li> children (text, nested elements directly under the list) are passed
+// through unchanged so structure is preserved.
+func (c *EPUBToMarkdownConverter) convertListItems(n *html.Node, md *strings.Builder, depth int, ordered bool) {
+	indent := ""
+	if depth > 0 {
+		indent = strings.Repeat("  ", depth-1)
+	}
+	itemNum := 0
+	for child := n.FirstChild; child != nil; child = child.NextSibling {
+		if child.Type == html.ElementNode && child.Data == "li" {
+			itemNum++
+			md.WriteString(indent)
+			if ordered {
+				md.WriteString(fmt.Sprintf("%d. ", itemNum))
+			} else {
+				md.WriteString("- ")
+			}
+			c.convertChildren(child, md, depth)
+			md.WriteString("\n")
+			continue
+		}
 		c.convertNode(child, md, depth)
 	}
 }

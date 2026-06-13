@@ -95,13 +95,18 @@ func TestConvertNode_BlockElements(t *testing.T) {
 			t.Fatalf("ul/li = %q, want '- one' and '- two'", got)
 		}
 	})
-	t.Run("ordered-list-renders-as-dashes", func(t *testing.T) {
-		// Documented lossy transform: <ol> is converted with the same "- "
-		// li marker as <ul> (convertNode does not number ol items). This is a
-		// real behaviour of the package, asserted so a future change is caught.
+	t.Run("ordered-list-renders-numbered", func(t *testing.T) {
+		// <ol> items render with a monotonic "1. ", "2. " counter so the user's
+		// ordering survives the HTML->Markdown conversion. (Previously <ol> was
+		// converted with the same "- " marker as <ul>, silently losing the
+		// numbering — a real data-loss defect, now fixed.)
 		got := htmlToMarkdown(t, "<ol><li>first</li><li>second</li></ol>")
-		if !strings.Contains(got, "- first") || !strings.Contains(got, "- second") {
-			t.Fatalf("ol/li = %q, want dash markers (ol numbering is lossy)", got)
+		if !strings.Contains(got, "1. first") || !strings.Contains(got, "2. second") {
+			t.Fatalf("ol/li = %q, want numbered markers '1. first','2. second'", got)
+		}
+		// And it must NOT emit a bare dash marker for ordered items.
+		if strings.Contains(got, "- first") {
+			t.Fatalf("ol/li = %q, ordered list must not use '- ' dash markers", got)
 		}
 	})
 	t.Run("br-line-break", func(t *testing.T) {

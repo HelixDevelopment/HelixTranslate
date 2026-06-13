@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -464,5 +465,12 @@ func truncateForDisplay(text string, maxLen int) string {
 	if len(text) <= maxLen {
 		return text
 	}
-	return text[:maxLen] + "..."
+	// Truncate on a rune boundary, not a byte boundary, so that multi-byte
+	// UTF-8 text (e.g. Cyrillic originals/translations) is never split
+	// mid-rune into invalid UTF-8 in the generated report.
+	cut := maxLen
+	for cut > 0 && !utf8.RuneStart(text[cut]) {
+		cut--
+	}
+	return text[:cut] + "..."
 }
