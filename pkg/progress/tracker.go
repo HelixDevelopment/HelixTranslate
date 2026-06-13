@@ -128,8 +128,12 @@ func (t *Tracker) Complete() {
 
 	t.progress.Status = "completed"
 	t.progress.CurrentTask = "Translation completed"
-	t.progress.PercentComplete = 100.0
 	t.updateProgress()
+	// Force 100% AFTER updateProgress: a Complete() before any chapter update
+	// leaves CurrentChapter=0, so the chapter-based recompute would otherwise
+	// reset PercentComplete to 0 and clobber the completion state.
+	t.progress.PercentComplete = 100.0
+	t.progress.EstimatedETA = "Completed"
 }
 
 // Error marks the translation as errored
@@ -146,24 +150,38 @@ func (t *Tracker) GetProgress() TranslationProgress {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 
-	// Update time fields before returning
-	elapsed := time.Since(t.progress.StartTime)
-	t.progress.ElapsedTime = formatDuration(elapsed)
+	// Take a snapshot copy first; derived time fields are computed on the COPY,
+	// never on the shared struct. Writing t.progress here would be a data race
+	// because RLock permits multiple concurrent readers.
+	snapshot := *t.progress
 
-	if t.progress.ItemsCompleted > 0 && t.progress.ItemsTotal > 0 {
-		avgTimePerItem := elapsed / time.Duration(t.progress.ItemsCompleted)
-		remainingItems := t.progress.ItemsTotal - t.progress.ItemsCompleted
+	elapsed := time.Since(snapshot.StartTime)
+	snapshot.ElapsedTime = formatDuration(elapsed)
+
+	if snapshot.ItemsCompleted > 0 && snapshot.ItemsTotal > 0 {
+		avgTimePerItem := elapsed / time.Duration(snapshot.ItemsCompleted)
+		remainingItems := snapshot.ItemsTotal - snapshot.ItemsCompleted
+		if remainingItems < 0 {
+			remainingItems = 0
+		}
 		estimatedRemaining := avgTimePerItem * time.Duration(remainingItems)
-		t.progress.EstimatedETA = formatDuration(estimatedRemaining)
+		snapshot.EstimatedETA = formatDuration(estimatedRemaining)
 	}
 
-	return *t.progress
+	return snapshot
 }
 
 // updateProgress calculates percentage and updates progress (must be called with lock held)
 func (t *Tracker) updateProgress() {
 	if t.progress.TotalChapters > 0 {
-		t.progress.PercentComplete = float64(t.progress.CurrentChapter-1) / float64(t.progress.TotalChapters) * 100.0
+		// Completed chapters = CurrentChapter-1, but never negative (CurrentChapter
+		// is 0 before any chapter update, which would otherwise yield a negative
+		// percentage).
+		completedChapters := t.progress.CurrentChapter - 1
+		if completedChapters < 0 {
+			completedChapters = 0
+		}
+		t.progress.PercentComplete = float64(completedChapters) / float64(t.progress.TotalChapters) * 100.0
 
 		// Add section progress within current chapter
 		if t.progress.TotalSections > 0 {
@@ -171,9 +189,12 @@ func (t *Tracker) updateProgress() {
 			t.progress.PercentComplete += sectionPercent
 		}
 
-		// Cap at 100%
+		// Clamp to [0, 100].
 		if t.progress.PercentComplete > 100.0 {
 			t.progress.PercentComplete = 100.0
+		}
+		if t.progress.PercentComplete < 0.0 {
+			t.progress.PercentComplete = 0.0
 		}
 	}
 
@@ -181,9 +202,12 @@ func (t *Tracker) updateProgress() {
 	elapsed := time.Since(t.progress.StartTime)
 	t.progress.ElapsedTime = formatDuration(elapsed)
 
-	// Calculate ETA
+	// Calculate ETA. Use float arithmetic for the projection: converting a
+	// fractional percentage directly to time.Duration truncates it (e.g.
+	// time.Duration(2.5)==2, time.Duration(0.5)==0 which would divide-by-zero),
+	// producing wrong ETAs or a panic.
 	if t.progress.PercentComplete > 0 && t.progress.PercentComplete < 100 {
-		totalEstimated := elapsed / time.Duration(t.progress.PercentComplete) * 100
+		totalEstimated := time.Duration(float64(elapsed) * (100.0 / t.progress.PercentComplete))
 		remaining := totalEstimated - elapsed
 		t.progress.EstimatedETA = formatDuration(remaining)
 	} else if t.progress.PercentComplete >= 100 {

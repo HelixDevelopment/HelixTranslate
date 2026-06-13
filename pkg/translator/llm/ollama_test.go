@@ -190,10 +190,19 @@ func TestOllamaRequestErrorPaths(t *testing.T) {
 	})
 
 	t.Run("malformed_json_response", func(t *testing.T) {
+		// §11.4.98 deterministic + offline: local server returns a 200 with a
+		// malformed JSON body so Translate's json.Unmarshal genuinely errors
+		// (previously dialed the real httpbin.org over the internet).
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{not valid json`))
+		}))
+		defer srv.Close()
+
 		config := TranslationConfig{
 			Provider: "ollama",
 			Model:    "llama3:8b",
-			BaseURL:  "http://httpbin.org/json", // Returns valid JSON but wrong format
+			BaseURL:  srv.URL,
 		}
 
 		client, err := NewOllamaClient(config)
@@ -315,9 +324,16 @@ func TestOllamaTranslateUncoveredPaths(t *testing.T) {
 
 	// Test 4: Non-200 status codes
 	t.Run("non_200_status_codes", func(t *testing.T) {
+		// §11.4.98 deterministic + offline: local server returns 404
+		// (previously dialed the real httpbin.org/status/404).
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
 		config := TranslationConfig{
 			Provider: "ollama",
-			BaseURL:  "http://httpbin.org/status/404", // Will return 404
+			BaseURL:  srv.URL,
 		}
 
 		client, err := NewOllamaClient(config)
@@ -334,9 +350,18 @@ func TestOllamaTranslateUncoveredPaths(t *testing.T) {
 
 	// Test 5: JSON unmarshaling error
 	t.Run("json_unmarshal_error", func(t *testing.T) {
+		// §11.4.98 deterministic + offline: local server returns HTML (200, not
+		// JSON) so Translate's json.Unmarshal errors (previously dialed
+		// the real httpbin.org/html).
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/html")
+			_, _ = w.Write([]byte("<html><body>not json</body></html>"))
+		}))
+		defer srv.Close()
+
 		config := TranslationConfig{
 			Provider: "ollama",
-			BaseURL:  "http://httpbin.org/html", // Returns HTML, not JSON
+			BaseURL:  srv.URL,
 		}
 
 		client, err := NewOllamaClient(config)
@@ -353,10 +378,19 @@ func TestOllamaTranslateUncoveredPaths(t *testing.T) {
 
 	// Test 6: Model defaulting behavior
 	t.Run("model_defaulting_behavior", func(t *testing.T) {
+		// §11.4.98 deterministic + offline: local server returns 404 so the
+		// resulting error is status-based, not "model required" — proving an
+		// empty model is internally defaulted, not rejected (previously dialed
+		// the real httpbin.org).
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
 		config := TranslationConfig{
 			Provider: "ollama",
-			BaseURL:  "http://httpbin.org", // Base URL - client will append /api/generate
-			Model:    "",                   // Empty model to trigger defaulting
+			BaseURL:  srv.URL,
+			Model:    "", // Empty model to trigger defaulting
 		}
 
 		client, err := NewOllamaClient(config)

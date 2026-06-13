@@ -80,26 +80,44 @@ func NewLogger(config LoggerConfig) Logger {
 	}
 }
 
-// shouldLog determines if a message should be logged based on log level
+// levelRank maps a known level name to its numeric severity (lower = more
+// verbose). The second return value reports whether the level was recognized.
+func levelRank(level string) (int, bool) {
+	switch level {
+	case DEBUG:
+		return 0, true
+	case INFO:
+		return 1, true
+	case WARN:
+		return 2, true
+	case ERROR:
+		return 3, true
+	case FATAL:
+		return 4, true
+	default:
+		return 0, false
+	}
+}
+
+// shouldLog determines if a message should be logged based on log level.
+//
+// Both the configured level and the message level are validated. An
+// unrecognized configured level (e.g. the common typo "warning") MUST NOT
+// fail open and log everything — it falls back to the INFO default. An
+// unrecognized message level MUST NOT be silently dropped — it is treated as
+// at least as severe as the configured level so it is never lost.
 func (l *StandardLogger) shouldLog(messageLevel string) bool {
-	levels := map[int]string{
-		0: DEBUG,
-		1: INFO,
-		2: WARN,
-		3: ERROR,
-		4: FATAL,
+	currentLevelValue, ok := levelRank(l.level)
+	if !ok {
+		// Misconfigured level: fall back to the documented default (INFO)
+		// rather than failing open to DEBUG.
+		currentLevelValue, _ = levelRank(INFO)
 	}
 
-	messageLevelValue := -1
-	currentLevelValue := -1
-
-	for i, level := range levels {
-		if level == messageLevel {
-			messageLevelValue = i
-		}
-		if level == l.level {
-			currentLevelValue = i
-		}
+	messageLevelValue, ok := levelRank(messageLevel)
+	if !ok {
+		// Unknown message severity: do not silently drop it.
+		return true
 	}
 
 	return messageLevelValue >= currentLevelValue
