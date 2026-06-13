@@ -89,12 +89,17 @@ func (d *Detector) getMacOSRAM() (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
+	return parseSysctlBytes(string(output))
+}
 
-	ramBytes, err := strconv.ParseUint(strings.TrimSpace(string(output)), 10, 64)
+// parseSysctlBytes parses the raw output of `sysctl -n hw.memsize` (a bare
+// byte count, optionally surrounded by whitespace, e.g. "17179869184\n") into
+// a uint64 byte count.
+func parseSysctlBytes(output string) (uint64, error) {
+	ramBytes, err := strconv.ParseUint(strings.TrimSpace(output), 10, 64)
 	if err != nil {
 		return 0, err
 	}
-
 	return ramBytes, nil
 }
 
@@ -105,9 +110,14 @@ func (d *Detector) getLinuxRAM() (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
+	return parseLinuxMeminfoKB(string(output))
+}
 
-	// MemTotal:       16384000 kB
-	parts := strings.Fields(string(output))
+// parseLinuxMeminfoKB parses a single /proc/meminfo line of the form
+// "MemTotal:       16384000 kB" (or "MemAvailable: ...") — field [1] is the
+// kB count — and returns the value converted to bytes.
+func parseLinuxMeminfoKB(output string) (uint64, error) {
+	parts := strings.Fields(output)
 	if len(parts) < 2 {
 		return 0, fmt.Errorf("unexpected meminfo format")
 	}
@@ -127,8 +137,17 @@ func (d *Detector) getWindowsRAM() (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
+	return parseWmicMem(string(output))
+}
 
-	lines := strings.Split(string(output), "\n")
+// parseWmicMem parses the raw output of `wmic computersystem get
+// totalphysicalmemory`, whose first line is the column header
+// "TotalPhysicalMemory" and whose second line is the byte count, e.g.:
+//
+//	TotalPhysicalMemory
+//	17179869184
+func parseWmicMem(output string) (uint64, error) {
+	lines := strings.Split(output, "\n")
 	if len(lines) < 2 {
 		return 0, fmt.Errorf("unexpected wmic output")
 	}
@@ -151,45 +170,7 @@ func (d *Detector) getAvailableRAM() (uint64, error) {
 		if err != nil {
 			return 0, err
 		}
-
-		// Parse vm_stat output to get free + inactive + speculative pages
-		lines := strings.Split(string(output), "\n")
-		var freePages, inactivePages, speculativePages uint64
-		var pageSize uint64 = 16384 // default page size for Apple Silicon
-
-		for _, line := range lines {
-			if strings.Contains(line, "Pages free:") {
-				parts := strings.Fields(line)
-				if len(parts) >= 3 {
-					pages, _ := strconv.ParseUint(strings.TrimSuffix(parts[2], "."), 10, 64)
-					freePages = pages
-				}
-			} else if strings.Contains(line, "Pages inactive:") {
-				parts := strings.Fields(line)
-				if len(parts) >= 3 {
-					pages, _ := strconv.ParseUint(strings.TrimSuffix(parts[2], "."), 10, 64)
-					inactivePages = pages
-				}
-			} else if strings.Contains(line, "Pages speculative:") {
-				parts := strings.Fields(line)
-				if len(parts) >= 3 {
-					pages, _ := strconv.ParseUint(strings.TrimSuffix(parts[2], "."), 10, 64)
-					speculativePages = pages
-				}
-			} else if strings.Contains(line, "page size of") {
-				parts := strings.Fields(line)
-				for i, part := range parts {
-					if part == "of" && i+1 < len(parts) {
-						pageSize, _ = strconv.ParseUint(parts[i+1], 10, 64)
-						break
-					}
-				}
-			}
-		}
-
-		// Available RAM = free + inactive + speculative pages
-		totalAvailablePages := freePages + inactivePages + speculativePages
-		return totalAvailablePages * pageSize, nil
+		return parseVMStatAvailableBytes(string(output)), nil
 
 	case "linux":
 		cmd := exec.Command("grep", "MemAvailable", "/proc/meminfo")
@@ -197,18 +178,7 @@ func (d *Detector) getAvailableRAM() (uint64, error) {
 		if err != nil {
 			return 0, err
 		}
-
-		parts := strings.Fields(string(output))
-		if len(parts) < 2 {
-			return 0, fmt.Errorf("unexpected meminfo format")
-		}
-
-		availKB, err := strconv.ParseUint(parts[1], 10, 64)
-		if err != nil {
-			return 0, err
-		}
-
-		return availKB * 1024, nil
+		return parseLinuxMeminfoKB(string(output))
 
 	case "windows":
 		// Use PowerShell to get available memory (more reliable than wmic)
@@ -218,13 +188,7 @@ func (d *Detector) getAvailableRAM() (uint64, error) {
 		if err != nil {
 			return 0, err
 		}
-
-		availBytes, err := strconv.ParseUint(strings.TrimSpace(string(output)), 10, 64)
-		if err != nil {
-			return 0, err
-		}
-
-		return availBytes, nil
+		return parsePowerShellBytes(string(output))
 
 	case "freebsd", "openbsd", "netbsd", "dragonfly":
 		// Use sysctl for BSD systems
@@ -233,24 +197,97 @@ func (d *Detector) getAvailableRAM() (uint64, error) {
 		if err != nil {
 			return 0, err
 		}
-
-		// Parse sysctl output (format: hw.usermem: 12345678)
-		parts := strings.Split(strings.TrimSpace(string(output)), ":")
-		if len(parts) < 2 {
-			return 0, fmt.Errorf("unexpected sysctl format")
-		}
-
-		totalMem, err := strconv.ParseUint(strings.TrimSpace(parts[1]), 10, 64)
-		if err != nil {
-			return 0, err
-		}
-
-		// Estimate available memory (roughly 70% of total)
-		return uint64(float64(totalMem) * 0.7), nil
+		return parseSysctlLabeledAvailableBytes(string(output))
 
 	default:
 		return 0, fmt.Errorf("not implemented for %s", runtime.GOOS)
 	}
+}
+
+// parseVMStatAvailableBytes parses macOS `vm_stat` output, summing the free +
+// inactive + speculative page counts and multiplying by the reported page
+// size. The header line declares the page size ("...page size of 16384
+// bytes)"); per-class lines look like "Pages free:    123456." (trailing
+// period stripped). Page size defaults to 16384 (Apple Silicon) when the
+// header is absent — matching the original inline behavior exactly.
+func parseVMStatAvailableBytes(output string) uint64 {
+	lines := strings.Split(output, "\n")
+	var freePages, inactivePages, speculativePages uint64
+	var pageSize uint64 = 16384 // default page size for Apple Silicon
+
+	for _, line := range lines {
+		if strings.Contains(line, "Pages free:") {
+			parts := strings.Fields(line)
+			if len(parts) >= 3 {
+				pages, _ := strconv.ParseUint(strings.TrimSuffix(parts[2], "."), 10, 64)
+				freePages = pages
+			}
+		} else if strings.Contains(line, "Pages inactive:") {
+			parts := strings.Fields(line)
+			if len(parts) >= 3 {
+				pages, _ := strconv.ParseUint(strings.TrimSuffix(parts[2], "."), 10, 64)
+				inactivePages = pages
+			}
+		} else if strings.Contains(line, "Pages speculative:") {
+			parts := strings.Fields(line)
+			if len(parts) >= 3 {
+				pages, _ := strconv.ParseUint(strings.TrimSuffix(parts[2], "."), 10, 64)
+				speculativePages = pages
+			}
+		} else if strings.Contains(line, "page size of") {
+			parts := strings.Fields(line)
+			for i, part := range parts {
+				if part == "of" && i+1 < len(parts) {
+					pageSize, _ = strconv.ParseUint(parts[i+1], 10, 64)
+					break
+				}
+			}
+		}
+	}
+
+	// Available RAM = free + inactive + speculative pages
+	totalAvailablePages := freePages + inactivePages + speculativePages
+	return totalAvailablePages * pageSize
+}
+
+// parsePowerShellBytes parses the raw output of a PowerShell expression that
+// emits a bare byte count (e.g. FreePhysicalMemory * 1024) — a single integer
+// optionally surrounded by whitespace — into a uint64 byte count.
+func parsePowerShellBytes(output string) (uint64, error) {
+	availBytes, err := strconv.ParseUint(strings.TrimSpace(output), 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return availBytes, nil
+}
+
+// parseSysctlLabeledAvailableBytes parses labeled BSD `sysctl hw.usermem`
+// output (format: "hw.usermem: 12345678"), then estimates available memory as
+// ~70% of the reported total — matching the original inline behavior exactly.
+func parseSysctlLabeledAvailableBytes(output string) (uint64, error) {
+	totalMem, err := parseSysctlLabeledUint(output)
+	if err != nil {
+		return 0, err
+	}
+	// Estimate available memory (roughly 70% of total)
+	return uint64(float64(totalMem) * 0.7), nil
+}
+
+// parseSysctlLabeledUint parses a labeled BSD sysctl line of the form
+// "<key>: <value>" (e.g. "hw.usermem: 12345678", "hw.ncpu: 8") and returns the
+// integer value. Used by the BSD RAM/core branches.
+func parseSysctlLabeledUint(output string) (uint64, error) {
+	parts := strings.Split(strings.TrimSpace(output), ":")
+	if len(parts) < 2 {
+		return 0, fmt.Errorf("unexpected sysctl format")
+	}
+
+	val, err := strconv.ParseUint(strings.TrimSpace(parts[1]), 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return val, nil
 }
 
 // getCPUModel returns the CPU model string
@@ -270,11 +307,7 @@ func (d *Detector) getCPUModel() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		parts := strings.Split(string(output), ":")
-		if len(parts) < 2 {
-			return "", fmt.Errorf("unexpected cpuinfo format")
-		}
-		return strings.TrimSpace(parts[1]), nil
+		return parseLinuxCPUModel(string(output))
 
 	case "windows":
 		// Use PowerShell to get CPU name
@@ -293,18 +326,35 @@ func (d *Detector) getCPUModel() (string, error) {
 		if err != nil {
 			return "", err
 		}
-
-		// Parse sysctl output (format: hw.model: Intel(R) Core(TM) i7-8700K)
-		parts := strings.Split(strings.TrimSpace(string(output)), ":")
-		if len(parts) < 2 {
-			return "", fmt.Errorf("unexpected sysctl format")
-		}
-
-		return strings.TrimSpace(parts[1]), nil
+		return parseSysctlLabeledString(string(output))
 
 	default:
 		return "", fmt.Errorf("not implemented for %s", runtime.GOOS)
 	}
+}
+
+// parseLinuxCPUModel parses a /proc/cpuinfo "model name" line of the form
+// "model name      : Intel(R) Core(TM) i7-8700K" and returns the trimmed value
+// after the first colon. Behavior-preserving: matches the original inline
+// strings.Split(":")[1] semantics exactly.
+func parseLinuxCPUModel(output string) (string, error) {
+	parts := strings.Split(output, ":")
+	if len(parts) < 2 {
+		return "", fmt.Errorf("unexpected cpuinfo format")
+	}
+	return strings.TrimSpace(parts[1]), nil
+}
+
+// parseSysctlLabeledString parses a labeled BSD sysctl line of the form
+// "<key>: <value>" (e.g. "hw.model: Intel(R) Core(TM) i7-8700K") and returns
+// the trimmed string value. Behavior-preserving: matches the original inline
+// strings.Split(":")[1] semantics exactly.
+func parseSysctlLabeledString(output string) (string, error) {
+	parts := strings.Split(strings.TrimSpace(output), ":")
+	if len(parts) < 2 {
+		return "", fmt.Errorf("unexpected sysctl format")
+	}
+	return strings.TrimSpace(parts[1]), nil
 }
 
 // getCPUCores returns the number of physical CPU cores
@@ -316,11 +366,7 @@ func (d *Detector) getCPUCores() (int, error) {
 		if err != nil {
 			return 0, err
 		}
-		cores, err := strconv.Atoi(strings.TrimSpace(string(output)))
-		if err != nil {
-			return 0, err
-		}
-		return cores, nil
+		return parseSysctlInt(string(output))
 
 	case "linux":
 		cmd := exec.Command("lscpu")
@@ -328,19 +374,7 @@ func (d *Detector) getCPUCores() (int, error) {
 		if err != nil {
 			return 0, err
 		}
-
-		for _, line := range strings.Split(string(output), "\n") {
-			if strings.Contains(line, "Core(s) per socket:") {
-				parts := strings.Fields(line)
-				if len(parts) >= 4 {
-					cores, err := strconv.Atoi(parts[3])
-					if err == nil {
-						return cores, nil
-					}
-				}
-			}
-		}
-		return 0, fmt.Errorf("could not parse core count")
+		return parseLscpuCores(string(output))
 
 	case "windows":
 		// Use PowerShell to get physical cores
@@ -350,11 +384,7 @@ func (d *Detector) getCPUCores() (int, error) {
 		if err != nil {
 			return 0, err
 		}
-		cores, err := strconv.Atoi(strings.TrimSpace(string(output)))
-		if err != nil {
-			return 0, err
-		}
-		return cores, nil
+		return parseSysctlInt(string(output))
 
 	case "freebsd", "openbsd", "netbsd", "dragonfly":
 		// Use sysctl for BSD systems
@@ -363,23 +393,57 @@ func (d *Detector) getCPUCores() (int, error) {
 		if err != nil {
 			return 0, err
 		}
-
-		// Parse sysctl output (format: hw.ncpu: 8)
-		parts := strings.Split(strings.TrimSpace(string(output)), ":")
-		if len(parts) < 2 {
-			return 0, fmt.Errorf("unexpected sysctl format")
-		}
-
-		cores, err := strconv.Atoi(strings.TrimSpace(parts[1]))
-		if err != nil {
-			return 0, err
-		}
-
-		return cores, nil
+		return parseSysctlLabeledInt(string(output))
 
 	default:
 		return 0, fmt.Errorf("not implemented for %s", runtime.GOOS)
 	}
+}
+
+// parseSysctlInt parses a bare integer from raw command output (a single
+// number optionally surrounded by whitespace, e.g. "12\n"). Used by the macOS
+// `sysctl -n hw.physicalcpu` and Windows NumberOfCores branches.
+func parseSysctlInt(output string) (int, error) {
+	cores, err := strconv.Atoi(strings.TrimSpace(output))
+	if err != nil {
+		return 0, err
+	}
+	return cores, nil
+}
+
+// parseLscpuCores scans Linux `lscpu` output for the "Core(s) per socket:"
+// line and returns the integer in field [3], e.g. "Core(s) per socket:    8"
+// -> 8. Behavior-preserving: returns an error only when no parseable line is
+// found, matching the original inline loop exactly.
+func parseLscpuCores(output string) (int, error) {
+	for _, line := range strings.Split(output, "\n") {
+		if strings.Contains(line, "Core(s) per socket:") {
+			parts := strings.Fields(line)
+			if len(parts) >= 4 {
+				cores, err := strconv.Atoi(parts[3])
+				if err == nil {
+					return cores, nil
+				}
+			}
+		}
+	}
+	return 0, fmt.Errorf("could not parse core count")
+}
+
+// parseSysctlLabeledInt parses a labeled BSD sysctl line of the form
+// "<key>: <value>" (e.g. "hw.ncpu: 8") and returns the integer value.
+// Behavior-preserving: matches the original inline strings.Split(":")[1]
+// semantics exactly.
+func parseSysctlLabeledInt(output string) (int, error) {
+	parts := strings.Split(strings.TrimSpace(output), ":")
+	if len(parts) < 2 {
+		return 0, fmt.Errorf("unexpected sysctl format")
+	}
+	cores, err := strconv.Atoi(strings.TrimSpace(parts[1]))
+	if err != nil {
+		return 0, err
+	}
+	return cores, nil
 }
 
 // detectGPU detects GPU presence and type

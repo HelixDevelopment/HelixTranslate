@@ -29,13 +29,20 @@ func TestConnectionPool_cleanup(t *testing.T) {
 			LastUsed:   time.Now().Add(-time.Hour), // Idle for a long time
 			InUse:      false,
 		}
+		// D10: add under cp.mu — cleanup() reads the map under the same lock, so an
+		// unlocked write here races it.
+		cp.mu.Lock()
 		cp.connections["test-key"] = entry
+		cp.mu.Unlock()
 
 		// Wait for cleanup to run (ticker interval)
 		time.Sleep(50 * time.Millisecond)
 
-		// Check that idle connection was removed
-		if _, exists := cp.connections["test-key"]; exists {
+		// Check that idle connection was removed (read under cp.mu — D10)
+		cp.mu.Lock()
+		_, exists := cp.connections["test-key"]
+		cp.mu.Unlock()
+		if exists {
 			t.Error("Expected idle connection to be removed")
 		}
 	})
@@ -63,13 +70,20 @@ func TestConnectionPool_cleanup(t *testing.T) {
 			LastUsed:   time.Now().Add(-time.Hour), // Idle for a long time
 			InUse:      true,                       // But marked as in use
 		}
+		// D10: add under cp.mu — cleanup() reads the map under the same lock, so an
+		// unlocked write here races it.
+		cp.mu.Lock()
 		cp.connections["test-key"] = entry
+		cp.mu.Unlock()
 
 		// Wait for cleanup to run (ticker interval)
 		time.Sleep(50 * time.Millisecond)
 
-		// Check that active connection was NOT removed
-		if _, exists := cp.connections["test-key"]; !exists {
+		// Check that active connection was NOT removed (read under cp.mu — D10)
+		cp.mu.Lock()
+		_, exists := cp.connections["test-key"]
+		cp.mu.Unlock()
+		if !exists {
 			t.Error("Expected active connection to NOT be removed")
 		}
 	})
@@ -97,13 +111,20 @@ func TestConnectionPool_cleanup(t *testing.T) {
 			LastUsed:   time.Now(),                 // Recently used
 			InUse:      false,
 		}
+		// D10: add under cp.mu — cleanup() reads the map under the same lock, so an
+		// unlocked write here races it.
+		cp.mu.Lock()
 		cp.connections["test-key"] = entry
+		cp.mu.Unlock()
 
 		// Wait for cleanup to run (ticker interval)
 		time.Sleep(50 * time.Millisecond)
 
-		// Check that expired connection was removed
-		if _, exists := cp.connections["test-key"]; exists {
+		// Check that expired connection was removed (read under cp.mu — D10)
+		cp.mu.Lock()
+		_, exists := cp.connections["test-key"]
+		cp.mu.Unlock()
+		if exists {
 			t.Error("Expected expired connection to be removed")
 		}
 	})

@@ -161,6 +161,7 @@ func TestNewFallbackManager(t *testing.T) {
 	logger := &fallbackMockLogger{}
 
 	fm := NewFallbackManager(config, perfConfig, eventBus, logger)
+	defer fm.Stop() // D10: stop monitor goroutines (no leak/race into later tests)
 
 	if fm == nil {
 		t.Fatal("NewFallbackManager returned nil")
@@ -491,7 +492,9 @@ func TestFallbackManager_ShouldExecuteFallback(t *testing.T) {
 			fm, _, _ := newTestFallbackManager(config)
 
 			if tt.degradedMode {
+				fm.mu.Lock() // D10: the monitor goroutine reads degradedMode under fm.mu
 				fm.degradedMode = true
+				fm.mu.Unlock()
 			}
 
 			fallback := FallbackStrategy{
@@ -619,9 +622,12 @@ func TestFallbackManager_ExitDegradedMode(t *testing.T) {
 		eventBus := events.NewEventBus()
 		logger := &fallbackMockLogger{}
 		fm := NewFallbackManager(fallbackConfig, performanceConfig, eventBus, logger)
+		defer fm.Stop() // D10: stop the monitor goroutines at subtest end (no leak/race)
 
-		// Manually set degraded mode
+		// Manually set degraded mode (under fm.mu — the monitor reads it concurrently)
+		fm.mu.Lock()
 		fm.degradedMode = true
+		fm.mu.Unlock()
 
 		// Exit degraded mode
 		fm.exitDegradedMode()
@@ -642,6 +648,7 @@ func TestFallbackManager_MonitorFailures(t *testing.T) {
 		eventBus := events.NewEventBus()
 		logger := &fallbackMockLogger{}
 		fm := NewFallbackManager(fallbackConfig, performanceConfig, eventBus, logger)
+		defer fm.Stop() // D10: stop the monitor goroutines at subtest end (no leak/race)
 
 		// This test just checks that the function can be called without panic
 		// With a zero interval, the ticker won't fire
@@ -659,6 +666,7 @@ func TestFallbackManager_MonitorFailures(t *testing.T) {
 		eventBus := events.NewEventBus()
 		logger := &fallbackMockLogger{}
 		fm := NewFallbackManager(fallbackConfig, performanceConfig, eventBus, logger)
+		defer fm.Stop() // D10: stop the monitor goroutines at subtest end (no leak/race)
 
 		// Set up a context to cancel the goroutine
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
@@ -690,6 +698,7 @@ func TestFallbackManager_MonitorRecovery(t *testing.T) {
 		eventBus := events.NewEventBus()
 		logger := &fallbackMockLogger{}
 		fm := NewFallbackManager(fallbackConfig, performanceConfig, eventBus, logger)
+		defer fm.Stop() // D10: stop the monitor goroutines at subtest end (no leak/race)
 
 		// This test just checks that the function can be called without panic
 		// With a zero interval, the ticker won't fire
@@ -707,6 +716,7 @@ func TestFallbackManager_MonitorRecovery(t *testing.T) {
 		eventBus := events.NewEventBus()
 		logger := &fallbackMockLogger{}
 		fm := NewFallbackManager(fallbackConfig, performanceConfig, eventBus, logger)
+		defer fm.Stop() // D10: stop the monitor goroutines at subtest end (no leak/race)
 
 		// Set up a context to cancel the goroutine
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)

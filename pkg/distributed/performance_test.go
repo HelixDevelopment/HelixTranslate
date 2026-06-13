@@ -213,7 +213,8 @@ func NewMockDistributedSystem(workerCount int, taskDelay time.Duration, errorRat
 func (m *MockDistributedSystem) ExecuteTask(ctx context.Context, task Task) (*TaskResult, error) {
 	m.mu.Lock()
 	m.requestCount++
-	m.mu.Unlock()
+	count := m.requestCount // snapshot under the lock — the reads below must NOT
+	m.mu.Unlock()           // touch m.requestCount unlocked (D10: concurrent ExecuteTask race)
 
 	// Simulate task processing time
 	select {
@@ -222,10 +223,11 @@ func (m *MockDistributedSystem) ExecuteTask(ctx context.Context, task Task) (*Ta
 		return nil, ctx.Err()
 	}
 
-	// Simulate errors based on error rate
+	// Simulate errors based on error rate (errorRate/workers/taskDelay are set at
+	// construction and never mutated, so they are safe to read without the lock).
 	if m.errorRate > 0 {
-		// Simple random error simulation
-		if int(m.requestCount)%int(1.0/m.errorRate*100) == 0 {
+		// Simple deterministic error simulation off the snapshot count.
+		if int(count)%int(1.0/m.errorRate*100) == 0 {
 			m.mu.Lock()
 			m.errorCount++
 			m.mu.Unlock()
@@ -235,7 +237,7 @@ func (m *MockDistributedSystem) ExecuteTask(ctx context.Context, task Task) (*Ta
 
 	result := &TaskResult{
 		TaskID:    task.ID,
-		WorkerID:  m.workers[int(m.requestCount)%len(m.workers)],
+		WorkerID:  m.workers[int(count)%len(m.workers)],
 		Success:   true,
 		Duration:  m.taskDelay,
 		Timestamp: time.Now(),

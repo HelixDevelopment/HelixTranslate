@@ -78,6 +78,11 @@ type FallbackManager struct {
 	degradedMode  bool
 
 	mu sync.RWMutex
+
+	// done stops the monitor goroutines; stopOnce guards Stop() against a
+	// double-close (D10: without a stop signal the monitors leak and race).
+	done     chan struct{}
+	stopOnce sync.Once
 }
 
 // FailureTracker tracks failures for a component
@@ -109,6 +114,7 @@ func NewFallbackManager(config *FallbackConfig, performance *PerformanceConfig, 
 		failureCounts: make(map[string]*FailureTracker),
 		recoveryState: make(map[string]*RecoveryTracker),
 		degradedMode:  false,
+		done:          make(chan struct{}),
 	}
 
 	// Only start monitoring goroutines if not in test environment
@@ -445,12 +451,25 @@ func (fm *FallbackManager) emitAlert(componentID string, failureRate float64, er
 	})
 }
 
+// Stop halts the monitor goroutines (idempotent; safe even if none were started).
+// Without it, monitors created with a positive RecoveryCheckInterval run forever
+// and — across short-interval tests — leak and race subsequent state mutations (D10).
+func (fm *FallbackManager) Stop() {
+	fm.stopOnce.Do(func() { close(fm.done) })
+}
+
 // monitorFailures monitors failure rates and manages degraded mode
 func (fm *FallbackManager) monitorFailures() {
 	ticker := time.NewTicker(fm.config.RecoveryCheckInterval)
 	defer ticker.Stop()
 
-	for range ticker.C {
+	for {
+		select {
+		case <-fm.done:
+			return
+		case <-ticker.C:
+		}
+
 		fm.mu.Lock()
 
 		// Check if we should exit degraded mode
@@ -477,7 +496,13 @@ func (fm *FallbackManager) monitorRecovery() {
 	ticker := time.NewTicker(fm.config.RecoveryCheckInterval)
 	defer ticker.Stop()
 
-	for range ticker.C {
+	for {
+		select {
+		case <-fm.done:
+			return
+		case <-ticker.C:
+		}
+
 		fm.mu.Lock()
 
 		now := time.Now()

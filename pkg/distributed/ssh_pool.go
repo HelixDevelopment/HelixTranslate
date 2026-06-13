@@ -78,8 +78,29 @@ func NewWorkerConfig(id, name, host, user string) *WorkerConfig {
 	}
 }
 
-// NewSSHPool creates a new SSH connection pool
-func NewSSHPool() *SSHPool {
+// SSHPoolOption configures a SSHPool at construction. Options are applied BEFORE
+// the cleanup goroutine starts — the only race-free way to tune timing, since
+// cleanup() reads maxIdleTime/cleanupTick concurrently the instant NewSSHPool
+// returns (D10: mutating those fields post-construction races the goroutine).
+type SSHPoolOption func(*SSHPool)
+
+// WithCleanupTiming sets the idle-eviction threshold and the cleanup tick
+// interval at construction (positive values only; zero leaves the default).
+func WithCleanupTiming(maxIdle, tick time.Duration) SSHPoolOption {
+	return func(p *SSHPool) {
+		if maxIdle > 0 {
+			p.maxIdleTime = maxIdle
+		}
+		if tick > 0 {
+			p.cleanupTick = tick
+		}
+	}
+}
+
+// NewSSHPool creates a new SSH connection pool. Variadic options are applied
+// before the cleanup goroutine starts; NewSSHPool() with no options keeps the
+// production defaults (backward-compatible).
+func NewSSHPool(opts ...SSHPoolOption) *SSHPool {
 	ctx, cancel := context.WithCancel(context.Background())
 	pool := &SSHPool{
 		connections: make(map[string]*SSHConnection),
@@ -89,8 +110,11 @@ func NewSSHPool() *SSHPool {
 		ctx:         ctx,
 		cancel:      cancel,
 	}
+	for _, opt := range opts {
+		opt(pool)
+	}
 
-	// Start cleanup goroutine
+	// Start cleanup goroutine AFTER options are applied, so it reads final timing.
 	go pool.cleanup()
 
 	return pool
