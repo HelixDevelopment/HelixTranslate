@@ -1,7 +1,7 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 7
-**Last modified:** 2026-06-13T15:30:00Z
+**Revision:** 8
+**Last modified:** 2026-06-13T16:15:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
@@ -12,7 +12,7 @@
 
 ## Live state anchors (moment-valid)
 
-- **Parent HEAD:** `9004477` on `main`; pushed to BOTH `milos85vasic/Translator` + `HelixDevelopment/HelixTranslate` (verified, fast-forward, no force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67 → 7331c54 → 76677aa → 18c5137 → de256dd → 9004477.
+- **Parent HEAD:** `218bfa0` on `main`; pushed to BOTH `milos85vasic/Translator` + `HelixDevelopment/HelixTranslate` (verified, fast-forward, no force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67 → 7331c54 → 76677aa → 18c5137 → de256dd → 9004477 → 13d5e30 → af1ef47 → a9b38fa → 218bfa0.
 - **llm_provider HEAD:** `b3dc7f9` (W7 CONST-036 propagation block + regenerated html/pdf), pushed to `HelixDevelopment/LLMProvider` master.
 - **Constitution HEAD:** `5e671fe` (§11.4.151 added), pushed to all 6 upstreams; parent pointer bumped.
 - **Build:** `go build ./...` = EXIT 0. **Total test coverage = 50.7%** (`go tool cover -func` total; see `docs/testing/coverage_matrix.md`).
@@ -50,7 +50,7 @@
 - **D6** (9004477) **FIXED** verified_factory map-order flake → order-independent ElementsMatch; 10/10.
 - **wave5** (af1ef47): **W14** `scripts/commit_all.sh` wrapper (no-force/multi-upstream/FF-only/quiescence/explicit-pathspec/bg-push) + hermetic selftest 13/0 (conductor-run verified) — NOT yet wired to real remotes (line-by-line review pending); **W2** format 0%→97.6%, markdown 73.9%→80.1%, coordination 0%→92.9% + **GENUINE nil-guard fix** in TranslateWithRetry (mutation-verified: revert→nil-panic). §11.4.147: format+coordination were rate-limit-crashed at report stage; conductor verified+adopted their work (not lost, not blindly trusted).
 
-**Session total: 25 items resolved** (W4-W10,W12 + D2 + W2×6[unified-translator/storage/batch/sshworker/verification/script] + W3 translator + sshworker-leak + D3 + D7 + D5 + D6). Real prod bugs fixed: translator cache race, SMTP no-deadline, dangling step-ptr, sshworker map-leak, event races (D2/D3/D7), note-content loss (D5).
+**Session total: 26 items resolved** (W4-W10,W12 + D2 + W2×6[unified-translator/storage/batch/sshworker/verification/script] + W3 translator + sshworker-leak + D3 + D7 + D5 + D6). Real prod bugs fixed: translator cache race, SMTP no-deadline, dangling step-ptr, sshworker map-leak, event races (D2/D3/D7), note-content loss (D5).
 
 ## OPEN workable items (queue — many parallelizable, disjoint scope)
 
@@ -66,7 +66,7 @@
 | W16 | Convert `Models/`→`models` submodule after W1 resolved | Task | Blocked on W1. |
 | D1 | `docs_chain` + `security` CONSTITUTION.md lack literal `CONST-036` | Task | §11.4.118 discovery. They use §11.4.X cascade scheme (not CONST-NNN); challenge doesn't check them. Governance-design decision needed — do NOT blindly inject CONST-NNN (§11.4.6). |
 | D4 | `pkg/script` Latin→Cyrillic morpheme-boundary mis-transliteration | Bug (open) | konjugacija→коњугација (should be конјугација); injekcija, nadживети similar. Greedy digraph matching; real fix needs morpheme/dictionary model (high blast radius) — operator-aware decision. Pinned with KNOWN-LOSSY tests. |
-| D8 | `pkg/markdown` bare leading `---` misparsed as frontmatter → chapters silently dropped (data loss) | Bug (open) | `markdown_to_epub.go:78-90`: first `---` always treated as frontmatter-open, so MD using `---` as chapter separator w/o a leading frontmatter block loses everything after it. HR-split works only after a real frontmatter block closes. Pinned w/ tests (correct + quirk). Fix: only open frontmatter if `---` is line 1 + a closing `---` exists; reconcile pinned tests (§11.4.120). Also minor: `<ol>`→dash (lossy numbering). |
+| D8 | ✅ FIXED (218bfa0) `pkg/markdown` bare-leading `---` data-loss | Bug (fixed) | Frontmatter now must begin at first non-blank line; later `---` = HR/chapter separator. RED(1ch)→GREEN(2ch), mutation-verified. Minor `<ol>`→dash numbering remains pinned/unfixed (D-list, low priority). |
 | W14b | Review `scripts/commit_all.sh` line-by-line, then adopt as the standard commit path | Task | Selftest 13/0 + conductor-run verified; not yet used on real remotes. macOS /bin/sh=bash so arrays OK; if ever run under dash/mksh refactor arrays (subagent flagged). |
 
 ## NEXT phases (priority order)

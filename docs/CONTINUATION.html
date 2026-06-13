@@ -175,8 +175,8 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 7 <strong>Last modified:</strong>
-2026-06-13T15:30:00Z <strong>Purpose:</strong> Single canonical
+<p><strong>Revision:</strong> 8 <strong>Last modified:</strong>
+2026-06-13T16:15:00Z <strong>Purpose:</strong> Single canonical
 out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 /
 §11.4.127). To resume: point a new session at THIS file, run
 <code>git fetch --all</code>, and say <strong>continue</strong>.</p>
@@ -198,11 +198,12 @@ prefixed <code>helix_translate-</code> (§11.4.151). Work subagent-driven
 <h2 id="live-state-anchors-moment-valid">Live state anchors
 (moment-valid)</h2>
 <ul>
-<li><strong>Parent HEAD:</strong> <code>9004477</code> on
+<li><strong>Parent HEAD:</strong> <code>218bfa0</code> on
 <code>main</code>; pushed to BOTH <code>milos85vasic/Translator</code> +
 <code>HelixDevelopment/HelixTranslate</code> (verified, fast-forward, no
 force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67
-→ 7331c54 → 76677aa → 18c5137 → de256dd → 9004477.</li>
+→ 7331c54 → 76677aa → 18c5137 → de256dd → 9004477 → 13d5e30 → af1ef47 →
+a9b38fa → 218bfa0.</li>
 <li><strong>llm_provider HEAD:</strong> <code>b3dc7f9</code> (W7
 CONST-036 propagation block + regenerated html/pdf), pushed to
 <code>HelixDevelopment/LLMProvider</code> master.</li>
@@ -319,7 +320,7 @@ revert→nil-panic). §11.4.147: format+coordination were
 rate-limit-crashed at report stage; conductor verified+adopted their
 work (not lost, not blindly trusted).</li>
 </ul>
-<p><strong>Session total: 25 items resolved</strong> (W4-W10,W12 + D2 +
+<p><strong>Session total: 26 items resolved</strong> (W4-W10,W12 + D2 +
 W2×6[unified-translator/storage/batch/sshworker/verification/script] +
 W3 translator + sshworker-leak + D3 + D7 + D5 + D6). Real prod bugs
 fixed: translator cache race, SMTP no-deadline, dangling step-ptr,
@@ -427,17 +428,13 @@ KNOWN-LOSSY tests.</td>
 </tr>
 <tr>
 <td>D8</td>
-<td><code>pkg/markdown</code> bare leading <code>---</code> misparsed as
-frontmatter → chapters silently dropped (data loss)</td>
-<td>Bug (open)</td>
-<td><code>markdown_to_epub.go:78-90</code>: first <code>---</code>
-always treated as frontmatter-open, so MD using <code>---</code> as
-chapter separator w/o a leading frontmatter block loses everything after
-it. HR-split works only after a real frontmatter block closes. Pinned w/
-tests (correct + quirk). Fix: only open frontmatter if <code>---</code>
-is line 1 + a closing <code>---</code> exists; reconcile pinned tests
-(§11.4.120). Also minor: <code>&lt;ol&gt;</code>→dash (lossy
-numbering).</td>
+<td>✅ FIXED (218bfa0) <code>pkg/markdown</code> bare-leading
+<code>---</code> data-loss</td>
+<td>Bug (fixed)</td>
+<td>Frontmatter now must begin at first non-blank line; later
+<code>---</code> = HR/chapter separator. RED(1ch)→GREEN(2ch),
+mutation-verified. Minor <code>&lt;ol&gt;</code>→dash numbering remains
+pinned/unfixed (D-list, low priority).</td>
 </tr>
 <tr>
 <td>W14b</td>
