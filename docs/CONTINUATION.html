@@ -175,8 +175,8 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 12 <strong>Last modified:</strong>
-2026-06-13T20:45:00Z <strong>Purpose:</strong> Single canonical
+<p><strong>Revision:</strong> 13 <strong>Last modified:</strong>
+2026-06-13T21:45:00Z <strong>Purpose:</strong> Single canonical
 out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 /
 §11.4.127). To resume: point a new session at THIS file, run
 <code>git fetch --all</code>, and say <strong>continue</strong>.</p>
@@ -198,7 +198,7 @@ prefixed <code>helix_translate-</code> (§11.4.151). Work subagent-driven
 <h2 id="live-state-anchors-moment-valid">Live state anchors
 (moment-valid)</h2>
 <ul>
-<li><strong>Parent HEAD:</strong> <code>b8a24f5</code> on
+<li><strong>Parent HEAD:</strong> <code>fc66c62</code> on
 <code>main</code>; pushed to BOTH <code>milos85vasic/Translator</code> +
 <code>HelixDevelopment/HelixTranslate</code> (verified, fast-forward, no
 force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67
@@ -321,9 +321,13 @@ revert→nil-panic). §11.4.147: format+coordination were
 rate-limit-crashed at report stage; conductor verified+adopted their
 work (not lost, not blindly trusted).</li>
 </ul>
-<p><strong>Session total: ~37 items resolved</strong> (+ models bridge
-wiring digital.vasic.models into the system; + D12 REAL CORS auth-bypass
-vuln fixed; + D11 doc)</p>
+<p><strong>Session total: ~39 items resolved</strong> (+ D10
+pkg/distributed FULLY -race-clean 9→0 races [4 sources
+incl. FallbackManager.Stop() lifecycle fix]; + D9 hardware parser
+testability 44.6→68.4%)</p>
+<p><strong>Prior: ~37 items</strong> (+ models bridge wiring
+digital.vasic.models into the system; + D12 REAL CORS auth-bypass vuln
+fixed; + D11 doc)</p>
 <p><strong>Prior: ~34 items</strong> (+ W15: real Postgres+Redis
 on-demand integration proven; PG connection-pool DoS bug found+fixed;
 containers StartRedis helper added)</p>
@@ -458,20 +462,19 @@ pinned/unfixed (D-list, low priority).</td>
 </tr>
 <tr>
 <td>D9</td>
-<td><code>pkg/hardware</code> foreign-OS exec.Command paths uncoverable
-on macOS (stuck 44.6%)</td>
+<td>✅ FIXED (fc66c62) hardware parser testability</td>
 <td>Task</td>
-<td>Raising needs parser-extraction refactor (extract pure parsers from
-exec callers); +13 behavioral tests already landed (a0930fc).</td>
+<td>Extracted 12 pure parsers from exec callers (behavior-preserving);
+44.6→68.4%, mutation-verified.</td>
 </tr>
 <tr>
 <td>D10</td>
 <td>3 baseline data races (FACT, captured -race)</td>
 <td>Bug</td>
 <td>#2 api_logger PRODUCT race ✅ FIXED (3027da2, snapshot,
-mutation-verified). #1 ssh_pool + #3 performance ConnectionPool =
-TEST-HARNESS races (production-safe; tests mutate cleanup timing
-post-construction). Fix = configurable constructor.</td>
+mutation-verified). #1 ssh_pool + #3 performance ConnectionPool. ✅ ALL
+FIXED (fc66c62): ssh_pool options API, perf locked-map + count-snapshot,
+FallbackManager.Stop() lifecycle. pkg/distributed now 0 races.</td>
 </tr>
 <tr>
 <td>D11</td>

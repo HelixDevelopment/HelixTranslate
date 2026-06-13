@@ -1,7 +1,7 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 12
-**Last modified:** 2026-06-13T20:45:00Z
+**Revision:** 13
+**Last modified:** 2026-06-13T21:45:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
@@ -12,7 +12,7 @@
 
 ## Live state anchors (moment-valid)
 
-- **Parent HEAD:** `b8a24f5` on `main`; pushed to BOTH `milos85vasic/Translator` + `HelixDevelopment/HelixTranslate` (verified, fast-forward, no force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67 → 7331c54 → 76677aa → 18c5137 → de256dd → 9004477 → 13d5e30 → af1ef47 → a9b38fa → 218bfa0 → 1f06bf5 → a0930fc → 3027da2 → b2377af → 6d4ae47.
+- **Parent HEAD:** `fc66c62` on `main`; pushed to BOTH `milos85vasic/Translator` + `HelixDevelopment/HelixTranslate` (verified, fast-forward, no force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67 → 7331c54 → 76677aa → 18c5137 → de256dd → 9004477 → 13d5e30 → af1ef47 → a9b38fa → 218bfa0 → 1f06bf5 → a0930fc → 3027da2 → b2377af → 6d4ae47.
 - **llm_provider HEAD:** `b3dc7f9` (W7 CONST-036 propagation block + regenerated html/pdf), pushed to `HelixDevelopment/LLMProvider` master.
 - **Constitution HEAD:** `5e671fe` (§11.4.151 added), pushed to all 6 upstreams; parent pointer bumped.
 - **Build:** `go build ./...` = EXIT 0. **Total test coverage = 50.7%** (`go tool cover -func` total; see `docs/testing/coverage_matrix.md`).
@@ -50,7 +50,9 @@
 - **D6** (9004477) **FIXED** verified_factory map-order flake → order-independent ElementsMatch; 10/10.
 - **wave5** (af1ef47): **W14** `scripts/commit_all.sh` wrapper (no-force/multi-upstream/FF-only/quiescence/explicit-pathspec/bg-push) + hermetic selftest 13/0 (conductor-run verified) — NOT yet wired to real remotes (line-by-line review pending); **W2** format 0%→97.6%, markdown 73.9%→80.1%, coordination 0%→92.9% + **GENUINE nil-guard fix** in TranslateWithRetry (mutation-verified: revert→nil-panic). §11.4.147: format+coordination were rate-limit-crashed at report stage; conductor verified+adopted their work (not lost, not blindly trusted).
 
-**Session total: ~37 items resolved** (+ models bridge wiring digital.vasic.models into the system; + D12 REAL CORS auth-bypass vuln fixed; + D11 doc)
+**Session total: ~39 items resolved** (+ D10 pkg/distributed FULLY -race-clean 9→0 races [4 sources incl. FallbackManager.Stop() lifecycle fix]; + D9 hardware parser testability 44.6→68.4%)
+
+**Prior: ~37 items** (+ models bridge wiring digital.vasic.models into the system; + D12 REAL CORS auth-bypass vuln fixed; + D11 doc)
 
 **Prior: ~34 items** (+ W15: real Postgres+Redis on-demand integration proven; PG connection-pool DoS bug found+fixed; containers StartRedis helper added)
 
@@ -75,8 +77,8 @@
 | D1 | `docs_chain` + `security` CONSTITUTION.md lack literal `CONST-036` | Task | §11.4.118 discovery. They use §11.4.X cascade scheme (not CONST-NNN); challenge doesn't check them. Governance-design decision needed — do NOT blindly inject CONST-NNN (§11.4.6). |
 | D4 | `pkg/script` Latin→Cyrillic morpheme-boundary mis-transliteration | Bug (open) | konjugacija→коњугација (should be конјугација); injekcija, nadживети similar. Greedy digraph matching; real fix needs morpheme/dictionary model (high blast radius) — operator-aware decision. Pinned with KNOWN-LOSSY tests. |
 | D8 | ✅ FIXED (218bfa0) `pkg/markdown` bare-leading `---` data-loss | Bug (fixed) | Frontmatter now must begin at first non-blank line; later `---` = HR/chapter separator. RED(1ch)→GREEN(2ch), mutation-verified. Minor `<ol>`→dash numbering remains pinned/unfixed (D-list, low priority). |
-| D9 | `pkg/hardware` foreign-OS exec.Command paths uncoverable on macOS (stuck 44.6%) | Task | Raising needs parser-extraction refactor (extract pure parsers from exec callers); +13 behavioral tests already landed (a0930fc). |
-| D10 | 3 baseline data races (FACT, captured -race) | Bug | #2 api_logger PRODUCT race ✅ FIXED (3027da2, snapshot, mutation-verified). #1 ssh_pool + #3 performance ConnectionPool = TEST-HARNESS races (production-safe; tests mutate cleanup timing post-construction). Fix = configurable constructor. |
+| D9 | ✅ FIXED (fc66c62) hardware parser testability | Task | Extracted 12 pure parsers from exec callers (behavior-preserving); 44.6→68.4%, mutation-verified. |
+| D10 | 3 baseline data races (FACT, captured -race) | Bug | #2 api_logger PRODUCT race ✅ FIXED (3027da2, snapshot, mutation-verified). #1 ssh_pool + #3 performance ConnectionPool. ✅ ALL FIXED (fc66c62): ssh_pool options API, perf locked-map + count-snapshot, FallbackManager.Stop() lifecycle. pkg/distributed now 0 races. |
 | D11 | ✅ FIXED (b8a24f5) CLAUDE.md mislocated CORS under pkg/security | Task | Corrected: CORS is server-layer (cmd/server corsMiddleware + internal/config). |
 | D12 | ✅ FIXED (b8a24f5) **CORS auth-bypass vuln** | Bug(security) | cmd/server corsMiddleware reflected ARBITRARY origin + Allow-Credentials:true under default `["*"]` → any site could make credentialed cross-origin requests. Fixed: wildcard→literal `*` no-creds; creds only for specific allowlist. RED→GREEN, mutation-verified. |
 | W14b | Review `scripts/commit_all.sh` line-by-line, then adopt as the standard commit path | Task | Selftest 13/0 + conductor-run verified; not yet used on real remotes. macOS /bin/sh=bash so arrays OK; if ever run under dash/mksh refactor arrays (subagent flagged). |
