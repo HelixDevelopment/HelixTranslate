@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
@@ -90,7 +91,7 @@ func (a *LLMsVerifierScoreAdapter) GetPreferences(ctx context.Context) ([]Provid
 	}
 
 	prefs := make([]ProviderPreference, 0, len(models))
-	for i, m := range models {
+	for _, m := range models {
 		// CONST-034: Only verified models may be used
 		if m.VerificationStatus != "verified" || !m.CanSeeCode || !m.AffirmativeResponse {
 			continue
@@ -100,14 +101,28 @@ func (a *LLMsVerifierScoreAdapter) GetPreferences(ctx context.Context) ([]Provid
 			continue
 		}
 		prefs = append(prefs, ProviderPreference{
-			ProviderID:    m.ProviderID,
-			ModelID:       m.ID,
-			ModelName:     m.Name,
-			Weight:        score / 10.0,
-			FallbackOrder: i + 1,
-			Score:         score,
-			Capabilities:  m.Capabilities,
+			ProviderID:   m.ProviderID,
+			ModelID:      m.ID,
+			ModelName:    m.Name,
+			Weight:       score / 10.0,
+			Score:        score,
+			Capabilities: m.Capabilities,
 		})
+	}
+
+	// Sort by score descending (documented contract). Tie-break on ModelID for
+	// deterministic, stable ordering across runs.
+	sort.SliceStable(prefs, func(i, j int) bool {
+		if prefs[i].Score != prefs[j].Score {
+			return prefs[i].Score > prefs[j].Score
+		}
+		return prefs[i].ModelID < prefs[j].ModelID
+	})
+
+	// Assign FallbackOrder as a contiguous 1-based rank among accepted preferences,
+	// computed AFTER sorting so the highest-scored model is fallback rank 1.
+	for i := range prefs {
+		prefs[i].FallbackOrder = i + 1
 	}
 
 	return prefs, nil

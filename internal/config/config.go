@@ -362,10 +362,14 @@ func (c *Config) validateLLMsVerifierConfig() error {
 		return fmt.Errorf("LLMsVerifier minimum score threshold cannot be negative")
 	}
 
-	// Validate scoring weights sum to approximately 1.0
+	// Validate scoring weights sum to approximately 1.0. An all-zero weight set
+	// (total == 0) is a degenerate, obviously-invalid configuration that would
+	// produce a meaningless scoring engine, so it MUST be rejected rather than
+	// silently accepted (fail-open). The only check that is skipped is for
+	// negative individual weights, handled below.
 	weights := c.LLMsVerifier.ScoringWeights
 	total := weights.ResponseSpeed + weights.CostEffectiveness + weights.ModelEfficiency + weights.Capability + weights.Recency
-	if total > 0 && (total < 0.99 || total > 1.01) {
+	if total < 0.99 || total > 1.01 {
 		return fmt.Errorf("LLMsVerifier scoring weights must sum to 1.0, got %.2f", total)
 	}
 
