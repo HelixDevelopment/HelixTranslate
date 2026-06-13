@@ -56,10 +56,15 @@ func (e *Engine) CalculateScore(modelID string, responsiveness, codeCapability, 
 	reliability = clamp01(reliability)
 	costEfficiency = clamp01(costEfficiency)
 
-	// Apply weights from requirements document
+	// Apply weights from requirements document. Each of the five distinct
+	// component weights MUST be applied exactly once so that, when the weight
+	// set sums to 1.0 (the production default), an all-max model scores exactly
+	// 1.0 and stays inside the 0..1 contract IsQualified/threshold logic relies
+	// on. Previously Capability was applied twice and Recency was dropped, which
+	// summed applied weights to 1.15 and silently ignored the recency component.
 	overall := (responsiveness * e.weights.ResponseSpeed) +
 		(codeCapability * e.weights.Capability) +
-		(featureRichness * e.weights.Capability) +
+		(featureRichness * e.weights.Recency) +
 		(reliability * e.weights.ModelEfficiency) +
 		(costEfficiency * e.weights.CostEffectiveness)
 

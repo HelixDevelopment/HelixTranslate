@@ -1,6 +1,22 @@
 package verifier
 
-import "sync"
+import (
+	"sort"
+	"sync"
+)
+
+// sortModels orders models deterministically: highest OverallScore first, with
+// model ID as the ascending tie-breaker. The registry's backing store is a Go
+// map whose iteration order is randomized per run, so callers (and tests) that
+// rely on order must receive a stable, useful ordering rather than map order.
+func sortModels(models []Model) {
+	sort.Slice(models, func(i, j int) bool {
+		if models[i].OverallScore != models[j].OverallScore {
+			return models[i].OverallScore > models[j].OverallScore
+		}
+		return models[i].ID < models[j].ID
+	})
+}
 
 // Registry holds discovered and verified models.
 type Registry struct {
@@ -48,6 +64,7 @@ func (r *Registry) ListModels() []Model {
 	for _, m := range r.models {
 		result = append(result, m)
 	}
+	sortModels(result)
 	return result
 }
 
@@ -62,5 +79,6 @@ func (r *Registry) FilterVerified(minScore float64) []Model {
 			result = append(result, m)
 		}
 	}
+	sortModels(result)
 	return result
 }

@@ -211,10 +211,23 @@ func (s *Service) discoverFromHuggingFace(ctx context.Context) error {
 				caps["local"] = true
 			}
 		}
+		// "id" is the HuggingFace API's canonical, contract-guaranteed model
+		// identifier; "modelId" is a legacy alias that may be absent. Prefer the
+		// canonical field and only fall back to the alias, otherwise a valid
+		// payload supplying only "id" registered every model under the empty
+		// string and silently collapsed to zero usable models.
+		modelID := m.ID
+		if modelID == "" {
+			modelID = m.ModelID
+		}
+		if modelID == "" {
+			// No usable identifier at all — skip rather than collide on "".
+			continue
+		}
 		s.registry.AddModel(verifier.Model{
-			ID:                 m.ModelID,
+			ID:                 modelID,
 			ProviderID:         "huggingface",
-			Name:               m.ModelID,
+			Name:               modelID,
 			VerificationStatus: "discovered",
 			Capabilities:       caps,
 		})

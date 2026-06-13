@@ -155,3 +155,36 @@ func TestRound(t *testing.T) {
 	assert.Equal(t, math.Floor(score.OverallScore*multiplier), score.OverallScore*multiplier,
 		"score should not have more than 4 decimal places of precision")
 }
+
+// TestEngineWeightsAppliedOnceEach is a RED regression test (Wave bug-hunt).
+// FACT: with the production-default asymmetric weights (sum == 1.0), all five
+// distinct component weights MUST be applied exactly once, so a model with all
+// component inputs == 1.0 MUST score exactly 1.0. The pre-fix formula reused
+// Capability twice and dropped Recency, producing 1.15 (sum of applied weights),
+// breaking the 0..1 contract that IsQualified / clamping rely on.
+func TestEngineWeightsAppliedOnceEach(t *testing.T) {
+	weights := ScoreWeights{
+		ResponseSpeed:     0.20,
+		CostEffectiveness: 0.30,
+		ModelEfficiency:   0.25,
+		Capability:        0.20,
+		Recency:           0.05,
+	}
+	engine := NewEngine(weights)
+
+	// All component inputs maxed -> overall MUST equal the weight sum == 1.0.
+	score, err := engine.CalculateScore("max", 1.0, 1.0, 1.0, 1.0, 1.0)
+	require.NoError(t, err)
+	assert.InDelta(t, 1.0, score.OverallScore, 1e-9,
+		"all-max inputs with sum-1.0 weights must score 1.0; got %v (weights applied wrong / Recency dropped)", score.OverallScore)
+
+	// Distinct-input probe: each weight must touch its own component exactly once.
+	// responsiveness=1,0,0,0,0 isolates ResponseSpeed.
+	s2, err := engine.CalculateScore("resp", 1.0, 0.0, 0.0, 0.0, 0.0)
+	require.NoError(t, err)
+	assert.InDelta(t, 0.20, s2.OverallScore, 1e-9, "ResponseSpeed weight")
+	// featureRichness=0,0,1,0,0 isolates the 5th weight (Recency), which the bug dropped.
+	s3, err := engine.CalculateScore("feat", 0.0, 0.0, 1.0, 0.0, 0.0)
+	require.NoError(t, err)
+	assert.InDelta(t, 0.05, s3.OverallScore, 1e-9, "featureRichness must use Recency weight (0.05), not Capability (0.20)")
+}
