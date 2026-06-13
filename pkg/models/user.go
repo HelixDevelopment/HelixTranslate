@@ -57,7 +57,14 @@ func (r *InMemoryUserRepository) FindByEmail(email string) (*User, error) {
 	return nil, ErrUserNotFound
 }
 
-// Create creates a new user
+// Create creates a new user.
+//
+// The stored record is a COPY of the caller's *User, not the same pointer. This
+// matters because callers (e.g. security.UserAuthService.CreateUser) clear the
+// plaintext password on the returned struct after Create returns; if the repo
+// kept the caller's pointer, that clear would also blank the stored bcrypt hash,
+// leaving the user permanently unable to authenticate. Storing a copy keeps the
+// persisted hash intact regardless of what the caller does to its struct.
 func (r *InMemoryUserRepository) Create(user *User) error {
 	// Hash password before storing
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -67,7 +74,8 @@ func (r *InMemoryUserRepository) Create(user *User) error {
 	user.Password = string(hashedPassword)
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
-	r.users[user.Username] = user
+	stored := *user // copy: caller may later mutate (e.g. clear) its own struct
+	r.users[user.Username] = &stored
 	return nil
 }
 
