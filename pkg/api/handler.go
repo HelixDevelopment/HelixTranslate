@@ -1068,6 +1068,32 @@ func (h *Handler) translateDistributed(c *gin.Context) {
 	})
 }
 
+// validateUpdateVersion guards the X-Update-Version header against path
+// traversal (CWE-22): the version is interpolated into an on-disk filename, so
+// it MUST NOT contain path separators, "..", NUL bytes, or other characters
+// that could escape the canonical update directory. Only a conservative set of
+// version-token characters (alphanumerics, '.', '-', '_', '+') is permitted.
+func validateUpdateVersion(version string) error {
+	if version == "" {
+		return fmt.Errorf("Update version not specified")
+	}
+	if len(version) > 128 {
+		return fmt.Errorf("Invalid update version: too long")
+	}
+	if strings.Contains(version, "..") ||
+		strings.ContainsAny(version, "/\\\x00") {
+		return fmt.Errorf("Invalid update version: contains illegal path characters")
+	}
+	for _, r := range version {
+		isAllowed := (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') ||
+			(r >= '0' && r <= '9') || r == '.' || r == '-' || r == '_' || r == '+'
+		if !isAllowed {
+			return fmt.Errorf("Invalid update version: contains illegal characters")
+		}
+	}
+	return nil
+}
+
 // uploadUpdate handles update package uploads
 func (h *Handler) uploadUpdate(c *gin.Context) {
 	// Get the uploaded file
@@ -1077,10 +1103,10 @@ func (h *Handler) uploadUpdate(c *gin.Context) {
 		return
 	}
 
-	// Get version from header
+	// Get version from header and validate it against path traversal.
 	version := c.GetHeader("X-Update-Version")
-	if version == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Update version not specified"})
+	if err := validateUpdateVersion(version); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -1106,10 +1132,10 @@ func (h *Handler) uploadUpdate(c *gin.Context) {
 
 // applyUpdate applies a previously uploaded update
 func (h *Handler) applyUpdate(c *gin.Context) {
-	// Get version from header
+	// Get version from header and validate it against path traversal.
 	version := c.GetHeader("X-Update-Version")
-	if version == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Update version not specified"})
+	if err := validateUpdateVersion(version); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
