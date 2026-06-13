@@ -6,9 +6,44 @@ import (
 	"digital.vasic.translator/pkg/translator"
 	"errors"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
+
+// asyncFlag is a thread-safe boolean set from an EventBus handler goroutine and
+// polled from the test goroutine. EventBus.Publish dispatches every handler on
+// its own goroutine (pkg/events/events.go), so a plain bool written by the
+// handler and read by the test is a data race with no happens-before guarantee.
+// asyncFlag serialises set/get under a mutex and exposes waitTrue to poll
+// deterministically instead of sleeping a fixed, load-sensitive duration.
+type asyncFlag struct {
+	mu  sync.Mutex
+	set bool
+}
+
+func (f *asyncFlag) mark() {
+	f.mu.Lock()
+	f.set = true
+	f.mu.Unlock()
+}
+
+func (f *asyncFlag) get() bool {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.set
+}
+
+func (f *asyncFlag) waitTrue(timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if f.get() {
+			return true
+		}
+		time.Sleep(time.Millisecond)
+	}
+	return f.get()
+}
 
 // TestIsTextSizeError tests detection of size-related errors
 func TestIsTextSizeError(t *testing.T) {
@@ -836,19 +871,20 @@ func TestLLMTranslatorTranslateWithProgress(t *testing.T) {
 
 	eventBus := events.NewEventBus()
 	sessionID := "test-session"
-	progressReceived := false
-	completionReceived := false
+	// Thread-safe flags: handlers run on EventBus.Publish goroutines.
+	var progressReceived asyncFlag
+	var completionReceived asyncFlag
 
 	// Subscribe to progress events
 	eventBus.Subscribe(events.EventTranslationProgress, func(event events.Event) {
 		if event.SessionID == sessionID {
-			progressReceived = true
+			progressReceived.mark()
 		}
 	})
 
 	eventBus.Subscribe(events.EventTranslationProgress, func(event events.Event) {
 		if event.SessionID == sessionID && strings.Contains(event.Message, "completed") {
-			completionReceived = true
+			completionReceived.mark()
 		}
 	})
 
@@ -862,14 +898,12 @@ func TestLLMTranslatorTranslateWithProgress(t *testing.T) {
 		t.Errorf("Expected 'HELLO WORLD', got '%s'", result)
 	}
 
-	// Give more time for async event processing
-	time.Sleep(50 * time.Millisecond)
-
-	if !progressReceived {
+	// Poll deterministically for async event processing instead of a fixed sleep.
+	if !progressReceived.waitTrue(2 * time.Second) {
 		t.Error("Expected progress event but none received")
 	}
 
-	if !completionReceived {
+	if !completionReceived.waitTrue(2 * time.Second) {
 		t.Error("Expected completion event but none received")
 	}
 }
@@ -1076,28 +1110,27 @@ func TestBaseTranslatorMethods(t *testing.T) {
 func TestEmitFunctions(t *testing.T) {
 	eventBus := events.NewEventBus()
 	sessionID := "test-session"
-	progressReceived := false
-	errorReceived := false
+	// Thread-safe flags: handlers run on EventBus.Publish goroutines.
+	var progressReceived asyncFlag
+	var errorReceived asyncFlag
 
 	eventBus.Subscribe(events.EventTranslationProgress, func(event events.Event) {
 		if event.SessionID == sessionID {
-			progressReceived = true
+			progressReceived.mark()
 		}
 	})
 
 	eventBus.Subscribe(events.EventTranslationError, func(event events.Event) {
 		if event.SessionID == sessionID {
-			errorReceived = true
+			errorReceived.mark()
 		}
 	})
 
 	t.Run("EmitProgress", func(t *testing.T) {
 		EmitProgress(eventBus, sessionID, "test message", map[string]interface{}{"key": "value"})
 
-		// Give some time for async processing
-		time.Sleep(10 * time.Millisecond)
-
-		if !progressReceived {
+		// Poll deterministically for async processing instead of a fixed sleep.
+		if !progressReceived.waitTrue(2 * time.Second) {
 			t.Error("Expected progress event to be received")
 		}
 	})
@@ -1106,10 +1139,8 @@ func TestEmitFunctions(t *testing.T) {
 		testErr := errors.New("test error")
 		EmitError(eventBus, sessionID, "test error message", testErr)
 
-		// Give some time for async processing
-		time.Sleep(10 * time.Millisecond)
-
-		if !errorReceived {
+		// Poll deterministically for async processing instead of a fixed sleep.
+		if !errorReceived.waitTrue(2 * time.Second) {
 			t.Error("Expected error event to be received")
 		}
 	})

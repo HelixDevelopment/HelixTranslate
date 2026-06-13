@@ -2,6 +2,7 @@ package sshworker
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"sync"
 	"testing"
@@ -239,12 +240,52 @@ func TestMonitorLongRunningCommand_ContextCancelled(t *testing.T) {
 	// error and the function must not hang. We assert only the error contract
 	// (presence above), since which branch wins is an inherent goroutine race.
 	//
-	// NOTE/UNCONFIRMED (product observation, not asserted): the ctx.Done() branch
-	// in MonitorLongRunningCommand returns WITHOUT delete(m.progress, operation),
-	// whereas the resultChan/errorChan branches DO clean up. Cleanup is therefore
-	// non-deterministic under cancellation; we do not assert it here to avoid a
-	// flaky test. Confirming/fixing that asymmetry is left to the owning stream.
+	// The former progress-map leak on the ctx.Done() branch is now fixed (a
+	// single deferred delete cleans up every exit path) and asserted directly by
+	// TestMonitorLongRunningCommand_CancelDoesNotLeakProgress below.
 	mu.Lock()
 	_ = sawError // error event may be cancellation or command-failure; err asserted above
 	mu.Unlock()
+}
+
+// TestMonitorLongRunningCommand_CancelDoesNotLeakProgress is the §11.4.115
+// reproduce-first regression guard for the progress-map leak: the ctx.Done()
+// branch of MonitorLongRunningCommand used to return WITHOUT
+// delete(m.progress, operation), while the resultChan/errorChan branches do
+// clean up — so every command that exits via cancellation leaked one entry in
+// m.progress forever.
+//
+// Determinism note (§11.4.50): with a disconnected worker the background
+// ExecuteCommand pushes to errorChan ~instantly, racing <-ctx.Done(). A single
+// run is therefore a coin-flip on which branch wins. We force the leak into the
+// open by running the cancellation path many iterations on ONE worker, each
+// with a UNIQUE operation key, and asserting the map is empty after the whole
+// batch. Each iteration that takes the ctx.Done() branch leaves a permanent
+// residue keyed by its unique op; on the buggy code P(zero leaks across N=300)
+// is ~2^-300 — i.e. this FAILs RED essentially every run. The fix (cleanup on
+// every exit path) makes the map deterministically empty, so it PASSes GREEN
+// reliably under -count=3 -race.
+func TestMonitorLongRunningCommand_CancelDoesNotLeakProgress(t *testing.T) {
+	m := newMonitored(t, events.NewEventBus(), "sess-leak")
+
+	const iterations = 300
+	for i := 0; i < iterations; i++ {
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel() // already cancelled => ctx.Done() is ready
+		op := fmt.Sprintf("leak-op-%d", i)
+		_, err := m.MonitorLongRunningCommand(ctx, op, "sleep 60", time.Hour)
+		if err == nil {
+			t.Fatalf("iteration %d: expected error on cancelled ctx, got nil", i)
+		}
+	}
+
+	// After every monitored command has returned, NO operation may remain in the
+	// progress map. A leaked entry from any ctx.Done()-winning iteration fails here.
+	if got := m.GetProgress(); len(got) != 0 {
+		ops := make([]string, 0, len(got))
+		for k := range got {
+			ops = append(ops, k)
+		}
+		t.Fatalf("progress map leaked %d entr(ies) after cancelled commands: %v", len(got), ops)
+	}
 }

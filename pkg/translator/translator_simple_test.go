@@ -2,6 +2,7 @@ package translator
 
 import (
 	"context"
+	"sync"
 	"testing"
 	"time"
 
@@ -13,6 +14,40 @@ import (
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/language"
 )
+
+// asyncFlag is a thread-safe boolean set from an EventBus handler goroutine and
+// polled from the test goroutine. EventBus.Publish dispatches every handler on
+// its own goroutine (pkg/events/events.go), so a plain bool written by the
+// handler and read by the test is a data race with no happens-before guarantee.
+// asyncFlag serialises set/get under a mutex and exposes waitTrue to poll
+// deterministically instead of sleeping a fixed, load-sensitive duration.
+type asyncFlag struct {
+	mu  sync.Mutex
+	set bool
+}
+
+func (f *asyncFlag) mark() {
+	f.mu.Lock()
+	f.set = true
+	f.mu.Unlock()
+}
+
+func (f *asyncFlag) get() bool {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.set
+}
+
+func (f *asyncFlag) waitTrue(timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if f.get() {
+			return true
+		}
+		time.Sleep(time.Millisecond)
+	}
+	return f.get()
+}
 
 // TestUniversalTranslator_BasicFunctionality tests basic translator functionality
 func TestUniversalTranslator_BasicFunctionalitySimple(t *testing.T) {
@@ -139,10 +174,10 @@ func TestUniversalTranslator_ProgressTrackingSimple(t *testing.T) {
 		eventBus := events.NewEventBus()
 		sessionID := "test-session"
 
-		// Subscribe to progress events
-		progressReceived := false
+		// Subscribe to progress events (handler runs on a Publish goroutine).
+		var progressReceived asyncFlag
 		eventBus.Subscribe(events.EventTranslationProgress, func(event events.Event) {
-			progressReceived = true
+			progressReceived.mark()
 		})
 
 		book := &ebook.Book{
@@ -159,11 +194,8 @@ func TestUniversalTranslator_ProgressTrackingSimple(t *testing.T) {
 		err := ut.TranslateBook(ctx, book, eventBus, sessionID)
 		assert.NoError(t, err)
 
-		// Wait a bit for async events
-		time.Sleep(time.Millisecond * 10)
-
-		// Verify progress events were emitted
-		assert.True(t, progressReceived, "Progress events should be emitted")
+		// Poll deterministically for async events instead of a fixed sleep.
+		assert.True(t, progressReceived.waitTrue(2*time.Second), "Progress events should be emitted")
 	})
 }
 
@@ -352,18 +384,16 @@ func TestBaseTranslator_EmitError(t *testing.T) {
 	// Set up event bus
 	eventBus := events.NewEventBus()
 
-	// Track error events
-	errorReceived := false
+	// Track error events (thread-safe: handler runs on a Publish goroutine).
+	var errorReceived asyncFlag
 	eventBus.Subscribe(events.EventTranslationError, func(event events.Event) {
-		errorReceived = true
 		assert.Contains(t, event.Message, "Test error")
+		errorReceived.mark()
 	})
 
 	// Emit error
 	EmitError(eventBus, "test-session", "Test error", nil)
 
-	// Wait for async event
-	time.Sleep(time.Millisecond * 10)
-
-	assert.True(t, errorReceived, "Error event should be emitted")
+	// Poll deterministically for the async event instead of a fixed sleep.
+	assert.True(t, errorReceived.waitTrue(2*time.Second), "Error event should be emitted")
 }

@@ -21,8 +21,15 @@ func TestNewEventBus(t *testing.T) {
 func TestEventBus_Subscribe(t *testing.T) {
 	bus := NewEventBus()
 	received := false
+	var mu sync.Mutex
 
 	handler := func(event Event) {
+		// EventBus.Publish dispatches handlers on detached goroutines, so the
+		// handler runs concurrently with the assertion below — guard the shared
+		// flag with a mutex (the same pattern the sibling tests use). Without
+		// this the read at the assert races the write here (-race FAIL).
+		mu.Lock()
+		defer mu.Unlock()
 		received = true
 	}
 
@@ -34,6 +41,8 @@ func TestEventBus_Subscribe(t *testing.T) {
 	// Give handler time to execute
 	time.Sleep(10 * time.Millisecond)
 
+	mu.Lock()
+	defer mu.Unlock()
 	assert.True(t, received, "Handler should have received event")
 }
 

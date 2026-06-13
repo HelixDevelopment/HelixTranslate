@@ -156,6 +156,16 @@ func (m *MonitoredSSHWorker) MonitorLongRunningCommand(ctx context.Context, oper
 	m.progress[operation] = tracker
 	m.progressMu.Unlock()
 
+	// Single cleanup path: every return (success, error, AND ctx cancellation)
+	// removes the tracker from the progress map. Previously the ctx.Done() branch
+	// returned without deleting, leaking one entry per cancelled command. The
+	// delete is cheap and non-blocking, so holding progressMu here is safe.
+	defer func() {
+		m.progressMu.Lock()
+		delete(m.progress, operation)
+		m.progressMu.Unlock()
+	}()
+
 	// Start command in background
 	resultChan := make(chan *CommandResult, 1)
 	errorChan := make(chan error, 1)
@@ -208,9 +218,7 @@ func (m *MonitoredSSHWorker) MonitorLongRunningCommand(ctx context.Context, oper
 				"session_id": m.sessionID,
 			})
 
-			m.progressMu.Lock()
-			delete(m.progress, operation)
-			m.progressMu.Unlock()
+			// Cleanup handled by the deferred delete above.
 			return result, nil
 
 		case err := <-errorChan:
@@ -228,9 +236,7 @@ func (m *MonitoredSSHWorker) MonitorLongRunningCommand(ctx context.Context, oper
 				"session_id": m.sessionID,
 			})
 
-			m.progressMu.Lock()
-			delete(m.progress, operation)
-			m.progressMu.Unlock()
+			// Cleanup handled by the deferred delete above.
 			return nil, err
 
 		case <-ticker.C:
