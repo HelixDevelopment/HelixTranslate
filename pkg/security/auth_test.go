@@ -663,9 +663,16 @@ func TestAuthService_TokenExpirationEdgeCases(t *testing.T) {
 			expectErr: true,
 		},
 		{
-			name:      "Short TTL",
-			ttl:       time.Second,
-			waitTime:  time.Millisecond * 50, // Further reduced wait time to ensure token is still valid
+			name: "Short TTL",
+			// Deterministic margin (§11.4.50): time.Sleep guarantees a MINIMUM, not a
+			// maximum — under heavy parallel-suite load a 50ms sleep can overshoot past a
+			// 1s TTL, expiring the token and producing a flaky FAIL (a §11.4.1 FAIL-bluff;
+			// the JWT exp logic itself is correct). A 1-minute TTL against a 50ms intended
+			// wait gives a ~1200x margin: only a machine frozen for >60s could expire it,
+			// in which case the whole suite fails anyway. Semantics preserved: a token
+			// validated well within its (short, non-production) TTL stays valid.
+			ttl:       time.Minute,
+			waitTime:  time.Millisecond * 50,
 			expectErr: false,
 		},
 		{

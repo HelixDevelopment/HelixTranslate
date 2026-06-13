@@ -9,7 +9,7 @@ set -euo pipefail
 # is worse than no tests at all. This challenge enforces that green = usable.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+PROJECT_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))"
 
 echo "=== Anti-Bluff Execution Challenge ==="
 echo "Verifying: build success + test execution + mutation failure"
@@ -64,8 +64,12 @@ MUTATION_BACKUP="${MUTATION_TARGET}.backup"
 # Backup original
 cp "${MUTATION_TARGET}" "${MUTATION_BACKUP}"
 
-# Apply mutation: break the Ping method so it always returns an error
-sed -i 's/func (c \*Client) Ping(ctx context.Context) error {/func (c *Client) Ping(ctx context.Context) error { return fmt.Errorf("MUTATION: deliberately broken")/' "${MUTATION_TARGET}"
+# Apply mutation: break the Ping method so it always returns an error.
+# Portable across BSD (macOS) and GNU sed: BSD `sed -i <script>` consumes the
+# script as the backup-extension arg and treats the file path as the script
+# ("invalid command code" on the first path char) — §11.4.67. The script already
+# keeps its own ${MUTATION_BACKUP} + restores it, so use the tmpfile pattern.
+sed 's/func (c \*Client) Ping(ctx context.Context) error {/func (c *Client) Ping(ctx context.Context) error { return fmt.Errorf("MUTATION: deliberately broken")/' "${MUTATION_TARGET}" > "${MUTATION_TARGET}.tmp" && mv "${MUTATION_TARGET}.tmp" "${MUTATION_TARGET}"
 
 # Run the test that should now fail
 MUTATION_FAILED=false
@@ -92,8 +96,8 @@ REGISTRY_TARGET="${PROJECT_ROOT}/pkg/models/verifier_registry.go"
 REGISTRY_BACKUP="${REGISTRY_TARGET}.backup"
 cp "${REGISTRY_TARGET}" "${REGISTRY_BACKUP}"
 
-# Break IsModelVerified to always return false
-sed -i 's/return m.VerificationStatus == "verified" && m.CanSeeCode && m.AffirmativeResponse/return false \/\/ MUTATION: always false/' "${REGISTRY_TARGET}"
+# Break IsModelVerified to always return false (portable sed — see Step 4 note, §11.4.67)
+sed 's/return m.VerificationStatus == "verified" && m.CanSeeCode && m.AffirmativeResponse/return false \/\/ MUTATION: always false/' "${REGISTRY_TARGET}" > "${REGISTRY_TARGET}.tmp" && mv "${REGISTRY_TARGET}.tmp" "${REGISTRY_TARGET}"
 
 REGISTRY_MUTATION_FAILED=false
 if go test ./pkg/models/... -run TestVerifierRegistry -count=1 -timeout=30s >/dev/null 2>&1; then

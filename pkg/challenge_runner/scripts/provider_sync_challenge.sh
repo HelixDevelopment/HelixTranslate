@@ -6,7 +6,7 @@ set -euo pipefail
 # Anti-bluff: Runs real discovery tests AND mutation-tests discovery logic.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+PROJECT_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))"
 
 echo "=== Provider Sync Challenge ==="
 

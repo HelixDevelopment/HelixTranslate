@@ -11,6 +11,14 @@ import (
 	"digital.vasic.translator/internal/verifier"
 )
 
+// Default Tier-2 public registry endpoints. Exported as defaults so that
+// production uses the real registries while tests (and operators via
+// Config.Options) can point them at a local/alternate endpoint.
+const (
+	defaultOpenRouterURL  = "https://openrouter.ai/api/v1/models"
+	defaultHuggingFaceURL = "https://huggingface.co/api/models?filter=text-generation&limit=50"
+)
+
 // Service performs three-tier model discovery.
 type Service struct {
 	config       *verifier.Config
@@ -20,6 +28,13 @@ type Service struct {
 	lastSync     time.Time
 	syncInterval time.Duration
 	httpClient   *http.Client
+
+	// Tier-2 registry endpoints. Defaulted to the public registries in
+	// NewService; overridable via Config.Options ("openrouter_url",
+	// "huggingface_url") for operators, or directly in tests, so the suite
+	// never depends on live internet reachability (§11.4.3 topology-aware).
+	openRouterURL  string
+	huggingFaceURL string
 }
 
 // openRouterModel represents a model from OpenRouter API.
@@ -48,12 +63,25 @@ type huggingFaceModel struct {
 
 // NewService creates a discovery service.
 func NewService(cfg *verifier.Config, registry *verifier.Registry) *Service {
-	return &Service{
-		config:       cfg,
-		registry:     registry,
-		syncInterval: cfg.CacheTTL,
-		httpClient:   &http.Client{Timeout: 30 * time.Second},
+	s := &Service{
+		config:         cfg,
+		registry:       registry,
+		syncInterval:   cfg.CacheTTL,
+		httpClient:     &http.Client{Timeout: 30 * time.Second},
+		openRouterURL:  defaultOpenRouterURL,
+		huggingFaceURL: defaultHuggingFaceURL,
 	}
+	// Allow operators (and tests) to override the Tier-2 registry endpoints
+	// without code changes; falls back to the public registries otherwise.
+	if cfg.Options != nil {
+		if url, ok := cfg.Options["openrouter_url"].(string); ok && url != "" {
+			s.openRouterURL = url
+		}
+		if url, ok := cfg.Options["huggingface_url"].(string); ok && url != "" {
+			s.huggingFaceURL = url
+		}
+	}
+	return s
 }
 
 // RegisterProvider adds a provider for discovery.
@@ -116,7 +144,7 @@ func (s *Service) discoverFromProvider(ctx context.Context, provider verifier.Pr
 
 // discoverFromOpenRouter queries OpenRouter's public model registry (Tier 2).
 func (s *Service) discoverFromOpenRouter(ctx context.Context) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://openrouter.ai/api/v1/models", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, s.openRouterURL, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create OpenRouter request: %w", err)
 	}
@@ -156,7 +184,7 @@ func (s *Service) discoverFromOpenRouter(ctx context.Context) error {
 
 // discoverFromHuggingFace queries HuggingFace's model registry (Tier 2).
 func (s *Service) discoverFromHuggingFace(ctx context.Context) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://huggingface.co/api/models?filter=text-generation&limit=50", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, s.huggingFaceURL, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create HuggingFace request: %w", err)
 	}

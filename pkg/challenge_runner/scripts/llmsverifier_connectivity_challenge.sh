@@ -6,7 +6,7 @@ set -euo pipefail
 # Anti-bluff: Actually attempts HTTP connection and validates response structure.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+PROJECT_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))"
 
 API_URL="${LLMSVERIFIER_API_URL:-http://localhost:8080}"
 API_KEY="${LLMSVERIFIER_API_KEY:-}"

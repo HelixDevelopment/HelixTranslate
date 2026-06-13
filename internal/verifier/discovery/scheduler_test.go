@@ -14,6 +14,7 @@ import (
 func TestSchedulerStartStop(t *testing.T) {
 	registry := verifier.NewRegistry()
 	service := NewService(verifier.DefaultConfig(), registry)
+	sentinelTier2(t, service) // Tier-2 live registries absent → fast local fail
 	scheduler := NewScheduler(service, 10*time.Second)
 
 	require.False(t, scheduler.IsRunning())
@@ -30,6 +31,7 @@ func TestSchedulerStartStop(t *testing.T) {
 func TestSchedulerDoubleStart(t *testing.T) {
 	registry := verifier.NewRegistry()
 	service := NewService(verifier.DefaultConfig(), registry)
+	sentinelTier2(t, service) // Tier-2 live registries absent → fast local fail
 	scheduler := NewScheduler(service, time.Hour)
 
 	require.NoError(t, scheduler.Start())
@@ -54,6 +56,7 @@ func TestSchedulerRunOnce(t *testing.T) {
 	registry := verifier.NewRegistry()
 	cfg := verifier.DefaultConfig()
 	service := NewService(cfg, registry)
+	sentinelTier2(t, service) // Tier-2 live registries absent → fast local fail
 
 	provider := verifier.ProviderConfig{ID: "test", BaseURL: "http://localhost:1", Models: []string{"m1"}}
 	service.RegisterProvider(provider)
@@ -79,6 +82,7 @@ func TestSchedulerRunOnce(t *testing.T) {
 func TestSchedulerCallback(t *testing.T) {
 	registry := verifier.NewRegistry()
 	service := NewService(verifier.DefaultConfig(), registry)
+	sentinelTier2(t, service) // Tier-2 live registries absent → fast local fail
 	scheduler := NewScheduler(service, 50*time.Millisecond)
 
 	var called atomic.Int32
@@ -100,6 +104,7 @@ func TestSchedulerCallbackReceivesError(t *testing.T) {
 	// Force a community URL that will fail
 	cfg.Options = map[string]interface{}{"community_registry_url": "http://localhost:1/community"}
 	service := NewService(cfg, registry)
+	sentinelTier2(t, service) // Tier-2 live registries absent → fast local fail
 
 	scheduler := NewScheduler(service, time.Hour)
 

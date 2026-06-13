@@ -18,6 +18,7 @@ import (
 	"digital.vasic.translator/pkg/fb2"
 	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/pkg/markdown"
+	"digital.vasic.translator/pkg/script"
 	"digital.vasic.translator/pkg/sshworker"
 	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/translator/llm"
@@ -213,6 +214,12 @@ func executeTranslation(session *TranslationSession) error {
 	if err != nil {
 		return stepError(step, fmt.Sprintf("Translation failed: %v", err))
 	}
+
+	// Normalize to the requested target script (W10). The LLM output may be in
+	// the wrong script (e.g. Cyrillic when -script latin was requested); this
+	// deterministically converts it so the saved markdown, the EPUB, and the
+	// verification all see the script the user asked for.
+	translatedMarkdown = normalizeScript(translatedMarkdown, config.Script)
 
 	// Save translated markdown
 	translatedMDPath := generateTranslatedMDPath(config.InputFile)
@@ -819,6 +826,27 @@ func bookToString(book *ebook.Book) string {
 		}
 	}
 	return result.String()
+}
+
+// normalizeScript deterministically converts translated text to the requested
+// target script. `-script latin` always yields Latin output (no Cyrillic
+// codepoints survive); `-script cyrillic` always yields Cyrillic. Conversion is
+// done directly via the script converter (ToLatin/ToCyrillic) rather than the
+// auto-detect Convert(), so the result is deterministic regardless of how the
+// LLM mixed scripts. Both directions are idempotent on already-target text
+// (target-script codepoints are not in the source mapping table, so they pass
+// through untouched). An empty or unrecognised script value passes the text
+// through unchanged (W10 — §11.4.6: no guessing, explicit closed-set handling).
+func normalizeScript(text, targetScript string) string {
+	conv := script.NewConverter()
+	switch targetScript {
+	case string(script.Latin):
+		return conv.ToLatin(text)
+	case string(script.Cyrillic):
+		return conv.ToCyrillic(text)
+	default:
+		return text
+	}
 }
 
 func verifyTranslation(text, targetLang, script string) bool {

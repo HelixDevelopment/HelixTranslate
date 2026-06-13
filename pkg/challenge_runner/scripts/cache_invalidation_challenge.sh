@@ -6,7 +6,7 @@ set -euo pipefail
 # Anti-bluff: Runs the actual unit tests AND mutation-tests the cache logic.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+PROJECT_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))"
 
 echo "=== Cache Invalidation Challenge ==="
 

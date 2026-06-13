@@ -13,11 +13,13 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/smtp"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -111,6 +113,10 @@ type EmailAlertChannel struct {
 	Password    string
 	FromAddress string
 	ToAddresses []string
+	// Timeout bounds the SMTP dial + send. Zero means the default (30s).
+	// Without it a send against an unreachable/filtered SMTP host would
+	// block until the OS TCP timeout (potentially minutes).
+	Timeout time.Duration
 }
 
 // WebhookAlertChannel sends alerts via HTTP webhook
@@ -261,11 +267,65 @@ This is an automated alert from the version management system.
 		body,
 	)
 
-	// Send email
+	// Send email with a bounded dial so an unreachable/filtered SMTP host
+	// cannot block indefinitely (smtp.SendMail has no timeout of its own).
 	auth := smtp.PlainAuth("", e.Username, e.Password, e.SMTPHost)
-	addr := fmt.Sprintf("%s:%d", e.SMTPHost, e.SMTPPort)
+	addr := net.JoinHostPort(e.SMTPHost, strconv.Itoa(e.SMTPPort))
 
-	return smtp.SendMail(addr, auth, e.FromAddress, e.ToAddresses, []byte(message))
+	timeout := e.Timeout
+	if timeout <= 0 {
+		timeout = 30 * time.Second
+	}
+
+	deadline := time.Now().Add(timeout)
+	conn, err := net.DialTimeout("tcp", addr, timeout)
+	if err != nil {
+		return fmt.Errorf("smtp dial %s: %w", addr, err)
+	}
+	// Enforce the deadline across the whole SMTP exchange, not just the dial.
+	_ = conn.SetDeadline(deadline)
+
+	client, err := smtp.NewClient(conn, e.SMTPHost)
+	if err != nil {
+		_ = conn.Close()
+		return fmt.Errorf("smtp client %s: %w", addr, err)
+	}
+	defer func() { _ = client.Close() }()
+
+	if ok, _ := client.Extension("STARTTLS"); ok {
+		if err := client.StartTLS(&tls.Config{ServerName: e.SMTPHost}); err != nil {
+			return fmt.Errorf("smtp starttls %s: %w", addr, err)
+		}
+	}
+
+	if ok, _ := client.Extension("AUTH"); ok {
+		if err := client.Auth(auth); err != nil {
+			return fmt.Errorf("smtp auth %s: %w", addr, err)
+		}
+	}
+
+	if err := client.Mail(e.FromAddress); err != nil {
+		return fmt.Errorf("smtp mail from %s: %w", e.FromAddress, err)
+	}
+	for _, rcpt := range e.ToAddresses {
+		if err := client.Rcpt(rcpt); err != nil {
+			return fmt.Errorf("smtp rcpt %s: %w", rcpt, err)
+		}
+	}
+
+	w, err := client.Data()
+	if err != nil {
+		return fmt.Errorf("smtp data: %w", err)
+	}
+	if _, err := w.Write([]byte(message)); err != nil {
+		_ = w.Close()
+		return fmt.Errorf("smtp write: %w", err)
+	}
+	if err := w.Close(); err != nil {
+		return fmt.Errorf("smtp close data: %w", err)
+	}
+
+	return client.Quit()
 }
 
 // WebhookAlertChannel implementation

@@ -60,3 +60,5 @@ qa-results/
 # mutation-test residue (§11.4.84) — never track
 *.go.backup
 *.go.bak
+*.bak
+*.backup

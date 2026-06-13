@@ -1,6 +1,13 @@
 package distributed
 
 import (
+	"bufio"
+	"fmt"
+	"net"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -239,73 +246,178 @@ func (m *MockAlertChannel) Name() string {
 	return "mock"
 }
 
+func testDriftAlert() *DriftAlert {
+	return &DriftAlert{
+		WorkerID:        "test-worker",
+		ExpectedVersion: VersionInfo{CodebaseVersion: "1.0.0"},
+		CurrentVersion:  VersionInfo{CodebaseVersion: "1.1.0"},
+		Message:         "Version drift detected",
+		Timestamp:       time.Now(),
+		Severity:        "warning",
+	}
+}
+
+// TestEmailAlertChannel_SendAlert drives the SMTP send path against a real
+// local TCP listener (no external infra, no unbounded network wait per
+// §11.4.3 + §11.4.27). The listener greets then closes, so SendAlert MUST
+// return an error promptly — proving the bounded-dial fix prevents the
+// indefinite hang that previously blew the package test budget.
 func TestEmailAlertChannel_SendAlert(t *testing.T) {
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Skipf("SKIP-OK: cannot bind loopback TCP listener (sandboxed network) — %v", err)
+	}
+	defer func() { _ = ln.Close() }()
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		conn, aerr := ln.Accept()
+		if aerr != nil {
+			return
+		}
+		// Minimal SMTP greeting then immediate close — the client's
+		// subsequent commands fail fast against a half-broken server.
+		_, _ = conn.Write([]byte("220 local test smtp\r\n"))
+		_ = conn.Close()
+	}()
+
+	host, portStr, _ := net.SplitHostPort(ln.Addr().String())
+	port := 0
+	_, _ = fmt.Sscan(portStr, &port)
+
 	channel := &EmailAlertChannel{
-		SMTPHost:    "smtp.example.com",
+		SMTPHost:    host,
+		SMTPPort:    port,
+		Username:    "test@example.com",
+		Password:    "password",
+		FromAddress: "test@example.com",
+		ToAddresses: []string{"admin@example.com"},
+		Timeout:     5 * time.Second,
+	}
+
+	start := time.Now()
+	err = channel.SendAlert(testDriftAlert())
+	elapsed := time.Since(start)
+	wg.Wait()
+
+	if err == nil {
+		t.Error("expected error sending email to a server that closes the connection")
+	}
+	// Bounded: must finish well within the configured 5s timeout, proving the
+	// dial/send is deadline-guarded (the product fix).
+	if elapsed > 6*time.Second {
+		t.Errorf("SendAlert took %v; expected bounded by ~5s timeout — dial deadline not enforced", elapsed)
+	}
+}
+
+// TestEmailAlertChannel_SendAlert_UnreachableIsBounded proves the missing-deadline
+// product defect is fixed: against an unrouteable address the send returns within
+// the configured timeout instead of blocking on the OS TCP timeout (minutes).
+func TestEmailAlertChannel_SendAlert_UnreachableIsBounded(t *testing.T) {
+	channel := &EmailAlertChannel{
+		// 203.0.113.0/24 (TEST-NET-3, RFC 5737) is reserved and unrouteable.
+		SMTPHost:    "203.0.113.1",
 		SMTPPort:    587,
 		Username:    "test@example.com",
 		Password:    "password",
 		FromAddress: "test@example.com",
 		ToAddresses: []string{"admin@example.com"},
+		Timeout:     2 * time.Second,
 	}
 
-	alert := &DriftAlert{
-		WorkerID:        "test-worker",
-		ExpectedVersion: VersionInfo{CodebaseVersion: "1.0.0"},
-		CurrentVersion:  VersionInfo{CodebaseVersion: "1.1.0"},
-		Message:         "Version drift detected",
-		Timestamp:       time.Now(),
-		Severity:        "warning",
-	}
+	start := time.Now()
+	err := channel.SendAlert(testDriftAlert())
+	elapsed := time.Since(start)
 
-	// Send alert (will fail since we don't have a real SMTP server)
-	err := channel.SendAlert(alert)
 	if err == nil {
-		t.Error("Expected error for sending email without real SMTP server")
+		t.Error("expected error dialing unrouteable SMTP host")
+	}
+	if elapsed > 4*time.Second {
+		t.Errorf("SendAlert took %v against unrouteable host; expected bounded by ~2s timeout", elapsed)
 	}
 }
 
+// TestWebhookAlertChannel_SendAlert drives a real in-process HTTP server and
+// asserts the webhook POST actually arrived with the alert payload — positive
+// captured evidence, no external host (§11.4.3 + §11.4.27 + anti-bluff §11.4).
 func TestWebhookAlertChannel_SendAlert(t *testing.T) {
+	var (
+		mu       sync.Mutex
+		gotBody  string
+		gotPath  bool
+		gotCType string
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buf := new(strings.Builder)
+		_, _ = bufio.NewReader(r.Body).WriteTo(buf)
+		mu.Lock()
+		gotBody = buf.String()
+		gotPath = r.Method == http.MethodPost
+		gotCType = r.Header.Get("Content-Type")
+		mu.Unlock()
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
 	channel := &WebhookAlertChannel{
-		URL:     "https://hooks.slack.com/test",
+		URL:     srv.URL,
 		Method:  "POST",
 		Headers: map[string]string{"Content-Type": "application/json"},
 	}
 
-	alert := &DriftAlert{
-		WorkerID:        "test-worker",
-		ExpectedVersion: VersionInfo{CodebaseVersion: "1.0.0"},
-		CurrentVersion:  VersionInfo{CodebaseVersion: "1.1.0"},
-		Message:         "Version drift detected",
-		Timestamp:       time.Now(),
-		Severity:        "warning",
+	if err := channel.SendAlert(testDriftAlert()); err != nil {
+		t.Fatalf("SendAlert to local webhook server failed: %v", err)
 	}
 
-	// Send alert (may succeed or fail depending on network)
-	// We're testing that the function doesn't panic and handles errors appropriately
-	err := channel.SendAlert(alert)
-	// We don't assert a specific error result since it depends on network conditions
-	_ = err // Just to avoid unused variable error
+	mu.Lock()
+	defer mu.Unlock()
+	if !gotPath {
+		t.Error("expected webhook server to receive a POST request")
+	}
+	if gotCType != "application/json" {
+		t.Errorf("expected Content-Type application/json, got %q", gotCType)
+	}
+	if !strings.Contains(gotBody, "test-worker") {
+		t.Errorf("expected webhook body to contain worker ID; got %q", gotBody)
+	}
 }
 
+// TestSlackAlertChannel_SendAlert drives a real in-process HTTP server and
+// asserts the Slack webhook POST actually arrived with a JSON payload.
 func TestSlackAlertChannel_SendAlert(t *testing.T) {
+	var (
+		mu      sync.Mutex
+		gotBody string
+		gotPost bool
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buf := new(strings.Builder)
+		_, _ = bufio.NewReader(r.Body).WriteTo(buf)
+		mu.Lock()
+		gotBody = buf.String()
+		gotPost = r.Method == http.MethodPost
+		mu.Unlock()
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
 	channel := &SlackAlertChannel{
-		WebhookURL: "https://hooks.slack.com/test",
+		WebhookURL: srv.URL,
 		Channel:    "#alerts",
 	}
 
-	alert := &DriftAlert{
-		WorkerID:        "test-worker",
-		ExpectedVersion: VersionInfo{CodebaseVersion: "1.0.0"},
-		CurrentVersion:  VersionInfo{CodebaseVersion: "1.1.0"},
-		Message:         "Version drift detected",
-		Timestamp:       time.Now(),
-		Severity:        "warning",
+	if err := channel.SendAlert(testDriftAlert()); err != nil {
+		t.Fatalf("SendAlert to local Slack webhook server failed: %v", err)
 	}
 
-	// Send alert (may succeed or fail depending on network)
-	// We're testing that the function doesn't panic and handles errors appropriately
-	err := channel.SendAlert(alert)
-	// We don't assert a specific error result since it depends on network conditions
-	_ = err // Just to avoid unused variable error
+	mu.Lock()
+	defer mu.Unlock()
+	if !gotPost {
+		t.Error("expected Slack webhook server to receive a POST request")
+	}
+	if !strings.Contains(gotBody, "Version drift detected") {
+		t.Errorf("expected Slack body to contain the alert message; got %q", gotBody)
+	}
 }
