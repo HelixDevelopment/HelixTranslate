@@ -321,6 +321,33 @@ func (mpp *MultiPassPolisher) performPass(
 }
 
 // polishWithNotes performs polishing with integrated note-taking
+// saveNewResults persists only the PolishingResults appended to report since the
+// previous call (identified by the savedResults high-water mark) and returns the
+// updated mark. report.SectionResults accumulates across chapters, so saving the
+// whole slice each chapter re-saves earlier chapters' results — producing
+// duplicate polishing_changes rows (that table has no unique key) and
+// PK-conflicting (silently-failing) section_results inserts.
+func (mpp *MultiPassPolisher) saveNewResults(report *PolishingReport, savedResults int, passID string) int {
+	if report == nil {
+		return savedResults
+	}
+	total := len(report.SectionResults)
+	if mpp.database == nil {
+		return total
+	}
+	if savedResults < 0 {
+		savedResults = 0
+	}
+	if savedResults > total {
+		savedResults = total
+	}
+	for _, result := range report.SectionResults[savedResults:] {
+		mpp.database.SaveResult(result, passID)
+		mpp.database.SaveChanges(result.Changes, passID, result.SectionID)
+	}
+	return total
+}
+
 func (mpp *MultiPassPolisher) polishWithNotes(
 	ctx context.Context,
 	polisher *BookPolisher,
@@ -361,6 +388,10 @@ func (mpp *MultiPassPolisher) polishWithNotes(
 
 	// Polish chapters with notes
 	totalChapters := len(originalBook.Chapters)
+	// High-water mark into report.SectionResults (the polisher appends to it as
+	// each chapter is polished); we persist only the newly-appended results each
+	// iteration via saveNewResults.
+	savedResults := 0
 	for i := range originalBook.Chapters {
 		select {
 		case <-ctx.Done():
@@ -402,13 +433,8 @@ func (mpp *MultiPassPolisher) polishWithNotes(
 			return nil, nil, nil, err
 		}
 
-		// Save results to database
-		if mpp.database != nil {
-			for _, result := range report.SectionResults {
-				mpp.database.SaveResult(result, passID)
-				mpp.database.SaveChanges(result.Changes, passID, result.SectionID)
-			}
-		}
+		// Save only the results newly appended by this chapter's polish.
+		savedResults = mpp.saveNewResults(report, savedResults, passID)
 	}
 
 	report.Finalize()
