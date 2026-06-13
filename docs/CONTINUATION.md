@@ -1,7 +1,7 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 4
-**Last modified:** 2026-06-13T12:00:00Z
+**Revision:** 5
+**Last modified:** 2026-06-13T13:30:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
@@ -12,7 +12,7 @@
 
 ## Live state anchors (moment-valid)
 
-- **Parent HEAD:** `e775088` (batch W4/W5/W6/W8/W9/W10/W12 + llm_provider pointer bump) on `main`; pushed to BOTH `milos85vasic/Translator` + `HelixDevelopment/HelixTranslate` (verified at e775088, fast-forward, no force).
+- **Parent HEAD:** `7331c54` (wave2: D2 race fix + W2-A/W2-B coverage; prior e775088 batch W4/W5/W6/W8/W9/W10/W12 + 8a6af67 doc-sync) on `main`; pushed to BOTH `milos85vasic/Translator` + `HelixDevelopment/HelixTranslate` (verified at 7331c54, fast-forward, no force).
 - **llm_provider HEAD:** `b3dc7f9` (W7 CONST-036 propagation block + regenerated html/pdf), pushed to `HelixDevelopment/LLMProvider` master.
 - **Constitution HEAD:** `5e671fe` (§11.4.151 added), pushed to all 6 upstreams; parent pointer bumped.
 - **Build:** `go build ./...` = EXIT 0. **Total test coverage = 50.7%** (`go tool cover -func` total; see `docs/testing/coverage_matrix.md`).
@@ -41,13 +41,17 @@
 - **W9** ✅ tracked `.bak`/`.backup` residue — git-history-investigated (§11.4.124), removed + .gitignore; build 0.
 - **W10** ✅ `-script latin`→Cyrillic — `pkg/script` was never imported into unified-translator; `normalizeScript` wired; RED→GREEN 7 tests + 3×.
 - **W12** ✅ 8 challenge scripts brittle root — `git -C rev-parse --show-toplevel` w/ fallback (§11.4.111); all parse:OK root:OK.
+- **D2** ✅ (wave2, 7331c54) `test/unit` intermittent FAIL — `TestVerifier/EventEmission` timing race (50ms Sleep vs goroutine-dispatched handler) + data race (proven `-race`). Mutex eventCollector + bounded poll. BEFORE 1/10 FAIL+race → AFTER `-race -count=10` 10/10 PASS.
+- **W2-A** ✅ (wave2) `cmd/unified-translator` coverage 3.2%→18.0%, mutation-verified; + latent dangling-pointer fix (`Steps []TranslationStep`→`[]*TranslationStep`).
+- **W2-B** ✅ (wave2) `pkg/storage` coverage 32.9%→35.3% (Redis cache-key helpers 0%→100%, real SQLite round-trips), mutation-verified, daemon paths honest-SKIP.
+- **W2 (wave3, in-flight)**: pkg/translator stress/chaos (W3), pkg/sshworker, pkg/batch coverage — subagents running.
 
 ## OPEN workable items (queue — many parallelizable, disjoint scope)
 
 | # | Item | Type | Notes / evidence |
 |---|---|---|---|
 | W1 | `Models/` divergent `types.go` (60-line lean LLMRequest, absent upstream) | **Operator decision §11.4.122** | Convert needs preserving/discarding the local shape. Not consumed (no replace/import). DO NOT silently remove. Deferred — not blocking; surface to operator before W16. |
-| W2 | Coverage 50.7% → ~100% (§11.4.27); 27 pkgs at 0% | Task | `cmd/unified-translator` 1.8%, gRPC/server 0%, sshworker 19.6%, storage 32.9%. Core translator pkgs healthy (77–82%). Parallelizable per-package. |
+| W2 | Coverage → ~100% (§11.4.27); ongoing | Task | Done: unified-translator 3.2%→18%, storage 32.9%→35.3%. In-flight (wave3): sshworker(19.6%), batch. NOTE: many 0% pkgs (gRPC/api-server/redis/postgres) are integration-infra-gated — unit gains capped; honest deferral per package. Core translator 77–82%. |
 | W3 | Missing test types: chaos, ddos, scaling, ui, ux, full-automation (in-module) | Task | §11.4.85 chaos/stress mandatory. |
 | W11 | Wire more docs_chain contexts (Issues/Fixed/Status once they exist) | Task | docs_chain proven operational. |
 | W13 | `.gitmodules` section labels still PascalCase | Task (cosmetic) | Needs per-submodule `.git/modules/*` gitdir move. |
@@ -55,7 +59,6 @@
 | W15 | Containers-first infra (§11.4.76) — run services via `containers` submodule | Feature | Phase 3/5. |
 | W16 | Convert `Models/`→`models` submodule after W1 resolved | Task | Blocked on W1. |
 | D1 | `docs_chain` + `security` CONSTITUTION.md lack literal `CONST-036` | Task | §11.4.118 discovery. They use §11.4.X cascade scheme (not CONST-NNN); challenge doesn't check them. Governance-design decision needed — do NOT blindly inject CONST-NNN (§11.4.6). |
-| D2 | Intermittent `go test ./test/unit/...` failure (surfaced by anti_bluff challenge step 2) | Bug | §11.4.118 discovery + §11.4.50 determinism. One run reached step 4, another failed at step 2. Needs systematic-debugging (§11.4.102). |
 
 ## NEXT phases (priority order)
 - **Phase 4** — drive W2–W8 + W10: per-type test suites to ~100% (§11.4.27), real Challenges + HelixQA bank execution with captured evidence, expand real ebook translations (all formats, whole chapters, anti-bluff §11.4/§11.4.69). Subagent-driven, ≥3 parallel streams.

@@ -175,8 +175,8 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 4 <strong>Last modified:</strong>
-2026-06-13T12:00:00Z <strong>Purpose:</strong> Single canonical
+<p><strong>Revision:</strong> 5 <strong>Last modified:</strong>
+2026-06-13T13:30:00Z <strong>Purpose:</strong> Single canonical
 out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 /
 §11.4.127). To resume: point a new session at THIS file, run
 <code>git fetch --all</code>, and say <strong>continue</strong>.</p>
@@ -198,10 +198,11 @@ prefixed <code>helix_translate-</code> (§11.4.151). Work subagent-driven
 <h2 id="live-state-anchors-moment-valid">Live state anchors
 (moment-valid)</h2>
 <ul>
-<li><strong>Parent HEAD:</strong> <code>e775088</code> (batch
-W4/W5/W6/W8/W9/W10/W12 + llm_provider pointer bump) on
-<code>main</code>; pushed to BOTH <code>milos85vasic/Translator</code> +
-<code>HelixDevelopment/HelixTranslate</code> (verified at e775088,
+<li><strong>Parent HEAD:</strong> <code>7331c54</code> (wave2: D2 race
+fix + W2-A/W2-B coverage; prior e775088 batch W4/W5/W6/W8/W9/W10/W12 +
+8a6af67 doc-sync) on <code>main</code>; pushed to BOTH
+<code>milos85vasic/Translator</code> +
+<code>HelixDevelopment/HelixTranslate</code> (verified at 7331c54,
 fast-forward, no force).</li>
 <li><strong>llm_provider HEAD:</strong> <code>b3dc7f9</code> (W7
 CONST-036 propagation block + regenerated html/pdf), pushed to
@@ -279,6 +280,19 @@ git-history-investigated (§11.4.124), removed + .gitignore; build
 <li><strong>W12</strong> ✅ 8 challenge scripts brittle root —
 <code>git -C rev-parse --show-toplevel</code> w/ fallback (§11.4.111);
 all parse:OK root:OK.</li>
+<li><strong>D2</strong> ✅ (wave2, 7331c54) <code>test/unit</code>
+intermittent FAIL — <code>TestVerifier/EventEmission</code> timing race
+(50ms Sleep vs goroutine-dispatched handler) + data race (proven
+<code>-race</code>). Mutex eventCollector + bounded poll. BEFORE 1/10
+FAIL+race → AFTER <code>-race -count=10</code> 10/10 PASS.</li>
+<li><strong>W2-A</strong> ✅ (wave2) <code>cmd/unified-translator</code>
+coverage 3.2%→18.0%, mutation-verified; + latent dangling-pointer fix
+(<code>Steps []TranslationStep</code>→<code>[]*TranslationStep</code>).</li>
+<li><strong>W2-B</strong> ✅ (wave2) <code>pkg/storage</code> coverage
+32.9%→35.3% (Redis cache-key helpers 0%→100%, real SQLite round-trips),
+mutation-verified, daemon paths honest-SKIP.</li>
+<li><strong>W2 (wave3, in-flight)</strong>: pkg/translator stress/chaos
+(W3), pkg/sshworker, pkg/batch coverage — subagents running.</li>
 </ul>
 <h2
 id="open-workable-items-queue-many-parallelizable-disjoint-scope">OPEN
@@ -310,11 +324,12 @@ surface to operator before W16.</td>
 </tr>
 <tr>
 <td>W2</td>
-<td>Coverage 50.7% → ~100% (§11.4.27); 27 pkgs at 0%</td>
+<td>Coverage → ~100% (§11.4.27); ongoing</td>
 <td>Task</td>
-<td><code>cmd/unified-translator</code> 1.8%, gRPC/server 0%, sshworker
-19.6%, storage 32.9%. Core translator pkgs healthy (77–82%).
-Parallelizable per-package.</td>
+<td>Done: unified-translator 3.2%→18%, storage 32.9%→35.3%. In-flight
+(wave3): sshworker(19.6%), batch. NOTE: many 0% pkgs
+(gRPC/api-server/redis/postgres) are integration-infra-gated — unit
+gains capped; honest deferral per package. Core translator 77–82%.</td>
 </tr>
 <tr>
 <td>W3</td>
@@ -365,14 +380,6 @@ literal <code>CONST-036</code></td>
 <td>§11.4.118 discovery. They use §11.4.X cascade scheme (not
 CONST-NNN); challenge doesn’t check them. Governance-design decision
 needed — do NOT blindly inject CONST-NNN (§11.4.6).</td>
-</tr>
-<tr>
-<td>D2</td>
-<td>Intermittent <code>go test ./test/unit/...</code> failure (surfaced
-by anti_bluff challenge step 2)</td>
-<td>Bug</td>
-<td>§11.4.118 discovery + §11.4.50 determinism. One run reached step 4,
-another failed at step 2. Needs systematic-debugging (§11.4.102).</td>
 </tr>
 </tbody>
 </table>
