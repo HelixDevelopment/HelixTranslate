@@ -403,10 +403,19 @@ self-test. Review before wiring to real remotes.</td>
 </tr>
 <tr>
 <td>W15</td>
-<td>Containers-first infra (§11.4.76) — run services via
-<code>containers</code> submodule</td>
+<td>Containers-first infra (§11.4.76) — boot real
+Postgres/Redis/services via <code>containers</code> submodule → UNLOCKS
+the W15-deferred coverage (storage redis/postgres 0%, distributed SSH,
+api/grpc DB-backed pipeline)</td>
 <td>Feature</td>
-<td>Phase 3/5.</td>
+<td>READY: podman 5.8.2 running (applehv VM 4GiB, ~3.2GiB free →
+container boot is VM-isolated, §12.6-safe re: host RAM);
+<code>replace digital.vasic.containers =&gt; ./containers</code> already
+in go.mod; containers pkgs incl. boot/compose/cache/discovery.
+STRUCTURE: serial infra-boot first, THEN parallel integration tests
+(storage/api/grpc). CAUTION: host swap ~95% full after marathon session
+— prefer a fresh session before heavy integration-test load
+(§12.6/§11.4.141).</td>
 </tr>
 <tr>
 <td>W16</td>
