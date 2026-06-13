@@ -127,6 +127,15 @@ func parseLinuxMeminfoKB(output string) (uint64, error) {
 		return 0, err
 	}
 
+	// Guard the kB->bytes conversion against uint64 overflow: a corrupt or
+	// hostile /proc/meminfo could report a kB value above 2^64/1024, which
+	// would silently wrap to an absurd small byte count (err==nil) and mis-size
+	// the model downstream. Reject it instead of returning a corrupt value.
+	const maxKB = ^uint64(0) / 1024
+	if ramKB > maxKB {
+		return 0, fmt.Errorf("meminfo kB value %d overflows uint64 byte count", ramKB)
+	}
+
 	return ramKB * 1024, nil
 }
 
@@ -238,7 +247,14 @@ func parseVMStatAvailableBytes(output string) uint64 {
 			parts := strings.Fields(line)
 			for i, part := range parts {
 				if part == "of" && i+1 < len(parts) {
-					pageSize, _ = strconv.ParseUint(parts[i+1], 10, 64)
+					// Only override the default when the header carries a
+					// valid, non-zero page size. A malformed/empty value must
+					// NOT zero out the page size — that would report all the
+					// parsed pages as 0 bytes available RAM (worse than an
+					// absent header, which keeps the 16384 default).
+					if parsed, err := strconv.ParseUint(parts[i+1], 10, 64); err == nil && parsed > 0 {
+						pageSize = parsed
+					}
 					break
 				}
 			}

@@ -158,7 +158,13 @@ func (t *Tracker) GetProgress() TranslationProgress {
 	elapsed := time.Since(snapshot.StartTime)
 	snapshot.ElapsedTime = formatDuration(elapsed)
 
-	if snapshot.ItemsCompleted > 0 && snapshot.ItemsTotal > 0 {
+	// Only refine the ETA from item counts while the run is genuinely IN
+	// PROGRESS. Once it is complete (100% / status "completed"), updateProgress
+	// already set EstimatedETA="Completed"; recomputing the items projection
+	// here would clobber that with a stale/empty remaining-time value, so a
+	// finished translation would report a non-"Completed" ETA to the dashboard.
+	if snapshot.ItemsCompleted > 0 && snapshot.ItemsTotal > 0 &&
+		snapshot.PercentComplete < 100.0 && snapshot.Status != "completed" {
 		avgTimePerItem := elapsed / time.Duration(snapshot.ItemsCompleted)
 		remainingItems := snapshot.ItemsTotal - snapshot.ItemsCompleted
 		if remainingItems < 0 {
