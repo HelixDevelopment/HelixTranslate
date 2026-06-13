@@ -246,16 +246,17 @@ func TestEscapingOrder(t *testing.T) {
 				"&lt;strong&gt;", // HTML tags should not be escaped
 			},
 		},
-		// Note: Link conversion to <a> tags is not yet implemented
-		// Links remain as markdown [text](url) format
+		// Inline links convert to real <a> anchors so the hyperlink survives
+		// into the EPUB and round-trips back to markdown. The URL's ampersand is
+		// still XML-escaped, and the emitted tag must NOT be double-escaped.
 		{
-			name:  "Links should preserve markdown format",
+			name:  "Links convert to anchor with escaped URL",
 			input: "Check [link](http://example.com?a=1&b=2)",
 			want: []string{
-				"[link](http://example.com?a=1&amp;b=2)", // URL ampersands should be escaped
+				`<a href="http://example.com?a=1&amp;b=2">link</a>`,
 			},
 			not: []string{
-				"&lt;a href", // No HTML anchor conversion yet
+				"&lt;a href", // The <a> tag itself must not be escaped.
 			},
 		},
 	}

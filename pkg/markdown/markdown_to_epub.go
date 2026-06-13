@@ -562,6 +562,7 @@ func (c *MarkdownToEPUBConverter) markdownToHTML(markdown string) string {
 	var currentParagraph strings.Builder
 	var codeBlock strings.Builder
 	var listBuf []parsedListItem
+	var quoteBuf []string
 
 	flushParagraph := func() {
 		if inParagraph {
@@ -576,11 +577,23 @@ func (c *MarkdownToEPUBConverter) markdownToHTML(markdown string) string {
 			listBuf = nil
 		}
 	}
-	// flush ends any open paragraph AND any open list — call before emitting a
-	// block-level element so lists/paragraphs are properly closed.
+	// flushQuote emits a contiguous run of "> " lines as one <blockquote>. A
+	// blockquote left as a literal "&gt; ..." paragraph (the pre-fix behaviour)
+	// breaks the round-trip: the HTML->markdown side emits "> " for
+	// <blockquote>, so md->HTML must produce the matching element.
+	flushQuote := func() {
+		if len(quoteBuf) > 0 {
+			html.WriteString("  <blockquote>" +
+				c.convertInlineMarkdown(strings.Join(quoteBuf, " ")) + "</blockquote>\n")
+			quoteBuf = nil
+		}
+	}
+	// flush ends any open paragraph AND any open list AND any open blockquote —
+	// call before emitting a block-level element so blocks are properly closed.
 	flush := func() {
 		flushParagraph()
 		flushList()
+		flushQuote()
 	}
 
 	for scanner.Scan() {
@@ -630,11 +643,23 @@ func (c *MarkdownToEPUBConverter) markdownToHTML(markdown string) string {
 		// flushed as one nested <ul>/<ol> block.
 		if item, ok := parseListItemLine(line); ok {
 			flushParagraph()
+			flushQuote()
 			listBuf = append(listBuf, item)
 			continue
 		}
 		// A non-list line ends any open list.
 		flushList()
+
+		// Blockquote: "> text" (or bare ">"). Accumulate contiguous quote lines
+		// and flush as one <blockquote>. Detected before the header/paragraph
+		// fallbacks so the marker is not escaped into a literal "&gt;".
+		if trimmed == ">" || strings.HasPrefix(trimmed, "> ") {
+			flushParagraph()
+			quoteBuf = append(quoteBuf, strings.TrimSpace(strings.TrimPrefix(trimmed, ">")))
+			continue
+		}
+		// A non-quote line ends any open blockquote.
+		flushQuote()
 
 		// Headers (h1 through h6)
 		if strings.HasPrefix(trimmed, "######") {
@@ -707,6 +732,20 @@ func (c *MarkdownToEPUBConverter) convertInlineMarkdown(text string) string {
 	// Code: `text`
 	text = regexp.MustCompile("`([^`]+)`").ReplaceAllString(text, "<code>$1</code>")
 
+	// Image: ![alt](src) — MUST run before the link rule, since the link rule's
+	// "[text](url)" pattern also matches the "[alt](src)" tail of an image. The
+	// alt text and src have already been XML-escaped above, so the emitted
+	// attributes are safe. Without this, an inline image left as literal
+	// "![alt](src)" text never reaches the EPUB (image lost on round-trip).
+	text = regexp.MustCompile(`!\[([^\]]*)\]\(([^)]*)\)`).
+		ReplaceAllString(text, `<img src="$2" alt="$1"/>`)
+
+	// Link: [text](url) — emit a real <a> so the hyperlink survives into the
+	// EPUB and round-trips back to markdown. Left literal before the fix, so a
+	// translated book shipped raw "[text](url)" to the reader.
+	text = regexp.MustCompile(`\[([^\]]*)\]\(([^)]*)\)`).
+		ReplaceAllString(text, `<a href="$2">$1</a>`)
+
 	return text
 }
 
@@ -726,6 +765,7 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 	var result strings.Builder
 	inParagraph := false
 	var listBuf []parsedListItem
+	var quoteBuf []string
 
 	flushParagraph := func() {
 		if inParagraph {
@@ -739,17 +779,37 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 			listBuf = nil
 		}
 	}
+	// flushQuote emits a contiguous run of "> " lines as one <blockquote>. This
+	// is the path createEPUB writes into each chapter, so a blockquote left as a
+	// literal "&gt; ..." paragraph reached the end user in the produced EPUB.
+	flushQuote := func() {
+		if len(quoteBuf) > 0 {
+			result.WriteString("<blockquote>" +
+				c.convertInlineMarkdown(strings.Join(quoteBuf, " ")) + "</blockquote>\n")
+			quoteBuf = nil
+		}
+	}
 
 	for _, raw := range lines {
 		// List detection runs on the RAW line so indentation (nesting) survives.
 		if item, ok := parseListItemLine(raw); ok {
 			flushParagraph()
+			flushQuote()
 			listBuf = append(listBuf, item)
 			continue
 		}
 		flushList()
 
 		line := strings.TrimSpace(raw)
+
+		// Blockquote: "> text" (or bare ">"). Accumulate contiguous quote lines
+		// and flush as one <blockquote> before the header/paragraph fallbacks.
+		if line == ">" || strings.HasPrefix(line, "> ") {
+			flushParagraph()
+			quoteBuf = append(quoteBuf, strings.TrimSpace(strings.TrimPrefix(line, ">")))
+			continue
+		}
+		flushQuote()
 
 		// Headers
 		if strings.HasPrefix(line, "# ") {
@@ -776,9 +836,10 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 		}
 	}
 
-	// Close any open paragraph and list
+	// Close any open paragraph, list and blockquote
 	flushParagraph()
 	flushList()
+	flushQuote()
 
 	// Wrap in XHTML document structure
 	return fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
