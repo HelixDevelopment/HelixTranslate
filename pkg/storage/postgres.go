@@ -24,13 +24,23 @@ func NewPostgreSQLStorage(config *Config) (*PostgreSQLStorage, error) {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	// Set connection pool settings
-	if config.MaxOpenConns > 0 {
-		db.SetMaxOpenConns(config.MaxOpenConns)
+	// Set connection pool settings. Bound the pool by DEFAULT (W15): with an
+	// unconfigured Config{} (MaxOpenConns==0) Go's database/sql pool is UNLIMITED,
+	// so concurrent callers each open a connection and exhaust the server's
+	// max_connections (~100) — `pq: sorry, too many clients already`, a real
+	// connection-exhaustion / DoS risk surfaced by the W15 real-Postgres chaos test.
+	maxOpen := config.MaxOpenConns
+	if maxOpen <= 0 {
+		maxOpen = 25
 	}
-	if config.MaxIdleConns > 0 {
-		db.SetMaxIdleConns(config.MaxIdleConns)
+	db.SetMaxOpenConns(maxOpen)
+
+	maxIdle := config.MaxIdleConns
+	if maxIdle <= 0 {
+		maxIdle = 5
 	}
+	db.SetMaxIdleConns(maxIdle)
+
 	if config.ConnMaxLifetime > 0 {
 		db.SetConnMaxLifetime(config.ConnMaxLifetime)
 	}

@@ -15,8 +15,10 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -144,4 +146,61 @@ func TestPostgresIntegration_RealCRUD(t *testing.T) {
 	require.NoError(t, st.DeleteSession(ctx, "w15-sess-1"), "DeleteSession")
 	_, err = st.GetSession(ctx, "w15-sess-1")
 	assert.Error(t, err, "GetSession after delete returns an error / not-found")
+}
+
+// TestPostgresIntegration_PoolBoundedNoClientExhaustion is the W15 regression
+// guard for the connection-exhaustion DoS fix: with the DEFAULT Config{}
+// (MaxOpenConns==0) NewPostgreSQLStorage now bounds the pool (25), so N concurrent
+// writers (N > a plausible unbounded burst) complete WITHOUT `pq: sorry, too many
+// clients already`. Before the fix the pool was unlimited and this flooded the
+// server's max_connections. No semaphore here — that's the whole point.
+func TestPostgresIntegration_PoolBoundedNoClientExhaustion(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
+	dsn, stop, err := brokertest.StartPostgres(ctx, brokertest.WithMemoryLimit("256m"))
+	if err != nil {
+		t.Skipf("SKIP-OK: container runtime unavailable — %v (§11.4.3 topology absent)", err)
+	}
+	defer stop()
+
+	st, err := NewPostgreSQLStorage(configFromDSN(t, dsn)) // DEFAULT config → pool bounded by the fix
+	require.NoError(t, err)
+	defer func() { _ = st.Close() }()
+
+	// DETERMINISTIC guard (§11.4.115/§11.4.50): white-box access to the pool's
+	// configured ceiling. SetMaxOpenConns(25) → Stats().MaxOpenConnections == 25;
+	// the pre-fix unbounded pool → 0. Asserting the bound directly is deterministic
+	// — unlike racing actual connection-exhaustion, which is timing-dependent and
+	// does NOT reliably reproduce (a blind test). Mutation: revert the default
+	// bound → MaxOpenConnections == 0 → this FAILs (the guard genuinely catches it).
+	require.Equal(t, 25, st.db.Stats().MaxOpenConnections,
+		"default Config{} must bound the connection pool (W15 DoS fix); unbounded (0) exhausts Postgres max_connections")
+
+	// Real-load sanity: a concurrent burst completes WITHOUT connection-exhaustion
+	// errors now that the pool is bounded (connections queue through the 25-cap).
+	const n = 60
+	var wg sync.WaitGroup
+	errs := make(chan error, n)
+	for i := 0; i < n; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			if e := st.CacheTranslation(ctx, &TranslationCache{
+				ID:             fmt.Sprintf("pool-%d", i),
+				SourceText:     fmt.Sprintf("src-%d", i),
+				TargetText:     fmt.Sprintf("tgt-%d", i),
+				SourceLanguage: "en", TargetLanguage: "sr", Provider: "p", Model: "m",
+				CreatedAt:      time.Now(), LastAccessedAt: time.Now(),
+			}); e != nil {
+				errs <- e
+			}
+		}(i)
+	}
+	wg.Wait()
+	close(errs)
+	var got []error
+	for e := range errs {
+		got = append(got, e)
+	}
+	require.Empty(t, got, "%d concurrent writers complete without connection-exhaustion (bounded pool); got: %v", n, got)
 }
