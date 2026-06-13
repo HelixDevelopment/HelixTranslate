@@ -1078,21 +1078,34 @@ func TestQwenRequestErrorPaths(t *testing.T) {
 	})
 
 	t.Run("invalid_model", func(t *testing.T) {
-		config := TranslationConfig{
-			Provider: "qwen",
-			APIKey:   "test-api-key",
-			Model:    "invalid-model-name",
-		}
+		// Qwen does not validate the model name locally — the request is built
+		// and sent. A local server returning the standard error envelope keeps
+		// the error-path assertion without dialing dashscope.aliyuncs.com
+		// (which previously returned a live 401) — deterministic + offline
+		// (§11.4.98).
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(`{"code":"InvalidParameter","message":"invalid model"}`))
+		}))
+		t.Cleanup(srv.Close)
 
-		client, err := NewQwenClient(config)
-		require.NoError(t, err)
-		require.NotNil(t, client)
+		client := &QwenClient{
+			config: TranslationConfig{
+				Provider: "qwen",
+				APIKey:   "test-api-key",
+				Model:    "invalid-model-name",
+			},
+			httpClient: &http.Client{},
+			baseURL:    srv.URL,
+		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		_, err = client.Translate(ctx, "Hello", "Translate to Russian")
+		_, err := client.Translate(ctx, "Hello", "Translate to Russian")
 		require.Error(t, err)
+		assert.Contains(t, err.Error(), "status 400")
 	})
 
 	t.Run("context_cancellation", func(t *testing.T) {
@@ -1119,42 +1132,59 @@ func TestQwenRequestErrorPaths(t *testing.T) {
 	})
 
 	t.Run("empty_text_input", func(t *testing.T) {
-		config := TranslationConfig{
-			Provider: "qwen",
-			APIKey:   "test-api-key",
-			Model:    "qwen-turbo",
-		}
+		// Offline (§11.4.98): a local server returns a valid Qwen response so the
+		// request-build + response-parse path runs without dialing dashscope.
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"Привет"}}]}`))
+		}))
+		t.Cleanup(srv.Close)
 
-		client, err := NewQwenClient(config)
-		require.NoError(t, err)
-		require.NotNil(t, client)
+		client := &QwenClient{
+			config: TranslationConfig{
+				Provider: "qwen",
+				APIKey:   "test-api-key",
+				Model:    "qwen-turbo",
+			},
+			httpClient: &http.Client{},
+			baseURL:    srv.URL,
+		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		result, err := client.Translate(ctx, "", "Translate to Russian")
-		_ = result
-		_ = err
+		require.NoError(t, err)
+		assert.Equal(t, "Привет", result)
 	})
 
 	t.Run("very_long_text", func(t *testing.T) {
-		config := TranslationConfig{
-			Provider: "qwen",
-			APIKey:   "test-api-key",
-			Model:    "qwen-turbo",
-		}
+		// Offline (§11.4.98): exercise the large-payload request path against a
+		// local server (which echoes a valid response) instead of dashscope.
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"Привет"}}]}`))
+		}))
+		t.Cleanup(srv.Close)
 
-		client, err := NewQwenClient(config)
-		require.NoError(t, err)
-		require.NotNil(t, client)
+		client := &QwenClient{
+			config: TranslationConfig{
+				Provider: "qwen",
+				APIKey:   "test-api-key",
+				Model:    "qwen-turbo",
+			},
+			httpClient: &http.Client{},
+			baseURL:    srv.URL,
+		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		longText := strings.Repeat("Hello world. ", 1000)
 
-		_, err = client.Translate(ctx, longText, "Translate to Russian")
-		require.Error(t, err)
+		result, err := client.Translate(ctx, longText, "Translate to Russian")
+		require.NoError(t, err)
+		assert.Equal(t, "Привет", result)
 	})
 
 	t.Run("invalid_base_url", func(t *testing.T) {

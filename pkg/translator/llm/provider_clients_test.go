@@ -1673,6 +1673,7 @@ func TestNewLlamaCppClientErrorPaths(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
 		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
+	seedLlamaCppModelsOffline(t) // keep auto-select offline + deterministic (§11.4.98)
 	tests := []struct {
 		name          string
 		config        TranslationConfig
@@ -1731,6 +1732,7 @@ func TestNewLlamaCppClientUncoveredPaths(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
 		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
+	seedLlamaCppModelsOffline(t) // keep auto-select offline + deterministic (§11.4.98)
 	// Test 1: Invalid model name that doesn't exist
 	// This tests the model validation path
 	t.Run("insufficient_resources_for_model", func(t *testing.T) {
@@ -1973,6 +1975,7 @@ func TestLlamaCppClientErrorPaths(t *testing.T) {
 func TestLlamaCppClientConfiguration(t *testing.T) {
 	// This test might fail if llama.cpp is not installed, but that's fine
 	// We're testing the configuration path, not the actual model loading
+	seedLlamaCppModelsOffline(t) // keep auto-select offline + deterministic (§11.4.98)
 	config := TranslationConfig{
 		// No model specified - let it auto-select
 	}
@@ -2457,6 +2460,7 @@ func TestGeminiMakeRequestUncoveredPaths(t *testing.T) {
 
 // TestNewLlamaCppClientHardwareAndModelPaths tests hardware and model selection paths
 func TestNewLlamaCppClientHardwareAndModelPaths(t *testing.T) {
+	seedLlamaCppModelsOffline(t) // keep auto-select offline + deterministic (§11.4.98)
 	// Test 1: Auto-selection with multiple error scenarios
 	t.Run("auto_selection_error_scenarios", func(t *testing.T) {
 		config := TranslationConfig{
@@ -2555,6 +2559,7 @@ func TestNewLlamaCppClientDownloadPaths(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
 		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
 	}
+	seedLlamaCppModelsOffline(t) // keep auto-select offline + deterministic (§11.4.98)
 	// Test 1: Model selection and caching behavior
 	t.Run("model_caching_behavior", func(t *testing.T) {
 		config := TranslationConfig{

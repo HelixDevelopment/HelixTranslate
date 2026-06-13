@@ -12,6 +12,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// newZhipuMockSuccess returns a local server answering with a valid Zhipu
+// response, letting the request-build + response-parse path run OFFLINE
+// (§11.4.98) instead of dialing open.bigmodel.cn.
+func newZhipuMockSuccess(t *testing.T) *httptest.Server {
+	t.Helper()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"Привет"}}]}`))
+	}))
+	t.Cleanup(srv.Close)
+	return srv
+}
+
 func TestZhipuProvider(t *testing.T) {
 	t.Run("provider_name", func(t *testing.T) {
 		client, err := NewZhipuClient(TranslationConfig{
@@ -118,22 +131,33 @@ func TestZhipuRequestErrorPaths(t *testing.T) {
 	})
 
 	t.Run("invalid_model", func(t *testing.T) {
-		config := TranslationConfig{
-			Provider: "zhipu",
-			APIKey:   "test-api-key",
-			Model:    "invalid-model-name",
-		}
+		// Zhipu does not validate the model name locally — the request is built
+		// and sent. A local server returning the error envelope keeps the
+		// error-path assertion without dialing open.bigmodel.cn (which
+		// previously returned a live 401) — deterministic + offline (§11.4.98).
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(`{"error":{"code":"1211","message":"model not found"}}`))
+		}))
+		t.Cleanup(srv.Close)
 
-		client, err := NewZhipuClient(config)
-		require.NoError(t, err)
-		require.NotNil(t, client)
+		client := &ZhipuClient{
+			config: TranslationConfig{
+				Provider: "zhipu",
+				APIKey:   "test-api-key",
+				Model:    "invalid-model-name",
+			},
+			httpClient: &http.Client{},
+			baseURL:    srv.URL,
+		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		_, err = client.Translate(ctx, "Hello", "Translate to Russian")
-		// Should fail because no real server is running
+		_, err := client.Translate(ctx, "Hello", "Translate to Russian")
 		require.Error(t, err)
+		assert.Contains(t, err.Error(), "status 400")
 	})
 
 	t.Run("context_cancellation", func(t *testing.T) {
@@ -160,89 +184,102 @@ func TestZhipuRequestErrorPaths(t *testing.T) {
 	})
 
 	t.Run("empty_text_input", func(t *testing.T) {
-		config := TranslationConfig{
-			Provider: "zhipu",
-			APIKey:   "test-api-key",
-			Model:    "glm-4",
-		}
+		// Offline (§11.4.98): local server returns a valid Zhipu response so the
+		// request-build + response-parse path runs without dialing bigmodel.cn.
+		srv := newZhipuMockSuccess(t)
 
-		client, err := NewZhipuClient(config)
-		require.NoError(t, err)
-		require.NotNil(t, client)
+		client := &ZhipuClient{
+			config: TranslationConfig{
+				Provider: "zhipu",
+				APIKey:   "test-api-key",
+				Model:    "glm-4",
+			},
+			httpClient: &http.Client{},
+			baseURL:    srv.URL,
+		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		result, err := client.Translate(ctx, "", "Translate to Russian")
-		// Empty text may return empty result or error depending on implementation
-		_ = result
-		_ = err
+		require.NoError(t, err)
+		assert.Equal(t, "Привет", result)
 	})
 
 	t.Run("temperature_option_validation", func(t *testing.T) {
-		config := TranslationConfig{
-			Provider: "zhipu",
-			APIKey:   "test-api-key",
-			Model:    "glm-4",
-			Options: map[string]interface{}{
-				"temperature": 2.5, // Too high (should be 0.0-2.0)
-			},
-		}
+		// Zhipu doesn't validate temperature locally; the request is built with
+		// the option and sent. Offline (§11.4.98) via a local server.
+		srv := newZhipuMockSuccess(t)
 
-		client, err := NewZhipuClient(config)
-		require.NoError(t, err)
-		require.NotNil(t, client)
+		client := &ZhipuClient{
+			config: TranslationConfig{
+				Provider: "zhipu",
+				APIKey:   "test-api-key",
+				Model:    "glm-4",
+				Options: map[string]interface{}{
+					"temperature": 2.5,
+				},
+			},
+			httpClient: &http.Client{},
+			baseURL:    srv.URL,
+		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		_, err = client.Translate(ctx, "Hello", "Translate to Russian")
-		// Zhipu doesn't validate temperature locally; request will fail due to no server
-		require.Error(t, err)
+		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
+		require.NoError(t, err)
+		assert.Equal(t, "Привет", result)
 	})
 
 	t.Run("max_tokens_option_validation", func(t *testing.T) {
-		config := TranslationConfig{
-			Provider: "zhipu",
-			APIKey:   "test-api-key",
-			Model:    "glm-4",
-			Options: map[string]interface{}{
-				"max_tokens": -1, // Invalid max_tokens
-			},
-		}
+		// Zhipu doesn't validate max_tokens locally; offline (§11.4.98).
+		srv := newZhipuMockSuccess(t)
 
-		client, err := NewZhipuClient(config)
-		require.NoError(t, err)
-		require.NotNil(t, client)
+		client := &ZhipuClient{
+			config: TranslationConfig{
+				Provider: "zhipu",
+				APIKey:   "test-api-key",
+				Model:    "glm-4",
+				Options: map[string]interface{}{
+					"max_tokens": -1,
+				},
+			},
+			httpClient: &http.Client{},
+			baseURL:    srv.URL,
+		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		_, err = client.Translate(ctx, "Hello", "Translate to Russian")
-		// Zhipu doesn't validate max_tokens locally; request will fail due to no server
-		require.Error(t, err)
+		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
+		require.NoError(t, err)
+		assert.Equal(t, "Привет", result)
 	})
 
 	t.Run("very_long_text", func(t *testing.T) {
-		config := TranslationConfig{
-			Provider: "zhipu",
-			APIKey:   "test-api-key",
-			Model:    "glm-4",
-		}
+		// Offline (§11.4.98): exercise the large-payload request path against a
+		// local server instead of bigmodel.cn.
+		srv := newZhipuMockSuccess(t)
 
-		client, err := NewZhipuClient(config)
-		require.NoError(t, err)
-		require.NotNil(t, client)
+		client := &ZhipuClient{
+			config: TranslationConfig{
+				Provider: "zhipu",
+				APIKey:   "test-api-key",
+				Model:    "glm-4",
+			},
+			httpClient: &http.Client{},
+			baseURL:    srv.URL,
+		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		// Create very long text that might trigger size limits
 		longText := strings.Repeat("Hello world. ", 1000)
 
-		_, err = client.Translate(ctx, longText, "Translate to Russian")
-		// Should fail due to connection error, not size validation
-		require.Error(t, err)
+		result, err := client.Translate(ctx, longText, "Translate to Russian")
+		require.NoError(t, err)
+		assert.Equal(t, "Привет", result)
 	})
 
 	t.Run("invalid_base_url", func(t *testing.T) {
