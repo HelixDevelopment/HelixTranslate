@@ -251,19 +251,10 @@ func formatAuthorName(author Author) string {
 	return strings.Join(parts, " ")
 }
 
-// extractTextFromParagraph extracts clean text from a paragraph
+// extractTextFromParagraph extracts clean text from a paragraph, including the
+// text of inline formatting elements (<emphasis>, <strong>, <a>, ...) and tail
+// text, in document order. Uses the full mixed-content text reconstructed by
+// Paragraph.UnmarshalXML so emphasized/strong/linked words are not dropped.
 func extractTextFromParagraph(para Paragraph) string {
-	if para.Text != "" {
-		return para.Text
-	}
-
-	// Extract text from mixed content
-	var textParts []string
-	for _, content := range para.Content {
-		if str, ok := content.(string); ok {
-			textParts = append(textParts, str)
-		}
-	}
-
-	return strings.Join(textParts, "")
+	return para.FullParagraphText()
 }

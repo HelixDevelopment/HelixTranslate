@@ -42,9 +42,13 @@ func TestExtractJSON(t *testing.T) {
 			expected: `{"outer": {"inner": "value"}}`,
 		},
 		{
-			name:     "JSON with array inside",
-			input:    `Text before [{"a": 1}, {"b": 2}] text after`,
-			expected: `{"a": 1}, {"b": 2}`, // Extracts from first { to last }
+			name:  "JSON with array inside",
+			input: `Text before [{"a": 1}, {"b": 2}] text after`,
+			// Reconciled per the robust extractor (§11.4.120): the old
+			// first-`{`..last-`}` slice returned the INVALID span
+			// `{"a": 1}, {"b": 2}`. The balanced scanner now returns the
+			// whole valid top-level array.
+			expected: `[{"a": 1}, {"b": 2}]`,
 		},
 		{
 			name:     "complex nested structure",

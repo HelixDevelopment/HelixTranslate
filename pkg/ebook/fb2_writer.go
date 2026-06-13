@@ -59,9 +59,9 @@ func (w *FB2Writer) Write(book *Book, filename string) error {
 			Title: sectionTitle{P: chapter.Title},
 		}
 		for _, sec := range chapter.Sections {
-			section.P = append(section.P, escapeFB2Text(sec.Content))
+			section.P = append(section.P, splitIntoParagraphs(sec.Content)...)
 			for _, sub := range sec.Subsections {
-				section.P = append(section.P, escapeFB2Text(sub.Content))
+				section.P = append(section.P, splitIntoParagraphs(sub.Content)...)
 			}
 		}
 		fb.Body.Sections = append(fb.Body.Sections, section)
@@ -83,13 +83,30 @@ func (w *FB2Writer) Write(book *Book, filename string) error {
 	return nil
 }
 
-// escapeFB2Text normalizes text for FB2 paragraphs.
-// Note: XML special characters are escaped automatically by the XML encoder.
-func escapeFB2Text(text string) string {
-	// Replace multiple newlines with paragraph breaks
-	text = strings.ReplaceAll(text, "\n\n", "</p>\n<p>")
-	text = strings.ReplaceAll(text, "\n", " ")
-	return text
+// splitIntoParagraphs splits section content into separate FB2 <p> paragraphs.
+//
+// Section content uses a blank line ("\n\n") as a paragraph separator. Each
+// resulting paragraph becomes its own <p> element so the XML encoder emits real,
+// well-formed <p>...</p> tags. The previous implementation injected raw
+// "</p><p>" markup into a single chardata string, which the XML encoder then
+// escaped to literal "&lt;/p&gt;&lt;p&gt;" text — producing one giant malformed
+// paragraph with visible markup instead of separate paragraphs. XML special
+// characters within each paragraph are escaped automatically by the encoder.
+func splitIntoParagraphs(text string) []string {
+	if strings.TrimSpace(text) == "" {
+		return nil
+	}
+	parts := strings.Split(text, "\n\n")
+	paragraphs := make([]string, 0, len(parts))
+	for _, part := range parts {
+		// Collapse single newlines within a paragraph to spaces.
+		p := strings.ReplaceAll(part, "\n", " ")
+		p = strings.TrimSpace(p)
+		if p != "" {
+			paragraphs = append(paragraphs, p)
+		}
+	}
+	return paragraphs
 }
 
 // FB2 XML structures.

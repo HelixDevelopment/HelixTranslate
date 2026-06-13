@@ -343,15 +343,127 @@ func (pc *PreparationCoordinator) extractChapterContent(chapter *ebook.Chapter) 
 	return content.String()
 }
 
-// extractJSON attempts to extract JSON from LLM response
+// extractJSON attempts to extract a valid JSON value (object or array) from an
+// LLM response.
+//
+// Real LLMs wrap JSON in explanatory prose and Markdown code fences, and that
+// prose can itself contain braces (e.g. "format {key:value}: {...}"). A naive
+// first-`{`..last-`}` slice grabs the wrong span in those cases and yields
+// malformed JSON that downstream json.Unmarshal silently mis-parses. This
+// implementation, in order:
+//
+//  1. prefers the contents of a fenced ```json / ``` code block when present;
+//  2. otherwise scans for the first balanced, string-and-escape-aware JSON
+//     value (object `{...}` or array `[...]`) that json.Valid accepts,
+//     tolerating braces in surrounding prose by trying successive candidate
+//     start positions.
+//
+// When no parseable JSON value is found it returns the original response
+// unchanged so the caller's json.Unmarshal surfaces an honest parse error
+// rather than silently consuming garbage.
 func extractJSON(response string) string {
-	// Try to find JSON block
-	if idx := strings.Index(response, "{"); idx != -1 {
-		if lastIdx := strings.LastIndex(response, "}"); lastIdx != -1 {
-			return response[idx : lastIdx+1]
+	// 1) Prefer a fenced code block if one is present and parseable.
+	if fenced, ok := extractFencedJSON(response); ok {
+		return fenced
+	}
+
+	// 2) Scan for the first balanced JSON value that json.Valid accepts.
+	if scanned, ok := scanBalancedJSON(response); ok {
+		return scanned
+	}
+
+	// 3) No JSON found — return as-is for an honest downstream parse error.
+	return response
+}
+
+// extractFencedJSON returns the JSON value inside the first Markdown code fence
+// (```json ... ``` or ``` ... ```) whose body, after balanced scanning, is
+// valid JSON. ok is false when there is no fence or its contents are not JSON.
+func extractFencedJSON(response string) (string, bool) {
+	rest := response
+	for {
+		open := strings.Index(rest, "```")
+		if open == -1 {
+			return "", false
+		}
+		// Skip past the opening fence and an optional language tag line.
+		afterOpen := rest[open+3:]
+		if nl := strings.IndexByte(afterOpen, '\n'); nl != -1 {
+			// Treat everything up to the newline as a (possibly empty) info string.
+			afterOpen = afterOpen[nl+1:]
+		}
+		close := strings.Index(afterOpen, "```")
+		if close == -1 {
+			// Unterminated fence: scan the remainder of the body directly.
+			if scanned, ok := scanBalancedJSON(afterOpen); ok {
+				return scanned, true
+			}
+			return "", false
+		}
+		body := afterOpen[:close]
+		if scanned, ok := scanBalancedJSON(body); ok {
+			return scanned, true
+		}
+		// This fence held no JSON; continue past it to any later fence.
+		rest = afterOpen[close+3:]
+	}
+}
+
+// scanBalancedJSON finds the first balanced JSON value (object or array) in s
+// that json.Valid accepts. It is string-aware (braces/brackets inside JSON
+// string literals are ignored) and escape-aware (`\"` does not end a string).
+// Candidate start positions are tried left-to-right so leading prose braces do
+// not derail extraction.
+func scanBalancedJSON(s string) (string, bool) {
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c != '{' && c != '[' {
+			continue
+		}
+		if end, ok := matchBalanced(s, i); ok {
+			candidate := s[i : end+1]
+			if json.Valid([]byte(candidate)) {
+				return candidate, true
+			}
 		}
 	}
-	return response
+	return "", false
+}
+
+// matchBalanced returns the index of the closing delimiter that balances the
+// opening delimiter at start, honoring nested objects/arrays and ignoring
+// delimiters that appear inside JSON string literals. ok is false when the
+// value is not balanced before the end of s.
+func matchBalanced(s string, start int) (int, bool) {
+	depth := 0
+	inString := false
+	escaped := false
+	for i := start; i < len(s); i++ {
+		c := s[i]
+		if inString {
+			switch {
+			case escaped:
+				escaped = false
+			case c == '\\':
+				escaped = true
+			case c == '"':
+				inString = false
+			}
+			continue
+		}
+		switch c {
+		case '"':
+			inString = true
+		case '{', '[':
+			depth++
+		case '}', ']':
+			depth--
+			if depth == 0 {
+				return i, true
+			}
+		}
+	}
+	return 0, false
 }
 
 // estimateTokens roughly estimates token count

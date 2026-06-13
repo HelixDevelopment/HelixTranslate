@@ -76,12 +76,36 @@ func (d *Detector) DetectFile(filename string) (Format, error) {
 		return formatByMagic, nil
 	}
 
+	// FB2 has no distinctive magic-byte prefix (it is XML beginning with the
+	// generic "<?xml" declaration), so it is invisible to detectByMagicBytes.
+	// Without this check, an FB2 document carrying a generic or wrong extension
+	// (.txt, .xml, no extension) would be classified by extension as plain text
+	// and then mangled — the XML structure parsed as raw prose. Content that is
+	// unmistakably FB2 MUST win over a generic extension so the right parser is
+	// chosen. This only fires for genuine FB2 content and never reclassifies a
+	// real plain-text file.
+	if d.isFB2Content(header) {
+		return FormatFB2, nil
+	}
+
 	if formatByExt != FormatUnknown {
 		return formatByExt, nil
 	}
 
 	// Try content-based detection
 	return d.detectByContent(header), nil
+}
+
+// isFB2Content reports whether the header is unmistakably an FB2 document: an
+// XML declaration (or BOM-prefixed XML) whose root references FictionBook.
+func (d *Detector) isFB2Content(data []byte) bool {
+	// Strip a UTF-8 BOM if present so the "<?xml" prefix check still matches.
+	data = bytes.TrimPrefix(data, []byte{0xEF, 0xBB, 0xBF})
+	trimmed := bytes.TrimLeft(data, " \t\r\n")
+	if !bytes.HasPrefix(trimmed, []byte("<?xml")) {
+		return false
+	}
+	return bytes.Contains(trimmed, []byte("FictionBook"))
 }
 
 // detectByExtension detects format by file extension

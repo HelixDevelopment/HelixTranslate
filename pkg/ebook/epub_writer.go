@@ -29,6 +29,15 @@ func (w *EPUBWriter) Write(book *Book, filename string) error {
 	zipWriter := zip.NewWriter(file)
 	defer zipWriter.Close()
 
+	// Compute the book's unique identifier ONCE so the OPF unique-identifier
+	// (dc:identifier) and the NCX dtb:uid are identical. EPUB 2 requires the
+	// NCX dtb:uid to match the package unique-identifier; previously each was a
+	// separately-generated random UUID, which fails epubcheck conformance.
+	identifier := book.Metadata.ISBN
+	if identifier == "" {
+		identifier = "urn:uuid:" + generateUUID()
+	}
+
 	// Write mimetype (must be first, uncompressed)
 	if err := w.writeMimetype(zipWriter); err != nil {
 		return err
@@ -40,12 +49,12 @@ func (w *EPUBWriter) Write(book *Book, filename string) error {
 	}
 
 	// Write content.opf
-	if err := w.writeContentOPF(zipWriter, book); err != nil {
+	if err := w.writeContentOPF(zipWriter, book, identifier); err != nil {
 		return err
 	}
 
 	// Write toc.ncx
-	if err := w.writeTOC(zipWriter, book); err != nil {
+	if err := w.writeTOC(zipWriter, book, identifier); err != nil {
 		return err
 	}
 
@@ -96,8 +105,9 @@ func (w *EPUBWriter) writeContainer(zw *zip.Writer) error {
 	return err
 }
 
-// writeContentOPF writes OEBPS/content.opf
-func (w *EPUBWriter) writeContentOPF(zw *zip.Writer, book *Book) error {
+// writeContentOPF writes OEBPS/content.opf. identifier is the shared package
+// unique-identifier (also used for the NCX dtb:uid).
+func (w *EPUBWriter) writeContentOPF(zw *zip.Writer, book *Book, identifier string) error {
 	writer, err := zw.Create("OEBPS/content.opf")
 	if err != nil {
 		return err
@@ -135,12 +145,6 @@ func (w *EPUBWriter) writeContentOPF(zw *zip.Writer, book *Book) error {
 	date := book.Metadata.Date
 	if date == "" {
 		date = time.Now().Format("2006-01-02")
-	}
-
-	// Use book ISBN if available, otherwise generate UUID
-	identifier := book.Metadata.ISBN
-	if identifier == "" {
-		identifier = "urn:uuid:" + generateUUID()
 	}
 
 	// Build metadata section
@@ -191,8 +195,9 @@ func (w *EPUBWriter) writeContentOPF(zw *zip.Writer, book *Book) error {
 	return err
 }
 
-// writeTOC writes OEBPS/toc.ncx
-func (w *EPUBWriter) writeTOC(zw *zip.Writer, book *Book) error {
+// writeTOC writes OEBPS/toc.ncx. identifier is the shared package
+// unique-identifier so dtb:uid matches the OPF dc:identifier (EPUB 2 conformance).
+func (w *EPUBWriter) writeTOC(zw *zip.Writer, book *Book, identifier string) error {
 	writer, err := zw.Create("OEBPS/toc.ncx")
 	if err != nil {
 		return err
@@ -217,7 +222,7 @@ func (w *EPUBWriter) writeTOC(zw *zip.Writer, book *Book) error {
 	ncx := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
   <head>
-    <meta name="dtb:uid" content="urn:uuid:%s"/>
+    <meta name="dtb:uid" content="%s"/>
     <meta name="dtb:depth" content="1"/>
     <meta name="dtb:totalPageCount" content="0"/>
     <meta name="dtb:maxPageNumber" content="0"/>
@@ -228,7 +233,7 @@ func (w *EPUBWriter) writeTOC(zw *zip.Writer, book *Book) error {
   <navMap>
 %s  </navMap>
 </ncx>`,
-		generateUUID(),
+		escapeXML(identifier),
 		escapeXML(book.Metadata.Title),
 		navMap.String())
 

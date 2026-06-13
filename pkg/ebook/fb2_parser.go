@@ -61,9 +61,10 @@ func convertFB2Section(fb2Sec *fb2.Section) Chapter {
 		Sections: make([]Section, 0),
 	}
 
-	// Extract title
+	// Extract title — use FullParagraphText so inline-element text in the
+	// title (e.g. <emphasis> inside a chapter heading) is not dropped.
 	if len(fb2Sec.Title.Paragraphs) > 0 {
-		chapter.Title = fb2Sec.Title.Paragraphs[0].Text
+		chapter.Title = fb2Sec.Title.Paragraphs[0].FullParagraphText()
 	}
 
 	// Create main section with paragraphs
@@ -72,7 +73,9 @@ func convertFB2Section(fb2Sec *fb2.Section) Chapter {
 	}
 
 	for _, para := range fb2Sec.Paragraph {
-		section.Content += para.Text + "\n\n"
+		// Use FullParagraphText so emphasized/strong/linked inline words and
+		// tail text are preserved in the chapter content (not dropped).
+		section.Content += para.FullParagraphText() + "\n\n"
 	}
 
 	chapter.Sections = append(chapter.Sections, section)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 // FB2 namespace constants
@@ -135,12 +136,89 @@ type Title struct {
 	EmptyLine  []struct{}  `xml:"empty-line,omitempty"`
 }
 
-// Paragraph represents a text paragraph with mixed content
+// Paragraph represents a text paragraph with mixed content.
+//
+// FB2 paragraphs contain mixed content: bare character data interleaved with
+// inline formatting elements (<emphasis>, <strong>, <a>, <sub>, <sup>, <code>,
+// <strikethrough>, ...), each of which may itself contain nested inline
+// elements and may be followed by "tail" text (the characters between an inline
+// element's closing tag and the next sibling). Go's encoding/xml `,chardata`
+// captures ONLY the bare character data and silently drops every inline
+// element's text, and `,any []interface{}` cannot be populated at all — so the
+// previous model lost all emphasized/strong/linked words from the translation.
+//
+// FullText holds the complete paragraph text in document order, including the
+// text of every inline element and all tail text, reconstructed by a custom
+// UnmarshalXML token walk. Text is retained for backward compatibility but only
+// contains the bare chardata; consumers MUST use FullText (or the FullText()
+// accessor) to get the user-visible paragraph content.
 type Paragraph struct {
-	ID      string        `xml:"id,attr,omitempty"`
-	Style   string        `xml:"style,attr,omitempty"`
-	Content []interface{} `xml:",any"`
-	Text    string        `xml:",chardata"`
+	ID       string `xml:"id,attr,omitempty"`
+	Style    string `xml:"style,attr,omitempty"`
+	Text     string `xml:"-"`
+	FullText string `xml:"-"`
+}
+
+// UnmarshalXML reconstructs the full mixed-content text of an FB2 paragraph in
+// document order. It walks the token stream so that bare chardata, inline-element
+// text (recursively, for nested inline formatting), and tail text are all
+// preserved exactly as the end user would read them — fixing the inline-text /
+// tail-text loss that the default struct-tag unmarshaling caused.
+func (p *Paragraph) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	for _, attr := range start.Attr {
+		switch attr.Name.Local {
+		case "id":
+			p.ID = attr.Value
+		case "style":
+			p.Style = attr.Value
+		}
+	}
+
+	var bareChardata, full strings.Builder
+	depth := 0
+	for {
+		tok, err := d.Token()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+		switch t := tok.(type) {
+		case xml.CharData:
+			full.Write(t)
+			if depth == 0 {
+				// Bare chardata directly under <p> (excludes inline-element text)
+				// — preserves the legacy Text field semantics.
+				bareChardata.Write(t)
+			}
+		case xml.StartElement:
+			depth++
+		case xml.EndElement:
+			if depth == 0 {
+				// Closing </p>
+				p.Text = bareChardata.String()
+				p.FullText = full.String()
+				return nil
+			}
+			depth--
+		}
+	}
+
+	p.Text = bareChardata.String()
+	p.FullText = full.String()
+	return nil
+}
+
+// FullParagraphText returns the complete user-visible text of a paragraph in
+// document order, including inline-element text and tail text. Falls back to the
+// bare chardata if FullText was not populated (e.g. a Paragraph constructed
+// directly in code rather than parsed).
+func (p *Paragraph) FullParagraphText() string {
+	if p.FullText != "" {
+		return p.FullText
+	}
+	return p.Text
 }
 
 // Emphasis represents emphasized text

@@ -142,9 +142,26 @@ func TestFB2WriterInvalidPath(t *testing.T) {
 	assert.Contains(t, err.Error(), "failed to write FB2")
 }
 
-func TestEscapeFB2Text(t *testing.T) {
-	// Double newlines should be handled
-	result := escapeFB2Text("Line 1\n\nLine 2")
-	assert.Contains(t, result, "</p>")
-	assert.Contains(t, result, "<p>")
+func TestSplitIntoParagraphs(t *testing.T) {
+	// A blank line separates paragraphs into distinct <p> entries.
+	result := splitIntoParagraphs("Line 1\n\nLine 2")
+	require.Len(t, result, 2)
+	assert.Equal(t, "Line 1", result[0])
+	assert.Equal(t, "Line 2", result[1])
+
+	// Single newlines within a paragraph collapse to spaces.
+	result = splitIntoParagraphs("Line A\nLine B")
+	require.Len(t, result, 1)
+	assert.Equal(t, "Line A Line B", result[0])
+
+	// Empty / whitespace-only content yields no paragraphs.
+	assert.Empty(t, splitIntoParagraphs(""))
+	assert.Empty(t, splitIntoParagraphs("   \n\n  "))
+
+	// The output must NOT contain raw paragraph markup — the encoder would
+	// escape it, which was the original defect.
+	for _, p := range splitIntoParagraphs("One\n\nTwo") {
+		assert.NotContains(t, p, "<p>")
+		assert.NotContains(t, p, "</p>")
+	}
 }

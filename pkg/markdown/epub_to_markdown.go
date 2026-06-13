@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"digital.vasic.translator/pkg/ebook"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -129,24 +130,46 @@ func (c *EPUBToMarkdownConverter) ConvertEPUBToMarkdown(epubPath, outputMDPath s
 	}
 	mdContent.WriteString("---\n\n")
 
-	// Process each chapter
+	// Process each chapter. A chapter that fails to convert MUST NOT be dropped
+	// silently (§11.4 / §11.4.6): the good chapters are still written
+	// (best-effort, no data loss for the chapters that converted), and every
+	// failure is collected and surfaced as an error from this function so the
+	// caller knows a chapter was lost rather than discovering a truncated book
+	// later.
+	var chapterErrs []error
 	for idx, contentFile := range contentFiles {
 		fullPath := opfDir + contentFile
+		found := false
 		for _, f := range r.File {
 			if f.Name == fullPath {
+				found = true
 				chapterMD, err := c.convertHTMLToMarkdown(f, idx+1)
-				if err == nil && chapterMD != "" {
+				if err != nil {
+					chapterErrs = append(chapterErrs,
+						fmt.Errorf("chapter %d (%s): %w", idx+1, contentFile, err))
+					break
+				}
+				if chapterMD != "" {
 					mdContent.WriteString(chapterMD)
 					mdContent.WriteString("\n\n---\n\n")
 				}
 				break
 			}
 		}
+		if !found {
+			chapterErrs = append(chapterErrs,
+				fmt.Errorf("chapter %d (%s): content file not found in EPUB", idx+1, contentFile))
+		}
 	}
 
-	// Write markdown file
+	// Write markdown file (write the chapters that succeeded before reporting).
 	if err := os.WriteFile(outputMDPath, []byte(mdContent.String()), 0644); err != nil {
 		return fmt.Errorf("failed to write markdown: %w", err)
+	}
+
+	if len(chapterErrs) > 0 {
+		return fmt.Errorf("failed to convert %d chapter(s): %w",
+			len(chapterErrs), errors.Join(chapterErrs...))
 	}
 
 	return nil
@@ -402,7 +425,13 @@ func (c *EPUBToMarkdownConverter) findBody(n *html.Node) *html.Node {
 // convertNode recursively converts HTML nodes to Markdown
 func (c *EPUBToMarkdownConverter) convertNode(n *html.Node, md *strings.Builder, depth int) {
 	if n.Type == html.TextNode {
-		text := strings.TrimSpace(n.Data)
+		// Collapse internal whitespace runs to a single space but PRESERVE a
+		// single leading/trailing space when the source had one, so the space
+		// separating adjacent inline elements (e.g. "<strong>x</strong> y") is
+		// not lost. Leading/trailing whitespace at block boundaries is cleaned
+		// up later by the block markers + the chapter-level TrimSpace in
+		// convertHTMLToMarkdown, so this does not reintroduce block-edge bugs.
+		text := collapseInlineWhitespace(n.Data)
 		if text != "" {
 			md.WriteString(text)
 		}
@@ -532,6 +561,45 @@ func (c *EPUBToMarkdownConverter) convertListItems(n *html.Node, md *strings.Bui
 			continue
 		}
 		c.convertNode(child, md, depth)
+	}
+}
+
+// collapseInlineWhitespace collapses every run of whitespace in an HTML text
+// node to a single ASCII space. A leading and/or trailing space is preserved
+// IFF the source text had leading/trailing whitespace — this keeps the space
+// that separates adjacent inline elements ("<strong>x</strong> y") while still
+// normalising the multiple-space / newline noise that HTML source carries. A
+// text node that is entirely whitespace collapses to a single space (a genuine
+// inline separator); an empty string stays empty.
+func collapseInlineWhitespace(s string) string {
+	if s == "" {
+		return ""
+	}
+	hasLead := isASCIISpace(s[0])
+	hasTrail := isASCIISpace(s[len(s)-1])
+
+	fields := strings.Fields(s)
+	if len(fields) == 0 {
+		// All whitespace: a single separating space.
+		return " "
+	}
+	collapsed := strings.Join(fields, " ")
+	if hasLead {
+		collapsed = " " + collapsed
+	}
+	if hasTrail {
+		collapsed += " "
+	}
+	return collapsed
+}
+
+// isASCIISpace reports whether b is one of the HTML whitespace bytes.
+func isASCIISpace(b byte) bool {
+	switch b {
+	case ' ', '\t', '\n', '\r', '\f':
+		return true
+	default:
+		return false
 	}
 }
 

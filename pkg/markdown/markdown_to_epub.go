@@ -469,6 +469,89 @@ func (c *MarkdownToEPUBConverter) writeChapterHTML(zw *zip.Writer, chapter ebook
 	return err
 }
 
+// listItemRegex matches a markdown list item line, capturing leading indent,
+// the marker, and the item content. Unordered markers: -, *, +. Ordered
+// markers: a number followed by '.' or ')'.
+var listItemRegex = regexp.MustCompile(`^(\s*)([-*+]|\d+[.)])\s+(.*)$`)
+
+// parsedListItem describes one markdown list line.
+type parsedListItem struct {
+	indent  int  // number of leading-space "levels" (2 spaces == 1 level)
+	ordered bool // true for "N." / "N)" markers
+	content string
+}
+
+// parseListItemLine returns the parsed item and ok=true if line is a list item.
+func parseListItemLine(line string) (parsedListItem, bool) {
+	m := listItemRegex.FindStringSubmatch(line)
+	if m == nil {
+		return parsedListItem{}, false
+	}
+	indentSpaces := len(strings.ReplaceAll(m[1], "\t", "  "))
+	marker := m[2]
+	ordered := marker[len(marker)-1] == '.' || marker[len(marker)-1] == ')'
+	// Unordered markers are single chars (-, *, +); everything else is ordered.
+	if marker == "-" || marker == "*" || marker == "+" {
+		ordered = false
+	} else {
+		ordered = true
+	}
+	return parsedListItem{
+		indent:  indentSpaces / 2,
+		ordered: ordered,
+		content: m[3],
+	}, true
+}
+
+// renderListBlock converts a contiguous run of markdown list lines into nested
+// <ul>/<ol> HTML. Items more deeply indented than their predecessor open a
+// nested list inside the previous <li>. Inline markdown in each item is
+// converted via convertInlineMarkdown. indentStr is prepended to every emitted
+// line for pretty-printing.
+func (c *MarkdownToEPUBConverter) renderListBlock(items []parsedListItem, indentStr string) string {
+	var b strings.Builder
+	c.renderListLevel(&b, items, 0, indentStr)
+	return b.String()
+}
+
+// renderListLevel renders the items at level `level`, recursing for deeper
+// indents. It returns after consuming a contiguous block; callers pass the full
+// slice and level 0.
+func (c *MarkdownToEPUBConverter) renderListLevel(b *strings.Builder, items []parsedListItem, level int, indentStr string) {
+	i := 0
+	for i < len(items) {
+		it := items[i]
+		if it.indent < level {
+			return
+		}
+		// Open the list tag for this level using the first item's ordering.
+		tag := "ul"
+		if it.ordered {
+			tag = "ol"
+		}
+		b.WriteString(indentStr + "<" + tag + ">\n")
+		for i < len(items) && items[i].indent == level {
+			cur := items[i]
+			// Look ahead for nested children (deeper indent).
+			j := i + 1
+			for j < len(items) && items[j].indent > level {
+				j++
+			}
+			if j > i+1 {
+				// This item has nested children: emit content + nested list.
+				b.WriteString(indentStr + "  <li>" + c.convertInlineMarkdown(cur.content) + "\n")
+				c.renderListLevel(b, items[i+1:j], level+1, indentStr+"  ")
+				b.WriteString(indentStr + "  </li>\n")
+				i = j
+			} else {
+				b.WriteString(indentStr + "  <li>" + c.convertInlineMarkdown(cur.content) + "</li>\n")
+				i++
+			}
+		}
+		b.WriteString(indentStr + "</" + tag + ">\n")
+	}
+}
+
 // markdownToHTML converts markdown content to HTML
 func (c *MarkdownToEPUBConverter) markdownToHTML(markdown string) string {
 	var html strings.Builder
@@ -478,6 +561,27 @@ func (c *MarkdownToEPUBConverter) markdownToHTML(markdown string) string {
 	inCodeBlock := false
 	var currentParagraph strings.Builder
 	var codeBlock strings.Builder
+	var listBuf []parsedListItem
+
+	flushParagraph := func() {
+		if inParagraph {
+			html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
+			currentParagraph.Reset()
+			inParagraph = false
+		}
+	}
+	flushList := func() {
+		if len(listBuf) > 0 {
+			html.WriteString(c.renderListBlock(listBuf, "  "))
+			listBuf = nil
+		}
+	}
+	// flush ends any open paragraph AND any open list — call before emitting a
+	// block-level element so lists/paragraphs are properly closed.
+	flush := func() {
+		flushParagraph()
+		flushList()
+	}
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -485,12 +589,7 @@ func (c *MarkdownToEPUBConverter) markdownToHTML(markdown string) string {
 
 		// Code block delimiter
 		if strings.HasPrefix(trimmed, "```") {
-			if inParagraph {
-				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
-				currentParagraph.Reset()
-				inParagraph = false
-			}
-
+			flush()
 			if inCodeBlock {
 				// End code block
 				html.WriteString("  <pre><code>" + c.escapeXML(codeBlock.String()) + "</code></pre>\n")
@@ -512,79 +611,59 @@ func (c *MarkdownToEPUBConverter) markdownToHTML(markdown string) string {
 			continue
 		}
 
-		// Empty line ends paragraph
+		// Empty line ends paragraph and list
 		if trimmed == "" {
-			if inParagraph {
-				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
-				currentParagraph.Reset()
-				inParagraph = false
-			}
+			flush()
 			continue
 		}
 
 		// Horizontal rule
 		if c.hrRegex.MatchString(trimmed) {
-			if inParagraph {
-				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
-				currentParagraph.Reset()
-				inParagraph = false
-			}
+			flush()
 			html.WriteString("  <hr/>\n")
 			continue
 		}
 
+		// List item (ordered or unordered, possibly nested). Detected BEFORE the
+		// paragraph fallback so list lines are not swallowed into a <p>. A list
+		// item ends any open paragraph; consecutive list lines accumulate and are
+		// flushed as one nested <ul>/<ol> block.
+		if item, ok := parseListItemLine(line); ok {
+			flushParagraph()
+			listBuf = append(listBuf, item)
+			continue
+		}
+		// A non-list line ends any open list.
+		flushList()
+
 		// Headers (h1 through h6)
 		if strings.HasPrefix(trimmed, "######") {
-			if inParagraph {
-				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
-				currentParagraph.Reset()
-				inParagraph = false
-			}
+			flushParagraph()
 			text := strings.TrimSpace(strings.TrimPrefix(trimmed, "######"))
 			html.WriteString(fmt.Sprintf("  <h6>%s</h6>\n", c.escapeXML(text)))
 			continue
 		} else if strings.HasPrefix(trimmed, "#####") {
-			if inParagraph {
-				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
-				currentParagraph.Reset()
-				inParagraph = false
-			}
+			flushParagraph()
 			text := strings.TrimSpace(strings.TrimPrefix(trimmed, "#####"))
 			html.WriteString(fmt.Sprintf("  <h5>%s</h5>\n", c.escapeXML(text)))
 			continue
 		} else if strings.HasPrefix(trimmed, "####") {
-			if inParagraph {
-				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
-				currentParagraph.Reset()
-				inParagraph = false
-			}
+			flushParagraph()
 			text := strings.TrimSpace(strings.TrimPrefix(trimmed, "####"))
 			html.WriteString(fmt.Sprintf("  <h4>%s</h4>\n", c.escapeXML(text)))
 			continue
 		} else if strings.HasPrefix(trimmed, "###") {
-			if inParagraph {
-				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
-				currentParagraph.Reset()
-				inParagraph = false
-			}
+			flushParagraph()
 			text := strings.TrimSpace(strings.TrimPrefix(trimmed, "###"))
 			html.WriteString(fmt.Sprintf("  <h3>%s</h3>\n", c.escapeXML(text)))
 			continue
 		} else if strings.HasPrefix(trimmed, "##") {
-			if inParagraph {
-				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
-				currentParagraph.Reset()
-				inParagraph = false
-			}
+			flushParagraph()
 			text := strings.TrimSpace(strings.TrimPrefix(trimmed, "##"))
 			html.WriteString(fmt.Sprintf("  <h2>%s</h2>\n", c.escapeXML(text)))
 			continue
 		} else if strings.HasPrefix(trimmed, "#") && len(trimmed) > 1 && trimmed[1] == ' ' {
-			if inParagraph {
-				html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
-				currentParagraph.Reset()
-				inParagraph = false
-			}
+			flushParagraph()
 			text := strings.TrimSpace(strings.TrimPrefix(trimmed, "#"))
 			html.WriteString(fmt.Sprintf("  <h1>%s</h1>\n", c.escapeXML(text)))
 			continue
@@ -599,10 +678,8 @@ func (c *MarkdownToEPUBConverter) markdownToHTML(markdown string) string {
 		currentParagraph.WriteString(trimmed)
 	}
 
-	// Close last paragraph
-	if inParagraph {
-		html.WriteString("  <p>" + c.convertInlineMarkdown(currentParagraph.String()) + "</p>\n")
-	}
+	// Close last paragraph and list
+	flush()
 
 	// Close unclosed code block
 	if inCodeBlock {
@@ -648,35 +725,45 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 	lines := strings.Split(markdown, "\n")
 	var result strings.Builder
 	inParagraph := false
+	var listBuf []parsedListItem
 
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
+	flushParagraph := func() {
+		if inParagraph {
+			result.WriteString("</p>\n")
+			inParagraph = false
+		}
+	}
+	flushList := func() {
+		if len(listBuf) > 0 {
+			result.WriteString(c.renderListBlock(listBuf, ""))
+			listBuf = nil
+		}
+	}
+
+	for _, raw := range lines {
+		// List detection runs on the RAW line so indentation (nesting) survives.
+		if item, ok := parseListItemLine(raw); ok {
+			flushParagraph()
+			listBuf = append(listBuf, item)
+			continue
+		}
+		flushList()
+
+		line := strings.TrimSpace(raw)
 
 		// Headers
 		if strings.HasPrefix(line, "# ") {
-			if inParagraph {
-				result.WriteString("</p>\n")
-				inParagraph = false
-			}
+			flushParagraph()
 			result.WriteString(fmt.Sprintf("<h1>%s</h1>\n", strings.TrimPrefix(line, "# ")))
 		} else if strings.HasPrefix(line, "## ") {
-			if inParagraph {
-				result.WriteString("</p>\n")
-				inParagraph = false
-			}
+			flushParagraph()
 			result.WriteString(fmt.Sprintf("<h2>%s</h2>\n", strings.TrimPrefix(line, "## ")))
 		} else if strings.HasPrefix(line, "### ") {
-			if inParagraph {
-				result.WriteString("</p>\n")
-				inParagraph = false
-			}
+			flushParagraph()
 			result.WriteString(fmt.Sprintf("<h3>%s</h3>\n", strings.TrimPrefix(line, "### ")))
 		} else if line == "" {
 			// Empty line - close paragraph if open
-			if inParagraph {
-				result.WriteString("</p>\n")
-				inParagraph = false
-			}
+			flushParagraph()
 		} else {
 			// Regular text - start or continue paragraph
 			if !inParagraph {
@@ -689,10 +776,9 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 		}
 	}
 
-	// Close any open paragraph
-	if inParagraph {
-		result.WriteString("</p>\n")
-	}
+	// Close any open paragraph and list
+	flushParagraph()
+	flushList()
 
 	// Wrap in XHTML document structure
 	return fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
