@@ -283,29 +283,29 @@ func TestParseMarkdown_StructureBranches(t *testing.T) {
 		}
 	})
 
-	t.Run("bare-leading-hr-misparsed-as-frontmatter", func(t *testing.T) {
-		// CORRECTNESS FINDING (documented, not asserted-as-correct): with NO
-		// leading frontmatter, the FIRST "---" line is treated as the OPENING
-		// frontmatter fence (markdown_to_epub.go:78-90), so everything after it
-		// up to the next "---" is consumed as frontmatter and dropped. The
-		// result is a SINGLE chapter ("One") and the "## Two" content is lost.
-		// This test pins the current real behaviour so the regression is visible
-		// if/when the frontmatter heuristic is hardened.
+	t.Run("bare-leading-hr-is-separator-not-frontmatter", func(t *testing.T) {
+		// D8 REGRESSION GUARD (fixed): with NO leading frontmatter, a "---" used as
+		// a chapter separator must NOT be misparsed as a frontmatter fence.
+		// Previously the first "---" opened frontmatter and silently swallowed every
+		// chapter after it (here "## Two" + "body two" were lost → 1 chapter). The
+		// fix (markdown_to_epub.go: frontmatter must begin at the first non-blank
+		// line) makes the "---" an HR/chapter separator, so both chapters survive.
 		md := "## One\nbody one\n---\n## Two\nbody two\n"
 		chapters, _, _, err := c.parseMarkdown(md, "")
 		if err != nil {
 			t.Fatalf("parseMarkdown: %v", err)
 		}
-		if len(chapters) != 1 {
-			t.Fatalf("documented quirk: expected 1 chapter (Two lost to frontmatter "+
-				"misparse), got %d: %+v", len(chapters), chapters)
+		if len(chapters) != 2 {
+			t.Fatalf("D8: expected 2 chapters (bare leading '---' is a separator, not "+
+				"frontmatter), got %d: %+v", len(chapters), chapters)
 		}
-		if chapters[0].Title != "One" {
-			t.Fatalf("expected surviving chapter 'One', got %q", chapters[0].Title)
+		if chapters[0].Title != "One" || chapters[1].Title != "Two" {
+			t.Fatalf("D8: expected chapters [One, Two], got [%q, %q]",
+				chapters[0].Title, chapters[1].Title)
 		}
-		if strings.Contains(chapters[0].Sections[0].Content, "body two") {
-			t.Fatalf("did not expect 'body two' to survive the frontmatter misparse: %q",
-				chapters[0].Sections[0].Content)
+		if !strings.Contains(chapters[1].Sections[0].Content, "body two") {
+			t.Fatalf("D8: 'body two' must survive in chapter Two, got %q",
+				chapters[1].Sections[0].Content)
 		}
 	})
 

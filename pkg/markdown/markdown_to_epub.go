@@ -74,6 +74,18 @@ func (c *MarkdownToEPUBConverter) parseMarkdown(content string, mdDir string) ([
 	for scanner.Scan() {
 		line := scanner.Text()
 
+		// D8: YAML frontmatter must begin at the very first non-blank line. If the
+		// first real content is anything other than "---", there is no frontmatter
+		// block, so a later "---" is a horizontal-rule / chapter separator (handled
+		// by the HR branch below) — NOT a frontmatter fence. Without this, a bare
+		// "---" used as a chapter separator in a doc with no leading frontmatter was
+		// treated as frontmatter-open, silently swallowing every chapter after it
+		// (data loss). Leading blank lines stay open to a following frontmatter fence.
+		if !frontmatterDone && !inFrontmatter && frontmatterCount == 0 &&
+			strings.TrimSpace(line) != "" && line != "---" {
+			frontmatterDone = true
+		}
+
 		// Handle frontmatter (only before it's done)
 		if !frontmatterDone && line == "---" {
 			frontmatterCount++
