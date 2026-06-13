@@ -1,6 +1,6 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 15
+**Revision:** 16
 **Last modified:** 2026-06-13T00:00:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
@@ -15,6 +15,22 @@
 - **W16 RESOLVED = KEEP Models/ as-is** — the `pkg/modelsbridge` bridge already consumes `digital.vasic.models` (functional need met). Converting `Models/` → a git submodule requires creating a NEW upstream repo under an owned org — an operator-gated repo-creation action (§11.4.101 block-only-when-irreversible+undeterminable; §11.4.122 keeping is the safe no-change path). Convert path remains available on operator request.
 
 **Autonomous-safe queue now EMPTY.** Genuinely-remaining = operator-gated only: W15 LLM-translation E2E (real provider key) + W16 convert (new upstream repo decision). Per §11.4.94 this is legitimate idle.
+
+
+<!-- LLMsVerifier real-key integration -->
+
+### LLMsVerifier real-key integration — DONE (HEAD e7d6d67; submodule 95fb1cce)
+Operator directive: use `~/api_keys.sh` so the LLMsVerifier submodule performs its mandatory steps and provides valid providers + models to the System. **Done, evidence-backed (§11.4.83 docs/qa/llmsverifier_20260613_182600/, key-free):**
+- Ran the submodule's REAL discovery/verification with real keys → **89 verified models** (DeepSeek 2, Cerebras 2, Groq 16, Mistral 69; OpenAI/Anthropic honestly fail — no key in api_keys.sh).
+- **Two real bugs found + fixed, both §11.4.135 mutation-proven guards (exact production errors):**
+  - **Bug B (main, internal/verifier/client.go) load-bearing**: the System's SSOT client couldn't decode the server's `{"count":N,"models":[...]}` envelope → consumed ZERO models while server healthy. Fixed (envelope-aware decode). Guard: client_envelope_test.go. System now fetches all 89 e2e.
+  - **Bug A (submodule llmverifier/models.go, 95fb1cce, pushed GitHub+GitLab)**: numeric `context_window` (Groq) crashed the whole provider decode → 0 models. Fixed (tolerant UnmarshalJSON). Guard: context_window_unmarshal_test.go.
+- Secrets: keys sourced inline only, never printed/logged/committed (§11.4.10); evidence dir + edits secret-scanned clean; throwaway run artifacts removed (§11.4.14).
+
+**Honest follow-up gaps (tracked, not bluffed — §11.4.6):**
+- (G1) Submodule `verify` (report) pipeline does NOT persist into the `server` SQLite DB — the served DB was seeded via live discovery (verifier's own client+database pkgs). Architectural bridge worth a workable item.
+- (G2) Full ~30-provider exhaustive per-model coding-capability scoring timed out at 600s in one pass; reliability-scored the seeded set. A bounded/batched sweep is the follow-up.
+- (G3) Providers without keys (OpenAI/Anthropic/Perplexity/Together) fail auth honestly; add their keys to api_keys.sh to include them.
 
 
 ## SHORT resumption sentence
