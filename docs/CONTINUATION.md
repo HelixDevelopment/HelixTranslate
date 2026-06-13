@@ -1,6 +1,6 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 16
+**Revision:** 17
 **Last modified:** 2026-06-13T00:00:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
@@ -31,6 +31,21 @@ Operator directive: use `~/api_keys.sh` so the LLMsVerifier submodule performs i
 - (G1) Submodule `verify` (report) pipeline does NOT persist into the `server` SQLite DB — the served DB was seeded via live discovery (verifier's own client+database pkgs). Architectural bridge worth a workable item.
 - (G2) Full ~30-provider exhaustive per-model coding-capability scoring timed out at 600s in one pass; reliability-scored the seeded set. A bounded/batched sweep is the follow-up.
 - (G3) Providers without keys (OpenAI/Anthropic/Perplexity/Together) fail auth honestly; add their keys to api_keys.sh to include them.
+
+
+<!-- bug-hunt waves 2026-06-13 -->
+
+### Real-bug-hunt waves (HEAD eb7576e) — 17 real bugs fixed this session, all reproduce-first + mutation-proven + pushed
+LLMsVerifier real-key integration: 89 verified models flow to the System end-to-end; System's own in-process verifier env-bridge (31 models, cmd/verify-models); real DeepSeek translation proof ("The sky is blue today."->"El cielo esta azul hoy.").
+
+Bugs fixed (each RED->GREEN, §11.4.135 guard, §1.1 mutation-proven, real evidence; commits e7d6d67/dfb250c/f80153b/eb7576e + submodule 95fb1cce):
+- Auth lockout (CreateUser blanked stored bcrypt hash); Verifier consume (client.go envelope); Verifier serve (listVerifiedModels dropped all); Groq context_window (submodule); Hardcoded RU->SR prompt (RU->SR Ekavica preserved); Uppercase Cyrillic digraph (LJUBAV); Ordered-list numbering lost; UTF-8 mid-rune truncation (HIGH, Cyrillic); Import data race; FB2 inline+tail text dropped (CRITICAL); FB2 writer escaped markup; FB2 format misdetection; EPUB OPF/NCX id mismatch; Markdown inline whitespace collapse; silent chapter drop; list reverse round-trip; extractJSON wrong span.
+
+Remaining tracked follow-ups (honest, §11.4.6/§11.4.118):
+- G1: submodule verify-pipeline->server-DB bridge (serial submodule wave, §11.4.119 contends with main builds; conductor-owned).
+- G2: batched full ~30-provider verification sweep (one-pass timed out 600s).
+- G3: add OPENAI/ANTHROPIC/etc keys to api_keys.sh (operator) to include those providers.
+- Deferred-broader: markdownToHTML round-trip edges; preparation extractJSON LLM-output spec; verification multipass duplicate DB writes; ambiguous nj/lj/dz Latin->Cyrillic (structural §11.4.112 won't-fix).
 
 
 ## SHORT resumption sentence
