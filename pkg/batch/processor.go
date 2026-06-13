@@ -279,6 +279,12 @@ func (bp *BatchProcessor) processFilesSequential(ctx context.Context, files []st
 	results := make([]ProcessingResult, 0, len(files))
 
 	for i, file := range files {
+		// Honor context cancellation: stop processing further files once the
+		// caller has cancelled (or the deadline has elapsed).
+		if err := ctx.Err(); err != nil {
+			return results, err
+		}
+
 		// Compute output path
 		outputPath, err := bp.computeOutputPath(file)
 		if err != nil {
@@ -344,6 +350,19 @@ func (bp *BatchProcessor) processFilesParallel(ctx context.Context, files []stri
 			semaphore <- struct{}{}
 			defer func() { <-semaphore }()
 
+			// Honor context cancellation: a worker that starts after the caller
+			// cancelled must not parse/write its file. Record the cancellation in
+			// its result slot (keeping every slot populated) instead of processing.
+			if cerr := ctx.Err(); cerr != nil {
+				results[idx] = ProcessingResult{
+					InputPath:  filePath,
+					OutputPath: "",
+					Success:    false,
+					Error:      cerr,
+				}
+				return
+			}
+
 			// Compute output path
 			outputPath, err := bp.computeOutputPath(filePath)
 			if err != nil {
@@ -386,6 +405,11 @@ func (bp *BatchProcessor) processFilesParallel(ctx context.Context, files []stri
 	}
 
 	wg.Wait()
+
+	// Surface cancellation to the caller after all workers have drained.
+	if err := ctx.Err(); err != nil {
+		return results, err
+	}
 
 	return results, nil
 }
