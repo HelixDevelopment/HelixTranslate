@@ -102,12 +102,14 @@ func (pc *PreparationCoordinator) PrepareBook(ctx context.Context, book *ebook.B
 	}
 
 	// Analyze chapters if requested
+	var chapterAnalyses []ChapterAnalysis
 	if pc.config.AnalyzeChapters {
 		log.Printf("  Analyzing individual chapters...")
-		chapterAnalyses, err := pc.analyzeChapters(ctx, book)
+		analyses, err := pc.analyzeChapters(ctx, book)
 		if err != nil {
 			log.Printf("  Warning: Chapter analysis failed: %v", err)
 		} else {
+			chapterAnalyses = analyses
 			// Add chapter analyses to the last pass
 			if len(result.Passes) > 0 {
 				result.Passes[len(result.Passes)-1].Analysis.ChapterAnalyses = chapterAnalyses
@@ -128,6 +130,15 @@ func (pc *PreparationCoordinator) PrepareBook(ctx context.Context, book *ebook.B
 		}
 	} else if len(result.Passes) == 1 {
 		result.FinalAnalysis = result.Passes[0].Analysis
+	}
+
+	// Chapter analyses are deterministic per-chapter artifacts that the
+	// consolidation LLM is never asked to reproduce, so a consolidated
+	// FinalAnalysis comes back without them. Re-attach the chapter analyses
+	// we computed so the downstream translator actually receives per-chapter
+	// context instead of silently losing the chapter-analysis work.
+	if len(chapterAnalyses) > 0 && len(result.FinalAnalysis.ChapterAnalyses) == 0 {
+		result.FinalAnalysis.ChapterAnalyses = chapterAnalyses
 	}
 
 	result.CompletedAt = time.Now()
@@ -201,9 +212,15 @@ func (pc *PreparationCoordinator) performPass(
 
 // analyzeChapters performs detailed analysis of each chapter
 func (pc *PreparationCoordinator) analyzeChapters(ctx context.Context, book *ebook.Book) ([]ChapterAnalysis, error) {
-	var analyses []ChapterAnalysis
-	var mu sync.Mutex
 	var wg sync.WaitGroup
+
+	// Results are written to a per-chapter slot indexed by chapter position so
+	// the returned slice is ALWAYS in chapter order regardless of goroutine
+	// completion order. Downstream GetTranslationContext indexes
+	// ChapterAnalyses[chapterNum-1] by position, so a completion-order slice
+	// would mis-attribute each chapter's analysis to the wrong chapter.
+	// Distinct goroutines write distinct indices, so no mutex is required.
+	slots := make([]*ChapterAnalysis, len(book.Chapters))
 
 	// Select a provider for chapter analysis
 	provider := pc.providers[0]
@@ -218,7 +235,7 @@ func (pc *PreparationCoordinator) analyzeChapters(ctx context.Context, book *ebo
 
 	for i, chapter := range book.Chapters {
 		wg.Add(1)
-		go func(chapterNum int, ch ebook.Chapter) {
+		go func(chapterIdx int, ch ebook.Chapter) {
 			defer wg.Done()
 
 			semaphore <- struct{}{}        // Acquire
@@ -229,7 +246,7 @@ func (pc *PreparationCoordinator) analyzeChapters(ctx context.Context, book *ebo
 
 			// Build prompt
 			prompt := promptBuilder.BuildChapterAnalysisPrompt(
-				chapterNum+1,
+				chapterIdx+1,
 				ch.Title,
 				chapterContent,
 			)
@@ -237,26 +254,32 @@ func (pc *PreparationCoordinator) analyzeChapters(ctx context.Context, book *ebo
 			// Call LLM
 			response, err := provider.Translate(ctx, prompt, "")
 			if err != nil {
-				log.Printf("    Warning: Chapter %d analysis failed: %v", chapterNum+1, err)
+				log.Printf("    Warning: Chapter %d analysis failed: %v", chapterIdx+1, err)
 				return
 			}
 
 			// Parse response
 			var analysis ChapterAnalysis
 			if err := json.Unmarshal([]byte(extractJSON(response)), &analysis); err != nil {
-				log.Printf("    Warning: Failed to parse chapter %d analysis: %v", chapterNum+1, err)
+				log.Printf("    Warning: Failed to parse chapter %d analysis: %v", chapterIdx+1, err)
 				return
 			}
 
-			mu.Lock()
-			analyses = append(analyses, analysis)
-			mu.Unlock()
+			slots[chapterIdx] = &analysis
 
-			log.Printf("    ✓ Chapter %d analyzed", chapterNum+1)
+			log.Printf("    ✓ Chapter %d analyzed", chapterIdx+1)
 		}(i, chapter)
 	}
 
 	wg.Wait()
+
+	// Compact into chapter order, dropping chapters whose analysis failed.
+	analyses := make([]ChapterAnalysis, 0, len(slots))
+	for _, a := range slots {
+		if a != nil {
+			analyses = append(analyses, *a)
+		}
+	}
 
 	return analyses, nil
 }

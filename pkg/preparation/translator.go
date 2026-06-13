@@ -245,9 +245,16 @@ func (pat *PreparationAwareTranslator) isUntranslatable(term string) bool {
 		return false
 	}
 
-	// Check untranslatable terms
+	// Check untranslatable terms. Skip empty/whitespace-only entries: an LLM can
+	// emit a blank term, and strings.Contains(x, "") is always true, which would
+	// otherwise classify EVERY string (including the book title) as
+	// untranslatable and silently suppress its translation.
 	for _, ut := range pat.preparationResult.FinalAnalysis.UntranslatableTerms {
-		if strings.Contains(strings.ToLower(term), strings.ToLower(ut.Term)) {
+		needle := strings.TrimSpace(ut.Term)
+		if needle == "" {
+			continue
+		}
+		if strings.Contains(strings.ToLower(term), strings.ToLower(needle)) {
 			return true
 		}
 	}
