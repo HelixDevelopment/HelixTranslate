@@ -71,6 +71,7 @@ require (
 	digital.vasic.challenges v0.0.0
 	digital.vasic.containers v0.0.0-00010101000000-000000000000
 	digital.vasic.llmsverifier v0.0.0
+	digital.vasic.models v0.0.0-00010101000000-000000000000
 )
 
 replace digital.vasic.challenges => ./challenges
@@ -88,3 +89,5 @@ replace digital.vasic.llmprovider => ./llm_provider
 replace digital.vasic.visionengine => ./vision_engine
 
 replace digital.vasic.llmsverifier => ./llms_verifier/llm-verifier
+
+replace digital.vasic.models => ./Models
