@@ -357,6 +357,19 @@ func createEPUBFromDirectory(sourceDir, outputPath string) error {
 	return nil
 }
 
+// escapeXHTMLText escapes the XML metacharacters &, <, > so arbitrary markdown
+// body/header text becomes well-formed XHTML character data. Without this, text
+// like "Smith & Jones" or "a < b" produced MALFORMED XHTML (a bare "&" is not a
+// valid entity; "a < b" opens a phantom tag), which strict EPUB readers reject
+// and lenient ones mangle. & MUST be replaced first so the &lt;/&gt; we emit are
+// not double-escaped.
+func escapeXHTMLText(s string) string {
+	s = strings.ReplaceAll(s, "&", "&amp;")
+	s = strings.ReplaceAll(s, "<", "&lt;")
+	s = strings.ReplaceAll(s, ">", "&gt;")
+	return s
+}
+
 // Convert basic markdown to simple XHTML
 func convertMarkdownToXHTML(markdown string) string {
 	lines := strings.Split(markdown, "\n")
@@ -372,19 +385,19 @@ func convertMarkdownToXHTML(markdown string) string {
 				result.WriteString("</p>\n")
 				inParagraph = false
 			}
-			result.WriteString(fmt.Sprintf("<h1>%s</h1>\n", strings.TrimPrefix(line, "# ")))
+			result.WriteString(fmt.Sprintf("<h1>%s</h1>\n", escapeXHTMLText(strings.TrimPrefix(line, "# "))))
 		} else if strings.HasPrefix(line, "## ") {
 			if inParagraph {
 				result.WriteString("</p>\n")
 				inParagraph = false
 			}
-			result.WriteString(fmt.Sprintf("<h2>%s</h2>\n", strings.TrimPrefix(line, "## ")))
+			result.WriteString(fmt.Sprintf("<h2>%s</h2>\n", escapeXHTMLText(strings.TrimPrefix(line, "## "))))
 		} else if strings.HasPrefix(line, "### ") {
 			if inParagraph {
 				result.WriteString("</p>\n")
 				inParagraph = false
 			}
-			result.WriteString(fmt.Sprintf("<h3>%s</h3>\n", strings.TrimPrefix(line, "### ")))
+			result.WriteString(fmt.Sprintf("<h3>%s</h3>\n", escapeXHTMLText(strings.TrimPrefix(line, "### "))))
 		} else if line == "" {
 			// Empty line - close paragraph if open
 			if inParagraph {
@@ -399,7 +412,7 @@ func convertMarkdownToXHTML(markdown string) string {
 			} else {
 				result.WriteString(" ")
 			}
-			result.WriteString(line)
+			result.WriteString(escapeXHTMLText(line))
 		}
 	}
 

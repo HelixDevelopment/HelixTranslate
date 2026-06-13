@@ -2,6 +2,7 @@ package markdown
 
 import (
 	"context"
+	"encoding/xml"
 	"digital.vasic.translator/pkg/format"
 	"digital.vasic.translator/pkg/logger"
 	"fmt"
@@ -720,5 +721,39 @@ This document contains multiple paragraphs for benchmarking.
 	for i := 0; i < b.N; i++ {
 		outputPath := filepath.Join(tmpDir, fmt.Sprintf("output_%d.md", i))
 		workflow.TranslateMarkdown(ctx, inputPath, outputPath, "en", "sr")
+	}
+}
+
+// TestConvertMarkdownToXHTML_EscapesSpecialChars proves the SimpleWorkflow EPUB
+// chapter path (package convertMarkdownToXHTML, wired via ConvertFromMarkdown ->
+// convertMarkdownToEPUB) XML-escapes &, <, > in body text and headers. Before
+// the fix it emitted raw "&", "<", ">" into the XHTML, producing MALFORMED
+// XHTML: a bare "&" is not a valid entity and "a < b" opens a phantom tag, so a
+// translated book containing "Smith & Jones" or "a < b" shipped invalid XHTML
+// that strict EPUB readers reject and lenient ones mangle (reader-visible loss).
+func TestConvertMarkdownToXHTML_EscapesSpecialChars(t *testing.T) {
+	// Body paragraph with all three special chars.
+	body := convertMarkdownToXHTML("Smith & Jones say a < b and c > d")
+	for _, want := range []string{"&amp;", "&lt;", "&gt;"} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("paragraph not XML-escaped, missing %q:\n%s", want, body)
+		}
+	}
+	// A bare unescaped ampersand (not part of an entity) must NOT remain.
+	if strings.Contains(body, "& Jones") {
+		t.Fatalf("raw unescaped '&' shipped in XHTML body:\n%s", body)
+	}
+
+	// Header text must be escaped too.
+	hdr := convertMarkdownToXHTML("# A & B < C")
+	if !strings.Contains(hdr, "<h1>A &amp; B &lt; C</h1>") {
+		t.Fatalf("header text not XML-escaped:\n%s", hdr)
+	}
+
+	// The full produced chapter must parse as well-formed XML (proves validity,
+	// not just substring presence).
+	full := "<root>" + convertMarkdownToXHTML("Tom & Jerry: a < b") + "</root>"
+	if err := xml.Unmarshal([]byte(full), new(struct{ XMLName xml.Name })); err != nil {
+		t.Fatalf("produced XHTML is not well-formed XML: %v\n%s", err, full)
 	}
 }

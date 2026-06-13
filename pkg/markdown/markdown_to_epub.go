@@ -764,6 +764,8 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 	lines := strings.Split(markdown, "\n")
 	var result strings.Builder
 	inParagraph := false
+	inCodeBlock := false
+	var codeBlock strings.Builder
 	var listBuf []parsedListItem
 	var quoteBuf []string
 
@@ -791,6 +793,36 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 	}
 
 	for _, raw := range lines {
+		trimmedRaw := strings.TrimSpace(raw)
+
+		// Fenced code block (```): the fence and its body MUST be emitted as a real
+		// <pre><code> so the code structure (internal newlines) survives into the
+		// EPUB and round-trips. Detected FIRST, before list/blockquote/header
+		// detection, so markdown markers inside a code block are treated as literal
+		// code, not parsed. Without this, createEPUB flattened the whole block into
+		// one <p> with literal backticks and newlines collapsed to spaces — the
+		// code was destroyed for the reader. Mirrors markdownToHTML's fence logic.
+		if strings.HasPrefix(trimmedRaw, "```") {
+			if inCodeBlock {
+				result.WriteString("<pre><code>" + c.escapeXML(codeBlock.String()) + "</code></pre>\n")
+				codeBlock.Reset()
+				inCodeBlock = false
+			} else {
+				flushParagraph()
+				flushList()
+				flushQuote()
+				inCodeBlock = true
+			}
+			continue
+		}
+		if inCodeBlock {
+			if codeBlock.Len() > 0 {
+				codeBlock.WriteString("\n")
+			}
+			codeBlock.WriteString(raw)
+			continue
+		}
+
 		// List detection runs on the RAW line so indentation (nesting) survives.
 		if item, ok := parseListItemLine(raw); ok {
 			flushParagraph()
@@ -811,16 +843,29 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 		}
 		flushQuote()
 
-		// Headers
-		if strings.HasPrefix(line, "# ") {
+		// Headers (h1..h6). Each level MUST be emitted as the matching element so
+		// the heading level survives into the EPUB and round-trips (convertNode
+		// emits "#".."######" for <h1>..<h6>). Deepest prefix is checked first so
+		// "######" is not matched by the "#" branch. Header text is XML-escaped so
+		// a header containing <, &, etc. produces valid XHTML.
+		if strings.HasPrefix(line, "###### ") {
 			flushParagraph()
-			result.WriteString(fmt.Sprintf("<h1>%s</h1>\n", strings.TrimPrefix(line, "# ")))
-		} else if strings.HasPrefix(line, "## ") {
+			result.WriteString(fmt.Sprintf("<h6>%s</h6>\n", c.escapeXML(strings.TrimPrefix(line, "###### "))))
+		} else if strings.HasPrefix(line, "##### ") {
 			flushParagraph()
-			result.WriteString(fmt.Sprintf("<h2>%s</h2>\n", strings.TrimPrefix(line, "## ")))
+			result.WriteString(fmt.Sprintf("<h5>%s</h5>\n", c.escapeXML(strings.TrimPrefix(line, "##### "))))
+		} else if strings.HasPrefix(line, "#### ") {
+			flushParagraph()
+			result.WriteString(fmt.Sprintf("<h4>%s</h4>\n", c.escapeXML(strings.TrimPrefix(line, "#### "))))
 		} else if strings.HasPrefix(line, "### ") {
 			flushParagraph()
-			result.WriteString(fmt.Sprintf("<h3>%s</h3>\n", strings.TrimPrefix(line, "### ")))
+			result.WriteString(fmt.Sprintf("<h3>%s</h3>\n", c.escapeXML(strings.TrimPrefix(line, "### "))))
+		} else if strings.HasPrefix(line, "## ") {
+			flushParagraph()
+			result.WriteString(fmt.Sprintf("<h2>%s</h2>\n", c.escapeXML(strings.TrimPrefix(line, "## "))))
+		} else if strings.HasPrefix(line, "# ") {
+			flushParagraph()
+			result.WriteString(fmt.Sprintf("<h1>%s</h1>\n", c.escapeXML(strings.TrimPrefix(line, "# "))))
 		} else if line == "" {
 			// Empty line - close paragraph if open
 			flushParagraph()
@@ -840,6 +885,10 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 	flushParagraph()
 	flushList()
 	flushQuote()
+	// Close an unterminated code block so its content is not silently dropped.
+	if inCodeBlock {
+		result.WriteString("<pre><code>" + c.escapeXML(codeBlock.String()) + "</code></pre>\n")
+	}
 
 	// Wrap in XHTML document structure
 	return fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>

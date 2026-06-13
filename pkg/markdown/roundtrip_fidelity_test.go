@@ -109,6 +109,101 @@ func TestXHTML_Blockquote_ProducesBlockquote(t *testing.T) {
 	}
 }
 
+// BUG 5: convertMarkdownToXHTML (the PRODUCTION EPUB chapter path) only handled
+// h1/h2/h3. An h4/h5/h6 markdown header was dropped through to the paragraph
+// fallback, so the literal "#### ..." text shipped to the reader as a <p> and
+// the heading level was lost on round-trip. The HTML->markdown side
+// (convertNode) already emits "####"/"#####"/"######" for <h4>/<h5>/<h6>, so
+// the md->XHTML side MUST produce the matching elements.
+func TestXHTML_DeepHeaders_ProduceHeadingElements(t *testing.T) {
+	c := NewMarkdownToEPUBConverter()
+	cases := []struct {
+		md      string
+		wantTag string
+	}{
+		{"#### Sub-sub-sub", "<h4>Sub-sub-sub</h4>"},
+		{"##### Five deep", "<h5>Five deep</h5>"},
+		{"###### Six deep", "<h6>Six deep</h6>"},
+	}
+	for _, tc := range cases {
+		out := c.convertMarkdownToXHTML(tc.md)
+		if !strings.Contains(out, tc.wantTag) {
+			t.Fatalf("convertMarkdownToXHTML(%q) missing %q (header lost to <p>):\n%s",
+				tc.md, tc.wantTag, out)
+		}
+		// The literal hash marker must NOT survive as paragraph text.
+		if strings.Contains(out, "<p>#") {
+			t.Fatalf("convertMarkdownToXHTML(%q) shipped literal '#' header text in a <p>:\n%s",
+				tc.md, out)
+		}
+	}
+}
+
+// BUG 5 round-trip: an h4 survives markdown -> production XHTML -> markdown with
+// its heading level intact. Fails if convertMarkdownToXHTML drops deep headers.
+func TestRoundTrip_DeepHeader_LevelPreserved(t *testing.T) {
+	c := NewMarkdownToEPUBConverter()
+	xhtml := c.convertMarkdownToXHTML("#### Methods")
+	doc, err := html.Parse(strings.NewReader(xhtml))
+	if err != nil {
+		t.Fatalf("parse produced xhtml: %v", err)
+	}
+	conv := NewEPUBToMarkdownConverter(false, "")
+	body := conv.findBody(doc)
+	var b strings.Builder
+	conv.convertChildren(body, &b, 0)
+	out := strings.TrimSpace(b.String())
+	if out != "#### Methods" {
+		t.Fatalf("h4 heading level lost on round-trip: got %q, want %q", out, "#### Methods")
+	}
+}
+
+// BUG 6: convertMarkdownToXHTML (the PRODUCTION EPUB chapter path) had no
+// fenced-code-block (```) handling. A code block was flattened into a single
+// <p> with literal backticks and its internal newlines collapsed to spaces —
+// the code structure was destroyed in the produced EPUB. The HTML->markdown
+// side (convertNode) emits <pre> as a ``` fence, so md->XHTML MUST produce
+// <pre><code> for the fenced block to survive (and round-trip).
+func TestXHTML_FencedCodeBlock_ProducesPreCode(t *testing.T) {
+	c := NewMarkdownToEPUBConverter()
+	md := "```\nfn main() {\n    return 0\n}\n```"
+	out := c.convertMarkdownToXHTML(md)
+	if !strings.Contains(out, "<pre><code>") {
+		t.Fatalf("fenced code block not converted to <pre><code> (code structure lost):\n%s", out)
+	}
+	// Literal backtick fence must not survive as paragraph text.
+	if strings.Contains(out, "```") {
+		t.Fatalf("literal ``` fence shipped to reader:\n%s", out)
+	}
+	// The code body's internal newline MUST be preserved (not collapsed to a space).
+	if !strings.Contains(out, "fn main() {\n") {
+		t.Fatalf("code block internal newlines collapsed (structure destroyed):\n%s", out)
+	}
+}
+
+// BUG 6 round-trip: a fenced code block survives markdown -> production XHTML ->
+// markdown as a fenced code block. Fails if convertMarkdownToXHTML lacks fence
+// handling.
+func TestRoundTrip_FencedCodeBlock_Survives(t *testing.T) {
+	c := NewMarkdownToEPUBConverter()
+	xhtml := c.convertMarkdownToXHTML("```\nx := 1\n```")
+	doc, err := html.Parse(strings.NewReader(xhtml))
+	if err != nil {
+		t.Fatalf("parse produced xhtml: %v", err)
+	}
+	conv := NewEPUBToMarkdownConverter(false, "")
+	body := conv.findBody(doc)
+	var b strings.Builder
+	conv.convertChildren(body, &b, 0)
+	out := b.String()
+	if !strings.Contains(out, "```") {
+		t.Fatalf("code fence lost on round-trip:\n%s", out)
+	}
+	if !strings.Contains(out, "x := 1") {
+		t.Fatalf("code content lost on round-trip:\n%s", out)
+	}
+}
+
 // Behavioral: a realistic chapter mixing a link, an image and a blockquote
 // survives the PRODUCTION EPUB chapter path (convertMarkdownToXHTML) AND
 // round-trips back through the HTML->markdown converter with all three
