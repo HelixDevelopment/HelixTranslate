@@ -172,14 +172,11 @@
   </style>
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">CONTINUATION</h1>
-</header>
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 3 <strong>Last modified:</strong>
-2026-06-12T00:00:00Z <strong>Purpose:</strong> Single canonical
+<p><strong>Revision:</strong> 4 <strong>Last modified:</strong>
+2026-06-13T12:00:00Z <strong>Purpose:</strong> Single canonical
 out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 /
 §11.4.127). To resume: point a new session at THIS file, run
 <code>git fetch --all</code>, and say <strong>continue</strong>.</p>
@@ -201,10 +198,14 @@ prefixed <code>helix_translate-</code> (§11.4.151). Work subagent-driven
 <h2 id="live-state-anchors-moment-valid">Live state anchors
 (moment-valid)</h2>
 <ul>
-<li><strong>Parent HEAD:</strong> see <code>git log -1</code> on
-<code>main</code> (latest commit this session = the wrap-up commit);
-pushed to BOTH <code>milos85vasic/Translator</code> +
-<code>HelixDevelopment/HelixTranslate</code> (origin fans out).</li>
+<li><strong>Parent HEAD:</strong> <code>e775088</code> (batch
+W4/W5/W6/W8/W9/W10/W12 + llm_provider pointer bump) on
+<code>main</code>; pushed to BOTH <code>milos85vasic/Translator</code> +
+<code>HelixDevelopment/HelixTranslate</code> (verified at e775088,
+fast-forward, no force).</li>
+<li><strong>llm_provider HEAD:</strong> <code>b3dc7f9</code> (W7
+CONST-036 propagation block + regenerated html/pdf), pushed to
+<code>HelixDevelopment/LLMProvider</code> master.</li>
 <li><strong>Constitution HEAD:</strong> <code>5e671fe</code> (§11.4.151
 added), pushed to all 6 upstreams; parent pointer bumped.</li>
 <li><strong>Build:</strong> <code>go build ./...</code> = EXIT 0.
@@ -251,9 +252,37 @@ deeper → corrected to <code>../../..</code>; 3 challenges re-verified
 PASS (cache_invalidation, model_verification_gate, anti_bluff
 step1-3).</p>
 <h2
-id="open-workable-items-tomorrows-queue-many-parallelizable-disjoint-scope">OPEN
-workable items (tomorrow’s queue — many parallelizable, disjoint
-scope)</h2>
+id="closed-this-session-2026-06-13-batch-e775088-llm_provider-b3dc7f9-all-pushed-captured-evidence">CLOSED
+this session (2026-06-13, batch e775088 / llm_provider b3dc7f9 — all
+pushed, captured evidence)</h2>
+<ul>
+<li><strong>W4</strong> ✅ <code>pkg/security</code> flaky Short-TTL —
+widened TTL→1min; 50× + <code>-race</code> + CPU-load all PASS.</li>
+<li><strong>W5</strong> ✅ <code>pkg/distributed</code> 120s timeout —
+bounded SMTP send (real defect) + in-process test servers; 3× ~48.5s,
+vet 0.</li>
+<li><strong>W6</strong> ✅ <code>internal/verifier/discovery</code> 600s
+timeout — injectable URLs (prod unchanged) + sentinel stub + honest
+SKIP; 3× ~1s, paired §1.1 mutation proven.</li>
+<li><strong>W7</strong> ✅ <code>llm_provider</code> CONST-036
+propagation block — challenge GREEN; html/pdf regenerated.</li>
+<li><strong>W8</strong> ✅
+<code>anti_bluff_execution_challenge.sh</code> BSD-sed — portable
+tmpfile sed (§11.4.67); isolated rc=0 proof.</li>
+<li><strong>W9</strong> ✅ tracked
+<code>.bak</code>/<code>.backup</code> residue —
+git-history-investigated (§11.4.124), removed + .gitignore; build
+0.</li>
+<li><strong>W10</strong> ✅ <code>-script latin</code>→Cyrillic —
+<code>pkg/script</code> was never imported into unified-translator;
+<code>normalizeScript</code> wired; RED→GREEN 7 tests + 3×.</li>
+<li><strong>W12</strong> ✅ 8 challenge scripts brittle root —
+<code>git -C rev-parse --show-toplevel</code> w/ fallback (§11.4.111);
+all parse:OK root:OK.</li>
+</ul>
+<h2
+id="open-workable-items-queue-many-parallelizable-disjoint-scope">OPEN
+workable items (queue — many parallelizable, disjoint scope)</h2>
 <table>
 <colgroup>
 <col style="width: 25%" />
@@ -276,14 +305,16 @@ scope)</h2>
 LLMRequest, absent upstream)</td>
 <td><strong>Operator decision §11.4.122</strong></td>
 <td>Convert needs preserving/discarding the local shape. Not consumed
-(no replace/import). DO NOT silently remove.</td>
+(no replace/import). DO NOT silently remove. Deferred — not blocking;
+surface to operator before W16.</td>
 </tr>
 <tr>
 <td>W2</td>
 <td>Coverage 50.7% → ~100% (§11.4.27); 27 pkgs at 0%</td>
 <td>Task</td>
 <td><code>cmd/unified-translator</code> 1.8%, gRPC/server 0%, sshworker
-19.6%, storage 32.9%. Core translator pkgs healthy (77–82%).</td>
+19.6%, storage 32.9%. Core translator pkgs healthy (77–82%).
+Parallelizable per-package.</td>
 </tr>
 <tr>
 <td>W3</td>
@@ -293,68 +324,11 @@ LLMRequest, absent upstream)</td>
 <td>§11.4.85 chaos/stress mandatory.</td>
 </tr>
 <tr>
-<td>W4</td>
-<td><code>pkg/security</code>
-<code>TestAuthService_TokenExpirationEdgeCases/Short_TTL</code> FAIL
-(timing race)</td>
-<td>Bug</td>
-<td>Token expires before assertion; real flaky FAIL.</td>
-</tr>
-<tr>
-<td>W5</td>
-<td><code>pkg/distributed</code> 120s timeout FAIL</td>
-<td>Bug</td>
-<td>Investigate (§11.4.102).</td>
-</tr>
-<tr>
-<td>W6</td>
-<td><code>internal/verifier/discovery</code> 600s timeout</td>
-<td>Task</td>
-<td>Network/service-dependent → SKIP(needs-service) discipline.</td>
-</tr>
-<tr>
-<td>W7</td>
-<td><code>llm_provider/CONSTITUTION.md</code> missing
-<code>CONST-036</code> (all siblings have it)</td>
-<td>Bug</td>
-<td>Governance propagation gap (caught by
-helixqa_wiring_challenge).</td>
-</tr>
-<tr>
-<td>W8</td>
-<td><code>anti_bluff_execution_challenge.sh</code> step-4 BSD-vs-GNU
-<code>sed</code> error on macOS</td>
-<td>Bug</td>
-<td>§11.4.67 target-shell parseability; mutation step silently
-no-ops.</td>
-</tr>
-<tr>
-<td>W9</td>
-<td>Tracked residue <code>pkg/api/handler_extended_test.go.bak</code>
-(orphan), <code>pkg/sshworker/worker.go.backup</code></td>
-<td>Task</td>
-<td>§11.4.30/§11.4.84 cleanup; investigate orphan via git history first
-(§11.4.124).</td>
-</tr>
-<tr>
-<td>W10</td>
-<td><code>-script latin</code> produced Cyrillic in translation</td>
-<td>Bug</td>
-<td>Script-normalization gap in unified-translator.</td>
-</tr>
-<tr>
 <td>W11</td>
 <td>Wire more docs_chain contexts (Issues/Fixed/Status once they
 exist)</td>
 <td>Task</td>
 <td>docs_chain proven operational.</td>
-</tr>
-<tr>
-<td>W12</td>
-<td>Challenge scripts use brittle path-counting</td>
-<td>Task</td>
-<td>§11.4.111 — switch to
-<code>git rev-parse --show-toplevel</code>.</td>
 </tr>
 <tr>
 <td>W13</td>
@@ -382,6 +356,23 @@ exist)</td>
 resolved</td>
 <td>Task</td>
 <td>Blocked on W1.</td>
+</tr>
+<tr>
+<td>D1</td>
+<td><code>docs_chain</code> + <code>security</code> CONSTITUTION.md lack
+literal <code>CONST-036</code></td>
+<td>Task</td>
+<td>§11.4.118 discovery. They use §11.4.X cascade scheme (not
+CONST-NNN); challenge doesn’t check them. Governance-design decision
+needed — do NOT blindly inject CONST-NNN (§11.4.6).</td>
+</tr>
+<tr>
+<td>D2</td>
+<td>Intermittent <code>go test ./test/unit/...</code> failure (surfaced
+by anti_bluff challenge step 2)</td>
+<td>Bug</td>
+<td>§11.4.118 discovery + §11.4.50 determinism. One run reached step 4,
+another failed at step 2. Needs systematic-debugging (§11.4.102).</td>
 </tr>
 </tbody>
 </table>
