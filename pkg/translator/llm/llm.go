@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 )
 
 // TranslationConfig holds translation configuration (use from parent package to avoid import cycle)
@@ -107,6 +108,7 @@ func (lt *LLMTranslator) GetStats() translator.TranslationStats {
 // BaseTranslator provides common functionality (local copy to avoid import cycle)
 type BaseTranslator struct {
 	config TranslationConfig
+	mu     sync.RWMutex // guards cache and stats for concurrent Translate callers
 	stats  TranslationStats
 	cache  map[string]string
 }
@@ -130,11 +132,15 @@ func NewBaseTranslator(config TranslationConfig) *BaseTranslator {
 
 // GetStats returns translation statistics
 func (bt *BaseTranslator) GetStats() TranslationStats {
+	bt.mu.RLock()
+	defer bt.mu.RUnlock()
 	return bt.stats
 }
 
 // CheckCache checks if translation is cached
 func (bt *BaseTranslator) CheckCache(text string) (string, bool) {
+	bt.mu.Lock()
+	defer bt.mu.Unlock()
 	if translated, ok := bt.cache[text]; ok {
 		bt.stats.Cached++
 		return translated, true
@@ -144,11 +150,15 @@ func (bt *BaseTranslator) CheckCache(text string) (string, bool) {
 
 // AddToCache adds a translation to cache
 func (bt *BaseTranslator) AddToCache(original, translated string) {
+	bt.mu.Lock()
+	defer bt.mu.Unlock()
 	bt.cache[original] = translated
 }
 
 // UpdateStats updates translation statistics
 func (bt *BaseTranslator) UpdateStats(success bool) {
+	bt.mu.Lock()
+	defer bt.mu.Unlock()
 	bt.stats.Total++
 	if success {
 		bt.stats.Translated++
