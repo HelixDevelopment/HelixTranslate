@@ -72,10 +72,25 @@ func (h *VerifierHandler) listVerifiedModels(c *gin.Context) {
 		return
 	}
 
-	// Filter to only verified models with positive scores
+	// Filter to only verified models with positive scores.
+	//
+	// The LLMsVerifier server's /api/models envelope (the SSOT) reports a
+	// model's authoritative state as VerificationStatus=="verified" + a
+	// numeric OverallScore, and does NOT carry the richer CanSeeCode /
+	// AffirmativeResponse / per-component-score signals (those are populated
+	// only on the forward-compatible bare-api.Model payload). Enforcing
+	// !CanSeeCode || !AffirmativeResponse unconditionally rejected EVERY
+	// real server-envelope model (they decode with both flags false),
+	// serving an empty list to clients despite N verified models upstream.
+	// Fix: only apply the rich CanSeeCode/AffirmativeResponse gate to
+	// payloads that actually carry the rich signal; server-envelope models
+	// are admitted on their authoritative verified status + score threshold.
 	var result []gin.H
 	for _, m := range models {
-		if m.VerificationStatus != "verified" || !m.CanSeeCode || !m.AffirmativeResponse {
+		if m.VerificationStatus != "verified" {
+			continue
+		}
+		if modelCarriesRichSignal(m) && (!m.CanSeeCode || !m.AffirmativeResponse) {
 			continue
 		}
 		if m.OverallScore <= h.config.MinScoreThreshold {
@@ -97,6 +112,17 @@ func (h *VerifierHandler) listVerifiedModels(c *gin.Context) {
 		"models": result,
 		"count":  len(result),
 	})
+}
+
+// modelCarriesRichSignal reports whether a verified model carries the richer
+// per-component verification signals that the bare-api.Model payload provides
+// but the LLMsVerifier server envelope omits. When true, the stricter
+// CanSeeCode/AffirmativeResponse gate is meaningful; when false (server
+// envelope), the model is admitted on its authoritative verified status.
+func modelCarriesRichSignal(m verifier.Model) bool {
+	return m.CanSeeCode || m.AffirmativeResponse ||
+		m.ResponsivenessScore > 0 || m.CodeCapabilityScore > 0 ||
+		m.FeatureRichnessScore > 0 || m.ReliabilityScore > 0
 }
 
 // getVerifiedModel returns details for a single verified model.
