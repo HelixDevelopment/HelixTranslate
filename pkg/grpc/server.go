@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -120,23 +122,55 @@ func NewServer(eventBus *events.EventBus, logger logger.Logger, translator CoreT
 
 // StartTranslation starts a new translation job
 func (s *Server) StartTranslation(ctx context.Context, req *proto.TranslationRequest) (*proto.TranslationResponse, error) {
+	// Validate the request BEFORE touching any of its sub-messages. In proto3
+	// every message field (provider_config, options) is optional on the wire, so
+	// a client can legitimately send a request with provider_config unset. The
+	// old code dereferenced req.ProviderConfig.Type in the opening log call,
+	// which panicked on a nil ProviderConfig — and grpc-go registers no panic
+	// recovery here, so a single malformed request crashed the serving goroutine
+	// (a remote-trigger DoS). Reject malformed input cleanly with InvalidArgument.
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "translation request is required")
+	}
+	if req.SessionId == "" {
+		return nil, status.Error(codes.InvalidArgument, "session_id is required")
+	}
+	if req.ProviderConfig == nil {
+		return &proto.TranslationResponse{
+			SessionId: req.SessionId,
+			Status:    "error",
+			Message:   "provider_config is required",
+		}, status.Error(codes.InvalidArgument, "provider_config is required")
+	}
+
 	s.logger.Info("Starting translation request", map[string]interface{}{
 		"session_id": req.SessionId,
 		"input_file": req.InputFile,
 		"provider":   req.ProviderConfig.Type,
 	})
 
-	// Check session limits
-	s.sessionsMutex.RLock()
-	activeCount := len(s.sessions)
-	s.sessionsMutex.RUnlock()
-
-	if activeCount >= s.config.MaxConcurrentTranslations {
+	// Check session limits AND reserve the session id atomically under a single
+	// write lock. The previous code checked the count under an RLock and inserted
+	// under a separate Lock, so two concurrent requests could both pass the gate
+	// (TOCTOU). It also overwrote an existing session with the same id WITHOUT
+	// cancelling the prior session's CancelFunc — leaking that session's timeout
+	// context (a live timer/goroutine) and orphaning its background translation.
+	s.sessionsMutex.Lock()
+	if _, dup := s.sessions[req.SessionId]; dup {
+		s.sessionsMutex.Unlock()
+		return &proto.TranslationResponse{
+			SessionId: req.SessionId,
+			Status:    "error",
+			Message:   "Translation session already exists",
+		}, status.Errorf(codes.AlreadyExists, "translation session already exists: %s", req.SessionId)
+	}
+	if len(s.sessions) >= s.config.MaxConcurrentTranslations {
+		s.sessionsMutex.Unlock()
 		return &proto.TranslationResponse{
 			SessionId: req.SessionId,
 			Status:    "error",
 			Message:   "Maximum concurrent translations reached",
-		}, fmt.Errorf("maximum concurrent translations (%d) reached", s.config.MaxConcurrentTranslations)
+		}, status.Errorf(codes.ResourceExhausted, "maximum concurrent translations (%d) reached", s.config.MaxConcurrentTranslations)
 	}
 
 	// Create session context with timeout
@@ -157,8 +191,8 @@ func (s *Server) StartTranslation(ctx context.Context, req *proto.TranslationReq
 		Files:      make([]*proto.GeneratedFile, 0),
 	}
 
-	// Store session
-	s.sessionsMutex.Lock()
+	// Store session (still under the same write lock — the gate above already
+	// proved this id is free and the slot is available).
 	s.sessions[req.SessionId] = session
 	s.sessionsMutex.Unlock()
 
