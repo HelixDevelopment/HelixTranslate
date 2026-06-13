@@ -159,7 +159,7 @@ func (p *SSHPool) GetConnection(workerID string) (*SSHConnection, error) {
 
 	// Check if we have an existing connection
 	if conn, exists := p.connections[workerID]; exists {
-		conn.LastUsed = time.Now()
+		conn.touch() // guard LastUsed under conn.mu (see touch)
 		return conn, nil
 	}
 
@@ -279,11 +279,26 @@ func appendToKnownHosts(filename, hostname string, key ssh.PublicKey) error {
 	return nil
 }
 
-// ExecuteCommand executes a command on a remote worker
-func (conn *SSHConnection) ExecuteCommand(ctx context.Context, command string) ([]byte, error) {
+// touch updates LastUsed under conn.mu. LastUsed is shared between the pool
+// (GetConnection/cleanup) and the connection (ExecuteCommand); it MUST be
+// accessed under conn.mu everywhere or the two access sites race on it.
+func (conn *SSHConnection) touch() {
 	conn.mu.Lock()
 	conn.LastUsed = time.Now()
 	conn.mu.Unlock()
+}
+
+// idleSince reports how long the connection has been idle, reading LastUsed
+// under conn.mu (consistent with touch).
+func (conn *SSHConnection) idleSince(now time.Time) time.Duration {
+	conn.mu.RLock()
+	defer conn.mu.RUnlock()
+	return now.Sub(conn.LastUsed)
+}
+
+// ExecuteCommand executes a command on a remote worker
+func (conn *SSHConnection) ExecuteCommand(ctx context.Context, command string) ([]byte, error) {
+	conn.touch()
 
 	if conn.Client == nil {
 		return nil, fmt.Errorf("SSH client is not initialized")
@@ -360,7 +375,7 @@ func (p *SSHPool) cleanup() {
 			p.mu.Lock()
 			now := time.Now()
 			for id, conn := range p.connections {
-				if now.Sub(conn.LastUsed) > p.maxIdleTime {
+				if conn.idleSince(now) > p.maxIdleTime { // read LastUsed under conn.mu
 					if conn.Client != nil {
 						conn.Client.Close()
 					}

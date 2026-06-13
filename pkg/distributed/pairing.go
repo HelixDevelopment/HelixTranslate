@@ -340,9 +340,14 @@ func (pm *PairingManager) checkServiceHealth(workerID string, service *RemoteSer
 	}
 	defer resp.Body.Close()
 
-	// Service is online
+	// Service is reachable. Preserve the "paired" status — a successful health
+	// check must NOT demote a paired worker to "online", otherwise
+	// GetPairedServices() (which filters by Status == "paired") would silently
+	// drop it after the first health-check tick, losing work distribution.
 	wasOffline := service.Status == "offline"
-	service.Status = "online"
+	if service.Status != "paired" {
+		service.Status = "online"
+	}
 	service.LastSeen = time.Now()
 
 	if wasOffline {

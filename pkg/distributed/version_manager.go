@@ -488,6 +488,7 @@ type VersionManager struct {
 	alerts       []*DriftAlert
 	alertManager *AlertManager
 	versionCache map[string]*VersionCacheEntry // workerID -> cached version info
+	cacheMu      sync.RWMutex                  // guards versionCache (BatchUpdateWorkers calls CheckWorkerVersion concurrently)
 	cacheTTL     time.Duration
 	baseURL      string // For testing: override the URL construction
 }
@@ -613,8 +614,12 @@ func (vm *VersionManager) SetBaseURL(baseURL string) {
 
 // CheckWorkerVersion checks if a worker's version matches the local version
 func (vm *VersionManager) CheckWorkerVersion(ctx context.Context, service *RemoteService) (bool, error) {
-	// Check cache first
-	if cached, exists := vm.versionCache[service.WorkerID]; exists && time.Since(cached.Timestamp) < cached.TTL {
+	// Check cache first (cacheMu guards versionCache against concurrent
+	// CheckWorkerVersion goroutines spawned by BatchUpdateWorkers).
+	vm.cacheMu.RLock()
+	cached, exists := vm.versionCache[service.WorkerID]
+	vm.cacheMu.RUnlock()
+	if exists && time.Since(cached.Timestamp) < cached.TTL {
 		// Use cached version
 		service.Version = cached.VersionInfo
 		isUpToDate := vm.compareVersions(vm.localVersion, cached.VersionInfo)
@@ -666,11 +671,13 @@ func (vm *VersionManager) CheckWorkerVersion(ctx context.Context, service *Remot
 	}
 
 	// Update cache
+	vm.cacheMu.Lock()
 	vm.versionCache[service.WorkerID] = &VersionCacheEntry{
 		VersionInfo: workerVersion,
 		Timestamp:   time.Now(),
 		TTL:         vm.cacheTTL,
 	}
+	vm.cacheMu.Unlock()
 
 	// Update service with version info
 	service.Version = workerVersion
@@ -1295,7 +1302,9 @@ func (r *BatchUpdateResult) GetSummary() string {
 
 // ClearCache clears the version check cache
 func (vm *VersionManager) ClearCache() {
+	vm.cacheMu.Lock()
 	vm.versionCache = make(map[string]*VersionCacheEntry)
+	vm.cacheMu.Unlock()
 }
 
 // SetCacheTTL sets the cache TTL for version checks
@@ -1307,6 +1316,7 @@ func (vm *VersionManager) SetCacheTTL(ttl time.Duration) {
 
 // GetCacheStats returns cache statistics
 func (vm *VersionManager) GetCacheStats() map[string]interface{} {
+	vm.cacheMu.RLock()
 	totalEntries := len(vm.versionCache)
 	now := time.Now()
 	validEntries := 0
@@ -1319,6 +1329,7 @@ func (vm *VersionManager) GetCacheStats() map[string]interface{} {
 			expiredEntries++
 		}
 	}
+	vm.cacheMu.RUnlock()
 
 	return map[string]interface{}{
 		"total_entries":   totalEntries,
