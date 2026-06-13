@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
 
 // Language represents a language with its codes
@@ -137,10 +138,14 @@ func (d *Detector) detectHeuristic(text string) Language {
 		return English // default
 	}
 
-	// Sample first 1000 characters
+	// Sample first 1000 characters (runes, not bytes — a byte slice would split a
+	// multi-byte rune at the boundary, feed invalid UTF-8 into the classifier, and
+	// systematically under-count trailing multi-byte scripts (Cyrillic/CJK/Arabic),
+	// flipping detection of genuinely non-Latin documents to English.
 	sample := text
-	if len(text) > 1000 {
-		sample = text[:1000]
+	if utf8.RuneCountInString(text) > 1000 {
+		runes := []rune(text)
+		sample = string(runes[:1000])
 	}
 
 	// Count character types

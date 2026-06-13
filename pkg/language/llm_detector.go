@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 // SimpleLLMDetector implements LLM-based language detection
@@ -58,10 +59,12 @@ func (d *SimpleLLMDetector) DetectLanguage(ctx context.Context, text string) (st
 		return "", fmt.Errorf("empty text provided")
 	}
 
-	// Sample text (first 500 characters)
+	// Sample text (first 500 characters). Truncate by runes, not bytes — a byte
+	// slice would split a multi-byte rune and send invalid UTF-8 in the prompt.
 	sample := text
-	if len(text) > 500 {
-		sample = text[:500]
+	if utf8.RuneCountInString(text) > 500 {
+		runes := []rune(text)
+		sample = string(runes[:500])
 	}
 
 	// Create prompt for language detection
@@ -266,9 +269,12 @@ func (d *SimpleLLMDetector) callZhipu(ctx context.Context, prompt string) (strin
 func FormatLanguageCode(code string) string {
 	code = strings.TrimSpace(strings.ToLower(code))
 
-	// Handle common variations
-	if len(code) > 2 {
-		code = code[:2]
+	// Keep the first 2 runes (ISO 639-1 prefix). Truncate by runes, not bytes —
+	// a byte slice (code[:2]) would split a multi-byte first character (e.g. an
+	// LLM echoing "中文" or "Русский") and return invalid UTF-8.
+	if utf8.RuneCountInString(code) > 2 {
+		runes := []rune(code)
+		code = string(runes[:2])
 	}
 
 	return code
