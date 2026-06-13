@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>commit_all.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="commit_all.sh-companion-guide">commit_all.sh — companion
+guide</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-13T00:00:00Z</p>
+<h2 id="overview">Overview</h2>
+<p><code>scripts/commit_all.sh</code> is the project’s <strong>single
+authorised commit + push entry point</strong> for the main repo,
+mandated by Constitution §11.4.22 (document-sync / official commit
+wrapper) and the “MANDATORY COMMIT &amp; PUSH CONSTRAINTS” section of
+<code>CLAUDE.md</code> (“NEVER use <code>git add</code>,
+<code>git commit</code>, or <code>git push</code> directly”).</p>
+<p>It mechanically encodes the git discipline the inherited Helix
+Constitution requires, so the conductor never enforces it by hand.
+Companion to §11.4.18 (script documentation) and validated by
+<code>scripts/commit_all_selftest.sh</code> (§11.4.27 / §11.4.85
+anti-bluff).</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li><code>bash</code> and <code>git</code> on <code>PATH</code>.</li>
+<li>A configured git identity (<code>user.name</code>,
+<code>user.email</code>).</li>
+<li>Remotes configured (this repo’s remotes resolve to two distinct push
+URLs: <code>git@github.com:milos85vasic/Translator.git</code> and
+<code>git@github.com:HelixDevelopment/HelixTranslate.git</code>).</li>
+<li><code>flock</code> is used when present; on macOS (no
+<code>flock</code>) an atomic <code>mkdir</code> lock is used
+instead.</li>
+</ul>
+<h2 id="usage-examples">Usage examples</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Commit explicit paths and push synchronously (default) to every distinct push URL:</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/commit_all.sh</span> <span class="at">-m</span> <span class="st">&quot;feat(fb2): preserve tail text in nested elements&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    pkg/fb2/parser.go pkg/ebook/fb2_parser.go</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Commit + detached background push (releases the commit lock immediately,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># orchestrator exit reports COMMIT success per §11.4.88):</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/commit_all.sh</span> <span class="at">-m</span> <span class="st">&quot;docs: update architecture notes&quot;</span> <span class="at">--background</span> docs/ARCHITECTURE.md</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Commit only, no push (staging-only / offline):</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/commit_all.sh</span> <span class="at">-m</span> <span class="st">&quot;wip: local checkpoint&quot;</span> <span class="at">--no-push</span> pkg/translator/llm/openai.go</span></code></pre></div>
+<h3 id="flags">Flags</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-m, --message &lt;msg&gt;</code></td>
+<td>Commit message (<strong>required</strong>).</td>
+</tr>
+<tr>
+<td><code>--sync-push</code></td>
+<td>Push synchronously, report push exit code
+(<strong>default</strong>).</td>
+</tr>
+<tr>
+<td><code>--background</code></td>
+<td>Detached push (<code>nohup &amp;</code>+<code>disown</code>); exit
+reports the COMMIT result.</td>
+</tr>
+<tr>
+<td><code>--no-push</code></td>
+<td>Commit only; do not push.</td>
+</tr>
+<tr>
+<td><code>&lt;pathspec&gt;...</code></td>
+<td><strong>Explicit</strong> paths to stage. At least one
+required.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="exit-codes">Exit codes</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>Commit succeeded (and, in <code>--sync-push</code>, push
+succeeded).</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>Usage error / forbidden flag / no pathspec / mutation residue /
+non-fast-forward STOP.</td>
+</tr>
+<tr>
+<td><code>3</code></td>
+<td>Nothing staged to commit (informational, mirrors §11.4.22).</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>Unexpected git failure (commit failed, or a sync push partially
+failed).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="constitutional-discipline-encoded">Constitutional discipline
+encoded</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Mechanism in the script</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>§11.4.113</strong> absolute no-force-push</td>
+<td><code>reject_force_tokens</code> (run on the whole argv first)
+refuses <code>--force</code>, <code>--force-with-lease[=…]</code>,
+<code>-f</code>, and any leading-<code>+</code> refspec. The push step
+passes an explicit <code>&lt;branch&gt;:&lt;branch&gt;</code> refspec
+with <strong>no</strong> <code>--force</code>.</td>
+</tr>
+<tr>
+<td><strong>§2.1</strong> multi-upstream push</td>
+<td><code>collect_push_remotes</code> enumerates every remote’s push
+URLs and <strong>de-duplicates by URL</strong>, so each physical repo is
+pushed exactly once (the 5 remote/URL entries collapse to the 2 distinct
+repos).</td>
+</tr>
+<tr>
+<td><strong>§11.4.71 / §11.4.113</strong> fetch-before-push +
+fast-forward-only</td>
+<td><code>push_one</code> runs <code>git fetch &lt;remote&gt;</code>
+first; if the remote-tracking branch is <strong>not</strong> an ancestor
+of <code>HEAD</code>, it <strong>STOPs</strong> (exit 2) and tells the
+operator to integrate manually — it never auto-merges and never
+force-pushes.</td>
+</tr>
+<tr>
+<td><strong>§11.4.84</strong> working-tree quiescence</td>
+<td><code>quiescence_check</code> greps the staged scope for mutation
+markers (<code>MUTATED for paired</code>, <code>// always pass</code>,
+<code>_mutated_</code>, conflict markers) and ABORTs (exit 2) on any
+unaccounted hit.</td>
+</tr>
+<tr>
+<td><strong>§11.4.30</strong> never <code>git add -A</code>; never
+<code>helix_qa</code></td>
+<td>Requires ≥1 explicit pathspec (refuses none); explicitly rejects
+<code>-A</code> / <code>--all</code> / <code>.</code> / <code>:/</code>;
+and refuses the <code>helix_qa</code> submodule path in any
+spelling.</td>
+</tr>
+<tr>
+<td><strong>§11.4.88</strong> background push + early lock release</td>
+<td>The <code>.git/.commit_all.lock</code> is released the instant
+<code>git commit</code> returns 0 (before any push).
+<code>--background</code> detaches the push via
+<code>nohup … &amp; ; disown</code>, logging to
+<code>.git/commit_all.push.&lt;ts&gt;.log</code>.</td>
+</tr>
+<tr>
+<td><strong>§11.4.67</strong> target-shell parseable</td>
+<td><code>#!/usr/bin/env bash</code>, <code>set -euo pipefail</code>,
+passes both <code>bash -n</code> and <code>sh -n</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="edge-cases">Edge cases</h2>
+<ul>
+<li><strong>Nothing to commit</strong> → exit 3 (not an error); the lock
+is released, no push.</li>
+<li><strong>Non-fast-forward</strong> on any remote → STOP (exit 2); the
+local commit is already durable. Integrate with <code>git fetch</code> +
+merge-onto-latest-<code>&lt;branch&gt;</code> and re-run.</li>
+<li><strong>Partial sync-push failure</strong> → exit 1, but the SUMMARY
+notes the commit is durable locally.</li>
+<li><strong>Hooks</strong> are never skipped — the wrapper never passes
+<code>--no-verify</code>.</li>
+</ul>
+<h2 id="internal-behaviour">Internal behaviour</h2>
+<ol type="1">
+<li>Guard argv for force tokens (§11.4.113) <strong>before</strong>
+option parsing.</li>
+<li>Parse flags + pathspecs; enforce §11.4.30 (explicit-only, no
+<code>helix_qa</code>).</li>
+<li>Locate repo root (override via <code>COMMIT_ALL_REPO_ROOT</code>),
+verify it is a git repo.</li>
+<li>§11.4.84 quiescence scan of the staged scope.</li>
+<li>Acquire the commit lock, stage the explicit pathspecs, create one
+commit.</li>
+<li>Release the lock immediately (§11.4.88).</li>
+<li>Sync or background push, fast-forward-only, to every distinct push
+URL (§2.1).</li>
+</ol>
+<h3 id="test-environment-overrides">Test / environment overrides</h3>
+<ul>
+<li><code>COMMIT_ALL_REPO_ROOT</code> — point at a throwaway repo (used
+by the self-test).</li>
+<li><code>COMMIT_ALL_REMOTE</code> — restrict pushes to one named remote
+(self-test uses a local bare remote so <strong>no real remote is ever
+touched</strong>).</li>
+</ul>
+<h2 id="related-scripts">Related scripts</h2>
+<ul>
+<li><code>scripts/commit_all_selftest.sh</code> — hermetic anti-bluff
+test (builds a throwaway repo + local bare remote under
+<code>$TMPDIR</code>, asserts every guard fires; <strong>no real
+push</strong>).</li>
+<li><code>scripts/no-silent-skips.sh</code>,
+<code>scripts/testing/meta_test_constitution_inheritance.sh</code> —
+sibling Definition-of-Done / constitution-inheritance enforcement
+scripts.</li>
+</ul>
+<h2 id="last-verified">Last verified</h2>
+<p>2026-06-13 — <code>bash -n</code> + <code>sh -n</code> clean;
+self-test <code>PASS=13 FAIL=0</code>.</p>
+</body>
+</html>

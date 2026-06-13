@@ -322,8 +322,11 @@ func (c *MultiLLMCoordinator) TranslateWithRetry(
 		lastErr = err
 		c.emitWarning(fmt.Sprintf("Translation failed with %s: %v", instance.ID, err))
 
-		// Mark instance as temporarily unavailable if rate limited
-		if strings.Contains(err.Error(), "rate limit") || strings.Contains(err.Error(), "429") {
+		// Mark instance as temporarily unavailable if rate limited.
+		// Guard against a nil err: a provider may return ("", nil) (empty
+		// result, no error), which is treated as a failure above but must not
+		// cause a nil-pointer dereference on err.Error() here.
+		if err != nil && (strings.Contains(err.Error(), "rate limit") || strings.Contains(err.Error(), "429")) {
 			instance.Available = false
 			go c.reenableInstanceAfterDelay(instance, 30*time.Second)
 		}
