@@ -1,10 +1,26 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 21
-**Last modified:** 2026-06-13T23:15:00Z
+**Revision:** 22
+**Last modified:** 2026-06-14T00:05:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
+
+<!-- session 2026-06-13e: parallel bug-hunt wave 3 + FULL-REPO SWEEP GREEN (HEAD 8d0b1b6) -->
+
+### Session 2026-06-13e — bug-hunt wave 3 + full-repo sweep GREEN (HEAD 8d0b1b6) — 7 real bugs + 2 interaction-defect reconciliations; `go test ./...` = 54 ok / 0 FAIL offline
+
+Mode: §11.4.126 autonomous loop + §11.4.103 4 parallel subagents (grpc · security · ebook html/docx · hardware/version/progress) + conductor verify-then-commit. Then a full-repo `go test ./...` sweep (§11.4.40-style interaction check) caught 2 latent defects, both reconciled. 6 commits (6e1b1f2..8d0b1b6) pushed FF.
+
+- **6e1b1f2** — grpc 2 bugs: StartTranslation deref'd req.ProviderConfig.Type unconditionally (proto3 optional → nil panic, no grpc recovery → remote-DoS CRASH the serving goroutine) → validate up front, InvalidArgument; session-limit TOCTOU (RLock-check then Lock-insert) + duplicate SessionId silently overwrote prior session WITHOUT CancelFunc (timeout-context leak + orphaned translation) → atomic gate+reserve, AlreadyExists. Mutation-proven over bufconn, -race ×2.
+- **96999b3** — security: AuthenticateUser checked IsActive BEFORE password → username/account-status enumeration oracle (CWE-204; API maps to 403 vs 401) on the live login path → validate password FIRST, disclose inactive only with correct password. Also fixed a §11.4.1 JWT-tamper test FAIL-bluff (mutated last sig char, ~1/64 flaky → first char, 200/200). RED(exploit)→GREEN→mutation, -race ×3, downstream pkg/api green.
+- **95323d8** — ebook HTML: td/th/dt/dd cells concatenated with no separator ('cell Acell B') + <br> dropped ('line oneline two') → isCellElement newline + <br> newline. Mutation-proven. HONEST PENDING_FORENSICS: DOCX parser depends on license-gated unioffice → non-functional for real DOCX (go.mod-scope, not fixed).
+- **044bacb** — hardware: vm_stat malformed page-size discarded parse error → 0 available RAM → guard (err==nil && >0); meminfo kB*1024 uint64 overflow wrap → maxKB guard. progress: GetProgress clobbered Complete()'s 'Completed' ETA → gate override on <100% && status!='completed'. Mutation-proven.
+- **8d0b1b6** — full-sweep interaction reconciliations (§11.4.120/§11.4.98): test/unit scoring expectations updated to the FIXED weight formula (0.78→0.675, 0.625→0.5, math-verified, not a revert); cmd/cli TestTranslateEbookFunction/with_app_config dialed real Qwen (env-dependent) → honest §11.4.3 SKIP when no provider key.
+
+**STABILITY MILESTONE:** `go test ./... -count=1` with ALL provider env unset = **54 ok / 0 FAIL / 24 no-test-files**, deterministic offline. `go build ./...` exit 0. Evidence: qa-results/full_sweep/fullsweep_20260613T225207.log. Session total this run: 26 real bugs (waves 1+2+3) + 2 reconciliations, all reproduce-first + mutation-proven + conductor-reverified + pushed FF (no force §11.4.113).
+
+Next-wave queue (disjoint, autonomous-safe): internal/services, internal/config, internal/cache, pkg/translator (deeper, non-llm), pkg/distributed (deeper pure-logic), cmd more. Carry-over latent (review-gated, NOT autonomously fixed): storage dup-tuple unique-index; DOCX unioffice license (go.mod); security RefreshToken re-validate. Operator-gated: G1/G2/G3.
 
 <!-- session 2026-06-13d: parallel subagent bug-hunt wave 2 (HEAD 39ee07a) -->
 
