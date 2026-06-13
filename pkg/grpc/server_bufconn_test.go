@@ -544,6 +544,53 @@ func TestSubscribeEvents_ReceivesBusEventFilteredByType(t *testing.T) {
 	}
 }
 
+// TestSubscribeEvents_NoHandlerLeakAfterStreamEnds proves the gRPC runtime
+// signature of the Unsubscribe fix on the real wire path: when a SubscribeEvents
+// stream ends (client cancels), the server removes its event-bus handler instead
+// of leaking it. Before the fix SubscribeEvents called SubscribeAll with no way
+// to deregister, so every stream permanently appended a dead handler to the bus
+// — invoked (and a send-on-closed panic recovered) on every future Publish,
+// growing unbounded on a long-running server.
+func TestSubscribeEvents_NoHandlerLeakAfterStreamEnds(t *testing.T) {
+	h := newTestHarness(t, nil, nil)
+
+	if got := h.server.eventBus.HandlerCount(); got != 0 {
+		t.Fatalf("baseline HandlerCount = %d, want 0", got)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	if _, err := h.client.SubscribeEvents(ctx, &proto.EventSubscriptionRequest{
+		ClientId: "leak-client",
+	}); err != nil {
+		cancel()
+		t.Fatalf("SubscribeEvents open: %v", err)
+	}
+
+	// wait for the server's SubscribeAll registration to land
+	deadline := time.Now().Add(2 * time.Second)
+	for h.server.eventBus.HandlerCount() == 0 && time.Now().Before(deadline) {
+		time.Sleep(10 * time.Millisecond)
+	}
+	if got := h.server.eventBus.HandlerCount(); got != 1 {
+		cancel()
+		t.Fatalf("after stream open: HandlerCount = %d, want 1 (handler should be registered)", got)
+	}
+
+	// end the stream: the server goroutine returns via ctx.Done() and runs its
+	// deferred Unsubscribe.
+	cancel()
+
+	// poll until the handler is removed (bounded — cancellation propagates over
+	// bufconn asynchronously).
+	deadline = time.Now().Add(3 * time.Second)
+	for h.server.eventBus.HandlerCount() != 0 && time.Now().Before(deadline) {
+		time.Sleep(10 * time.Millisecond)
+	}
+	if got := h.server.eventBus.HandlerCount(); got != 0 {
+		t.Fatalf("after stream cancel: HandlerCount = %d, want 0 (handler leaked)", got)
+	}
+}
+
 // closeStreamSanity ensures a stream over bufconn terminates cleanly when the
 // client context is cancelled (exercises the ctx.Done() path).
 func TestStream_ClientCancel_TerminatesCleanly(t *testing.T) {

@@ -177,16 +177,19 @@ func (s *Server) StartTranslation(ctx context.Context, req *proto.TranslationReq
 
 // GetTranslationStatus returns the current status of a translation
 func (s *Server) GetTranslationStatus(ctx context.Context, req *proto.TranslationStatusRequest) (*proto.TranslationStatusResponse, error) {
+	// Snapshot the session fields under the read lock into a LOCAL response. The
+	// background runTranslation / CancelTranslation paths mutate these fields
+	// under the same lock, so the snapshot is race-free. The slow
+	// translator.GetStatus call below runs AFTER the lock is released (no I/O
+	// under the lock). We deliberately do NOT write session.Response from this
+	// read RPC — that was an unsynchronized shared write.
 	s.sessionsMutex.RLock()
 	session, exists := s.sessions[req.SessionId]
-	s.sessionsMutex.RUnlock()
-
 	if !exists {
+		s.sessionsMutex.RUnlock()
 		return nil, fmt.Errorf("translation session not found: %s", req.SessionId)
 	}
-
-	// Update status response
-	session.Response = &proto.TranslationStatusResponse{
+	resp := &proto.TranslationStatusResponse{
 		SessionId:          session.ID,
 		Status:             session.Status,
 		ProgressPercentage: session.Progress,
@@ -196,34 +199,43 @@ func (s *Server) GetTranslationStatus(ctx context.Context, req *proto.Translatio
 		Files:              session.Files,
 		Steps:              session.Steps,
 	}
+	s.sessionsMutex.RUnlock()
 
-	// Try to get status from core translator
+	// Try to get status from core translator (no lock held — may do I/O).
 	if coreStatus, err := s.translator.GetStatus(req.SessionId); err == nil {
-		session.Response.Status = coreStatus.Status
-		session.Response.ProgressPercentage = coreStatus.ProgressPercentage
-		session.Response.CurrentStep = coreStatus.CurrentStep
-		session.Response.EstimatedCompletion = coreStatus.EstimatedCompletion
-		session.Response.Files = coreStatus.Files
-		session.Response.Steps = coreStatus.Steps
+		resp.Status = coreStatus.Status
+		resp.ProgressPercentage = coreStatus.ProgressPercentage
+		resp.CurrentStep = coreStatus.CurrentStep
+		resp.EstimatedCompletion = coreStatus.EstimatedCompletion
+		resp.Files = coreStatus.Files
+		resp.Steps = coreStatus.Steps
 	}
 
-	return session.Response, nil
+	return resp, nil
 }
 
 // ListTranslations returns all translation sessions
 func (s *Server) ListTranslations(ctx context.Context, _ *emptypb.Empty) (*proto.TranslationListResponse, error) {
+	// Snapshot session IDs under the read lock, then release it BEFORE calling
+	// GetTranslationStatus (which takes the read lock itself). Holding the lock
+	// across that call is a recursive read-lock that can deadlock if a writer
+	// arrives between the two acquisitions.
 	s.sessionsMutex.RLock()
-	defer s.sessionsMutex.RUnlock()
-
-	translations := make([]*proto.TranslationStatusResponse, 0, len(s.sessions))
-
+	ids := make([]string, 0, len(s.sessions))
 	for _, session := range s.sessions {
+		ids = append(ids, session.ID)
+	}
+	s.sessionsMutex.RUnlock()
+
+	translations := make([]*proto.TranslationStatusResponse, 0, len(ids))
+
+	for _, id := range ids {
 		status, err := s.GetTranslationStatus(ctx, &proto.TranslationStatusRequest{
-			SessionId: session.ID,
+			SessionId: id,
 		})
 		if err != nil {
 			s.logger.Warn("Failed to get session status", map[string]interface{}{
-				"session_id": session.ID,
+				"session_id": id,
 				"error":      err.Error(),
 			})
 			continue
@@ -269,9 +281,12 @@ func (s *Server) CancelTranslation(ctx context.Context, req *proto.CancelTransla
 		})
 	}
 
-	// Update session status
+	// Update session status under the lock (the fields are read concurrently by
+	// GetTranslationStatus / ListTranslations).
+	s.sessionsMutex.Lock()
 	session.Status = "cancelled"
 	session.UpdatedAt = time.Now()
+	s.sessionsMutex.Unlock()
 
 	// Emit cancellation event
 	s.emitProgressEvent(session.ID, "cancelled", "", 0, "Translation cancelled: "+req.Reason, nil)
@@ -361,7 +376,7 @@ func (s *Server) SubscribeEvents(req *proto.EventSubscriptionRequest, stream pro
 	eventChan := make(chan *proto.SystemEvent, 100)
 
 	// Subscribe to event bus
-	s.eventBus.SubscribeAll(func(event events.Event) {
+	subID := s.eventBus.SubscribeAll(func(event events.Event) {
 		// Filter by event types if specified
 		if len(req.EventTypes) > 0 {
 			found := false
@@ -398,10 +413,15 @@ func (s *Server) SubscribeEvents(req *proto.EventSubscriptionRequest, stream pro
 		}
 	})
 
-	// Clean up on exit
-	defer func() {
-		close(eventChan)
-	}()
+	// Clean up on exit: remove our handler from the bus so it is not leaked and
+	// invoked on every future Publish for the lifetime of the server. We
+	// deliberately do NOT close(eventChan): the handler is removed first, but a
+	// Publish already in flight (it snapshots handlers, then releases the lock)
+	// could still invoke our handler after Unsubscribe returns — sending on a
+	// closed channel would panic. The stream loop below exits via the request
+	// context being cancelled, so the channel never needs closing; it is GC'd
+	// once unreferenced.
+	defer s.eventBus.Unsubscribe(subID)
 
 	// Stream events
 	for {
@@ -428,9 +448,12 @@ func (s *Server) runTranslation(session *TranslationSession) {
 		"session_id": session.ID,
 	})
 
-	// Update status
+	// Update status under the lock (read concurrently by
+	// GetTranslationStatus / ListTranslations).
+	s.sessionsMutex.Lock()
 	session.Status = "running"
 	session.UpdatedAt = time.Now()
+	s.sessionsMutex.Unlock()
 
 	// Emit start event
 	s.emitProgressEvent(session.ID, "started", "", 0, "Translation started", nil)

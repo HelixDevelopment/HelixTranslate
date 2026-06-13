@@ -39,33 +39,92 @@ type Event struct {
 // EventHandler is a function that processes events
 type EventHandler func(event Event)
 
+// SubscriptionID identifies a registered handler so it can be removed via
+// Unsubscribe. The zero value is never returned for a real subscription.
+type SubscriptionID uint64
+
+// subscription pairs a handler with the id used to remove it.
+type subscription struct {
+	id      SubscriptionID
+	handler EventHandler
+}
+
 // EventBus manages event distribution
 type EventBus struct {
 	mu        sync.RWMutex
-	handlers  map[EventType][]EventHandler
-	allEvents []EventHandler
+	handlers  map[EventType][]subscription
+	allEvents []subscription
+	nextID    SubscriptionID
 }
 
 // NewEventBus creates a new event bus
 func NewEventBus() *EventBus {
 	return &EventBus{
-		handlers:  make(map[EventType][]EventHandler),
-		allEvents: make([]EventHandler, 0),
+		handlers:  make(map[EventType][]subscription),
+		allEvents: make([]subscription, 0),
 	}
 }
 
-// Subscribe adds a handler for a specific event type
-func (eb *EventBus) Subscribe(eventType EventType, handler EventHandler) {
+// Subscribe adds a handler for a specific event type and returns a
+// SubscriptionID that can later be passed to Unsubscribe.
+func (eb *EventBus) Subscribe(eventType EventType, handler EventHandler) SubscriptionID {
 	eb.mu.Lock()
 	defer eb.mu.Unlock()
-	eb.handlers[eventType] = append(eb.handlers[eventType], handler)
+	eb.nextID++
+	id := eb.nextID
+	eb.handlers[eventType] = append(eb.handlers[eventType], subscription{id: id, handler: handler})
+	return id
 }
 
-// SubscribeAll adds a handler for all events
-func (eb *EventBus) SubscribeAll(handler EventHandler) {
+// SubscribeAll adds a handler for all events and returns a SubscriptionID that
+// can later be passed to Unsubscribe.
+func (eb *EventBus) SubscribeAll(handler EventHandler) SubscriptionID {
 	eb.mu.Lock()
 	defer eb.mu.Unlock()
-	eb.allEvents = append(eb.allEvents, handler)
+	eb.nextID++
+	id := eb.nextID
+	eb.allEvents = append(eb.allEvents, subscription{id: id, handler: handler})
+	return id
+}
+
+// Unsubscribe removes the handler registered under id from both the
+// type-specific and all-event handler sets. It is safe to call with an unknown
+// or already-removed id (no-op). Without this, a finite-lifetime subscriber
+// (e.g. a gRPC SubscribeEvents stream) would remain registered forever —
+// leaking handlers and invoking them on every future Publish.
+func (eb *EventBus) Unsubscribe(id SubscriptionID) {
+	if id == 0 {
+		return
+	}
+	eb.mu.Lock()
+	defer eb.mu.Unlock()
+	for eventType, subs := range eb.handlers {
+		for i := range subs {
+			if subs[i].id == id {
+				eb.handlers[eventType] = append(subs[:i], subs[i+1:]...)
+				break
+			}
+		}
+	}
+	for i := range eb.allEvents {
+		if eb.allEvents[i].id == id {
+			eb.allEvents = append(eb.allEvents[:i], eb.allEvents[i+1:]...)
+			break
+		}
+	}
+}
+
+// HandlerCount returns the total number of currently-registered handlers
+// (type-specific + all-event). Used to assert that finite-lifetime subscribers
+// are removed and do not leak.
+func (eb *EventBus) HandlerCount() int {
+	eb.mu.RLock()
+	defer eb.mu.RUnlock()
+	n := len(eb.allEvents)
+	for _, subs := range eb.handlers {
+		n += len(subs)
+	}
+	return n
 }
 
 // Publish sends an event to all subscribed handlers.
@@ -93,17 +152,17 @@ func (eb *EventBus) Publish(event Event) {
 	// Copy the handler slices so we can release the lock before invoking them.
 	// append(nil, src...) returns nil for an empty/absent slice, which the
 	// range loops below handle correctly (zero iterations).
-	typeHandlers := append([]EventHandler(nil), eb.handlers[event.Type]...)
-	allHandlers := append([]EventHandler(nil), eb.allEvents...)
+	typeHandlers := append([]subscription(nil), eb.handlers[event.Type]...)
+	allHandlers := append([]subscription(nil), eb.allEvents...)
 	eb.mu.RUnlock()
 
 	// Send to specific handlers, then all-event handlers — synchronously and in
 	// order, each isolated from panics.
-	for _, handler := range typeHandlers {
-		invokeHandler(handler, event)
+	for _, sub := range typeHandlers {
+		invokeHandler(sub.handler, event)
 	}
-	for _, handler := range allHandlers {
-		invokeHandler(handler, event)
+	for _, sub := range allHandlers {
+		invokeHandler(sub.handler, event)
 	}
 }
 
