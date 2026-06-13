@@ -175,8 +175,8 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 11 <strong>Last modified:</strong>
-2026-06-13T19:45:00Z <strong>Purpose:</strong> Single canonical
+<p><strong>Revision:</strong> 12 <strong>Last modified:</strong>
+2026-06-13T20:45:00Z <strong>Purpose:</strong> Single canonical
 out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 /
 §11.4.127). To resume: point a new session at THIS file, run
 <code>git fetch --all</code>, and say <strong>continue</strong>.</p>
@@ -198,7 +198,7 @@ prefixed <code>helix_translate-</code> (§11.4.151). Work subagent-driven
 <h2 id="live-state-anchors-moment-valid">Live state anchors
 (moment-valid)</h2>
 <ul>
-<li><strong>Parent HEAD:</strong> <code>58def2b</code> on
+<li><strong>Parent HEAD:</strong> <code>b8a24f5</code> on
 <code>main</code>; pushed to BOTH <code>milos85vasic/Translator</code> +
 <code>HelixDevelopment/HelixTranslate</code> (verified, fast-forward, no
 force). Session commit chain: b3dc7f9(llm_provider) → e775088 → 8a6af67
@@ -321,9 +321,12 @@ revert→nil-panic). §11.4.147: format+coordination were
 rate-limit-crashed at report stage; conductor verified+adopted their
 work (not lost, not blindly trusted).</li>
 </ul>
-<p><strong>Session total: ~34 items resolved</strong> (+ W15: real
-Postgres+Redis on-demand integration proven; PG connection-pool DoS bug
-found+fixed; containers StartRedis helper added)</p>
+<p><strong>Session total: ~37 items resolved</strong> (+ models bridge
+wiring digital.vasic.models into the system; + D12 REAL CORS auth-bypass
+vuln fixed; + D11 doc)</p>
+<p><strong>Prior: ~34 items</strong> (+ W15: real Postgres+Redis
+on-demand integration proven; PG connection-pool DoS bug found+fixed;
+containers StartRedis helper added)</p>
 <p><strong>Prior: 31 items</strong> (+ wave7: grpc 0→53.3% bufconn, api
 55→62.2% httptest, security +14 adversarial tests — all
 real-protocol/anti-bluff, auth confirmed hardened)</p>
@@ -356,12 +359,13 @@ workable items (queue — many parallelizable, disjoint scope)</h2>
 <tbody>
 <tr>
 <td>W1</td>
-<td><code>Models/</code> divergent <code>types.go</code> (60-line lean
-LLMRequest, absent upstream)</td>
-<td><strong>Operator decision §11.4.122</strong></td>
-<td>Convert needs preserving/discarding the local shape. Not consumed
-(no replace/import). DO NOT silently remove. Deferred — not blocking;
-surface to operator before W16.</td>
+<td><code>Models/</code> (<code>digital.vasic.models</code>) orphan
+module</td>
+<td>RESOLVED-via-bridge</td>
+<td>Operator directed “create bridge”: pkg/modelsbridge now CONSUMES
+digital.vasic.models (go.mod require+replace=&gt;./Models),
+contract-tested 100%, mutation-verified (146b2b5). No longer orphan. W16
+(convert to git submodule) still optional/operator-gated.</td>
 </tr>
 <tr>
 <td>W2</td>
@@ -471,11 +475,20 @@ post-construction). Fix = configurable constructor.</td>
 </tr>
 <tr>
 <td>D11</td>
-<td><code>pkg/security</code> has NO CORS impl despite CLAUDE.md listing
-it</td>
+<td>✅ FIXED (b8a24f5) CLAUDE.md mislocated CORS under pkg/security</td>
 <td>Task</td>
-<td>Doc discrepancy — reconcile (remove from CLAUDE.md or locate/route
-CORS elsewhere).</td>
+<td>Corrected: CORS is server-layer (cmd/server corsMiddleware +
+internal/config).</td>
+</tr>
+<tr>
+<td>D12</td>
+<td>✅ FIXED (b8a24f5) <strong>CORS auth-bypass vuln</strong></td>
+<td>Bug(security)</td>
+<td>cmd/server corsMiddleware reflected ARBITRARY origin +
+Allow-Credentials:true under default <code>["*"]</code> → any site could
+make credentialed cross-origin requests. Fixed: wildcard→literal
+<code>*</code> no-creds; creds only for specific allowlist. RED→GREEN,
+mutation-verified.</td>
 </tr>
 <tr>
 <td>W14b</td>
