@@ -2,6 +2,8 @@ package storage
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -183,6 +185,12 @@ func (r *RedisStorage) GetStatistics(ctx context.Context) (*Statistics, error) {
 	// Count sessions by status
 	pattern := "session:*"
 	var cursor uint64
+	// durationSessions counts ONLY completed sessions that carry an EndTime —
+	// the divisor for the average duration. Using stats.CompletedSessions here
+	// would wrongly dilute the average with completed-but-unfinished sessions
+	// that contribute no duration (matching the SQL "... WHERE end_time IS NOT
+	// NULL" semantics of the SQLite/PostgreSQL backends).
+	var durationSessions int64
 
 	for {
 		keys, nextCursor, err := r.client.Scan(ctx, cursor, pattern, 100).Result()
@@ -211,10 +219,11 @@ func (r *RedisStorage) GetStatistics(ctx context.Context) (*Statistics, error) {
 				stats.InProgressSessions++
 			}
 
-			// Calculate average duration for completed sessions
+			// Calculate average duration for completed sessions that finished.
 			if session.Status == "completed" && session.EndTime != nil {
 				duration := session.EndTime.Sub(session.StartTime).Seconds()
-				stats.AverageDuration = (stats.AverageDuration*float64(stats.CompletedSessions-1) + duration) / float64(stats.CompletedSessions)
+				stats.AverageDuration, durationSessions = accumulateAvgDuration(
+					stats.AverageDuration, durationSessions, duration)
 			}
 		}
 
@@ -279,11 +288,26 @@ func (r *RedisStorage) makeCacheKey(sourceText, sourceLanguage, targetLanguage, 
 	return fmt.Sprintf("cache:%s:%s:%s:%s:%s", sourceLanguage, targetLanguage, provider, model, hashString(sourceText))
 }
 
-// hashString creates a simple hash of a string (for cache keys)
+// accumulateAvgDuration folds one more duration sample into a running mean.
+// prevAvg/prevN are the mean and sample count BEFORE this sample; it returns
+// the updated mean and count. The divisor is the number of duration samples
+// actually folded in — never the count of all completed sessions — so a
+// completed session with no recorded duration cannot dilute the average.
+func accumulateAvgDuration(prevAvg float64, prevN int64, duration float64) (float64, int64) {
+	n := prevN + 1
+	avg := (prevAvg*float64(prevN) + duration) / float64(n)
+	return avg, n
+}
+
+// hashString creates a collision-resistant hash of a string (for cache keys).
+//
+// A previous implementation used a 32-bit polynomial hash (h = h*31 + c),
+// which has trivial collisions ("Aa"/"BB", "AaAa"/"BBBB", ...) and overflows
+// at 2^32. Because the cache key embeds this hash, a collision made two
+// DISTINCT source texts share a Redis key, so a lookup could return the WRONG
+// translation. sha256 (256-bit, cryptographically collision-resistant) removes
+// that defect; the full hex digest keeps keys unambiguous.
 func hashString(s string) string {
-	h := uint32(0)
-	for _, c := range s {
-		h = h*31 + uint32(c)
-	}
-	return fmt.Sprintf("%08x", h)
+	sum := sha256.Sum256([]byte(s))
+	return hex.EncodeToString(sum[:])
 }

@@ -30,9 +30,9 @@ func TestRedisHashString_Deterministic(t *testing.T) {
 	if a != b {
 		t.Fatalf("hashString not deterministic: %q != %q", a, b)
 	}
-	// Output is the documented 8-hex-digit form.
-	if len(a) != 8 {
-		t.Fatalf("expected 8-char hex hash, got %q (len %d)", a, len(a))
+	// Output is the documented sha256 hex digest form (64 hex chars).
+	if len(a) != 64 {
+		t.Fatalf("expected 64-char sha256 hex hash, got %q (len %d)", a, len(a))
 	}
 	for _, c := range a {
 		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) {
@@ -49,17 +49,17 @@ func TestRedisHashString_DistinctInputs(t *testing.T) {
 	if h1 == h2 {
 		t.Fatalf("distinct inputs collided: hashString(hello)=%s hashString(world)=%s", h1, h2)
 	}
-	// Empty string has a well-defined, stable hash.
-	if got := hashString(""); got != "00000000" {
-		t.Fatalf("empty-string hash changed: got %q want 00000000", got)
+	// Empty string has a well-defined, stable hash (sha256 of empty input).
+	if got := hashString(""); got != "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" {
+		t.Fatalf("empty-string hash changed: got %q", got)
 	}
 }
 
 func TestRedisHashString_KnownVector(t *testing.T) {
-	// Lock the algorithm (h = h*31 + rune) against silent change.
-	// "ab": ('a'=97) -> 97; 97*31 + 98 = 3105 = 0x00000c21
-	if got := hashString("ab"); got != "00000c21" {
-		t.Fatalf("hashString(\"ab\") = %q, want 00000c21 (algorithm changed?)", got)
+	// Lock the algorithm (sha256 hex digest) against silent change.
+	// sha256("ab") is a fixed, well-known vector.
+	if got := hashString("ab"); got != "fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603" {
+		t.Fatalf("hashString(\"ab\") = %q (algorithm changed?)", got)
 	}
 }
 
