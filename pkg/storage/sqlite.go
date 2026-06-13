@@ -337,11 +337,21 @@ func (s *SQLiteStorage) GetStatistics(ctx context.Context) (*Statistics, error) 
 		stats.AverageDuration = avgDuration.Float64
 	}
 
-	// Cache hit rate (approximate based on access count)
+	// Cache hit rate (approximate based on access count).
+	//
+	// access_count counts re-reads (HITS) of an entry AFTER its initial insert;
+	// each distinct entry represents one MISS (the lookup that caused the insert).
+	// The hit rate is therefore hits / (hits + misses) = totalAccess /
+	// (totalAccess + totalTranslations). The previous formula,
+	// (totalAccess - totalTranslations) / totalAccess, went NEGATIVE whenever
+	// entries were inserted but rarely re-read (e.g. 3 entries, 1 hit => -200%),
+	// reporting a nonsensical cache-hit-rate. The corrected formula is always in
+	// [0, 100).
 	var totalAccess sql.NullInt64
 	err = s.db.QueryRowContext(ctx, "SELECT SUM(access_count) FROM translation_cache").Scan(&totalAccess)
 	if err == nil && totalAccess.Valid && totalAccess.Int64 > 0 && stats.TotalTranslations > 0 {
-		stats.CacheHitRate = float64(totalAccess.Int64-stats.TotalTranslations) / float64(totalAccess.Int64) * 100.0
+		denom := float64(totalAccess.Int64 + stats.TotalTranslations)
+		stats.CacheHitRate = float64(totalAccess.Int64) / denom * 100.0
 	}
 
 	return stats, nil

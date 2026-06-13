@@ -265,9 +265,18 @@ func (r *RedisStorage) GetStatistics(ctx context.Context) (*Statistics, error) {
 		}
 	}
 
-	// Calculate cache hit rate
+	// Calculate cache hit rate.
+	//
+	// access_count counts re-reads (HITS) of an entry AFTER its initial insert;
+	// each distinct entry represents one MISS (the lookup that caused the insert).
+	// hit rate = hits / (hits + misses) = totalAccess / (totalAccess +
+	// totalTranslations). The previous (totalAccess - totalTranslations) /
+	// totalAccess formula went NEGATIVE when entries were rarely re-read,
+	// reporting a nonsensical cache-hit-rate. The corrected formula is always in
+	// [0, 100).
 	if totalAccess > 0 && stats.TotalTranslations > 0 {
-		stats.CacheHitRate = float64(totalAccess-stats.TotalTranslations) / float64(totalAccess) * 100.0
+		denom := float64(totalAccess + stats.TotalTranslations)
+		stats.CacheHitRate = float64(totalAccess) / denom * 100.0
 	}
 
 	return stats, nil

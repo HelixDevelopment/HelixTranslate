@@ -346,11 +346,20 @@ func (s *PostgreSQLStorage) GetStatistics(ctx context.Context) (*Statistics, err
 		stats.AverageDuration = avgDuration.Float64
 	}
 
-	// Cache hit rate (approximate based on access count)
+	// Cache hit rate (approximate based on access count).
+	//
+	// access_count counts re-reads (HITS) of an entry AFTER its initial insert;
+	// each distinct entry represents one MISS (the lookup that caused the insert).
+	// hit rate = hits / (hits + misses) = totalAccess / (totalAccess +
+	// totalTranslations). The previous (totalAccess - totalTranslations) /
+	// totalAccess formula went NEGATIVE when entries were rarely re-read,
+	// reporting a nonsensical cache-hit-rate. The corrected formula is always in
+	// [0, 100).
 	var totalAccess sql.NullInt64
 	err = s.db.QueryRowContext(ctx, "SELECT SUM(access_count) FROM translation_cache").Scan(&totalAccess)
 	if err == nil && totalAccess.Valid && totalAccess.Int64 > 0 && stats.TotalTranslations > 0 {
-		stats.CacheHitRate = float64(totalAccess.Int64-stats.TotalTranslations) / float64(totalAccess.Int64) * 100.0
+		denom := float64(totalAccess.Int64 + stats.TotalTranslations)
+		stats.CacheHitRate = float64(totalAccess.Int64) / denom * 100.0
 	}
 
 	return stats, nil
