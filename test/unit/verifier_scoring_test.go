@@ -28,8 +28,12 @@ func TestEngine_CalculateScore(t *testing.T) {
 	assert.Greater(t, score.OverallScore, 0.0)
 	assert.LessOrEqual(t, score.OverallScore, 10.0)
 
-	// Verify weights are applied
-	expected := 0.9*0.20 + 0.8*0.20 + 0.7*0.20 + 0.6*0.25 + 0.5*0.30
+	// Verify weights are applied — each of the five distinct component weights
+	// exactly once, mapped to the CalculateScore parameter order
+	// (responsiveness, codeCapability, featureRichness, reliability, costEfficiency)
+	// -> (ResponseSpeed, Capability, Recency, ModelEfficiency, CostEffectiveness).
+	// = 0.18 + 0.16 + 0.035 + 0.15 + 0.15 = 0.675.
+	expected := 0.9*0.20 + 0.8*0.20 + 0.7*0.05 + 0.6*0.25 + 0.5*0.30
 	assert.InDelta(t, expected, score.OverallScore, 0.0001)
 }
 
@@ -157,6 +161,8 @@ func TestEngine_CalculateScore_Determinism(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, s1.OverallScore, s2.OverallScore)
-	// Weighted sum: 0.5*0.25 + 0.5*0.25 + 0.5*0.25 + 0.5*0.25 + 0.5*0.25 = 0.625
-	assert.InDelta(t, 0.625, s1.OverallScore, 0.0001)
+	// Weighted sum with Recency weight = 0.0 (so the featureRichness term drops):
+	// 0.5*0.25 (ResponseSpeed) + 0.5*0.25 (Capability) + 0.5*0.0 (Recency) +
+	// 0.5*0.25 (ModelEfficiency) + 0.5*0.25 (CostEffectiveness) = 0.5.
+	assert.InDelta(t, 0.5, s1.OverallScore, 0.0001)
 }
