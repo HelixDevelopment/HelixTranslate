@@ -102,8 +102,8 @@ func TestParseNote_DefaultsAndRejection(t *testing.T) {
 			wantNil: true,
 		},
 		{
-			// Note: parseNote only finalizes Content when an IMPLICATIONS: marker
-			// is seen, so a valid note must include it for Content to be retained.
+			// IMPLICATIONS is optional (D5 fixed); Content is retained with or
+			// without it. This case keeps IMPLICATIONS to also exercise that path.
 			name:      "no importance -> defaults to medium",
 			block:     "NOTE: [theme]\nTITLE: Loss\nCONTENT: recurring loss motif\nIMPLICATIONS: preserve motif",
 			wantNil:   false,
@@ -134,6 +134,28 @@ func TestParseNote_DefaultsAndRejection(t *testing.T) {
 				t.Errorf("Title = %q, want %q", note.Title, tt.wantTitle)
 			}
 		})
+	}
+}
+
+// TestParseNote_ContentWithoutImplicationsRetained is the D5 regression guard.
+// A well-formed note (NOTE+TITLE+CONTENT) that omits the OPTIONAL IMPLICATIONS:
+// marker MUST be retained with its Content — the validator treats Content as
+// required and Implications as optional, so a CONTENT-only note is valid.
+// Before the fix, parseNote only finalized note.Content inside the IMPLICATIONS:
+// branch, so this note was silently dropped (returned nil) — a real loss of
+// literary notes whenever the LLM omitted IMPLICATIONS.
+func TestParseNote_ContentWithoutImplicationsRetained(t *testing.T) {
+	nt := &NoteTaker{provider: "test"}
+	block := "NOTE: [theme]\nTITLE: Loss\nCONTENT: recurring loss motif"
+	note := nt.parseNote(block, 1, "s", "loc")
+	if note == nil {
+		t.Fatal("D5: a NOTE+TITLE+CONTENT note without IMPLICATIONS was dropped (Content not finalized)")
+	}
+	if note.Content != "recurring loss motif" {
+		t.Errorf("D5: Content = %q, want %q", note.Content, "recurring loss motif")
+	}
+	if note.Implications != "" {
+		t.Errorf("D5: Implications = %q, want empty (none provided)", note.Implications)
 	}
 }
 

@@ -93,8 +93,14 @@ func TestVerifiedFactory_LLMsVerifierSSOT_AntiBluff(t *testing.T) {
 	// Verify the factory's registry now contains models from the server
 	verified := factory.ListVerifiedModels()
 	require.Len(t, verified, 2, "registry must contain 2 verified models from SSOT")
-	assert.Equal(t, "gpt-4", verified[0].ID)
-	assert.Equal(t, "claude-3", verified[1].ID)
+	// Order-independent (§11.4.50/§11.4.6): ListVerifiedModels -> FilterVerified
+	// ranges a map (internal/verifier/registry.go:60), so the returned slice
+	// order is nondeterministic. The contract is the SET of verified models,
+	// not their order — assert membership, not position (positional asserts here
+	// were an intermittent map-iteration-order flake, D6).
+	gotIDs := []string{verified[0].ID, verified[1].ID}
+	assert.ElementsMatch(t, []string{"gpt-4", "claude-3"}, gotIDs,
+		"registry must contain exactly the gpt-4 + claude-3 models from SSOT (any order)")
 
 	t.Logf("Anti-bluff SSOT verification passed: factory fetched %d models from mock LLMsVerifier", len(verified))
 }

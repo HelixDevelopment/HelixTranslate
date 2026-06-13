@@ -332,6 +332,16 @@ func (nt *NoteTaker) parseNote(
 		}
 	}
 
+	// Finalize content (D5): if the note ended while still in the content field
+	// (no optional IMPLICATIONS: marker), flush the accumulated content to
+	// note.Content. Without this, a valid NOTE+TITLE+CONTENT note that omits
+	// IMPLICATIONS leaves note.Content empty and is silently dropped by the
+	// required-fields check below — the validator treats Content as required and
+	// Implications as optional, so the parser must populate Content unconditionally.
+	if currentField == "content" {
+		note.Content = contentBuilder.String()
+	}
+
 	// Finalize implications
 	if currentField == "implications" {
 		note.Implications = contentBuilder.String()
