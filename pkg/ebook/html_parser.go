@@ -104,6 +104,14 @@ func (p *HTMLParser) extractTextWithContext(n *html.Node, inPre bool) string {
 			continue
 		}
 
+		// A <br> is a void line-break element: it carries no child text, so
+		// without explicit handling the words around it get glued together
+		// ("line one<br>line two" -> "line oneline two"). Emit a newline.
+		if c.Type == html.ElementNode && c.Data == "br" {
+			content.WriteString("\n")
+			continue
+		}
+
 		text := p.extractTextWithContext(c, newInPre)
 		if text != "" {
 			content.WriteString(text)
@@ -111,6 +119,11 @@ func (p *HTMLParser) extractTextWithContext(n *html.Node, inPre bool) string {
 			// Add newlines after block elements if we have content
 			if c.Type == html.ElementNode && isBlockElement(c.Data) {
 				content.WriteString("\n\n")
+			} else if c.Type == html.ElementNode && isCellElement(c.Data) {
+				// Table cells / definition-list items are not full blocks but
+				// MUST be separated, otherwise sibling cells glue into one
+				// nonsense token ("cell A" + "cell B" -> "cell Acell B").
+				content.WriteString("\n")
 			}
 		}
 	}
@@ -177,6 +190,19 @@ func isBlockElement(tag string) bool {
 		}
 	}
 	return false
+}
+
+// isCellElement checks if an element is a table cell or definition-list item.
+// These are not full block elements (they should not force a blank line), but
+// their content MUST be separated from sibling cells/items to avoid gluing
+// distinct values into a single token.
+func isCellElement(tag string) bool {
+	switch tag {
+	case "td", "th", "dt", "dd", "tr", "caption":
+		return true
+	default:
+		return false
+	}
 }
 
 // GetFormat returns the format
