@@ -97,9 +97,13 @@ func (acl *APICommunicationLogger) LogRequest(sourceHost string, sourcePort int,
 		RequestSize: requestSize,
 	}
 
-	// Log asynchronously to avoid blocking
+	// Log asynchronously to avoid blocking. Pass an immutable SNAPSHOT (D10): the
+	// returned *entry is later mutated by LogResponse, so the async read here must
+	// not alias the caller's entry or it races that write (api_logger.go:112 write
+	// vs :41 read). Copying the struct gives this goroutine its own request-time view.
+	snapshot := *entry
 	go func() {
-		if err := acl.LogCommunication(entry); err != nil {
+		if err := acl.LogCommunication(&snapshot); err != nil {
 			log.Printf("Failed to log API request: %v", err)
 		}
 	}()
@@ -118,9 +122,12 @@ func (acl *APICommunicationLogger) LogResponse(entry *APICommunicationLog, statu
 		entry.Error = err.Error()
 	}
 
-	// Update the existing log entry
+	// Update the existing log entry. Snapshot AFTER applying the response fields
+	// (D10) so the async read uses an immutable copy and never races the request-log
+	// goroutine's read or any concurrent reader of the caller's entry.
+	snapshot := *entry
 	go func() {
-		if logErr := acl.LogCommunication(entry); logErr != nil {
+		if logErr := acl.LogCommunication(&snapshot); logErr != nil {
 			log.Printf("Failed to log API response: %v", logErr)
 		}
 	}()
