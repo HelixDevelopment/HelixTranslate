@@ -50,14 +50,23 @@ func (uas *UserAuthService) AuthenticateUser(req LoginRequest) (*LoginResponse, 
 		return nil, fmt.Errorf("failed to find user: %w", err)
 	}
 
-	// Check if user is active
-	if !user.IsActive {
-		return nil, models.ErrUserInactive
-	}
-
-	// Validate password
+	// Validate password FIRST — before any account-status check. Reporting
+	// IsActive before the password is verified leaks whether a username exists
+	// and is inactive to an unauthenticated attacker (CWE-204 observable
+	// response discrepancy → username enumeration): a wrong password on an
+	// inactive account would otherwise return ErrUserInactive while a wrong
+	// password on an active/unknown account returns ErrInvalidCredentials, and
+	// the API layer maps those to distinct HTTP 403/401 responses. Validating
+	// the password first makes the wrong-password response indistinguishable
+	// regardless of account status.
 	if err := user.ValidatePassword(req.Password); err != nil {
 		return nil, models.ErrInvalidCredentials
+	}
+
+	// Only after the caller has proven they hold the correct password may we
+	// disclose that the account is inactive.
+	if !user.IsActive {
+		return nil, models.ErrUserInactive
 	}
 
 	// Generate token

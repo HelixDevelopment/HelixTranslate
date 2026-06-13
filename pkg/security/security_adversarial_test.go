@@ -51,12 +51,18 @@ func TestAdv_JWT_TamperedSignatureRejected(t *testing.T) {
 	if len(parts) != 3 {
 		t.Fatalf("expected 3 JWT segments, got %d", len(parts))
 	}
-	// Mutate the signature: flip the last character to a different valid base64url char.
+	// Mutate the signature: flip the FIRST character to a different valid
+	// base64url char. The first character always carries 6 significant bits of
+	// the raw signature, so changing it guarantees the decoded signature bytes
+	// differ. (Flipping the LAST char is unsound: for a 32-byte HS256 signature
+	// the final base64url char encodes only 2 significant bits + padding, so
+	// e.g. 'A'<->'B' decodes to identical bytes and the token verifies — a
+	// §11.4.1 FAIL-bluff that fires ~1/64 of runs.)
 	sig := []byte(parts[2])
-	if sig[len(sig)-1] == 'A' {
-		sig[len(sig)-1] = 'B'
+	if sig[0] == 'A' {
+		sig[0] = 'B'
 	} else {
-		sig[len(sig)-1] = 'A'
+		sig[0] = 'A'
 	}
 	tampered := parts[0] + "." + parts[1] + "." + string(sig)
 
