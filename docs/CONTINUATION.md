@@ -1,10 +1,27 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 19
-**Last modified:** 2026-06-13T20:00:00Z
+**Revision:** 20
+**Last modified:** 2026-06-13T22:30:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
+
+<!-- session 2026-06-13c: parallel subagent bug-hunt wave (HEAD f451468) -->
+
+### Session 2026-06-13c — parallel subagent bug-hunt wave (HEAD f451468) — 7 real bugs, all reproduce-first + mutation-proven + conductor-reverified (-race) + pushed FF (no force §11.4.113)
+
+Mode: §11.4.126 autonomous loop + §11.4.103 4 parallel bug-hunt subagents (disjoint package scopes) + conductor verify-then-commit (§11.4.147/§11.4.142). Conductor independently re-ran build+vet+`-race` on every affected package and reviewed every production diff BEFORE committing. 6 separate descriptive commits (caa39c1..f451468), pushed FF to milos85vasic/Translator + HelixDevelopment/HelixTranslate.
+
+- **caa39c1** — websocket `Hub.StartServer` SESSION FAN-OUT HOLE: /ws handler left `Client.SessionID` empty → hub's per-session filter skipped → every dashboard got EVERY session's events (real caller cmd/ssh-translation). Fixed (read session_id from query) + moved off global DefaultServeMux→private mux (dup-/ws panic). Mutation-proven (alpha client saw beta's BETA-LEAK frame), -race ×3.
+- **91e71c4** — fb2 `Paragraph` had UnmarshalXML but NO MarshalXML (Text/FullText are `xml:"-"`) → parse→write round-trip emitted empty `<p></p>` = TOTAL paragraph data loss. Added MarshalXML (FullParagraphText, id/style attrs, escaped once). Mutation-proven.
+- **ef8b3c7** — ebook EPUB fallback cleaner 2 bugs: CleanXMLData blind 2-char prefix rewrite corrupted valid entities (&amp;→&amp;mp;) + text (Q&A); removeHTMLTags regex EXCLUDED self-closing/void tags (<br/> <img/> <hr/>) → leaked literal markup into chapter text. Fixed (escapeBareAmpersands + unified htmlTagRe, RE2-safe). Mutation-proven; stale test reconciled §11.4.120.
+- **7e05c5e** — batch `Process(ctx)` NEVER honored cancellation (no ctx.Err/Done in either loop) → ran every remaining file, error stayed nil. Added seq guard + parallel in-worker short-circuit + post-Wait surfacing. Mutation-proven ×2, -race ×3.
+- **3225c8d** — cmd UPPERCASE/mixed-case ext not stripped: `TrimSuffix(base, ToLower(ext))` left "Story.EPUB"→"Story.EPUB_sr.epub" (case-insensitive FS). Fixed in unified-translator (3 helpers) + translator. Mutation-proven; stale test reconciled §11.4.120; cmd/translator gained first tests.
+- **f451468** — §11.4.98 offline-ize: openai/qwen/zhipu error-paths → httptest; llamacpp auto-download → temp-HOME stub .gguf (no HF dial); HF_TOKEN skip-guards; TestValidate AvailableRAM pinned. Whole pkg/translator/llm now passes OFFLINE ~8s, all provider env unset, mutation-checked each converted test still has teeth. No prod client bug (honest §11.4.6).
+
+Honest clean-verifications (§11.4.6 — investigated, NO bug): pkg/coordination (lock ordering leaf-only, consensus chan cap≥goroutines, immutable instances post-init); openai/qwen/zhipu/llamacpp clients parse correctly (defect was purely tests dialing real APIs).
+
+Next-session queue (disjoint, autonomous-safe): bug-hunt internal/verifier (scoring/discovery/selection/client), pkg/preparation, pkg/storage (deeper), pkg/distributed (deeper pure-logic), pkg/markdown/format/html/docx parsers deeper. Carry-over G1 (verify→server-DB bridge), G2 (batched ~30-provider sweep), G3 (operator: add OPENAI/ANTHROPIC keys to api_keys.sh).
 
 <!-- session 2026-06-13b: parallel subagent bug-hunt wave -->
 
