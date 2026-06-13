@@ -1,10 +1,27 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 20
-**Last modified:** 2026-06-13T22:30:00Z
+**Revision:** 21
+**Last modified:** 2026-06-13T23:15:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
+
+<!-- session 2026-06-13d: parallel subagent bug-hunt wave 2 (HEAD 39ee07a) -->
+
+### Session 2026-06-13d — parallel subagent bug-hunt wave 2 (HEAD 39ee07a) — 10 real bugs, all reproduce-first + mutation-proven + conductor-reverified (-race) + pushed FF (no force §11.4.113)
+
+Mode: §11.4.126 autonomous loop + §11.4.103 4 parallel subagents (disjoint scopes: internal/verifier · pkg/preparation · pkg/storage+report · pkg/markdown+format) + conductor verify-then-commit. 4 descriptive commits (539659b..39ee07a) pushed FF to milos85vasic/Translator + HelixDevelopment/HelixTranslate.
+
+- **539659b** — internal/verifier 3 bugs: scoring/engine.go applied weights.Capability TWICE + DROPPED Recency (sum 1.15, broke 0..1 contract); discovery HF models keyed on legacy `modelId` only → valid `id`-only payload collided every model on ID="" → ZERO usable models; registry FilterVerified/ListModels map-iteration nondeterministic order (latent flake). All mutation-proven, -race.
+- **1bee190** — pkg/preparation 3 bugs: analyzeChapters appended goroutine results in COMPLETION order → GetTranslationContext[n-1] mis-attributed each chapter's analysis to the wrong chapter (→ slot-indexed, no mutex); multi-pass consolidation set FinalAnalysis from fresh parse with no chapter_analyses → all per-chapter analysis silently lost (→ re-attach); isUntranslatable strings.Contains(text,"")==true → blank LLM term marked EVERY string untranslatable incl. title (→ skip empty). Mutation-proven, -race ×3.
+- **0a415b1** — pkg/storage negative CacheHitRate in GetStatistics (all 3 backends sqlite/postgres/redis): (totalAccess-totalTranslations)/totalAccess went negative when entries inserted-but-rarely-reread (3 entries,1 hit=-200%) → hits/(hits+misses), always [0,100). Mutation-proven via real SQLite round-trip.
+- **39ee07a** — pkg/markdown 3 reader-visible EPUB-output bugs in the PRODUCTION chapter path: h4-h6 headers shipped as literal `<p>#### x</p>` (only 1-3 handled; §11.4.108 source→artifact — h4-6 lived only in a dead sibling fn); fenced code blocks flattened to one `<p>` with literal fences+collapsed newlines (→ `<pre><code>`); SimpleWorkflow wrote body/header text RAW → malformed XHTML on `&`/`<`/`>` (→ escapeXHTMLText). Mutation-proven.
+
+Honest clean-verifications (§11.4.6): coordination/scoring/selection concurrency sound; openai/qwen/zhipu/llamacpp clients parse correctly; format detector edge cases correct; Redis cache-key+avg-duration sound (prior fixes intact).
+
+**FLAGGED latent (NOT fixed — needs conductor/operator review per §11.4.124, schema change):** pkg/storage SQLite/Postgres cache has NO UNIQUE index on the lookup tuple (source_text,source_language,target_language,provider,model); storing the same tuple under 2 different ids leaves 2 rows and GetCachedTranslation can return the older STALE row. No production caller constructs cache IDs today (all in tests). Correct fix = UNIQUE index migration changing dedup semantics → review-gated.
+
+Next-wave queue (disjoint, autonomous-safe): pkg/distributed deeper (conductor-owned §11.4.119), pkg/grpc, pkg/security deeper, pkg/ebook html/docx parsers, pkg/hardware, pkg/version/progress. Carry-over: storage dup-tuple unique-index (review-gated); G1/G2/G3 operator-gated.
 
 <!-- session 2026-06-13c: parallel subagent bug-hunt wave (HEAD f451468) -->
 
