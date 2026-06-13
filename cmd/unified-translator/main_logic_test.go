@@ -25,10 +25,13 @@ func TestGenerateOutputFilename(t *testing.T) {
 	}{
 		{"fb2 in subdir", "/books/war.fb2", "/books/war_sr.epub"},
 		{"lowercase ext stripped", "/books/story.epub", "/books/story_sr.epub"},
-		// KNOWN QUIRK (reported as finding): the ext is lowercased before
-		// TrimSuffix, so an UPPERCASE extension is NOT stripped. We pin the
-		// actual behavior so a future fix flips this case deliberately.
-		{"uppercase ext not stripped (quirk)", "/books/Story.EPUB", "/books/Story.EPUB_sr.epub"},
+		// §11.4.120 RECONCILED: the prior wave pinned the BUGGY behavior
+		// (Story.EPUB_sr.epub) as a "quirk". An uppercase extension MUST be
+		// stripped just like a lowercase one — on case-insensitive filesystems
+		// (macOS/Windows) a user opening "Story.EPUB" otherwise gets a malformed
+		// output name. This case now asserts the correct, user-visible result.
+		{"uppercase ext stripped", "/books/Story.EPUB", "/books/Story_sr.epub"},
+		{"mixed-case ext stripped", "/books/Tale.Fb2", "/books/Tale_sr.epub"},
 		{"relative path", "book.txt", "book_sr.epub"},
 		{"no extension", "/data/plain", "/data/plain_sr.epub"},
 		{"dotted basename", "/d/my.book.v2.fb2", "/d/my.book.v2_sr.epub"},

@@ -701,22 +701,26 @@ func generateSessionID() string {
 }
 
 func generateOutputFilename(inputFile string) string {
-	ext := strings.ToLower(filepath.Ext(inputFile))
-	baseName := strings.TrimSuffix(filepath.Base(inputFile), ext)
+	base := filepath.Base(inputFile)
+	// Trim the actual extension (case-preserving) so UPPERCASE/mixed-case
+	// extensions (e.g. "Story.EPUB", "Tale.Fb2") are stripped just like
+	// lowercase ones. Lowercasing the ext before TrimSuffix would not match
+	// the original-case basename and leave the extension embedded in the name.
+	baseName := strings.TrimSuffix(base, filepath.Ext(base))
 
 	return filepath.Join(filepath.Dir(inputFile), baseName+"_sr.epub")
 }
 
 func generateOriginalMDPath(inputFile string) string {
-	ext := strings.ToLower(filepath.Ext(inputFile))
-	baseName := strings.TrimSuffix(filepath.Base(inputFile), ext)
+	base := filepath.Base(inputFile)
+	baseName := strings.TrimSuffix(base, filepath.Ext(base))
 
 	return filepath.Join(filepath.Dir(inputFile), baseName+"_original.md")
 }
 
 func generateTranslatedMDPath(inputFile string) string {
-	ext := strings.ToLower(filepath.Ext(inputFile))
-	baseName := strings.TrimSuffix(filepath.Base(inputFile), ext)
+	base := filepath.Base(inputFile)
+	baseName := strings.TrimSuffix(base, filepath.Ext(base))
 
 	return filepath.Join(filepath.Dir(inputFile), baseName+"_translated.md")
 }

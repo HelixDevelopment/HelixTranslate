@@ -1056,8 +1056,13 @@ func parseFlags() *TranslationConfig {
 
 // generateOutputFilename generates output filename based on input
 func generateOutputFilename(inputFile string) string {
-	ext := strings.ToLower(filepath.Ext(inputFile))
-	baseName := strings.TrimSuffix(filepath.Base(inputFile), ext)
+	base := filepath.Base(inputFile)
+	rawExt := filepath.Ext(base)
+	ext := strings.ToLower(rawExt)
+	// Trim the actual (case-preserving) extension, not the lowercased copy:
+	// an UPPERCASE/mixed-case extension (e.g. "Book.FB2") must still be stripped
+	// so the output is "Book_sr.epub", never "Book.FB2_sr.epub".
+	baseName := strings.TrimSuffix(base, rawExt)
 
 	// Default output format based on input or use EPUB for translations
 	if ext == ".fb2" {
