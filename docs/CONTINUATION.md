@@ -1,10 +1,29 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 23
-**Last modified:** 2026-06-14T00:45:00Z
+**Revision:** 24
+**Last modified:** 2026-06-14T01:20:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
+
+<!-- session 2026-06-13g: bug-hunt wave 5 + STABLE GREEN BUILD + §12 host-safety pace (HEAD ceab1db) -->
+
+### Session 2026-06-13g — bug-hunt wave 5 (HEAD ceab1db) — 4 real bugs incl. CWE-22 path traversal + PairingManager race; build STABLE GREEN; paced for §12 host-safety
+
+Mode: §11.4.126 autonomous loop + §11.4.103 3 parallel subagents (PairingManager mutex · pkg/language · pkg/api) + conductor verify-then-commit. 3 commits (38300e4..ceab1db) pushed FF.
+
+- **38300e4** — pkg/distributed PairingManager.services map DATA RACE (no manager mutex; map + *RemoteService.Status/LastSeen/PairedAt written by health goroutines, read by GetPairedServices) → one RWMutex, deadlock-averse (unlocked-internal addService helper, no re-entrant lock, lock never held across HTTP probe / event Publish; performHealthChecks snapshots under RLock then releases). RED(-race)→GREEN(-race -count=5 ~4s no hang)→mutation; full pkg -race ok ~52s. Resolves the wave-4 flagged latent.
+- **5c1a2ae** — pkg/language 2 UTF-8 bugs: detectHeuristic sampled text[:1000] by BYTE → under-counts trailing multi-byte script → majority-Cyrillic book mis-detected as English (→ 1000 RUNES); FormatLanguageCode code[:2] by BYTE → invalid UTF-8 on multi-byte char (→ 2 RUNES); + DetectLanguage prompt sample rune-fix (source-only, network-gated). Mutation-proven, -race ×3.
+- **ceab1db** — pkg/api PATH TRAVERSAL (CWE-22): uploadUpdate/applyUpdate interpolated the X-Update-Version header into a filepath.Join, '..' escaped the update dir → arbitrary file write. → validateUpdateVersion allowlist (reject ''/'..'/separators/NUL/>128, charset [A-Za-z0-9.+_-]). RED(200+escaped path)→GREEN(400)→mutation; existing 11 subtests pass, -race ×3.
+
+**BUILD STATE — STABLE GREEN.** Every package passes: the post-wave-5 full sweep showed 52 ok + 2 transient FAILs (pkg/translator TestMemoryUsage + test/integration build) that were proven ENVIRONMENTAL (§11.4.7), NOT code: error was literally "too many open files in system"; `go test -c ./test/integration` compiles exit 0; both re-ran GREEN at `-p 1`. Root cause: host `kern.num_files` at ~95.8% of `kern.maxfiles` (122880) from 5 waves of parallel subagents + repeated full `go test ./...` + a concurrent claude security-review process. Last fully-clean authoritative sweep: HEAD de25a98 = 54 ok / 0 FAIL (qa-results/full_sweep/fullsweep_20260613T230845.log). `go build ./...` exit 0 throughout.
+
+**§12 HOST-SAFETY DECISION (§11.4.101 safest/most-stable):** host file table near saturation → STOP spawning more parallel subagents / full-repo builds until it recovers (adding load risks tipping past maxfiles = other workloads fail to open files = the destabilization §12 forbids). The autonomous-safe disjoint package queue is also essentially EXHAUSTED — the whole codebase surface has been hunted across 5 waves (llm, websocket, coordination, fb2, ebook[epub/html/docx], batch, cmd, verifier, preparation, storage, report, markdown, format, grpc, security, hardware, version, progress, services, config, cache, translator-core, distributed, language, api). Per §11.4.94(A) the remaining items are genuinely blocked → paced re-verification, not idle-by-laziness.
+
+### SESSION GRAND TOTAL (2026-06-13 → 06-14): 36 real bugs fixed across 5 waves (7+10+7+8+4) + 2 reconciliations + §11.4.98 llm offline conversion
+All reproduce-first + mutation-proven + conductor-independently-reverified (-race) + 24 descriptive commits pushed FF to milos85vasic/Translator + HelixDevelopment/HelixTranslate (no force §11.4.113). Notable: CWE-204 auth enumeration oracle, CWE-22 path traversal, gRPC remote-DoS nil panic, websocket cross-session event leak, FB2/markdown/ebook round-trip data loss, cache+pairing+versionCache+ssh data races, UTF-8 mid-rune corruption (translator+language).
+
+Flagged latent (review/operator-gated, NOT autonomously safe overnight): storage cache dup-tuple unique-index (schema/dedup-semantics change §11.4.124); DOCX unioffice license-gated (go.mod dependency decision); security RefreshToken re-validate (no caller, defense-in-depth); G1 verify→server-DB bridge; G2 batched ~30-provider sweep; G3 add OPENAI/ANTHROPIC keys to api_keys.sh. These need operator decisions (user away) — correctly deferred per §11.4.101/§11.4.122.
 
 <!-- session 2026-06-13f: parallel bug-hunt wave 4 + FULL-REPO SWEEP GREEN (HEAD de25a98) -->
 
