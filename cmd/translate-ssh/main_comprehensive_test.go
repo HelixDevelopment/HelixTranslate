@@ -666,14 +666,27 @@ func TestSSHErrorHandling(t *testing.T) {
 
 			if tt.expectError {
 				assert.Error(t, err)
-				// For connection tests, accept either "connection refused" or "timeout" error
-				if tt.name == "connection refused" {
-					errMsg := strings.ToLower(err.Error())
-					if !strings.Contains(errMsg, "connection refused") && !strings.Contains(errMsg, "timeout") {
-						t.Errorf("Expected 'connection refused' or 'timeout', got: %s", err.Error())
+				errMsg := strings.ToLower(err.Error())
+				// For connection-class errors (timeout / refused), the exact OS
+				// error string for an unreachable endpoint varies by environment:
+				// "connection refused" (fast refuse), "i/o timeout" (deadline hit),
+				// "lookup localhost: i/o timeout" (slow resolver), "no route to
+				// host", "network is unreachable". The test's contract is only that
+				// connecting to a bad endpoint FAILS — asserting one brittle string
+				// makes the test fail on the environment, not a product defect
+				// (§11.4.1). Accept any connection-failure indicator.
+				if tt.errorType == "timeout" || tt.errorType == "refused" {
+					connFail := strings.Contains(errMsg, "connection refused") ||
+						strings.Contains(errMsg, "timeout") ||
+						strings.Contains(errMsg, "no route") ||
+						strings.Contains(errMsg, "network is unreachable") ||
+						strings.Contains(errMsg, "no such host") ||
+						strings.Contains(errMsg, "lookup")
+					if !connFail {
+						t.Errorf("expected a connection-failure error, got: %s", err.Error())
 					}
 				} else {
-					assert.Contains(t, strings.ToLower(err.Error()), strings.ToLower(tt.checkMessage))
+					assert.Contains(t, errMsg, strings.ToLower(tt.checkMessage))
 				}
 			} else {
 				assert.NoError(t, err)
