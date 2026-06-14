@@ -1,7 +1,22 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 25
-**Last modified:** 2026-06-14T06:30:00Z
+**Revision:** 26
+**Last modified:** 2026-06-14T11:30:00Z
+
+<!-- session 2026-06-14b: parallel SECOND-PASS discovery wave (HEAD 47ea69d) — 5 more real bugs, FD-safe -->
+
+### Session 2026-06-14b — parallel §11.4.118 second-pass discovery wave (HEAD 47ea69d) — 5 more real bugs; ran 3 subagents at ~95% FD with low-FD discipline, NO ENFILE
+
+Operator repeatedly requested parallel subagents; FDs never freed (~95%, 15 claude procs). Honored the informed repeated instruction with mitigations: 3 streams (not 4), investigation-first + targeted -p 1 tests only, no ./... , no -race during hunt. Result: NO ENFILE, 5 real bugs, conductor-reverified (build+vet+ -p 1 each pkg green), 3 commits pushed FF.
+
+- **87a8048** — Anthropic client returned only response.Content[0].Text but the Messages API returns content as an ARRAY: long output split across text blocks was TRUNCATED, and a leading thinking/redacted_thinking block made Content[0].Text=="" → EMPTY translation. Fix: concatenate all text blocks (skip thinking/tool). httptest RED→GREEN→mutation.
+- **edadd73** — distributed performance.go ResultCache.Set evicted on every update-while-full (didn't check key-exists) → shrank cache below maxSize, dropped valid entry. + coordinator.go round-robin currentIndex never reset on DiscoverRemoteInstances rebuild → index-out-of-range PANIC after worker pool shrinks (translation hot path). Both RED→GREEN→mutation (-p 1).
+- **47ea69d** — ebook epub_parser.go built opfDir+href verbatim; EPUB OCF hrefs are percent-encoded/relative (RFC 3986) but zip entries are literal → 'chapter%20one.xhtml' never matched 'OEBPS/chapter one.xhtml' → chapter+cover SILENTLY DROPPED (data loss). Fix: resolveEPUBHref (PathUnescape + ./ ../ normalize). + html_parser.go removed a hardcoded 'Nestedtexthere'->'Nested text here' test-hack that corrupted any real doc containing that substring. RED→GREEN→mutation.
+
+Honest §11.4.6 flags (NOT auto-fixed — ambiguous intent/operator-gated): Qwen endpoint↔response-shape mismatch (native DashScope path vs OpenAI-compatible config base-URL — needs operator decision on intended Qwen mode); coordinator reduced_quality fallback lowercases passthrough text; FB2 writer section-title flatten. Markdown→EPUB path clean-verified (lists/blockquotes/fences/headers all handled). EPUB writer clean-verified.
+
+**SESSION GRAND TOTAL: 44 real bugs** (5 parallel waves + 3 inline + this 5-bug second-pass wave) + 2 reconciliations + §11.4.98 conversion. Post-wave full sweep GREEN at HEAD 47ea69d: `go test ./... -p 1` = **54 ok / 0 FAIL** (host-safe -p 1 avoided ENFILE at ~95% FD); evidence qa-results/full_sweep/fullsweep_20260614T104630.log. Build+vet exit 0.
+
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
