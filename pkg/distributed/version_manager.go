@@ -484,9 +484,11 @@ type VersionManager struct {
 	updateDir    string
 	backupDir    string
 	backups      map[string]*UpdateBackup // workerID -> backup
+	backupsMu    sync.RWMutex             // guards backups (BatchUpdateWorkers runs UpdateWorker -> createWorkerBackup concurrently; an unsynchronized map write is a fatal "concurrent map writes")
 	metrics      *VersionMetrics
 	metricsMu    sync.Mutex // guards every read/modify/write of *metrics (Record*/CheckVersionDrift/GetMetrics/GetHealthStatus run concurrently; the counter ++ are non-atomic RMW and lost ~40-60% of updates under load)
 	alerts       []*DriftAlert
+	alertsMu     sync.RWMutex // guards alerts (CheckVersionDrift writes it while GetAlerts/GetHealthStatus read it concurrently)
 	alertManager *AlertManager
 	versionCache map[string]*VersionCacheEntry // workerID -> cached version info
 	cacheMu      sync.RWMutex                  // guards versionCache (BatchUpdateWorkers calls CheckWorkerVersion concurrently)
@@ -1002,8 +1004,11 @@ func (vm *VersionManager) createWorkerBackup(ctx context.Context, service *Remot
 		Status:          "created",
 	}
 
-	// Store backup reference
+	// Store backup reference (guarded — concurrent BatchUpdateWorkers goroutines
+	// write distinct keys here simultaneously).
+	vm.backupsMu.Lock()
 	vm.backups[service.WorkerID] = backup
+	vm.backupsMu.Unlock()
 
 	// Emit backup created event
 	event := events.Event{
@@ -1023,7 +1028,9 @@ func (vm *VersionManager) createWorkerBackup(ctx context.Context, service *Remot
 
 // rollbackWorkerUpdate rolls back a worker to its previous state using the backup
 func (vm *VersionManager) rollbackWorkerUpdate(ctx context.Context, service *RemoteService) error {
+	vm.backupsMu.RLock()
 	backup, exists := vm.backups[service.WorkerID]
+	vm.backupsMu.RUnlock()
 	if !exists {
 		return fmt.Errorf("no backup found for worker %s", service.WorkerID)
 	}
@@ -1130,6 +1137,8 @@ func (vm *VersionManager) cleanupExpiredBackups() error {
 	// Remove backups older than 24 hours that are not active
 	cutoff := time.Now().Add(-24 * time.Hour)
 
+	vm.backupsMu.Lock()
+	defer vm.backupsMu.Unlock()
 	for workerID, backup := range vm.backups {
 		if backup.Timestamp.Before(cutoff) && backup.Status != "active" {
 			if err := os.RemoveAll(backup.BackupPath); err != nil {
@@ -1195,6 +1204,8 @@ func (vm *VersionManager) GetMetrics() *VersionMetrics {
 
 // GetAlerts returns current version drift alerts
 func (vm *VersionManager) GetAlerts() []*DriftAlert {
+	vm.alertsMu.RLock()
+	defer vm.alertsMu.RUnlock()
 	return vm.alerts
 }
 
@@ -1433,8 +1444,10 @@ func (vm *VersionManager) CheckVersionDrift(ctx context.Context, services []*Rem
 	vm.metrics.WorkersUnhealthy = unhealthyCount
 	vm.metricsMu.Unlock()
 
-	// Store alerts
+	// Store alerts (guarded — GetAlerts/GetHealthStatus read this slice concurrently)
+	vm.alertsMu.Lock()
 	vm.alerts = alerts
+	vm.alertsMu.Unlock()
 
 	// Emit drift check event (use the locals, not vm.metrics, to avoid a racy read)
 	event := events.Event{
@@ -1527,13 +1540,15 @@ func (vm *VersionManager) RecordSignatureMetrics(success bool) {
 // RecordBackupMetrics records metrics for backup operations
 func (vm *VersionManager) RecordBackupMetrics() {
 	// Count active backups before taking metricsMu (don't hold it across the
-	// backups iteration).
+	// backups iteration). The backups map is guarded by backupsMu.
 	activeCount := int64(0)
+	vm.backupsMu.RLock()
 	for _, backup := range vm.backups {
 		if backup.Status == "active" {
 			activeCount++
 		}
 	}
+	vm.backupsMu.RUnlock()
 	vm.metricsMu.Lock()
 	vm.metrics.BackupsCreated++
 	vm.metrics.BackupsActive = activeCount
@@ -1591,6 +1606,10 @@ func (vm *VersionManager) GetHealthStatus() map[string]interface{} {
 		status = "critical"
 	}
 
+	vm.alertsMu.RLock()
+	activeAlerts := len(vm.alerts)
+	vm.alertsMu.RUnlock()
+
 	return map[string]interface{}{
 		"status":                status,
 		"health_score":          healthScore,
@@ -1600,7 +1619,7 @@ func (vm *VersionManager) GetHealthStatus() map[string]interface{} {
 		"workers_up_to_date":    m.WorkersUpToDate,
 		"workers_outdated":      m.WorkersOutdated,
 		"workers_unhealthy":     m.WorkersUnhealthy,
-		"active_alerts":         len(vm.alerts),
+		"active_alerts":         activeAlerts,
 		"update_success_rate":   vm.calculateSuccessRate(m.SuccessfulUpdates, m.TotalUpdates),
 		"rollback_success_rate": vm.calculateSuccessRate(m.SuccessfulRollbacks, m.TotalRollbacks),
 	}

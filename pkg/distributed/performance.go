@@ -503,52 +503,73 @@ func (bp *BatchProcessor) AddRequest(batchID string, request interface{}) error 
 
 	batch.Requests = append(batch.Requests, request)
 
-	// If batch is full, process it immediately
+	// If batch is full, detach it under the lock then process it OUTSIDE the
+	// lock. processFn is arbitrary, potentially long-running work (the real one
+	// performs the batched remote translation network call); running it under
+	// bp.mu violates the "no blocking call inside a held lock" rule — it
+	// serializes unrelated batches and self-deadlocks if processFn re-enters
+	// the BatchProcessor (e.g. flushes a sibling batch).
 	if len(batch.Requests) >= bp.batchSize {
-		return bp.processBatch(batchID)
+		requests := bp.detachBatch(batchID)
+		bp.mu.Unlock()
+		err := bp.runProcess(requests)
+		bp.mu.Lock() // re-acquire so the deferred Unlock stays balanced
+		return err
 	}
 
 	// Set timeout if not already set
 	if batch.Timer == nil {
 		batch.Timer = time.AfterFunc(bp.timeout, func() {
 			bp.mu.Lock()
-			defer bp.mu.Unlock()
-			bp.processBatch(batchID)
+			requests := bp.detachBatch(batchID)
+			bp.mu.Unlock()
+			_ = bp.runProcess(requests) // unlocked — see above
 		})
 	}
 
 	return nil
 }
 
-// processBatch processes a batch of requests
-func (bp *BatchProcessor) processBatch(batchID string) error {
+// detachBatch removes a batch from the registry and returns its requests for
+// processing. Caller MUST hold bp.mu. Returns nil if the batch no longer exists
+// (e.g. a stale timer fired after the batch was already processed by fill).
+func (bp *BatchProcessor) detachBatch(batchID string) []interface{} {
 	batch, exists := bp.batches[batchID]
 	if !exists {
 		return nil
 	}
-
-	// Cancel timer if it exists
 	if batch.Timer != nil {
 		batch.Timer.Stop()
 	}
-
-	// Process the batch
-	err := bp.processFn(batch.Requests)
-
-	// Remove the batch
 	delete(bp.batches, batchID)
-
-	return err
+	return batch.Requests
 }
 
-// FlushAll flushes all pending batches
+// runProcess invokes processFn OUTSIDE bp.mu. A nil/empty request slice (stale
+// timer, already-processed batch) is a no-op.
+func (bp *BatchProcessor) runProcess(requests []interface{}) error {
+	if requests == nil {
+		return nil
+	}
+	return bp.processFn(requests)
+}
+
+// FlushAll flushes all pending batches. It detaches every batch under the lock,
+// releases the lock, then runs processFn for each detached batch — processFn is
+// never invoked while bp.mu is held (see AddRequest for the rationale).
 func (bp *BatchProcessor) FlushAll() error {
 	bp.mu.Lock()
-	defer bp.mu.Unlock()
+	pending := make([][]interface{}, 0, len(bp.batches))
+	for batchID := range bp.batches {
+		if reqs := bp.detachBatch(batchID); reqs != nil {
+			pending = append(pending, reqs)
+		}
+	}
+	bp.mu.Unlock()
 
 	var lastErr error
-	for batchID := range bp.batches {
-		if err := bp.processBatch(batchID); err != nil {
+	for _, reqs := range pending {
+		if err := bp.runProcess(reqs); err != nil {
 			lastErr = err
 		}
 	}

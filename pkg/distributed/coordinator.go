@@ -26,7 +26,7 @@ type RemoteLLMInstance struct {
 	Priority  int
 	Available bool
 	LastUsed  time.Time
-	mu        sync.Mutex //nolint:unused
+	mu        sync.Mutex // guards LastUsed (written from the translation hot path)
 }
 
 // DistributedCoordinator manages distributed LLM instances across remote workers
@@ -401,14 +401,22 @@ func (dc *DistributedCoordinator) translateWithRemoteInstances(
 	contextHint string,
 ) (string, error) {
 
-	if len(dc.remoteInstances) == 0 {
+	// Snapshot the instance count under the lock. dc.remoteInstances is rebuilt
+	// under dc.mu.Lock() by DiscoverRemoteInstances (worker drop-out / re-pair),
+	// so reading the slice header here without the lock is a data race. The
+	// per-iteration selection itself goes through getNextRemoteInstance (locked).
+	dc.mu.RLock()
+	instanceCount := len(dc.remoteInstances)
+	dc.mu.RUnlock()
+
+	if instanceCount == 0 {
 		return "", fmt.Errorf("no remote instances available")
 	}
 
 	var lastErr error
 	triedInstances := make(map[string]bool)
 
-	for attempt := 0; attempt < dc.maxRetries*len(dc.remoteInstances); attempt++ {
+	for attempt := 0; attempt < dc.maxRetries*instanceCount; attempt++ {
 		instance := dc.getNextRemoteInstance()
 		if instance == nil {
 			break
@@ -440,7 +448,9 @@ func (dc *DistributedCoordinator) translateWithRemoteInstances(
 
 		result, err := dc.translateWithRemoteInstance(ctx, instance, text, contextHint)
 		if err == nil && result != "" {
+			instance.mu.Lock()
 			instance.LastUsed = time.Now()
+			instance.mu.Unlock()
 			dc.emitEvent(events.Event{
 				Type:      "distributed_translation_success",
 				SessionID: "system",
