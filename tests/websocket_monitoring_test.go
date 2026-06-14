@@ -137,8 +137,8 @@ func (suite *WebSocketMonitoringTestSuite) startTestServer() {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"status":   "running",
-			"clients":  len(suite.server.Clients),
-			"sessions": len(suite.testSessions),
+			"clients":  suite.clientCount(),
+			"sessions": suite.sessionCount(),
 		})
 	})
 
@@ -174,12 +174,13 @@ func (suite *WebSocketMonitoringTestSuite) handleWebSocket(w http.ResponseWriter
 		clientID = fmt.Sprintf("test-client-%d", time.Now().Unix())
 	}
 
-	// Store client
+	// Store client + register the test session under a single critical section.
+	// Both suite.server.Clients and suite.testSessions are shared with the
+	// per-client goroutines (handleClientMessages) and broadcastEvent, so every
+	// access MUST hold suite.server.mu — otherwise the maps race (Go panics on
+	// concurrent map read/write; confirmed by `go test -race`).
 	suite.server.mu.Lock()
 	suite.server.Clients[clientID] = conn
-	suite.server.mu.Unlock()
-
-	// Create test session if it doesn't exist
 	if _, exists := suite.testSessions[sessionID]; !exists {
 		suite.testSessions[sessionID] = &TestSession{
 			ID:        sessionID,
@@ -187,6 +188,7 @@ func (suite *WebSocketMonitoringTestSuite) handleWebSocket(w http.ResponseWriter
 			StartTime: time.Now(),
 		}
 	}
+	suite.server.mu.Unlock()
 
 	// Handle client messages
 	go suite.handleClientMessages(clientID, sessionID, conn)
@@ -194,7 +196,11 @@ func (suite *WebSocketMonitoringTestSuite) handleWebSocket(w http.ResponseWriter
 
 func (suite *WebSocketMonitoringTestSuite) handleClientMessages(clientID, sessionID string, client *gorillaws.Conn) {
 	defer func() {
+		// suite.server.Clients is shared — the delete MUST hold the lock, or it
+		// races broadcastEvent's locked iteration (concurrent map write panic).
+		suite.server.mu.Lock()
 		delete(suite.server.Clients, clientID)
+		suite.server.mu.Unlock()
 		client.Close()
 	}()
 
@@ -208,7 +214,11 @@ func (suite *WebSocketMonitoringTestSuite) handleClientMessages(clientID, sessio
 			break
 		}
 
-		// Store event in test session
+		// Store event in test session. suite.testSessions and the *TestSession it
+		// holds are shared across per-client goroutines, so the lookup AND the
+		// mutation MUST hold the lock (the append at the former line 213 was the
+		// other half of the data race `go test -race` reported).
+		suite.server.mu.Lock()
 		if session, exists := suite.testSessions[sessionID]; exists {
 			session.Events = append(session.Events, event)
 			session.Progress = event.Progress
@@ -221,6 +231,7 @@ func (suite *WebSocketMonitoringTestSuite) handleClientMessages(clientID, sessio
 				session.EndTime = time.Now()
 			}
 		}
+		suite.server.mu.Unlock()
 
 		// Broadcast to other clients
 		suite.broadcastEvent(event, clientID)
@@ -244,6 +255,52 @@ func (suite *WebSocketMonitoringTestSuite) broadcastEvent(event TestEvent, exclu
 	}
 }
 
+// --- thread-safe accessors -------------------------------------------------
+// suite.server.Clients and suite.testSessions (and the *TestSession values it
+// holds) are shared between the main test goroutine, the /status HTTP handler,
+// and the per-client goroutines. Every read MUST go through these helpers so it
+// holds suite.server.mu — otherwise the maps race the goroutine writes (Go
+// fatals on concurrent map access; `go test -race` flagged the bare reads).
+// The helpers only lock + copy (no network I/O under the lock), so they cannot
+// deadlock against broadcastEvent.
+
+func (suite *WebSocketMonitoringTestSuite) clientCount() int {
+	suite.server.mu.Lock()
+	defer suite.server.mu.Unlock()
+	return len(suite.server.Clients)
+}
+
+func (suite *WebSocketMonitoringTestSuite) sessionCount() int {
+	suite.server.mu.Lock()
+	defer suite.server.mu.Unlock()
+	return len(suite.testSessions)
+}
+
+// sessionSnapshot returns a race-free copy of a session's observable fields
+// (Events is deep-copied); the bool reports existence.
+func (suite *WebSocketMonitoringTestSuite) sessionSnapshot(id string) (TestSession, bool) {
+	suite.server.mu.Lock()
+	defer suite.server.mu.Unlock()
+	s, ok := suite.testSessions[id]
+	if !ok {
+		return TestSession{}, false
+	}
+	cp := *s
+	cp.Events = append([]TestEvent(nil), s.Events...)
+	return cp, true
+}
+
+// totalSessionEvents sums Events across every session under the lock.
+func (suite *WebSocketMonitoringTestSuite) totalSessionEvents() int {
+	suite.server.mu.Lock()
+	defer suite.server.mu.Unlock()
+	total := 0
+	for _, s := range suite.testSessions {
+		total += len(s.Events)
+	}
+	return total
+}
+
 func (suite *WebSocketMonitoringTestSuite) connectTestClients(t *testing.T) {
 	// Connect multiple test clients
 	for i := 0; i < 3; i++ {
@@ -263,7 +320,7 @@ func (suite *WebSocketMonitoringTestSuite) connectTestClients(t *testing.T) {
 func (suite *WebSocketMonitoringTestSuite) TestWebSocketConnection(t *testing.T) {
 	// Test that all clients are connected
 	assert.Equal(t, 3, len(suite.clients), "Should have 3 connected clients")
-	assert.Equal(t, 3, len(suite.server.Clients), "Server should track 3 clients")
+	assert.Equal(t, 3, suite.clientCount(), "Server should track 3 clients")
 
 	// Test server status
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/status", suite.server.Port))
@@ -299,7 +356,8 @@ func (suite *WebSocketMonitoringTestSuite) TestEventTransmission(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 
 	// Verify event was stored in session
-	session := suite.testSessions["test-session"]
+	session, ok := suite.sessionSnapshot("test-session")
+	require.True(t, ok, "Session should exist")
 	assert.Equal(t, 1, len(session.Events), "Session should have 1 event")
 	assert.Equal(t, testEvent.Type, session.Events[0].Type)
 	assert.Equal(t, testEvent.Progress, session.Events[0].Progress)
@@ -320,8 +378,17 @@ func (suite *WebSocketMonitoringTestSuite) TestEventTransmission(t *testing.T) {
 func (suite *WebSocketMonitoringTestSuite) TestMultipleClients(t *testing.T) {
 	// Test concurrent events from multiple clients
 	eventCount := 5
+	// Use a WaitGroup (not a fixed sleep) so every writer goroutine has
+	// DETERMINISTICALLY finished before the test returns. A sleep establishes no
+	// happens-before edge, so a writer that outlives the method would overlap a
+	// later test's write to the same shared suite.clients conn — gorilla forbids
+	// concurrent writers on one conn, and `go test -race` flagged exactly that.
+	// wg.Wait() synchronizes-with each wg.Done(), giving the required edge.
+	var wg sync.WaitGroup
 	for i := 0; i < len(suite.clients); i++ {
+		wg.Add(1)
 		go func(clientIndex int) {
+			defer wg.Done()
 			for j := 0; j < eventCount; j++ {
 				event := TestEvent{
 					Type:      "translation_progress",
@@ -337,14 +404,13 @@ func (suite *WebSocketMonitoringTestSuite) TestMultipleClients(t *testing.T) {
 		}(i)
 	}
 
-	// Wait for all events
-	time.Sleep(500 * time.Millisecond)
+	// Wait for all writer goroutines to complete, then allow the server to
+	// process the in-flight broadcasts before asserting.
+	wg.Wait()
+	time.Sleep(300 * time.Millisecond)
 
 	// Verify all events were processed
-	totalEvents := 0
-	for _, session := range suite.testSessions {
-		totalEvents += len(session.Events)
-	}
+	totalEvents := suite.totalSessionEvents()
 
 	expectedEvents := len(suite.clients) * eventCount
 	assert.GreaterOrEqual(t, totalEvents, expectedEvents/2, "Should process most events (allowing for some loss)")
@@ -376,7 +442,7 @@ func (suite *WebSocketMonitoringTestSuite) TestSessionManagement(t *testing.T) {
 	}
 
 	// Verify session exists
-	session, exists := suite.testSessions[sessionID]
+	session, exists := suite.sessionSnapshot(sessionID)
 	assert.True(t, exists, "Session should exist")
 	assert.Equal(t, sessionID, session.ID, "Session ID should match")
 	assert.Equal(t, len(events), len(session.Events), "Should have all events")
@@ -405,7 +471,8 @@ func (suite *WebSocketMonitoringTestSuite) TestErrorHandling(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 
 	// Verify error was stored
-	session := suite.testSessions["test-session"]
+	session, ok := suite.sessionSnapshot("test-session")
+	require.True(t, ok, "Session should exist")
 	assert.NotNil(t, session.Error, "Session should have error")
 	assert.Contains(t, session.Error.Error(), "Simulated error", "Error message should match")
 }
