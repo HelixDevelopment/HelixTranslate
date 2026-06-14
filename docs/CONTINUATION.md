@@ -1,7 +1,28 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 42
-**Last modified:** 2026-06-14T18:35:00Z
+**Revision:** 43
+**Last modified:** 2026-06-14T19:02:00Z
+
+<!-- session 2026-06-14t: plan-execution wave 13 — autonomous queue DRAINED (HEAD 6444e38) -->
+
+### Session 2026-06-14t — plan-execution wave 13; autonomous queue DRAINED (HEAD 6444e38)
+
+Wave 13 closed the last clean autonomous WORKING_PLAN items (3 background subagents, disjoint, all real + proven):
+- **e623ffb** §11.4.93 workable-items SQLite SSoT: `cmd/workable-items` Go tool (`sync md-to-db`/`validate`/`list`) + tracked `docs/workable_items.db` (§11.4.95). Real run: 81 items (64 fixed + 17 open), validate exit 0, verified via `sqlite3 SELECT`; mutation-proven. (Fuller schema — item_history/obsolete_details/db-to-md/fingerprint — is a tracked follow-on.)
+- **78023a7** P4.2 +2 gates: CM-TRACKER-DOCS-PRESENT + CM-ATM-TICKET-IDS → **pre-build suite now 6 gates, all green**, each paired-mutation-proven.
+- **6444e38** P4.3/ATM-076 §11.4.65 doc-export: `scripts/testing/sync_all_markdown_exports.sh` (pandoc html + weasyprint pdf, idempotent, `--check` gate mode, §11.4.106 honest tool-absence) + **225 siblings generated (0 failures, 0 stale)** for 120 in-scope docs. Caught + excluded a stray docs/research/helix_qa/ workspace dump (§11.4.30 guard).
+
+**FINAL integration sweep GREEN** at HEAD 6444e38 (quiescent): `go test ./... -p 1` = **58 ok / 0 FAIL**; 6-gate pre-build suite PASS; build+vet clean. All FF-pushed both upstreams (no force §11.4.113).
+
+#### SESSION FINAL STATE — autonomous queue DRAINED
+**Delivered:** ~30 genuine mutation-proven bug fixes (13 waves; main-module bug-hunt SATURATED per §11.4.118 completeness audit); format matrix complete (6 in × 5 out); PDF+DOCX input revived; deepseek-v4 allowlist current; version single-source (5 binaries); workable-items tracker constellation (81 ATM tickets) + SQLite SSoT; 6-gate mutation-proven pre-build suite; §11.4.65 doc-export (225 siblings); perf/stress/chaos coverage (5 hot-path packages); docs/WORKING_PLAN.md (canonical unfinished+known-issues inventory).
+
+**REMAINING — all operator-gated or larger tracked follow-ons (NOT autonomously closable; see docs/WORKING_PLAN.md + docs/Issues.md ATM-065..081):**
+1. **OPERATOR DECISIONS:** P1.0 version number (2.3.0 vs 3.0.0; wiring done) · P3.1 pkg/hash remove-vs-relocate · P1.1 provider keys/balance (OPENAI/ANTHROPIC absent, GEMINI invalid, ZHIPU no-balance) → unblocks stale-allowlist audits (deepseek pattern proven) · P2.x design calls (inert flags, MinScoreThreshold scale, reasoning-model structured-content, markdown first-class input).
+2. **LARGER TRACKED FOLLOW-ONS:** fuller §11.4.93 schema (item_history/db-to-md/fingerprint) · owned-submodule bug-hunt waves (§11.4.28 — ANOTHER SESSION ACTIVE on helix_qa, coordinate per §11.4.119) · full §11.4.27 test-type matrix + HelixQA/Challenges banks · P2.6 cmd/translator SSH download-dir (needs live SSH via §11.4.76 Containers).
+3. **RELEASE:** P0.2 full §11.4.40 7-step retest → P0.3 §11.4.151 `helix_translate-<version>` tag (after the operator decisions + the test-type matrix).
+
+**Loop status (§11.4.94(A)/§11.4.101/§11.4.126):** correctly rests on operator decisions — every remaining item is externally/operator-gated and explicitly tracked; nothing silently dropped. Resume by pointing a fresh session at this file + docs/WORKING_PLAN.md.
 
 <!-- session 2026-06-14s: WORKING_PLAN + plan-execution waves 10-12 (HEAD 06a8a16) -->
 
