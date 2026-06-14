@@ -25,6 +25,17 @@
 #       (integration/e2e/full-automation, identified by build tag) do not
 #       import a mock/stub package path; mocks are permitted in unit tests
 #       only. Best-effort, AST-free, documented limitations below.
+#   CM-SCRIPT-TARGET-SHELL-PARSEABLE (§11.4.67) — every tracked *.sh under
+#       scripts/ + scripts/testing/ parses cleanly under `bash -n`, AND any
+#       script declaring an sh shebang (#!/bin/sh, #!/usr/bin/env sh) ALSO
+#       parses under `sh -n`. A bash-shebang'd script is only required to be
+#       bash-parseable (invoked via its shebang it never runs under sh) — see
+#       §11.4.67's "may be invoked under a target shell OTHER than its shebang".
+#   CM-VERSION-SINGLE-SOURCE     (P0.1 / a36030e) — no cmd/*/main.go declares
+#       a hardcoded semver version literal (e.g. appVersion = "3.0.0"); every
+#       binary's version derives from pkg/version.AppVersion (== authoritative
+#       VERSION file). Fast grep complement of the Go test
+#       TestNoBinaryDeclaresDivergentVersionLiteral.
 #
 # Usage:
 #   scripts/pre_build_verification.sh            # run all gates
@@ -51,6 +62,8 @@
 #   docs/scripts/pre_build_verification.sh.md  — companion user guide (§11.4.18)
 #   scripts/testing/meta_test_gitignore_precommit_audit.sh — paired mutation (§1.1)
 #   scripts/testing/meta_test_no_fakes_beyond_unit.sh      — paired mutation (§1.1)
+#   scripts/testing/meta_test_script_target_shell_parseable.sh — paired mutation (§1.1)
+#   scripts/testing/meta_test_version_single_source.sh         — paired mutation (§1.1)
 #   §11.4.67 target-shell-parseable — passes `bash -n` AND `sh -n`.
 #
 # Parseability note (§11.4.67): written in POSIX-portable shell. No arrays,
@@ -178,17 +191,133 @@ $_f"
 }
 
 # ---------------------------------------------------------------------------
+# Gate: CM-SCRIPT-TARGET-SHELL-PARSEABLE (§11.4.67)
+#
+# Asserts every tracked *.sh under scripts/ + scripts/testing/ parses cleanly.
+# Rule (faithful to §11.4.67 "every shell script that may be invoked under a
+# target shell OTHER than the one in its shebang MUST parse cleanly under that
+# target shell"):
+#   - EVERY script MUST pass `bash -n` (bash is the project's superset shell;
+#     a script that is not even valid bash is broken outright).
+#   - A script whose shebang declares an sh-family interpreter (#!/bin/sh,
+#     #!/usr/bin/env sh, plain `sh`) MUST ALSO pass `sh -n` — because POSIX sh
+#     parses the WHOLE script before executing (the mksh-on-Android lesson in
+#     §11.4.67), so a bash-only construct anywhere is a latent crash.
+#   - A script whose shebang declares bash is NOT required to pass `sh -n`:
+#     invoked via its shebang it only ever runs under bash, so bash-only
+#     constructs (mapfile, < <(...), [[ ]], arrays) are legitimate. Forcing
+#     `sh -n` on an honest-bash script would itself be a §11.4.1 FAIL-bluff.
+#
+# A script that fails its REQUIRED parse is a §11.4.67 violation (a real,
+# user-invocable broken script — fix at source per §11.4.1, never the gate).
+#
+# Requires `bash` AND `sh` on PATH; if either is missing the gate cannot make
+# its assertion and returns 2 (harness error), never a false PASS (§11.4.1).
+# ---------------------------------------------------------------------------
+gate_script_target_shell_parseable() {
+  command -v bash >/dev/null 2>&1 || {
+    echo "FAIL CM-SCRIPT-TARGET-SHELL-PARSEABLE — 'bash' not on PATH (cannot assert)"; return 2; }
+  command -v sh >/dev/null 2>&1 || {
+    echo "FAIL CM-SCRIPT-TARGET-SHELL-PARSEABLE — 'sh' not on PATH (cannot assert)"; return 2; }
+
+  _bad=""
+  for _f in $(git ls-files 'scripts/*.sh' 'scripts/*/*.sh' 'scripts/*/*/*.sh' 2>/dev/null); do
+    [ -f "$_f" ] || continue
+    # Every script must be valid bash.
+    if ! bash -n "$_f" 2>/dev/null; then
+      _bad="$_bad
+$_f (bash -n FAILED — not valid bash)"
+      continue
+    fi
+    # Determine declared shell from the shebang's first line.
+    _shebang=$(head -n 1 "$_f" 2>/dev/null)
+    case "$_shebang" in
+      *bash*)
+        : # bash-declared: bash -n already passed; sh -n NOT required.
+        ;;
+      \#!*sh*)
+        # sh-family shebang (covers #!/bin/sh, #!/usr/bin/env sh, #!/usr/bin/ksh
+        # etc.) — must ALSO parse under sh.
+        if ! sh -n "$_f" 2>/dev/null; then
+          _bad="$_bad
+$_f (sh shebang but sh -n FAILED — bash-only construct in an sh script)"
+        fi
+        ;;
+      *)
+        # No recognised shell shebang: treat conservatively (§11.4.6) — require
+        # sh -n too, since such a script could be invoked via `sh script.sh`.
+        if ! sh -n "$_f" 2>/dev/null; then
+          _bad="$_bad
+$_f (no shell shebang and sh -n FAILED — could be run under sh)"
+        fi
+        ;;
+    esac
+  done
+  _bad=$(printf '%s\n' "$_bad" | sed '/^[[:space:]]*$/d')
+
+  if [ -n "$_bad" ]; then
+    echo "FAIL CM-SCRIPT-TARGET-SHELL-PARSEABLE — script(s) fail required parse (§11.4.67):"
+    printf '%s\n' "$_bad" | sed 's/^/         - /'
+    return 1
+  fi
+  echo "PASS CM-SCRIPT-TARGET-SHELL-PARSEABLE — every tracked scripts/*.sh parses under its required shell"
+  return 0
+}
+
+# ---------------------------------------------------------------------------
+# Gate: CM-VERSION-SINGLE-SOURCE (P0.1 / a36030e)
+#
+# Asserts NO cmd/*/main.go declares a hardcoded semver version literal. Every
+# binary MUST source its version from pkg/version.AppVersion (== authoritative
+# VERSION file) so all binaries agree. The forbidden pattern is a Go assignment
+# of a 3-part semver string literal to an identifier named (app)version:
+#     appVersion = "3.0.0"   |   const version = "2.0.0"
+# A reference like `appVersion = version.AppVersion` is COMPLIANT (no string
+# literal). XML/EPUB attrs like version="1.0" are NOT matched (no Go ` = `
+# assignment spacing + only 2-part). Mirrors the Go test
+# TestNoBinaryDeclaresDivergentVersionLiteral as a fast pre-build grep.
+#
+# Honest boundary (§11.4.6): grep-based, so a version literal assembled at
+# runtime (fmt.Sprintf) or held in a non-(app)version identifier is not caught
+# — the Go test + this gate together are the high-value cheap probe, not an
+# AST-grade proof.
+# ---------------------------------------------------------------------------
+gate_version_single_source() {
+  _offenders=""
+  for _f in $(git ls-files 'cmd/*/main.go' 2>/dev/null); do
+    [ -f "$_f" ] || continue
+    _hits=$(grep -nE '\b(app[Vv]ersion|version)[[:space:]]*=[[:space:]]*"[0-9]+\.[0-9]+\.[0-9]+"' "$_f" 2>/dev/null || true)
+    if [ -n "$_hits" ]; then
+      _offenders="$_offenders
+$_f:
+$(printf '%s\n' "$_hits" | sed 's/^/    /')"
+    fi
+  done
+  _offenders=$(printf '%s\n' "$_offenders" | sed '/^[[:space:]]*$/d')
+
+  if [ -n "$_offenders" ]; then
+    echo "FAIL CM-VERSION-SINGLE-SOURCE — cmd binary hardcodes a version literal (P0.1):"
+    printf '%s\n' "$_offenders" | sed 's/^/         /'
+    return 1
+  fi
+  echo "PASS CM-VERSION-SINGLE-SOURCE — no cmd/*/main.go hardcodes a version literal (all derive from version.AppVersion)"
+  return 0
+}
+
+# ---------------------------------------------------------------------------
 # Dispatch.
 # ---------------------------------------------------------------------------
 run_one() {
   case "$1" in
-    CM-GITIGNORE-PRECOMMIT-AUDIT) gate_gitignore_precommit_audit ;;
-    CM-NO-FAKES-BEYOND-UNIT)      gate_no_fakes_beyond_unit ;;
+    CM-GITIGNORE-PRECOMMIT-AUDIT)     gate_gitignore_precommit_audit ;;
+    CM-NO-FAKES-BEYOND-UNIT)          gate_no_fakes_beyond_unit ;;
+    CM-SCRIPT-TARGET-SHELL-PARSEABLE) gate_script_target_shell_parseable ;;
+    CM-VERSION-SINGLE-SOURCE)         gate_version_single_source ;;
     *) echo "pre_build_verification: ERROR — unknown gate '$1'" >&2; return 2 ;;
   esac
 }
 
-GATES="CM-GITIGNORE-PRECOMMIT-AUDIT CM-NO-FAKES-BEYOND-UNIT"
+GATES="CM-GITIGNORE-PRECOMMIT-AUDIT CM-NO-FAKES-BEYOND-UNIT CM-SCRIPT-TARGET-SHELL-PARSEABLE CM-VERSION-SINGLE-SOURCE"
 
 if [ "${1:-}" = "--list" ]; then
   for g in $GATES; do echo "$g"; done

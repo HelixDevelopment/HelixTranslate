@@ -1,6 +1,6 @@
 # pre_build_verification.sh — companion guide
 
-**Revision:** 1
+**Revision:** 2
 **Last modified:** 2026-06-14T00:00:00Z
 
 ## Overview
@@ -24,6 +24,8 @@ bluff.
 |---|---|---|
 | `CM-GITIGNORE-PRECOMMIT-AUDIT` | §11.4.30 | No tracked file matches the forbidden build-artifact / secret classes the project's `.gitignore` declares. Includes the **cmd/api-server anchoring regression guard**: the prebuilt root `api-server` binary must stay anchored as `/api-server` so the bare token never re-hides the SOURCE directory. |
 | `CM-NO-FAKES-BEYOND-UNIT` | §11.4.27 | Non-unit Go test files (build-tagged `integration`/`e2e`/`stress`/`performance`/`security`) do not import a mock/stub/fake package path. Mocks are permitted in unit tests only. |
+| `CM-SCRIPT-TARGET-SHELL-PARSEABLE` | §11.4.67 | Every tracked `*.sh` under `scripts/` + `scripts/testing/` parses cleanly under `bash -n`; any script declaring an **sh-family shebang** (`#!/bin/sh`, `#!/usr/bin/env sh`) or **no recognised shell shebang** must ALSO parse under `sh -n`. A script with an honest **bash** shebang is only required to be bash-parseable (invoked via its shebang it never runs under `sh`), so its bash-only constructs (`mapfile`, `< <(...)`, `[[ ]]`, arrays) are legitimate and must NOT be false-FAILed. |
+| `CM-VERSION-SINGLE-SOURCE` | P0.1 / `a36030e` | No `cmd/*/main.go` declares a hardcoded semver version literal (e.g. `appVersion = "3.0.0"`); every binary's version derives from `pkg/version.AppVersion` (== authoritative `VERSION` file). A fast grep complement of the Go test `TestNoBinaryDeclaresDivergentVersionLiteral`. |
 
 ## Prerequisites
 
@@ -67,6 +69,22 @@ Exit codes: `0` all selected gates passed · `1` at least one real violation ·
   matching the convention that integration/e2e suites carry build tags. This is
   a high-value cheap probe, not a complete proof; AST-grade enforcement is
   tracked as future work.
+- **CM-SCRIPT-TARGET-SHELL-PARSEABLE** is faithful to §11.4.67's "every shell
+  script that may be invoked under a target shell OTHER than the one in its
+  shebang MUST parse cleanly under that target shell." It does NOT force `sh -n`
+  on an honest-`bash` script, because such a script invoked via its shebang only
+  ever runs under bash — doing so would itself be a §11.4.1 FAIL-bluff (the
+  project's `scripts/demo-all.sh` is exactly this case: genuine bash with
+  `mapfile` + process substitution, correctly PASSes). It requires `bash` AND
+  `sh` on `PATH`; if either is absent it returns `2` (harness error), never a
+  false PASS. Scope is the tracked `scripts/` tree (incl. `scripts/testing/`).
+- **CM-VERSION-SINGLE-SOURCE** is grep-based: it matches a Go assignment of a
+  3-part semver string literal to an identifier named `(app)version`. A version
+  built at runtime (`fmt.Sprintf`) or held in a differently-named identifier is
+  NOT caught; a compliant `appVersion = version.AppVersion` reference and a
+  2-part XML/EPUB attr (`version="1.0"`) are correctly NOT flagged. It and the
+  Go test `TestNoBinaryDeclaresDivergentVersionLiteral` together are the
+  high-value probe, not an AST-grade proof.
 
 ## Internal behaviour
 
@@ -85,9 +103,15 @@ mutated.
   mutation proof for `CM-GITIGNORE-PRECOMMIT-AUDIT`.
 - `scripts/testing/meta_test_no_fakes_beyond_unit.sh` — paired §1.1 mutation
   proof for `CM-NO-FAKES-BEYOND-UNIT`.
+- `scripts/testing/meta_test_script_target_shell_parseable.sh` — paired §1.1
+  mutation proof for `CM-SCRIPT-TARGET-SHELL-PARSEABLE`.
+- `scripts/testing/meta_test_version_single_source.sh` — paired §1.1 mutation
+  proof for `CM-VERSION-SINGLE-SOURCE`.
 - `scripts/testing/meta_test_constitution_inheritance.sh` — the pre-existing
   inheritance meta-test (sibling discipline).
 - `scripts/commit_all.sh` — the authorised commit + push wrapper.
 
-**Last verified:** 2026-06-14 (suite PASS on current tree; both paired mutation
-tests PASS — every gate FAILs on a real violation and PASSes when restored).
+**Last verified:** 2026-06-14 (all 4 gates PASS on current tree; all four paired
+mutation tests PASS — every gate FAILs on a real violation and PASSes when
+restored, and the two false-FAIL negatives confirm honest-bash scripts and the
+compliant `version.AppVersion` form are never wrongly flagged).
