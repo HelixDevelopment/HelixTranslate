@@ -80,7 +80,15 @@ func NewQwenClient(config TranslationConfig) (*QwenClient, error) {
 
 	baseURL := config.BaseURL
 	if baseURL == "" {
-		baseURL = "https://dashscope.aliyuncs.com/api/v1"
+		// OpenAI-COMPATIBLE-mode base, consistent with this client's request
+		// (messages[]) + response (choices[].message.content) shapes and the
+		// /chat/completions path used in Translate. The old default was the
+		// NATIVE base ".../api/v1", which combined with a compatible-shaped
+		// request/response could never work (native returns {"output":{"text"}},
+		// not choices[]) — Qwen translation was effectively broken for the default
+		// config. The production config already points here. Verified against
+		// DashScope OpenAI-compatibility docs (§11.4.150, 2026-06-14).
+		baseURL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 	}
 
 	client := &QwenClient{
