@@ -1,7 +1,40 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 39
-**Last modified:** 2026-06-14T16:05:00Z
+**Revision:** 40
+**Last modified:** 2026-06-14T17:40:00Z
+
+<!-- session 2026-06-14q: parallel subagent bug-hunt campaign — 18 genuine fixes across 7 waves (HEAD 4bbac9a) -->
+
+### Session 2026-06-14q — parallel subagent-driven bug-hunt campaign (§11.4.70/§11.4.103): 18 genuine mutation-proven fixes across 7 waves (HEAD 4bbac9a)
+
+Operator directive: continuous endless loop with 3–4 parallel subagents on all parallelizable workable items, rock-solid evidence, zero bluff. Ran 7 waves (21 subagents on DISJOINT package scopes per §11.4.58/§11.4.119); every fix reproduce-first (§11.4.115) + mutation-proven (§1.1) + single-package `-p 1`(+`-race`) validated; all FF-pushed to both upstreams (no force §11.4.113). 4 subagents honestly reported NO bug (events/websocket, storage, api/services) — no manufactured changes (§11.4.6).
+
+**The 18 fixes:**
+- **80d627b** hardware: `parseLscpuCores` undercounts cores on multi-socket hosts (ignored `Socket(s)`; dual-socket 16-core → 8).
+- **0df25d9** preparation: coordinator never stamped `ChapterNum` → 0 → positional-fallback chapter-context mis-attribution after a failed chapter compacts.
+- **c3117f8** batch: same-stem/different-ext inputs (`book.fb2`+`book.epub`) collide onto one output → data loss; reconciled the 3 stem-only tests (§11.4.120).
+- **d0fe40a** security: `RefreshToken` minted fresh tokens from EXPIRED/no-expiry claims (auth-bypass, session resurrection); zero residue confirmed.
+- **d8142e5** verifier: `/api/v1/verified-models` hard-errored on zero verified models (`{"models":null}` fell through to array-decode).
+- **20beda7** distributed: `getFailureRate` fabricated 100% failure rate on zero/expired window → falsely traps coordinator in degraded mode.
+- **8f52370** fb2: `<v>`/`<subtitle>`/`<text-author>` dropped inline-element text (verse/quote/attribution data loss).
+- **a728e57** llm/ollama: dropped `temperature`/`max_tokens` (must be in `options` per official API §11.4.99) → non-deterministic output.
+- **be81550** markdown: chapter XHTML `<title>` unescaped → malformed EPUB for titles with `&`/`<`/`>`.
+- **7434ee4** verification: `polishChapter`/`polishSectionRecursive` index-out-of-range panic when translated has fewer sections.
+- **fd07e18** grpc: `SubscribeEvents` delivered lifecycle events with empty `session_id`.
+- **107e570** ebook/epub_parser: chapter text shipped HTML entities literally (`Tom &amp; Jerry`, `caf&#233;`).
+- **fa35d2e** config: nil-map panic in `LoadConfig` (omitted `providers` + any API-key env var set).
+- **8316e3f** translator core: data race / concurrent-map-write crash in `BaseTranslator` cache+stats (race-proven).
+- **c416bd8** ebook/epub_writer: cover image mislabeled `image/jpeg` for PNG/GIF/WEBP/SVG covers → broken cover.
+- **36f740a** cmd/unified-translator: SSH provider used a hardcoded "ru→sr-cyrillic" prompt + hardcoded binary/model paths, ignoring all user flags (also carried the cmd/api-server health fix below, swept in by the wrapper).
+- **(36f740a)** cmd/api-server: `healthCheck` returned 200 "healthy" regardless of gRPC backend state → derives from `conn.GetState()` → 503 when not Ready.
+- **85b3362** cmd/markdown-translator: `-format` flag never validated → unsupported value prints success but writes no file (false-success bluff).
+- **4bbac9a** .gitignore (§11.4.30): bare `api-server` pattern ignored the whole `cmd/api-server/` SOURCE dir (no repo-root binary exists; build output is `build/api-server`) → hid the package + blocked its tests (api-server had ZERO committed tests). Anchored to `/api-server`; committed the health regression guard.
+
+**Operator-flag (no production caller, design decision):** verifier `MinScoreThreshold` scale inconsistency — handler compares raw 0-100, adapter compares normalized 0-10; `GetPreferences`/`GetProviderScore` have no production caller; needs an operator decision on the canonical scale before either is wired (not guessed, §11.4.6/§11.4.120).
+
+**Process lesson (§11.4.119):** the full `go test ./... -p 1` integration sweep includes pkg/version's CodebaseHasher which hashes the whole tree (.go + .md + docs/) — it MUST run on a QUIESCENT tree; running it concurrently with file-writing subagents produces a spurious pkg/version hash-mismatch FAIL (confirmed green isolated). Sweeps + CONTINUATION syncs are therefore serialized BETWEEN parallel waves.
+
+**Integration sweeps GREEN** at each quiescent checkpoint: waves 1-5 → 54 ok/0; waves 6+7 → **55 ok/0 FAIL** (HEAD 4bbac9a; cmd/api-server now has committed tests). build+vet exit 0. **SESSION GRAND TOTAL: ~25 real fixes** (this campaign's 18 + earlier: PDF revival, format matrix + .html, deepseek-v4 allowlist, websocket race, ssh-test, 2 doc-syncs).
 
 <!-- session 2026-06-14p: zhipu allowlist finding (operator-blocked) + queue-drained status (HEAD a33f20b) -->
 
