@@ -4,6 +4,7 @@ import (
 	"context"
 	"digital.vasic.translator/pkg/events"
 	"errors"
+	"sync"
 )
 
 var (
@@ -49,8 +50,15 @@ type Translator interface {
 // BaseTranslator provides common functionality
 type BaseTranslator struct {
 	config TranslationConfig
-	stats  TranslationStats
-	cache  map[string]string
+	// mu guards cache and stats for concurrent Translate callers. The
+	// translation pipeline runs with -concurrency / -workers, so CheckCache,
+	// AddToCache, GetStats and UpdateStats are invoked from multiple
+	// goroutines; without this lock concurrent access to the cache map is a
+	// runtime "fatal error: concurrent map writes" crash and the stats
+	// counters race.
+	mu    sync.RWMutex
+	stats TranslationStats
+	cache map[string]string
 }
 
 // NewBaseTranslator creates a new base translator
@@ -64,11 +72,15 @@ func NewBaseTranslator(config TranslationConfig) *BaseTranslator {
 
 // GetStats returns translation statistics
 func (bt *BaseTranslator) GetStats() TranslationStats {
+	bt.mu.RLock()
+	defer bt.mu.RUnlock()
 	return bt.stats
 }
 
 // CheckCache checks if translation is cached
 func (bt *BaseTranslator) CheckCache(text string) (string, bool) {
+	bt.mu.Lock()
+	defer bt.mu.Unlock()
 	if translated, ok := bt.cache[text]; ok {
 		bt.stats.Cached++
 		return translated, true
@@ -78,11 +90,15 @@ func (bt *BaseTranslator) CheckCache(text string) (string, bool) {
 
 // AddToCache adds a translation to cache
 func (bt *BaseTranslator) AddToCache(original, translated string) {
+	bt.mu.Lock()
+	defer bt.mu.Unlock()
 	bt.cache[original] = translated
 }
 
 // UpdateStats updates translation statistics
 func (bt *BaseTranslator) UpdateStats(success bool) {
+	bt.mu.Lock()
+	defer bt.mu.Unlock()
 	bt.stats.Total++
 	if success {
 		bt.stats.Translated++
