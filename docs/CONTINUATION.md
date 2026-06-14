@@ -1,7 +1,18 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 34
-**Last modified:** 2026-06-14T15:07:00Z
+**Revision:** 35
+**Last modified:** 2026-06-14T15:17:00Z
+
+<!-- session 2026-06-14l: CLI output-format honored + 2 gate reconciliations (HEAD ca5608f) -->
+
+### Session 2026-06-14l — CLI honors -o output format + 2 §11.4.120 reconciliations (HEAD ca5608f)
+
+- **ca5608f** cli: `unified-translator` ALWAYS emitted EPUB regardless of the `-o` extension → `-o book.txt`/`-o book.fb2` wrote EPUB (PK-zip) bytes into a misnamed file (silent wrong-output, §11.4). New `generateOutput()` dispatches on extension: `.epub` (default)→EPUB; `.txt`/`.md`→translated text direct; `.fb2`→FB2Writer; unsupported→explicit error (§11.4.6). REAL E2E PROVEN (docs/qa/e2e_output_formats_20260614_151507/): same PDF → real DeepSeek → out.txt (UTF-8 plain, not zip, 135 Cyrillic) + out.fb2 (valid FictionBook XML, 138 Cyrillic). Permanent guard cmd/unified-translator/output_format_test.go, MUTATION-PROVEN (force always-EPUB → .txt/.fb2 FAIL).
+- **§11.4.120 reconciliations surfaced by the post-PDF full sweep:**
+  - test/unit/format_detector_test.go: PDF + DOCX moved to supportedFormats (real extractors landed); MOBI stays unsupported.
+  - cmd/cli TestTranslateEbookFunction/with_app_config: was a §11.4.98 BLUFF — skip-guard fired only with NO key, then forced openai + fake "config-key", dialled REAL OpenAI, 401'd, failed NoError whenever ANY other provider key was in env (DEEPSEEK/ZHIPU/GEMINI/MISTRAL present this session). Rewritten to a self-driving httptest OpenAI mock (config BaseURL→mock); asserts success + mock-hit + non-empty output. No real network, no env dependency.
+
+**SESSION GRAND TOTAL: ~83 real bugs** + 5 reconciliations + §11.4.98 conversions + real E2E proofs (PDF, output-formats, 5-format matrix via DeepSeek + Mistral). All 6 input formats + 4 output formats (.epub/.fb2/.txt/.md) proven end-to-end. Post-fix full `go test ./... -p 1` sweep GREEN at HEAD ca5608f: **54 ok / 0 FAIL** (was 52 ok/2 stale-gate FAIL pre-reconcile; qa-results/full_sweep_20260614_151656.log). build+vet exit 0.
 
 <!-- session 2026-06-14k: PDF input revived (HEAD 18d6f73) -->
 
