@@ -503,6 +503,79 @@ func parseListItemLine(line string) (parsedListItem, bool) {
 	}, true
 }
 
+// tableDelimRegex matches a GFM table delimiter row, e.g. "| --- | :--: |".
+// Each cell is a run of dashes with optional leading/trailing colons (alignment).
+var tableDelimRegex = regexp.MustCompile(`^\s*\|?\s*:?-{1,}:?\s*(\|\s*:?-{1,}:?\s*)*\|?\s*$`)
+
+// isTableRow reports whether a line looks like a GFM table row: it contains at
+// least one pipe and is non-empty after trimming. (Pure delimiter rows are
+// matched separately by tableDelimRegex.)
+func isTableRow(line string) bool {
+	t := strings.TrimSpace(line)
+	return t != "" && strings.Contains(t, "|")
+}
+
+// splitTableCells splits a "| a | b |" row into its cell strings, dropping the
+// optional leading/trailing empty cells produced by the bounding pipes. A
+// backslash-escaped pipe ("\|") is NOT a column separator.
+func splitTableCells(row string) []string {
+	t := strings.TrimSpace(row)
+	t = strings.TrimPrefix(t, "|")
+	t = strings.TrimSuffix(t, "|")
+	// Split on unescaped pipes.
+	var cells []string
+	var cur strings.Builder
+	runes := []rune(t)
+	for i := 0; i < len(runes); i++ {
+		if runes[i] == '\\' && i+1 < len(runes) && runes[i+1] == '|' {
+			cur.WriteRune('|')
+			i++
+			continue
+		}
+		if runes[i] == '|' {
+			cells = append(cells, strings.TrimSpace(cur.String()))
+			cur.Reset()
+			continue
+		}
+		cur.WriteRune(runes[i])
+	}
+	cells = append(cells, strings.TrimSpace(cur.String()))
+	return cells
+}
+
+// renderTableBlock converts a GFM pipe-table block (header row, delimiter row,
+// then zero+ data rows) into a <table> with <thead>/<tbody>. Inline markdown in
+// each cell is converted via convertInlineMarkdown so links/emphasis in cells
+// survive. indentStr is prepended to every emitted line for pretty-printing.
+func (c *MarkdownToEPUBConverter) renderTableBlock(rows []string, indentStr string) string {
+	if len(rows) < 2 {
+		return ""
+	}
+	header := splitTableCells(rows[0])
+	var b strings.Builder
+	b.WriteString(indentStr + "<table>\n")
+	b.WriteString(indentStr + "  <thead>\n" + indentStr + "    <tr>")
+	for _, h := range header {
+		b.WriteString("<th>" + c.convertInlineMarkdown(h) + "</th>")
+	}
+	b.WriteString("</tr>\n" + indentStr + "  </thead>\n")
+	// Data rows start after the delimiter row (rows[1]).
+	if len(rows) > 2 {
+		b.WriteString(indentStr + "  <tbody>\n")
+		for _, dr := range rows[2:] {
+			cells := splitTableCells(dr)
+			b.WriteString(indentStr + "    <tr>")
+			for _, cell := range cells {
+				b.WriteString("<td>" + c.convertInlineMarkdown(cell) + "</td>")
+			}
+			b.WriteString("</tr>\n")
+		}
+		b.WriteString(indentStr + "  </tbody>\n")
+	}
+	b.WriteString(indentStr + "</table>\n")
+	return b.String()
+}
+
 // renderListBlock converts a contiguous run of markdown list lines into nested
 // <ul>/<ol> HTML. Items more deeply indented than their predecessor open a
 // nested list inside the previous <li>. Inline markdown in each item is
@@ -714,10 +787,57 @@ func (c *MarkdownToEPUBConverter) markdownToHTML(markdown string) string {
 	return html.String()
 }
 
+// inlineEscapable lists the markdown metacharacters a leading backslash escapes
+// (CommonMark "backslash escapes"). A "\*" must reach the reader as a literal
+// "*", not be interpreted as emphasis.
+const inlineEscapable = "\\`*_{}[]()#+-.!>"
+
+// inlineEscapePlaceholderBase is a Private-Use-Area rune base used to hide
+// backslash-escaped characters from the emphasis/link regexes; decoded back to
+// the literal character at the very end of convertInlineMarkdown.
+const inlineEscapePlaceholderBase = rune(0xE000)
+
+// protectEscapes replaces every "\X" (X in inlineEscapable) with a private-use
+// placeholder so X is not seen by the markdown substitution regexes. The
+// backslash is consumed (a literal "\*" yields a literal "*").
+func protectEscapes(s string) string {
+	var b strings.Builder
+	runes := []rune(s)
+	for i := 0; i < len(runes); i++ {
+		if runes[i] == '\\' && i+1 < len(runes) &&
+			strings.ContainsRune(inlineEscapable, runes[i+1]) {
+			b.WriteRune(inlineEscapePlaceholderBase + (runes[i+1] & 0xFF))
+			i++
+			continue
+		}
+		b.WriteRune(runes[i])
+	}
+	return b.String()
+}
+
+// restoreEscapes turns the placeholders from protectEscapes back into the
+// literal characters they stood for.
+func restoreEscapes(s string) string {
+	var b strings.Builder
+	for _, r := range s {
+		if r >= inlineEscapePlaceholderBase && r < inlineEscapePlaceholderBase+0x100 {
+			b.WriteRune(r - inlineEscapePlaceholderBase)
+			continue
+		}
+		b.WriteRune(r)
+	}
+	return b.String()
+}
+
 // convertInlineMarkdown converts inline markdown formatting to HTML
 func (c *MarkdownToEPUBConverter) convertInlineMarkdown(text string) string {
 	// First escape XML special characters in the raw text
 	text = c.escapeXML(text)
+
+	// Hide backslash-escaped markdown metacharacters from the substitution
+	// regexes below so "\*literal\*" is NOT treated as emphasis. The escape is
+	// processed AFTER escapeXML so a "\<" still produced a valid "&lt;" first.
+	text = protectEscapes(text)
 
 	// Now convert markdown to HTML (HTML tags won't be escaped)
 	// Bold: **text** or __text__ (process first to avoid conflicts)
@@ -746,6 +866,9 @@ func (c *MarkdownToEPUBConverter) convertInlineMarkdown(text string) string {
 	text = regexp.MustCompile(`\[([^\]]*)\]\(([^)]*)\)`).
 		ReplaceAllString(text, `<a href="$2">$1</a>`)
 
+	// Decode the protected backslash-escapes back to their literal characters.
+	text = restoreEscapes(text)
+
 	return text
 }
 
@@ -768,6 +891,7 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 	var codeBlock strings.Builder
 	var listBuf []parsedListItem
 	var quoteBuf []string
+	var tableBuf []string
 
 	flushParagraph := func() {
 		if inParagraph {
@@ -780,6 +904,22 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 			result.WriteString(c.renderListBlock(listBuf, ""))
 			listBuf = nil
 		}
+	}
+	// flushTable emits a buffered GFM pipe-table block. A buffer that is NOT a
+	// valid table (missing the delimiter row) is emitted as paragraph text so no
+	// pipe content is lost — the buffering is speculative and reversible.
+	flushTable := func() {
+		if len(tableBuf) == 0 {
+			return
+		}
+		if len(tableBuf) >= 2 && tableDelimRegex.MatchString(tableBuf[1]) {
+			result.WriteString(c.renderTableBlock(tableBuf, ""))
+		} else {
+			for _, row := range tableBuf {
+				result.WriteString("<p>" + c.convertInlineMarkdown(strings.TrimSpace(row)) + "</p>\n")
+			}
+		}
+		tableBuf = nil
 	}
 	// flushQuote emits a contiguous run of "> " lines as one <blockquote>. This
 	// is the path createEPUB writes into each chapter, so a blockquote left as a
@@ -811,6 +951,7 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 				flushParagraph()
 				flushList()
 				flushQuote()
+				flushTable()
 				inCodeBlock = true
 			}
 			continue
@@ -827,12 +968,28 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 		if item, ok := parseListItemLine(raw); ok {
 			flushParagraph()
 			flushQuote()
+			flushTable()
 			listBuf = append(listBuf, item)
 			continue
 		}
 		flushList()
 
 		line := strings.TrimSpace(raw)
+
+		// GFM table row: any non-empty line containing a pipe (and not a list /
+		// quote / header) is a candidate table line. Buffer contiguous candidate
+		// rows; flushTable decides whether the buffer is a real table (delimiter
+		// row present) or falls back to paragraphs. Detected before the
+		// header/paragraph fallback so a "| a | b |" row is never flattened into a
+		// single literal-pipe paragraph (total table-structure loss).
+		if line != "" && isTableRow(line) &&
+			!strings.HasPrefix(line, "#") && !strings.HasPrefix(line, ">") {
+			flushParagraph()
+			flushQuote()
+			tableBuf = append(tableBuf, line)
+			continue
+		}
+		flushTable()
 
 		// Blockquote: "> text" (or bare ">"). Accumulate contiguous quote lines
 		// and flush as one <blockquote> before the header/paragraph fallbacks.
@@ -881,10 +1038,11 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 		}
 	}
 
-	// Close any open paragraph, list and blockquote
+	// Close any open paragraph, list, blockquote and table
 	flushParagraph()
 	flushList()
 	flushQuote()
+	flushTable()
 	// Close an unterminated code block so its content is not silently dropped.
 	if inCodeBlock {
 		result.WriteString("<pre><code>" + c.escapeXML(codeBlock.String()) + "</code></pre>\n")

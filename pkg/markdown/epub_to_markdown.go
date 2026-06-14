@@ -483,8 +483,15 @@ func (c *EPUBToMarkdownConverter) convertNode(n *html.Node, md *strings.Builder,
 			c.convertChildren(n, md, depth)
 			md.WriteString("`")
 		case "pre":
+			// A <pre> holds preformatted text whose newlines and indentation are
+			// significant. Recursing through convertChildren would (a) run every
+			// text node through collapseInlineWhitespace — flattening newlines to
+			// spaces and stripping leading indentation — and (b) wrap any inner
+			// <code> in stray inline backticks. Both DESTROY the code block on the
+			// round-trip. Instead, gather the descendant text VERBATIM so the
+			// fenced block survives exactly as written.
 			md.WriteString("\n\n```\n")
-			c.convertChildren(n, md, depth)
+			md.WriteString(strings.TrimRight(rawText(n), "\n"))
 			md.WriteString("\n```\n\n")
 		case "blockquote":
 			md.WriteString("\n\n> ")
@@ -518,6 +525,15 @@ func (c *EPUBToMarkdownConverter) convertNode(n *html.Node, md *strings.Builder,
 			// Convert image src to Images/ reference
 			imgFilename := filepath.Base(src)
 			md.WriteString(fmt.Sprintf("![%s](Images/%s)", alt, imgFilename))
+		case "table":
+			// Render an HTML table back to a GFM pipe table so the table survives
+			// the EPUB->markdown direction (md->XHTML emits <table> for a pipe
+			// table; the reverse MUST reproduce the pipe table or the structure is
+			// lost). Without this, the default branch flattened every cell's text
+			// into one run with no row/column structure.
+			md.WriteString("\n\n")
+			c.convertTable(n, md, depth)
+			md.WriteString("\n\n")
 		case "hr":
 			md.WriteString("\n\n---\n\n")
 		default:
@@ -561,6 +577,79 @@ func (c *EPUBToMarkdownConverter) convertListItems(n *html.Node, md *strings.Bui
 			continue
 		}
 		c.convertNode(child, md, depth)
+	}
+}
+
+// rawText returns the concatenated text of all descendant text nodes of n
+// WITHOUT any whitespace collapsing — used for <pre> content where newlines and
+// indentation are significant and must survive verbatim.
+func rawText(n *html.Node) string {
+	var b strings.Builder
+	var walk func(*html.Node)
+	walk = func(node *html.Node) {
+		if node.Type == html.TextNode {
+			b.WriteString(node.Data)
+			return
+		}
+		for child := node.FirstChild; child != nil; child = child.NextSibling {
+			walk(child)
+		}
+	}
+	walk(n)
+	return b.String()
+}
+
+// convertTable renders an HTML <table> as a GFM pipe table. It gathers every
+// <tr> (whether under <thead>/<tbody>/<tfoot> or directly under <table>), treats
+// the first row as the header, emits a delimiter row, then the data rows. Cell
+// inline content is converted via convertChildren so links/emphasis in cells
+// survive; a literal "|" inside a cell is backslash-escaped so it does not get
+// mistaken for a column separator on the next parse.
+func (c *EPUBToMarkdownConverter) convertTable(table *html.Node, md *strings.Builder, depth int) {
+	var rows [][]string
+	var collectRows func(n *html.Node)
+	collectRows = func(n *html.Node) {
+		for child := n.FirstChild; child != nil; child = child.NextSibling {
+			if child.Type != html.ElementNode {
+				continue
+			}
+			switch child.Data {
+			case "thead", "tbody", "tfoot":
+				collectRows(child)
+			case "tr":
+				var cells []string
+				for cell := child.FirstChild; cell != nil; cell = cell.NextSibling {
+					if cell.Type == html.ElementNode && (cell.Data == "td" || cell.Data == "th") {
+						var cb strings.Builder
+						c.convertChildren(cell, &cb, depth)
+						text := strings.TrimSpace(cb.String())
+						text = strings.ReplaceAll(text, "|", "\\|")
+						cells = append(cells, text)
+					}
+				}
+				rows = append(rows, cells)
+			}
+		}
+	}
+	collectRows(table)
+
+	if len(rows) == 0 {
+		return
+	}
+	writeRow := func(cells []string) {
+		md.WriteString("| ")
+		md.WriteString(strings.Join(cells, " | "))
+		md.WriteString(" |\n")
+	}
+	writeRow(rows[0])
+	// Delimiter row matching the header's column count.
+	delims := make([]string, len(rows[0]))
+	for i := range delims {
+		delims[i] = "---"
+	}
+	writeRow(delims)
+	for _, r := range rows[1:] {
+		writeRow(r)
 	}
 }
 
