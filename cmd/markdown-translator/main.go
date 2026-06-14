@@ -16,6 +16,20 @@ import (
 	"strings"
 )
 
+// validateOutputFormat checks the -format flag against the closed set of
+// supported output formats {epub, md}. Step 4 of the pipeline only knows how
+// to emit those two formats; any other value would silently produce NO output
+// file while the program still reported success. Rejecting unsupported values
+// up front turns that false-success into an honest, actionable error.
+func validateOutputFormat(format string) error {
+	switch format {
+	case "epub", "md":
+		return nil
+	default:
+		return fmt.Errorf("unsupported output format %q (supported: epub, md)", format)
+	}
+}
+
 func main() {
 	// Command line flags
 	inputFile := flag.String("input", "", "Input file (EPUB or Markdown)")
@@ -35,6 +49,13 @@ func main() {
 		fmt.Println("Supported output formats: EPUB (epub), Markdown (md)")
 		flag.PrintDefaults()
 		os.Exit(1)
+	}
+
+	// Validate output format against the supported closed set before doing any
+	// work; otherwise an unsupported value silently produces no output file
+	// while the pipeline still reports success.
+	if err := validateOutputFormat(*outputFormat); err != nil {
+		log.Fatalf("%v", err)
 	}
 
 	// Validate input file
