@@ -921,11 +921,11 @@ func step5DownloadFiles(ctx context.Context, config *Config, progress *Translati
 		return fmt.Errorf("SSH worker not initialized - ensure step1 completed successfully")
 	}
 
-	// Download each file to local directory
-	inputDir := filepath.Dir(config.InputFile)
-
+	// Download each file to its correct local destination. The translated EPUB
+	// MUST land at the operator-requested config.OutputFile; all other generated
+	// files (markdown sidecars) land next to the input file.
 	for _, remoteFile := range progress.FilesCreated {
-		localFile := filepath.Join(inputDir, filepath.Base(remoteFile))
+		localFile := localDownloadPath(remoteFile, config)
 
 		if err := worker.DownloadFile(ctx, remoteFile, localFile); err != nil {
 			config.Logger.Warn("Failed to download file", map[string]interface{}{
@@ -1075,6 +1075,22 @@ func printFinalReport(progress *TranslationProgress) {
 	}
 
 	fmt.Println(strings.Repeat("=", 80))
+}
+
+// localDownloadPath maps a remote generated file to its correct local
+// destination. The translated EPUB (whose remote basename equals the requested
+// output file's basename) is delivered to the exact path the operator requested
+// via -output (config.OutputFile). Every other generated file (the
+// _original.md / _translated.md markdown sidecars) is placed next to the input
+// file. Previously every file — including the EPUB — was written to
+// inputDir/<basename>, so an -output pointing at a different directory or
+// basename silently produced the artifact at the wrong location while the final
+// report claimed success at config.OutputFile.
+func localDownloadPath(remoteFile string, config *Config) string {
+	if filepath.Base(remoteFile) == filepath.Base(config.OutputFile) {
+		return config.OutputFile
+	}
+	return filepath.Join(filepath.Dir(config.InputFile), filepath.Base(remoteFile))
 }
 
 // calculateEssentialFilesHash calculates hash of essential files only
