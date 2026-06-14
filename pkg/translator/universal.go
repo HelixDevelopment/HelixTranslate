@@ -6,8 +6,22 @@ import (
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/language"
 	"fmt"
+	"strings"
 	"unicode/utf8"
 )
+
+// keepIfTranslationEmpty guards against a "successful" (nil-error) translation
+// that returns an empty or whitespace-only string for non-empty source text.
+// Assigning such a result would silently destroy the original content while the
+// run reports success — a data-loss bluff. When the source is non-empty but the
+// translated result is blank, the original is preserved; otherwise the
+// translation is returned unchanged.
+func keepIfTranslationEmpty(original, translated string) string {
+	if strings.TrimSpace(original) != "" && strings.TrimSpace(translated) == "" {
+		return original
+	}
+	return translated
+}
 
 // truncateOnRuneBoundary returns s limited to at most maxBytes bytes without
 // splitting a multi-byte UTF-8 rune. If a cut at maxBytes would land in the
@@ -133,7 +147,7 @@ func (ut *UniversalTranslator) translateMetadata(
 		if err != nil {
 			return fmt.Errorf("failed to translate title: %w", err)
 		}
-		metadata.Title = translated
+		metadata.Title = keepIfTranslationEmpty(metadata.Title, translated)
 	}
 
 	// Translate description
@@ -148,7 +162,7 @@ func (ut *UniversalTranslator) translateMetadata(
 		if err != nil {
 			EmitProgress(eventBus, sessionID, "Warning: Failed to translate description", map[string]interface{}{"error": err.Error()})
 		} else {
-			metadata.Description = translated
+			metadata.Description = keepIfTranslationEmpty(metadata.Description, translated)
 		}
 	}
 
@@ -174,7 +188,7 @@ func (ut *UniversalTranslator) translateChapter(
 		if err != nil {
 			return fmt.Errorf("failed to translate chapter title: %w", err)
 		}
-		chapter.Title = translated
+		chapter.Title = keepIfTranslationEmpty(chapter.Title, translated)
 	}
 
 	// Translate sections
@@ -206,7 +220,7 @@ func (ut *UniversalTranslator) translateSection(
 		if err != nil {
 			return fmt.Errorf("failed to translate section title: %w", err)
 		}
-		section.Title = translated
+		section.Title = keepIfTranslationEmpty(section.Title, translated)
 	}
 
 	// Translate content
@@ -221,7 +235,7 @@ func (ut *UniversalTranslator) translateSection(
 		if err != nil {
 			return fmt.Errorf("failed to translate section content: %w", err)
 		}
-		section.Content = translated
+		section.Content = keepIfTranslationEmpty(section.Content, translated)
 	}
 
 	// Translate subsections
