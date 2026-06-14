@@ -19,7 +19,8 @@ import (
 	"strings"
 )
 
-const version = "2.0.0"
+// version is sourced from the single authoritative version.AppVersion (== VERSION file).
+const version = versionpkg.AppVersion
 
 func main() {
 	// Define CLI flags

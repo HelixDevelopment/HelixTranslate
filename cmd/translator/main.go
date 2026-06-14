@@ -20,7 +20,8 @@ import (
 )
 
 const (
-	appVersion = "2.1.0"
+	// appVersion is sourced from the single authoritative version.AppVersion (== VERSION file).
+	appVersion = version.AppVersion
 )
 
 // Global configuration

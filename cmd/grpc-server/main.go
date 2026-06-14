@@ -16,10 +16,12 @@ import (
 	translatorgrpc "digital.vasic.translator/pkg/grpc"
 	"digital.vasic.translator/pkg/grpc/proto"
 	"digital.vasic.translator/pkg/logger"
+	"digital.vasic.translator/pkg/version"
 )
 
 const (
-	appVersion = "3.0.0"
+	// appVersion is sourced from the single authoritative version.AppVersion (== VERSION file).
+	appVersion = version.AppVersion
 )
 
 // ServerConfig holds configuration for the gRPC server

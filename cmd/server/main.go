@@ -16,6 +16,7 @@ import (
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/models"
 	"digital.vasic.translator/pkg/security"
+	versionpkg "digital.vasic.translator/pkg/version"
 	"digital.vasic.translator/pkg/websocket"
 	"encoding/pem"
 	"flag"
@@ -33,7 +34,8 @@ import (
 	"github.com/quic-go/quic-go/http3"
 )
 
-const version = "1.0.0"
+// version is sourced from the single authoritative versionpkg.AppVersion (== VERSION file).
+const version = versionpkg.AppVersion
 
 func main() {
 	// Parse command-line flags

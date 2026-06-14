@@ -22,10 +22,12 @@ import (
 	"digital.vasic.translator/pkg/sshworker"
 	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/translator/llm"
+	"digital.vasic.translator/pkg/version"
 )
 
 const (
-	appVersion = "3.0.0"
+	// appVersion is sourced from the single authoritative version.AppVersion (== VERSION file).
+	appVersion = version.AppVersion
 )
 
 // UnifiedConfig holds the configuration for the unified translation system
