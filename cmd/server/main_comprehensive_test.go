@@ -9,6 +9,7 @@ import (
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/models"
 	"digital.vasic.translator/pkg/security"
+	versionpkg "digital.vasic.translator/pkg/version"
 	"digital.vasic.translator/pkg/websocket"
 	"encoding/json"
 	"flag"
