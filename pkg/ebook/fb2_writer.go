@@ -88,7 +88,17 @@ func (w *FB2Writer) Write(book *Book, filename string) error {
 // over the full Subsections tree (as the EPUB writer's formatSection already
 // does) makes the write lossless for arbitrarily-nested content.
 func collectSectionParagraphs(sec Section) []string {
-	paragraphs := splitIntoParagraphs(sec.Content)
+	var paragraphs []string
+	// Preserve the section/subsection HEADING as a leading paragraph. The writer
+	// only emits the chapter title as the FB2 <section> title; without this, every
+	// Section.Title / nested Subsection.Title was silently dropped on write —
+	// heading-text data loss. (Kept as a flat paragraph rather than a nested
+	// <section> to preserve the existing single-section-per-chapter structure
+	// while making the write lossless for titles.)
+	if t := strings.TrimSpace(sec.Title); t != "" {
+		paragraphs = append(paragraphs, t)
+	}
+	paragraphs = append(paragraphs, splitIntoParagraphs(sec.Content)...)
 	for _, sub := range sec.Subsections {
 		paragraphs = append(paragraphs, collectSectionParagraphs(sub)...)
 	}
