@@ -216,10 +216,11 @@ func (pc *PreparationCoordinator) analyzeChapters(ctx context.Context, book *ebo
 
 	// Results are written to a per-chapter slot indexed by chapter position so
 	// the returned slice is ALWAYS in chapter order regardless of goroutine
-	// completion order. Downstream GetTranslationContext indexes
-	// ChapterAnalyses[chapterNum-1] by position, so a completion-order slice
-	// would mis-attribute each chapter's analysis to the wrong chapter.
-	// Distinct goroutines write distinct indices, so no mutex is required.
+	// completion order. Each analysis is additionally stamped with its
+	// authoritative ChapterNum below, so downstream GetTranslationContext can
+	// attribute by number (robust to the slice being compacted after a failed
+	// chapter is dropped). Distinct goroutines write distinct indices, so no
+	// mutex is required.
 	slots := make([]*ChapterAnalysis, len(book.Chapters))
 
 	// Select a provider for chapter analysis
@@ -264,6 +265,16 @@ func (pc *PreparationCoordinator) analyzeChapters(ctx context.Context, book *ebo
 				log.Printf("    Warning: Failed to parse chapter %d analysis: %v", chapterIdx+1, err)
 				return
 			}
+
+			// Stamp the AUTHORITATIVE chapter number we already know. The LLM is
+			// the only source of ChapterNum otherwise, and it frequently omits the
+			// field (leaving it 0) or returns a wrong/duplicated value. Either case
+			// defeats the by-number attribution in lookupChapterAnalysis: an all-zero
+			// slice silently degrades to positional indexing, which mis-attributes
+			// every surviving chapter once a failed chapter is compacted out. The
+			// coordinator owns the ground truth (chapterIdx+1), so override whatever
+			// the LLM returned.
+			analysis.ChapterNum = chapterIdx + 1
 
 			slots[chapterIdx] = &analysis
 
