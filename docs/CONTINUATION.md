@@ -1,7 +1,18 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 31
-**Last modified:** 2026-06-14T13:15:00Z
+**Revision:** 32
+**Last modified:** 2026-06-14T14:25:00Z
+
+<!-- session 2026-06-14i: real-translation E2E matrix caught + fixed more bugs (HEAD b23bcac) -->
+
+### Session 2026-06-14i — real provider×format E2E matrix found + fixed more bugs (HEAD b23bcac)
+
+Driving REAL translations across formats/providers (rate-limited subagents → done inline) surfaced + fixed:
+- **41063cb** FB2 + EPUB INPUT broken end-to-end: convertToMarkdown re-parsed already-extracted text as the original format ('failed to parse FB2: EOF' / 'not a valid zip'). Fixed → all 5 input formats translate. PROVEN: real DeepSeek E2E matrix FB2/EPUB/TXT/DOCX/HTML all → valid Serbian-Cyrillic EPUB (docs/qa/e2e_format_matrix_*).
+- **9821e0f** zhipu missing from cmd/unified-translator resolveProviderAPIKey env map → ZHIPU_API_KEY never satisfied the gate. Fixed (proven: now reaches the live Zhipu API). + Multi-provider proven: Mistral E2E PASS (docs/qa/e2e_multiprovider_*).
+- **b23bcac** stale provider model-allowlists (gemini/groq/zhipu accepted only DEPRECATED models, rejected current → providers unusable). Added current models; live-proven the gate blocker is gone (groq llama-3.3-70b → 429 'recognized'; gemini-1.5-flash → reaches API (auth err); zhipu glm-4-flash → reaches API (account err)). docs/qa/allowlist_fix_*.
+
+**SESSION GRAND TOTAL: ~78 real bugs** + 3 reconciliations + §11.4.98 conversion + real E2E proofs (5-format matrix via DeepSeek + Mistral 2nd-provider). OPERATOR/research-gated remainders: add OPENAI/ANTHROPIC keys (absent); GEMINI_API_KEY appears invalid/expired (gemini reaches API but 'API Key not found'); zhipu key's account/endpoint rejects documented models (possible gemini/zhipu CLIENT endpoint bug like Qwen's — flagged for investigation, not guessed §11.4.6). Post-wave full sweep GREEN at HEAD b23bcac: 54 ok / 0 FAIL. Build+vet exit 0.
 
 <!-- session 2026-06-14h: all 4 operator-selected directives executed (HEAD c6c2930) -->
 
