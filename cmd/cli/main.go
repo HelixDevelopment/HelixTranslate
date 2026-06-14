@@ -449,6 +449,7 @@ func getAPIKeyFromEnv(provider string) string {
 		"zhipu":     "ZHIPU_API_KEY",
 		"deepseek":  "DEEPSEEK_API_KEY",
 		"qwen":      "QWEN_API_KEY",
+		"gemini":    "GEMINI_API_KEY",
 	}
 
 	if envVar, ok := envMappings[provider]; ok {
