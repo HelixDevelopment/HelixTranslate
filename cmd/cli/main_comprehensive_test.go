@@ -670,6 +670,7 @@ func TestTranslateEbookFunction(t *testing.T) {
 			nil,
 			false,
 			false,
+			true, // provider explicitly set
 		)
 
 		// We expect an error due to missing API key in test environment
@@ -728,6 +729,7 @@ func TestTranslateEbookFunction(t *testing.T) {
 			nil,
 			false,
 			false,
+			false, // provider not explicitly set — config default applies
 		)
 
 		// We expect no error in test environment with mocked/empty translation

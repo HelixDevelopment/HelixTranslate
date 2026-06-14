@@ -11,8 +11,27 @@ import (
 	"flag"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
+
+// parseProviders splits a comma-separated providers flag into a clean slice.
+// It trims surrounding whitespace from each entry and drops empty entries
+// (so "deepseek, ,zhipu" -> ["deepseek","zhipu"]). When the result is empty
+// (flag empty or only separators/whitespace), it returns the supplied
+// fallback so the pipeline always has at least one provider to work with.
+func parseProviders(raw string, fallback []string) []string {
+	out := make([]string, 0)
+	for _, p := range strings.Split(raw, ",") {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	if len(out) == 0 {
+		return fallback
+	}
+	return out
+}
 
 func main() {
 	// Parse command-line flags
@@ -24,6 +43,9 @@ func main() {
 	passCount := flag.Int("passes", 2, "Number of preparation passes")
 	providers := flag.String("providers", "deepseek,zhipu", "Comma-separated list of LLM providers")
 	flag.Parse()
+
+	// Honor the -providers flag instead of silently ignoring it.
+	providerList := parseProviders(*providers, []string{"deepseek", "zhipu"})
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
@@ -58,7 +80,7 @@ func main() {
 	log.Printf("\n2. Configuring preparation phase...")
 	prepConfig := &preparation.PreparationConfig{
 		PassCount:          *passCount,
-		Providers:          []string{"deepseek", "zhipu"}, // Fixed for now
+		Providers:          providerList,
 		AnalyzeContentType: true,
 		AnalyzeCharacters:  true,
 		AnalyzeTerminology: true,

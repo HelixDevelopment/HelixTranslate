@@ -74,6 +74,16 @@ func main() {
 
 	flag.Parse()
 
+	// Track which flags the user explicitly set so config defaults never
+	// silently override an explicit CLI choice (e.g. -provider openai must win
+	// over config.DefaultProvider). flag.Visit only reports flags actually set.
+	explicitProvider := false
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == "provider" || f.Name == "p" {
+			explicitProvider = true
+		}
+	})
+
 	// Handle version
 	if showVersion {
 		fmt.Printf("Universal Ebook Translator v%s\n", version)
@@ -222,6 +232,7 @@ func main() {
 		eventBus,
 		disableLocalLLMs,
 		preferDistributed,
+		explicitProvider,
 	); err != nil {
 		fmt.Fprintf(os.Stderr, "Translation failed: %v\n", err)
 		os.Exit(1)
@@ -238,7 +249,7 @@ func translateEbook(
 	appConfig *config.Config,
 	sourceLang, targetLang language.Language,
 	eventBus *events.EventBus,
-	disableLocalLLMs, preferDistributed bool,
+	disableLocalLLMs, preferDistributed, explicitProvider bool,
 ) error {
 	ctx := context.Background()
 
@@ -246,10 +257,9 @@ func translateEbook(
 	if appConfig != nil {
 		fmt.Printf("Using loaded configuration\n")
 
-		// Override CLI parameters with config values if not explicitly set
-		if providerName == "openai" && appConfig.Translation.DefaultProvider != "" {
-			providerName = appConfig.Translation.DefaultProvider
-		}
+		// Override CLI parameters with config values if not explicitly set.
+		// The CLI flag wins over the config default (see resolveProvider).
+		providerName = resolveProvider(providerName, explicitProvider, appConfig.Translation.DefaultProvider)
 		if model == "" && appConfig.Translation.DefaultModel != "" {
 			model = appConfig.Translation.DefaultModel
 		}
@@ -418,6 +428,18 @@ func writeAsText(book *ebook.Book, filename string) error {
 	text := book.ExtractText()
 	_, err = file.WriteString(text)
 	return err
+}
+
+// resolveProvider applies config-default precedence for the translation
+// provider. The CLI flag wins: the config DefaultProvider is only adopted when
+// the user did NOT explicitly pass -provider/-p. Previously this used
+// `providerName == "openai"` as a proxy for "unset", which silently overrode an
+// explicit `-provider openai` with the config's DefaultProvider.
+func resolveProvider(cliProvider string, explicitlySet bool, configDefault string) string {
+	if !explicitlySet && configDefault != "" {
+		return configDefault
+	}
+	return cliProvider
 }
 
 func getAPIKeyFromEnv(provider string) string {
