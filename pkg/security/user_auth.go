@@ -7,8 +7,35 @@ import (
 	"fmt"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"digital.vasic.translator/pkg/models"
 )
+
+// dummyPasswordHash is a fixed, valid bcrypt hash (of a random throwaway value)
+// used ONLY to spend a comparable amount of CPU on the user-not-found path so
+// that login response time does not reveal whether a username exists (CWE-208
+// timing-based username enumeration). It is generated once at package init at
+// the same DefaultCost the repository uses to store real password hashes, so the
+// not-found path's bcrypt cost matches the wrong-password path's. No real
+// password ever hashes to this value, and it is never compared as a credential
+// of any account, so a successful compare against it cannot authenticate anyone.
+var dummyPasswordHash []byte
+
+func init() {
+	// Hash a random value (not a constant) so the dummy hash is unguessable and
+	// not shared across builds. DefaultCost matches models.InMemoryUserRepository.
+	seed := make([]byte, 32)
+	_, _ = rand.Read(seed)
+	h, err := bcrypt.GenerateFromPassword(seed, bcrypt.DefaultCost)
+	if err != nil {
+		// bcrypt.GenerateFromPassword only errors on an out-of-range cost, which
+		// DefaultCost is not; fall back to a known-valid precomputed cost-10 hash
+		// so the timing mitigation is never silently disabled.
+		h = []byte("$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy")
+	}
+	dummyPasswordHash = h
+}
 
 // UserAuthService extends AuthService with user validation
 type UserAuthService struct {
@@ -45,6 +72,16 @@ func (uas *UserAuthService) AuthenticateUser(req LoginRequest) (*LoginResponse, 
 	user, err := uas.userRepo.FindByUsername(req.Username)
 	if err != nil {
 		if errors.Is(err, models.ErrUserNotFound) {
+			// Spend a comparable bcrypt computation against a dummy hash before
+			// returning, so the user-not-found path's response time matches the
+			// wrong-password path (which runs bcrypt over a real hash). Without
+			// this, an unauthenticated attacker who times the login response can
+			// distinguish existing usernames from non-existent ones even though
+			// both return the identical ErrInvalidCredentials value (CWE-208
+			// username enumeration via timing). The compare always fails (no
+			// password equals the random dummy hash) — its only purpose is to
+			// consume time, never to authenticate.
+			_ = bcrypt.CompareHashAndPassword(dummyPasswordHash, []byte(req.Password))
 			return nil, models.ErrInvalidCredentials
 		}
 		return nil, fmt.Errorf("failed to find user: %w", err)
