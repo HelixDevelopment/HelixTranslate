@@ -49,8 +49,10 @@ build/unified-translator
 
 # Test outputs
 cmd/cli/test_output.epub
-cmd/cli/test_output.epub
-api-server
+# §11.4.30: anchor the prebuilt repo-root 'api-server' binary to the root so the
+# bare pattern no longer matches the cmd/api-server/ SOURCE directory (it was
+# hiding the package + blocking its tests; the build output is build/api-server).
+/api-server
 test_output.epub
 
 # Raw QA evidence + docs_chain runtime (regeneratable; §11.4.128/§11.4.106)
