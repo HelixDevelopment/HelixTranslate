@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>WebSocket_Monitoring_Guide</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">WebSocket_Monitoring_Guide</h1>
+</header>
+<h1 id="websocket-monitoring-system-documentation">WebSocket Monitoring
+System Documentation</h1>
+<h2 id="overview">Overview</h2>
+<p>The Translation Monitor system provides real-time WebSocket-based
+monitoring for translation workflows, supporting both local LLM
+translation and remote SSH worker translation. The system consists
+of:</p>
+<ul>
+<li><strong>WebSocket Server</strong>: Real-time event streaming
+server</li>
+<li><strong>Monitoring Dashboard</strong>: Interactive web interface for
+tracking progress</li>
+<li><strong>Event System</strong>: Comprehensive event emission and
+handling</li>
+<li><strong>SSH Worker Integration</strong>: Remote worker management
+and monitoring</li>
+</ul>
+<h2 id="architecture">Architecture</h2>
+<pre><code>┌─────────────────┐    WebSocket Events    ┌─────────────────────┐
+│ Translation CLI │ ────────────────────► │  Monitoring Server  │
+└─────────────────┘                       └─────────────────────┘
+                                                     │
+                                                     │ WebSocket Stream
+                                                     ▼
+                                           ┌─────────────────────┐
+                                           │  Web Dashboard      │
+                                           │  (Real-time UI)     │
+                                           └─────────────────────┘
+
+Remote SSH Workers:
+┌─────────────────┐    SSH Connection    ┌─────────────────────┐
+│ SSH Worker 1    │ ◄──────────────────► │  Translation CLI    │
+└─────────────────┘                       └─────────────────────┘
+
+┌─────────────────┐
+│ SSH Worker 2    │
+└─────────────────┘</code></pre>
+<h2 id="components">Components</h2>
+<h3 id="1-websocket-server-cmdmonitor-servermaingo">1. WebSocket Server
+(<code>cmd/monitor-server/main.go</code>)</h3>
+<p>Real-time event streaming server running on port 8090.</p>
+<p><strong>Features:</strong></p>
+<ul>
+<li>WebSocket connection management</li>
+<li>Event routing to clients</li>
+<li>Session-based monitoring</li>
+<li>Multi-client support</li>
+</ul>
+<p><strong>Endpoints:</strong></p>
+<ul>
+<li><code>ws://localhost:8090/ws?session_id={id}&amp;client_id={id}</code>
+- WebSocket connection</li>
+<li><code>http://localhost:8090/monitor</code> - Web dashboard</li>
+</ul>
+<p><strong>Usage:</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/monitor-server</span></code></pre></div>
+<h3 id="2-monitoring-dashboard-monitorhtml--enhanced-monitorhtml">2.
+Monitoring Dashboard (<code>monitor.html</code> &amp;
+<code>enhanced-monitor.html</code>)</h3>
+<p>Interactive web interface for monitoring translation progress.</p>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Real-time progress bars</li>
+<li>Event logging</li>
+<li>Session history</li>
+<li>Worker information display</li>
+<li>Progress charts</li>
+</ul>
+<p><strong>Access:</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Basic monitor</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">open</span> http://localhost:8090/monitor</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Enhanced monitor with SSH worker support</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">open</span> enhanced-monitor.html</span></code></pre></div>
+<h3 id="3-event-system-pkgeventseventsgo">3. Event System
+(<code>pkg/events/events.go</code>)</h3>
+<p>Event-driven architecture for translation monitoring.</p>
+<p><strong>Event Types:</strong></p>
+<ul>
+<li><code>translation_started</code> - Translation job initiated</li>
+<li><code>translation_progress</code> - Progress update</li>
+<li><code>translation_completed</code> - Translation finished</li>
+<li><code>translation_error</code> - Error occurred</li>
+<li><code>step_completed</code> - Step finished</li>
+<li><code>conversion_started</code> - Content conversion started</li>
+<li><code>conversion_progress</code> - Conversion progress</li>
+<li><code>conversion_completed</code> - Conversion finished</li>
+</ul>
+<p><strong>Event Structure:</strong></p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;translation_progress&quot;</span><span class="fu">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;session_id&quot;</span><span class="fu">:</span> <span class="st">&quot;session-123&quot;</span><span class="fu">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;step&quot;</span><span class="fu">:</span> <span class="st">&quot;translation&quot;</span><span class="fu">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;message&quot;</span><span class="fu">:</span> <span class="st">&quot;Translating line 5/10&quot;</span><span class="fu">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;progress&quot;</span><span class="fu">:</span> <span class="fl">55.0</span><span class="fu">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;current_item&quot;</span><span class="fu">:</span> <span class="st">&quot;line_5&quot;</span><span class="fu">,</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;total_items&quot;</span><span class="fu">:</span> <span class="dv">10</span><span class="fu">,</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1640995200</span><span class="fu">,</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;worker_info&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;host&quot;</span><span class="fu">:</span> <span class="st">&quot;localhost&quot;</span><span class="fu">,</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;port&quot;</span><span class="fu">:</span> <span class="dv">8444</span><span class="fu">,</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;ssh-llamacpp&quot;</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="4-ssh-worker-integration-pkgsshworker">4. SSH Worker Integration
+(<code>pkg/sshworker/</code>)</h3>
+<p>Remote worker management for distributed translation.</p>
+<p><strong>Features:</strong></p>
+<ul>
+<li>SSH connection management</li>
+<li>Remote command execution</li>
+<li>Progress tracking</li>
+<li>Error handling</li>
+<li>Worker health monitoring</li>
+</ul>
+<p><strong>Configuration:</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;distributed&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;workers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;thinker-worker&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;Local Llama.cpp Worker&quot;</span><span class="fu">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;host&quot;</span><span class="fu">:</span> <span class="st">&quot;localhost&quot;</span><span class="fu">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;port&quot;</span><span class="fu">:</span> <span class="dv">8444</span><span class="fu">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;user&quot;</span><span class="fu">:</span> <span class="st">&quot;milosvasic&quot;</span><span class="fu">,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;password&quot;</span><span class="fu">:</span> <span class="st">&quot;password&quot;</span><span class="fu">,</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;max_capacity&quot;</span><span class="fu">:</span> <span class="dv">10</span><span class="fu">,</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;tags&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;gpu&quot;</span><span class="ot">,</span> <span class="st">&quot;llamacpp&quot;</span><span class="ot">]</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;ssh_timeout&quot;</span><span class="fu">:</span> <span class="dv">30</span><span class="fu">,</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;ssh_max_retries&quot;</span><span class="fu">:</span> <span class="dv">3</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="quick-start-guide">Quick Start Guide</h2>
+<h3 id="1-start-the-monitoring-server">1. Start the Monitoring
+Server</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Navigate to project root</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /Users/milosvasic/Projects/Translate</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Start WebSocket monitoring server</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/monitor-server</span></code></pre></div>
+<h3 id="2-open-the-monitoring-dashboard">2. Open the Monitoring
+Dashboard</h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Open web dashboard (in new terminal)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">open</span> http://localhost:8090/monitor</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Or open the enhanced dashboard</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">open</span> enhanced-monitor.html</span></code></pre></div>
+<h3 id="3-run-translation-with-monitoring">3. Run Translation with
+Monitoring</h3>
+<h4 id="option-a-basic-demo-with-websocket-monitoring">Option A: Basic
+Demo with WebSocket Monitoring</h4>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the basic translation demo</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run demo-translation-with-monitoring-fixed.go</span></code></pre></div>
+<h4 id="option-b-real-llm-translation-with-monitoring">Option B: Real
+LLM Translation with Monitoring</h4>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set OpenAI API key (optional)</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OPENAI_API_KEY</span><span class="op">=</span>your_api_key_here</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Run real LLM translation</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run demo-real-llm-with-monitoring.go</span></code></pre></div>
+<h4 id="option-c-ssh-worker-translation-with-monitoring">Option C: SSH
+Worker Translation with Monitoring</h4>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Configure SSH worker (optional)</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">SSH_WORKER_HOST</span><span class="op">=</span>localhost</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">SSH_WORKER_USER</span><span class="op">=</span>milosvasic</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">SSH_WORKER_PASSWORD</span><span class="op">=</span>your_password</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Run SSH worker translation</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run demo-ssh-worker-with-monitoring.go</span></code></pre></div>
+<h3 id="4-monitor-progress">4. Monitor Progress</h3>
+<p>The dashboard will show:</p>
+<ul>
+<li>Real-time progress updates</li>
+<li>Current translation step</li>
+<li>Event logs</li>
+<li>Session history</li>
+<li>Worker information (for SSH mode)</li>
+</ul>
+<h2 id="configuration">Configuration</h2>
+<h3 id="environment-variables">Environment Variables</h3>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WebSocket Server</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="va">MONITOR_SERVER_PORT</span><span class="op">=</span>8090</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># SSH Workers</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="va">SSH_WORKER_HOST</span><span class="op">=</span>localhost</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="va">SSH_WORKER_USER</span><span class="op">=</span>milosvasic</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="va">SSH_WORKER_PASSWORD</span><span class="op">=</span>password</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="va">SSH_WORKER_PORT</span><span class="op">=</span>22</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="va">SSH_WORKER_REMOTE_DIR</span><span class="op">=</span>/tmp/translate-ssh</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co"># LLM Configuration</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="va">OPENAI_API_KEY</span><span class="op">=</span>your_openai_key</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="va">ANTHROPIC_API_KEY</span><span class="op">=</span>your_anthropic_key</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="va">DEEPSEEK_API_KEY</span><span class="op">=</span>your_deepseek_key</span></code></pre></div>
+<h3 id="configuration-files">Configuration Files</h3>
+<ul>
+<li><code>config.json</code> - Main application configuration</li>
+<li><code>internal/working/config.distributed.json</code> - SSH worker
+configuration</li>
+<li><code>internal/working/config.*.json</code> - Various LLM provider
+configurations</li>
+</ul>
+<h2 id="api-reference">API Reference</h2>
+<h3 id="websocket-messages">WebSocket Messages</h3>
+<h4 id="client-to-server">Client to Server</h4>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Connect with session</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> ws <span class="op">=</span> <span class="kw">new</span> <span class="bu">WebSocket</span>(<span class="st">&#39;ws://localhost:8090/ws?session_id=your_session_id&amp;client_id=dashboard&#39;</span>)<span class="op">;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Listen for events</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>ws<span class="op">.</span><span class="at">onmessage</span> <span class="op">=</span> <span class="kw">function</span>(<span class="bu">event</span>) {</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> data <span class="op">=</span> <span class="bu">JSON</span><span class="op">.</span><span class="fu">parse</span>(<span class="bu">event</span><span class="op">.</span><span class="at">data</span>)<span class="op">;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">&#39;Received event:&#39;</span><span class="op">,</span> data)<span class="op">;</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+<h4 id="server-to-client-events">Server to Client Events</h4>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Translation progress</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;translation_progress&quot;</span><span class="op">,</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;session_id&quot;</span><span class="op">:</span> <span class="st">&quot;session-123&quot;</span><span class="op">,</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;step&quot;</span><span class="op">:</span> <span class="st">&quot;translation&quot;</span><span class="op">,</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;message&quot;</span><span class="op">:</span> <span class="st">&quot;Translating line 5/10&quot;</span><span class="op">,</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;progress&quot;</span><span class="op">:</span> <span class="fl">55.0</span><span class="op">,</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;current_item&quot;</span><span class="op">:</span> <span class="st">&quot;line_5&quot;</span><span class="op">,</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;total_items&quot;</span><span class="op">:</span> <span class="dv">10</span><span class="op">,</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;timestamp&quot;</span><span class="op">:</span> <span class="dv">1640995200</span><span class="op">,</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;worker_info&quot;</span><span class="op">:</span> {</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;host&quot;</span><span class="op">:</span> <span class="st">&quot;localhost&quot;</span><span class="op">,</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;port&quot;</span><span class="op">:</span> <span class="dv">8444</span><span class="op">,</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;ssh-llamacpp&quot;</span><span class="op">,</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;model&quot;</span><span class="op">:</span> <span class="st">&quot;llama-2-7b-chat&quot;</span><span class="op">,</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;capacity&quot;</span><span class="op">:</span> <span class="dv">10</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="co">// Translation completed</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;translation_completed&quot;</span><span class="op">,</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;session_id&quot;</span><span class="op">:</span> <span class="st">&quot;session-123&quot;</span><span class="op">,</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;message&quot;</span><span class="op">:</span> <span class="st">&quot;Translation completed successfully&quot;</span><span class="op">,</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;progress&quot;</span><span class="op">:</span> <span class="fl">100.0</span><span class="op">,</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;timestamp&quot;</span><span class="op">:</span> <span class="dv">1640995300</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a><span class="co">// Error event</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;translation_error&quot;</span><span class="op">,</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;session_id&quot;</span><span class="op">:</span> <span class="st">&quot;session-123&quot;</span><span class="op">,</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;step&quot;</span><span class="op">:</span> <span class="st">&quot;translation&quot;</span><span class="op">,</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;message&quot;</span><span class="op">:</span> <span class="st">&quot;Failed to translate line 5&quot;</span><span class="op">,</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;error&quot;</span><span class="op">:</span> <span class="st">&quot;Connection timeout&quot;</span><span class="op">,</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;timestamp&quot;</span><span class="op">:</span> <span class="dv">1640995200</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h3 id="http-api-for-rest-endpoints">HTTP API (for REST endpoints)</h3>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get server status</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:8090/status</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Get active sessions</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:8090/sessions</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Get session history</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:8090/sessions/history</span></code></pre></div>
+<h2 id="testing">Testing</h2>
+<h3 id="unit-tests">Unit Tests</h3>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test WebSocket server</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./cmd/monitor-server</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Test event system</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./pkg/events</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Test SSH workers</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./pkg/sshworker</span></code></pre></div>
+<h3 id="integration-tests">Integration Tests</h3>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test full WebSocket monitoring workflow</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run demo-websocket-client.go</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Test SSH worker integration</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run demo-ssh-worker-with-monitoring.go</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Test LLM integration</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run demo-real-llm-with-monitoring.go</span></code></pre></div>
+<h3 id="load-testing">Load Testing</h3>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run multiple concurrent translation sessions</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="dt">{</span><span class="dv">1</span><span class="dt">..</span><span class="dv">5</span><span class="dt">}</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="ex">go</span> run demo-translation-with-monitoring-fixed.go <span class="kw">&amp;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Monitor all sessions in the dashboard</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="ex">open</span> http://localhost:8090/monitor</span></code></pre></div>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="common-issues">Common Issues</h3>
+<ol type="1">
+<li><p><strong>WebSocket Connection Failed</strong></p>
+<pre><code>Solution: Check if monitoring server is running on port 8090
+Command: lsof -i :8090</code></pre></li>
+<li><p><strong>SSH Worker Connection Failed</strong></p>
+<pre><code>Solution: Verify SSH credentials and connectivity
+Command: ssh milosvasic@localhost &#39;echo &quot;SSH works&quot;&#39;</code></pre></li>
+<li><p><strong>LLM API Authentication Failed</strong></p>
+<pre><code>Solution: Check API key environment variables
+Command: echo $OPENAI_API_KEY</code></pre></li>
+<li><p><strong>Port Conflicts</strong></p>
+<pre><code>Solution: Change server port in configuration
+File: internal/working/config.distributed.json</code></pre></li>
+</ol>
+<h3 id="debug-mode">Debug Mode</h3>
+<p>Enable debug logging:</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set log level</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">LOG_LEVEL</span><span class="op">=</span>debug</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Run monitoring server with debug output</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/monitor-server <span class="at">-log-level</span><span class="op">=</span>debug</span></code></pre></div>
+<h2 id="performance-considerations">Performance Considerations</h2>
+<h3 id="websocket-connection-limits">WebSocket Connection Limits</h3>
+<ul>
+<li>Default: 100 concurrent connections</li>
+<li>Recommended: Monitor connection count in production</li>
+</ul>
+<h3 id="ssh-worker-scaling">SSH Worker Scaling</h3>
+<ul>
+<li>Maximum workers: 20 (configurable)</li>
+<li>Connection timeout: 30 seconds (configurable)</li>
+<li>Health check interval: 30 seconds</li>
+</ul>
+<h3 id="memory-usage">Memory Usage</h3>
+<ul>
+<li>Event history: 1000 events per session</li>
+<li>Session timeout: 24 hours</li>
+<li>Log retention: 7 days</li>
+</ul>
+<h2 id="security-considerations">Security Considerations</h2>
+<h3 id="websocket-security">WebSocket Security</h3>
+<ul>
+<li>Consider using WSS in production</li>
+<li>Implement authentication tokens</li>
+<li>Rate limiting for connections</li>
+</ul>
+<h3 id="ssh-security">SSH Security</h3>
+<ul>
+<li>Use SSH key authentication instead of passwords</li>
+<li>Limit command execution permissions</li>
+<li>Regular key rotation</li>
+</ul>
+<h3 id="api-security">API Security</h3>
+<ul>
+<li>Implement API key authentication</li>
+<li>Rate limiting for HTTP endpoints</li>
+<li>Input validation and sanitization</li>
+</ul>
+<h2 id="future-enhancements">Future Enhancements</h2>
+<h3 id="planned-features">Planned Features</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />User authentication and
+authorization</label></li>
+<li><label><input type="checkbox" />Persistent session
+storage</label></li>
+<li><label><input type="checkbox" />Advanced analytics and
+reporting</label></li>
+<li><label><input type="checkbox" />Mobile monitoring app</label></li>
+<li><label><input type="checkbox" />Integration with monitoring systems
+(Prometheus, Grafana)</label></li>
+</ul>
+<h3 id="performance-improvements">Performance Improvements</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />Event batching for high-frequency
+updates</label></li>
+<li><label><input type="checkbox" />WebSocket compression</label></li>
+<li><label><input type="checkbox" />Connection pooling for SSH
+workers</label></li>
+<li><label><input type="checkbox" />Caching for translation
+results</label></li>
+</ul>
+<h3 id="uiux-enhancements">UI/UX Enhancements</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />Real-time notifications</label></li>
+<li><label><input type="checkbox" />Customizable dashboards</label></li>
+<li><label><input type="checkbox" />Dark mode support</label></li>
+<li><label><input type="checkbox" />Mobile-responsive
+design</label></li>
+</ul>
+<h2 id="contributing">Contributing</h2>
+<h3 id="development-setup">Development Setup</h3>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clone the repository</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="op">&lt;</span>repository-url<span class="op">&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Install dependencies</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Run development server</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/monitor-server</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Run tests</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./...</span></code></pre></div>
+<h3 id="code-style">Code Style</h3>
+<ul>
+<li>Follow Go conventions</li>
+<li>Add comprehensive tests</li>
+<li>Update documentation</li>
+<li>Use meaningful commit messages</li>
+</ul>
+<h2 id="support">Support</h2>
+<h3 id="getting-help">Getting Help</h3>
+<ul>
+<li>Check this documentation</li>
+<li>Review GitHub issues</li>
+<li>Contact the development team</li>
+</ul>
+<h3 id="reporting-issues">Reporting Issues</h3>
+<ul>
+<li>Include error logs</li>
+<li>Provide configuration details</li>
+<li>Describe steps to reproduce</li>
+<li>Include system information</li>
+</ul>
+</body>
+</html>

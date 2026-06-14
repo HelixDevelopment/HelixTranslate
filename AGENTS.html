@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>AGENTS</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">AGENTS</h1>
+</header>
+<!-- AGENTS.md - Universal Multi-Format Multi-Language Ebook Translation System -->
+
+<blockquote>
+<p>Base agent rules: <code>constitution/AGENTS.md</code> — READ IT
+FIRST. The base file is authoritative for any topic not covered here.
+Project-specific rules below extend them; they never weaken them.</p>
+<p>Locate the constitution submodule from any nested depth with its
+<code>constitution/find_constitution.sh</code> helper. Canonical
+reference: <a
+href="https://github.com/HelixDevelopment/HelixConstitution">https://github.com/HelixDevelopment/HelixConstitution</a></p>
+</blockquote>
+<p>This file contains project-specific information intended for AI
+coding agents. The reader is expected to know nothing about the project
+beforehand.</p>
+<hr />
+<h2 id="project-overview">Project Overview</h2>
+<p>This is a Go-based ebook translation system that translates books
+between multiple languages using various LLM providers. It supports
+multiple input/output formats (FB2, EPUB, TXT, HTML, PDF, DOCX) and
+provides both CLI tools and API servers for translation workflows.</p>
+<p>Key capabilities:</p>
+<ul>
+<li>Multi-format ebook parsing and generation</li>
+<li>Integration with multiple LLM providers (OpenAI, Anthropic,
+DeepSeek, Zhipu, Qwen, Gemini, Ollama, LlamaCpp)</li>
+<li>Distributed translation via SSH workers</li>
+<li>Real-time WebSocket monitoring dashboard</li>
+<li>REST API and gRPC interfaces</li>
+<li>Translation caching, quality verification, and multi-pass
+processing</li>
+<li>Preparation phase analysis for improved translation quality</li>
+<li>Markdown workflow (EPUB to Markdown and back)</li>
+</ul>
+<hr />
+<h2 id="technology-stack">Technology Stack</h2>
+<ul>
+<li><strong>Language</strong>: Go 1.25.2 (per <code>go.mod</code>);
+<code>Dockerfile</code> uses <code>golang:1.24-alpine</code> as
+builder</li>
+<li><strong>Module</strong>: <code>digital.vasic.translator</code></li>
+<li><strong>Version</strong>: Makefile declares <code>3.0.0</code>;
+<code>VERSION</code> file reads <code>2.3.0</code></li>
+<li><strong>Web Framework</strong>: Gin (github.com/gin-gonic/gin)</li>
+<li><strong>WebSocket</strong>: Gorilla WebSocket
+(github.com/gorilla/websocket)</li>
+<li><strong>gRPC</strong>: google.golang.org/grpc with Protocol
+Buffers</li>
+<li><strong>Authentication</strong>: JWT
+(github.com/golang-jwt/jwt/v5)</li>
+<li><strong>Databases</strong>: PostgreSQL (github.com/lib/pq), SQLite
+(github.com/mattn/go-sqlite3), Redis (github.com/redis/go-redis/v9)</li>
+<li><strong>Document Processing</strong>: unidoc/unioffice,
+unidoc/unipdf/v3</li>
+<li><strong>CLI Framework</strong>: Cobra (github.com/spf13/cobra)</li>
+<li><strong>Testing</strong>: testify (github.com/stretchr/testify)</li>
+<li><strong>Transport</strong>: QUIC support
+(github.com/quic-go/quic-go)</li>
+<li><strong>TLS</strong>: golang.org/x/crypto</li>
+</ul>
+<hr />
+<h2 id="build-and-test-commands">Build and Test Commands</h2>
+<h3 id="building">Building</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build all primary binaries (gRPC server, API server, unified CLI)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Build specific components</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-grpc      <span class="co"># ./build/grpc-server</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-api       <span class="co"># ./build/api-server</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-cli       <span class="co"># ./build/unified-translator</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Build for all platforms (Linux AMD64/ARM64, macOS AMD64/ARM64, Windows AMD64)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-all</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean build artifacts</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> clean</span></code></pre></div>
+<p>Additional entry points that can be built individually:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> build/monitor-server ./cmd/monitor-server</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> build/translator ./cmd/translator</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> build/server ./cmd/server</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> build/markdown-translator ./cmd/markdown-translator</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> build/preparation-translator ./cmd/preparation-translator</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> build/ebook-translator ./cmd/ebook-translator</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> build/translate-ssh ./cmd/translate-ssh</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> build/deployment ./cmd/deployment</span></code></pre></div>
+<h3 id="testing">Testing</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run all tests (excludes build-tagged tests by default)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./... <span class="at">-v</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Run tests with coverage (generates coverage.html)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-coverage</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Run a specific package</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> ./pkg/translator</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> ./pkg/events</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> ./pkg/websocket</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Run a specific test function</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> <span class="at">-run</span> TestFunctionName ./pkg/package</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick development cycle (format + vet + test)</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> quick-test</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Pre-commit checks</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> pre-commit</span></code></pre></div>
+<h3 id="running-tagged-tests">Running Tagged Tests</h3>
+<p>Tests outside the default cycle are gated by build tags:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Integration tests</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-tags</span><span class="op">=</span>integration <span class="at">-v</span> ./test/integration/...</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># End-to-end tests</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-tags</span><span class="op">=</span>e2e <span class="at">-v</span> ./test/e2e/...</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Performance benchmarks</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-tags</span><span class="op">=</span>performance <span class="at">-v</span> ./test/performance/...</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Stress tests</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-tags</span><span class="op">=</span>stress <span class="at">-v</span> ./test/stress/...</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Security tests</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-tags</span><span class="op">=</span>security <span class="at">-v</span> ./test/security/...</span></code></pre></div>
+<h3 id="code-quality">Code Quality</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Format code</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> fmt</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Vet code</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> vet</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Lint (requires golangci-lint installation)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="ex">golangci-lint</span> run</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Configuration is in .golangci.yml</span></span></code></pre></div>
+<h3 id="running-services-development">Running Services
+(Development)</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Start development environment (gRPC on :50051 + API on :8080 in debug mode)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> dev</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Run full system (builds and runs both servers)</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> run-system</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Individual servers</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> run-grpc    <span class="co"># gRPC server on port 50051</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> run-api     <span class="co"># API server on port 8080</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># WebSocket monitoring server</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/monitor-server</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Dashboard available at http://localhost:8090/monitor</span></span></code></pre></div>
+<h3 id="docker">Docker</h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build Docker image</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> docker-build</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Run Docker container</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> docker-run</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Full stack with PostgreSQL and Redis</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="ex">docker-compose</span> up <span class="at">-d</span></span></code></pre></div>
+<hr />
+<h2 id="code-organization">Code Organization</h2>
+<h3 id="directory-structure">Directory Structure</h3>
+<pre><code>cmd/                    # Command-line entry points (14 binaries)
+  api-server/          # REST API server (port 8080)
+  challenge-runner/    # Runs project challenges/validations
+  cli/                 # Legacy CLI tool
+  deployment/          # Deployment management tool
+  ebook-translator/    # Specialized SSH ebook translator
+  grpc-server/         # gRPC translation service (port 50051)
+  markdown-translator/ # Markdown workflow tool
+  monitor-server/      # WebSocket monitoring server (port 8090)
+  preparation-translator/ # Pre-translation analysis tool
+  server/              # Main REST API server (older entry point, TLS/HTTP3)
+  ssh-translation/     # Complete SSH-based translation system
+  translate-ssh/       # SSH worker standalone binary
+  translator/          # Legacy translator CLI
+  unified-translator/  # Primary unified CLI with full provider support
+
+pkg/                    # Public packages
+  api/                 # REST API handlers, middleware, routing
+  batch/               # Batch processing logic
+  coordination/        # Multi-LLM coordination
+  deployment/          # Docker and SSH deployment utilities
+  distributed/         # Distributed processing over SSH workers
+  ebook/               # Universal ebook parsing (FB2, EPUB, TXT, HTML, PDF, DOCX)
+  events/              # Event bus system for real-time updates
+  fb2/                 # FB2 format-specific handling
+  format/              # Format detection and validation
+  grpc/                # gRPC service implementation and proto definitions
+  hardware/            # Hardware detection for optimization
+  hash/                # Codebase hash utilities
+  language/            # Language detection utilities
+  logger/              # Structured logging utilities
+  markdown/            # EPUB to Markdown conversion workflow
+  models/              # Data models and registry
+  preparation/         # Pre-translation preparation phase
+  progress/            # Progress tracking
+  report/              # Report generation
+  script/              # Script conversion (Cyrillic/Latin)
+  security/            # JWT authentication, rate limiting
+  sshworker/           # SSH worker management
+  storage/             # Database abstraction (PostgreSQL, Redis, SQLite)
+  translator/          # Translation engine core
+    llm/               # LLM provider implementations
+  verification/        # Translation quality verification
+  version/             # Version information
+  websocket/           # WebSocket hub and connection management
+
+internal/               # Internal packages
+  cache/               # In-memory caching layer
+  config/              # Configuration loading and validation
+  scripts/             # Production and deployment shell scripts
+  working/             # Working configuration files and runtime data
+
+test/                   # Test suites organized by scope
+  distributed/         # Distributed system tests
+  e2e/                 # End-to-end tests
+  fixtures/            # Test data (ebooks, configs, translations)
+  integration/         # Cross-package integration tests
+  mocks/               # testify/mock implementations
+  performance/         # Benchmarks and performance tests
+  security/            # Security-focused tests
+  stress/              # Load and stress tests
+  translator/          # Translator-specific tests
+  unit/                # Unit tests for individual components
+  utils/               # Test helper utilities and infrastructure
+
+api/                    # API documentation
+  examples/            # API usage examples
+  openapi/             # OpenAPI 3.0 specification
+
+web/                    # Web interface assets
+  templates/           # HTML templates (dashboard.html)
+
+scripts/                # Utility and demonstration scripts
+  host-power-management/  # CONST-033 enforcement scripts
+  demo-all.sh
+  ebook_translation_workflow.sh
+  python_translation.sh
+  run_monitoring_demo.sh
+
+build/                  # Build artifacts directory
+docs/                   # Project documentation
+Documentation/          # Additional documentation and guides
+challenges/             # Submodule: challenge framework
+containers/             # Submodule: container runtime extensions</code></pre>
+<hr />
+<h2 id="code-style-guidelines">Code Style Guidelines</h2>
+<h3 id="go-conventions">Go Conventions</h3>
+<ul>
+<li><strong>Naming</strong>: PascalCase for exported identifiers,
+camelCase for unexported.</li>
+<li><strong>Imports order</strong>: Standard library → third-party →
+local packages (<code>digital.vasic.translator/...</code>). Keep
+alphabetical within each group.</li>
+<li><strong>Types</strong>: Both <code>interface{}</code> and
+<code>any</code> appear in the codebase; <code>interface{}</code> is
+still prevalent in many packages (e.g.,
+<code>map[string]interface{}</code> for config options and event
+data).</li>
+<li><strong>Error handling</strong>: Always handle errors explicitly.
+Wrap errors with context:
+<code>fmt.Errorf("operation failed: %w", err)</code>.</li>
+<li><strong>Comments</strong>: Document all exported functions, types,
+and packages. Avoid commenting the obvious.</li>
+<li><strong>Line length</strong>: Keep lines under 140 characters (per
+<code>.golangci.yml</code>).</li>
+<li><strong>Function length</strong>: Aim for under 150 lines or 120
+statements (<code>funlen</code> setting). Tests and <code>cmd/</code>
+entry points have relaxed rules.</li>
+<li><strong>Cyclomatic complexity</strong>: <code>gocyclo</code> minimum
+is 35 in config; <code>gocognit</code> minimum is 20.</li>
+</ul>
+<h3 id="security-rules">Security Rules</h3>
+<ul>
+<li><strong>Never hardcode API keys or secrets</strong>. Use environment
+variables or secure config files.</li>
+<li><strong>Never commit files containing secrets</strong>.
+<code>.gitignore</code> already excludes
+<code>config_with_keys.json</code>, <code>.env</code>,
+<code>secrets.*</code>, etc.</li>
+<li>Input validation is required on all API endpoints.</li>
+<li>Use parameterized queries or ORM patterns for database access.</li>
+</ul>
+<h3 id="linting-configuration">Linting Configuration</h3>
+<p>The <code>.golangci.yml</code> file enables a strict set of linters
+including:</p>
+<ul>
+<li><code>govet</code>, <code>staticcheck</code>, <code>gosimple</code>,
+<code>ineffassign</code> for correctness</li>
+<li><code>gocyclo</code>, <code>funlen</code>, <code>gocognit</code>,
+<code>nestif</code> for complexity</li>
+<li><code>gosec</code> for security issues</li>
+<li><code>goimports</code> with local prefix
+<code>digital.vasic.translator</code></li>
+<li><code>misspell</code> with US English locale</li>
+</ul>
+<p>Test files and <code>cmd/</code> entry points have relaxed rules for
+<code>funlen</code>, <code>gochecknoinits</code>, <code>gosec</code>,
+<code>errcheck</code>, etc.</p>
+<hr />
+<h2 id="testing-strategy">Testing Strategy</h2>
+<h3 id="test-organization">Test Organization</h3>
+<p>Tests are organized by scope rather than always co-located with
+source files:</p>
+<ul>
+<li><code>test/unit/</code> - Unit tests for individual packages and
+components</li>
+<li><code>test/integration/</code> - Cross-package integration tests
+(build tag: <code>integration</code>)</li>
+<li><code>test/e2e/</code> - End-to-end tests with realistic scenarios
+(build tag: <code>e2e</code>)</li>
+<li><code>test/security/</code> - Authentication, authorization, and
+security tests (build tag: <code>security</code>)</li>
+<li><code>test/performance/</code> - Benchmarks and performance tests
+(build tag: <code>performance</code>)</li>
+<li><code>test/stress/</code> - Load and stress tests (build tag:
+<code>stress</code>)</li>
+<li><code>test/distributed/</code> - Distributed system and SSH worker
+tests</li>
+<li><code>test/mocks/</code> - Shared mock implementations using
+testify/mock</li>
+<li><code>test/fixtures/</code> - Sample ebooks, configs, and
+translation data</li>
+<li><code>test/utils/</code> - Shared test helpers and
+infrastructure</li>
+</ul>
+<p>Many packages also have <code>*_test.go</code> files alongside source
+code, particularly in <code>pkg/api/</code>,
+<code>pkg/translator/</code>, <code>pkg/distributed/</code>,
+<code>cmd/</code>, and <code>internal/</code>.</p>
+<h3 id="testing-patterns">Testing Patterns</h3>
+<ul>
+<li><strong>Table-driven tests</strong>: Preferred style. Define a slice
+of anonymous structs with inputs and expected outputs, then iterate with
+<code>t.Run()</code>.</li>
+<li><strong>Sub-tests</strong>: Use
+<code>t.Run("descriptive_name", func(t *testing.T) { ... })</code> for
+clarity.</li>
+<li><strong>Mocking</strong>: Use <code>testify/mock</code> for
+interface mocking. Mocks are defined in
+<code>test/mocks/providers.go</code>.</li>
+<li><strong>Build tags</strong>: Use
+<code>//go:build integration</code>, <code>//go:build e2e</code>,
+<code>//go:build performance</code>, <code>//go:build stress</code>,
+<code>//go:build security</code> for tests that should not run in the
+default quick-test cycle.</li>
+<li><strong>HTTP testing</strong>: Use <code>httptest</code> package and
+<code>gin.SetMode(gin.TestMode)</code> for API handler tests.</li>
+<li><strong>SSH testing</strong>:
+<code>test/utils/ssh_test_server.go</code> provides a full in-process
+SSH server with generated RSA keys for distributed tests.</li>
+<li><strong>Short mode</strong>: Many tests check
+<code>testing.Short()</code> and skip when <code>-short</code> is
+used.</li>
+</ul>
+<h3 id="test-utilities">Test Utilities</h3>
+<ul>
+<li><code>test/utils/helpers.go</code> provides helpers for creating
+temporary test files, test configs, and minimal valid ebooks (EPUB, FB2,
+TXT, HTML).</li>
+<li><code>test/utils/test_infrastructure.go</code> provides
+<code>TestHTTPServer</code> and <code>TestWebSocketServer</code> for
+integration tests.</li>
+<li><code>test/utils/ports.go</code> manages dynamic port allocation
+starting from 30000.</li>
+<li><code>test/mocks/providers.go</code> provides
+<code>MockTranslator</code>, <code>MockLLMProvider</code>,
+<code>MockDatabase</code>, <code>MockSecurityProvider</code>,
+<code>MockStorage</code>, and <code>MockProgressReporter</code>.</li>
+</ul>
+<h3 id="coverage">Coverage</h3>
+<ul>
+<li><strong>Tool</strong>: Go's built-in coverage
+(<code>go test -cover</code>)</li>
+<li><strong>Makefile target</strong>:
+<code>make test-coverage</code></li>
+<li><strong>Artifacts</strong>: <code>coverage.out</code> and
+<code>coverage.html</code> are generated at project root</li>
+<li><strong>Current coverage</strong>: Approximately 43.6% overall</li>
+</ul>
+<hr />
+<h2 id="architecture-and-key-patterns">Architecture and Key
+Patterns</h2>
+<h3 id="event-driven-architecture">Event-Driven Architecture</h3>
+<p>The system uses a central event bus
+(<code>pkg/events/events.go</code>) for component communication and
+real-time progress tracking:</p>
+<ul>
+<li><strong>Event types</strong>: <code>EventTranslationStarted</code>,
+<code>EventTranslationProgress</code>,
+<code>EventTranslationCompleted</code>,
+<code>EventTranslationError</code>, <code>EventConversionStarted</code>,
+<code>EventConversionProgress</code>,
+<code>EventConversionCompleted</code>,
+<code>EventConversionError</code>.</li>
+<li><strong>Subscription</strong>:
+<code>Subscribe(eventType, handler)</code> for type-specific;
+<code>SubscribeAll(handler)</code> for global listeners.</li>
+<li><strong>WebSocket Integration</strong>:
+<code>pkg/websocket/hub.go</code> subscribes to all events and
+broadcasts to connected dashboard clients.</li>
+<li><strong>Session tracking</strong>: Every translation operation has a
+unique <code>SessionID</code>. Events are tagged with session IDs so the
+dashboard can filter per-client.</li>
+<li><strong>Concurrency</strong>: Every event handler is invoked in its
+own goroutine with panic recovery.</li>
+</ul>
+<h3 id="translation-pipeline">Translation Pipeline</h3>
+<ol type="1">
+<li><strong>Format detection</strong>
+(<code>pkg/format/detector.go</code>) identifies the input file type by
+magic bytes, extension, and content analysis.</li>
+<li><strong>Parsing</strong> (<code>pkg/ebook/parser.go</code> and
+format-specific parsers) extracts content into a <code>Book</code>
+model.</li>
+<li><strong>Preparation</strong> (optional,
+<code>pkg/preparation/</code>) analyzes content for characters,
+terminology, culture, and chapter structure using multi-pass LLM
+analysis.</li>
+<li><strong>Translation</strong>
+(<code>pkg/translator/translator.go</code> and
+<code>pkg/translator/llm/</code>) sends segments to LLM providers with
+smart retry and automatic chunking on token limit errors.</li>
+<li><strong>Verification</strong> (<code>pkg/verification/</code>) runs
+quality checks (untranslated block detection, HTML artifact detection,
+completeness) and supports multi-LLM consensus polishing.</li>
+<li><strong>Output generation</strong> writes translated content back to
+the target format (EPUB writer, Markdown converter).</li>
+</ol>
+<h3 id="llm-provider-pattern">LLM Provider Pattern</h3>
+<p>All LLM providers implement the <code>LLMClient</code> interface in
+<code>pkg/translator/llm/llm.go</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LLMClient <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    Translate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> text <span class="dt">string</span><span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    GetProviderName<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Supported providers</strong>:</p>
+<ul>
+<li>API-based: OpenAI, Anthropic, Zhipu, DeepSeek, Qwen, Gemini</li>
+<li>Self-hosted: Ollama (local HTTP), LlamaCpp (executes local
+binary)</li>
+<li>Distributed: SSH workers for remote processing</li>
+<li>Test: Mock provider</li>
+</ul>
+<p>Provider selection uses a factory pattern
+(<code>NewLLMTranslatorWithConfig()</code>) that validates
+provider/model and creates the appropriate client. Valid models are
+registered in <code>ValidModels</code> map.</p>
+<p><strong>Import cycle avoidance</strong>:
+<code>pkg/translator/llm/</code> uses a type alias
+(<code>type TranslationConfig = translator.TranslationConfig</code>) to
+avoid direct import cycles with <code>pkg/translator/</code>.</p>
+<h3 id="configuration-system">Configuration System</h3>
+<ul>
+<li><code>internal/config/config.go</code> defines the canonical config
+struct with nested sections: <code>Server</code>, <code>Security</code>,
+<code>Translation</code>, <code>Preparation</code>,
+<code>Distributed</code>, <code>Logging</code>.</li>
+<li>Config is loaded from JSON files (e.g., <code>config.json</code>,
+files in <code>internal/working/</code>).</li>
+<li>Environment variables override file values, especially for secrets
+and API keys (<code>OPENAI_API_KEY</code>,
+<code>ANTHROPIC_API_KEY</code>, <code>ZHIPU_API_KEY</code>,
+<code>DEEPSEEK_API_KEY</code>, <code>JWT_SECRET</code>).</li>
+<li><code>Config.Validate()</code> checks ports, TLS requirements, JWT
+secret length (minimum 16 characters), and distributed worker
+configs.</li>
+</ul>
+<h3 id="distributed-processing">Distributed Processing</h3>
+<ul>
+<li><code>pkg/distributed/coordinator.go</code> manages remote LLM
+instances across SSH workers with round-robin selection and fallback
+strategies.</li>
+<li><code>pkg/distributed/manager.go</code> is the top-level
+orchestrator composing <code>SSHPool</code>,
+<code>PairingManager</code>, <code>VersionManager</code>,
+<code>FallbackManager</code>, and
+<code>DistributedCoordinator</code>.</li>
+<li><code>pkg/sshworker/worker.go</code> handles SSH connection
+management, file transfer, remote command execution, and codebase
+version synchronization.</li>
+<li><code>pkg/distributed/version_manager.go</code> compares local vs.
+remote codebase versions, supports update/rollback flows, and emits
+drift alerts.</li>
+<li><code>pkg/distributed/fallback.go</code> tracks per-component
+failure rates with exponential backoff and degraded mode fallback
+(remote → local → reduced quality).</li>
+<li>Workers must be reachable from the coordinator. Version
+synchronization is required.</li>
+</ul>
+<h3 id="markdown-workflow">Markdown Workflow</h3>
+<ul>
+<li><code>pkg/markdown/epub_to_markdown.go</code> converts EPUB to
+Markdown preserving metadata, cover images, and chapter structure.</li>
+<li><code>pkg/markdown/markdown_to_epub.go</code> converts translated
+Markdown back to EPUB.</li>
+<li><code>pkg/markdown/translator.go</code> translates Markdown
+line-by-line while preserving syntax (headers, lists, code blocks,
+links, inline formatting).</li>
+<li><code>pkg/markdown/simple_workflow.go</code> orchestrates the full
+Ebook → Markdown → Translate → Ebook pipeline.</li>
+</ul>
+<h3 id="grpc-and-protobuf">gRPC and Protobuf</h3>
+<ul>
+<li>Protobuf definition lives at
+<code>pkg/grpc/translator.proto</code>.</li>
+<li>Generated code is consumed from <code>pkg/grpc/proto</code>.</li>
+<li><code>pkg/grpc/server.go</code> implements
+<code>TranslationService</code> with session management, streaming
+progress, provider registry, and cleanup routines.</li>
+</ul>
+<hr />
+<h2 id="security-considerations">Security Considerations</h2>
+<ul>
+<li><strong>TLS required for production</strong>: The main
+<code>server</code> entry point uses HTTPS/HTTP3. TLS certificates are
+expected in the <code>certs/</code> directory (<code>server.crt</code>,
+<code>server.key</code>). Self-signed cert generation is available via
+<code>--generate-certs</code> flag.</li>
+<li><strong>JWT authentication</strong>: Configurable via
+<code>security.enable_auth</code> in config. Secret must be at least 16
+characters. Timing attack mitigation adds an artificial delay for
+invalid tokens.</li>
+<li><strong>Rate limiting</strong>: Configurable requests-per-second and
+burst limits via <code>security.rate_limit_rps</code> and
+<code>security.rate_limit_burst</code>. Per-key limiters with background
+cleanup every 10 minutes.</li>
+<li><strong>API key management</strong>: API keys must be provided via
+environment variables (e.g., <code>OPENAI_API_KEY</code>,
+<code>ANTHROPIC_API_KEY</code>). Never commit them.</li>
+<li><strong>CORS</strong>: Configurable allowed origins via
+<code>security.cors_origins</code>.</li>
+<li><strong>Input validation</strong>: All API endpoints validate
+request bodies using Gin binding tags (<code>binding:"required"</code>,
+<code>binding:"email"</code>, etc.).</li>
+<li><strong>SSH security</strong>: Key-based authentication is preferred
+for SSH workers. Password auth is supported but discouraged for
+production.</li>
+<li><strong>Transport</strong>: HTTP/3 uses TLS 1.3 with <code>h3</code>
+ALPN; HTTP/2 fallback uses TLS 1.2+.</li>
+</ul>
+<h3 id="sensitive-files-already-in-gitignore">Sensitive Files (Already
+in .gitignore)</h3>
+<ul>
+<li><code>config_with_keys.json</code>, <code>api_keys.json</code></li>
+<li><code>.env</code>, <code>.env.*</code>, <code>secrets.*</code>,
+<code>keys.*</code></li>
+<li><code>qwen_credentials.json</code>,
+<code>oauth_creds.json</code></li>
+<li><code>.translator/</code> directory</li>
+</ul>
+<hr />
+<h2 id="deployment-processes">Deployment Processes</h2>
+<h3 id="docker-deployment">Docker Deployment</h3>
+<p>A multi-stage <code>Dockerfile</code> is provided:</p>
+<ul>
+<li><strong>Builder stage</strong>: <code>golang:1.24-alpine</code> with
+<code>git</code> and <code>make</code></li>
+<li><strong>Production stage</strong>: <code>alpine:latest</code> with
+<code>ca-certificates</code> and <code>tzdata</code></li>
+<li>Runs as non-root user (<code>appuser</code>, UID 1000)</li>
+<li>Exposes port 8443 (TCP and UDP for HTTP/3)</li>
+<li>Health check endpoint:
+<code>https://localhost:8443/health</code></li>
+<li>Default command:
+<code>/app/translator-server -config /app/config/config.json</code></li>
+<li>Volumes exposed for <code>/app/certs</code> and
+<code>/app/config</code></li>
+</ul>
+<p><strong>Note</strong>: The <code>Dockerfile</code> references
+<code>make build-server</code>, which does not exist in the root
+<code>Makefile</code>. The Makefile defines <code>build</code>,
+<code>build-grpc</code>, <code>build-api</code>, and
+<code>build-cli</code> instead.</p>
+<h3 id="docker-compose">Docker Compose</h3>
+<p><code>docker-compose.yml</code> provides a full production stack:</p>
+<ul>
+<li>PostgreSQL 16 (with health checks and optional init script)</li>
+<li>Redis 7 (with password, 512MB maxmemory, <code>allkeys-lru</code>
+policy)</li>
+<li>Translator API server (depends on healthy postgres &amp; redis)</li>
+<li>Optional admin tools (Adminer, Redis Commander) via
+<code>--profile admin</code></li>
+</ul>
+<p><code>docker-compose.distributed.yml</code> provides a distributed
+worker stack with main server, worker instances, and Ollama
+services.</p>
+<h3 id="manual-deployment">Manual Deployment</h3>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build binaries</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Start gRPC server</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/grpc-server</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Start API server</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/api-server</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Start monitoring server</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/monitor-server</span></span></code></pre></div>
+<h3 id="deployment-scripts">Deployment Scripts</h3>
+<p><code>internal/scripts/</code> contains extensive operational
+scripts:</p>
+<ul>
+<li><code>deploy-system.sh</code> - Automated deployment using
+<code>./build/deployment-cli</code></li>
+<li><code>deploy_ssh_worker.sh</code> / <code>deploy_worker.sh</code> -
+SSH worker deployment</li>
+<li><code>check-health.sh</code> / <code>check_worker.sh</code> - Health
+checks</li>
+<li><code>monitor-production.sh</code> - Full production monitoring with
+disk/CPU/memory/API/DB/Redis checks and alerting</li>
+<li><code>start.sh</code> / <code>stop.sh</code> /
+<code>restart.sh</code> / <code>logs.sh</code> / <code>exec.sh</code> -
+Docker lifecycle management</li>
+<li><code>demo_production_system.sh</code> /
+<code>test_production_system.sh</code> - Production verification
+suites</li>
+</ul>
+<hr />
+<h2 id="development-conventions">Development Conventions</h2>
+<h3 id="adding-a-new-llm-provider">Adding a New LLM Provider</h3>
+<ol type="1">
+<li>Create a new file under
+<code>pkg/translator/llm/&lt;provider&gt;.go</code>.</li>
+<li>Implement the <code>LLMClient</code> interface with HTTP POST JSON
+requests (or local execution for self-hosted).</li>
+<li>Add valid models to <code>ValidModels</code> map in
+<code>pkg/translator/llm/llm.go</code>.</li>
+<li>Add provider-specific configuration to
+<code>internal/config/config.go</code> if needed.</li>
+<li>Register the provider in the factory switch in
+<code>NewLLMTranslatorWithConfig()</code>.</li>
+<li>Add unit tests in <code>test/unit/</code> or alongside the
+package.</li>
+<li>Update <code>api/openapi/openapi.yaml</code> if the provider appears
+in API enums.</li>
+</ol>
+<h3 id="adding-a-new-file-format">Adding a New File Format</h3>
+<ol type="1">
+<li>Implement the parser interface
+(<code>Parse(filename string) (*Book, error)</code>) in
+<code>pkg/ebook/</code>.</li>
+<li>Register the format in <code>pkg/ebook/parser.go</code> via
+<code>RegisterParser()</code>.</li>
+<li>Add detection logic in <code>pkg/format/detector.go</code>.</li>
+<li>Add writer support if output generation is required.</li>
+<li>Add sample files to <code>test/fixtures/ebooks/</code>.</li>
+<li>Add parser tests.</li>
+</ol>
+<h3 id="session-and-progress-tracking">Session and Progress
+Tracking</h3>
+<ul>
+<li>Always generate a unique <code>SessionID</code> (e.g., UUID) for
+each translation operation.</li>
+<li>Emit progress events via the event bus so WebSocket clients receive
+updates.</li>
+<li>The monitoring dashboard (<code>web/templates/dashboard.html</code>)
+displays sessions, progress bars, event logs, and worker status.</li>
+</ul>
+<h3 id="goroutine-and-context-patterns">Goroutine and Context
+Patterns</h3>
+<ul>
+<li><code>context.Context</code> is the first parameter in virtually all
+I/O and long-running operations.</li>
+<li>Use <code>context.WithTimeout</code> for API calls;
+<code>context.WithCancel</code> for per-session cancellation.</li>
+<li>Always defer <code>mu.Unlock()</code> after <code>mu.Lock()</code>
+or <code>mu.RLock()</code>.</li>
+<li>WebSocket and event handlers launch background goroutines with panic
+recovery.</li>
+<li>Graceful shutdown catches <code>SIGINT</code>/<code>SIGTERM</code>
+and cancels contexts with a 30-second timeout.</li>
+</ul>
+<hr />
+<h2 id="critical-non-negotiable-constraints">Critical Non-Negotiable
+Constraints</h2>
+<ul>
+<li><strong>LLMsVerifier SSOT</strong>: LLMsVerifier is the EXCLUSIVE
+source of truth for all LLM models. No hardcoded model lists. No
+unverified models. No bypass.</li>
+<li><strong>HELIXQA ONLY</strong>: All automated UI/UX testing must use
+HelixQA. No custom browser scripts.</li>
+<li><strong>ANTI-BLUFF MANDATE</strong>: Every test must verify real
+user-visible behavior. See CONSTITUTION.md CONST-035.</li>
+<li><strong>FULL-QA MASTER CYCLE</strong>: Every change requires the
+full Article VII cycle.</li>
+<li><strong>4-ARTEFACT FIX</strong>: Every defect fix must produce: unit
+test + integration test + bank entry + challenge.</li>
+<li><strong>EVIDENCE OR BUST</strong>: Passing tests without captured
+evidence = invalid. Screenshot/video/log required.</li>
+</ul>
+<h2 id="helixqa-commands">HelixQA Commands</h2>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build HelixQA binary</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixQA <span class="kw">&amp;&amp;</span> <span class="fu">make</span> build</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Standard QA</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="ex">helixqa</span> run <span class="at">--banks</span> tests/banks/ <span class="at">--platform</span> all <span class="at">--speed</span> normal</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># List available tests</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="ex">helixqa</span> list <span class="at">--banks</span> tests/banks/ <span class="at">--platform</span> web <span class="at">--json</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Autonomous QA session</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="ex">helixqa</span> autonomous <span class="at">--project</span> . <span class="at">--platforms</span> web,api,cli <span class="dt">\</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">--timeout</span> 2h <span class="at">--output</span> qa-results/ <span class="at">--verbose</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate report</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="ex">helixqa</span> report <span class="at">--input</span> qa-results/ <span class="at">--format</span> html <span class="at">--output</span> qa-report.html</span></code></pre></div>
+<h2 id="qa-bank-format-yaml">QA Bank Format (YAML)</h2>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;1.0&quot;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;HelixTranslate Full QA - API&quot;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">test_cases</span><span class="kw">:</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> HTQ-API-001</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Health check returns healthy status&quot;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">category</span><span class="kw">:</span><span class="at"> functional</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> critical</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">api</span><span class="kw">]</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Send GET /health&quot;</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;GET https://localhost:8443/health&quot;</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;HTTP 200 with {</span><span class="sc">\&quot;</span><span class="st">status</span><span class="sc">\&quot;</span><span class="st">:</span><span class="sc">\&quot;</span><span class="st">healthy</span><span class="sc">\&quot;</span><span class="st">}&quot;</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">health</span><span class="kw">,</span><span class="at"> smoke</span><span class="kw">]</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">expected_result</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Health endpoint returns valid JSON with healthy status&quot;</span></span></code></pre></div>
+<h2 id="helixqa-ecosystem-sibling-modules">HelixQA Ecosystem (Sibling
+Modules)</h2>
+<p>The project depends on several sibling Go modules managed as Git
+submodules:</p>
+<pre><code>./HelixQA          → digital.vasic.helixqa        (QA automation engine)
+./DocProcessor     → digital.vasic.docprocessor   (Document processing)
+./LLMOrchestrator  → digital.vasic.llmorchestrator (Agent orchestration)
+./LLMProvider      → digital.vasic.llmprovider    (Provider facade + circuit breaker)
+./VisionEngine     → digital.vasic.visionengine   (Vision + OpenCV analysis)
+./LLMsVerifier     → digital.vasic.llmsverifier   (Model verification SSOT)
+./Challenges       → digital.vasic.challenges     (Challenge framework)
+./Containers       → digital.vasic.containers     (Container orchestration)
+./Models           → digital.vasic.models         (Shared data types)
+./Security         → digital.vasic.security       (Security utilities / SSRF)</code></pre>
+<p>All submodules are wired via <code>replace</code> directives in
+<code>go.mod</code>. If a submodule fails to clone (e.g.
+<code>LLMsVerifier</code> repository unavailable), create a local
+placeholder with a matching <code>go.mod</code> module name and populate
+the packages that HelixTranslate imports.</p>
+<h2 id="llmsverifier-integration-architecture">LLMsVerifier Integration
+Architecture</h2>
+<pre><code>[HelixTranslate Application]
+    |
+    | 1. Config Load
+    v
+[internal/verifier/]
+    |
+    | 2. Verify All Providers
+    v
+[digital.vasic.llmsverifier/pkg/api]
+    |---&gt; types.go (canonical Model, PricingInfo — CONST-034 SSOT)
+    |---&gt; pkg/helixqa (VisionModelRegistry for HelixQA ranking)
+    |
+    | 3. Return Verified + Scored Models
+    v
+[internal/services/llmsverifier_score_adapter.go]
+    |
+    | 4. Score Normalization (0-100 -&gt; 0-10)
+    v
+[pkg/translator/llm/llm.go]
+    |
+    | 5. Translation via Verified Providers (26 providers)
+    v
+[LLM Provider APIs]</code></pre>
+<p><strong>Canonical type location</strong>:
+<code>llms_verifier/pkg/api/types.go</code> defines <code>Model</code>
+and <code>PricingInfo</code>. HelixTranslate aliases them in
+<code>internal/verifier/client.go</code>
+(<code>type Model = api.Model</code>).</p>
+<hr />
+<h2 id="essential-files-quick-reference">Essential Files Quick
+Reference</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>go.mod</code> / <code>go.sum</code></td>
+<td>Module definition and dependency checksums</td>
+</tr>
+<tr>
+<td><code>Makefile</code></td>
+<td>Build, test, and development commands</td>
+</tr>
+<tr>
+<td><code>config.json</code></td>
+<td>Default application configuration</td>
+</tr>
+<tr>
+<td><code>Dockerfile</code></td>
+<td>Multi-stage container build</td>
+</tr>
+<tr>
+<td><code>docker-compose.yml</code></td>
+<td>Full stack with PostgreSQL and Redis</td>
+</tr>
+<tr>
+<td><code>.golangci.yml</code></td>
+<td>Strict linting configuration</td>
+</tr>
+<tr>
+<td><code>internal/config/config.go</code></td>
+<td>Canonical configuration structs and loading</td>
+</tr>
+<tr>
+<td><code>pkg/events/events.go</code></td>
+<td>Central pub/sub event system</td>
+</tr>
+<tr>
+<td><code>pkg/websocket/hub.go</code></td>
+<td>WebSocket hub for real-time monitoring</td>
+</tr>
+<tr>
+<td><code>pkg/translator/llm/llm.go</code></td>
+<td>LLM provider interface and factory (26 providers)</td>
+</tr>
+<tr>
+<td><code>llms_verifier/pkg/api/types.go</code></td>
+<td>Canonical model verification types (CONST-034 SSOT)</td>
+</tr>
+<tr>
+<td><code>api/openapi/openapi.yaml</code></td>
+<td>OpenAPI 3.0 specification</td>
+</tr>
+<tr>
+<td><code>VERSION</code></td>
+<td>Current application version (2.3.0)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="common-pitfalls">Common Pitfalls</h2>
+<ul>
+<li><strong>FB2 XML</strong>: Always register the FB2 namespace before
+parsing. Use UTF-8 encoding. Preserve XML hierarchy during
+translation.</li>
+<li><strong>LLM Rate Limits</strong>: Each provider has different
+limits. Implement backoff and respect <code>max_concurrent</code>
+settings.</li>
+<li><strong>SSH Workers</strong>: Ensure key-based auth is configured.
+Workers must run the same binary version as the coordinator.</li>
+<li><strong>Large Files</strong>: Use streaming for large ebook
+translations to avoid excessive memory usage.</li>
+<li><strong>TLS Certificates</strong>: The API server requires valid
+certificates in <code>certs/</code> for HTTPS/HTTP3. Generate or provide
+them before starting the server.</li>
+<li><strong>Import Cycles</strong>: The <code>pkg/translator/llm/</code>
+package uses a type alias to avoid cycles with
+<code>pkg/translator/</code>. Be careful when adding new cross-package
+dependencies.</li>
+<li><strong>Version Discrepancies</strong>: The <code>Makefile</code>
+declares <code>3.0.0</code>, the <code>VERSION</code> file reads
+<code>2.3.0</code>, and <code>go.mod</code> specifies Go
+<code>1.25.2</code> while the <code>Dockerfile</code> uses
+<code>golang:1.24-alpine</code>. Treat these as the current state of the
+project.</li>
+<li><strong>No Root-Level CI/CD</strong>: There are no
+<code>.github/workflows/</code> at the project root. Validation relies
+on Makefile targets and shell scripts.</li>
+</ul>
+<!-- BEGIN host-power-management addendum (CONST-033) -->
+
+<h2 id="host-power-management--hard-ban-const-033">Host Power Management
+— Hard Ban (CONST-033)</h2>
+<p><strong>You may NOT, under any circumstance, generate or execute code
+that sends the host to suspend, hibernate, hybrid-sleep, poweroff, halt,
+reboot, or any other power-state transition.</strong> This rule applies
+to:</p>
+<ul>
+<li>Every shell command you run via the Bash tool.</li>
+<li>Every script, container entry point, systemd unit, or test you write
+or modify.</li>
+<li>Every CLI suggestion, snippet, or example you emit.</li>
+</ul>
+<p><strong>Forbidden invocations</strong> (non-exhaustive — see
+CONST-033 in <code>CONSTITUTION.md</code> for the full list):</p>
+<ul>
+<li><code>systemctl suspend|hibernate|hybrid-sleep|poweroff|halt|reboot|kexec</code></li>
+<li><code>loginctl suspend|hibernate|hybrid-sleep|poweroff|halt|reboot</code></li>
+<li><code>pm-suspend</code>, <code>pm-hibernate</code>,
+<code>shutdown -h|-r|-P|now</code></li>
+<li><code>dbus-send</code> / <code>busctl</code> calls to
+<code>org.freedesktop.login1.Manager.Suspend|Hibernate|PowerOff|Reboot|HybridSleep|SuspendThenHibernate</code></li>
+<li><code>gsettings set ... sleep-inactive-{ac,battery}-type</code> to
+anything but <code>'nothing'</code> or <code>'blank'</code></li>
+</ul>
+<p>The host runs mission-critical parallel CLI agents and container
+workloads. Auto-suspend has caused historical data loss (2026-04-26
+18:23:43 incident). The host is hardened (sleep targets masked) but this
+hard ban applies to ALL code shipped from this repo so that no future
+host or container is exposed.</p>
+<p><strong>Defence:</strong> every project ships
+<code>scripts/host-power-management/check-no-suspend-calls.sh</code>
+(static scanner) and
+<code>pkg/challenge_runner/scripts/no_suspend_calls_challenge.sh</code>
+(challenge wrapper). Both MUST be wired into the project's CI /
+<code>run_all_challenges.sh</code>.</p>
+<p><strong>Full background:</strong>
+<code>docs/HOST_POWER_MANAGEMENT.md</code> and
+<code>CONSTITUTION.md</code> (CONST-033).</p>
+<!-- END host-power-management addendum (CONST-033) -->
+
+<h2 id="const-035--anti-bluff-operative-rule-mandatory">CONST-035 —
+Anti-Bluff Operative Rule (MANDATORY)</h2>
+<blockquote>
+<p>"We had been in position that all tests do execute with success and
+all Challenges as well, but in reality the most of the features does not
+work and can't be used! This MUST NOT be the case."</p>
+</blockquote>
+<p><strong>The operative rule:</strong> Execution of tests and
+Challenges MUST guarantee the quality, the completion and full usability
+by end users of the product.</p>
+<ul>
+<li>A green test or challenge for a feature that does not actually work
+is a <strong>BLUFF</strong> and is <strong>FORBIDDEN</strong>.</li>
+<li>Every test must assert concrete user-visible outcomes, not just
+internal state.</li>
+<li>Every challenge must run real code and verify real behavior;
+grep/file-existence checks are <strong>NOT sufficient</strong>.</li>
+<li>Mutation testing is <strong>MANDATORY</strong>: deliberately break
+the feature → the test/challenge <strong>MUST then FAIL</strong>.</li>
+<li>The bar for shipping is <strong>NOT "tests pass"</strong> but
+<strong>"users can use the feature."</strong></li>
+<li>No false-success results are tolerable.</li>
+</ul>
+</body>
+</html>

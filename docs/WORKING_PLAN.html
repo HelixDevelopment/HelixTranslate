@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>WORKING_PLAN</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">WORKING_PLAN</h1>
+</header>
+<h1
+id="helixtranslate--working-plan-unfinished-items--known-issues">HelixTranslate
+— Working Plan: Unfinished Items &amp; Known Issues</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-14T18:10:00Z <strong>Authority:</strong> operator mandate
+2026-06-14 ("what is left unfinished and what are (known) issues …
+nothing left unfinished with zero issues when we finally finish")
+<strong>Scope:</strong> the complete, honest (§11.4.6) inventory of
+everything not-done + every known issue, structured as a subagent-driven
+execution plan. Each item carries: WHAT, WHY-OPEN/BLOCKER, EVIDENCE,
+SUBAGENT-TASK, ACCEPTANCE (rock-solid proof per §11.4.123, no
+bluff).</p>
+<p><strong>Baseline at authoring:</strong> HEAD <code>5b0dd17</code>;
+<code>go build ./...</code> clean; full <code>go test ./... -p 1</code>
+GREEN (57 ok / 0 FAIL at HEAD daa2f70; HEAD 5b0dd17 adds only llm.go
+fixes — <code>pkg/distributed/TestSSHPool_cleanup</code> is a confirmed
+full-sweep-load flake, passes <code>-count=3</code> isolated, §11.4.7).
+27 genuine mutation-proven bug fixes landed this session across 10
+parallel subagent waves; the main-module product bug-hunt is
+<strong>saturated</strong> per the §11.4.118 completeness-critic
+audit.</p>
+<p>Status legend: <code>OPEN</code> · <code>OPERATOR-BLOCKED</code>
+(needs credentials/decision) · <code>DESIGN</code> (needs architecture
+decision) · <code>AUTONOMOUS</code> (a subagent can close it now) ·
+<code>DONE</code>.</p>
+<hr />
+<h2 id="p0--release-blockers-must-close-before-any-release-tag">P0 —
+Release blockers (must close before any release tag)</h2>
+<h3 id="p01--version-string-inconsistency-autonomous">P0.1 — Version
+string inconsistency <code>[AUTONOMOUS]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> Authoritative version is ambiguous.
+<code>VERSION</code>=<code>2.3.0</code>; <code>cmd/grpc-server</code>
+&amp; <code>cmd/unified-translator</code>
+<code>appVersion</code>=<code>3.0.0</code>; <code>cmd/translator</code>
+<code>appVersion</code>=<code>2.1.0</code>; CLAUDE.md says treat
+<code>VERSION</code> (2.3.0) as authoritative, Makefile references
+3.0.0.</li>
+<li><strong>EVIDENCE:</strong> <code>cat VERSION</code>=2.3.0;
+<code>grep appVersion cmd/*/main.go</code> → 3.0.0/3.0.0/2.1.0.</li>
+<li><strong>SUBAGENT-TASK:</strong> Reconcile every binary's
+<code>appVersion</code> to the single authoritative <code>VERSION</code>
+value (read <code>VERSION</code> at build time or a shared
+<code>pkg/version</code> constant); remove the hardcoded divergent
+literals. RED test asserting each
+<code>appVersion == VERSION</code>.</li>
+<li><strong>ACCEPTANCE:</strong> all <code>appVersion</code> literals
+equal <code>VERSION</code>; mutation (revert one) → test FAILs.
+<strong>NOTE:</strong> the authoritative number (2.3.0 vs 3.0.0) is an
+<strong>operator decision</strong> — see P1.0; the subagent wires the
+single-source-of-truth, operator picks the value.</li>
+</ul>
+<h3
+id="p02--full-11440-release-retest-not-yet-run-operator-blocked-on-devicestopology">P0.2
+— Full §11.4.40 release retest not yet run
+<code>[OPERATOR-BLOCKED on devices/topology]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> Release requires the complete §11.4.40 7-step
+retest (pre-build sweep, post-build sweep, on-device cycle, meta-test
+mutation sweep, Challenge bank sweep, Issues/Fixed audit, CONTINUATION
+sync) on a clean baseline. We have run repeated full
+<code>go test ./... -p 1</code> sweeps (green) but not the full 7-step
+ritual.</li>
+<li><strong>SUBAGENT-TASK:</strong> none yet — gated on P4 (gates), P6
+(Challenges/HelixQA), and the §11.4.151 release-prefix tagging.
+Sequenced AFTER P4/P6.</li>
+<li><strong>ACCEPTANCE:</strong> all 7 steps GREEN with captured
+evidence + operator confirmation + §11.4.151
+<code>helix_translate-&lt;version&gt;</code> tag pushed to all upstreams
+(no force §11.4.113).</li>
+</ul>
+<h3 id="p03--no-114151-prefixed-release-tag-yet-operator-blocked">P0.3 —
+No §11.4.151 prefixed release tag yet
+<code>[OPERATOR-BLOCKED]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> No release tag exists. Per §11.4.151 the tag
+must be <code>helix_translate-&lt;version&gt;</code> (prefix from
+<code>HELIX_RELEASE_PREFIX</code> env or lowercased root dir name) on
+main repo + every owned submodule.</li>
+<li><strong>ACCEPTANCE:</strong> prefixed tag created post-P0.2, fanned
+to all upstreams.</li>
+</ul>
+<hr />
+<h2
+id="p1--operator--credential-gated-cannot-be-closed-autonomously-need-the-operator">P1
+— Operator / credential-gated (cannot be closed autonomously; need the
+operator)</h2>
+<h3
+id="p10--decide-the-authoritative-version-number-operator-blocked">P1.0
+— Decide the authoritative version number
+<code>[OPERATOR-BLOCKED]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> Is the next version 2.3.x or 3.0.0? CLAUDE.md
+says VERSION (2.3.0) wins; Makefile/binaries say 3.0.0. Operator must
+pick.</li>
+</ul>
+<h3 id="p11--provider-credentials-absentinvalid-operator-blocked">P1.1 —
+Provider credentials absent/invalid <code>[OPERATOR-BLOCKED]</code></h3>
+<ul>
+<li><strong>OPENAI_API_KEY</strong> absent → OpenAI provider unverified;
+allowlist stale (<code>gpt-3.5-turbo/gpt-4/gpt-4-turbo/gpt-4o</code>
+only — missing gpt-4o-mini/4.1/o-series).</li>
+<li><strong>ANTHROPIC_API_KEY</strong> absent → Anthropic unverified;
+allowlist very stale (only claude-3 2024 models; missing
+3.5/3.7/4.x).</li>
+<li><strong>GEMINI_API_KEY</strong> invalid ("API Key not found",
+re-confirmed via live <code>/models</code>) → gemini
+non-functional.</li>
+<li><strong>ZHIPU</strong> account out of balance (error 1113
+"余额不足") → allowlist stale (live <code>/models</code> =
+<code>glm-4.5/4.5-air/4.6/4.7/5/5-turbo/5.1</code>; our allowlist has
+none of them) but <strong>cannot verify translation or
+response-shape</strong> → fix blocked.</li>
+<li><strong>UNBLOCK:</strong> operator adds/refreshes the keys /
+recharges Zhipu. Then the <strong>deepseek pattern</strong> applies
+(proven this session): live <code>/models</code> → verify-translate +
+verify string-content shape → additive allowlist update + RED-proven
+gate guard.</li>
+<li><strong>EVIDENCE:</strong> live <code>/models</code> probes captured
+this session; deepseek fix <code>0fd1a34</code> is the template.</li>
+</ul>
+<h3
+id="p12--30-other-provider-allowlists-not-audited-operator-blocked-on-keys">P1.2
+— ~30 other provider allowlists not audited
+<code>[OPERATOR-BLOCKED on keys]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> qwen, groq, cohere, mistral (live shows
+<code>magistral-*</code> reasoning family missing — but magistral-medium
+returns structured-list content our client can't parse, see P2.4), xai,
+replicate, cerebras, cloudflare, siliconflow, hyperbolic, togetherai,
+sambanova, kimi, novita, nlpcloud, upstage, sarvam, modal, publicai,
+nia, vulavula — allowlists not verified against live current
+models.</li>
+<li><strong>UNBLOCK:</strong> funded keys per provider → apply the
+deepseek pattern per provider (verify-translate + string-content shape
+before adding).</li>
+</ul>
+<hr />
+<h2
+id="p2--design-decisions-need-architectureoperator-input-not-blind-autonomous-fixes">P2
+— Design decisions (need architecture/operator input; not blind
+autonomous fixes)</h2>
+<h3 id="p21--inert-cli-flags-design">P2.1 — Inert CLI flags
+<code>[DESIGN]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> <code>cmd/unified-translator</code> parses
+<code>-chunk-size</code>, <code>-workers</code>,
+<code>-concurrency</code>, <code>-verify</code> but <strong>never
+consumes</strong> them (real chunking is automatic + correct via
+<code>translateWithRetry</code>/<code>splitText</code>).
+<code>startMonitoringServer</code> is a print-only stub (the
+<code>-monitoring</code> flag does not start a real monitor in the
+unified CLI).</li>
+<li><strong>DECISION NEEDED:</strong> wire each flag to real behavior
+(define semantics) OR remove it (§11.4.122 — removing a user-facing flag
+needs operator confirmation). Removing/altering is not a blind fix.</li>
+<li><strong>SUBAGENT-TASK (after decision):</strong> wire or remove per
+operator choice, with RED→GREEN tests.</li>
+</ul>
+<h3 id="p22--inert-config-fields-design">P2.2 — Inert config fields
+<code>[DESIGN]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> <code>DOCXConfig.MinTextLength</code> +
+<code>DOCXConfig.IgnoreStyles</code> and
+<code>PDFConfig.MinTextLength</code> are declared/documented but never
+consumed.</li>
+<li><strong>DECISION:</strong> wire (filter short paragraphs / honor
+ignore-styles) or drop. Wiring MinTextLength changes output → needs care
++ tests.</li>
+</ul>
+<h3 id="p23--verifier-minscorethreshold-scale-inconsistency-design">P2.3
+— Verifier <code>MinScoreThreshold</code> scale inconsistency
+<code>[DESIGN]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> the handler
+(<code>pkg/api/verifier_handlers.go</code>) compares
+<code>MinScoreThreshold</code> against <strong>raw 0-100</strong>
+<code>OverallScore</code>; the adapter
+(<code>internal/services/llmsverifier_score_adapter.go</code>) compares
+it against the <strong>normalized 0-10</strong> score. The two contracts
+contradict; <code>GetPreferences</code>/<code>GetProviderScore</code>
+currently have <strong>no production caller</strong>.</li>
+<li><strong>DECISION NEEDED:</strong> declare the canonical scale (0-100
+or 0-10) before either path is wired. Fixing either side blindly breaks
+the other's passing test (§11.4.120).</li>
+</ul>
+<h3 id="p24--reasoning-model-structured-content-support-design">P2.4 —
+Reasoning-model structured-<code>content</code> support
+<code>[DESIGN]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> OpenAI-compatible clients assume
+<code>content</code> is a STRING. Some reasoning models return
+<code>content</code> as a structured LIST (verified: Mistral
+<code>magistral-medium-latest</code>; likely glm-5 / deepseek-reasoner
+class). Our clients silently drop / can't parse it.</li>
+<li><strong>DECISION:</strong> add structured-content handling to the
+OpenAI-compatible client layer → would unlock magistral/glm-5/reasoner
+models. Non-trivial; design + tests required.</li>
+</ul>
+<h3 id="p25--markdown-not-a-first-class-cli-input-design">P2.5 —
+Markdown not a first-class CLI input <code>[DESIGN]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> <code>.md</code> input is detected as TXT and
+translated as plain text (works, but markdown structure not preserved).
+First-class markdown input is an enhancement.</li>
+</ul>
+<h3
+id="p26--cmdtranslator-intermediate-markdown-download-dir-inconsistency-open-needs-live-ssh">P2.6
+— cmd/translator intermediate-markdown download-dir inconsistency
+<code>[OPEN, needs live SSH]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> intermediate <code>.md</code> downloads to
+<code>Dir(InputFile)</code> in one path vs <code>Dir(OutputFile)</code>
+in another; manifests only under live SSH with <code>-o</code> in a
+different dir. Not unit-testable without real SSH infra.</li>
+<li><strong>SUBAGENT-TASK:</strong> reproduce via the §11.4.76
+Containers submodule (boot an SSH worker container) → RED → fix → GREEN.
+Gated on containerized SSH test infra.</li>
+</ul>
+<hr />
+<h2 id="p3--dead--unwired-code-114124-investigate-before-remove">P3 —
+Dead / unwired code (§11.4.124 investigate-before-remove)</h2>
+<h3 id="p31--pkghash-package-is-dead-autonomous--investigate">P3.1 —
+<code>pkg/hash</code> package is dead
+<code>[AUTONOMOUS — investigate]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> <code>pkg/hash</code> (393 LOC) has
+<strong>ZERO importers</strong> across the module (confirmed). Per
+§11.4.124 it must NOT be removed without git-history investigation
+establishing how/when it became dead + whether a hidden reference
+exists.</li>
+<li><strong>SUBAGENT-TASK:</strong> git-history investigation
+(<code>git log --follow</code>, <code>-S</code> pickaxe, blame) →
+capture as FACT where it was wired + when it died → either (a) restore a
+mistakenly-deleted call-site / wire it in properly + add tests, or (b)
+if proven genuinely unneeded, remove it in its own descriptive commit
+citing the git evidence (+ operator confirm per §11.4.122 since it's a
+shipped package).</li>
+<li><strong>ACCEPTANCE:</strong> captured git-history evidence +
+decision; if removed, separate commit citing evidence.</li>
+</ul>
+<hr />
+<h2
+id="p4--governance--constitution-compliance-gaps-large-the-project-under-implements-many-mandates">P4
+— Governance / constitution-compliance gaps (large; the project
+under-implements many mandates)</h2>
+<h3
+id="p41--workable-items-tracker-constellation-missing-autonomous-scaffold--ongoing">P4.1
+— Workable-items tracker constellation missing
+<code>[AUTONOMOUS scaffold + ongoing]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> The constitution mandates
+<code>docs/Issues.md</code>, <code>docs/Issues_Summary.md</code>,
+<code>docs/Fixed.md</code>, <code>docs/Fixed_Summary.md</code>,
+<code>docs/CONTINUATION.md</code> (✓ exists), per-item ATM-NNN tickets
+(§11.4.54), the SQLite <code>docs/workable_items.db</code>
+single-source-of-truth (§11.4.93/.95), procedure docs
+<code>docs/procedures/issues/*.md</code> (§11.4.63), Reopens/Status
+docs. <strong>CONFIRMED ABSENT:</strong> Issues/Fixed/summaries,
+procedures/, workable_items.db, ATM tickets. The project tracks work in
+<code>CONTINUATION.md</code> only.</li>
+<li><strong>SUBAGENT-TASK:</strong> scaffold the tracker constellation:
+migrate this session's 27 fixes into <code>Fixed.md</code> +
+<code>Fixed_Summary.md</code> with ATM-NNN IDs + Status/Type columns;
+create empty <code>Issues.md</code>/<code>Issues_Summary.md</code>;
+stand up the §11.4.93 Go <code>cmd/workable-items</code> tool + DB (or
+document a deliberate §11.4.6 deviation). Large — split across
+sub-tasks.</li>
+<li><strong>ACCEPTANCE:</strong> the doc-set exists, in sync (.md +
+.html + .pdf per §11.4.65), gates green.</li>
+</ul>
+<h3
+id="p42--pre-build-cm--gate-suite-not-implemented-autonomous-large">P4.2
+— Pre-build CM-* gate suite not implemented
+<code>[AUTONOMOUS, large]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> The constitution references dozens of
+<code>CM-*</code> pre-build gates + paired §1.1 mutations. This project
+has only
+<code>scripts/testing/meta_test_constitution_inheritance.sh</code>; the
+<code>CM-*</code> gate suite + <code>pre_build_verification.sh</code>
+are NOT implemented.</li>
+<li><strong>SUBAGENT-TASK:</strong> implement the highest-value gates
+first (anti-bluff smoke, doc-sync, regression-guard-registered,
+no-fakes-beyond-unit, gitignore-precommit-audit) each with a paired
+mutation, wired into a
+<code>scripts/pre_build_verification.sh</code>.</li>
+<li><strong>ACCEPTANCE:</strong> each gate present + its paired mutation
+FAILs it; runnable as a suite.</li>
+</ul>
+<h3 id="p43--11465-universal-markdown-export-audit-autonomous">P4.3 —
+§11.4.65 universal markdown export audit <code>[AUTONOMOUS]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> all tracked non-source <code>.md</code> must
+have synced <code>.html</code>+<code>.pdf</code> siblings. The commit
+wrapper auto-syncs, but a full audit (incl. this new WORKING_PLAN.md +
+all docs/) is needed.</li>
+<li><strong>SUBAGENT-TASK:</strong> run/verify
+<code>sync_all_markdown_exports</code>-equivalent; confirm every
+docs/*.md has fresh .html/.pdf.</li>
+</ul>
+<hr />
+<h2
+id="p5--owned-submodules-11428-equal-codebase-operator-coordination">P5
+— Owned submodules (§11.4.28 equal-codebase)
+<code>[OPERATOR-COORDINATION]</code></h2>
+<h3
+id="p51--submodule-bug-hunt--brittle-test-fixes-blocked-another-session-active">P5.1
+— Submodule bug-hunt + brittle-test fixes
+<code>[BLOCKED: another session active]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> Owned submodules present:
+<code>challenges</code>, <code>containers</code>, <code>helix_qa</code>,
+<code>doc_processor</code>, <code>llm_orchestrator</code>,
+<code>llm_provider</code>, <code>vision_engine</code>,
+<code>llms_verifier</code>, <code>docs_chain</code>. They are §11.4.28
+equal-codebase and have the brittle <code>"connection refused"</code>
+env-coupled test class (15+ sites in challenges/containers/helix_qa) —
+the same class fixed in the main module this session.</li>
+<li><strong>BLOCKER:</strong> evidence shows <strong>another session is
+actively working <code>helix_qa</code></strong> (observed
+<code>github.com/HelixDevelopment/...</code> <code>go test -race</code>
+running). Per §11.4.119 single-owner, do NOT collide.</li>
+<li><strong>SUBAGENT-TASK (after operator confirms
+ownership/coordination):</strong> per-submodule bug-hunt waves (separate
+go.mod, separate upstreams, their own commit flow) mirroring the
+main-module campaign.</li>
+</ul>
+<hr />
+<h2
+id="p6--full-test-type-coverage-11425--11427-autonomous--infra-gated">P6
+— Full test-type coverage (§11.4.25 / §11.4.27)
+<code>[AUTONOMOUS + infra-gated]</code></h2>
+<h3
+id="p61--per-feature-test-type-matrix--helixqa--challenges-open-large">P6.1
+— Per-feature test-type matrix + HelixQA + Challenges
+<code>[OPEN, large]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> §11.4.27 mandates 100% coverage with every
+test type (unit ✓, integration ✓-partial, e2e ✓-partial, security
+✓-partial, stress/chaos ✓-partial via §11.4.85, plus
+ddos/scaling/perf/benchmark/ui/ux, Challenges bank, full HelixQA
+autonomous sessions). This session added unit/integration + some
+stress/chaos + real E2E proofs; the full matrix per feature is
+unfilled.</li>
+<li><strong>SUBAGENT-TASK:</strong> build the §11.4.25 coverage ledger
+(feature × platform × test-type × status); fill the highest-value gaps
+(perf/benchmark for the translation pipeline, chaos for
+distributed/storage, Challenges entries per shipped feature in
+<code>tools/helixqa/banks/</code>).</li>
+<li><strong>ACCEPTANCE:</strong> coverage ledger published; each shipped
+feature has ≥ the mandated test types with captured evidence under
+<code>docs/qa/&lt;run-id&gt;/</code> (§11.4.83).</li>
+</ul>
+<h3 id="p62--docsqa-evidence-per-shipped-feature-autonomous">P6.2 —
+docs/qa/<run-id> evidence per shipped feature
+<code>[AUTONOMOUS]</code></h3>
+<ul>
+<li><strong>WHAT:</strong> §11.4.83 requires a recorded e2e transcript
+per shipped feature. We have E2E proofs for PDF input, output-format
+matrix, deepseek-v4. The 27 fixes' user-visible features need
+per-feature evidence dirs.</li>
+</ul>
+<hr />
+<h2 id="confirmed-green--done-this-session-for-completeness">Confirmed
+GREEN / DONE this session (for completeness)</h2>
+<ul>
+<li>27 genuine mutation-proven bug fixes (waves 1-10) — see
+CONTINUATION.md Rev 36-41 for the itemized list with commit hashes.</li>
+<li>Format matrix complete: 6 inputs (FB2/EPUB/TXT/HTML/DOCX/PDF) × 5
+outputs (EPUB/FB2/HTML/TXT/MD), all real-translation proven.</li>
+<li>PDF + DOCX input revived from license-gated-dead (MIT ledongthuc/pdf
++ stdlib OOXML).</li>
+<li>DeepSeek allowlist current (v4 models,
+live-<code>/models</code>-proven).</li>
+<li>All sweeps GREEN at quiescent checkpoints (57 ok / 0 FAIL);
+build+vet clean; all FF-pushed to both upstreams (no force
+§11.4.113).</li>
+</ul>
+<hr />
+<h2 id="execution-order-recommended">Execution order (recommended)</h2>
+<ol type="1">
+<li><strong>Now (autonomous):</strong> P0.1 version single-source wiring
+(pending P1.0 value) · P3.1 pkg/hash investigation · P4.3 export audit ·
+P6.2 evidence backfill.</li>
+<li><strong>After operator input:</strong> P1.0 version number ·
+P1.1/P1.2 keys → allowlist audits · P2.x design decisions.</li>
+<li><strong>Larger autonomous tracks:</strong> P4.1 tracker
+constellation · P4.2 CM-gate suite · P6.1 test-type matrix.</li>
+<li><strong>Coordinated:</strong> P5.1 submodules (confirm no
+collision).</li>
+<li><strong>Final:</strong> P0.2 full §11.4.40 retest → P0.3 §11.4.151
+prefixed release tag.</li>
+</ol>
+<p><strong>Nothing here is silently dropped.</strong> Every item is
+tracked to a subagent task with rock-solid-proof acceptance (§11.4.123)
+and no-bluff verification (§11.4).</p>
+</body>
+</html>

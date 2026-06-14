@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Fixed_Summary</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Fixed_Summary</h1>
+</header>
+<h1 id="helixtranslate--fixed-summary">HelixTranslate — Fixed
+Summary</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-14T15:41:17Z <strong>Authority:</strong> §11.4.53 (Fixed_Summary
+parity) · §11.4.54 (ATM ID column) · §11.4.19 (column-alignment) ·
+§11.4.91 (clear descriptions) <strong>Generated:</strong> auto-generated
+from <code>docs/Fixed.md</code> by
+<code>scripts/testing/generate_fixed_summary.sh</code> — do not
+hand-edit.</p>
+<table>
+<thead>
+<tr>
+<th>ATM ID</th>
+<th>Level</th>
+<th>Status</th>
+<th>Type</th>
+<th>One-line description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ATM-001</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>splitText dropped paragraph separators at chunk boundaries causing
+structural data loss</td>
+</tr>
+<tr>
+<td>ATM-002</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>In-memory translation cache-key collision served the wrong
+translation</td>
+</tr>
+<tr>
+<td>ATM-003</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>FB2 writer dropped deeply-nested (&gt;2 level) section content as
+translated-text data loss</td>
+</tr>
+<tr>
+<td>ATM-004</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Anthropic client dropped all content blocks after the first,
+truncating translations</td>
+</tr>
+<tr>
+<td>ATM-005</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Distributed ResultCache spurious eviction on update + round-robin
+index panic after pool shrink</td>
+</tr>
+<tr>
+<td>ATM-006</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>EPUB percent-encoded/relative hrefs dropped chapters and cover; HTML
+test-hack corrupted content</td>
+</tr>
+<tr>
+<td>ATM-007</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Verification parseNote dropped EXAMPLES-terminated notes, produced
+NaN confidence, under-counted multipass sections</td>
+</tr>
+<tr>
+<td>ATM-008</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Redis makeCacheKey metadata delimiter-injection collision served the
+wrong translation</td>
+</tr>
+<tr>
+<td>ATM-009</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>EPUB↔︎Markdown round-trip destroyed code blocks, lost GFM tables,
+corrupted backslash-escapes</td>
+</tr>
+<tr>
+<td>ATM-010</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>API translateText silently dropped script=cyrillic and accepted
+invalid script; verifier handlers returned wrong HTTP status</td>
+</tr>
+<tr>
+<td>ATM-011</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Verifier fallback chain randomly shuffled (lost score order);
+OpenRouter pricing decode failed on string values</td>
+</tr>
+<tr>
+<td>ATM-012</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>gRPC GetTranslationStatus returned the wrong error code;
+cleanupOldSessions leaked a timeout context</td>
+</tr>
+<tr>
+<td>ATM-013</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>CWE-208 username-enumeration timing oracle in AuthenticateUser</td>
+</tr>
+<tr>
+<td>ATM-014</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Preparation failed-chapter analysis misattribution +
+nested-subsection analysis content loss</td>
+</tr>
+<tr>
+<td>ATM-015</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Directory batch to a non-existent output dir collided all files onto
+one path (data loss)</td>
+</tr>
+<tr>
+<td>ATM-016</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Coordination TranslateWithRetry ignored ctx cancellation; consensus
+skipped available instances</td>
+</tr>
+<tr>
+<td>ATM-017</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Successful-but-empty translation silently wiped source content (data
+loss)</td>
+</tr>
+<tr>
+<td>ATM-018</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Dashboard ETA formatDuration trailing space + non-unique progress
+event IDs</td>
+</tr>
+<tr>
+<td>ATM-019</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Qwen client posted to native DashScope path under an
+OpenAI-compatible base (wrong URL + response-shape mismatch)</td>
+</tr>
+<tr>
+<td>ATM-020</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>preparation-translator -providers flag silently ignored; CLI
+explicit -provider overridden by config</td>
+</tr>
+<tr>
+<td>ATM-021</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Storage cache dup-tuple served stale translation (added UNIQUE
+lookup-hash index + idempotent UPSERT)</td>
+</tr>
+<tr>
+<td>ATM-022</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>VersionManager.metrics data race / lost updates (+ §11.4.85
+stress/chaos suites)</td>
+</tr>
+<tr>
+<td>ATM-023</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Qwen compatible-mode alignment to default base + §11.4.98-honest
+live test</td>
+</tr>
+<tr>
+<td>ATM-024</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>DOCX input non-functional (license-gated unioffice) — rewritten as a
+stdlib OOXML parser</td>
+</tr>
+<tr>
+<td>ATM-025</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>API-key gate ignored provider env vars (DEEPSEEK_API_KEY etc.) in
+unified-translator</td>
+</tr>
+<tr>
+<td>ATM-026</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>DOCX rejected by the CLI pipeline despite a working parser
+(detector.IsSupported missing DOCX)</td>
+</tr>
+<tr>
+<td>ATM-027</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>FB2 + EPUB input broken end-to-end (convertToMarkdown re-parsed
+already-extracted text)</td>
+</tr>
+<tr>
+<td>ATM-028</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Zhipu missing from the API-key env map in unified-translator (+
+stale-allowlist audit)</td>
+</tr>
+<tr>
+<td>ATM-029</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Stale provider model-allowlists blocked current gemini/groq/zhipu
+models</td>
+</tr>
+<tr>
+<td>ATM-030</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Coordination consensus tie-break was non-deterministic
+(map-iteration order)</td>
+</tr>
+<tr>
+<td>ATM-031</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Multipass verification chapter loop panicked when translation has
+fewer chapters than original</td>
+</tr>
+<tr>
+<td>ATM-032</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>FB2 writer dropped section/subsection titles</td>
+</tr>
+<tr>
+<td>ATM-033</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>PDF input revived — replaced license-gated unipdf with MIT
+ledongthuc/pdf</td>
+</tr>
+<tr>
+<td>ATM-034</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>CLI ignored -o output format — always emitted EPUB</td>
+</tr>
+<tr>
+<td>ATM-035</td>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>Add .html/.htm CLI output format (completes the 5-output
+matrix)</td>
+</tr>
+<tr>
+<td>ATM-036</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>DeepSeek model allowlist un-staled (accept
+deepseek-v4-flash/v4-pro)</td>
+</tr>
+<tr>
+<td>ATM-037</td>
+<td>Task</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Task</td>
+<td>WebSocket monitoring test harness data races + fatal map panic</td>
+</tr>
+<tr>
+<td>ATM-038</td>
+<td>Task</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Task</td>
+<td>TestSSHErrorHandling brittle error-string assertion (§11.4.1)</td>
+</tr>
+<tr>
+<td>ATM-039</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Preparation per-chapter analysis stamped no authoritative chapter
+number</td>
+</tr>
+<tr>
+<td>ATM-040</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>hardware parseLscpuCores undercounts physical cores on multi-socket
+hosts</td>
+</tr>
+<tr>
+<td>ATM-041</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Batch same-stem/different-ext inputs collided onto one output file
+(data loss)</td>
+</tr>
+<tr>
+<td>ATM-042</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Security RefreshToken resurrected expired/unbounded sessions into
+fresh valid tokens</td>
+</tr>
+<tr>
+<td>ATM-043</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Empty/null LLMsVerifier envelope ({"models":null}) failed to decode,
+breaking /api/v1/verified-models</td>
+</tr>
+<tr>
+<td>ATM-044</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>FB2 <v>/<subtitle>/<text-author> dropped inline-element text</td>
+</tr>
+<tr>
+<td>ATM-045</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Distributed fallback getFailureRate fabricated a 100% rate on window
+expiry / zero window</td>
+</tr>
+<tr>
+<td>ATM-046</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>markdown→EPUB chapter <title> shipped unescaped — malformed
+XHTML</td>
+</tr>
+<tr>
+<td>ATM-047</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Verification polishChapter/polishSectionRecursive index-out-of-range
+on shorter translations</td>
+</tr>
+<tr>
+<td>ATM-048</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>Ollama client dropped temperature/max_tokens — never sent options to
+/api/generate</td>
+</tr>
+<tr>
+<td>ATM-049</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>EPUB chapter text shipped HTML entities literally to readers</td>
+</tr>
+<tr>
+<td>ATM-050</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>gRPC SubscribeEvents delivered lifecycle events with an empty
+session_id</td>
+</tr>
+<tr>
+<td>ATM-051</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>LoadConfig nil-map panic when config omits translation.providers and
+a provider key env var is set</td>
+</tr>
+<tr>
+<td>ATM-052</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>EPUB cover image mislabeled image/jpeg on round-trip (broke
+PNG/GIF/WEBP/SVG covers)</td>
+</tr>
+<tr>
+<td>ATM-053</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>BaseTranslator cache/stats data race + concurrent-map-write
+crash</td>
+</tr>
+<tr>
+<td>ATM-054</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>markdown-translator -format flag unvalidated — unsupported value
+produced no output yet reported success</td>
+</tr>
+<tr>
+<td>ATM-055</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>CLI SSH provider ignored -source/target-lang, -script,
+-llama-binary/-model (hardcoded ru→sr-cyrillic)</td>
+</tr>
+<tr>
+<td>ATM-056</td>
+<td>Task</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Task</td>
+<td>cmd/api-server source was gitignored; committed health-check
+regression guard</td>
+</tr>
+<tr>
+<td>ATM-057</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>cmd/cli GEMINI_API_KEY silently ignored — gemini missing from
+env-key map</td>
+</tr>
+<tr>
+<td>ATM-058</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>translate-ssh delivered the translated EPUB to the wrong path;
+-output ignored</td>
+</tr>
+<tr>
+<td>ATM-059</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>grpc-server ignored documented env-var overrides (GRPC_ADDRESS/PORT,
+LOG_LEVEL, ENABLE_METRICS/REFLECTION)</td>
+</tr>
+<tr>
+<td>ATM-060</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>cmd/deployment status action panicked on container IDs shorter than
+12 chars</td>
+</tr>
+<tr>
+<td>ATM-061</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>grpc-server/monitor-server: dead -max-connections flag wired +
+monitor start error no longer swallowed</td>
+</tr>
+<tr>
+<td>ATM-062</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>logger JSON reserved-key collision silently dropped real
+severity/message/timestamp</td>
+</tr>
+<tr>
+<td>ATM-063</td>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>enhanceTranslation capitalization dead for Cyrillic/accented-Latin
+first letters (byte-indexed guard)</td>
+</tr>
+<tr>
+<td>ATM-064</td>
+<td>Task</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Task</td>
+<td>Single-source binary version from authoritative VERSION</td>
+</tr>
+</tbody>
+</table>
+<p>Total closed items: 64</p>
+</body>
+</html>

@@ -1,0 +1,2170 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>LLMsVerifier_COMPREHENSIVE_ANALYSIS</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">LLMsVerifier_COMPREHENSIVE_ANALYSIS</h1>
+</header>
+<h1 id="llmsverifier---comprehensive-analysis-report">LLMsVerifier -
+Comprehensive Analysis Report</h1>
+<h2 id="prepared-for-helixtranslate-integration">Prepared for:
+HelixTranslate Integration</h2>
+<hr />
+<h2 id="a-project-overview">A. PROJECT OVERVIEW</h2>
+<h3 id="language--framework">Language &amp; Framework</h3>
+<ul>
+<li><strong>Primary Language</strong>: Go (Golang) 1.25.3</li>
+<li><strong>Secondary Languages</strong>: TypeScript/JavaScript (web
+UI), Python (SDK), Dart (mobile), Rust (messaging)</li>
+<li><strong>UI Frameworks</strong>:
+<ul>
+<li>CLI: Cobra (command-line framework) + Bubble Tea (TUI)</li>
+<li>Web: Next.js (website/)</li>
+<li>Mobile: Flutter, React Native, Aurora OS, Harmony OS</li>
+<li>Desktop: Electron, Tauri</li>
+</ul></li>
+</ul>
+<h3 id="purpose">Purpose</h3>
+<p>LLMsVerifier is an <strong>enterprise-grade LLM verification and
+benchmarking platform</strong>. Its primary purpose is to:</p>
+<ol type="1">
+<li><strong>Verify LLMs</strong> - Confirm models can "see" and
+understand provided code ("Do you see my code?" test)</li>
+<li><strong>Benchmark LLMs</strong> - Measure response time, capability,
+and performance across providers</li>
+<li><strong>Score &amp; Rank LLMs</strong> - Comprehensive scoring
+system with weighted components</li>
+<li><strong>Monitor LLMs</strong> - Real-time health checking with
+intelligent failover</li>
+<li><strong>Generate Verified Configs</strong> - Export configurations
+containing only verified models</li>
+</ol>
+<h3 id="architecture">Architecture</h3>
+<ul>
+<li><strong>Monolithic Go application</strong> with modular package
+structure</li>
+<li><strong>SQLite database</strong> with SQLCipher encryption (WAL
+mode, optimized pragmas)</li>
+<li><strong>REST API server</strong> (Gin framework) with JWT
+authentication</li>
+<li><strong>3-tier model discovery</strong>: User config -&gt; Provider
+API -&gt; models.dev fallback</li>
+<li><strong>Provider adapter pattern</strong> for 25+ LLM providers</li>
+<li><strong>Pluggable scoring strategy</strong> system</li>
+<li><strong>Docker/Kubernetes ready</strong> with health checks and
+monitoring</li>
+</ul>
+<hr />
+<h2 id="b-complete-directory-structure">B. COMPLETE DIRECTORY
+STRUCTURE</h2>
+<pre><code>LLMsVerifier/
+├── go.mod                          # Root Go module (imports llm-verifier submodule)
+├── package.json                    # NPM metadata (minimal)
+├── Dockerfile                      # Multi-stage build with distroless runtime
+├── docker-compose.yml              # Docker Compose with health checks
+├── docker-compose.prod.yml         # Production compose
+├── docker-compose.messaging.yml    # Messaging stack (Kafka/RabbitMQ)
+├── k8s-manifests.yaml              # Kubernetes manifests
+├── Makefile                        # Build automation
+├── README.md                       # Main documentation
+├── API_REFERENCE.md                # API reference documentation
+├── ACP_API_DOCUMENTATION.md        # ACP (AI Coding Protocol) API docs
+├── ACP_*.md                        # Multiple ACP documentation files
+├── VERIFYING.md                    # Verification guide
+├── AGENTS.md                       # CLI agents documentation
+├── SECURITY.md                     # Security documentation
+├── CONSTITUTION.md                 # Project constitution
+├── CHALLENGES_*.md                 # Challenge system documentation
+├── VERIFICATION_*.md               # Verification documentation
+├── SCORING_*.md                    # Scoring system documentation
+├── DEPLOYMENT.md                   # Deployment guide
+├── docs/                           # Documentation directory
+│   ├── ARCHITECTURE_OVERVIEW.md
+│   ├── COMPLETE_SYSTEM_DOCUMENTATION.md
+│   ├── MODEL_VERIFICATION_GUIDE.md
+│   ├── LLMSVD_SUFFIX_GUIDE.md
+│   ├── CONFIGURATION_MIGRATION_GUIDE.md
+│   ├── CAPABILITY_DETECTION.md
+│   ├── monitoring/
+│   ├── protocols/
+│   ├── releases/
+│   └── scoring/
+│
+├── llm-verifier/                   # MAIN APPLICATION CODE
+│   ├── go.mod                      # Application Go module
+│   ├── go.sum                      # Dependency checksums
+│   ├── cmd/main.go                 # Main entry point
+│   ├── config.yaml                 # Configuration file
+│   ├── config.yaml.example         # Configuration example
+│   │
+│   ├── api/                        # REST API (Gin-based)
+│   │   ├── server.go               # API server setup
+│   │   ├── handlers.go             # HTTP handlers (487 lines)
+│   │   ├── middleware.go           # Auth &amp; rate limiting middleware
+│   │   ├── validation.go           # Request validation (custom validators)
+│   │   ├── errors.go               # API error types
+│   │   ├── sanitize.go             # Input sanitization
+│   │   ├── audit_logger.go         # Audit logging
+│   │   ├── compliance_checker.go   # Compliance checks
+│   │   ├── content_filter.go       # Content filtering
+│   │   ├── schema_validator.go     # Schema validation
+│   │   └── docs/docs.go            # Swagger/OpenAPI docs
+│   │
+│   ├── llmverifier/                # CORE VERIFICATION ENGINE
+│   │   ├── verifier.go             # Main Verifier struct
+│   │   ├── models.go               # Data models (VerificationResult, ModelInfo, etc.)
+│   │   ├── llm_client.go           # LLM client for testing
+│   │   ├── reporter.go             # Report generation (Markdown/JSON)
+│   │   ├── strategy.go             # Scoring strategy interface
+│   │   ├── strategy_builder.go     # Strategy builder (fluent API)
+│   │   ├── strategy_default.go     # Default scoring strategy
+│   │   ├── config_loader.go        # Configuration loading (Viper)
+│   │   ├── config_export.go        # Config export for CLI agents
+│   │   ├── config_migration.go     # Config migration
+│   │   ├── issue_detector.go       # Issue detection
+│   │   ├── analytics.go            # Analytics
+│   │   └── recipes/                # Test recipes
+│   │       ├── recipe.go
+│   │       ├── context_window.go
+│   │       ├── streaming.go
+│   │       ├── vision.go
+│   │       ├── instruction.go
+│   │       └── long_session.go
+│   │
+│   ├── providers/                  # PROVIDER ADAPTERS (25+ providers)
+│   │   ├── base.go                 # BaseAdapter (common HTTP functionality)
+│   │   ├── service.go              # Provider service interface
+│   │   ├── config.go               # ProviderConfig, ProviderRegistry
+│   │   ├── errors.go               # ProviderError, ErrorClassifier
+│   │   ├── http_client.go          # Provider HTTP client
+│   │   ├── model_provider_service.go     # 3-tier model discovery
+│   │   ├── model_verification_service.go # Model verification service
+│   │   ├── verified_config_generator.go  # Generate verified configs
+│   │   ├── fallback_models.go      # Fallback model lists
+│   │   ├── config_validator.go     # Config validation
+│   │   ├── openai.go               # OpenAI adapter
+│   │   ├── openai_endpoints.go     # OpenAI API endpoints
+│   │   ├── anthropic.go            # Anthropic adapter (with OAuth support)
+│   │   ├── groq.go                 # Groq adapter
+│   │   ├── deepseek.go             # DeepSeek adapter
+│   │   ├── cohere.go               # Cohere adapter
+│   │   ├── mistral.go              # Mistral adapter
+│   │   ├── xai.go                  # xAI/Grok adapter
+│   │   ├── replicate.go            # Replicate adapter
+│   │   ├── cerebras.go             # Cerebras adapter
+│   │   ├── cloudflare.go           # Cloudflare Workers AI
+│   │   ├── siliconflow.go          # SiliconFlow adapter
+│   │   ├── hyperbolic.go           # Hyperbolic adapter
+│   │   ├── togetherai.go           # Together AI adapter
+│   │   ├── sambanova.go            # SambaNova adapter
+│   │   ├── kilo.go                 # KiloCode adapter
+│   │   ├── kimi.go                 # Moonshot/Kimi adapter
+│   │   ├── qwen.go                 # Qwen/DashScope adapter
+│   │   ├── novita.go               # Novita AI adapter
+│   │   ├── nlpcloud.go             # NLP Cloud adapter
+│   │   ├── nia.go                  # NIA adapter
+│   │   ├── upstage.go              # Upstage adapter
+│   │   ├── sarvam.go               # Sarvam adapter
+│   │   ├── publicai.go             # Public AI adapter
+│   │   ├── zhipu.go                # Zhipu adapter
+│   │   ├── modal.go                # Modal adapter
+│   │   ├── vulavula.go             # Vulavula adapter
+│   │   ├── kimicode.go             # KimiCode adapter
+│   │   └── verification_integration_example.go
+│   │
+│   ├── verification/               # VERIFICATION SYSTEM
+│   │   ├── verification.go         # Core verification logic
+│   │   ├── code_verification.go    # Mandatory code visibility verification
+│   │   ├── coding_capability_verification.go  # Coding capability tests
+│   │   ├── provider_client.go      # Provider client interface
+│   │   ├── models_dev_enhanced.go  # Enhanced models.dev client
+│   │   └── verification_real.go    # Real-world verification
+│   │
+│   ├── scoring/                    # SCORING SYSTEM
+│   │   ├── scoring_engine.go       # ScoringEngine - calculates scores
+│   │   ├── types.go                # Score types (ScoreWeights, ComprehensiveScore)
+│   │   ├── api_handlers.go         # Scoring API handlers
+│   │   ├── metrics_collector.go    # Metrics collection
+│   │   ├── alert_manager.go        # Alert management
+│   │   ├── model_display.go        # Model display names
+│   │   ├── model_naming.go         # Model naming conventions
+│   │   ├── monitoring.go           # Scoring monitoring
+│   │   ├── database_integration.go # Database integration
+│   │   └── main.go                 # Scoring service main
+│   │
+│   ├── capabilities/               # CAPABILITY DETECTION
+│   │   ├── detector.go             # Dynamic capability detector
+│   │   ├── types.go                # Capability types &amp; enums
+│   │   ├── registry.go             # Provider capability registry
+│   │   └── config_generator.go     # Config generation from capabilities
+│   │
+│   ├── database/                   # DATABASE LAYER (SQLite + SQLCipher)
+│   │   ├── database.go             # Database struct &amp; encryption setup
+│   │   ├── crud.go                 # CRUD operations
+│   │   ├── migrations.go           # Schema migrations
+│   │   ├── validation.go           # SQL injection prevention
+│   │   ├── optimizations.go        # Query optimizations
+│   │   ├── in_memory.go            # In-memory store
+│   │   ├── api_keys_crud.go        # API key CRUD
+│   │   ├── config_exports_crud.go  # Config export CRUD
+│   │   ├── events_crud.go          # Events CRUD
+│   │   ├── issues_crud.go          # Issues CRUD
+│   │   ├── logs_crud.go            # Logs CRUD
+│   │   ├── pricing_crud.go         # Pricing CRUD
+│   │   ├── schedules_crud.go       # Schedules CRUD
+│   │   ├── users_crud.go           # Users CRUD
+│   │   └── verification_scores_crud.go
+│   │
+│   ├── config/                     # CONFIGURATION SYSTEM
+│   │   ├── config.go               # Config struct definitions
+│   │   ├── validation.go           # Config validation
+│   │   ├── validator.go            # Validator setup
+│   │   ├── production_config.go    # Production defaults
+│   │   └── examples/               # Example configs
+│   │
+│   ├── client/                     # API CLIENT
+│   │   ├── client.go               # REST API client
+│   │   ├── http_client.go          # HTTP client with Brotli detection
+│   │   ├── client_manager.go       # Client manager
+│   │   ├── rate_limiter.go         # Rate limiting
+│   │   └── analytics.go            # Client analytics
+│   │
+│   ├── auth/                       # AUTHENTICATION &amp; AUTHORIZATION
+│   │   ├── auth_manager.go         # JWT + Argon2 + RBAC
+│   │   ├── ldap.go                 # LDAP integration
+│   │   ├── rbac.go                 # Role-based access control
+│   │   ├── oauth_stub.go           # OAuth stub
+│   │   └── compliance.go           # Auth compliance
+│   │
+│   ├── cmd/                        # ADDITIONAL ENTRY POINTS
+│   │   ├── acp-cli/                # ACP CLI tool
+│   │   ├── code-verification/      # Code verification tool
+│   │   ├── crush-config-converter/ # Crush config converter
+│   │   ├── full-verify/            # Full verification
+│   │   ├── model-verification/     # Model verification
+│   │   ├── partners/               # Partner management
+│   │   ├── quick-verify/           # Quick verification
+│   │   ├── test-direct/            # Direct testing
+│   │   ├── test-models-live/       # Live model testing
+│   │   ├── testsuite/              # Test suite runner
+│   │   ├── tui/                    # Terminal UI
+│   │   └── ultimate-challenge/     # Ultimate challenge
+│   │
+│   ├── api_keys/                   # API KEY MANAGEMENT
+│   │   ├── manager.go              # API key manager
+│   │   ├── env_scanner.go          # Environment scanner
+│   │   └── priority.go             # Key priority system
+│   │
+│   ├── tui/                        # TERMINAL UI
+│   │   └── screens/                # TUI screens
+│   │
+│   ├── web/                        # WEB APPLICATION
+│   │   └── src/app/                # Next.js app
+│   │
+│   ├── sdk/                        # SDKs
+│   │   ├── go/                     # Go SDK
+│   │   ├── python/                 # Python SDK
+│   │   └── javascript/             # JavaScript SDK
+│   │
+│   ├── enhanced/                   # ENTERPRISE FEATURES
+│   │   ├── adapters/               # Enterprise adapters
+│   │   ├── analytics/              # Predictive analytics
+│   │   ├── checkpointing/          # State checkpointing
+│   │   ├── context/                # Context management (24hr+ sessions)
+│   │   ├── enterprise/             # Enterprise features
+│   │   ├── supervisor/             # Supervisor/worker pattern
+│   │   ├── validation/             # Enhanced validation
+│   │   └── vector/                 # Vector database integration
+│   │
+│   ├── messaging/                  # MESSAGING SYSTEM
+│   │   └── factory/                # Message broker factory
+│   │
+│   ├── monitoring/                 # MONITORING
+│   │   └── grafana/                # Grafana dashboards
+│   │
+│   ├── performance/                # PERFORMANCE TESTING
+│   ├── security/                   # SECURITY FEATURES
+│   ├── failover/                   # FAILOVER MECHANISMS
+│   ├── scheduler/                  # JOB SCHEDULER
+│   ├── notifications/              # NOTIFICATION SYSTEM
+│   ├── multimodal/                 # MULTIMODAL SUPPORT
+│   ├── events/                     # EVENT SYSTEM
+│   └── logging/                    # LOGGING SYSTEM
+│
+├── sdk/                            # EXTERNAL SDKs
+│   ├── python/llm_verifier_sdk/    # Python SDK package
+│   └── java/                       # Java SDK
+│
+├── configs/                        # Configuration templates
+├── tests/                          # Test suites
+│   ├── unit/
+│   ├── integration/
+│   ├── e2e/
+│   ├── performance/
+│   ├── security/
+│   └── automation/
+│
+├── helm/                           # Helm charts
+├── k8s/                            # Kubernetes configs
+├── Website/                        # Website source
+├── website/                        # Alternative website
+├── mobile/                         # Mobile app variants
+└── scripts/                        # Utility scripts</code></pre>
+<hr />
+<h2 id="c-full-api-surface-map">C. FULL API SURFACE MAP</h2>
+<h3 id="c1-core-package-digitalvasicllmsverifierllmverifier">C.1 Core
+Package: <code>digital.vasic.llmsverifier/llmverifier</code></h3>
+<h4 id="types">Types</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Main types</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Verifier <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* config, timing */</span> <span class="op">}</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerificationResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    ModelInfo<span class="op">,</span> Availability<span class="op">,</span> ResponseTime<span class="op">,</span> FeatureDetection<span class="op">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    CodeCapabilities<span class="op">,</span> GenerativeCapabilities<span class="op">,</span> PerformanceScores<span class="op">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    Timestamp<span class="op">,</span> Error<span class="op">,</span> ScoreDetails</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelInfo <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* ID, Endpoint, Capabilities, ContextWindow, Prices, etc. */</span> <span class="op">}</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PerformanceScore <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* OverallScore, Responsiveness, CodeCapability, etc. */</span> <span class="op">}</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ScoreDetails <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* detailed scoring breakdown */</span> <span class="op">}</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Summary <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* TotalModels, AvailableModels, FailedModels, AverageScore, etc. */</span> <span class="op">}</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TopPerformer <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* ModelName, Score, Rank */</span> <span class="op">}</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ConversationSummary <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* Summary, Topics, Sentiment, KeyPoints */</span> <span class="op">}</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LLMClient <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* HTTP client for LLM APIs */</span> <span class="op">}</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> WeightConfig <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* Responsiveness, CodeCapability, FeatureRichness, Reliability, VisionCapability, InstructionFollowing */</span> <span class="op">}</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TestResult <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* TestID, Category, Passed, Score, Latency, Error, Details */</span> <span class="op">}</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> StrategyScore <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* Overall, Breakdown, Passed, Details */</span> <span class="op">}</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Thresholds <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* MinOverallScore, MaxLatency, MinContextWindow, RequiredCapabilities */</span> <span class="op">}</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">// Interfaces</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ScoringStrategy <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    Description<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    WeightConfig<span class="op">()</span> WeightConfig</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    CustomTests<span class="op">()</span> <span class="op">[]</span>VerificationTest</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    ScoreModel<span class="op">(</span>ctx<span class="op">,</span> model<span class="op">,</span> results<span class="op">)</span> <span class="op">(</span>StrategyScore<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    FilterModels<span class="op">(</span>models<span class="op">)</span> <span class="op">[]</span>ModelInfo</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    MinimumThresholds<span class="op">()</span> Thresholds</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerificationTest <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">()</span> <span class="dt">string</span><span class="op">;</span> Name<span class="op">()</span> <span class="dt">string</span><span class="op">;</span> Category<span class="op">()</span> TestCategory</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    Run<span class="op">(</span>ctx<span class="op">,</span> client<span class="op">)</span> <span class="op">(</span>TestResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    Weight<span class="op">()</span> <span class="dt">float64</span><span class="op">;</span> Required<span class="op">()</span> <span class="dt">bool</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="functionsmethods">Functions/Methods</h4>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Verifier</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> New<span class="op">(</span>cfg <span class="op">*</span>config<span class="op">.</span>Config<span class="op">)</span> <span class="op">*</span>Verifier</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>Verifier<span class="op">)</span> StartTiming<span class="op">()</span> <span class="op">/</span> EndTiming<span class="op">()</span> <span class="op">/</span> GetStartTime<span class="op">()</span> <span class="op">/</span> GetEndTime<span class="op">()</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>Verifier<span class="op">)</span> GetGlobalClient<span class="op">()</span> <span class="op">*</span>LLMClient</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>Verifier<span class="op">)</span> SummarizeConversation<span class="op">(</span>messages <span class="op">[]</span><span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>ConversationSummary<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>Verifier<span class="op">)</span> Verify<span class="op">()</span> <span class="op">([]</span>VerificationResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>Verifier<span class="op">)</span> GenerateMarkdownReport<span class="op">(</span>results <span class="op">[]</span>VerificationResult<span class="op">,</span> outputDir <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>Verifier<span class="op">)</span> GenerateJSONReport<span class="op">(</span>results <span class="op">[]</span>VerificationResult<span class="op">,</span> outputDir <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>Verifier<span class="op">)</span> generateSummary<span class="op">(</span>results <span class="op">[]</span>VerificationResult<span class="op">)</span> Summary</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">// Config Loading</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> LoadConfig<span class="op">(</span>filePath <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>config<span class="op">.</span>Config<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> LoadConfigWithProfile<span class="op">(</span>filePath<span class="op">,</span> profile <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>config<span class="op">.</span>Config<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">// LLM Client</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewLLMClientWithTimeout<span class="op">(</span>baseURL<span class="op">,</span> apiKey <span class="dt">string</span><span class="op">,</span> headers <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">,</span> timeout time<span class="op">.</span>Duration<span class="op">)</span> <span class="op">*</span>LLMClient</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LLMClient<span class="op">)</span> SendMessage<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> model<span class="op">,</span> message <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LLMClient<span class="op">)</span> SendMessageWithSystem<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> model<span class="op">,</span> system<span class="op">,</span> message <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">// Strategy</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewStrategyBuilder<span class="op">()</span> <span class="op">*</span>StrategyBuilder</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>StrategyBuilder<span class="op">)</span> WithName<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>StrategyBuilder</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>StrategyBuilder<span class="op">)</span> WithWeights<span class="op">(</span>w WeightConfig<span class="op">)</span> <span class="op">*</span>StrategyBuilder</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>StrategyBuilder<span class="op">)</span> AddTest<span class="op">(</span>test VerificationTest<span class="op">)</span> <span class="op">*</span>StrategyBuilder</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>StrategyBuilder<span class="op">)</span> WithThresholds<span class="op">(</span>t Thresholds<span class="op">)</span> <span class="op">*</span>StrategyBuilder</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>StrategyBuilder<span class="op">)</span> Build<span class="op">()</span> <span class="op">(</span>ScoringStrategy<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">// Reporter</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>Verifier<span class="op">)</span> GenerateMarkdownReport<span class="op">(</span>results <span class="op">[]</span>VerificationResult<span class="op">,</span> outputDir <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>Verifier<span class="op">)</span> GenerateJSONReport<span class="op">(</span>results <span class="op">[]</span>VerificationResult<span class="op">,</span> outputDir <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span></code></pre></div>
+<h3 id="c2-config-package-digitalvasicllmsverifierconfig">C.2 Config
+Package: <code>digital.vasic.llmsverifier/config</code></h3>
+<h4 id="types-1">Types</h4>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Config <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    Profile       <span class="dt">string</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    LLMs          <span class="op">[]</span>LLMConfig</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Global        GlobalConfig</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Database      DatabaseConfig</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    API           APIConfig</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    Concurrency   <span class="dt">int</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    Timeout       time<span class="op">.</span>Duration</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    Logging       LoggingConfig</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    Monitoring    MonitoringConfig</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    Security      SecurityConfig</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    Notifications NotificationsConfig</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LLMConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    Name     <span class="dt">string</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    Endpoint <span class="dt">string</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    APIKey   <span class="dt">string</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    Model    <span class="dt">string</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    Headers  <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    Features <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">bool</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> GlobalConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    BaseURL<span class="op">,</span> APIKey<span class="op">,</span> DefaultModel <span class="dt">string</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    MaxRetries <span class="dt">int</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    RequestDelay<span class="op">,</span> Timeout time<span class="op">.</span>Duration</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    CustomParams <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DatabaseConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    Path          <span class="dt">string</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    EncryptionKey <span class="dt">string</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> APIConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    Port<span class="op">,</span> JWTSecret <span class="dt">string</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    RateLimit<span class="op">,</span> BurstLimit <span class="dt">int</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    RateLimitWindow <span class="dt">int</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    EnableCORS <span class="dt">bool</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    TrustedProxies <span class="dt">string</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    RateLimitByAPIKey <span class="dt">bool</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    CORSOrigins<span class="op">,</span> CORSMethods<span class="op">,</span> CORSHeaders <span class="dt">string</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    EnableHTTPS <span class="dt">bool</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    TLSCertFile<span class="op">,</span> TLSKeyFile <span class="dt">string</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    ReadTimeout<span class="op">,</span> WriteTimeout <span class="dt">int</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    MaxHeaderBytes <span class="dt">int</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LoggingConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    Level<span class="op">,</span> Format<span class="op">,</span> Output<span class="op">,</span> FilePath <span class="dt">string</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    MaxSize<span class="op">,</span> MaxBackups<span class="op">,</span> MaxAge <span class="dt">int</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    Compress <span class="dt">bool</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MonitoringConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>    EnableMetrics<span class="op">,</span> EnableHealth<span class="op">,</span> EnableTracing<span class="op">,</span> EnableProfiling <span class="dt">bool</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>    MetricsPort<span class="op">,</span> HealthPort<span class="op">,</span> TracingEndpoint<span class="op">,</span> ProfilingPort <span class="dt">string</span></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SecurityConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>    EnableRateLimiting<span class="op">,</span> EnableIPWhitelist<span class="op">,</span> EnableRequestLogging <span class="dt">bool</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>    IPWhitelist <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>    EnableCSRFProtection <span class="dt">bool</span></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>    CSRFTokenLength <span class="dt">int</span></span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>    SessionTimeout <span class="dt">int</span></span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>    SensitiveHeaders <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> NotificationsConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>    Slack    SlackConfig</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>    Email    EmailConfig</span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>    Telegram TelegramConfig</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>    Matrix   MatrixConfig</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>    WhatsApp WhatsAppConfig</span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="functions">Functions</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> LoadFromFile<span class="op">(</span>path <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Config<span class="op">,</span> <span class="dt">error</span><span class="op">)</span>  <span class="co">// Supports YAML, JSON, TOML</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> SaveToFile<span class="op">(</span>cfg <span class="op">*</span>Config<span class="op">,</span> path <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span></code></pre></div>
+<h3 id="c3-providers-package-digitalvasicllmsverifierproviders">C.3
+Providers Package:
+<code>digital.vasic.llmsverifier/providers</code></h3>
+<h4 id="types-2">Types</h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BaseAdapter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    client <span class="op">*</span>http<span class="op">.</span>Client</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    endpoint <span class="dt">string</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    apiKey <span class="dt">string</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    headers <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Methods: Set/Get Client, Endpoint, APIKey, Headers; AddHeader</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">,</span> Endpoint<span class="op">,</span> AuthType<span class="op">,</span> StreamingFormat<span class="op">,</span> DefaultModel <span class="dt">string</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    RateLimits  RateLimitConfig</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    Timeouts    TimeoutConfig</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    RetryConfig RetryConfig</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    Features    <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderRegistry <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* providers map */</span> <span class="op">}</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">// 25+ Provider Adapters (all embed BaseAdapter):</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">// OpenAIAdapter, AnthropicAdapter, GroqAdapter, DeepSeekAdapter,</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">// CohereAdapter, MistralAdapter, XAIAdapter, ReplicateAdapter,</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">// CerebrasAdapter, CloudflareAdapter, SiliconFlowAdapter, HyperbolicAdapter,</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">// TogetherAIAdapter, SambanovaAdapter, KiloAdapter, KimiAdapter,</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co">// QwenAdapter, NovitaAdapter, NLPCloudAdapter, NIAAdapter,</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co">// UpstageAdapter, SarvamAdapter, PublicAIAdapter, ZhipuAdapter,</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="co">// ModalAdapter, VulavulaAdapter, KimiCodeAdapter</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelProviderService <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* 3-tier discovery */</span> <span class="op">}</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderClient <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    ProviderID<span class="op">,</span> BaseURL<span class="op">,</span> APIKey <span class="dt">string</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    HTTPClient <span class="op">*</span>http<span class="op">.</span>Client</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Model <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">,</span> Name<span class="op">,</span> ProviderID<span class="op">,</span> ProviderName<span class="op">,</span> DisplayName <span class="dt">string</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    Features<span class="op">,</span> Metadata <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    MaxTokens<span class="op">,</span> ContextWindow <span class="dt">int</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    CostPer1MInput<span class="op">,</span> CostPer1MOutput <span class="dt">float64</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    SupportsBrotli<span class="op">,</span> SupportsHTTP3<span class="op">,</span> SupportsToon<span class="op">,</span> IsFree<span class="op">,</span> IsOpenSource <span class="dt">bool</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    Source <span class="dt">string</span>  <span class="co">// &quot;config&quot;, &quot;api&quot;, &quot;models.dev&quot;</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderError <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    Provider<span class="op">,</span> Code<span class="op">,</span> Message <span class="dt">string</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    Type ErrorType</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>    HTTPStatus <span class="dt">int</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    Retryable <span class="dt">bool</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>    RetryAfter time<span class="op">.</span>Duration</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    RawResponse <span class="op">[]</span><span class="dt">byte</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerifiedConfigGenerator <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* generates verified-only configs */</span> <span class="op">}</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerifiedConfig <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* GeneratedAt, Providers, VerifiedModels */</span> <span class="op">}</span></span></code></pre></div>
+<h4 id="key-functions">Key Functions</h4>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Provider Registry</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewProviderRegistry<span class="op">()</span> <span class="op">*</span>ProviderRegistry</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>pr <span class="op">*</span>ProviderRegistry<span class="op">)</span> GetConfig<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>ProviderConfig<span class="op">,</span> <span class="dt">bool</span><span class="op">)</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>pr <span class="op">*</span>ProviderRegistry<span class="op">)</span> RegisterProvider<span class="op">(</span>config <span class="op">*</span>ProviderConfig<span class="op">)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Model Provider Service (3-tier discovery)</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewModelProviderService<span class="op">(</span>configPath <span class="dt">string</span><span class="op">,</span> logger <span class="op">*</span>logging<span class="op">.</span>Logger<span class="op">)</span> <span class="op">*</span>ModelProviderService</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mps <span class="op">*</span>ModelProviderService<span class="op">)</span> RegisterProvider<span class="op">(</span>providerID<span class="op">,</span> baseURL<span class="op">,</span> apiKey <span class="dt">string</span><span class="op">)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mps <span class="op">*</span>ModelProviderService<span class="op">)</span> GetAllModelsWithVerification<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">][]</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mps <span class="op">*</span>ModelProviderService<span class="op">)</span> GetModels<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> providerID <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">// Verified Config Generation</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewVerifiedConfigGenerator<span class="op">(</span>service <span class="op">*</span>EnhancedModelProviderService<span class="op">,</span> logger <span class="op">*</span>logging<span class="op">.</span>Logger<span class="op">,</span> outputDir <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>VerifiedConfigGenerator</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>vcg <span class="op">*</span>VerifiedConfigGenerator<span class="op">)</span> GenerateVerifiedConfig<span class="op">()</span> <span class="op">(*</span>VerifiedConfig<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">// Error Handling</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewErrorClassifier<span class="op">(</span>provider <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>ErrorClassifier</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>ec <span class="op">*</span>ErrorClassifier<span class="op">)</span> ClassifyError<span class="op">(</span>resp <span class="op">*</span>http<span class="op">.</span>Response<span class="op">,</span> body <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="op">*</span>ProviderError</span></code></pre></div>
+<h3
+id="c4-verification-package-digitalvasicllmsverifierverification">C.4
+Verification Package:
+<code>digital.vasic.llmsverifier/verification</code></h3>
+<h4 id="types-3">Types</h4>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Request <span class="kw">struct</span> <span class="op">{</span> ModelID <span class="dt">string</span><span class="op">;</span> Prompt <span class="dt">string</span> <span class="op">}</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Verifier <span class="kw">struct</span> <span class="op">{</span> db <span class="op">*</span>database<span class="op">.</span>Database <span class="op">}</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Code Verification</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CodeVerificationService <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    httpClient <span class="op">*</span>client<span class="op">.</span>HTTPClient</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    logger     <span class="op">*</span>logging<span class="op">.</span>Logger</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CodeVerificationRequest <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    ModelID<span class="op">,</span> ProviderID<span class="op">,</span> Code<span class="op">,</span> Language <span class="dt">string</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CodeVerificationResponse <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    ModelID<span class="op">,</span> ProviderID <span class="dt">string</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    Verified<span class="op">,</span> CanSeeCode<span class="op">,</span> AffirmativeResponse <span class="dt">bool</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    CodeUnderstanding <span class="dt">float64</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    ResponseTime <span class="dt">int64</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CodeVerificationResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    VerificationID<span class="op">,</span> ModelID<span class="op">,</span> ProviderID<span class="op">,</span> Status <span class="dt">string</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    CodeVisibility<span class="op">,</span> ToolSupport<span class="op">,</span> AffirmativeConfirmation <span class="dt">bool</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    ResponseAnalysis CodeResponseAnalysis</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    VerificationScore <span class="dt">float64</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CodeResponseAnalysis <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    ContainsAffirmative<span class="op">,</span> ContainsNegative <span class="dt">bool</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    CodeReferences <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    LanguageDetection<span class="op">,</span> UnderstandingLevel <span class="dt">string</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    ConfidenceScore <span class="dt">float64</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="co">// Coding Capability Verification</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CodingCapabilityVerificationService <span class="kw">struct</span> <span class="op">{</span> httpClient<span class="op">,</span> logger <span class="op">}</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CodingCapabilityRequest <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    ModelID<span class="op">,</span> ProviderID<span class="op">,</span> TestType<span class="op">,</span> TestInput <span class="dt">string</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    ExpectedHints <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CodingCapabilityResponse <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    ModelID<span class="op">,</span> ProviderID<span class="op">,</span> TestType <span class="dt">string</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    Passed <span class="dt">bool</span><span class="op">;</span> Response <span class="dt">string</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    MatchedKeywords<span class="op">,</span> ExpectedKeywords <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    CapabilityScore <span class="dt">float64</span><span class="op">;</span> ResponseTime <span class="dt">int64</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CodingCapabilityResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    VerificationID<span class="op">,</span> ModelID<span class="op">,</span> ProviderID<span class="op">,</span> Status <span class="dt">string</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    CodebaseDetection<span class="op">,</span> LanguageDetection<span class="op">,</span> CodeGeneration<span class="op">,</span> CodeAnalysis CodingCapabilityResponse</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    OverallCapabilityScore <span class="dt">float64</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>    CanDetectCodebase<span class="op">,</span> CanIdentifyLanguage<span class="op">,</span> CanGenerateCode<span class="op">,</span> CanAnalyzeCode <span class="dt">bool</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>    ReadyForCoding <span class="dt">bool</span><span class="op">;</span> ReadinessScore <span class="dt">float64</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a><span class="co">// Provider Client Interface</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderClientInterface <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>    SendPrompt<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>    StreamPrompt<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(&lt;-</span><span class="kw">chan</span> <span class="dt">string</span><span class="op">,</span> <span class="op">&lt;-</span><span class="kw">chan</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>    GetModelInfo<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="functions-1">Functions</h4>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewVerifier<span class="op">(</span>db <span class="op">*</span>database<span class="op">.</span>Database<span class="op">)</span> <span class="op">*</span>Verifier</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>Verifier<span class="op">)</span> Verify<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>Request<span class="op">)</span> <span class="op">(*</span>database<span class="op">.</span>VerificationResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewCodeVerificationService<span class="op">(</span>httpClient <span class="op">*</span>client<span class="op">.</span>HTTPClient<span class="op">,</span> logger <span class="op">*</span>logging<span class="op">.</span>Logger<span class="op">)</span> <span class="op">*</span>CodeVerificationService</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>cvs <span class="op">*</span>CodeVerificationService<span class="op">)</span> VerifyModelCodeVisibility<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID<span class="op">,</span> providerID <span class="dt">string</span><span class="op">,</span> client ProviderClientInterface<span class="op">)</span> <span class="op">(*</span>CodeVerificationResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewCodingCapabilityVerificationService<span class="op">(</span>httpClient <span class="op">*</span>client<span class="op">.</span>HTTPClient<span class="op">,</span> logger <span class="op">*</span>logging<span class="op">.</span>Logger<span class="op">)</span> <span class="op">*</span>CodingCapabilityVerificationService</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>cvs <span class="op">*</span>CodingCapabilityVerificationService<span class="op">)</span> VerifyModelCodingCapabilities<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID<span class="op">,</span> providerID <span class="dt">string</span><span class="op">,</span> client ProviderClientInterface<span class="op">)</span> <span class="op">(*</span>CodingCapabilityResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<h3 id="c5-scoring-package-digitalvasicllmsverifierscoring">C.5 Scoring
+Package: <code>digital.vasic.llmsverifier/scoring</code></h3>
+<h4 id="types-4">Types</h4>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ScoringEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    modelsDevClient ModelsDevClientInterface</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    dbIntegration   <span class="op">*</span>DatabaseIntegration</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    weights         ScoreWeights</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Engine = alias for ScoringEngine</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ComprehensiveScore <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    ModelID<span class="op">,</span> ModelName <span class="dt">string</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    OverallScore <span class="dt">float64</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    ScoreSuffix <span class="dt">string</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    Components ScoreComponents</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    LastCalculated time<span class="op">.</span>Time</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    CalculationHash <span class="dt">string</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    DataSource <span class="dt">string</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ScoreComponents <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    SpeedScore<span class="op">,</span> EfficiencyScore<span class="op">,</span> CostScore<span class="op">,</span> CapabilityScore<span class="op">,</span> RecencyScore <span class="dt">float64</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ScoreWeights <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    ResponseSpeed<span class="op">,</span> ModelEfficiency<span class="op">,</span> CostEffectiveness<span class="op">,</span> Capability<span class="op">,</span> Recency <span class="dt">float64</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ScoreThresholds <span class="kw">struct</span> <span class="op">{</span> MinScore<span class="op">,</span> MaxScore <span class="dt">float64</span> <span class="op">}</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ScoringConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    ConfigName <span class="dt">string</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    Weights    ScoreWeights</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    Thresholds ScoreThresholds</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    Enabled    <span class="dt">bool</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelData <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">,</span> Name<span class="op">,</span> Provider<span class="op">,</span> Description <span class="dt">string</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    Capabilities <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    ContextWindow<span class="op">,</span> MaxTokens <span class="dt">int</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>    InputTokenCost<span class="op">,</span> OutputTokenCost <span class="dt">float64</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    ThroughputRPS <span class="dt">float64</span><span class="op">;</span> LatencyMs <span class="dt">int</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    ReleaseDate<span class="op">,</span> TrainingCutoff<span class="op">,</span> LastUpdated time<span class="op">.</span>Time</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>    ParameterCount <span class="dt">int64</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>    OpenSource<span class="op">,</span> Multimodal<span class="op">,</span> Reasoning <span class="dt">bool</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelRanking <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    Rank <span class="dt">int</span><span class="op">;</span> ModelID<span class="op">,</span> ModelName <span class="dt">string</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    OverallScore <span class="dt">float64</span><span class="op">;</span> ScoreSuffix <span class="dt">string</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>    Category <span class="dt">string</span><span class="op">;</span> CategoryScore <span class="dt">float64</span></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelsDevClientInterface <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>    FetchAllModels<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>ModelsDevAPIResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>    FetchModelByID<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>ModelsDevModel<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>    FetchModelsByProvider<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> providerID <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span>ModelsDevModel<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="functions-2">Functions</h4>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewScoringEngine<span class="op">(</span>db <span class="op">*</span>database<span class="op">.</span>Database<span class="op">,</span> modelsDevClient ModelsDevClientInterface<span class="op">,</span> logger <span class="kw">interface</span><span class="op">{})</span> <span class="op">*</span>ScoringEngine</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>se <span class="op">*</span>ScoringEngine<span class="op">)</span> CalculateComprehensiveScore<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID <span class="dt">string</span><span class="op">,</span> config ScoringConfig<span class="op">)</span> <span class="op">(*</span>ComprehensiveScore<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>se <span class="op">*</span>ScoringEngine<span class="op">)</span> calculateResponseSpeedScore<span class="op">(</span>modelInfo <span class="op">*</span>ModelData<span class="op">,</span> dbModel <span class="op">*</span>database<span class="op">.</span>Model<span class="op">)</span> <span class="dt">float64</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>se <span class="op">*</span>ScoringEngine<span class="op">)</span> calculateModelEfficiencyScore<span class="op">(</span>modelInfo <span class="op">*</span>ModelData<span class="op">,</span> dbModel <span class="op">*</span>database<span class="op">.</span>Model<span class="op">)</span> <span class="dt">float64</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>se <span class="op">*</span>ScoringEngine<span class="op">)</span> calculateCostEffectivenessScore<span class="op">(</span>modelInfo <span class="op">*</span>ModelData<span class="op">,</span> dbModel <span class="op">*</span>database<span class="op">.</span>Model<span class="op">)</span> <span class="dt">float64</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>se <span class="op">*</span>ScoringEngine<span class="op">)</span> calculateCapabilityScore<span class="op">(</span>modelInfo <span class="op">*</span>ModelData<span class="op">,</span> dbModel <span class="op">*</span>database<span class="op">.</span>Model<span class="op">)</span> <span class="dt">float64</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>se <span class="op">*</span>ScoringEngine<span class="op">)</span> calculateRecencyScore<span class="op">(</span>modelInfo <span class="op">*</span>ModelData<span class="op">,</span> dbModel <span class="op">*</span>database<span class="op">.</span>Model<span class="op">)</span> <span class="dt">float64</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> DefaultScoringConfig<span class="op">()</span> ScoringConfig  <span class="co">// Returns default weights (ResponseSpeed: 0.25, ModelEfficiency: 0.20, CostEffectiveness: 0.25, Capability: 0.20, Recency: 0.10)</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> DefaultScoreWeights<span class="op">()</span> ScoreWeights</span></code></pre></div>
+<h3 id="c6-api-package-digitalvasicllmsverifierapi">C.6 API Package:
+<code>digital.vasic.llmsverifier/api</code></h3>
+<h4 id="types-5">Types</h4>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Server <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    config   <span class="op">*</span>config<span class="op">.</span>Config</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    database <span class="op">*</span>database<span class="op">.</span>Database</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    server   <span class="op">*</span>http<span class="op">.</span>Server</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="api-endpoints">API Endpoints</h4>
+<pre><code>GET  /api/health              - Health check
+GET  /api/models              - List models (with filtering)
+GET  /api/models/{id}          - Get specific model
+POST /api/models/{id}/verify   - Verify a model
+GET  /api/providers            - List providers
+POST /api/providers            - Add provider</code></pre>
+<h4 id="functions-3">Functions</h4>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewServer<span class="op">(</span>cfg <span class="op">*</span>config<span class="op">.</span>Config<span class="op">,</span> db <span class="op">*</span>database<span class="op">.</span>Database<span class="op">)</span> <span class="op">*</span>Server</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Server<span class="op">)</span> Start<span class="op">(</span>port <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Server<span class="op">)</span> Stop<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Server<span class="op">)</span> Router<span class="op">()</span> http<span class="op">.</span>Handler</span></code></pre></div>
+<h3 id="c7-database-package-digitalvasicllmsverifierdatabase">C.7
+Database Package: <code>digital.vasic.llmsverifier/database</code></h3>
+<h4 id="types-6">Types</h4>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Database <span class="kw">struct</span> <span class="op">{</span> conn <span class="op">*</span>sql<span class="op">.</span>DB <span class="op">}</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Model types</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Provider <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">,</span> Name<span class="op">,</span> Endpoint<span class="op">,</span> APIKeyEncrypted<span class="op">,</span> Description<span class="op">,</span> Website <span class="dt">string</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    SupportEmail<span class="op">,</span> DocumentationURL <span class="dt">string</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    CreatedAt<span class="op">,</span> UpdatedAt time<span class="op">.</span>Time<span class="op">;</span> LastChecked <span class="op">*</span>time<span class="op">.</span>Time</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    IsActive <span class="dt">bool</span><span class="op">;</span> ReliabilityScore <span class="dt">float64</span><span class="op">;</span> AverageResponseTimeMs <span class="dt">int</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Model <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    ID <span class="dt">int64</span><span class="op">;</span> ModelID<span class="op">,</span> Name<span class="op">,</span> Description<span class="op">,</span> Version <span class="dt">string</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    ProviderID <span class="dt">int64</span><span class="op">;</span> VerificationStatus <span class="dt">string</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    OverallScore <span class="dt">float64</span><span class="op">;</span> Deprecated <span class="dt">bool</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    CreatedAt<span class="op">,</span> UpdatedAt time<span class="op">.</span>Time</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Capabilities (many boolean fields)</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    SupportsStreaming<span class="op">,</span> SupportsJSONMode<span class="op">,</span> SupportsFunctionCalling <span class="dt">bool</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Pricing</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    InputPricePer1M<span class="op">,</span> OutputPricePer1M <span class="dt">float64</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Context</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    MaxTokens<span class="op">,</span> ContextWindow <span class="dt">int</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Code capabilities</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    SupportsCodeGeneration<span class="op">,</span> SupportsCodeCompletion<span class="op">,</span> SupportsCodeReview <span class="dt">bool</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerificationResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    ID <span class="dt">int64</span><span class="op">;</span> ModelID <span class="dt">int64</span><span class="op">;</span> VerificationType<span class="op">,</span> Status <span class="dt">string</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    StartedAt time<span class="op">.</span>Time<span class="op">;</span> CompletedAt <span class="op">*</span>time<span class="op">.</span>Time</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>    ModelExists<span class="op">,</span> Responsive<span class="op">,</span> Overloaded <span class="op">*</span><span class="dt">bool</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>    LatencyMs <span class="op">*</span><span class="dt">int</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Feature flags (40+ boolean fields)</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>    SupportsToolUse<span class="op">,</span> SupportsFunctionCalling<span class="op">,</span> SupportsCodeGeneration <span class="dt">bool</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>    SupportsStreaming<span class="op">,</span> SupportsJSONMode<span class="op">,</span> SupportsStructuredOutput <span class="dt">bool</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Scores</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>    CodeQualityScore<span class="op">,</span> LogicCorrectnessScore<span class="op">,</span> RuntimeEfficiencyScore <span class="dt">float64</span></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>    OverallScore<span class="op">,</span> CodeCapabilityScore<span class="op">,</span> ResponsivenessScore <span class="dt">float64</span></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>    ReliabilityScore<span class="op">,</span> FeatureRichnessScore <span class="dt">float64</span></span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="crud-functions">CRUD Functions</h4>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Provider CRUD</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>CreateProvider<span class="op">,</span> GetProvider<span class="op">,</span> GetProviderByName<span class="op">,</span> UpdateProvider<span class="op">,</span> DeleteProvider<span class="op">,</span> ListProviders</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Model CRUD</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>CreateModel<span class="op">,</span> GetModel<span class="op">,</span> UpdateModel<span class="op">,</span> DeleteModel<span class="op">,</span> ListModels</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Verification CRUD</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>CreateVerificationResult<span class="op">,</span> GetVerificationResult<span class="op">,</span> ListVerificationResults<span class="op">,</span> GetLatestVerificationResults<span class="op">,</span> UpdateVerificationResult<span class="op">,</span> DeleteVerificationResult</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co">// API Keys</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>CreateAPIKey<span class="op">,</span> GetAPIKey<span class="op">,</span> UpdateAPIKey<span class="op">,</span> DeleteAPIKey<span class="op">,</span> ListAPIKeys</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="co">// Events</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>CreateEvent<span class="op">,</span> GetEvent<span class="op">,</span> ListEvents<span class="op">,</span> UpdateEvent<span class="op">,</span> DeleteEvent</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="co">// Issues</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>CreateIssue<span class="op">,</span> GetIssue<span class="op">,</span> ListIssues<span class="op">,</span> UpdateIssue<span class="op">,</span> DeleteIssue</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="co">// Schedules</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>CreateSchedule<span class="op">,</span> GetSchedule<span class="op">,</span> ListSchedules<span class="op">,</span> UpdateSchedule<span class="op">,</span> DeleteSchedule</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="co">// Pricing</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>CreatePricing<span class="op">,</span> GetPricing<span class="op">,</span> UpdatePricing<span class="op">,</span> DeletePricing<span class="op">,</span> ListPricing</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a><span class="co">// Config Exports</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>CreateConfigExport<span class="op">,</span> GetConfigExport<span class="op">,</span> ListConfigExports<span class="op">,</span> UpdateConfigExport<span class="op">,</span> DeleteConfigExport</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a><span class="co">// Users</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>CreateUser<span class="op">,</span> GetUser<span class="op">,</span> UpdateUser<span class="op">,</span> DeleteUser<span class="op">,</span> ListUsers</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a><span class="co">// Counts</span></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>GetModelCount<span class="op">,</span> GetProviderCount<span class="op">,</span> GetVerificationResultCount</span></code></pre></div>
+<h3 id="c8-auth-package-digitalvasicllmsverifierauth">C.8 Auth Package:
+<code>digital.vasic.llmsverifier/auth</code></h3>
+<h4 id="types-7">Types</h4>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AuthManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    jwtSecret <span class="op">[]</span><span class="dt">byte</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    clients <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Client</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    ldapEnabled<span class="op">,</span> rbacEnabled<span class="op">,</span> ssoEnabled <span class="dt">bool</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    ldapManager <span class="op">*</span>LDAPManager</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    roles <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">][]</span><span class="dt">string</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    usageTracking <span class="op">*</span>UsageTracker</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Client <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    ID <span class="dt">int64</span><span class="op">;</span> Name<span class="op">,</span> Description<span class="op">,</span> APIKey<span class="op">,</span> APIKeyHash <span class="dt">string</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    Permissions <span class="op">[]</span><span class="dt">string</span><span class="op">;</span> RateLimit <span class="dt">int</span><span class="op">;</span> IsActive <span class="dt">bool</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    CreatedAt<span class="op">,</span> UpdatedAt time<span class="op">.</span>Time<span class="op">;</span> LastUsedAt <span class="op">*</span>time<span class="op">.</span>Time</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> JWTClaims <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    ClientID <span class="dt">int64</span><span class="op">;</span> ClientName <span class="dt">string</span><span class="op">;</span> Permissions <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    jwt<span class="op">.</span>RegisteredClaims</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="functions-4">Functions</h4>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewAuthManager<span class="op">(</span>jwtSecret <span class="dt">string</span><span class="op">,</span> ldapConfig <span class="op">*</span>LDAPConfig<span class="op">)</span> <span class="op">(*</span>AuthManager<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>am <span class="op">*</span>AuthManager<span class="op">)</span> RegisterClient<span class="op">(</span>name<span class="op">,</span> description <span class="dt">string</span><span class="op">,</span> permissions <span class="op">[]</span><span class="dt">string</span><span class="op">,</span> rateLimit <span class="dt">int</span><span class="op">)</span> <span class="op">(*</span>Client<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>am <span class="op">*</span>AuthManager<span class="op">)</span> AuthenticateClient<span class="op">(</span>apiKey <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Client<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>am <span class="op">*</span>AuthManager<span class="op">)</span> GenerateJWT<span class="op">(</span>client <span class="op">*</span>Client<span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>am <span class="op">*</span>AuthManager<span class="op">)</span> ValidateJWT<span class="op">(</span>tokenString <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>JWTClaims<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>am <span class="op">*</span>AuthManager<span class="op">)</span> CheckPermission<span class="op">(</span>client <span class="op">*</span>Client<span class="op">,</span> permission <span class="dt">string</span><span class="op">)</span> <span class="dt">bool</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>am <span class="op">*</span>AuthManager<span class="op">)</span> RecordUsage<span class="op">(</span>clientID <span class="dt">int64</span><span class="op">)</span></span></code></pre></div>
+<h3 id="c9-client-package-digitalvasicllmsverifierclient">C.9 Client
+Package: <code>digital.vasic.llmsverifier/client</code></h3>
+<h4 id="types-8">Types</h4>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Client <span class="kw">struct</span> <span class="op">{</span> baseURL <span class="dt">string</span><span class="op">;</span> httpClient <span class="op">*</span>http<span class="op">.</span>Client<span class="op">;</span> token <span class="dt">string</span> <span class="op">}</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> HTTPClient <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    client <span class="op">*</span>http<span class="op">.</span>Client</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    brotliCache <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>BrotliCacheEntry</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    metricsTracker <span class="op">*</span>monitoring<span class="op">.</span>MetricsTracker</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RateLimiter <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* token bucket */</span> <span class="op">}</span></span></code></pre></div>
+<h4 id="functions-5">Functions</h4>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> New<span class="op">(</span>baseURL <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>Client</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Client<span class="op">)</span> SetToken<span class="op">(</span>token <span class="dt">string</span><span class="op">)</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Client<span class="op">)</span> Login<span class="op">(</span>username<span class="op">,</span> password <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Client<span class="op">)</span> GetModels<span class="op">()</span> <span class="op">([]</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Client<span class="op">)</span> GetModel<span class="op">(</span>id <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewHTTPClient<span class="op">(</span>timeout time<span class="op">.</span>Duration<span class="op">)</span> <span class="op">*</span>HTTPClient</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>HTTPClient<span class="op">)</span> TestModelExists<span class="op">(</span>ctx<span class="op">,</span> provider<span class="op">,</span> apiKey<span class="op">,</span> modelID <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">bool</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>HTTPClient<span class="op">)</span> TestResponsiveness<span class="op">(</span>ctx<span class="op">,</span> provider<span class="op">,</span> apiKey<span class="op">,</span> modelID<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>time<span class="op">.</span>Duration<span class="op">,</span> time<span class="op">.</span>Duration<span class="op">,</span> <span class="dt">error</span><span class="op">,</span> <span class="dt">string</span><span class="op">,</span> <span class="dt">bool</span><span class="op">,</span> <span class="dt">int</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>HTTPClient<span class="op">)</span> TestBrotliSupport<span class="op">(</span>ctx<span class="op">,</span> provider<span class="op">,</span> apiKey<span class="op">,</span> modelID <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">bool</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<h3
+id="c10-capabilities-package-digitalvasicllmsverifiercapabilities">C.10
+Capabilities Package:
+<code>digital.vasic.llmsverifier/capabilities</code></h3>
+<h4 id="types-enums">Types (Enums)</h4>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Streaming types</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>StreamingTypeSSE<span class="op">,</span> StreamingTypeWebSocket<span class="op">,</span> StreamingTypeAsyncGen<span class="op">,</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>StreamingTypeJSONL<span class="op">,</span> StreamingTypeMpscStream<span class="op">,</span> StreamingTypeEventStream<span class="op">,</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>StreamingTypeStdout<span class="op">,</span> StreamingTypeNone</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co">// HTTP versions</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>HTTPVersion1_1<span class="op">,</span> HTTPVersion2<span class="op">,</span> HTTPVersion3</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="co">// Compression types</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>CompressionGzip<span class="op">,</span> CompressionBrotli<span class="op">,</span> CompressionDeflate<span class="op">,</span> CompressionZstd<span class="op">,</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>CompressionSemantic<span class="op">,</span> CompressionChat<span class="op">,</span> CompressionNone</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co">// Caching types</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>CachingAnthropic<span class="op">,</span> CachingDashScope<span class="op">,</span> CachingPrompt<span class="op">,</span> CachingSemantic<span class="op">,</span> CachingLLMOps<span class="op">,</span> CachingNone</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="co">// Protocol types</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>ProtocolMCP<span class="op">,</span> ProtocolACP<span class="op">,</span> ProtocolLSP<span class="op">,</span> ProtocolGRPC<span class="op">,</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>ProtocolOpenAI<span class="op">,</span> ProtocolAnthropic<span class="op">,</span> ProtocolOllama</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="co">// Auth types</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>AuthAPIKey<span class="op">,</span> AuthBearer<span class="op">,</span> AuthOAuth2<span class="op">,</span> AuthNone<span class="op">,</span> AuthAWSSigV4</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="co">// Main capability struct</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderCapabilities <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>    Provider<span class="op">,</span> Model <span class="dt">string</span><span class="op">;</span> Verified <span class="dt">bool</span><span class="op">;</span> VerifiedAt time<span class="op">.</span>Time</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>    Streaming StreamingCapability</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>    Network NetworkCapability</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>    Compression CompressionCapability</span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>    Caching CachingCapability</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>    Protocols <span class="op">[]</span>ProtocolType</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>    Auth AuthCapability</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>    Model_ ModelCapability</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>    Extended ExtendedCapabilities</span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>    Custom <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="d-validation-system">D. VALIDATION SYSTEM</h2>
+<h3 id="how-models-are-validated">How Models Are Validated</h3>
+<ol type="1">
+<li><strong>Existence Check</strong>: Verify the model exists on the
+provider's API (<code>TestModelExists</code>)</li>
+<li><strong>Responsiveness Check</strong>: Send a test prompt and
+measure response time (<code>TestResponsiveness</code>)</li>
+<li><strong>Feature Detection</strong>: Dynamically detect supported
+features (streaming, function calling, etc.)</li>
+<li><strong>Code Visibility Verification</strong> (MANDATORY): Ask "Do
+you see my code?" - model must respond affirmatively</li>
+<li><strong>Coding Capability Verification</strong>: Test practical
+coding abilities:
+<ul>
+<li>Codebase detection</li>
+<li>Language identification</li>
+<li>Code generation</li>
+<li>Code analysis</li>
+</ul></li>
+<li><strong>Capability Scoring</strong>: Score each capability
+dimension</li>
+</ol>
+<h3 id="validation-types-from-apivalidationgo">Validation Types (from
+api/validation.go)</h3>
+<p>Custom validators registered:</p>
+<ul>
+<li><code>alphanumspace</code> - Alphanumeric with spaces</li>
+<li><code>url</code> - URL validation</li>
+<li><code>email</code> - Email validation</li>
+<li><code>cron</code> - Cron expression validation</li>
+<li><code>severity</code> - One of: info, warning, error, critical</li>
+<li><code>event_type</code> - Predefined event types</li>
+<li><code>verification_type</code> - Verification type validation</li>
+<li><code>status</code> - Status validation</li>
+<li><code>schedule_type</code> - Schedule type validation</li>
+<li><code>target_type</code> - Target type validation</li>
+<li><code>export_type</code> - Export type validation</li>
+<li><code>issue_type</code> - Issue type validation</li>
+<li><code>pricing_model</code> - Pricing model validation</li>
+<li><code>limit_type</code> - Limit type validation</li>
+<li><code>reset_period</code> - Reset period validation</li>
+<li><code>port</code> - Port number validation</li>
+</ul>
+<hr />
+<h2 id="e-verification-system">E. VERIFICATION SYSTEM</h2>
+<h3 id="core-verification-flow">Core Verification Flow</h3>
+<pre><code>1. Load Configuration (config.yaml)
+   |
+2. For each configured LLM:
+   |
+   +-- 3. Test Model Existence
+   |      - Query provider&#39;s /models endpoint
+   |      - Verify model ID is in response
+   |
+   +-- 4. Test Responsiveness
+   |      - Send simple prompt
+   |      - Measure response time
+   |      - Check for valid response
+   |
+   +-- 5. Feature Detection
+   |      - Test streaming support (SSE, WebSocket)
+   |      - Test function calling
+   |      - Test JSON mode
+   |      - Test vision capabilities
+   |      - Test embeddings
+   |
+   +-- 6. Code Visibility Verification (MANDATORY)
+   |      - Send code snippet
+   |      - Ask &quot;Do you see my code?&quot;
+   |      - Check affirmative response
+   |      - Verify code references in response
+   |
+   +-- 7. Coding Capability Verification
+   |      - Test codebase detection
+   |      - Test language identification
+   |      - Test code generation
+   |      - Test code analysis
+   |
+   +-- 8. Calculate Scores
+          - Response speed score
+          - Model efficiency score
+          - Cost effectiveness score
+          - Capability score
+          - Recency score
+          - Weighted overall score</code></pre>
+<h3 id="verification-types">Verification Types</h3>
+<ul>
+<li><strong>Standard Verification</strong>: Basic existence +
+responsiveness + features</li>
+<li><strong>Code Verification</strong>: Mandatory code visibility
+test</li>
+<li><strong>Coding Capability</strong>: Practical coding task
+evaluation</li>
+<li><strong>Comprehensive Verification</strong>: All tests combined</li>
+<li><strong>Relaxed Verification</strong>: Less strict requirements
+(configurable)</li>
+</ul>
+<hr />
+<h2 id="f-scoring-system">F. SCORING SYSTEM</h2>
+<h3 id="score-components-from-scoringtypesgo">Score Components (from
+scoring/types.go)</h3>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ScoreWeights <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    ResponseSpeed      <span class="dt">float64</span>  <span class="co">// 0.25 default - How fast the model responds</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    ModelEfficiency    <span class="dt">float64</span>  <span class="co">// 0.20 default - Token throughput, resource usage</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    CostEffectiveness  <span class="dt">float64</span>  <span class="co">// 0.25 default - Price per token</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    Capability         <span class="dt">float64</span>  <span class="co">// 0.20 default - Feature support breadth</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    Recency            <span class="dt">float64</span>  <span class="co">// 0.10 default - How recently updated</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="scoring-algorithm">Scoring Algorithm</h3>
+<pre><code>Overall Score = (SpeedScore * 0.25) +
+                (EfficiencyScore * 0.20) +
+                (CostScore * 0.25) +
+                (CapabilityScore * 0.20) +
+                (RecencyScore * 0.10)</code></pre>
+<p>Scores are clamped to range [0, 10].</p>
+<h3 id="individual-score-calculations">Individual Score
+Calculations</h3>
+<ol type="1">
+<li><p><strong>Response Speed Score</strong>
+(<code>calculateResponseSpeedScore</code>):</p>
+<ul>
+<li>Based on latency measurements</li>
+<li>Faster = higher score</li>
+<li>Uses models.dev API data + live tests</li>
+</ul></li>
+<li><p><strong>Model Efficiency Score</strong>
+(<code>calculateModelEfficiencyScore</code>):</p>
+<ul>
+<li>Based on context window size, throughput</li>
+<li>Parameter count consideration</li>
+</ul></li>
+<li><p><strong>Cost Effectiveness Score</strong>
+(<code>calculateCostEffectivenessScore</code>):</p>
+<ul>
+<li>Input/output token pricing</li>
+<li>Free/open source bonus</li>
+</ul></li>
+<li><p><strong>Capability Score</strong>
+(<code>calculateCapabilityScore</code>):</p>
+<ul>
+<li>Number of supported features</li>
+<li>Streaming, function calling, vision, etc.</li>
+<li>Protocol support (MCP, ACP, LSP)</li>
+</ul></li>
+<li><p><strong>Recency Score</strong>
+(<code>calculateRecencyScore</code>):</p>
+<ul>
+<li>Release date / last update</li>
+<li>Newer models score higher</li>
+</ul></li>
+</ol>
+<h3 id="score-output-format">Score Output Format</h3>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;model_id&quot;</span><span class="fu">:</span> <span class="st">&quot;gpt-4&quot;</span><span class="fu">,</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;model_name&quot;</span><span class="fu">:</span> <span class="st">&quot;GPT-4&quot;</span><span class="fu">,</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;overall_score&quot;</span><span class="fu">:</span> <span class="fl">8.5</span><span class="fu">,</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;score_suffix&quot;</span><span class="fu">:</span> <span class="st">&quot;(SC:8.5)&quot;</span><span class="fu">,</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;components&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;speed_score&quot;</span><span class="fu">:</span> <span class="fl">7.2</span><span class="fu">,</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;efficiency_score&quot;</span><span class="fu">:</span> <span class="fl">8.8</span><span class="fu">,</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;cost_score&quot;</span><span class="fu">:</span> <span class="fl">6.5</span><span class="fu">,</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;capability_score&quot;</span><span class="fu">:</span> <span class="fl">9.2</span><span class="fu">,</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;recency_score&quot;</span><span class="fu">:</span> <span class="fl">9.5</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<hr />
+<h2 id="g-provider-support">G. PROVIDER SUPPORT</h2>
+<h3 id="supported-providers-25">Supported Providers (25+)</h3>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>File</th>
+<th>Auth Type</th>
+<th>Endpoint</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OpenAI</strong></td>
+<td>openai.go</td>
+<td>Bearer</td>
+<td>api.openai.com/v1</td>
+<td>Full API support</td>
+</tr>
+<tr>
+<td><strong>Anthropic</strong></td>
+<td>anthropic.go</td>
+<td>API Key + OAuth</td>
+<td>api.anthropic.com</td>
+<td>OAuth via Claude CLI</td>
+</tr>
+<tr>
+<td><strong>Groq</strong></td>
+<td>groq.go</td>
+<td>Bearer</td>
+<td>api.groq.com/openai/v1</td>
+<td>Streaming SSE</td>
+</tr>
+<tr>
+<td><strong>DeepSeek</strong></td>
+<td>deepseek.go</td>
+<td>Bearer</td>
+<td>api.deepseek.com</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Cohere</strong></td>
+<td>cohere.go</td>
+<td>Bearer</td>
+<td>api.cohere.com</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Mistral</strong></td>
+<td>mistral.go</td>
+<td>Bearer</td>
+<td>api.mistral.ai</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>xAI</strong></td>
+<td>xai.go</td>
+<td>Bearer</td>
+<td>api.x.ai</td>
+<td>Grok models</td>
+</tr>
+<tr>
+<td><strong>Replicate</strong></td>
+<td>replicate.go</td>
+<td>Token</td>
+<td>api.replicate.com</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Cerebras</strong></td>
+<td>cerebras.go</td>
+<td>Bearer</td>
+<td>api.cerebras.ai</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Cloudflare Workers AI</strong></td>
+<td>cloudflare.go</td>
+<td>API Key</td>
+<td>api.cloudflare.com</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SiliconFlow</strong></td>
+<td>siliconflow.go</td>
+<td>Bearer</td>
+<td>api.siliconflow.cn</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Hyperbolic</strong></td>
+<td>hyperbolic.go</td>
+<td>Bearer</td>
+<td>api.hyperbolic.xyz</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Together AI</strong></td>
+<td>togetherai.go</td>
+<td>Bearer</td>
+<td>api.together.xyz</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>SambaNova</strong></td>
+<td>sambanova.go</td>
+<td>Bearer</td>
+<td>api.sambanova.ai</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>KiloCode</strong></td>
+<td>kilo.go</td>
+<td>Bearer</td>
+<td>Various</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Moonshot/Kimi</strong></td>
+<td>kimi.go</td>
+<td>Bearer</td>
+<td>api.moonshot.cn</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Qwen/DashScope</strong></td>
+<td>qwen.go</td>
+<td>API Key</td>
+<td>dashscope.aliyuncs.com</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Novita AI</strong></td>
+<td>novita.go</td>
+<td>Bearer</td>
+<td>api.novita.ai</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>NLP Cloud</strong></td>
+<td>nlpcloud.go</td>
+<td>Token</td>
+<td>api.nlpcloud.io</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Upstage</strong></td>
+<td>upstage.go</td>
+<td>Bearer</td>
+<td>api.upstage.ai</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Sarvam</strong></td>
+<td>sarvam.go</td>
+<td>API Key</td>
+<td>api.sarvam.ai</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Zhipu</strong></td>
+<td>zhipu.go</td>
+<td>API Key</td>
+<td>open.bigmodel.cn</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Modal</strong></td>
+<td>modal.go</td>
+<td>Token</td>
+<td>modal.com</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Public AI</strong></td>
+<td>publicai.go</td>
+<td>API Key</td>
+<td>api.publicai.net</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>NIA</strong></td>
+<td>nia.go</td>
+<td>API Key</td>
+<td>api.nia.ai</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Vulavula</strong></td>
+<td>vulavula.go</td>
+<td>API Key</td>
+<td>api.vulavula.com</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>KimiCode</strong></td>
+<td>kimicode.go</td>
+<td>Bearer</td>
+<td>api.kimicode.com</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="provider-configuration-per-provider">Provider Configuration (per
+provider)</h3>
+<ul>
+<li><strong>Auth Type</strong>: bearer, api_key, oauth</li>
+<li><strong>Rate Limits</strong>: requests/minute, requests/hour, burst
+limit</li>
+<li><strong>Timeouts</strong>: request, stream, connect</li>
+<li><strong>Retry Config</strong>: max retries, initial delay, max
+delay, backoff factor, retryable errors</li>
+<li><strong>Features</strong>: streaming, functions, vision, ACP, max
+context, supported models</li>
+</ul>
+<h3 id="3-tier-model-discovery">3-Tier Model Discovery</h3>
+<ol type="1">
+<li><strong>Priority 1</strong>: User configuration files</li>
+<li><strong>Priority 2</strong>: Provider API (live model listing)</li>
+<li><strong>Priority 3</strong>: models.dev fallback (cached)</li>
+</ol>
+<hr />
+<h2 id="h-configuration-system">H. CONFIGURATION SYSTEM</h2>
+<h3 id="configuration-file-format-yaml">Configuration File Format
+(YAML)</h3>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">profile</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;production&quot;</span><span class="co">  # dev, prod, test</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">global</span><span class="kw">:</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">base_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://api.openai.com/v1&quot;</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${OPENAI_API_KEY}&quot;</span><span class="co">  # Environment variable expansion</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">max_retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">request_delay</span><span class="kw">:</span><span class="at"> 1s</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="fu">database</span><span class="kw">:</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;./llm-verifier.db&quot;</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">encryption_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;your-encryption-key&quot;</span><span class="co">  # SQL Cipher</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="fu">api</span><span class="kw">:</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;8080&quot;</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">jwt_secret</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;your-jwt-secret&quot;</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">rate_limit</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">burst_limit</span><span class="kw">:</span><span class="at"> </span><span class="dv">20</span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enable_cors</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cors_origins</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;http://localhost:3000&quot;</span></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enable_https</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">tls_cert_file</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;&quot;</span></span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">tls_key_file</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;&quot;</span></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a><span class="co"># LLM configurations (optional - auto-discovery if empty)</span></span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a><span class="fu">llms</span><span class="kw">:</span></span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;OpenAI GPT-4&quot;</span></span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">endpoint</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://api.openai.com/v1&quot;</span></span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${OPENAI_API_KEY}&quot;</span></span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">model</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;gpt-4-turbo&quot;</span></span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">headers</span><span class="kw">:</span></span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">Custom-Header</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;value&quot;</span></span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">features</span><span class="kw">:</span></span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">tool_calling</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">embeddings</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a><span class="fu">concurrency</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 60s</span></span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a><span class="fu">logging</span><span class="kw">:</span></span>
+<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">level</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;info&quot;</span><span class="co">      # debug, info, warn, error</span></span>
+<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">format</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;json&quot;</span><span class="co">     # json, text</span></span>
+<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">output</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;stdout&quot;</span><span class="co">   # stdout, stderr, file</span></span>
+<span id="cb26-44"><a href="#cb26-44" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">file_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/var/log/llm-verifier.log&quot;</span></span>
+<span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">max_size</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span></span>
+<span id="cb26-46"><a href="#cb26-46" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">max_backups</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb26-47"><a href="#cb26-47" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">max_age</span><span class="kw">:</span><span class="at"> </span><span class="dv">30</span></span>
+<span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">compress</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb26-49"><a href="#cb26-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-50"><a href="#cb26-50" aria-hidden="true" tabindex="-1"></a><span class="fu">monitoring</span><span class="kw">:</span></span>
+<span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enable_metrics</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb26-52"><a href="#cb26-52" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">metrics_port</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;9090&quot;</span></span>
+<span id="cb26-53"><a href="#cb26-53" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enable_health</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb26-54"><a href="#cb26-54" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">health_port</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;8081&quot;</span></span>
+<span id="cb26-55"><a href="#cb26-55" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enable_tracing</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb26-56"><a href="#cb26-56" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enable_profiling</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb26-57"><a href="#cb26-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a><span class="fu">security</span><span class="kw">:</span></span>
+<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enable_rate_limiting</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb26-60"><a href="#cb26-60" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enable_ip_whitelist</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb26-61"><a href="#cb26-61" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ip_whitelist</span><span class="kw">:</span><span class="at"> </span><span class="kw">[]</span></span>
+<span id="cb26-62"><a href="#cb26-62" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enable_request_logging</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enable_csrf_protection</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">session_timeout</span><span class="kw">:</span><span class="at"> </span><span class="dv">60</span></span>
+<span id="cb26-65"><a href="#cb26-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-66"><a href="#cb26-66" aria-hidden="true" tabindex="-1"></a><span class="fu">notifications</span><span class="kw">:</span></span>
+<span id="cb26-67"><a href="#cb26-67" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">slack</span><span class="kw">:</span></span>
+<span id="cb26-68"><a href="#cb26-68" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb26-69"><a href="#cb26-69" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">webhook_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;&quot;</span></span>
+<span id="cb26-70"><a href="#cb26-70" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">email</span><span class="kw">:</span></span>
+<span id="cb26-71"><a href="#cb26-71" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb26-72"><a href="#cb26-72" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">smtp_host</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;&quot;</span></span>
+<span id="cb26-73"><a href="#cb26-73" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">smtp_port</span><span class="kw">:</span><span class="at"> </span><span class="dv">587</span></span>
+<span id="cb26-74"><a href="#cb26-74" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">username</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;&quot;</span></span>
+<span id="cb26-75"><a href="#cb26-75" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">password</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;&quot;</span></span>
+<span id="cb26-76"><a href="#cb26-76" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">telegram</span><span class="kw">:</span></span>
+<span id="cb26-77"><a href="#cb26-77" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb26-78"><a href="#cb26-78" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">bot_token</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;&quot;</span></span>
+<span id="cb26-79"><a href="#cb26-79" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">chat_id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;&quot;</span></span></code></pre></div>
+<h3 id="required-api-keyscredentials">Required API Keys/Credentials</h3>
+<ul>
+<li><strong>OPENAI_API_KEY</strong>: For OpenAI provider</li>
+<li><strong>ANTHROPIC_API_KEY</strong>: For Anthropic provider</li>
+<li>Provider-specific API keys for each configured provider</li>
+<li><strong>JWT_SECRET</strong>: For API authentication</li>
+<li><strong>DATABASE_ENCRYPTION_KEY</strong>: For SQL Cipher
+(optional)</li>
+</ul>
+<h3 id="environment-variables">Environment Variables</h3>
+<ul>
+<li><code>LLM_VERIFIER_*</code>: All config values can be overridden via
+env vars</li>
+<li>Provider API keys: <code>${PROVIDER_API_KEY}</code> syntax in
+config</li>
+<li><code>LLM_DB_PATH</code>: Database file path</li>
+<li><code>PORT</code> / <code>GIN_MODE</code>: Server settings</li>
+</ul>
+<hr />
+<h2 id="i-test-suite">I. TEST SUITE</h2>
+<h3 id="test-structure-across-all-packages">Test Structure (across all
+packages)</h3>
+<ul>
+<li><strong>Total Go files</strong>: 512</li>
+<li><strong>Core Go files in llm-verifier/</strong>: 448</li>
+<li><strong>Test files</strong>: ~130+ (roughly 25% of source
+files)</li>
+</ul>
+<h3 id="test-types">Test Types</h3>
+<pre><code>llm-verifier/
+├── llmverifier/
+│   ├── verifier_test.go
+│   ├── verifier_core_final_test.go
+│   ├── verifier_ultimate_test.go
+│   ├── verifier_comprehensive_test_fixed.go
+│   ├── strategy_test.go
+│   ├── strategy_integration_test.go
+│   ├── strategy_security_test.go
+│   ├── strategy_stress_test.go
+│   ├── strategy_e2e_test.go
+│   ├── strategy_builder_test.go
+│   ├── feature_detection_test.go
+│   ├── config_export_test.go
+│   ├── config_loader_test.go
+│   ├── config_migration_test.go
+│   ├── llm_client_test.go
+│   ├── models_test.go
+│   ├── reporter_test.go
+│   ├── analytics_test.go
+│   └── integration_test.go
+├── providers/
+│   ├── providers_test.go
+│   ├── providers_extended_test.go
+│   ├── openai_test.go
+│   ├── anthropic_test.go
+│   ├── deepseek_extended_test.go
+│   ├── model_provider_service_test.go
+│   ├── model_verification_test.go
+│   ├── verified_config_generator_test.go
+│   ├── adapters_test.go
+│   ├── fallback_models_test.go
+│   └── integration_test.go
+├── verification/
+│   ├── verification_test.go
+│   ├── verification_real_test.go
+│   ├── code_verification_test.go
+│   ├── code_verification_integration_test.go
+│   ├── coding_capability_verification_test.go
+│   └── meaningful_response_test.go
+├── scoring/
+│   ├── scoring_engine_test.go
+│   ├── types_test.go
+│   ├── metrics_collector_test.go
+│   ├── alert_manager_test.go
+│   ├── model_display_test.go
+│   ├── model_naming_test.go
+│   ├── database_extensions_test.go
+│   └── integration_test.go
+├── api/
+│   ├── handlers_test.go
+│   ├── handlers_integration_test.go
+│   ├── middleware_test.go
+│   ├── server_test.go
+│   ├── server_init_test.go
+│   ├── validation_test.go
+│   ├── types_test.go
+│   ├── errors_sanitize_test.go
+│   ├── schema_validator_test.go
+│   └── security_middleware_test.go
+├── database/
+│   ├── crud_test.go
+│   ├── database_helpers_test.go
+│   ├── migrations_test.go
+│   ├── optimizations_test.go
+│   ├── in_memory_test.go
+│   ├── events_crud_test.go
+│   ├── issues_crud_test.go
+│   ├── logs_crud_test.go
+│   ├── config_exports_crud_test.go
+│   └── verification_scores_crud_test.go
+├── config/
+│   ├── config_test.go
+│   ├── loader_test.go
+│   └── validation_test.go
+├── auth/
+│   ├── auth_manager_test.go
+│   ├── compliance_test.go
+│   ├── ldap_test.go
+│   └── rbac_test.go
+├── client/
+│   ├── client_test.go
+│   ├── client_manager_test.go
+│   ├── http_client_test.go
+│   └── rate_limiter_test.go
+├── ai/
+│   └── simple_recommender_test.go
+├── analytics/
+│   └── predictive_test.go
+└── capabilities/
+    └── capabilities_test.go</code></pre>
+<h3 id="external-tests">External Tests</h3>
+<pre><code>tests/
+├── unit/              # Unit tests
+├── integration/       # Integration tests
+├── e2e/              # End-to-end tests
+├── performance/       # Performance benchmarks
+├── security/          # Security tests
+├── automation/        # Automated test suites
+└── challenges/        # Challenge-based tests</code></pre>
+<hr />
+<h2 id="j-documentation">J. DOCUMENTATION</h2>
+<h3 id="main-documentation-files">Main Documentation Files</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>README.md</td>
+<td>Main project documentation</td>
+</tr>
+<tr>
+<td>API_REFERENCE.md</td>
+<td>Complete API reference</td>
+</tr>
+<tr>
+<td>ACP_API_DOCUMENTATION.md</td>
+<td>AI Coding Protocol API docs</td>
+</tr>
+<tr>
+<td>ACP_EXAMPLES_AND_DEMOS.md</td>
+<td>Usage examples and demos</td>
+</tr>
+<tr>
+<td>ACP_IMPLEMENTATION_DESIGN.md</td>
+<td>Implementation design</td>
+</tr>
+<tr>
+<td>AGENTS.md</td>
+<td>CLI agent documentation</td>
+</tr>
+<tr>
+<td>SECURITY.md</td>
+<td>Security configuration</td>
+</tr>
+<tr>
+<td>VERIFYING.md</td>
+<td>Verification guide</td>
+</tr>
+<tr>
+<td>DEPLOYMENT.md</td>
+<td>Deployment guide</td>
+</tr>
+<tr>
+<td>GETTING_STARTED.md</td>
+<td>Quick start guide</td>
+</tr>
+<tr>
+<td>DEVELOPER_GUIDE.md</td>
+<td>Developer documentation</td>
+</tr>
+<tr>
+<td>USER_MANUAL.md</td>
+<td>User manual</td>
+</tr>
+<tr>
+<td>CONSTITUTION.md</td>
+<td>Project constitution</td>
+</tr>
+<tr>
+<td>CODE_OF_CONDUCT.md</td>
+<td>Code of conduct</td>
+</tr>
+<tr>
+<td>CONTRIBUTING.md</td>
+<td>Contribution guidelines</td>
+</tr>
+</tbody>
+</table>
+<h3 id="in-project-documentation">In-Project Documentation</h3>
+<pre><code>llm-verifier/docs/
+├── COMPLETE_USER_MANUAL.md
+├── USER_MANUAL.md
+├── API_DOCUMENTATION.md
+├── DEPLOYMENT_GUIDE.md
+├── ENVIRONMENT_VARIABLES.md
+├── CHANGELOG.md
+├── bigdata/
+└── deployment/
+
+docs/
+├── ARCHITECTURE_OVERVIEW.md
+├── COMPLETE_SYSTEM_DOCUMENTATION.md
+├── MODEL_VERIFICATION_GUIDE.md
+├── LLMSVD_SUFFIX_GUIDE.md
+├── CONFIGURATION_MIGRATION_GUIDE.md
+├── CAPABILITY_DETECTION.md
+├── COMPREHENSIVE_TEST_SUITE_DOCUMENTATION.md
+├── scoring/
+│   ├── guides/
+│   ├── tutorials/
+│   ├── examples/
+│   └── api/
+└── monitoring/</code></pre>
+<hr />
+<h2 id="k-docker-support">K. DOCKER SUPPORT</h2>
+<h3 id="dockerfile-multi-stage">Dockerfile (Multi-Stage)</h3>
+<pre><code>Stage 1: Build (golang:1.21-alpine)
+  - Install git, ca-certificates, tzdata
+  - Download dependencies
+  - Build static binary with CGO_ENABLED=0
+  
+Stage 2: Security Scan (aquasecurity/trivy)
+  - Run Trivy security scanner
+  - Output scan results as JSON
+  
+Stage 3: Runtime (gcr.io/distroless/static-debian12)
+  - Copy CA certificates
+  - Copy timezone data
+  - Copy binary and scan results
+  - Run as non-root (UID 65534)
+  - Health check: /llm-verifier health
+  - Expose port 8080</code></pre>
+<h3 id="docker-composeyml">docker-compose.yml</h3>
+<ul>
+<li>Main service with memory limits (4GB), PID limits (2048)</li>
+<li>Health check every 30s via wget</li>
+<li>Volume mounts for data, exports, config</li>
+<li>Optional PostgreSQL and Redis services (commented)</li>
+<li>Custom bridge network</li>
+</ul>
+<h3 id="docker-composeprodyml">docker-compose.prod.yml</h3>
+<ul>
+<li>Production-optimized configuration</li>
+</ul>
+<h3 id="docker-composemessagingyml">docker-compose.messaging.yml</h3>
+<ul>
+<li>Kafka and RabbitMQ messaging stack</li>
+</ul>
+<hr />
+<h2 id="l-dependencies">L. DEPENDENCIES</h2>
+<h3 id="core-go-dependencies-from-gomod">Core Go Dependencies (from
+go.mod)</h3>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Version</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>github.com/gin-gonic/gin</td>
+<td>v1.11.0</td>
+<td>HTTP web framework</td>
+</tr>
+<tr>
+<td>github.com/spf13/cobra</td>
+<td>v1.10.2</td>
+<td>CLI framework</td>
+</tr>
+<tr>
+<td>github.com/spf13/viper</td>
+<td>v1.21.0</td>
+<td>Configuration management</td>
+</tr>
+<tr>
+<td>github.com/charmbracelet/bubbletea</td>
+<td>v1.1.0</td>
+<td>TUI framework</td>
+</tr>
+<tr>
+<td>github.com/charmbracelet/lipgloss</td>
+<td>v0.13.0</td>
+<td>Terminal styling</td>
+</tr>
+<tr>
+<td>github.com/mattn/go-sqlite3</td>
+<td>v1.14.32</td>
+<td>SQLite driver (CGO)</td>
+</tr>
+<tr>
+<td>github.com/golang-jwt/jwt/v5</td>
+<td>v5.3.0</td>
+<td>JWT authentication</td>
+</tr>
+<tr>
+<td>github.com/go-ldap/ldap/v3</td>
+<td>v3.4.12</td>
+<td>LDAP integration</td>
+</tr>
+<tr>
+<td>github.com/go-playground/validator/v10</td>
+<td>v10.27.0</td>
+<td>Request validation</td>
+</tr>
+<tr>
+<td>github.com/gorilla/websocket</td>
+<td>v1.5.3</td>
+<td>WebSocket support</td>
+</tr>
+<tr>
+<td>github.com/google/uuid</td>
+<td>v1.6.0</td>
+<td>UUID generation</td>
+</tr>
+<tr>
+<td>github.com/andybalholm/brotli</td>
+<td>v1.2.0</td>
+<td>Brotli compression</td>
+</tr>
+<tr>
+<td>golang.org/x/crypto</td>
+<td>v0.46.0</td>
+<td>Argon2, crypto utilities</td>
+</tr>
+<tr>
+<td>cloud.google.com/go/storage</td>
+<td>v1.58.0</td>
+<td>Google Cloud Storage</td>
+</tr>
+<tr>
+<td>github.com/aws/aws-sdk-go-v2</td>
+<td>v1.41.0</td>
+<td>AWS SDK</td>
+</tr>
+<tr>
+<td>github.com/Azure/azure-sdk-for-go/sdk/storage/azblob</td>
+<td>v1.6.3</td>
+<td>Azure Blob Storage</td>
+</tr>
+<tr>
+<td>github.com/minio/minio-go/v7</td>
+<td>v7.0.98</td>
+<td>MinIO/S3 compatible</td>
+</tr>
+<tr>
+<td>google.golang.org/api</td>
+<td>v0.256.0</td>
+<td>Google APIs</td>
+</tr>
+<tr>
+<td>google.golang.org/grpc</td>
+<td>v1.76.0</td>
+<td>gRPC support</td>
+</tr>
+<tr>
+<td>github.com/stretchr/testify</td>
+<td>v1.11.1</td>
+<td>Testing framework</td>
+</tr>
+<tr>
+<td>github.com/swaggo/swag</td>
+<td>v1.16.6</td>
+<td>Swagger/OpenAPI docs</td>
+</tr>
+<tr>
+<td>github.com/rabbitmq/amqp091-go</td>
+<td>v1.10.0</td>
+<td>RabbitMQ client</td>
+</tr>
+<tr>
+<td>github.com/segmentio/kafka-go</td>
+<td>v0.4.50</td>
+<td>Kafka client</td>
+</tr>
+<tr>
+<td>github.com/sirupsen/logrus</td>
+<td>v1.9.4</td>
+<td>Structured logging</td>
+</tr>
+</tbody>
+</table>
+<h3 id="python-sdk-dependencies">Python SDK Dependencies</h3>
+<pre><code>llm-verifier-sdk/
+├── Client class
+├── Async support
+├── Type hints
+├── Error handling</code></pre>
+<hr />
+<h2 id="m-integration-pattern">M. INTEGRATION PATTERN</h2>
+<h3 id="how-to-integrate-llmsverifier-into-helixtranslate">How to
+Integrate LLMsVerifier into HelixTranslate</h3>
+<h4 id="option-1-go-module-import-recommended">Option 1: Go Module
+Import (Recommended)</h4>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">// go.mod</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>require digital<span class="op">.</span>vasic<span class="op">.</span>llmsverifier v0<span class="fl">.0</span><span class="er">.0</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>replace digital<span class="op">.</span>vasic<span class="op">.</span>llmsverifier <span class="op">=&gt;</span> <span class="op">./</span>llm<span class="op">-</span>verifier  <span class="co">// Or remote path</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co">// In HelixTranslate code:</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> main</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;digital.vasic.llmsverifier/config&quot;</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;digital.vasic.llmsverifier/llmverifier&quot;</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;digital.vasic.llmsverifier/providers&quot;</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;digital.vasic.llmsverifier/verification&quot;</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;digital.vasic.llmsverifier/scoring&quot;</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;digital.vasic.llmsverifier/database&quot;</span></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 1. Load configuration</span></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">,</span> err <span class="op">:=</span> config<span class="op">.</span>LoadFromFile<span class="op">(</span><span class="st">&quot;config.yaml&quot;</span><span class="op">)</span></span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>        log<span class="op">.</span>Fatal<span class="op">(</span>err<span class="op">)</span></span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 2. Initialize database</span></span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a>    db<span class="op">,</span> err <span class="op">:=</span> database<span class="op">.</span>New<span class="op">(</span>cfg<span class="op">.</span>Database<span class="op">.</span>Path<span class="op">,</span> cfg<span class="op">.</span>Database<span class="op">.</span>EncryptionKey<span class="op">)</span></span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>        log<span class="op">.</span>Fatal<span class="op">(</span>err<span class="op">)</span></span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 3. Create provider registry</span></span>
+<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a>    registry <span class="op">:=</span> providers<span class="op">.</span>NewProviderRegistry<span class="op">()</span></span>
+<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 4. Register providers with API keys</span></span>
+<span id="cb32-34"><a href="#cb32-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> llm <span class="op">:=</span> <span class="kw">range</span> cfg<span class="op">.</span>LLMs <span class="op">{</span></span>
+<span id="cb32-35"><a href="#cb32-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Register each provider</span></span>
+<span id="cb32-36"><a href="#cb32-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb32-37"><a href="#cb32-37" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-38"><a href="#cb32-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 5. Create verifier</span></span>
+<span id="cb32-39"><a href="#cb32-39" aria-hidden="true" tabindex="-1"></a>    verifier <span class="op">:=</span> llmverifier<span class="op">.</span>New<span class="op">(</span>cfg<span class="op">)</span></span>
+<span id="cb32-40"><a href="#cb32-40" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-41"><a href="#cb32-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 6. Run verification</span></span>
+<span id="cb32-42"><a href="#cb32-42" aria-hidden="true" tabindex="-1"></a>    results<span class="op">,</span> err <span class="op">:=</span> verifier<span class="op">.</span>Verify<span class="op">()</span></span>
+<span id="cb32-43"><a href="#cb32-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb32-44"><a href="#cb32-44" aria-hidden="true" tabindex="-1"></a>        log<span class="op">.</span>Fatal<span class="op">(</span>err<span class="op">)</span></span>
+<span id="cb32-45"><a href="#cb32-45" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb32-46"><a href="#cb32-46" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-47"><a href="#cb32-47" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 7. Score models</span></span>
+<span id="cb32-48"><a href="#cb32-48" aria-hidden="true" tabindex="-1"></a>    engine <span class="op">:=</span> scoring<span class="op">.</span>NewScoringEngine<span class="op">(</span>db<span class="op">,</span> modelsDevClient<span class="op">,</span> logger<span class="op">)</span></span>
+<span id="cb32-49"><a href="#cb32-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> result <span class="op">:=</span> <span class="kw">range</span> results <span class="op">{</span></span>
+<span id="cb32-50"><a href="#cb32-50" aria-hidden="true" tabindex="-1"></a>        score<span class="op">,</span> err <span class="op">:=</span> engine<span class="op">.</span>CalculateComprehensiveScore<span class="op">(</span>ctx<span class="op">,</span> result<span class="op">.</span>ModelInfo<span class="op">.</span>ID<span class="op">,</span> scoring<span class="op">.</span>DefaultScoringConfig<span class="op">())</span></span>
+<span id="cb32-51"><a href="#cb32-51" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Use score data...</span></span>
+<span id="cb32-52"><a href="#cb32-52" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb32-53"><a href="#cb32-53" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-54"><a href="#cb32-54" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 8. Generate reports</span></span>
+<span id="cb32-55"><a href="#cb32-55" aria-hidden="true" tabindex="-1"></a>    verifier<span class="op">.</span>GenerateMarkdownReport<span class="op">(</span>results<span class="op">,</span> <span class="st">&quot;./reports&quot;</span><span class="op">)</span></span>
+<span id="cb32-56"><a href="#cb32-56" aria-hidden="true" tabindex="-1"></a>    verifier<span class="op">.</span>GenerateJSONReport<span class="op">(</span>results<span class="op">,</span> <span class="st">&quot;./reports&quot;</span><span class="op">)</span></span>
+<span id="cb32-57"><a href="#cb32-57" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="option-2-rest-api-client">Option 2: REST API Client</h4>
+<div class="sourceCode" id="cb33"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;digital.vasic.llmsverifier/client&quot;</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Create client</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>cli <span class="op">:=</span> client<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;http://localhost:8080&quot;</span><span class="op">)</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Authenticate</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>cli<span class="op">.</span>Login<span class="op">(</span><span class="st">&quot;username&quot;</span><span class="op">,</span> <span class="st">&quot;password&quot;</span><span class="op">)</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a><span class="co">// List models</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>models<span class="op">,</span> err <span class="op">:=</span> cli<span class="op">.</span>GetModels<span class="op">()</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="co">// Verify a model</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a><span class="co">// (POST /api/models/{id}/verify)</span></span></code></pre></div>
+<h4 id="option-3-direct-package-usage-selective">Option 3: Direct
+Package Usage (Selective)</h4>
+<div class="sourceCode" id="cb34"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Use only specific packages</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="co">// For provider management</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;digital.vasic.llmsverifier/providers&quot;</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>mps <span class="op">:=</span> providers<span class="op">.</span>NewModelProviderService<span class="op">(</span><span class="st">&quot;config.yaml&quot;</span><span class="op">,</span> logger<span class="op">)</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>models<span class="op">,</span> err <span class="op">:=</span> mps<span class="op">.</span>GetAllModelsWithVerification<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="co">// For verification only</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;digital.vasic.llmsverifier/verification&quot;</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>verifier <span class="op">:=</span> verification<span class="op">.</span>NewVerifier<span class="op">(</span>db<span class="op">)</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>result<span class="op">,</span> err <span class="op">:=</span> verifier<span class="op">.</span>Verify<span class="op">(</span>ctx<span class="op">,</span> <span class="op">&amp;</span>verification<span class="op">.</span>Request<span class="op">{</span>ModelID<span class="op">:</span> <span class="st">&quot;gpt-4&quot;</span><span class="op">,</span> Prompt<span class="op">:</span> <span class="st">&quot;test&quot;</span><span class="op">})</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a><span class="co">// For scoring only</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;digital.vasic.llmsverifier/scoring&quot;</span></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>engine <span class="op">:=</span> scoring<span class="op">.</span>NewScoringEngine<span class="op">(</span>db<span class="op">,</span> client<span class="op">,</span> logger<span class="op">)</span></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>score<span class="op">,</span> err <span class="op">:=</span> engine<span class="op">.</span>CalculateComprehensiveScore<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;gpt-4&quot;</span><span class="op">,</span> scoring<span class="op">.</span>DefaultScoringConfig<span class="op">())</span></span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a><span class="co">// For capability detection</span></span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;digital.vasic.llmsverifier/capabilities&quot;</span></span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>detector <span class="op">:=</span> capabilities<span class="op">.</span>NewDetector<span class="op">()</span></span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>caps<span class="op">,</span> err <span class="op">:=</span> detector<span class="op">.</span>DetectProviderCapabilities<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;openai&quot;</span><span class="op">,</span> apiKey<span class="op">)</span></span></code></pre></div>
+<h3 id="configuration-for-helixtranslate">Configuration for
+HelixTranslate</h3>
+<div class="sourceCode" id="cb35"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># helix-verifier-config.yaml</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">profile</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;production&quot;</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="fu">global</span><span class="kw">:</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">max_retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="fu">database</span><span class="kw">:</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;./helix-verifier.db&quot;</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="fu">llms</span><span class="kw">:</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Helix-Primary&quot;</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">endpoint</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${HELIX_API_ENDPOINT}&quot;</span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${HELIX_API_KEY}&quot;</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">model</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${HELIX_MODEL}&quot;</span></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">features</span><span class="kw">:</span></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">code_generation</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">code_completion</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">streaming</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a><span class="fu">verification</span><span class="kw">:</span></span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">strict_mode</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">require_affirmative</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">max_retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">timeout_seconds</span><span class="kw">:</span><span class="at"> </span><span class="dv">30</span></span>
+<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">min_verification_score</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.7</span></span>
+<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a><span class="fu">scoring</span><span class="kw">:</span></span>
+<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">weights</span><span class="kw">:</span></span>
+<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">response_speed</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.30</span></span>
+<span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">model_efficiency</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.25</span></span>
+<span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">cost_effectiveness</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">capability</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">recency</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.05</span></span></code></pre></div>
+<h3 id="key-integration-points">Key Integration Points</h3>
+<ol type="1">
+<li><strong>Import the module</strong>:
+<code>digital.vasic.llmsverifier</code> as a Go module dependency</li>
+<li><strong>Configuration</strong>: Load from YAML/JSON with
+provider-specific settings</li>
+<li><strong>Database</strong>: Initialize SQLite with encryption for
+local state</li>
+<li><strong>Provider registration</strong>: Register Helix's LLM
+providers</li>
+<li><strong>Verification pipeline</strong>: Run the full verification
+flow</li>
+<li><strong>Scoring</strong>: Calculate scores using the scoring
+engine</li>
+<li><strong>Report generation</strong>: Generate Markdown/JSON
+reports</li>
+<li><strong>API integration</strong>: Optionally run the REST API server
+alongside HelixTranslate</li>
+</ol>
+<h3 id="critical-notes-for-helixtranslate-integration">Critical Notes
+for HelixTranslate Integration</h3>
+<ul>
+<li>The project uses <strong>Go modules</strong> - must be imported as a
+Go dependency</li>
+<li>Requires <strong>CGO</strong> for SQLite (mattn/go-sqlite3)</li>
+<li>All provider API keys should be passed via <strong>environment
+variables</strong></li>
+<li>The <strong>verification system is mandatory</strong> - models must
+pass "Do you see my code?" test</li>
+<li>The <strong>scoring system is pluggable</strong> - customize weights
+via config</li>
+<li><strong>Database encryption</strong> is optional but recommended for
+production</li>
+<li><strong>Branding suffix</strong> <code>(llmsvd)</code> is added to
+all generated configs</li>
+</ul>
+</body>
+</html>

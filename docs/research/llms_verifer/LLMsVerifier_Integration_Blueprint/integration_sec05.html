@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>integration_sec05</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">integration_sec05</h1>
+</header>
+<h1 id="5-phase-4-model-discovery-and-registry-integration">5. Phase 4:
+Model Discovery and Registry Integration</h1>
+<p>The discovery and registry subsystem forms the informational backbone
+of the LLMsVerifier integration, responsible for identifying available
+language models across all configured providers, maintaining a durable
+and queryable catalog of verified models, and enforcing admission
+policies that prevent unqualified models from entering the translation
+pipeline. This phase implements a resilient three-tier discovery
+architecture that balances user control against automation, a local
+SQLite-backed registry with full-text search capabilities, and a
+gatekeeping layer that applies composite-score and health-status filters
+before any model can be selected for inference. All discovery results
+are persisted to the unified registry, indexed for efficient lookup, and
+exposed through a stable REST API that serves both the internal scorer
+and external administrative tools. The subsystem is designed to operate
+continuously in the background, refreshing model availability at
+configurable intervals while broadcasting change events to interested
+consumers throughout the HelixTranslate system.</p>
+<h2 id="51-three-tier-discovery-service">5.1 Three-Tier Discovery
+Service</h2>
+<p>The <code>DiscoveryService</code> orchestrates model enumeration
+across three independent tiers, each offering a different trade-off
+between authority and freshness. Tier 1 draws from the user's explicit
+configuration in <code>configs/verifier.yaml</code>, where
+administrators can whitelist specific model IDs, set per-model score
+thresholds, or pin provider preferences. This tier carries the highest
+priority because user-specified values represent deliberate policy
+decisions that must override any dynamically discovered alternative.
+When Tier 1 returns at least one model, the discovery process terminates
+immediately and returns only the user-configured entries, ensuring that
+no provider API or community registry can supersede administrator
+intent.</p>
+<p>Tier 2 performs dynamic enumeration by querying each configured
+provider's model list endpoint. OpenAI-compatible providers expose
+<code>/v1/models</code>; Anthropic provides <code>v1/models</code>; and
+custom adapters normalize their native APIs to the same response shape.
+Each provider query is executed with a 30-second timeout and runs in its
+own goroutine, with results aggregated through a buffered channel. The
+provider API tier is the primary source of truth for newly released
+models or pricing changes, but it is only consulted when the user
+configuration tier returns no entries. This fallback ordering prevents
+API quota consumption when the administrator has already specified a
+closed set of acceptable models.</p>
+<p>Tier 3 queries the models.dev community registry, a publicly
+maintained database of language model metadata including
+community-verified scores, pricing benchmarks, and capability tags. This
+tier serves as the final fallback when both user configuration and live
+provider APIs are unavailable or return empty results. The registry
+endpoint responds within 10 seconds and provides models that may not yet
+be present in any configured provider account, enabling the system to
+pre-evaluate models before they are commercially available. Because
+community data can be stale or unverified, Tier 3 results receive the
+lowest priority and are always marked with
+<code>source: "community"</code> for downstream auditing.</p>
+<p>The cascading logic is implemented in <code>DiscoverAll</code>, which
+sequentially attempts each tier, deduplicates results by model ID, and
+returns the first non-empty set. Deduplication preserves the
+highest-priority entry when the same model appears in multiple tiers,
+ensuring that a user-configured whitelist entry always dominates a
+matching API-discovered entry even if both tiers were eventually
+queried.</p>
+<p><strong>Table 5.1: Discovery Tier Configuration</strong></p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Source</th>
+<th>Timeout</th>
+<th>Priority</th>
+<th>Refresh</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>User config (<code>configs/verifier.yaml</code>)</td>
+<td>5s</td>
+<td>Highest</td>
+<td>On config change</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Provider API dynamic enumeration</td>
+<td>30s/provider</td>
+<td>Medium</td>
+<td>1 hour</td>
+</tr>
+<tr>
+<td>3</td>
+<td>models.dev community registry</td>
+<td>10s</td>
+<td>Lowest (fallback)</td>
+<td>24 hours</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>DiscoveryService</code> struct embeds three tier-specific
+implementations, each satisfying a common <code>Discovery</code>
+interface that abstracts the underlying enumeration mechanism. A
+<code>sync.RWMutex</code> protects the service state during concurrent
+discovery runs, ensuring that background sync goroutines and on-demand
+API calls do not race on shared configuration.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/discovery/service.go</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DiscoveryService <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    tier1 <span class="op">*</span>ConfigDiscovery   <span class="co">// User-configured</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    tier2 <span class="op">*</span>APIDiscovery      <span class="co">// Provider APIs</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    tier3 <span class="op">*</span>RegistryDiscovery <span class="co">// models.dev</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    mu    sync<span class="op">.</span>RWMutex</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>DiscoveryService<span class="op">)</span> DiscoverAll<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">([]</span>DiscoveredModel<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> allModels <span class="op">[]</span>DiscoveredModel</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Tier 1: User config</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> models<span class="op">,</span> err <span class="op">:=</span> s<span class="op">.</span>tier1<span class="op">.</span>Discover<span class="op">(</span>ctx<span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        allModels <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>allModels<span class="op">,</span> models<span class="op">...)</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>allModels<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> deduplicate<span class="op">(</span>allModels<span class="op">),</span> <span class="ot">nil</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Tier 2: Provider APIs</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> models<span class="op">,</span> err <span class="op">:=</span> s<span class="op">.</span>tier2<span class="op">.</span>Discover<span class="op">(</span>ctx<span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        allModels <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>allModels<span class="op">,</span> models<span class="op">...)</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>allModels<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> deduplicate<span class="op">(</span>allModels<span class="op">),</span> <span class="ot">nil</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Tier 3: models.dev</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> models<span class="op">,</span> err <span class="op">:=</span> s<span class="op">.</span>tier3<span class="op">.</span>Discover<span class="op">(</span>ctx<span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        allModels <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>allModels<span class="op">,</span> models<span class="op">...)</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> deduplicate<span class="op">(</span>allModels<span class="op">),</span> <span class="ot">nil</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>deduplicate</code> helper selects entries by priority
+order. Each <code>DiscoveredModel</code> carries a
+<code>SourceTier</code> field populated by the originating discovery
+implementation. When two entries share the same <code>ModelID</code>,
+the one with the numerically lower tier value is retained. After
+deduplication, the final slice is sorted lexicographically by model ID
+to provide deterministic output across repeated calls. This
+deterministic ordering is critical for cache key generation and for test
+assertions that verify discovery behavior.</p>
+<p>Each tier implementation handles its own caching and error semantics.
+<code>ConfigDiscovery</code> watches <code>configs/verifier.yaml</code>
+via <code>fsnotify</code> and reloads on <code>Write</code> events,
+providing near-instant refresh without polling.
+<code>APIDiscovery</code> maintains an in-memory cache of provider
+responses with a 1-hour TTL, serving stale data during transient
+provider outages while queuing a background refresh.
+<code>RegistryDiscovery</code> implements exponential backoff for failed
+requests to the models.dev endpoint, waiting 1 minute after the first
+failure, 5 minutes after the second, and capping at 30 minutes to avoid
+hammering the community service. All three implementations emit
+structured log entries at <code>INFO</code> level for successful
+discoveries and <code>WARN</code> level for timeouts or non-2xx HTTP
+responses.</p>
+<h2 id="52-unified-model-registry">5.2 Unified Model Registry</h2>
+<p>Discovered models are persisted to a local SQLite database that
+serves as the single source of truth for all downstream components. The
+registry schema is designed to capture every dimension needed for model
+selection: identification, verification status, scoring, capabilities,
+pricing, availability, and temporal metadata. The
+<code>verified_models</code> table enforces data integrity through
+<code>CHECK</code> constraints on enumerated columns and uses a
+composite index strategy optimized for the query patterns observed in
+production.</p>
+<p>The <code>model_id</code> column stores the canonical model
+identifier as returned by the provider (e.g.,
+<code>gpt-4o-2024-08-06</code>, <code>claude-sonnet-4-20250514</code>).
+The <code>provider_id</code> foreign key links to a separate
+<code>providers</code> table defined in Phase 3. The <code>status</code>
+column implements the model lifecycle: <code>pending</code> for newly
+discovered models awaiting first evaluation, <code>verified</code> for
+models that have completed at least one full scoring run,
+<code>failed</code> for models that failed verification due to repeated
+inference errors or policy violations, and <code>retired</code> for
+models that have been removed from all provider APIs and community
+registries. A model in <code>retired</code> status remains in the
+database for audit purposes but is excluded from all selection
+queries.</p>
+<p>The <code>composite_score</code> column stores the weighted aggregate
+score produced by Phase 6's scoring pipeline, ranging from 0.0 to 10.0.
+The <code>tier</code> column classifies models into four bands:
+<code>premium</code> (score &gt;= 8.0), <code>standard</code> (score
+&gt;= 6.0), <code>budget</code> (score &gt;= 4.0), and
+<code>unranked</code> (below 4.0 or no score). Both
+<code>capabilities</code> and <code>pricing</code> columns store JSON
+documents, allowing the schema to evolve without migration scripts as
+providers introduce new features or pricing dimensions. The
+<code>is_available</code> boolean reflects the most recent health check
+result and is used as a fast filter to exclude down providers without
+evaluating score predicates.</p>
+<p><strong>Table 5.2: SQLite Registry Schema</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- pkg/registry/schema.sql</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> verified_models (</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span> AUTOINCREMENT,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    model_id TEXT <span class="kw">UNIQUE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    provider_id TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    name TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    status TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span>(status <span class="kw">IN</span> (<span class="st">&#39;pending&#39;</span>,<span class="st">&#39;verified&#39;</span>,<span class="st">&#39;failed&#39;</span>,<span class="st">&#39;retired&#39;</span>)),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    composite_score <span class="dt">REAL</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    tier TEXT <span class="kw">CHECK</span>(tier <span class="kw">IN</span> (<span class="st">&#39;premium&#39;</span>,<span class="st">&#39;standard&#39;</span>,<span class="st">&#39;budget&#39;</span>,<span class="st">&#39;unranked&#39;</span>)),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    capabilities TEXT, <span class="co">-- JSON</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    pricing TEXT, <span class="co">-- JSON</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    verified_at <span class="dt">TIMESTAMP</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    last_checked <span class="dt">TIMESTAMP</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    is_available <span class="dt">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    created_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    updated_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_models_score <span class="kw">ON</span> verified_models(composite_score);</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_models_provider <span class="kw">ON</span> verified_models(provider_id);</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_models_status <span class="kw">ON</span> verified_models(status);</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_models_available <span class="kw">ON</span> verified_models(is_available, composite_score);</span></code></pre></div>
+<p>The index design reflects the system's dominant access patterns.
+<code>idx_models_score</code> accelerates <code>FilterByScore</code>
+queries used by the gatekeeper to find all models above a threshold.
+<code>idx_models_provider</code> speeds up provider-specific
+administrative views. <code>idx_models_status</code> supports batch
+operations that target models in a particular lifecycle state, such as
+re-evaluating all <code>failed</code> models after a configuration
+change. The composite index <code>idx_models_available</code> is the
+most critical for runtime performance: nearly every production query
+includes <code>is_available = TRUE</code>, and the secondary ordering by
+<code>composite_score</code> allows the query planner to satisfy
+<code>ORDER BY composite_score DESC</code> without an additional sort
+step.</p>
+<p>The <code>ModelRegistry</code> type provides the Go API for all
+database operations. It uses <code>database/sql</code> with
+<code>modernc.org/sqlite</code> as the driver, avoiding CGO dependencies
+for simpler cross-compilation. Connection pooling is configured with a
+maximum of 10 open connections and 5 idle connections, sufficient for
+the single-node deployment model. All methods accept a
+<code>context.Context</code> for timeout and cancellation propagation,
+and queries exceeding 5 seconds are logged at <code>WARN</code> level
+for operational monitoring.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/registry/registry.go</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelRegistry <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    db <span class="op">*</span>sql<span class="op">.</span>DB</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>ModelRegistry<span class="op">)</span> ListModels<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> filter ModelFilter<span class="op">)</span> <span class="op">([]</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>ModelRegistry<span class="op">)</span> GetModel<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>ModelRegistry<span class="op">)</span> FilterByScore<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> minScore <span class="dt">float64</span><span class="op">)</span> <span class="op">([]</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>ModelRegistry<span class="op">)</span> FilterByProvider<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> providerID <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>ModelRegistry<span class="op">)</span> SearchModels<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> query <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><code>ListModels</code> accepts a <code>ModelFilter</code> struct
+containing optional fields for <code>ProviderID</code>,
+<code>Status</code>, <code>MinScore</code>, <code>MaxScore</code>,
+<code>Tier</code>, and <code>IsAvailable</code>. The implementation
+builds parameterized SQL dynamically, including only non-zero filter
+predicates in the <code>WHERE</code> clause. Results are ordered by
+<code>composite_score DESC</code> when a score filter is present,
+otherwise by <code>name ASC</code>. <code>GetModel</code> performs a
+primary-key lookup by <code>model_id</code> and returns
+<code>sql.ErrNoRows</code> as a sentinel when the model is not found,
+allowing callers to distinguish between missing data and database
+errors. <code>FilterByScore</code> and <code>FilterByProvider</code> are
+convenience methods that delegate to <code>ListModels</code> with
+appropriately populated filters, exposed separately because they
+represent the two most common query patterns in the selection
+pipeline.</p>
+<p><code>SearchModels</code> implements full-text search over the
+<code>name</code> column using SQLite's <code>LIKE</code> operator with
+<code>%</code> wildcards prepended and appended to the query term. While
+this is not a true full-text search engine, it satisfies the
+administrative use case of finding models by partial name match (e.g.,
+searching "gpt-4" to find all GPT-4 variants). For installations
+requiring more sophisticated search, the method can be replaced with an
+FTS5-backed implementation without changing the interface. Search
+results are ordered by <code>composite_score DESC</code> to surface the
+highest-quality matches first.</p>
+<p><strong>Table 5.3: Registry Query API Reference</strong></p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Parameters</th>
+<th>Return</th>
+<th>SQL Complexity</th>
+<th>Cache</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ListModels</td>
+<td>ModelFilter</td>
+<td>[]Model</td>
+<td>WHERE + ORDER</td>
+<td>5min</td>
+</tr>
+<tr>
+<td>GetModel</td>
+<td>modelID</td>
+<td>*Model</td>
+<td>PRIMARY KEY</td>
+<td>10min</td>
+</tr>
+<tr>
+<td>FilterByScore</td>
+<td>minScore</td>
+<td>[]Model</td>
+<td>WHERE score &gt;=</td>
+<td>None</td>
+</tr>
+<tr>
+<td>FilterByProvider</td>
+<td>providerID</td>
+<td>[]Model</td>
+<td>WHERE provider</td>
+<td>1min</td>
+</tr>
+<tr>
+<td>SearchModels</td>
+<td>query</td>
+<td>[]Model</td>
+<td>LIKE on name</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<p>The registry implements a read-through caching layer using an
+in-memory LRU cache with a default capacity of 1,000 entries.
+<code>GetModel</code> results are cached for 10 minutes because
+individual model metadata changes infrequently. <code>ListModels</code>
+with filters is cached for 5 minutes, with cache keys computed from the
+serialized filter struct. Score and provider filters bypass the cache
+because they are typically invoked by automated pipelines that benefit
+from fresh data and operate at frequencies where cache hits would be
+rare. Search queries are also uncached due to the high cardinality of
+possible query strings. Cache invalidation is triggered by
+<code>ModelUpdatedEvent</code> broadcasts (see Section 5.4), ensuring
+that model metadata changes are reflected in subsequent queries without
+waiting for TTL expiration.</p>
+<h2 id="53-verified-model-gatekeeping">5.3 Verified Model
+Gatekeeping</h2>
+<p>The gatekeeping layer enforces admission control, determining whether
+a specific model is eligible for translation work based on its
+verification status, composite score, and health state. This component
+sits at the boundary between model discovery and model selection: it
+answers the binary question "can this model be used right now?" with a
+detailed reason when the answer is negative. The <code>Gatekeeper</code>
+type is initialized with a <code>minScoreThreshold</code> (default 5.5)
+and a reference to the <code>ModelRegistry</code> for lookups.</p>
+<p>The <code>IsModelAvailable</code> method performs a synchronous
+database lookup followed by a sequence of predicate checks. First, it
+verifies that the model exists in the registry; a missing model returns
+<code>false</code> with reason <code>"not_found"</code>. Second, it
+checks that the model's <code>status</code> column equals
+<code>"verified"</code>; models in <code>pending</code>,
+<code>failed</code>, or <code>retired</code> states are rejected with
+reason <code>"verification"</code>. Third, it compares the model's
+<code>CompositeScore</code> against the configured threshold; models
+scoring below the minimum are rejected with reason <code>"score"</code>.
+Fourth, it examines the <code>HealthStatus</code> field, which must be
+either <code>"healthy"</code> or <code>"degraded"</code>; models marked
+<code>"down"</code> or <code>"unknown"</code> are rejected with reason
+<code>"health"</code>. Only when all four predicates pass does the
+method return <code>true</code> with an empty reason string.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/gatekeeper/gatekeeper.go</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Gatekeeper <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    minScoreThreshold <span class="dt">float64</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    registry          <span class="op">*</span>ModelRegistry</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>g <span class="op">*</span>Gatekeeper<span class="op">)</span> IsModelAvailable<span class="op">(</span>modelID <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">bool</span><span class="op">,</span> <span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    model<span class="op">,</span> err <span class="op">:=</span> g<span class="op">.</span>registry<span class="op">.</span>GetModel<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> modelID<span class="op">)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">false</span><span class="op">,</span> <span class="st">&quot;not_found&quot;</span><span class="op">,</span> err</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> model<span class="op">.</span>Status <span class="op">!=</span> <span class="st">&quot;verified&quot;</span> <span class="op">{</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">false</span><span class="op">,</span> <span class="st">&quot;verification&quot;</span><span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> model<span class="op">.</span>CompositeScore <span class="op">&lt;</span> g<span class="op">.</span>minScoreThreshold <span class="op">{</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">false</span><span class="op">,</span> <span class="st">&quot;score&quot;</span><span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> model<span class="op">.</span>HealthStatus <span class="op">!=</span> <span class="st">&quot;healthy&quot;</span> <span class="op">&amp;&amp;</span> model<span class="op">.</span>HealthStatus <span class="op">!=</span> <span class="st">&quot;degraded&quot;</span> <span class="op">{</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">false</span><span class="op">,</span> <span class="st">&quot;health&quot;</span><span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">true</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The gatekeeper is intentionally conservative: a model must
+demonstrate sustained positive evidence to pass. This design prevents
+transiently available models with unknown quality from entering the
+translation pipeline. The <code>minScoreThreshold</code> is configurable
+at startup via the <code>VERIFIER_MIN_SCORE</code> environment variable
+and can be adjusted at runtime through a configuration hot-reload
+endpoint. Lowering the threshold increases model diversity but may
+reduce average translation quality; raising it improves quality
+guarantees but decreases redundancy in the model pool.</p>
+<p>The reason strings returned by <code>IsModelAvailable</code> are used
+for observability and debugging. Each rejection reason increments a
+Prometheus counter
+<code>gatekeeper_rejections_total{reason="..."}</code>, allowing
+operators to monitor whether rejections are dominated by score failures
+(indicating the threshold may be too high), health failures (indicating
+provider instability), or verification failures (indicating models stuck
+in pending state). These metrics feed into the alerting rules defined in
+Phase 8.</p>
+<p><strong>Table 5.4: Gatekeeping Decision Matrix</strong></p>
+<table>
+<thead>
+<tr>
+<th>Verification</th>
+<th>Score &gt;= 5.5</th>
+<th>Health</th>
+<th>Available</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pass</td>
+<td>Yes</td>
+<td>Healthy</td>
+<td>TRUE</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>Pass</td>
+<td>Yes</td>
+<td>Degraded</td>
+<td>TRUE</td>
+<td>DEGRADED</td>
+</tr>
+<tr>
+<td>Pass</td>
+<td>Yes</td>
+<td>Down</td>
+<td>FALSE</td>
+<td>PROVIDER_DOWN</td>
+</tr>
+<tr>
+<td>Pass</td>
+<td>No</td>
+<td>Any</td>
+<td>FALSE</td>
+<td>SCORE_LOW</td>
+</tr>
+<tr>
+<td>Fail</td>
+<td>Any</td>
+<td>Any</td>
+<td>FALSE</td>
+<td>VERIFICATION_FAILED</td>
+</tr>
+<tr>
+<td>Pending</td>
+<td>Any</td>
+<td>Any</td>
+<td>FALSE</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<p>When a model passes gatekeeping with <code>DEGRADED</code> health
+status, it is admitted to the pool but with reduced traffic weight. The
+selection algorithm (Phase 6) applies a 0.5x multiplier to the degraded
+model's routing probability, shifting load toward fully healthy
+alternatives while maintaining the degraded model as a warm standby. If
+all models in a tier are degraded, the system continues operating at
+reduced capacity rather than rejecting requests, providing graceful
+degradation rather than hard failure. A model marked <code>Down</code>
+is completely excluded from the selection set, and if all models across
+all providers are down, the system returns a 503 Service Unavailable
+with a descriptive error message listing the affected providers.</p>
+<h2 id="54-background-discovery-and-event-broadcasting">5.4 Background
+Discovery and Event Broadcasting</h2>
+<p>Discovery is not a one-time operation. Provider catalogs change as
+new models are released, old models are deprecated, and pricing is
+adjusted. The <code>DiscoveryService</code> runs a background
+synchronization loop that periodically re-executes the three-tier
+discovery pipeline, compares results against the current registry state,
+and publishes change events for any detected differences.</p>
+<p>The <code>StartBackgroundSync</code> method accepts a context and a
+refresh interval (default 1 hour). It creates a <code>time.Ticker</code>
+and adds a random jitter of up to 10% of the interval duration before
+the first tick. This jitter prevents thundering herd behavior when
+multiple HelixTranslate instances start simultaneously and share the
+same configuration. Each tick triggers a full <code>DiscoverAll</code>
+call; when new models are found, an event is published to the central
+event bus for each discovered entry. Errors during discovery are logged
+but do not terminate the goroutine, ensuring that transient network
+issues do not permanently disable background synchronization.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/discovery/background.go</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>DiscoveryService<span class="op">)</span> StartBackgroundSync<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> interval time<span class="op">.</span>Duration<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    ticker <span class="op">:=</span> time<span class="op">.</span>NewTicker<span class="op">(</span>interval<span class="op">)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    jitter <span class="op">:=</span> time<span class="op">.</span>Duration<span class="op">(</span>rand<span class="op">.</span>Int63n<span class="op">(</span><span class="dt">int64</span><span class="op">(</span>interval <span class="op">/</span> <span class="dv">10</span><span class="op">)))</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">go</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        time<span class="op">.</span>Sleep<span class="op">(</span>jitter<span class="op">)</span> <span class="co">// Prevent thundering herd</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">{</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">select</span> <span class="op">{</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">case</span> <span class="op">&lt;-</span>ticker<span class="op">.</span>C<span class="op">:</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>                models<span class="op">,</span> err <span class="op">:=</span> s<span class="op">.</span>DiscoverAll<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>                    log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;discovery error: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">continue</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> _<span class="op">,</span> m <span class="op">:=</span> <span class="kw">range</span> models <span class="op">{</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>                    events<span class="op">.</span>Publish<span class="op">(</span>ctx<span class="op">,</span> events<span class="op">.</span>ModelDiscovered<span class="op">{</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>                        ModelID<span class="op">:</span>    m<span class="op">.</span>ID<span class="op">,</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>                        ProviderID<span class="op">:</span> m<span class="op">.</span>ProviderID<span class="op">,</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>                    <span class="op">})</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>            <span class="cf">case</span> <span class="op">&lt;-</span>ctx<span class="op">.</span>Done<span class="op">():</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                ticker<span class="op">.</span>Stop<span class="op">()</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}()</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The event bus (<code>pkg/events</code>) provides a publish-subscribe
+mechanism with at-least-once delivery semantics. Subscribers register
+typed handlers for specific event kinds, and the bus dispatches
+published events to all matching handlers in parallel. Event delivery is
+asynchronous, with a 30-second timeout per handler to prevent slow
+consumers from blocking the publisher. Events that fail delivery are
+retried up to 3 times with exponential backoff, then written to a
+dead-letter log for manual inspection.</p>
+<p>Four event types capture the full lifecycle of a model in the
+registry. The <code>ModelDiscoveredEvent</code> fires when a background
+sync or manual discovery finds a model not currently present in the
+registry. The <code>ModelUpdatedEvent</code> fires when an existing
+model's metadata changes, such as a pricing update or capability
+addition detected during a subsequent provider API query. The
+<code>Changes</code> map contains only the fields that differ from the
+previous registry entry, allowing subscribers to perform incremental
+updates. The <code>ModelScoreChangedEvent</code> fires when a model's
+composite score crosses a tier boundary, enabling subscribers to react
+to promotions (e.g., budget to standard) or demotions (premium to
+standard) with appropriate log entries or alerts. The
+<code>ModelRemovedEvent</code> fires when a model that was previously in
+the registry disappears from all discovery tiers for three consecutive
+sync cycles, indicating provider deprecation or retirement.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/events/model_events.go</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelDiscoveredEvent <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    ModelID    <span class="dt">string</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    ProviderID <span class="dt">string</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    Name       <span class="dt">string</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    Source     <span class="dt">string</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    Timestamp  time<span class="op">.</span>Time</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelUpdatedEvent <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    ModelID   <span class="dt">string</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    Changes   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    Timestamp time<span class="op">.</span>Time</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelScoreChangedEvent <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    ModelID   <span class="dt">string</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    OldScore  <span class="dt">float64</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    NewScore  <span class="dt">float64</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    OldTier   <span class="dt">string</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    NewTier   <span class="dt">string</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    Timestamp time<span class="op">.</span>Time</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelRemovedEvent <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    ModelID   <span class="dt">string</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    Reason    <span class="dt">string</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    Timestamp time<span class="op">.</span>Time</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The registry subscribes to all four event types and updates its
+SQLite database accordingly. On <code>ModelDiscoveredEvent</code>, it
+inserts a new row with <code>status = 'pending'</code> and queues an
+asynchronous scoring job. On <code>ModelUpdatedEvent</code>, it applies
+the changes map using a JSON merge patch for the
+<code>capabilities</code> and <code>pricing</code> columns, and bumps
+the <code>updated_at</code> timestamp. On
+<code>ModelScoreChangedEvent</code>, it updates both the
+<code>composite_score</code> and <code>tier</code> columns, triggering
+any downstream cache invalidation. On <code>ModelRemovedEvent</code>, it
+transitions the model to <code>status = 'retired'</code> rather than
+deleting the row, preserving historical audit data. The scoring pipeline
+(Phase 6) subscribes to <code>ModelDiscoveredEvent</code> to trigger
+initial evaluations and to <code>ModelScoreChangedEvent</code> to log
+tier transitions for analytics.</p>
+<p>Administrators can trigger on-demand discovery through the REST API
+(Section 5.5), which bypasses the background ticker and immediately
+executes <code>DiscoverAll</code>. This is useful when a new model has
+just been enabled in a provider account and the operator does not want
+to wait for the next scheduled sync. On-demand discovery publishes the
+same events as background sync, ensuring consistent handling regardless
+of trigger source.</p>
+<h2 id="55-rest-api-endpoints">5.5 REST API Endpoints</h2>
+<p>The discovery and registry functionality is exposed through a JSON
+REST API under the <code>/api/v1/models</code> path prefix. All
+endpoints require authentication via the bearer token middleware
+established in Phase 3, and all responses include standard
+<code>X-Request-ID</code> headers for traceability. The API follows REST
+conventions: collection endpoints return arrays, singleton endpoints
+return objects, and write operations return the affected resource. Error
+responses conform to RFC 7807 Problem Details format with
+<code>application/problem+json</code> content type.</p>
+<p><code>GET /api/v1/models</code> returns a paginated list of models
+from the registry, accepting query parameters for <code>provider</code>,
+<code>status</code>, <code>min_score</code>, <code>tier</code>, and
+<code>available</code> to filter results. Pagination uses cursor-based
+navigation with a <code>limit</code> parameter (default 50, max 200) and
+an <code>after</code> cursor for consistent ordering across insertions.
+The response includes a <code>Link</code> header with <code>next</code>
+and <code>prev</code> relations when additional pages exist. Each model
+object in the response array contains the full registry record with
+<code>capabilities</code> and <code>pricing</code> JSON objects inlined
+for convenience.</p>
+<p><code>GET /api/v1/models/{id}</code> returns a single model by its
+canonical model ID. If the model is not found, the endpoint returns 404
+Not Found with a problem detail indicating
+<code>"model not found"</code>. If the model exists but is in
+<code>retired</code> status, it is returned with a 200 OK and an
+additional <code>retired: true</code> field in the response body,
+allowing clients to distinguish retired models from active ones.</p>
+<p><code>POST /api/v1/models/discover</code> triggers an on-demand
+discovery run across all three tiers. The endpoint returns 202 Accepted
+immediately with a JSON body containing a <code>discovery_id</code>
+UUID. The actual discovery executes asynchronously, and clients can poll
+<code>GET /api/v1/models/discover/{discovery_id}</code> for status
+updates. The status endpoint returns <code>pending</code>,
+<code>running</code>, <code>completed</code>, or <code>failed</code>,
+and on completion includes a summary of models discovered, updated, and
+removed during the run. This asynchronous pattern prevents long-running
+discovery operations from occupying HTTP connections and timing out at
+load balancer or client levels.</p>
+<p><code>POST /api/v1/models/refresh</code> forces a refresh of model
+metadata from provider APIs for all models currently in the registry
+with <code>status = 'verified'</code>. Unlike <code>discover</code>,
+which looks for new models, <code>refresh</code> updates existing
+records with the latest provider data. This endpoint is useful after
+provider maintenance windows or pricing changes. It also returns 202
+Accepted and follows the same async polling pattern as discovery.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/api/handler.go</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>Handler<span class="op">)</span> ListModels<span class="op">(</span>w http<span class="op">.</span>ResponseWriter<span class="op">,</span> r <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span>    <span class="co">// GET /api/v1/models</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>Handler<span class="op">)</span> GetModel<span class="op">(</span>w http<span class="op">.</span>ResponseWriter<span class="op">,</span> r <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span>      <span class="co">// GET /api/v1/models/{id}</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>Handler<span class="op">)</span> TriggerDiscovery<span class="op">(</span>w http<span class="op">.</span>ResponseWriter<span class="op">,</span> r <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="co">// POST /api/v1/models/discover</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>Handler<span class="op">)</span> RefreshModels<span class="op">(</span>w http<span class="op">.</span>ResponseWriter<span class="op">,</span> r <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span>    <span class="co">// POST /api/v1/models/refresh</span></span></code></pre></div>
+<p>The handler implementation uses a shared <code>ModelRegistry</code>
+instance initialized at application startup and injected through the
+handler's constructor. This dependency injection pattern ensures that
+API handlers and background discovery processes operate on the same
+database connection pool and cache layer, maintaining consistency
+without explicit synchronization. Request parsing validates all query
+parameters and returns 400 Bad Request with detailed validation errors
+for invalid filter combinations (e.g., <code>min_score</code> above the
+maximum possible value of 10.0, or a <code>tier</code> value not in the
+allowed enumeration).</p>
+<p>Response serialization uses the same JSON encoder configuration as
+the rest of the HelixTranslate API: indented output in development mode,
+compact output in production, and HTML-escaping disabled to properly
+render Unicode characters in model names. The <code>capabilities</code>
+and <code>pricing</code> JSON columns are unmarshaled into
+<code>map[string]interface{}</code> during serialization so they appear
+as nested objects in the response rather than escaped JSON strings.
+Database timestamps are formatted as RFC 3339 strings in the response
+body, with null timestamps for models that have never been verified or
+checked omitted entirely using <code>omitempty</code> struct tags.</p>
+<p>The API layer implements request logging middleware that records
+method, path, query parameters, response status, and duration for every
+request. These logs are emitted at <code>INFO</code> level for 2xx
+responses, <code>WARN</code> level for 4xx responses, and
+<code>ERROR</code> level for 5xx responses. Aggregate metrics are
+exported via Prometheus counters <code>api_requests_total</code> and
+histograms <code>api_request_duration_seconds</code>, labeled by method,
+endpoint pattern, and status code. Together, these observability
+features provide operators with full visibility into discovery and
+registry API usage patterns and performance characteristics.</p>
+</body>
+</html>

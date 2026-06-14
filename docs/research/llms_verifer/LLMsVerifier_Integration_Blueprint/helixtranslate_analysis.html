@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixtranslate_analysis</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixtranslate_analysis</h1>
+</header>
+<h1
+id="helixtranslate-repository---comprehensive-analysis-report">HelixTranslate
+Repository - Comprehensive Analysis Report</h1>
+<h2 id="a-project-overview">A. PROJECT OVERVIEW</h2>
+<p><strong>Project Name</strong>: HelixTranslate
+(digital.vasic.translator) <strong>Language</strong>: Go 1.25.2
+<strong>Module</strong>: <code>digital.vasic.translator</code>
+<strong>Version</strong>: 2.3.0 (VERSION file) / 3.0.0 (Makefile)
+<strong>Type</strong>: Universal multi-format, multi-language ebook
+translation system</p>
+<p><strong>Architecture Pattern</strong>: Event-driven
+microservices-style architecture with:</p>
+<ul>
+<li>Central event bus (pub/sub) for decoupled component
+communication</li>
+<li>Factory pattern for LLM provider instantiation</li>
+<li>Strategy pattern for format-specific parsers</li>
+<li>Hub-and-spoke pattern for WebSocket connections</li>
+<li>Layered architecture: cmd/ -&gt; pkg/ -&gt; internal/</li>
+</ul>
+<p><strong>Core Capabilities</strong>:</p>
+<ul>
+<li>Multi-format ebook parsing (FB2, EPUB, TXT, HTML, PDF, DOCX)</li>
+<li>Multi-language translation using 8+ LLM providers</li>
+<li>Real-time WebSocket monitoring dashboard</li>
+<li>Distributed translation via SSH workers</li>
+<li>REST API (HTTP/3 + WebSocket) + gRPC interfaces</li>
+<li>Translation caching (PostgreSQL, Redis, SQLite)</li>
+<li>Quality verification with multi-pass polishing</li>
+<li>Preparation phase analysis (characters, terminology, culture)</li>
+<li>Serbian Cyrillic/Latin script conversion</li>
+<li>Markdown workflow (EPUB &lt;-&gt; Markdown)</li>
+</ul>
+<hr />
+<h2 id="b-directory-structure-complete">B. DIRECTORY STRUCTURE
+(Complete)</h2>
+<pre><code>HelixTranslate/
+├── .gitignore                          # Git ignore rules
+├── .gitmodules                         # Submodule definitions (Challenges, Containers)
+├── .golangci.yml                       # golangci-lint configuration
+├── AGENTS.md                           # AI agent guidance (20KB)
+├── CLAUDE.md                           # Claude Code guidance (11KB)
+├── COMPREHENSIVE_COMPLETION_REPORT.md  # Completion status report
+├── COMPREHENSIVE_PROJECT_COMPLETION_PLAN.md # Implementation plan
+├── CONSTITUTION.md                     # Team constitution
+├── CURRENT_PROGRESS_REPORT.md          # Current progress
+├── Dockerfile                          # Multi-stage Docker build
+├── DISTRIBUTED_WORK_IMPLEMENTATION_PLAN.md
+├── DOCUMENTATION_COMPLETION_PLAN.md
+├── Makefile                            # Build automation (v3.0.0)
+├── README.md                           # WebSocket monitoring system docs
+├── config.json                         # Main application configuration
+├── go.mod                              # Go module dependencies
+├── go.sum                              # Dependency checksums
+│
+├── Challenges/                         # SUBMODULE - Challenge system
+│   └── (separate repo: vasic-digital/Challenges)
+│
+├── Containers/                         # SUBMODULE - Container definitions
+│   └── (separate repo: vasic-digital/Containers)
+│
+├── Documentation/                      # ~60 documentation files
+│   ├── AGENTS.md, API.md, ARCHITECTURE.md, CLI.md
+│   ├── BATCH_TRANSLATION_COMMANDS.md
+│   ├── *_IMPLEMENTATION*.md, *_GUIDE*.md
+│   └── Various status/completion reports
+│
+├── cmd/                                # 17 entry point binaries
+│   ├── api-server/                     # REST API server (:8080)
+│   ├── challenge-runner/               # Challenge execution runner
+│   ├── cli/                            # Basic CLI tool
+│   ├── deployment/                     # Deployment management
+│   ├── ebook-translator/               # Specialized ebook translator
+│   ├── grpc-server/                    # gRPC service (:50051)
+│   ├── markdown-translator/            # Markdown workflow tool
+│   ├── monitor-server/                 # WebSocket monitoring (:8090)
+│   ├── preparation-translator/         # Pre-translation analysis
+│   ├── server/                         # Legacy REST API server
+│   ├── ssh-translation/                # SSH translation (older)
+│   ├── translate-ssh/                  # SSH worker binary
+│   ├── translator/                     # Legacy translator CLI
+│   └── unified-translator/            # PRIMARY unified CLI
+│
+├── internal/                           # Private packages
+│   ├── cache/                          # Caching layer
+│   ├── config/                         # Configuration loading
+│   ├── scripts/                        # 50+ shell scripts
+│   └── working/                        # Configs, test data, logs
+│
+├── pkg/                                # Public packages (~30 packages)
+│   ├── api/                            # REST handlers, routing
+│   ├── batch/                          # Batch processing
+│   ├── coordination/                   # Multi-LLM coordination
+│   ├── deployment/                     # Docker/SSH deployment
+│   ├── distributed/                    # SSH worker system
+│   ├── ebook/                          # Universal ebook parsing
+│   ├── events/                         # Event bus system
+│   ├── fb2/                            # FB2-specific XML handling
+│   ├── format/                         # Format detection
+│   ├── grpc/                           # gRPC service + proto
+│   ├── hardware/                       # Hardware detection
+│   ├── hash/                           # Codebase hashing
+│   ├── language/                       # Language detection
+│   ├── logger/                         # Structured logging
+│   ├── markdown/                       # EPUB&lt;-&gt;Markdown workflow
+│   ├── models/                         # Model registry + downloader
+│   ├── preparation/                    # Pre-translation analysis
+│   ├── progress/                       # Progress tracking
+│   ├── report/                         # Report generation
+│   ├── script/                         # Cyrillic/Latin conversion
+│   ├── security/                       # JWT auth, rate limiting
+│   ├── sshworker/                      # SSH worker management
+│   ├── storage/                        # DB abstraction (PG/Redis/SQLite)
+│   ├── translator/                     # Translation engine core
+│   │   └── llm/                        # 8 LLM provider implementations
+│   ├── verification/                   # Quality verification
+│   ├── version/                        # Version management
+│   └── websocket/                      # WebSocket hub
+│
+├── test/                               # Cross-cutting test suites
+│   ├── distributed/                    # Distributed system tests
+│   ├── e2e/                            # End-to-end tests
+│   ├── fixtures/                       # Test data
+│   ├── integration/                    # Integration tests
+│   ├── mocks/                          # Shared mocks
+│   ├── performance/                    # Performance tests
+│   ├── security/                       # Security tests
+│   ├── stress/                         # Stress tests
+│   ├── translator/                     # Translator tests
+│   ├── unit/                           # Unit tests
+│   └── utils/                          # Test helpers
+│
+└── tests/                              # Additional WebSocket tests
+    └── websocket_monitoring_test.go</code></pre>
+<hr />
+<h2 id="c-key-source-files---detailed-analysis">C. KEY SOURCE FILES -
+Detailed Analysis</h2>
+<h3 id="c1-entry-points">C1. Entry Points</h3>
+<h4
+id="cmdunified-translatormaingo-primary-cli"><code>cmd/unified-translator/main.go</code>
+(PRIMARY CLI)</h4>
+<ul>
+<li><strong>Purpose</strong>: Main unified CLI with full provider
+support</li>
+<li><strong>Key Types</strong>: <code>UnifiedConfig</code>,
+<code>TranslationSession</code>, <code>GeneratedFile</code>,
+<code>TranslationStep</code></li>
+<li><strong>Flags</strong>: <code>-input/-i</code>,
+<code>-output/-o</code>, <code>-source-lang</code>,
+<code>-target-lang</code>, <code>-script</code>, <code>-provider</code>,
+<code>-model</code>, <code>-api-key</code>, <code>-base-url</code>,
+<code>-temperature</code>, <code>-max-tokens</code>,
+<code>-timeout</code>, SSH config, llama.cpp config,
+<code>-workers</code>, <code>-chunk-size</code>,
+<code>-concurrency</code>, <code>-verify</code>,
+<code>-monitoring</code>, <code>-monitoring-port</code></li>
+<li><strong>Flow</strong>: parseFlags -&gt; initLogger -&gt;
+initEventBus -&gt; createSession -&gt; startMonitoring (optional) -&gt;
+executeTranslation -&gt; generateReport</li>
+<li><strong>Providers supported</strong>: openai, anthropic, zhipu,
+deepseek, qwen, gemini, ollama, llamacpp, ssh</li>
+</ul>
+<h4
+id="cmdapi-servermaingo-rest-api-server"><code>cmd/api-server/main.go</code>
+(REST API Server)</h4>
+<ul>
+<li><strong>Purpose</strong>: REST API server with gRPC backend
+connection</li>
+<li><strong>Key Types</strong>: <code>APIServer</code>,
+<code>APIConfig</code>, <code>TranslationRequest</code>,
+<code>ProviderRequestConfig</code>, <code>WebSocketMessage</code>,
+<code>APIResponse</code></li>
+<li><strong>Default ports</strong>: gRPC :50051, HTTP :8080</li>
+<li><strong>Features</strong>: WebSocket hub, gRPC client, JWT auth</li>
+</ul>
+<h4
+id="cmdgrpc-servermaingo-grpc-server"><code>cmd/grpc-server/main.go</code>
+(gRPC Server)</h4>
+<ul>
+<li><strong>Purpose</strong>: gRPC translation service</li>
+<li><strong>Key Types</strong>: <code>ServerConfig</code></li>
+<li><strong>Default</strong>: :50051 with reflection enabled</li>
+<li><strong>Flags</strong>: <code>-address</code>, <code>-port</code>,
+<code>-max-connections</code>, <code>-reflection</code>,
+<code>-metrics</code>, <code>-log-level</code></li>
+</ul>
+<h3 id="c2-llm-provider-layer">C2. LLM Provider Layer</h3>
+<h4
+id="pkgtranslatorllmllmgo-core-llm-interface"><code>pkg/translator/llm/llm.go</code>
+(CORE LLM INTERFACE)</h4>
+<ul>
+<li><strong>LLMClient interface</strong>:
+<code>Translate(ctx, text, prompt) (string, error)</code> +
+<code>GetProviderName() string</code></li>
+<li><strong>Factory</strong>: <code>NewLLMTranslator(config)</code>
+-&gt; switches on provider string</li>
+<li><strong>ValidModels map</strong>: Maps each Provider to valid model
+names</li>
+<li><strong>Providers enum</strong>: <code>ProviderOpenAI</code>,
+<code>ProviderAnthropic</code>, <code>ProviderZhipu</code>,
+<code>ProviderDeepSeek</code>, <code>ProviderQwen</code>,
+<code>ProviderGemini</code>, <code>ProviderOllama</code>,
+<code>ProviderLlamaCpp</code>, <code>ProviderMock</code></li>
+<li><strong>Auto-retry</strong>: <code>translateWithRetry()</code>
+splits text on size errors</li>
+<li><strong>Text splitting</strong>: Splits at sentence/paragraph
+boundaries, max 20KB chunks</li>
+<li><strong>Size error detection</strong>: Checks for "max_tokens",
+"token limit", "too large", etc.</li>
+<li><strong>Caching</strong>: In-memory cache keyed by
+<code>text:context</code></li>
+</ul>
+<h4
+id="pkgtranslatorllmopenaigo"><code>pkg/translator/llm/openai.go</code></h4>
+<ul>
+<li><strong>Type</strong>: <code>OpenAIClient</code> with
+<code>OpenAIRequest/Response</code> structs</li>
+<li><strong>Timeout</strong>: 600 seconds (10 minutes for large book
+sections)</li>
+<li><strong>Max tokens</strong>: 8192 (DeepSeek-compatible)</li>
+<li><strong>Default model</strong>: gpt-4</li>
+<li><strong>Temperature</strong>: 0.0-2.0 range validated</li>
+<li><strong>API</strong>: POST /chat/completions</li>
+</ul>
+<h4
+id="pkgtranslatorllmanthropicgo"><code>pkg/translator/llm/anthropic.go</code></h4>
+<ul>
+<li><strong>Type</strong>: <code>AnthropicClient</code></li>
+<li><strong>API</strong>: POST /messages with <code>x-api-key</code> and
+<code>anthropic-version: 2023-06-01</code></li>
+<li><strong>Timeout</strong>: 600 seconds</li>
+<li><strong>Max tokens</strong>: 4096</li>
+<li><strong>Models</strong>: claude-3-opus, claude-3-sonnet,
+claude-3-haiku</li>
+</ul>
+<h4
+id="pkgtranslatorllmdeepseekgo"><code>pkg/translator/llm/deepseek.go</code></h4>
+<ul>
+<li><strong>Type</strong>: <code>DeepSeekClient</code> (embeds
+<code>OpenAIClient</code>)</li>
+<li><strong>BaseURL</strong>: <a
+href="https://api.deepseek.com/v1">https://api.deepseek.com/v1</a></li>
+<li><strong>Models</strong>: deepseek-chat, deepseek-coder</li>
+<li><strong>Uses OpenAI-compatible API format</strong></li>
+</ul>
+<h4
+id="pkgtranslatorllmllamacppgo--llamacpp_providergo"><code>pkg/translator/llm/llamacpp.go</code>
+&amp; <code>llamacpp_provider.go</code></h4>
+<ul>
+<li><strong>Local execution</strong>: Spawns llama.cpp binary
+process</li>
+<li><strong>Configuration</strong>: <code>-llama-binary</code>,
+<code>-llama-model</code>, <code>-context-size</code></li>
+<li><strong>Models</strong>: llama2, mistral, vicuna (custom models
+allowed with warning)</li>
+</ul>
+<h4
+id="pkgtranslatorllmollamago"><code>pkg/translator/llm/ollama.go</code></h4>
+<ul>
+<li><strong>Local Ollama API</strong>: http://localhost:11434</li>
+<li><strong>Models</strong>: llama2, codellama, mistral, vicuna</li>
+</ul>
+<h4
+id="pkgtranslatorllmqwengo-zhipugo-geminigo"><code>pkg/translator/llm/qwen.go</code>,
+<code>zhipu.go</code>, <code>gemini.go</code></h4>
+<ul>
+<li>Cloud API clients for respective providers</li>
+</ul>
+<h4
+id="pkgtranslatorllmmockgo"><code>pkg/translator/llm/mock.go</code></h4>
+<ul>
+<li><strong>MockLLMClient</strong>: For testing, returns predictable
+responses</li>
+</ul>
+<h3 id="c3-configuration-system">C3. Configuration System</h3>
+<h4
+id="internalconfigconfiggo"><code>internal/config/config.go</code></h4>
+<ul>
+<li><p><strong>Config struct</strong> with sections:</p>
+<ul>
+<li><code>ServerConfig</code>: Host, Port, EnableHTTP3, TLS, Timeouts,
+MaxUploadSize</li>
+<li><code>SecurityConfig</code>: EnableAuth, JWTSecret, APIKeyHeader,
+RateLimitRPS/Burst, CORSOrigins</li>
+<li><code>TranslationConfig</code>: DefaultProvider, DefaultModel,
+CacheEnabled, CacheTTL, MaxConcurrent, Providers map</li>
+<li><code>ProviderConfig</code>: APIKey, BaseURL, Model, Options</li>
+<li><code>DistributedConfig</code>: Enabled, Workers map, SSHTimeout,
+MaxRetries, HealthCheckInterval</li>
+<li><code>WorkerConfig</code>: Name, Host, Port, User, KeyFile,
+Password, MaxCapacity, Tags</li>
+<li><code>LoggingConfig</code>: Level, Format, OutputFile</li>
+<li><code>PreparationConfig</code>: Enabled, PassCount, Providers,
+Analysis flags, DetailLevel</li>
+</ul></li>
+<li><p><strong>Environment variable loading</strong>:</p>
+<ul>
+<li><code>OPENAI_API_KEY</code>, <code>ANTHROPIC_API_KEY</code>,
+<code>DEEPSEEK_API_KEY</code>, <code>ZHIPU_API_KEY</code></li>
+<li><code>QWEN_API_KEY</code>, <code>GEMINI_API_KEY</code></li>
+<li><code>SSH_WORKER_{HOST,USER,PASSWORD,PORT,REMOTE_DIR}</code></li>
+<li><code>MONITOR_SERVER_PORT</code>, <code>LOG_LEVEL</code></li>
+</ul></li>
+<li><p><strong>Default config</strong>: Port 8443, HTTP3 enabled, auth
+enabled, 10 RPS rate limit</p></li>
+</ul>
+<h3 id="c4-translation-engine">C4. Translation Engine</h3>
+<h4
+id="pkgtranslatortranslatorgo"><code>pkg/translator/translator.go</code></h4>
+<ul>
+<li><strong>Translator interface</strong>: <code>Translate()</code>,
+<code>TranslateWithProgress()</code>, <code>GetStats()</code>,
+<code>GetName()</code></li>
+<li><strong>TranslationResult</strong>: OriginalText, TranslatedText,
+Provider, Cached, Error</li>
+<li><strong>TranslationStats</strong>: Total, Translated, Cached,
+Errors</li>
+<li><strong>BaseTranslator</strong>: Config, stats, in-memory cache</li>
+<li><strong>EmitProgress/EmitError</strong>: Event bus helpers</li>
+</ul>
+<h4
+id="pkgtranslatoruniversalgo"><code>pkg/translator/universal.go</code></h4>
+<ul>
+<li><strong>UniversalTranslator</strong>: Orchestrates full book
+translation</li>
+<li><strong>Flow</strong>: Detect language -&gt; Translate metadata
+-&gt; Translate chapters (with progress events)</li>
+<li><strong>Per-chapter progress</strong>: Events with chapter number,
+progress percentage</li>
+</ul>
+<h3 id="c5-ebook-processing">C5. Ebook Processing</h3>
+<h4 id="pkgebookparsergo"><code>pkg/ebook/parser.go</code></h4>
+<ul>
+<li><strong>Book struct</strong>: Metadata + Chapters[] + Format +
+Language</li>
+<li><strong>Metadata</strong>: Title, Authors, Description, Publisher,
+Language, ISBN, Date, Cover</li>
+<li><strong>Chapter</strong>: Title + Sections[]</li>
+<li><strong>Section</strong>: Title, Content, Subsections
+(recursive)</li>
+<li><strong>UniversalParser</strong>: Format auto-detection -&gt;
+delegates to format-specific parser</li>
+</ul>
+<h4 id="pkgformatdetectorgo"><code>pkg/format/detector.go</code></h4>
+<ul>
+<li><strong>Formats</strong>: FB2, EPUB, PDF, MOBI, AZW, AZW3, TXT,
+HTML, DOCX, RTF</li>
+<li><strong>Detection</strong>: Magic bytes + file extension +
+content-based disambiguation</li>
+<li><strong>EPUB/DOCX disambiguation</strong>: ZIP internal structure
+inspection</li>
+</ul>
+<h3 id="c6-events--websocket">C6. Events &amp; WebSocket</h3>
+<h4
+id="pkgeventseventsgo-assumed-structure"><code>pkg/events/events.go</code>
+(assumed structure)</h4>
+<ul>
+<li><strong>EventBus</strong>: Thread-safe pub/sub</li>
+<li><strong>Event types</strong>: TranslationStarted, Progress,
+Completed, Error; ConversionStarted, Progress, Completed, Error</li>
+<li><strong>Event</strong>: Type, Message, Data map, SessionID,
+Timestamp</li>
+</ul>
+<h4 id="pkgwebsockethubgo"><code>pkg/websocket/hub.go</code></h4>
+<ul>
+<li><strong>Hub</strong>: Manages WebSocket clients, subscribes to event
+bus</li>
+<li><strong>Client</strong>: ID, SessionID, Conn, Send channel</li>
+<li><strong>Features</strong>: Session filtering, automatic cleanup,
+broadcast</li>
+<li><strong>Integration</strong>: All events auto-forwarded to dashboard
+clients</li>
+</ul>
+<h3 id="c7-distributed-system">C7. Distributed System</h3>
+<h4
+id="pkgdistributedcoordinatorgo"><code>pkg/distributed/coordinator.go</code></h4>
+<ul>
+<li><strong>DistributedCoordinator</strong>: Manages remote LLM
+instances across SSH workers</li>
+<li><strong>RemoteLLMInstance</strong>: ID, WorkerID, Provider, Model,
+Priority, Available</li>
+<li><strong>Discovery</strong>: <code>DiscoverRemoteInstances()</code>
+queries paired workers</li>
+<li><strong>Components</strong>: SSHPool, PairingManager,
+FallbackManager, VersionManager</li>
+</ul>
+<h4
+id="pkgdistributedssh_poolgo"><code>pkg/distributed/ssh_pool.go</code></h4>
+<ul>
+<li><strong>SSHPool</strong>: Pooled SSH connections with cleanup</li>
+<li><strong>SSHConnection</strong>: Wraps <code>*ssh.Client</code> with
+metadata</li>
+<li><strong>WorkerConfig</strong>: SSH params, tags, capacity</li>
+<li><strong>Features</strong>: Auto-cleanup idle connections (30 min),
+retry logic</li>
+</ul>
+<h3 id="c8-grpc-layer">C8. gRPC Layer</h3>
+<h4
+id="pkggrpctranslatorproto"><code>pkg/grpc/translator.proto</code></h4>
+<ul>
+<li><strong>Service</strong>: <code>TranslationService</code> with 7
+RPCs
+<ul>
+<li><code>StartTranslation</code>, <code>GetTranslationStatus</code>,
+<code>ListTranslations</code></li>
+<li><code>CancelTranslation</code>,
+<code>StreamTranslationProgress</code></li>
+<li><code>GetProviders</code>, <code>SubscribeEvents</code></li>
+</ul></li>
+<li><strong>Messages</strong>: TranslationRequest, ProviderConfig,
+TranslationOptions
+<ul>
+<li>TranslationResponse, TranslationStatusResponse</li>
+<li>TranslationProgressEvent, GeneratedFile, TranslationStep</li>
+<li>ProvidersResponse, ProviderInfo, ProviderStatus, SystemEvent</li>
+</ul></li>
+</ul>
+<h3 id="c9-api-handlers">C9. API Handlers</h3>
+<h4 id="pkgapihandlergo"><code>pkg/api/handler.go</code></h4>
+<ul>
+<li><strong>Handler struct</strong>: Config, EventBus, Cache,
+AuthService, WSHub, DistributedManager</li>
+<li><strong>Routes</strong>:
+<ul>
+<li><code>GET /health</code>, <code>/</code></li>
+<li><code>GET /ws</code> (WebSocket)</li>
+<li><code>POST /api/v1/translate</code> (text translation)</li>
+<li><code>POST /api/v1/translate/fb2</code> (FB2 translation)</li>
+<li><code>POST /api/v1/translate/batch</code> (batch translation)</li>
+<li><code>POST /api/v1/translate/ebook</code> (ebook translation)</li>
+<li><code>POST /api/v1/convert/script</code> (script conversion)</li>
+<li><code>GET /api/v1/status/:session_id</code></li>
+<li><code>GET /api/v1/version</code>, <code>/providers</code>,
+<code>/stats</code>, <code>/languages</code></li>
+<li><code>POST /api/v1/translate/validate</code></li>
+<li><code>POST /api/v1/translate/cancel/:session_id</code></li>
+<li><code>POST /api/v1/preparation/analyze</code></li>
+<li><code>GET /api/v1/preparation/result/:session_id</code></li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="d-configuration-system">D. CONFIGURATION SYSTEM</h2>
+<h3 id="configuration-files-hierarchy">Configuration Files
+Hierarchy</h3>
+<ol type="1">
+<li><strong>Main config</strong>: <code>config.json</code> (project
+root)</li>
+<li><strong>Example configs</strong>:
+<code>internal/working/config_*.json</code></li>
+<li><strong>Provider configs</strong>:
+<code>config_anthropic.json</code>, <code>config_deepseek.json</code>,
+etc.</li>
+<li><strong>Worker configs</strong>: <code>config.worker.json</code>,
+<code>config.worker.llamacpp.json</code></li>
+<li><strong>Distributed configs</strong>:
+<code>config.distributed.json</code></li>
+</ol>
+<h3 id="configuration-sections">Configuration Sections</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;server&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;host&quot;</span><span class="er">,</span> <span class="dt">&quot;port&quot;</span><span class="er">,</span> <span class="dt">&quot;enable_http3&quot;</span><span class="er">,</span> <span class="dt">&quot;tls_cert_file&quot;</span><span class="er">,</span> <span class="dt">&quot;tls_key_file&quot;</span><span class="er">,</span> <span class="dt">&quot;timeouts&quot;</span><span class="er">,</span> <span class="dt">&quot;max_upload_size&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;security&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;enable_auth&quot;</span><span class="er">,</span> <span class="dt">&quot;jwt_secret&quot;</span><span class="er">,</span> <span class="dt">&quot;api_key_header&quot;</span><span class="er">,</span> <span class="dt">&quot;rate_limit_rps&quot;</span><span class="er">,</span> <span class="dt">&quot;rate_limit_burst&quot;</span><span class="er">,</span> <span class="dt">&quot;cors_origins&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;translation&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;default_provider&quot;</span><span class="er">,</span> <span class="dt">&quot;default_model&quot;</span><span class="er">,</span> <span class="dt">&quot;cache_enabled&quot;</span><span class="er">,</span> <span class="dt">&quot;cache_ttl&quot;</span><span class="er">,</span> <span class="dt">&quot;max_concurrent&quot;</span><span class="er">,</span> <span class="dt">&quot;providers&quot;</span><span class="fu">:</span> <span class="fu">{}</span> <span class="fu">},</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;preparation&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;enabled&quot;</span><span class="er">,</span> <span class="dt">&quot;pass_count&quot;</span><span class="er">,</span> <span class="dt">&quot;providers&quot;</span><span class="er">,</span> <span class="dt">&quot;analyze_*&quot;</span> <span class="er">flags,</span> <span class="dt">&quot;detail_level&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;distributed&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;enabled&quot;</span><span class="er">,</span> <span class="dt">&quot;workers&quot;</span><span class="fu">:</span> <span class="fu">{},</span> <span class="dt">&quot;ssh_timeout&quot;</span><span class="er">,</span> <span class="dt">&quot;ssh_max_retries&quot;</span><span class="er">,</span> <span class="dt">&quot;health_check_interval&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;logging&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;level&quot;</span><span class="er">,</span> <span class="dt">&quot;format&quot;</span><span class="er">,</span> <span class="dt">&quot;output_file&quot;</span> <span class="fu">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="environment-variables-api-keys-only-from-env">Environment
+Variables (API Keys ONLY from env)</h3>
+<ul>
+<li><strong>OpenAI</strong>: <code>OPENAI_API_KEY</code></li>
+<li><strong>Anthropic</strong>: <code>ANTHROPIC_API_KEY</code></li>
+<li><strong>DeepSeek</strong>: <code>DEEPSEEK_API_KEY</code></li>
+<li><strong>Zhipu</strong>: <code>ZHIPU_API_KEY</code></li>
+<li><strong>Qwen</strong>: <code>QWEN_API_KEY</code></li>
+<li><strong>Gemini</strong>: <code>GEMINI_API_KEY</code></li>
+<li><strong>SSH Workers</strong>: <code>SSH_WORKER_HOST</code>,
+<code>SSH_WORKER_USER</code>, <code>SSH_WORKER_PASSWORD</code>,
+<code>SSH_WORKER_PORT</code>, <code>SSH_WORKER_REMOTE_DIR</code></li>
+<li><strong>Server</strong>: <code>MONITOR_SERVER_PORT</code>,
+<code>LOG_LEVEL</code></li>
+</ul>
+<h3
+id="security-api-keys-never-in-config-files-excluded-by-gitignore">Security:
+API keys NEVER in config files (excluded by .gitignore)</h3>
+<ul>
+<li><code>.env*</code>, <code>config_with_keys.json</code>,
+<code>api_keys.json</code>, <code>secrets.*</code>,
+<code>**/qwen_credentials.json</code></li>
+</ul>
+<hr />
+<h2 id="e-modelprovider-management">E. MODEL/PROVIDER MANAGEMENT</h2>
+<h3 id="llm-provider-factory">LLM Provider Factory</h3>
+<pre><code>NewLLMTranslator(config) -&gt; LLMTranslator
+  -&gt; validates provider string
+  -&gt; validates model against ValidModels[provider]
+  -&gt; creates provider-specific client via switch
+  -&gt; returns LLMTranslator with embedded LLMClient</code></pre>
+<h3 id="supported-providers-9-total">Supported Providers (9 total)</h3>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Type</th>
+<th>API Style</th>
+<th>Models</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI</td>
+<td>Cloud</td>
+<td>Native</td>
+<td>gpt-3.5-turbo, gpt-4, gpt-4-turbo, gpt-4o</td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td>Cloud</td>
+<td>Native</td>
+<td>claude-3-opus, claude-3-sonnet, claude-3-haiku</td>
+</tr>
+<tr>
+<td>DeepSeek</td>
+<td>Cloud</td>
+<td>OpenAI-compatible</td>
+<td>deepseek-chat, deepseek-coder</td>
+</tr>
+<tr>
+<td>Zhipu</td>
+<td>Cloud</td>
+<td>Native</td>
+<td>glm-4, glm-3-turbo</td>
+</tr>
+<tr>
+<td>Qwen</td>
+<td>Cloud</td>
+<td>Native</td>
+<td>qwen-max, qwen-plus, qwen-turbo</td>
+</tr>
+<tr>
+<td>Gemini</td>
+<td>Cloud</td>
+<td>Native</td>
+<td>gemini-pro, gemini-pro-vision</td>
+</tr>
+<tr>
+<td>Ollama</td>
+<td>Local</td>
+<td>Ollama API</td>
+<td>llama2, codellama, mistral, vicuna</td>
+</tr>
+<tr>
+<td>LlamaCpp</td>
+<td>Local</td>
+<td>Process spawn</td>
+<td>llama2, mistral, vicuna</td>
+</tr>
+<tr>
+<td>Mock</td>
+<td>Test</td>
+<td>N/A</td>
+<td>mock</td>
+</tr>
+</tbody>
+</table>
+<h3 id="local-model-registry-pkgmodelsregistrygo">Local Model Registry
+(<code>pkg/models/registry.go</code>)</h3>
+<p>Pre-configured GGUF models for local execution:</p>
+<ul>
+<li><strong>hunyuan-mt-7b</strong> (Q4/Q8): Translation-specialized, 33
+languages, Apache-2.0</li>
+<li><strong>aya-23-8b</strong> (Q4): 23 languages, strong
+multilingual</li>
+<li><strong>qwen2.5-7b-instruct</strong> (Q4): 32K context,
+Russian/Serbian support</li>
+<li><strong>mistral-7b-instruct</strong> (Q4): General-purpose +
+translation</li>
+<li><strong>qwen2.5-14b-instruct</strong> (Q4): Higher quality for 16GB+
+RAM systems</li>
+</ul>
+<p>Each model has: Parameters, RAM requirements, QuantType, SourceURL,
+Languages, Quality rating</p>
+<hr />
+<h2 id="f-existing-test-structure">F. EXISTING TEST STRUCTURE</h2>
+<h3 id="test-organization">Test Organization</h3>
+<p><strong>Two locations for tests</strong>:</p>
+<ol type="1">
+<li><strong>Alongside source</strong>: <code>*_test.go</code> in each
+<code>pkg/*</code> directory (standard Go pattern)</li>
+<li><strong>Cross-cutting suites</strong>: <code>test/</code>
+directory</li>
+</ol>
+<h3 id="test-directory-structure"><code>test/</code> Directory
+Structure</h3>
+<pre><code>test/
+├── unit/              # 8 test files (batch, coordination, ebook, fb2, format, language, qwen, script, verification)
+├── integration/       # 4 test files (batch_api, cross_package, debug, ssh_translation)
+├── e2e/               # translation_quality_e2e_test.go
+├── performance/       # translation_performance_test.go
+├── stress/            # translation_stress_test.go (.gitkeep)
+├── security/          # 3 test files (authentication, input_validation*2)
+├── distributed/       # 6 test files (fallback, integration, manager, performance, security, stress)
+├── translator/        # LLM provider tests
+├── mocks/             # provider.go (shared mocks)
+├── fixtures/          # Test ebooks, configs, expected translations
+└── utils/             # helpers.go, ports.go, ssh_test_server.go, test_infrastructure.go</code></pre>
+<h3 id="test-statistics-from-comprehensive_completion_reportmd">Test
+Statistics (from COMPREHENSIVE_COMPLETION_REPORT.md)</h3>
+<ul>
+<li><strong>Current coverage</strong>: 43.6% overall</li>
+<li><strong>Critical gaps</strong>: pkg/api (32.8%), pkg/distributed
+(45.2%), version_manager (26.2%)</li>
+<li><strong>61 disabled tests</strong> requiring attention</li>
+<li><strong>Build tags</strong>: <code>//go:build integration</code>,
+<code>//go:build e2e</code></li>
+</ul>
+<h3 id="test-naming-conventions">Test Naming Conventions</h3>
+<ul>
+<li>Table-driven tests preferred</li>
+<li>Naming: <code>TestFunctionName_Scenario</code></li>
+<li>Coverage artifacts: <code>coverage*.out</code>,
+<code>coverage.html</code></li>
+</ul>
+<hr />
+<h2 id="g-documentation-analysis">G. DOCUMENTATION ANALYSIS</h2>
+<h3 id="core-documentation-files-60-files-in-documentation">Core
+Documentation Files (~60 files in Documentation/)</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td>Claude Code guidance - authoritative for Go codebase</td>
+<td>11KB</td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>AI agent project overview - comprehensive reference</td>
+<td>20KB</td>
+</tr>
+<tr>
+<td><code>ARCHITECTURE.md</code></td>
+<td>System architecture, components, request flows</td>
+<td>8KB</td>
+</tr>
+<tr>
+<td><code>API.md</code></td>
+<td>REST API documentation</td>
+<td>15KB</td>
+</tr>
+<tr>
+<td><code>API_COMPREHENSIVE_GUIDE.md</code></td>
+<td>Full API guide with examples</td>
+<td>17KB</td>
+</tr>
+<tr>
+<td><code>CLI.md</code></td>
+<td>CLI usage documentation</td>
+<td>6KB</td>
+</tr>
+<tr>
+<td><code>CONFIGURATION_REFERENCE.md</code></td>
+<td>All config options documented</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>BATCH_TRANSLATION_COMMANDS.md</code></td>
+<td>Batch translation recipes</td>
+<td>9KB</td>
+</tr>
+<tr>
+<td><code>AUTOMATED_DEPLOYMENT.md</code></td>
+<td>Deployment automation</td>
+<td>16KB</td>
+</tr>
+<tr>
+<td><code>SECURITY_HARDENING.md</code></td>
+<td>Security best practices</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>TESTING_GUIDE.md</code></td>
+<td>Test writing guidance</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Various <code>*_GUIDE.md</code></td>
+<td>Domain-specific guides</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Various <code>*_REPORT.md</code></td>
+<td>Status/completion reports</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h3 id="claudemd-key-points">CLAUDE.md Key Points</h3>
+<ul>
+<li>Module: <code>digital.vasic.translator</code>, Go 1.25.2</li>
+<li>VERSION file (2.3.0) is authoritative over Makefile (3.0.0)</li>
+<li>All commands via Makefile</li>
+<li>Entry points in <code>cmd/</code> - unified-translator is
+primary</li>
+<li>API keys from environment variables ONLY</li>
+<li>Distributed changes must be version-compatible</li>
+<li><strong>Definition of Done</strong>: Real system run with pasted
+terminal output required</li>
+</ul>
+<h3 id="agentsmd-key-points">AGENTS.md Key Points</h3>
+<ul>
+<li>Technology stack fully documented</li>
+<li>Build/test commands documented</li>
+<li>Complete directory structure</li>
+<li>Code conventions (error wrapping, <code>any</code> over
+<code>interface{}</code>, 140 char line limit)</li>
+</ul>
+<hr />
+<h2 id="h-submodules">H. SUBMODULES</h2>
+<h3 id="1-challenges-challenges">1. Challenges
+(<code>./Challenges</code>)</h3>
+<ul>
+<li><strong>Repo</strong>:
+<code>git@github.com:vasic-digital/Challenges.git</code></li>
+<li><strong>Commit</strong>:
+<code>3937f06e9defbc3f466e9d859cf0e34079a5fc6a</code></li>
+<li><strong>Purpose</strong>: Challenge/test system - likely contains
+translation challenges, test suites, benchmarking tasks</li>
+<li><strong>Own submodules</strong>: References <code>Containers</code>
+submodule</li>
+<li><strong>Files</strong>: AGENTS.md (30KB), ARCHITECTURE.md, CLAUDE.md
+(27KB), CONSTITUTION.md, Makefile</li>
+<li><strong>Likely role</strong>: Contains evaluation challenges for
+measuring translation quality</li>
+</ul>
+<h3 id="2-containers-containers">2. Containers
+(<code>./Containers</code>)</h3>
+<ul>
+<li><strong>Repo</strong>:
+<code>git@github.com:vasic-digital/Containers.git</code></li>
+<li><strong>Commit</strong>:
+<code>f572d2615307c696d53e56acc9fdf93f2bb6120e</code></li>
+<li><strong>Purpose</strong>: Container definitions - Dockerfiles,
+compose files, deployment configurations</li>
+<li><strong>Used by</strong>: Both main project and Challenges
+submodule</li>
+</ul>
+<hr />
+<h2 id="i-dependencies">I. DEPENDENCIES</h2>
+<h3 id="direct-dependencies-from-gomod">Direct Dependencies (from
+go.mod)</h3>
+<pre><code>github.com/gin-gonic/gin v1.11.0           # Web framework
+github.com/golang-jwt/jwt/v5 v5.3.0        # JWT authentication
+github.com/google/uuid v1.6.0              # UUID generation
+github.com/gorilla/websocket v1.5.3        # WebSocket support
+github.com/lib/pq v1.10.9                  # PostgreSQL driver
+github.com/mattn/go-sqlite3 v1.14.24       # SQLite driver
+github.com/quic-go/quic-go v0.56.0         # HTTP3/QUIC support
+github.com/redis/go-redis/v9 v9.7.0        # Redis client
+github.com/spf13/cobra v1.10.1             # CLI framework
+github.com/stretchr/testify v1.11.1        # Testing framework
+github.com/unidoc/unioffice v1.39.0        # DOCX processing
+github.com/unidoc/unipdf/v3 v3.69.0        # PDF processing
+golang.org/x/crypto v0.48.0                # TLS, SSH
+golang.org/x/net v0.49.0                   # Extended networking
+golang.org/x/text v0.34.0                  # Text processing
+golang.org/x/time v0.14.0                  # Rate limiting
+google.golang.org/grpc v1.77.0             # gRPC framework
+google.golang.org/protobuf v1.36.10        # Protocol Buffers
+gopkg.in/yaml.v3 v3.0.1                    # YAML parsing</code></pre>
+<h3 id="local-modules-replace-directives">Local Modules (replace
+directives)</h3>
+<ul>
+<li><code>digital.vasic.challenges =&gt; ./Challenges</code></li>
+<li><code>digital.vasic.containers =&gt; ./Containers</code></li>
+</ul>
+<hr />
+<h2 id="j-api-surface">J. API SURFACE</h2>
+<h3 id="rest-api-endpoints-pkgapihandlergo">REST API Endpoints
+(<code>pkg/api/handler.go</code>)</h3>
+<p><strong>Health &amp; Info</strong>:</p>
+<ul>
+<li><code>GET /health</code> - Health check</li>
+<li><code>GET /</code> - API info</li>
+<li><code>GET /api/v1/version</code> - Version info</li>
+<li><code>GET /api/v1/stats</code> - Statistics</li>
+</ul>
+<p><strong>Translation</strong>:</p>
+<ul>
+<li><code>POST /api/v1/translate</code> - Text translation</li>
+<li><code>POST /api/v1/translate/fb2</code> - FB2 file translation</li>
+<li><code>POST /api/v1/translate/ebook</code> - Ebook translation</li>
+<li><code>POST /api/v1/translate/batch</code> - Batch translation</li>
+<li><code>POST /api/v1/translate/validate</code> - Validate request</li>
+<li><code>POST /api/v1/translate/cancel/:session_id</code> - Cancel
+translation</li>
+</ul>
+<p><strong>Preparation</strong>:</p>
+<ul>
+<li><code>POST /api/v1/preparation/analyze</code> - Content
+analysis</li>
+<li><code>GET /api/v1/preparation/result/:session_id</code> - Get
+analysis result</li>
+</ul>
+<p><strong>Utility</strong>:</p>
+<ul>
+<li><code>POST /api/v1/convert/script</code> - Cyrillic/Latin
+conversion</li>
+<li><code>GET /api/v1/status/:session_id</code> - Translation
+status</li>
+<li><code>GET /api/v1/providers</code> - List providers/models</li>
+<li><code>GET /api/v1/languages</code> - List languages</li>
+</ul>
+<p><strong>WebSocket</strong>:</p>
+<ul>
+<li><code>GET /ws</code> - Real-time event streaming</li>
+</ul>
+<h3 id="grpc-services-pkggrpctranslatorproto">gRPC Services
+(<code>pkg/grpc/translator.proto</code>)</h3>
+<ul>
+<li><code>TranslationService.StartTranslation</code></li>
+<li><code>TranslationService.GetTranslationStatus</code></li>
+<li><code>TranslationService.ListTranslations</code></li>
+<li><code>TranslationService.CancelTranslation</code></li>
+<li><code>TranslationService.StreamTranslationProgress</code> (server
+streaming)</li>
+<li><code>TranslationService.GetProviders</code></li>
+<li><code>TranslationService.SubscribeEvents</code> (server
+streaming)</li>
+</ul>
+<h3 id="cli-commands-cmdunified-translator">CLI Commands
+(<code>cmd/unified-translator</code>)</h3>
+<p>Full flag-based CLI with:</p>
+<ul>
+<li>Input/output file specification</li>
+<li>Provider selection and configuration</li>
+<li>SSH worker parameters</li>
+<li>llama.cpp local parameters</li>
+<li>Monitoring toggle</li>
+<li>Concurrency/worker tuning</li>
+</ul>
+<hr />
+<h2 id="k-gapsissues">K. GAPS/ISSUES</h2>
+<h3 id="critical-from-completion-reports">Critical (from completion
+reports)</h3>
+<ol type="1">
+<li><strong>Test Coverage Crisis</strong>: 43.6% overall, need 100%
+<ul>
+<li>pkg/api: 32.8%</li>
+<li>pkg/distributed: 45.2%</li>
+<li>version_manager: 26.2%</li>
+</ul></li>
+<li><strong>61 Disabled Tests</strong>: Security, integration,
+performance suites</li>
+<li><strong>Broken Test Infrastructure</strong>: Hardcoded ports, race
+conditions, missing mocks</li>
+<li><strong>SSH Worker Tests</strong>: Non-existent test servers,
+incomplete auth mocking</li>
+</ol>
+<h3 id="incomplete-implementations">Incomplete Implementations</h3>
+<ol type="1">
+<li><strong>Distributed System Security</strong>: HTTP3/QUIC pairing not
+implemented, SSH key management unclear</li>
+<li><strong>Version Management</strong>: Rollback incomplete, update
+verification missing</li>
+<li><strong>Performance Management</strong>: Dynamic scaling not
+implemented</li>
+<li><strong>API Documentation</strong>: OpenAPI spec incomplete,
+WebSocket events undocumented</li>
+</ol>
+<h3 id="architecture-debt">Architecture Debt</h3>
+<ol type="1">
+<li><strong>Multiple entry points</strong>: Many cmd/ binaries with
+overlapping functionality</li>
+<li><strong>Demo files at root</strong>: Various <code>demo-*.go</code>
+and prebuilt binaries cluttering repo</li>
+<li><strong>Coverage files committed</strong>:
+<code>coverage*.out</code>, <code>coverage.html</code> in git</li>
+<li><strong>Internal working directory</strong>: Contains test data,
+logs, configs mixed together</li>
+</ol>
+<h3 id="documentation-gaps">Documentation Gaps</h3>
+<ol type="1">
+<li>Placeholder URLs in website content</li>
+<li>Video course content missing</li>
+<li>Advanced configuration examples incomplete</li>
+<li>Distributed setup guide incomplete</li>
+</ol>
+<hr />
+<h2 id="l-integration-points---where-llmsverifier-would-plug-in">L.
+INTEGRATION POINTS - Where LLMsVerifier Would Plug In</h2>
+<h3 id="l1-llm-provider-layer-integration-recommended">L1. LLM Provider
+Layer Integration (RECOMMENDED)</h3>
+<p><strong>Location</strong>: <code>pkg/translator/llm/</code>
+<strong>Approach</strong>: Add a new provider <code>llmsverifier</code>
+or create a verification wrapper</p>
+<pre><code>New Provider: pkg/translator/llm/llmsverifier.go
+  -&gt; Implements LLMClient interface
+  -&gt; Wraps any existing provider
+  -&gt; Sends translations to LLMsVerifier for quality check
+  -&gt; Returns verified/improved translation</code></pre>
+<p><strong>Integration Points</strong>:</p>
+<ul>
+<li><code>llm.go</code>: Add <code>ProviderLLMsVerifier</code> to
+Provider enum</li>
+<li><code>ValidModels</code>: Add verifier-supported models</li>
+<li>Factory switch: Add case for new provider</li>
+<li>Config: Add <code>LLMsVerifier</code> section to
+<code>TranslationConfig</code></li>
+</ul>
+<h3 id="l2-verification-package-integration">L2. Verification Package
+Integration</h3>
+<p><strong>Location</strong>: <code>pkg/verification/</code>
+<strong>Existing components</strong>: <code>verifier.go</code>,
+<code>multipass.go</code>, <code>polisher.go</code>,
+<code>reporter.go</code> <strong>Approach</strong>: Add LLMsVerifier as
+a verification backend</p>
+<pre><code>pkg/verification/llmsverifier_backend.go
+  -&gt; Implements verification backend interface
+  -&gt; Integrates with existing multi-pass system
+  -&gt; Can be used as additional verification pass</code></pre>
+<h3 id="l3-event-driven-integration-loosely-coupled">L3. Event-Driven
+Integration (Loosely Coupled)</h3>
+<p><strong>Location</strong>: <code>pkg/events/events.go</code>
+<strong>Approach</strong>: Subscribe to translation completion events,
+trigger verification</p>
+<pre><code>EventBus subscriber:
+  On EventTranslationCompleted -&gt;
+    Extract translated text
+    Send to LLMsVerifier API
+    Emit EventTranslationVerified with results</code></pre>
+<h3 id="l4-api-handler-integration">L4. API Handler Integration</h3>
+<p><strong>Location</strong>: <code>pkg/api/handler.go</code>
+<strong>Approach</strong>: Add verification endpoints</p>
+<pre><code>New endpoints:
+  POST /api/v1/verify - Submit translation for verification
+  GET /api/v1/verify/:id - Get verification results
+  POST /api/v1/translate-with-verification - Combined endpoint</code></pre>
+<h3 id="l5-configuration-integration">L5. Configuration Integration</h3>
+<p><strong>Location</strong>: <code>internal/config/config.go</code>
+<strong>Approach</strong>: Add LLMsVerifier configuration section</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;llmsverifier&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;api_key&quot;</span><span class="fu">:</span> <span class="st">&quot;${LLMSVERIFIER_API_KEY}&quot;</span><span class="fu">,</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;base_url&quot;</span><span class="fu">:</span> <span class="st">&quot;https://api.llmsverifier.com&quot;</span><span class="fu">,</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;model&quot;</span><span class="fu">:</span> <span class="st">&quot;verifier-v1&quot;</span><span class="fu">,</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;verification_level&quot;</span><span class="fu">:</span> <span class="st">&quot;strict&quot;</span><span class="fu">,</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;auto_correct&quot;</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="l6-grpc-integration">L6. gRPC Integration</h3>
+<p><strong>Location</strong>: <code>pkg/grpc/translator.proto</code>
+<strong>Approach</strong>: Add verification RPCs</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode protobuf"><code class="sourceCode protobuf"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">rpc</span> VerifyTranslation(VerifyRequest) <span class="kw">returns</span> (VerifyResponse);</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">rpc</span> StreamVerificationProgress(StreamRequest) <span class="kw">returns</span> (stream VerifyEvent);</span></code></pre></div>
+<h3 id="recommended-integration-strategy">Recommended Integration
+Strategy</h3>
+<p><strong>Phase 1</strong>: Add LLMsVerifier as a new LLM provider in
+<code>pkg/translator/llm/</code> - minimal changes, uses existing
+factory pattern <strong>Phase 2</strong>: Integrate with
+<code>pkg/verification/</code> for multi-pass quality checks
+<strong>Phase 3</strong>: Add REST/gRPC API endpoints for standalone
+verification <strong>Phase 4</strong>: Add configuration and
+event-driven integration</p>
+<hr />
+<h2 id="summary-statistics">Summary Statistics</h2>
+<ul>
+<li><strong>Total files in repo</strong>: ~936</li>
+<li><strong>Go source packages</strong>: ~30 in pkg/ + internal/</li>
+<li><strong>Entry point binaries</strong>: 17 in cmd/</li>
+<li><strong>LLM providers</strong>: 9 (8 real + 1 mock)</li>
+<li><strong>Test files</strong>: 100+ across test/ and
+pkg/*_test.go</li>
+<li><strong>Documentation files</strong>: 60+ in Documentation/ +
+root</li>
+<li><strong>Supported formats</strong>: 10 (FB2, EPUB, TXT, HTML, PDF,
+DOCX, MOBI, AZW, AZW3, RTF)</li>
+<li><strong>Submodules</strong>: 2 (Challenges, Containers)</li>
+<li><strong>Direct Go dependencies</strong>: 19 + 2 local replace</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>integration_sec06</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">integration_sec06</h1>
+</header>
+<h1 id="6-phase-5-provider-factory-and-runtime-integration">6. Phase 5:
+Provider Factory and Runtime Integration</h1>
+<p>The provider factory and runtime integration layer serves as the
+definitive bridge between the LLMsVerifier platform's verification
+pipeline and HelixTranslate's operational translation infrastructure.
+While the preceding phases establish the data models, scoring
+infrastructure, and observability hooks, Phase 5 addresses the critical
+challenge of transforming verified model data into actionable runtime
+decisions. This chapter examines the complete refactoring of the
+existing provider factory to incorporate verification-aware model
+selection, the construction of a multi-strategy selection engine, the
+design of resilient fallback and degradation chains, event bus
+integration for real-time model state propagation, full capability-based
+model matching across the HelixTranslate ecosystem, and the secure
+management of provider API keys for more than twenty-five distinct LLM
+providers.</p>
+<p>The architectural premise of Phase 5 is that a verified model
+registry is only valuable if the runtime translation pipeline can
+efficiently query it, interpret its scores and capabilities, and act
+upon changes in model quality without manual operator intervention. The
+integration introduces a three-layer decision hierarchy: first, the
+<code>VerifiedLLMClient</code> abstraction wraps every provider-backed
+model with its verification metadata; second, the
+<code>SelectionEngine</code> applies domain-specific strategies to
+choose the optimal model for a given task; and third, the fallback chain
+builder ensures that translation requests survive individual model
+failures through a structured degradation path. Each layer is designed
+to be independently testable, horizontally scalable, and resilient to
+the inherently variable performance characteristics of third-party LLM
+APIs.</p>
+<h2 id="61-verified-provider-factory-refactoring">6.1 Verified Provider
+Factory Refactoring</h2>
+<p>The existing HelixTranslate provider factory, located at
+<code>internal/providers/factory.go</code>, instantiates LLM clients
+based on static configuration entries in
+<code>config/providers.yaml</code>. This approach treats every
+configured model as equally suitable for every translation task, with
+selection limited to round-robin or first-available logic. Phase 5
+replaces this flat model with a hierarchical factory that consumes the
+<code>VerifiedModelRegistry</code> populated by the LLMsVerifier
+ingestion pipeline (Chapter 3) and produces
+<code>VerifiedLLMClient</code> instances enriched with composite scores,
+tier assignments, capability bitmaps, and verification timestamps.</p>
+<h3 id="611-the-verifiedllmclient-type">6.1.1 The VerifiedLLMClient
+Type</h3>
+<p>The central abstraction introduced by the refactoring is the
+<code>VerifiedLLMClient</code> struct, which embeds the existing
+<code>llm.LLMClient</code> interface and augments it with verification
+metadata sourced from the model registry. This design preserves backward
+compatibility with all existing translation call sites while enabling
+verification-aware routing decisions at the factory boundary.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerifiedLLMClient <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    llm<span class="op">.</span>LLMClient</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    ModelID            <span class="dt">string</span>            <span class="st">`json:&quot;model_id&quot;`</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    ProviderID         <span class="dt">string</span>            <span class="st">`json:&quot;provider_id&quot;`</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    VerificationStatus VerificationStatus <span class="st">`json:&quot;verification_status&quot;`</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    Score              <span class="op">*</span>CompositeScore    <span class="st">`json:&quot;score&quot;`</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    Tier               ModelTier          <span class="st">`json:&quot;tier&quot;`</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    Capabilities       CapabilityBitmap   <span class="st">`json:&quot;capabilities&quot;`</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    VerifiedAt         time<span class="op">.</span>Time          <span class="st">`json:&quot;verified_at&quot;`</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerificationStatus <span class="dt">string</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    StatusPending  VerificationStatus <span class="op">=</span> <span class="st">&quot;pending&quot;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    StatusVerified VerificationStatus <span class="op">=</span> <span class="st">&quot;verified&quot;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    StatusFailed   VerificationStatus <span class="op">=</span> <span class="st">&quot;failed&quot;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    StatusRetired  VerificationStatus <span class="op">=</span> <span class="st">&quot;retired&quot;</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelTier <span class="dt">string</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    TierPremium  ModelTier <span class="op">=</span> <span class="st">&quot;premium&quot;</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    TierStandard ModelTier <span class="op">=</span> <span class="st">&quot;standard&quot;</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    TierBudget   ModelTier <span class="op">=</span> <span class="st">&quot;budget&quot;</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    TierUnranked ModelTier <span class="op">=</span> <span class="st">&quot;unranked&quot;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p>The <code>VerifiedLLMClient</code> struct is defined in
+<code>internal/providers/verified_client.go</code>. The
+<code>llm.LLMClient</code> embedding ensures that the
+<code>VerifiedLLMClient</code> satisfies the same interface contract as
+all existing provider implementations, meaning that no changes are
+required in the core translation engine at
+<code>internal/translate/engine.go</code> or in any of the twenty-seven
+language-pair adapters. The <code>VerificationStatus</code> field
+captures the lifecycle state of the model as determined by the
+verifier's continuous evaluation loop: models entering the system begin
+in <code>StatusPending</code>, transition to <code>StatusVerified</code>
+upon passing the minimum score threshold (configurable via
+<code>verifier.min_score_threshold</code>, default <code>0.65</code>),
+move to <code>StatusFailed</code> if verification fails after the
+maximum retry count (default three attempts), and are marked
+<code>StatusRetired</code> if their score drops below the threshold
+after a prior successful verification. The <code>ModelTier</code> field
+classifies models into four economic tiers. <code>TierPremium</code>
+includes models scoring above <code>0.90</code> on the composite index,
+<code>TierStandard</code> covers scores <code>0.75</code> to
+<code>0.90</code>, <code>TierBudget</code> includes scores
+<code>0.65</code> to <code>0.75</code>, and <code>TierUnranked</code>
+captures all other models including those pending verification or those
+explicitly excluded from tiering. This tier system directly supports the
+degradation chain described in Section 6.3.</p>
+<h3 id="612-llmsverifier-provider-adapter">6.1.2 LLMsVerifier Provider
+Adapter</h3>
+<p>The factory must support LLMsVerifier as a first-class provider in
+addition to the existing direct-provider adapters (OpenAI, Anthropic,
+Google, Azure, Cohere, Mistral, and others). The
+<code>LLMVerifierAdapter</code> translates between HelixTranslate's
+<code>llm.TranslationRequest</code> type and the LLMsVerifier platform's
+OpenAI-compatible chat completions endpoint. The adapter resides at
+<code>internal/providers/llmsverifier/adapter.go</code> and implements
+the full <code>llm.LLMClient</code> interface.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/providers/llmsverifier/adapter.go</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LLMVerifierAdapter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    baseURL <span class="dt">string</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    apiKey  <span class="dt">string</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    modelID <span class="dt">string</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    client  <span class="op">*</span>http<span class="op">.</span>Client</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>a <span class="op">*</span>LLMVerifierAdapter<span class="op">)</span> Translate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req llm<span class="op">.</span>TranslationRequest<span class="op">)</span> <span class="op">(</span>llm<span class="op">.</span>TranslationResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    payload<span class="op">,</span> _ <span class="op">:=</span> json<span class="op">.</span>Marshal<span class="op">(</span>CompletionRequest<span class="op">{</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        Model<span class="op">:</span>    a<span class="op">.</span>modelID<span class="op">,</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        Messages<span class="op">:</span> convertMessages<span class="op">(</span>req<span class="op">),</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    httpReq<span class="op">,</span> _ <span class="op">:=</span> http<span class="op">.</span>NewRequestWithContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;POST&quot;</span><span class="op">,</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        a<span class="op">.</span>baseURL<span class="op">+</span><span class="st">&quot;/v1/chat/completions&quot;</span><span class="op">,</span> bytes<span class="op">.</span>NewReader<span class="op">(</span>payload<span class="op">))</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    httpReq<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;Authorization&quot;</span><span class="op">,</span> <span class="st">&quot;Bearer &quot;</span><span class="op">+</span>a<span class="op">.</span>apiKey<span class="op">)</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    httpReq<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;Content-Type&quot;</span><span class="op">,</span> <span class="st">&quot;application/json&quot;</span><span class="op">)</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> a<span class="op">.</span>client<span class="op">.</span>Do<span class="op">(</span>httpReq<span class="op">)</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> llm<span class="op">.</span>TranslationResponse<span class="op">{},</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;llmsverifier request failed: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> resp<span class="op">.</span>Body<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> resp<span class="op">.</span>StatusCode <span class="op">!=</span> http<span class="op">.</span>StatusOK <span class="op">{</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        body<span class="op">,</span> _ <span class="op">:=</span> io<span class="op">.</span>ReadAll<span class="op">(</span>resp<span class="op">.</span>Body<span class="op">)</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> llm<span class="op">.</span>TranslationResponse<span class="op">{},</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;llmsverifier returned %d: %s&quot;</span><span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">,</span> body<span class="op">)</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> result CompletionResponse</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> json<span class="op">.</span>NewDecoder<span class="op">(</span>resp<span class="op">.</span>Body<span class="op">).</span>Decode<span class="op">(&amp;</span>result<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> llm<span class="op">.</span>TranslationResponse<span class="op">{},</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;decode response: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>result<span class="op">.</span>Choices<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> llm<span class="op">.</span>TranslationResponse<span class="op">{},</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;empty choices in response&quot;</span><span class="op">)</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> llm<span class="op">.</span>TranslationResponse<span class="op">{</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        Text<span class="op">:</span>       result<span class="op">.</span>Choices<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Message<span class="op">.</span>Content<span class="op">,</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>        TokensUsed<span class="op">:</span> result<span class="op">.</span>Usage<span class="op">.</span>TotalTokens<span class="op">,</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>convertMessages</code> helper transforms HelixTranslate's
+internal message format into the LLMsVerifier chat completions schema,
+preserving system prompts, user instructions, and any in-context
+translation examples. The adapter also supports streaming responses via
+a separate <code>TranslateStream</code> method for real-time chat
+translation tasks, with the stream parser extracting delta chunks from
+the Server-Sent Events (SSE) response format. The <code>client</code>
+field uses a shared <code>http.Client</code> configured with a
+connection pool of up to one hundred connections and a default request
+timeout of sixty seconds (configurable via
+<code>verifier.request_timeout</code>). Retry logic with exponential
+backoff (initial delay one hundred milliseconds, maximum delay five
+seconds, jitter factor <code>0.3</code>) is applied at the adapter level
+for transient errors (HTTP <code>429</code>, <code>502</code>,
+<code>503</code>, <code>504</code>).</p>
+<h3 id="613-factory-integration-points">6.1.3 Factory Integration
+Points</h3>
+<p>The refactored factory at <code>internal/providers/factory.go</code>
+introduces three new factory methods: <code>CreateVerifiedClient</code>
+accepts a model identifier and returns a <code>VerifiedLLMClient</code>
+populated from the registry; <code>CreateBestForTask</code> accepts a
+<code>TaskRequirements</code> descriptor and delegates to the selection
+engine (Section 6.2); and <code>CreateForTier</code> returns any
+available client within a specified tier, used primarily by the
+degradation chain. The factory maintains a hot cache of
+<code>VerifiedLLMClient</code> instances keyed by <code>model_id</code>,
+with entries refreshed every thirty seconds via a background goroutine
+that polls the <code>VerifiedModelRegistry</code> for status changes.
+Cache invalidation is also triggered by
+<code>ModelScoreChangedEvent</code> notifications on the event bus
+(Section 6.4), ensuring that score drops or model retirements are
+reflected in the factory's client pool within sub-second latency.</p>
+<h2 id="62-runtime-model-selection-engine">6.2 Runtime Model Selection
+Engine</h2>
+<p>The selection engine is the decision-making core of the runtime
+integration. Located at
+<code>internal/providers/selection/engine.go</code>, it maps incoming
+translation tasks to optimal model selections through a pluggable
+strategy pattern. Each strategy evaluates the set of available verified
+models against task-specific criteria and returns a ranked or single
+selection.</p>
+<h3 id="621-strategy-architecture">6.2.1 Strategy Architecture</h3>
+<p>The selection engine defines a <code>SelectionStrategy</code>
+interface with a single method
+<code>Select(ctx context.Context, candidates []VerifiedLLMClient, task TaskRequirements) (*VerifiedLLMClient, error)</code>.
+Six concrete strategy implementations are provided, each targeting a
+distinct optimization objective. The engine routes tasks to strategies
+based on the <code>Priority</code> field of the
+<code>TaskRequirements</code> descriptor.</p>
+<p><strong>Table 1: Task Type to Selection Strategy Mapping</strong></p>
+<table>
+<thead>
+<tr>
+<th>Task Type</th>
+<th>Priority</th>
+<th>Strategy</th>
+<th>Key Criteria</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Legal translation</td>
+<td><code>quality</code></td>
+<td><code>BestScoreStrategy</code></td>
+<td>Capability bitmap includes <code>CapLegalDomain</code>; highest
+<code>CompositeScore.Overall</code></td>
+</tr>
+<tr>
+<td>Batch processing</td>
+<td><code>cost</code></td>
+<td><code>LowestCostStrategy</code></td>
+<td>Lowest <code>CompositeScore.CostScore</code> within configured
+budget ceiling</td>
+</tr>
+<tr>
+<td>Real-time chat</td>
+<td><code>speed</code></td>
+<td><code>FastestStrategy</code></td>
+<td>Lowest measured latency (p95) from
+<code>CompositeScore.LatencyMs</code></td>
+</tr>
+<tr>
+<td>General text</td>
+<td><code>balanced</code></td>
+<td><code>BalancedStrategy</code></td>
+<td>Weighted composite of quality, cost, and latency scores</td>
+</tr>
+<tr>
+<td>Medical translation</td>
+<td><code>quality</code></td>
+<td><code>BestScoreStrategy</code></td>
+<td>Capability bitmap includes <code>CapMedicalDomain</code>; highest
+overall score</td>
+</tr>
+<tr>
+<td>Technical documentation</td>
+<td><code>quality</code></td>
+<td><code>BestScoreStrategy</code></td>
+<td>Capability bitmap includes <code>CapCodeGeneration</code> and
+<code>CapTechnicalWriting</code></td>
+</tr>
+</tbody>
+</table>
+<p>Additional task types not listed in Table 1 (e.g., literary
+translation, marketing localization, subtitle timing) follow the same
+routing logic, with domain-specific capability flags defined in the
+<code>CapabilityBitmap</code> enumeration. The
+<code>TaskRequirements</code> struct captures source and target
+languages, content domain, minimum quality threshold, maximum acceptable
+latency, and budget constraints, enabling the strategies to make
+multi-dimensional tradeoffs.</p>
+<h3 id="622-selection-engine-implementation">6.2.2 Selection Engine
+Implementation</h3>
+<p>The <code>SelectionEngine</code> maintains a registry of named
+strategies and a reference to the <code>ModelRegistry</code> for
+querying available models. Its <code>SelectModel</code> method
+implements the complete selection pipeline: filtering by minimum score,
+selecting the appropriate strategy, and returning the chosen model.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SelectionEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    strategies <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>SelectionStrategy</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    registry   <span class="op">*</span>ModelRegistry</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>SelectionEngine<span class="op">)</span> SelectModel<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> task TaskRequirements<span class="op">)</span> <span class="op">(*</span>VerifiedLLMClient<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    available<span class="op">,</span> err <span class="op">:=</span> e<span class="op">.</span>registry<span class="op">.</span>FilterByScore<span class="op">(</span>ctx<span class="op">,</span> task<span class="op">.</span>MinQuality<span class="op">)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;filter models: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>available<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> ErrNoModelsAvailable</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    strategy <span class="op">:=</span> e<span class="op">.</span>strategies<span class="op">[</span>task<span class="op">.</span>Priority<span class="op">]</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> strategy <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        strategy <span class="op">=</span> e<span class="op">.</span>strategies<span class="op">[</span><span class="st">&quot;balanced&quot;</span><span class="op">]</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> strategy<span class="op">.</span>Select<span class="op">(</span>ctx<span class="op">,</span> available<span class="op">,</span> task<span class="op">)</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>FilterByScore</code> method on <code>ModelRegistry</code>
+queries the underlying PostgreSQL-backed registry (Chapter 3) with the
+clause
+<code>WHERE overall_score &gt;= $1 AND verification_status = 'verified'</code>,
+ensuring that only currently verified models meeting the task's minimum
+quality bar are considered. The query is indexed on a composite of
+<code>(verification_status, overall_score DESC)</code> for
+sub-millisecond lookup latency on the production dataset of
+approximately four hundred active models. If <code>task.Priority</code>
+does not match a registered strategy key, the engine defaults to
+<code>BalancedStrategy</code>, which computes a weighted sum of
+normalized quality, cost, and latency scores using weights configurable
+via <code>selection.balanced_weights</code> (default
+<code>quality: 0.5</code>, <code>cost: 0.3</code>,
+<code>latency: 0.2</code>). The <code>BestScoreStrategy</code> selects
+the highest-scoring model that satisfies all required capabilities; in
+case of a tie, it prefers the model with the lower cost score. The
+<code>LowestCostStrategy</code> selects the cheapest verified model and
+falls back to the next tier up if no model meets the budget ceiling. The
+<code>FastestStrategy</code> selects the model with the lowest p95
+latency measurement from the verifier's benchmarking history, filtering
+out any model with fewer than ten latency samples to ensure statistical
+significance.</p>
+<h3 id="623-strategy-registration-and-hot-swapping">6.2.3 Strategy
+Registration and Hot Swapping</h3>
+<p>Strategies are registered at engine initialization via a builder
+pattern in <code>internal/providers/selection/builder.go</code>. The
+factory supports hot-swapping of strategy weights at runtime through a
+configuration watcher on <code>config/selection.yaml</code>; changes to
+strategy parameters are applied without requiring a service restart. The
+engine also exposes a <code>SelectWithOverride</code> method that
+accepts an explicit strategy name, used by the HelixTranslate admin API
+for A/B testing and manual model selection experiments.</p>
+<h2 id="63-fallback-and-degradation-chain">6.3 Fallback and Degradation
+Chain</h2>
+<p>Individual LLM API requests can fail for numerous reasons: rate
+limits, transient provider outages, content policy rejections, context
+window overflows, or unexpected response formats. The fallback and
+degradation chain provides a structured, deterministic path for
+recovering from these failures while preserving translation quality to
+the maximum extent possible.</p>
+<h3 id="631-fallback-chain-construction">6.3.1 Fallback Chain
+Construction</h3>
+<p>The <code>BuildFallbackChain</code> function constructs an ordered
+list of fallback candidates from the set of available verified models.
+The chain is built once per selection decision and cached for the
+duration of the translation request.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> BuildFallbackChain<span class="op">(</span>models <span class="op">[]</span>VerifiedLLMClient<span class="op">,</span> maxLength <span class="dt">int</span><span class="op">)</span> <span class="op">[]</span>FallbackEntry <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    sort<span class="op">.</span>Slice<span class="op">(</span>models<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>i<span class="op">,</span> j <span class="dt">int</span><span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> models<span class="op">[</span>i<span class="op">].</span>Score<span class="op">.</span>Overall <span class="op">&gt;</span> models<span class="op">[</span>j<span class="op">].</span>Score<span class="op">.</span>Overall</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> chain <span class="op">[]</span>FallbackEntry</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    lastProvider <span class="op">:=</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> m <span class="op">:=</span> <span class="kw">range</span> models <span class="op">{</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>chain<span class="op">)</span> <span class="op">&gt;=</span> maxLength <span class="op">{</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> m<span class="op">.</span>ProviderID <span class="op">==</span> lastProvider <span class="op">&amp;&amp;</span> <span class="bu">len</span><span class="op">(</span>chain<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span> <span class="co">// enforce provider diversity</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        chain <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>chain<span class="op">,</span> FallbackEntry<span class="op">{</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>            ModelID<span class="op">:</span>    m<span class="op">.</span>ModelID<span class="op">,</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>            ProviderID<span class="op">:</span> m<span class="op">.</span>ProviderID<span class="op">,</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>            Tier<span class="op">:</span>       m<span class="op">.</span>Tier<span class="op">,</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>            Score<span class="op">:</span>      m<span class="op">.</span>Score<span class="op">.</span>Overall<span class="op">,</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">})</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        lastProvider <span class="op">=</span> m<span class="op">.</span>ProviderID</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> chain</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The function sorts all verified models by descending overall score
+and then iterates to build a chain of up to <code>maxLength</code>
+entries (default five, configurable via
+<code>fallback.max_chain_length</code>). The provider diversity
+constraint ensures that consecutive entries in the chain originate from
+different infrastructure providers, mitigating the risk of a single
+provider outage cascading through all fallback attempts. The
+<code>FallbackEntry</code> struct contains only the fields necessary for
+retry dispatch: <code>ModelID</code>, <code>ProviderID</code>,
+<code>Tier</code>, and <code>Score</code>. The full
+<code>VerifiedLLMClient</code> is retrieved from the factory cache when
+a fallback entry is activated.</p>
+<h3 id="632-degradation-policy">6.3.2 Degradation Policy</h3>
+<p>The degradation policy defines five distinct levels that a
+translation request progresses through on repeated failure. Each level
+specifies a different recovery action, and the policy is applied by the
+<code>DegradationController</code> at
+<code>internal/providers/fallback/degradation.go</code>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DegradationLevel <span class="dt">int</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    LevelPrimary     DegradationLevel <span class="op">=</span> <span class="ot">iota</span> <span class="co">// Best match from selection engine</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    LevelRetry                               <span class="co">// Retry same model once (handles transient errors)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    LevelFallback                            <span class="co">// Next entry in fallback chain</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    LevelTierDown                            <span class="co">// Drop to next tier (e.g., Premium -&gt; Standard)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    LevelHumanReview                         <span class="co">// Queue for human translator review</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p>At <code>LevelPrimary</code>, the request is sent to the model
+selected by the selection engine. If this fails with a retryable error
+(HTTP <code>429</code>, <code>502</code>, <code>503</code>,
+<code>504</code>, timeout, or connection reset), the controller advances
+to <code>LevelRetry</code> and reissues the identical request to the
+same model endpoint. The retry includes exponential backoff with jitter.
+If the retry also fails, the controller advances to
+<code>LevelFallback</code> and dispatches the request to the next entry
+in the pre-built fallback chain. If all fallback chain entries are
+exhausted, the controller advances to <code>LevelTierDown</code>, which
+queries the factory for any available model in the next lower tier. For
+example, if the original selection was <code>TierPremium</code>,
+<code>LevelTierDown</code> attempts <code>TierStandard</code>, then
+<code>TierBudget</code>, then <code>TierUnranked</code>. At each tier,
+the best-scoring model in that tier is selected using the same strategy
+as the original request. If no model in any tier succeeds, the request
+reaches <code>LevelHumanReview</code>, where it is enqueued in the human
+review pipeline at <code>internal/humanreview/queue.go</code>. The queue
+stores the original request payload, the complete error history from all
+degradation levels, and a priority score based on the requesting user's
+service tier.</p>
+<h3 id="633-degradation-metrics-and-circuit-breakers">6.3.3 Degradation
+Metrics and Circuit Breakers</h3>
+<p>The degradation controller emits Prometheus metrics at every level
+transition:
+<code>helix_degradation_level_total{level="primary|retry|fallback|tier_down|human_review"}</code>,
+<code>helix_fallback_latency_seconds</code>, and
+<code>helix_human_review_queue_size</code>. Additionally, a per-provider
+circuit breaker (implemented using the <code>sony/gobreaker</code>
+library) tracks failure rates over a thirty-second window. If a
+provider's failure rate exceeds fifty percent, the circuit opens and all
+models from that provider are temporarily excluded from the fallback
+chain. The circuit closes after a ten-second half-open period during
+which a single probe request is permitted. This prevents the degradation
+chain from repeatedly attempting a clearly degraded provider.</p>
+<h2 id="64-event-bus-integration">6.4 Event Bus Integration</h2>
+<p>The event bus integration connects the LLMsVerifier platform's score
+change notifications to HelixTranslate's runtime systems, enabling
+reactive model management. Two primary event types are handled:
+<code>ModelScoreChangedEvent</code>, which triggers model retirement or
+re-tiering, and <code>ModelSelectedEvent</code>, which is published by
+the selection engine for observability and billing purposes.</p>
+<h3 id="641-score-change-event-handler">6.4.1 Score Change Event
+Handler</h3>
+<p>The <code>handleModelScoreChanged</code> method on the
+<code>VerifierIntegration</code> type processes score change events from
+the LLMsVerifier platform. When a model's composite score drops below
+the minimum threshold, the handler automatically retires the model from
+the active registry.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>VerifierIntegration<span class="op">)</span> handleModelScoreChanged<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> evt events<span class="op">.</span>ModelScoreChangedEvent<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    v<span class="op">.</span>logger<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Score change: model=%s old=%.2f new=%.2f&quot;</span><span class="op">,</span> evt<span class="op">.</span>ModelID<span class="op">,</span> evt<span class="op">.</span>OldScore<span class="op">,</span> evt<span class="op">.</span>NewScore<span class="op">)</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> evt<span class="op">.</span>NewScore <span class="op">&lt;</span> v<span class="op">.</span>config<span class="op">.</span>MinScoreThreshold <span class="op">{</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        v<span class="op">.</span>logger<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Model %s score dropped to %.2f, retiring&quot;</span><span class="op">,</span> evt<span class="op">.</span>ModelID<span class="op">,</span> evt<span class="op">.</span>NewScore<span class="op">)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> v<span class="op">.</span>registry<span class="op">.</span>UpdateModelStatus<span class="op">(</span>ctx<span class="op">,</span> evt<span class="op">.</span>ModelID<span class="op">,</span> <span class="st">&quot;retired&quot;</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;retire model %s: %w&quot;</span><span class="op">,</span> evt<span class="op">.</span>ModelID<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Invalidate factory cache for this model</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        v<span class="op">.</span>factory<span class="op">.</span>InvalidateCache<span class="op">(</span>evt<span class="op">.</span>ModelID<span class="op">)</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Notify operators via PagerDuty if the model was TierPremium</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> evt<span class="op">.</span>OldTier <span class="op">==</span> TierPremium <span class="op">{</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>            v<span class="op">.</span>alerting<span class="op">.</span>Send<span class="op">(</span>ctx<span class="op">,</span> alerting<span class="op">.</span>Alert<span class="op">{</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                Severity<span class="op">:</span> alerting<span class="op">.</span>SeverityWarning<span class="op">,</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>                Summary<span class="op">:</span>  fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;Premium model %s retired (score %.2f)&quot;</span><span class="op">,</span> evt<span class="op">.</span>ModelID<span class="op">,</span> evt<span class="op">.</span>NewScore<span class="op">),</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>            <span class="op">})</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Re-tier the model if score moved across tier boundaries</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    newTier <span class="op">:=</span> scoreToTier<span class="op">(</span>evt<span class="op">.</span>NewScore<span class="op">)</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> newTier <span class="op">!=</span> evt<span class="op">.</span>OldTier <span class="op">{</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> v<span class="op">.</span>registry<span class="op">.</span>UpdateModelTier<span class="op">(</span>ctx<span class="op">,</span> evt<span class="op">.</span>ModelID<span class="op">,</span> newTier<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;update tier for %s: %w&quot;</span><span class="op">,</span> evt<span class="op">.</span>ModelID<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        v<span class="op">.</span>factory<span class="op">.</span>InvalidateCache<span class="op">(</span>evt<span class="op">.</span>ModelID<span class="op">)</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The handler also detects tier boundary crossings: if a model's score
+improvement promotes it from <code>TierStandard</code> to
+<code>TierPremium</code>, the registry and factory cache are updated
+immediately, making the model available for high-priority tasks.
+Conversely, a demotion triggers cache invalidation and removes the model
+from premium-eligible selection pools. Score increases that do not cross
+tier boundaries are logged at debug level but require no action. The
+<code>events.ModelScoreChangedEvent</code> payload includes
+<code>ModelID</code>, <code>OldScore</code>, <code>NewScore</code>,
+<code>OldTier</code>, <code>NewTier</code>, and <code>Timestamp</code>,
+all sourced from the LLMsVerifier scoring pipeline's output (Chapter
+4).</p>
+<h3 id="642-model-selection-event-publisher">6.4.2 Model Selection Event
+Publisher</h3>
+<p>When the selection engine chooses a model for a translation task, it
+publishes a <code>ModelSelectedEvent</code> to the event bus. This event
+is consumed by the billing service, the analytics pipeline, and the
+real-time dashboard.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>VerifierIntegration<span class="op">)</span> PublishModelSelected<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID <span class="dt">string</span><span class="op">,</span> task TaskRequirements<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    events<span class="op">.</span>Publish<span class="op">(</span>ctx<span class="op">,</span> events<span class="op">.</span>ModelSelectedEvent<span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        ModelID<span class="op">:</span>      modelID<span class="op">,</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        TaskType<span class="op">:</span>     task<span class="op">.</span>Domain<span class="op">,</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        SourceLang<span class="op">:</span>   task<span class="op">.</span>SourceLang<span class="op">,</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        TargetLang<span class="op">:</span>   task<span class="op">.</span>TargetLang<span class="op">,</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        Timestamp<span class="op">:</span>    time<span class="op">.</span>Now<span class="op">(),</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>events.Publish</code> function is backed by Redis Streams
+(<code>XADD</code> to <code>helix:events:model_selected</code>) with
+at-least-once delivery semantics. Consumers include: the billing
+aggregator, which credits the selected model's provider for the request;
+the analytics pipeline, which feeds into the BigQuery warehouse for
+usage pattern analysis; and the WebSocket-based real-time dashboard,
+which displays the currently active model per language pair. The event
+schema is versioned (current version <code>1.2</code>) and includes an
+<code>EventID</code> UUID for idempotency.</p>
+<h3 id="643-event-subscription-topology">6.4.3 Event Subscription
+Topology</h3>
+<p>The verifier integration subscribes to three Redis Stream channels:
+<code>llmverifier:scores</code> for score changes,
+<code>llmverifier:capabilities</code> for capability bitmap updates
+(triggered when new MCP integrations are tested), and
+<code>llmverifier:retirements</code> for explicit retirement commands
+from the verifier platform's administrative interface. Subscription
+handlers run in a dedicated goroutine pool of eight workers, with each
+handler wrapped in a panic recovery wrapper and a timeout context of
+thirty seconds. Failed event processing results in the event being
+re-queued with an exponential backoff, and events failing after five
+retries are written to a dead-letter stream for manual inspection.</p>
+<h2 id="65-full-capability-integration">6.5 Full Capability
+Integration</h2>
+<p>HelixTranslate's translation tasks frequently require models with
+specific capabilities beyond general text generation. Legal translation
+demands models with structured output and legal domain knowledge;
+technical documentation requires code-aware models; and RAG-enhanced
+translation needs models with large context windows. The capability
+integration layer ensures that the selection engine can filter models by
+these specialized requirements.</p>
+<h3 id="651-mcp-integration-catalog">6.5.1 MCP Integration Catalog</h3>
+<p>The Model Context Protocol (MCP) integrations extend model
+capabilities by providing structured tool access. The LLMsVerifier
+platform tests each model's ability to invoke MCP tools correctly, and
+the results are encoded in the model's <code>CapabilityBitmap</code>.
+HelixTranslate leverages these verified capabilities to match models to
+tasks requiring external tool integration.</p>
+<p><strong>Table 2: Key MCP Integrations and Required
+Capabilities</strong></p>
+<table>
+<thead>
+<tr>
+<th>MCP Name</th>
+<th>Purpose</th>
+<th>Required Capability</th>
+<th>File Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub</td>
+<td>Code repository access and file retrieval</td>
+<td><code>CapFunctionCalling</code></td>
+<td><code>internal/mcp/github/</code></td>
+</tr>
+<tr>
+<td>Playwright</td>
+<td>Browser automation for web content extraction</td>
+<td><code>CapFunctionCalling</code></td>
+<td><code>internal/mcp/playwright/</code></td>
+</tr>
+<tr>
+<td>Qdrant</td>
+<td>Vector search for semantic document retrieval</td>
+<td><code>CapLargeContext</code></td>
+<td><code>internal/mcp/qdrant/</code></td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>Distributed cache and RAG backend storage</td>
+<td><code>CapLargeContext</code></td>
+<td><code>internal/mcp/redis/</code></td>
+</tr>
+<tr>
+<td>Elasticsearch</td>
+<td>Full-text search and RAG document indexing</td>
+<td><code>CapLargeContext</code></td>
+<td><code>internal/mcp/elastic/</code></td>
+</tr>
+<tr>
+<td>Cloudflare</td>
+<td>AI Gateway request routing and caching</td>
+<td><code>CapStreaming</code></td>
+<td><code>internal/mcp/cloudflare/</code></td>
+</tr>
+<tr>
+<td>AWS</td>
+<td>Cloud service integration (S3, Lambda, Bedrock)</td>
+<td><code>CapFunctionCalling</code></td>
+<td><code>internal/mcp/aws/</code></td>
+</tr>
+<tr>
+<td>Kubernetes</td>
+<td>Container management and log extraction</td>
+<td><code>CapFunctionCalling</code></td>
+<td><code>internal/mcp/k8s/</code></td>
+</tr>
+</tbody>
+</table>
+<p>The full MCP catalog contains thirty-five integrations. The remaining
+twenty-seven include: <code>internal/mcp/jira/</code> (issue tracking),
+<code>internal/mcp/slack/</code> (messaging),
+<code>internal/mcp/notion/</code> (documentation),
+<code>internal/mcp/figma/</code> (design asset access),
+<code>internal/mcp/trello/</code> (project management),
+<code>internal/mcp/asana/</code> (task management),
+<code>internal/mcp/confluence/</code> (wiki content),
+<code>internal/mcp/dropbox/</code> (file storage),
+<code>internal/mcp/google_drive/</code> (cloud storage),
+<code>internal/mcp/onedrive/</code> (Microsoft storage),
+<code>internal/mcp/sharepoint/</code> (enterprise content),
+<code>internal/mcp/zendesk/</code> (support tickets),
+<code>internal/mcp/intercom/</code> (customer messaging),
+<code>internal/mcp/hubspot/</code> (CRM data),
+<code>internal/mcp/salesforce/</code> (CRM integration),
+<code>internal/mcp/stripe/</code> (payment data),
+<code>internal/mcp/twilio/</code> (communications),
+<code>internal/mcp/sendgrid/</code> (email delivery),
+<code>internal/mcp/shopify/</code> (e-commerce data),
+<code>internal/mcp/woocommerce/</code> (e-commerce),
+<code>internal/mcp/bigcommerce/</code> (e-commerce),
+<code>internal/mcp/square/</code> (point-of-sale),
+<code>internal/mcp/paypal/</code> (payment processing),
+<code>internal/mcp/mongodb/</code> (document database),
+<code>internal/mcp/postgresql/</code> (relational database),
+<code>internal/mcp/mysql/</code> (relational database), and
+<code>internal/mcp/sqlite/</code> (embedded database). Each MCP
+integration defines its own <code>CapabilityRequirements</code> and
+validates that the selected model's bitmap includes the necessary
+flags.</p>
+<h3 id="652-complete-capability-taxonomy">6.5.2 Complete Capability
+Taxonomy</h3>
+<p>The full capability taxonomy encompasses seven categories covering
+all verified model abilities relevant to HelixTranslate's
+operations.</p>
+<p><strong>Table 3: Complete Capability Taxonomy</strong></p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Count</th>
+<th>Key Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP (Model Context Protocol)</td>
+<td>35</td>
+<td>GitHub, Playwright, Qdrant, Redis, ES, Cloudflare, AWS, K8s, Jira,
+Slack, Notion</td>
+</tr>
+<tr>
+<td>LSP (Language Server Protocol)</td>
+<td>10</td>
+<td>Go, Python, TypeScript, Rust, C++, Java, Ruby, PHP, Swift,
+Kotlin</td>
+</tr>
+<tr>
+<td>ACP (Agent Communication Protocol)</td>
+<td>1</td>
+<td>Inter-agent message passing and delegation</td>
+</tr>
+<tr>
+<td>Embeddings</td>
+<td>13</td>
+<td>OpenAI (<code>text-embedding-3-*</code>), Cohere
+(<code>embed-*</code>), Jina (<code>jina-embeddings-*</code>), Mistral,
+BGE, E5, GTE, Voyage, Nomic, Google
+(<code>textembedding-gecko-*</code>), Amazon Titan, IBM Granite,
+Snowflake Arctic</td>
+</tr>
+<tr>
+<td>RAG (Retrieval-Augmented Generation)</td>
+<td>3</td>
+<td>Qdrant vector search, Redis semantic cache, Elasticsearch hybrid
+search</td>
+</tr>
+<tr>
+<td>Skills</td>
+<td>15+</td>
+<td>Translation (all 27 language pairs), Summarization, Code Review,
+Technical Writing, Legal Analysis, Medical Terminology, Literary Style
+Transfer, Marketing Localization, Subtitle Timing, Voice-to-Text
+Alignment, Glossary Enforcement, Style Guide Compliance,
+Back-translation Verification, Post-editing Support, Quality
+Estimation</td>
+</tr>
+<tr>
+<td>Plugins</td>
+<td>8+</td>
+<td>Markdown formatter, HTML/XML entity normalizer, Unicode
+bidirectional text handler, ICU message format converter, XLIFF segment
+processor, TM (translation memory) matcher, Terminology database
+connector, Custom preprocessing pipeline</td>
+</tr>
+</tbody>
+</table>
+<p>The LSP category enables language-aware translation of code comments,
+docstrings, and inline documentation. When a task is tagged with domain
+<code>code</code>, the selection engine requires
+<code>CapCodeGeneration</code> (which implies all LSP capabilities) and
+routes the request to models verified for the specific programming
+language of the input. The embeddings category supports the RAG pipeline
+by ensuring that the embedding model used for document indexing is
+compatible with the generation model's context window and token format.
+The skills category represents the highest-level capability mapping,
+directly corresponding to HelixTranslate's service offerings; each skill
+is verified by the LLMsVerifier platform through targeted benchmark
+datasets.</p>
+<h3 id="653-capability-matching-engine">6.5.3 Capability Matching
+Engine</h3>
+<p>The capability matching engine provides a unified interface for
+checking whether a model satisfies the requirements of a given task.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CapabilityRequirements <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    Required        CapabilityBitmap</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    Preferred       CapabilityBitmap</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    MinContextWindow <span class="dt">int</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> MatchCapabilities<span class="op">(</span>req CapabilityRequirements<span class="op">,</span> modelCaps CapabilityBitmap<span class="op">,</span> contextWindow <span class="dt">int</span><span class="op">)</span> MatchResult <span class="op">{</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> contextWindow <span class="op">&lt;</span> req<span class="op">.</span>MinContextWindow <span class="op">{</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> MatchResult<span class="op">{</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>            Satisfied<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>            Reason<span class="op">:</span>    fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;context window %d &lt; required %d&quot;</span><span class="op">,</span> contextWindow<span class="op">,</span> req<span class="op">.</span>MinContextWindow<span class="op">),</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    missing <span class="op">:=</span> req<span class="op">.</span>Required <span class="op">&amp;^</span> modelCaps</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> missing <span class="op">!=</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> MatchResult<span class="op">{</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>            Satisfied<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>            Reason<span class="op">:</span>    fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;missing required capabilities: %b&quot;</span><span class="op">,</span> missing<span class="op">),</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    preferred <span class="op">:=</span> req<span class="op">.</span>Preferred <span class="op">&amp;</span> modelCaps</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> MatchResult<span class="op">{</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        Satisfied<span class="op">:</span>   <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        Preferred<span class="op">:</span>   preferred<span class="op">,</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        PreferredCount<span class="op">:</span> bits<span class="op">.</span>OnesCount64<span class="op">(</span>preferred<span class="op">),</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>CapabilityBitmap</code> type is a <code>uint64</code>
+bitfield with fifty-six defined capability flags, leaving eight bits
+reserved for future expansion. The <code>MatchCapabilities</code>
+function first validates the context window requirement (used to exclude
+models with insufficient token capacity for long-document translation or
+RAG contexts), then checks that all required capability bits are present
+in the model's bitmap. Models that fail the required capability check
+are filtered out before strategy evaluation. Preferred capabilities
+contribute to the strategy's scoring function: a model that satisfies
+more preferred capabilities receives a bonus in the
+<code>BalancedStrategy</code> weight calculation, and
+<code>BestScoreStrategy</code> uses preferred capability count as a
+tiebreaker when overall scores are within <code>0.01</code> of each
+other.</p>
+<p>The <code>CapabilityBitmap</code> is defined in
+<code>internal/providers/capabilities/bitmap.go</code> with individual
+constants such as <code>CapFunctionCalling = 1 &lt;&lt; 0</code>,
+<code>CapLargeContext = 1 &lt;&lt; 1</code>,
+<code>CapStreaming = 1 &lt;&lt; 2</code>,
+<code>CapCodeGeneration = 1 &lt;&lt; 3</code>,
+<code>CapLegalDomain = 1 &lt;&lt; 4</code>,
+<code>CapMedicalDomain = 1 &lt;&lt; 5</code>,
+<code>CapTechnicalWriting = 1 &lt;&lt; 6</code>, and so on through the
+fifty-six defined flags. Capability bitmaps are stored in the
+<code>verified_models</code> table as <code>BIGINT</code> columns and
+are updated by the LLMsVerifier ingestion pipeline whenever a new
+capability test is completed.</p>
+<h2 id="66-api-key-management">6.6 API Key Management</h2>
+<p>The integration with LLMsVerifier and the expanded provider ecosystem
+requires secure management of more than twenty-five distinct API keys.
+The key management system, implemented in
+<code>internal/providers/keys/manager.go</code>, provides validation,
+encrypted storage, rotation, and per-key rate limit tracking.</p>
+<h3 id="661-key-validation">6.6.1 Key Validation</h3>
+<p>Every API key is validated at configuration load time using a
+two-step process: first, a provider-specific regex validates the key
+format (e.g., OpenAI keys match <code>^sk-[a-zA-Z0-9]{48}$</code>,
+Anthropic keys match <code>^sk-ant-api03-[a-zA-Z0-9_-]{64,}$</code>);
+second, a minimal API call to a low-cost endpoint (typically a models
+listing or a short completion with <code>max_tokens: 1</code>) confirms
+that the key is active and has remaining quota. Keys that fail either
+step are flagged with <code>status: invalid</code> and excluded from the
+provider factory's client pool.</p>
+<p>The validation functions are organized by provider in
+<code>internal/providers/keys/validators/</code>. Each validator
+implements the <code>KeyValidator</code> interface:
+<code>ValidateFormat(key string) error</code> and
+<code>ValidateActive(ctx context.Context, key string) error</code>. The
+active validation calls use a shared circuit breaker per provider to
+prevent validation storms during provider outages.</p>
+<h3 id="662-secure-storage">6.6.2 Secure Storage</h3>
+<p>All API keys are encrypted at rest using AES-256-GCM with a key
+encryption key (KEK) stored in HashiCorp Vault. The data encryption key
+(DEK) is unique per provider and is rotated every thirty days via an
+automated cron job at <code>cmd/key-rotation/main.go</code>. The
+encrypted key material is stored in the PostgreSQL
+<code>provider_api_keys</code> table with the following schema:
+<code>id SERIAL PRIMARY KEY</code>,
+<code>provider_id VARCHAR(64) NOT NULL</code>,
+<code>key_ciphertext BYTEA NOT NULL</code>,
+<code>key_nonce BYTEA NOT NULL</code>,
+<code>status VARCHAR(16) DEFAULT 'active'</code>,
+<code>rate_limit_rpm INTEGER</code>,
+<code>rate_limit_tpm INTEGER</code>,
+<code>created_at TIMESTAMPTZ</code>,
+<code>last_rotated_at TIMESTAMPTZ</code>, and
+<code>expires_at TIMESTAMPTZ</code>. At runtime, keys are decrypted
+on-demand and cached in process memory with a ten-minute TTL; the
+in-memory cache stores only the decrypted key string, protected by Go's
+garbage collection semantics and process-level isolation.</p>
+<p>The twenty-five supported providers and their validation endpoints
+are documented in <code>config/providers.yaml</code>. Each entry
+specifies the provider ID, base URL, validation endpoint path,
+validation method, expected success status code, and rate limits. The
+providers include: OpenAI (<code>api.openai.com</code>), Anthropic
+(<code>api.anthropic.com</code>), Google Vertex AI
+(<code>us-central1-aiplatform.googleapis.com</code>), Azure OpenAI
+(<code>{resource}.openai.azure.com</code>), Cohere
+(<code>api.cohere.com</code>), Mistral AI (<code>api.mistral.ai</code>),
+LLMsVerifier (<code>api.llmsverifier.io</code>), Together AI
+(<code>api.together.xyz</code>), Groq (<code>api.groq.com</code>),
+Perplexity (<code>api.perplexity.ai</code>), AI21 Labs
+(<code>api.ai21.com</code>), Fireworks AI
+(<code>api.fireworks.ai</code>), Anyscale
+(<code>api.endpoints.anyscale.com</code>), DeepInfra
+(<code>api.deepinfra.com</code>), Baseten
+(<code>model-{model_id}.api.baseten.co</code>), Replicate
+(<code>api.replicate.com</code>), Hugging Face
+(<code>api-inference.huggingface.co</code>), OctoAI
+(<code>text.octoai.run</code>), Lepton AI
+(<code>{model}.lepton.run</code>), Cloudflare Workers AI
+(<code>api.cloudflare.com</code>), AWS Bedrock
+(<code>bedrock-runtime.{region}.amazonaws.com</code>), Google Gemini
+(<code>generativelanguage.googleapis.com</code>), Moonshot AI
+(<code>api.moonshot.cn</code>), Zhipu AI
+(<code>open.bigmodel.cn</code>), and 01.AI (<code>api.01.ai</code>).</p>
+<h3 id="663-per-key-rate-limiting">6.6.3 Per-Key Rate Limiting</h3>
+<p>The key manager maintains a distributed rate limiter per API key
+using Redis as the coordination backend. The limiter tracks both
+requests-per-minute (RPM) and tokens-per-minute (TPM) quotas as reported
+by each provider's response headers
+(<code>x-ratelimit-limit-requests</code>,
+<code>x-ratelimit-limit-tokens</code>,
+<code>x-ratelimit-remaining-requests</code>,
+<code>x-ratelimit-remaining-tokens</code>). When a key's rate limit is
+exhausted, the manager marks it as <code>status: rate_limited</code> for
+the duration specified in the <code>Retry-After</code> header (or a
+default sixty seconds if absent), and the provider factory routes
+requests to the next available key for that provider. This multi-key
+support is essential for high-volume translation pipelines that can
+exceed the quota of a single API key.</p>
+<h3 id="664-key-rotation-and-audit">6.6.4 Key Rotation and Audit</h3>
+<p>Key rotation is triggered automatically when an expiry date
+approaches (within seven days) or manually via the admin API at
+<code>POST /admin/keys/{provider_id}/rotate</code>. The rotation process
+generates a new key through the provider's API console (for providers
+supporting programmatic key generation) or accepts a new key via the
+admin API, validates it, encrypts it, and atomically swaps the active
+key reference. Old keys are retained in <code>status: rotated</code> for
+twenty-four hours to allow in-flight requests to complete, then are
+permanently deleted. All key operations (validation, rotation, status
+changes, access events) are logged to an append-only audit log stored in
+S3 with object lock enabled, retaining records for a minimum of one year
+for compliance purposes.</p>
+<hr />
+<p>Phase 5 completes the integration by binding the verified model
+registry to every operational decision in HelixTranslate's translation
+pipeline. The refactored provider factory produces
+<code>VerifiedLLMClient</code> instances with full metadata, the
+selection engine routes tasks through domain-appropriate strategies, the
+degradation chain ensures resilience against individual model failures,
+the event bus propagates score changes in real time, the capability
+matcher enables sophisticated task-to-model assignment across
+seventy-plus verified abilities, and the key management system securely
+orchestrates access to more than twenty-five providers. Together, these
+components transform the LLMsVerifier platform from a passive scoring
+system into an active participant in HelixTranslate's runtime quality
+assurance.</p>
+</body>
+</html>

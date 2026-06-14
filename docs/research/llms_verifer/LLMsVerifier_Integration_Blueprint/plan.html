@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>plan</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">plan</h1>
+</header>
+<h1
+id="plan-llmsverifier-integration-into-helixtranslate--deep-analysis--implementation-plan">Plan:
+LLMsVerifier Integration into HelixTranslate — Deep Analysis &amp;
+Implementation Plan</h1>
+<h2 id="overview">Overview</h2>
+<p>Create an in-depth, enterprise-grade integration plan for
+LLMsVerifier as the single source of truth for model provisioning in
+HelixTranslate. Three repositories must be analyzed comprehensively.</p>
+<h2 id="stage-1--repository-discovery--deep-analysis">Stage 1 —
+Repository Discovery &amp; Deep Analysis</h2>
+<p><strong>Goal</strong>: Clone and analyze all three repositories to
+understand architecture, code structure, APIs, configuration, testing,
+and documentation.</p>
+<h3 id="sub-tasks">Sub-tasks:</h3>
+<p>1.1 Clone HelixTranslate repository and analyze:</p>
+<ul>
+<li>Project structure, architecture, entry points</li>
+<li>Model management &amp; provider integration</li>
+<li>Configuration system (config files, .env support)</li>
+<li>Existing test suite &amp; Challenges</li>
+<li>Documentation (CLAUDE.MD, AGENTS.MD, README, etc.)</li>
+<li>All supported providers, models, MCPs, LSPs, ACPs, Embeddings, RAGs,
+Skills, Plugins</li>
+</ul>
+<p>1.2 Clone LLMsVerifier repository and analyze:</p>
+<ul>
+<li>Project structure, architecture, entry points</li>
+<li>Validation, verification, scoring mechanisms</li>
+<li>API surface (classes, methods, exports)</li>
+<li>Configuration requirements, API keys needed</li>
+<li>Test suite</li>
+<li>Documentation</li>
+</ul>
+<p>1.3 Clone HelixAgent repository and analyze:</p>
+<ul>
+<li>How LLMsVerifier is already integrated here (reference
+implementation)</li>
+<li>Configuration pattern, initialization pattern</li>
+<li>Model consumption pattern from LLMsVerifier</li>
+<li>All providers, MCPs, LSPs, ACPs, Embeddings, RAGs, Skills, Plugins
+usage</li>
+<li>Test suite &amp; Challenges structure</li>
+<li>Documentation (CLAUDE.MD, AGENTS.MD)</li>
+</ul>
+<h3 id="parallel-execution">Parallel Execution:</h3>
+<ul>
+<li>Agent 1: HelixTranslate deep analysis</li>
+<li>Agent 2: LLMsVerifier deep analysis</li>
+<li>Agent 3: HelixAgent deep analysis (reference integration)</li>
+</ul>
+<h2 id="stage-2--gap-analysis--integration-design">Stage 2 — Gap
+Analysis &amp; Integration Design</h2>
+<p><strong>Goal</strong>: Compare and identify gaps, design the
+integration architecture.</p>
+<h3 id="sub-tasks-1">Sub-tasks:</h3>
+<p>2.1 Model Management Gap Analysis</p>
+<ul>
+<li>How HelixTranslate currently gets models vs. LLMsVerifier's model
+provision</li>
+<li>What changes needed for single-source-of-truth pattern</li>
+<li>Provider abstraction alignment</li>
+</ul>
+<p>2.2 Configuration Integration Design</p>
+<ul>
+<li>How to route LLMsVerifier API keys through HelixTranslate
+config/.env</li>
+<li>Configuration schema design</li>
+<li>Backward compatibility considerations</li>
+</ul>
+<p>2.3 Full Capability Integration Design</p>
+<ul>
+<li>MCPs, LSPs, ACPs, Embeddings, RAGs, Skills, Plugins integration
+plan</li>
+<li>How each capability flows from LLMsVerifier → HelixTranslate</li>
+</ul>
+<p>2.4 UX Design for Enterprise Translation Tool</p>
+<ul>
+<li>Model selection UX (validated models only)</li>
+<li>Provider management UX</li>
+<li>Error handling, fallback strategies</li>
+<li>Multi-model translation workflows</li>
+</ul>
+<h2 id="stage-3--implementation-plan-writing">Stage 3 — Implementation
+Plan Writing</h2>
+<p><strong>Goal</strong>: Write the comprehensive implementation plan
+document.</p>
+<h3 id="sub-tasks-2">Sub-tasks:</h3>
+<p>3.1 Phase-based Implementation Plan</p>
+<ul>
+<li>Phase 1: Foundation &amp; Configuration</li>
+<li>Phase 2: Core LLMsVerifier Integration</li>
+<li>Phase 3: Full Capability Integration (MCPs, LSPs, ACPs, etc.)</li>
+<li>Phase 4: UX &amp; Enterprise Features</li>
+<li>Phase 5: Testing &amp; Quality Assurance</li>
+<li>Phase 6: Documentation &amp; Constitution Updates</li>
+</ul>
+<p>3.2 Task &amp; Sub-task Breakdown</p>
+<ul>
+<li>Fine-grained tasks with codebase references</li>
+<li>Exact files, functions, lines to modify</li>
+<li>New files to create</li>
+</ul>
+<h2 id="stage-4--testing-strategy--anti-bluff-framework">Stage 4 —
+Testing Strategy &amp; Anti-Bluff Framework</h2>
+<p><strong>Goal</strong>: Design comprehensive testing strategy with
+anti-bluff guarantees.</p>
+<h3 id="sub-tasks-3">Sub-tasks:</h3>
+<p>4.1 Test Coverage Plan</p>
+<ul>
+<li>Unit tests, integration tests, e2e tests</li>
+<li>Challenge-based validation</li>
+<li>Model validation testing</li>
+<li>Provider integration testing</li>
+</ul>
+<p>4.2 Anti-Bluff Testing Framework</p>
+<ul>
+<li>Constitution/CLAUDE.MD/AGENTS.MD requirements</li>
+<li>Real feature validation (not just mock tests)</li>
+<li>End-to-end workflow verification</li>
+<li>Submodule Constitution propagation</li>
+</ul>
+<h2 id="stage-5--final-assembly--document-production">Stage 5 — Final
+Assembly &amp; Document Production</h2>
+<p><strong>Goal</strong>: Produce final comprehensive document in proper
+format.</p>
+<h3 id="sub-tasks-4">Sub-tasks:</h3>
+<p>5.1 Assemble all analysis into final document 5.2 Convert to DOCX
+format using docx skill 5.3 Deliver final artifact</p>
+<h2 id="skills-used">Skills Used:</h2>
+<ul>
+<li>Stage 1-4: deep-research-swarm (multi-agent parallel analysis)</li>
+<li>Stage 5: report-writing + docx</li>
+</ul>
+</body>
+</html>

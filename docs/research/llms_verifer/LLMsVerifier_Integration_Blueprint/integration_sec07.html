@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>integration_sec07</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">integration_sec07</h1>
+</header>
+<h1 id="7-phase-6-enterprise-ux-and-user-facing-features">7. Phase 6:
+Enterprise UX and User-Facing Features</h1>
+<p>Phase 6 represents the culmination of the LLMsVerifier integration
+effort—the layer where the underlying scoring, routing, and verification
+infrastructure becomes tangible and accessible to end users. Where
+Phases 1 through 5 established the foundational scoring engine, provider
+management, routing intelligence, quality assurance mechanisms, and
+CI/CD integration, Phase 6 channels all of that computational work into
+polished, enterprise-grade user experiences. The guiding principle of
+this phase is <strong>transparency through instrumentation</strong>:
+every model score, routing decision, quality metric, and fallback event
+is surfaced to the user in a way that builds trust and enables informed
+decision-making. This chapter covers four interconnected workstreams:
+the model selection user experience with rich score visualization, a
+real-time model status dashboard powered by WebSocket streaming, a batch
+translation system with multi-model orchestration, and a closed-loop
+translation quality feedback mechanism that continuously refines model
+capability scores based on real user interactions.</p>
+<p>The architecture of Phase 6 is designed to serve two distinct
+personas simultaneously. <strong>End users</strong> (translators,
+localization engineers, and enterprise customers) need intuitive
+interfaces that communicate which model is being used, why it was
+selected, and how well it performed. <strong>Platform operators</strong>
+(SRE teams, model governance officers, and product managers) need
+dashboards that expose system health, model degradation patterns,
+routing efficiency metrics, and quality trend analysis. The components
+described in this chapter satisfy both audiences without compromising
+the clarity needed by either. All UI components are built in
+TypeScript/React for the web interface and Go for backend orchestration,
+maintaining consistency with the HelixTranslate technology stack
+established in prior phases.</p>
+<hr />
+<h2 id="71-model-selection-user-experience">7.1 Model Selection User
+Experience</h2>
+<p>The model selection interface is the primary touchpoint where users
+interact with the LLMsVerifier scoring system. It transforms abstract
+numerical scores into actionable visual information, enabling users to
+choose translation models with confidence. The design follows a
+card-based metaphor where each available model is represented as a
+self-contained card containing all information necessary for an informed
+selection decision. The card layout is hierarchical: provider identity
+and model name occupy the header row, the overall verification score is
+rendered as a prominent color-coded badge, capability tags communicate
+domain expertise, and bottom-row metrics convey operational
+characteristics such as cost tier and speed classification.</p>
+<h3 id="711-score-badge-visualization">7.1.1 Score Badge
+Visualization</h3>
+<p>The score badge is the most visually dominant element of the model
+card because it communicates the single most important piece of
+information: the model's verified quality score on a 0–10 scale. The
+color coding scheme follows a traffic-light metaphor with five distinct
+tiers. Scores of 9.0 and above render in green (<code>#22C55E</code>),
+indicating exceptional quality suitable for the most demanding
+translation tasks such as legal contract localization and medical
+documentation. Scores between 7.5 and 8.9 render in blue
+(<code>#3B82F6</code>), denoting strong performance appropriate for
+professional translation workflows. The amber tier
+(<code>#EAB308</code>, scores 6.0–7.4) signals acceptable quality for
+general-purpose content where cost efficiency may outweigh absolute
+accuracy. Scores between 4.0 and 5.9 render in orange
+(<code>#F97316</code>), flagging models that should be used cautiously
+and only for low-stakes content or as fallback options. Any model
+scoring below 4.0 displays in red (<code>#EF4444</code>), serving as a
+visual warning that the model has failed verification criteria and
+should not be used for production translation work. The numeric value is
+always displayed with one decimal place of precision (e.g., "8.3" rather
+than "8"), reflecting the granularity of the underlying scoring
+engine.</p>
+<h3 id="712-capability-tags-and-metadata">7.1.2 Capability Tags and
+Metadata</h3>
+<p>Beneath the score badge, each model card renders a horizontal row of
+capability chips that communicate the model's verified domain
+competencies. These tags are derived directly from the
+<code>capabilities</code> field of the <code>VerifiedModel</code> record
+populated by the Phase 2 scoring engine. Common tags include
+<code>CapDomainLegal</code>, <code>CapDomainMedical</code>,
+<code>CapDomainTechnical</code>, <code>CapDomainCreative</code>, and
+<code>CapGeneral</code>. Each tag is rendered as a small, rounded
+pill-shaped element with a consistent color scheme that corresponds to
+the domain family. The provider icon (e.g., OpenAI's spiral, Anthropic's
+constellation, or Google's "G" mark) appears in the header row alongside
+the model name, providing immediate brand recognition and reinforcing
+the trust relationship between the user and the model vendor.</p>
+<h3 id="713-filtering-and-sorting-interface">7.1.3 Filtering and Sorting
+Interface</h3>
+<p>The model selection panel includes a comprehensive filtering system
+that allows users to narrow the model list based on operational
+requirements. The provider filter supports multi-select, enabling users
+to include or exclude specific vendors (for example, excluding all
+models from a provider undergoing a known outage). The score range
+slider allows users to set minimum and maximum score thresholds, which
+is particularly useful when searching for models within a specific
+quality band. Capability toggles function as a set of checkboxes where
+users can require that displayed models possess specific domain
+competencies. The cost tier selector offers four
+tiers—<code>Free</code>, <code>Standard</code>, <code>Premium</code>,
+and <code>Enterprise</code>—allowing budget-conscious users to filter by
+economic constraints.</p>
+<p>Sorting options include four dimensions, each supporting ascending
+and descending order. <strong>Score</strong> (descending) is the default
+sort, presenting the highest-quality models first.
+<strong>Speed</strong> sorting orders models by their latency score
+component, prioritizing low-latency options for time-sensitive
+workflows. <strong>Cost</strong> sorting arranges models from least to
+most expensive, aiding budget optimization. <strong>Recency</strong>
+sorting surfaces newly verified models, giving users early access to the
+latest options. Each sort dimension updates the card grid in real time
+without requiring a page refresh.</p>
+<p>The <code>ModelCard</code> component implementation encapsulates all
+of these concerns into a single reusable React component, as shown in
+Code Block 1.</p>
+<p><strong>Code Block 1: ModelCard component
+(TypeScript/React)</strong></p>
+<pre class="tsx"><code>interface ModelCardProps {
+  model: VerifiedModel;
+  onSelect: (modelId: string) =&gt; void;
+  isSelected: boolean;
+}
+
+const ModelCard: React.FC&lt;ModelCardProps&gt; = ({ model, onSelect, isSelected }) =&gt; {
+  const scoreColor = model.score.overall &gt;= 9 ? &#39;#22C55E&#39; : 
+                     model.score.overall &gt;= 7.5 ? &#39;#3B82F6&#39; :
+                     model.score.overall &gt;= 6 ? &#39;#EAB308&#39; :
+                     model.score.overall &gt;= 4 ? &#39;#F97316&#39; : &#39;#EF4444&#39;;
+
+  return (
+    &lt;div className={`model-card ${isSelected ? &#39;selected&#39; : &#39;&#39;}`} onClick={() =&gt; onSelect(model.modelId)}&gt;
+      &lt;div className=&quot;model-header&quot;&gt;
+        &lt;ProviderIcon provider={model.providerId} /&gt;
+        &lt;span className=&quot;model-name&quot;&gt;{model.name}&lt;/span&gt;
+        &lt;span className=&quot;score-badge&quot; style={{ backgroundColor: scoreColor }}&gt;
+          {model.score.overall.toFixed(1)}
+        &lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div className=&quot;model-capabilities&quot;&gt;
+        {model.capabilities.map(cap =&gt; (
+          &lt;CapabilityTag key={cap} name={cap} /&gt;
+        ))}
+      &lt;/div&gt;
+      &lt;div className=&quot;model-metrics&quot;&gt;
+        &lt;CostIndicator tier={model.tier} /&gt;
+        &lt;SpeedIndicator latency={model.score.components.speed} /&gt;
+        &lt;AvailabilityStatus status={model.status} /&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+<p>The component receives a <code>VerifiedModel</code> object (populated
+from the Phase 2 registry), a selection callback, and a boolean flag
+indicating selection state. The <code>scoreColor</code> computation
+applies the five-tier color mapping directly, ensuring visual
+consistency across the entire interface. The <code>CapabilityTag</code>
+sub-component renders each capability as a styled chip, while
+<code>CostIndicator</code>, <code>SpeedIndicator</code>, and
+<code>AvailabilityStatus</code> provide the bottom-row metrics. CSS
+classes <code>model-card</code> and <code>selected</code> support hover
+states, focus rings, and visual distinction for the currently selected
+model. The click handler propagates the <code>modelId</code> upward,
+triggering the routing logic described in Phase 3.</p>
+<hr />
+<h2 id="72-real-time-model-status-dashboard">7.2 Real-Time Model Status
+Dashboard</h2>
+<p>Enterprise translation workflows demand real-time visibility into
+model health. A model that scored 8.5 during the morning verification
+cycle may degrade to 6.2 by afternoon due to provider-side issues,
+prompt template drift, or rate-limiting behavior changes. The real-time
+model status dashboard addresses this operational need by establishing a
+persistent WebSocket connection between the client browser and the
+HelixTranslate backend, streaming model status events as they occur.
+This architecture eliminates the need for periodic polling, reduces
+server load, and ensures that users see status changes within
+milliseconds of detection.</p>
+<h3 id="721-websocket-event-architecture">7.2.1 WebSocket Event
+Architecture</h3>
+<p>The WebSocket endpoint
+<code>wss://api.helixtranslate.com/v1/models/stream</code> emits typed
+events that conform to the <code>ModelStatusEvent</code> interface. Four
+event types cover the full lifecycle of model state changes. The
+<code>score_changed</code> event fires whenever a model's composite
+score shifts by more than 0.2 points, carrying both the previous and
+current scores so that the UI can animate transitions and flag
+significant changes. The <code>verification_failed</code> event
+indicates that a model has failed a scheduled verification challenge,
+including a human-readable <code>reason</code> field (e.g.,
+"hallucination in legal terminology test" or "excessive latency on 4K
+token requests"). The <code>model_discovered</code> event announces the
+registration of a newly verified model, prompting the dashboard to add a
+new card with a "New" badge. The <code>model_retired</code> event
+signals that a model has been removed from the active pool, typically
+because its provider has deprecated the endpoint or the model has failed
+three consecutive verification cycles.</p>
+<h3 id="722-status-indicator-semantics">7.2.2 Status Indicator
+Semantics</h3>
+<p>Each model card on the dashboard displays a status indicator that
+aggregates the current score into a high-level health classification. A
+<strong>green</strong> indicator means the model's score is at or above
+7.0, representing healthy operation suitable for all supported
+translation domains. A <strong>yellow</strong> indicator corresponds to
+scores between 5.5 and 6.9, signaling degraded performance—usable for
+general content but requiring monitoring and potentially triggering
+automatic fallback for high-stakes domains. A <strong>red</strong>
+indicator indicates a score below 5.5, meaning the model has entered a
+failing state and should not be used for any production translation
+until the underlying issue is resolved. A <strong>gray</strong>
+indicator means the model is currently unavailable (provider downtime,
+rate limit exhaustion, or maintenance mode), rendering it non-selectable
+but still visible for transparency.</p>
+<h3 id="723-degraded-mode-warnings">7.2.3 Degraded Mode Warnings</h3>
+<p>When a model transitions into yellow or red status, the dashboard
+emits a non-blocking toast notification to alert the user. If the user
+has an active translation session using a model that subsequently
+degrades, the system displays a prominent banner offering one-click
+migration to the next-best available model. This automatic fallback
+notification includes the name of the recommended replacement model, its
+current score, and the estimated latency delta compared to the original
+selection. The notification respects user preferences: users can opt to
+remain on the degraded model, auto-switch to the recommended
+alternative, or configure automatic migration based on score thresholds
+(e.g., "always switch when score drops below 6.5").</p>
+<p>The WebSocket client hook shown in Code Block 2 encapsulates the
+connection lifecycle and event dispatch logic.</p>
+<p><strong>Code Block 2: WebSocket events</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> ModelStatusEvent {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  type<span class="op">:</span> <span class="st">&#39;score_changed&#39;</span> <span class="op">|</span> <span class="st">&#39;verification_failed&#39;</span> <span class="op">|</span> <span class="st">&#39;model_discovered&#39;</span> <span class="op">|</span> <span class="st">&#39;model_retired&#39;</span><span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  modelId<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  payload<span class="op">:</span> {</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    previousScore<span class="op">?:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    currentScore<span class="op">?:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    reason<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  timestamp<span class="op">:</span> <span class="bu">Date</span><span class="op">;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> useModelStatus <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [models<span class="op">,</span> setModels] <span class="op">=</span> <span class="fu">useState</span><span class="op">&lt;</span>VerifiedModel[]<span class="op">&gt;</span>([])<span class="op">;</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">useEffect</span>(() <span class="kw">=&gt;</span> {</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> ws <span class="op">=</span> <span class="kw">new</span> <span class="bu">WebSocket</span>(<span class="st">&#39;wss://api.helixtranslate.com/v1/models/stream&#39;</span>)<span class="op">;</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    ws<span class="op">.</span><span class="at">onmessage</span> <span class="op">=</span> (<span class="bu">event</span>) <span class="kw">=&gt;</span> {</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> evt<span class="op">:</span> ModelStatusEvent <span class="op">=</span> <span class="bu">JSON</span><span class="op">.</span><span class="fu">parse</span>(<span class="bu">event</span><span class="op">.</span><span class="at">data</span>)<span class="op">;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">handleStatusChange</span>(evt<span class="op">,</span> setModels)<span class="op">;</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    }<span class="op">;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> () <span class="kw">=&gt;</span> ws<span class="op">.</span><span class="fu">close</span>()<span class="op">;</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span> [])<span class="op">;</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> models<span class="op">;</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+<p>The <code>handleStatusChange</code> function (not shown inline for
+brevity) implements an optimistic update strategy: it applies the event
+payload to the local model state immediately upon receipt, then
+schedules a background reconciliation request to fetch the authoritative
+state from the scoring engine. This approach ensures that the UI feels
+instantaneous while maintaining eventual consistency with the backend.
+The WebSocket connection automatically reconnects with exponential
+backoff (starting at 1 second, capping at 30 seconds) if the connection
+drops, ensuring resilience against transient network failures.</p>
+<hr />
+<h2 id="73-batch-translation-with-multi-model-orchestration">7.3 Batch
+Translation with Multi-Model Orchestration</h2>
+<p>Enterprise translation workflows frequently involve processing large
+documents that span multiple content domains. A single pharmaceutical
+regulatory submission, for example, may contain chemical nomenclature
+(technical domain), patient safety warnings (medical domain), and legal
+disclaimers (legal domain). Processing such a document through a single
+general-purpose model produces suboptimal results because no single
+model excels across all domain categories. The batch translation system
+described in this section addresses this challenge through domain-aware
+chunking and intelligent model routing, assigning each content segment
+to the model best suited for its specific domain.</p>
+<h3 id="731-domain-aware-document-chunking">7.3.1 Domain-Aware Document
+Chunking</h3>
+<p>The batch translation pipeline begins by decomposing the input
+document into <code>TranslationChunk</code> objects. Each chunk is
+classified into one of five domain categories: <code>legal</code>,
+<code>medical</code>, <code>technical</code>, <code>creative</code>, or
+<code>general</code>. Classification employs a multi-modal detection
+strategy that combines heuristic pattern matching with a lightweight
+machine learning classifier. Legal content is identified through regex
+patterns that match legalese signatures such as "hereinafter," "pursuant
+to," "witnesseth," and standard legal clause numbering formats
+(<code>§1.2(a)</code>). Medical content is detected by cross-referencing
+terminology against a curated medical terminology database containing
+47,000 terms spanning ICD-10 codes, drug names, anatomical references,
+and clinical procedure identifiers. Technical content is identified by
+the presence of code blocks, structured data formats (JSON, XML, YAML),
+and high concentrations of domain-specific acronyms. Creative content is
+recognized through narrative pattern analysis—detection of dialogue
+formatting, descriptive prose density, and literary device markers.
+Content that fails all specialized domain tests, or falls below a
+confidence threshold, is classified as <code>general</code>.</p>
+<h3 id="732-intelligent-chunk-routing">7.3.2 Intelligent Chunk
+Routing</h3>
+<p>Once chunks are classified, the routing engine assigns each chunk to
+the most appropriate available model. The routing decision considers
+three factors in priority order: (1) domain capability match, (2)
+current model score, and (3) cost efficiency. A chunk classified as
+<code>legal</code> is routed to the highest-scoring model that possesses
+the <code>CapDomainLegal</code> capability. If no legal-specialized
+model is available (for example, due to provider outage), the system
+falls back to the highest-scoring general-capable model. This fallback
+behavior ensures continuity of service while transparently degrading
+quality expectations. The routing strategy is abstracted behind the
+<code>RoutingStrategy</code> interface, enabling experimentation with
+different allocation algorithms (greedy, round-robin, load-balanced,
+cost-optimized) without modifying the core orchestration logic.</p>
+<p>The Go data structures in Code Block 3 define the complete domain
+model for batch translation jobs.</p>
+<p><strong>Code Block 3: BatchTranslationJob</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BatchTranslationJob <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    ID          <span class="dt">string</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    SourceLang  <span class="dt">string</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    TargetLang  <span class="dt">string</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    Chunks      <span class="op">[]</span>TranslationChunk</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    Assignments <span class="op">[]</span>ModelAssignment</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    Strategy    RoutingStrategy</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    Status      JobStatus</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TranslationChunk <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    ID        <span class="dt">string</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    Content   <span class="dt">string</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    WordCount <span class="dt">int</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    Domain    <span class="dt">string</span> <span class="co">// detected via classifier</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelAssignment <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    ChunkID  <span class="dt">string</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    ModelID  <span class="dt">string</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    Status   AssignmentStatus</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    Result   <span class="op">*</span>TranslationResult</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RoutingStrategy <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    AssignChunks<span class="op">(</span>chunks <span class="op">[]</span>TranslationChunk<span class="op">,</span> models <span class="op">[]</span>VerifiedLLMClient<span class="op">)</span> <span class="op">[]</span>ModelAssignment</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>BatchTranslationJob</code> struct serves as the aggregate
+root, tracking the job's lifecycle from <code>Pending</code> through
+<code>Chunking</code>, <code>Routing</code>, <code>Translating</code>,
+<code>Aggregating</code>, and finally <code>Completed</code> or
+<code>Failed</code>. The <code>TranslationChunk</code> struct carries
+the domain classification result alongside the raw content and word
+count, which feeds into cost estimation and progress reporting. Each
+<code>ModelAssignment</code> records which model was assigned to a
+specific chunk, the current status of that assignment
+(<code>Pending</code>, <code>InProgress</code>, <code>Completed</code>,
+<code>Failed</code>), and a pointer to the translation result once
+available. The <code>RoutingStrategy</code> interface enables pluggable
+routing algorithms, with a default <code>CapabilityAwareRouter</code>
+that implements the domain-match-with-fallback logic described
+above.</p>
+<h3 id="733-chunk-routing-strategy-reference">7.3.3 Chunk Routing
+Strategy Reference</h3>
+<p>The routing matrix in Table 1 documents the complete decision logic
+for chunk-to-model assignment. Each content type maps to a detection
+method, a preferred capability requirement, and a fallback capability
+for degraded-mode operation.</p>
+<p><strong>Table 1: Chunk routing strategy</strong></p>
+<table>
+<thead>
+<tr>
+<th>Content Type</th>
+<th>Detection Method</th>
+<th>Preferred Capability</th>
+<th>Fallback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Legal</td>
+<td>Regex (legalese patterns)</td>
+<td>CapDomainLegal</td>
+<td>CapGeneral</td>
+</tr>
+<tr>
+<td>Medical</td>
+<td>Medical terminology DB</td>
+<td>CapDomainMedical</td>
+<td>CapGeneral</td>
+</tr>
+<tr>
+<td>Technical</td>
+<td>Code blocks, acronyms</td>
+<td>CapDomainTechnical</td>
+<td>CapGeneral</td>
+</tr>
+<tr>
+<td>Creative</td>
+<td>Narrative patterns</td>
+<td>CapDomainCreative</td>
+<td>CapGeneral</td>
+</tr>
+<tr>
+<td>General</td>
+<td>Default / short text</td>
+<td>Balanced score</td>
+<td>Any available</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>Balanced score</code> entry for general content indicates
+that the routing engine selects the model with the highest composite
+score across all capability components, rather than requiring a specific
+domain tag. This ensures that general content benefits from the best
+available model even when no specialized model exists. The fallback
+chain always terminates at <code>CapGeneral</code> or
+<code>Any available</code>, guaranteeing that every chunk receives a
+translation assignment as long as at least one model is operational.</p>
+<hr />
+<h2 id="74-translation-quality-feedback-loop">7.4 Translation Quality
+Feedback Loop</h2>
+<p>The most reliable measure of a translation model's quality is the
+judgment of the humans who consume its output. The translation quality
+feedback loop closes the circuit between automated scoring and
+subjective human evaluation, creating a composite quality signal that
+reflects both machine-measured accuracy and human-perceived utility.
+This feedback loop operates continuously: every translation output
+carries an invitation for user rating, every rating is incorporated into
+the model's capability score through a weighted moving average, and the
+updated scores flow back into the model selection and routing systems
+within minutes.</p>
+<h3 id="741-user-rating-interface">7.4.1 User Rating Interface</h3>
+<p>After each translation is delivered, the user interface presents a
+non-intrusive rating widget inviting the user to assign 1–5 stars and
+optionally provide free-text feedback. The rating prompt appears in a
+collapsible panel adjacent to the translation output, minimizing
+disruption to the user's workflow. Five-star ratings indicate excellent
+quality requiring no further attention. Four-star ratings signal minor
+issues—perhaps a single awkward phrasing or terminology choice.
+Three-star and below trigger an expanded feedback form asking the user
+to categorize the problem (accuracy, fluency, terminology, formatting,
+cultural appropriateness). These categorizations feed into granular
+capability component scores, enabling the system to distinguish between
+a model that struggles with medical terminology but excels at
+grammatical fluency versus one with the opposite profile.</p>
+<h3 id="742-automatic-quality-metrics">7.4.2 Automatic Quality
+Metrics</h3>
+<p>In parallel with user ratings, the system computes automatic quality
+metrics for every translation. The BLEU (Bilingual Evaluation
+Understudy) score measures n-gram overlap between the model output and
+reference translations from the HelixTranslate validation corpus. The
+COMET (Cross-lingual Optimized Metric for Evaluation of Translation)
+score provides a neural evaluation that correlates more strongly with
+human judgments than BLEU by leveraging cross-lingual sentence
+embeddings. Semantic similarity is computed using cosine distance
+between vector embeddings of the source text and back-translated output,
+detecting meaning drift that lexical metrics might miss. Perplexity
+measures the model's confidence in its output, with unusually high
+perplexity signaling potential hallucination or exposure to
+out-of-distribution content. These automatic metrics are computed
+asynchronously in a background worker queue, with results typically
+available within 2–5 minutes of translation completion.</p>
+<h3 id="743-composite-score-computation">7.4.3 Composite Score
+Computation</h3>
+<p>The composite quality engine synthesizes three independent signal
+sources into a unified quality score using a weighted formula. User
+ratings contribute 40% of the composite weight, reflecting the primacy
+of human judgment. Automatic metrics (BLEU, COMET, semantic similarity)
+contribute 35%, providing an objective baseline that operates
+independently of user engagement. Challenge pass rate—derived from the
+Phase 4 verification challenge system—contributes 25%, capturing the
+model's performance on structured, adversarial test cases. The
+<code>SubmitRating</code> method in Code Block 4 demonstrates how a
+newly submitted user rating triggers an immediate capability score
+update.</p>
+<p><strong>Code Block 4: UserRating</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> UserRating <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    TranslationID <span class="dt">string</span>    <span class="st">`json:&quot;translation_id&quot;`</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    ModelID       <span class="dt">string</span>    <span class="st">`json:&quot;model_id&quot;`</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Rating        <span class="dt">int</span>       <span class="st">`json:&quot;rating&quot;`</span> <span class="co">// 1-5</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Feedback      <span class="dt">string</span>    <span class="st">`json:&quot;feedback&quot;`</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    CreatedAt     time<span class="op">.</span>Time <span class="st">`json:&quot;created_at&quot;`</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>ScoringEngine<span class="op">)</span> SubmitRating<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> rating UserRating<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Weighted moving average: 40% user ratings + 35% auto metrics + 25% challenge pass rate</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    current<span class="op">,</span> _ <span class="op">:=</span> e<span class="op">.</span>GetModelScore<span class="op">(</span>ctx<span class="op">,</span> rating<span class="op">.</span>ModelID<span class="op">)</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    newCapability <span class="op">:=</span> <span class="fl">0.4</span><span class="op">*</span><span class="dt">float64</span><span class="op">(</span>rating<span class="op">.</span>Rating<span class="op">)*</span><span class="fl">2.0</span> <span class="op">+</span> <span class="fl">0.35</span><span class="op">*</span>current<span class="op">.</span>Components<span class="op">.</span>Capability <span class="op">+</span> <span class="fl">0.25</span><span class="op">*</span>current<span class="op">.</span>ChallengePassRate</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> e<span class="op">.</span>UpdateCapabilityScore<span class="op">(</span>ctx<span class="op">,</span> rating<span class="op">.</span>ModelID<span class="op">,</span> newCapability<span class="op">)</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The rating scaling logic (<code>float64(rating.Rating) * 2.0</code>)
+maps the 1–5 star scale onto the 0–10 score scale used by the composite
+engine, ensuring dimensional consistency across signal sources. The
+<code>UpdateCapabilityScore</code> method persists the new score to the
+model registry and emits a <code>score_changed</code> WebSocket event,
+which propagates the update to all connected dashboards within
+milliseconds. The use of a weighted moving average (rather than simple
+averaging) ensures that new ratings have immediate impact while
+historical data still influences the score, preventing erratic swings
+from single outlier ratings.</p>
+<h3 id="744-signal-source-reference">7.4.4 Signal Source Reference</h3>
+<p>Table 2 documents the complete signal inventory, including each
+source's relative weight, the specific metrics it contributes, and its
+characteristic latency profile.</p>
+<p><strong>Table 2: Quality signals</strong></p>
+<table>
+<thead>
+<tr>
+<th>Signal Source</th>
+<th>Weight</th>
+<th>Metric</th>
+<th>Latency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>User ratings</td>
+<td>40%</td>
+<td>1-5 stars</td>
+<td>Real-time</td>
+</tr>
+<tr>
+<td>Auto metrics</td>
+<td>35%</td>
+<td>BLEU, COMET, semantic sim</td>
+<td>Minutes</td>
+</tr>
+<tr>
+<td>Challenge pass</td>
+<td>25%</td>
+<td>Pass rate 0-100%</td>
+<td>Hours</td>
+</tr>
+</tbody>
+</table>
+<p>The latency column is operationally significant because it determines
+how quickly each signal reflects changes in model behavior. User ratings
+provide the fastest feedback but depend on user engagement—models
+serving low-traffic language pairs may accumulate ratings slowly.
+Automatic metrics provide consistent, engagement-independent coverage
+with a moderate delay. Challenge pass rates update the slowest
+(reflecting the batch nature of verification challenge execution) but
+capture adversarial robustness that neither user ratings nor automatic
+metrics can reliably measure.</p>
+<h3 id="745-composite-quality-engine-implementation">7.4.5 Composite
+Quality Engine Implementation</h3>
+<p>The full composite quality engine is implemented in Go as shown in
+Code Block 5. The engine encapsulates the three weight constants,
+enforces their sum to 1.0 during initialization, and exposes a single
+<code>CalculateQuality</code> method that retrieves the component scores
+and computes the weighted composite.</p>
+<p><strong>Code Block 5: Composite quality engine</strong></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CompositeQualityEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    userRatingWeight    <span class="dt">float64</span> <span class="co">// 0.40</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    autoMetricWeight    <span class="dt">float64</span> <span class="co">// 0.35</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    challengePassWeight <span class="dt">float64</span> <span class="co">// 0.25</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>q <span class="op">*</span>CompositeQualityEngine<span class="op">)</span> CalculateQuality<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">float64</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    userScore <span class="op">:=</span> q<span class="op">.</span>getAverageUserRating<span class="op">(</span>modelID<span class="op">)</span> <span class="op">*</span> <span class="fl">2.0</span> <span class="co">// scale 1-5 to 0-10</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    autoScore <span class="op">:=</span> q<span class="op">.</span>getAutoMetricsScore<span class="op">(</span>modelID<span class="op">)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    challengeScore <span class="op">:=</span> q<span class="op">.</span>getChallengePassRate<span class="op">(</span>modelID<span class="op">)</span> <span class="op">*</span> <span class="fl">0.1</span> <span class="co">// scale 0-100 to 0-10</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    composite <span class="op">:=</span> q<span class="op">.</span>userRatingWeight<span class="op">*</span>userScore <span class="op">+</span> </span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>                 q<span class="op">.</span>autoMetricWeight<span class="op">*</span>autoScore <span class="op">+</span> </span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>                 q<span class="op">.</span>challengePassWeight<span class="op">*</span>challengeScore</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> composite<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The normalization logic ensures dimensional consistency across the
+three inputs. User ratings on a 1–5 scale are multiplied by 2.0 to map
+onto the 0–10 composite scale. Challenge pass rates on a 0–100
+percentage scale are multiplied by 0.1 for the same purpose. The
+<code>getAutoMetricsScore</code> method returns a score already
+normalized to the 0–10 scale by the Phase 2 scoring pipeline. The engine
+validates during construction that
+<code>userRatingWeight + autoMetricWeight + challengePassWeight == 1.0</code>,
+panicking on violation to prevent silent score corruption. Weight values
+are configurable through environment variables, enabling A/B experiments
+and operational adjustments without code changes.</p>
+<p>The composite score produced by this engine feeds directly into the
+<code>VerifiedModel.score.overall</code> field consumed by the
+<code>ModelCard</code> component in Section 7.1 and the
+<code>RoutingStrategy</code> implementations in Section 7.3. This
+architectural closure ensures that user feedback, once submitted,
+propagates through the entire system—from the rating widget, through the
+composite engine, into the model registry, across the WebSocket stream,
+onto the model selection dashboard, and ultimately into the routing
+decisions that determine which model translates the next chunk of
+content. The feedback loop is fully closed, self-reinforcing, and
+operates without human intervention beyond the initial rating
+gesture.</p>
+</body>
+</html>

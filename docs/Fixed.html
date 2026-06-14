@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Fixed</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Fixed</h1>
+</header>
+<h1 id="helixtranslate--fixed-closed-workable-items">HelixTranslate —
+Fixed (Closed Workable Items)</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-14T15:37:53Z <strong>Authority:</strong> §11.4.15 (status) ·
+§11.4.16 (type) · §11.4.19 (column-alignment) · §11.4.33 (type-aware
+closure vocabulary) · §11.4.53 (Fixed_Summary parity) · §11.4.54
+(ATM-NNN ticket IDs) <strong>Scope:</strong> the closed-archive tracker.
+Every entry is a real, landed, in-git fix from this session's
+mutation-proven bug-hunt campaign + the format-matrix / PDF / DeepSeek /
+WebSocket / SSH work. Each carries a stable <code>[ATM-NNN]</code> id,
+<code>**Status:**</code>, <code>**Type:**</code>, a 1-2 line root cause,
+and the commit hash as captured evidence (§11.4.123 — no fix is claimed
+that is not in <code>git log</code>).</p>
+<p>Sort order: ATM id ascending (allocation order). The companion
+<code>Fixed_Summary.md</code> sorts most-recent-first.</p>
+<hr />
+<h3
+id="1-atm-001-splittext-dropped-paragraph-separators-at-chunk-boundaries-causing-structural-data-loss">§1.
+[ATM-001] splitText dropped paragraph separators at chunk boundaries
+causing structural data loss</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: large-chapter chunking concatenated chunks without
+re-inserting the paragraph separator at boundaries, silently flattening
+structure in the translated output. Mutation-proven.</li>
+<li>Evidence: commit <code>24b0fd0</code></li>
+</ul>
+<h3
+id="2-atm-002-in-memory-translation-cache-key-collision-served-the-wrong-translation">§2.
+[ATM-002] In-memory translation cache-key collision served the wrong
+translation</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the in-memory cache key did not distinguish all inputs,
+so distinct (text,context) tuples collided onto one entry and a prior
+translation was returned for new content. Mutation-proven.</li>
+<li>Evidence: commit <code>bd8a1ef</code></li>
+</ul>
+<h3
+id="3-atm-003-fb2-writer-dropped-deeply-nested-2-level-section-content-as-translated-text-data-loss">§3.
+[ATM-003] FB2 writer dropped deeply-nested (&gt;2 level) section content
+as translated-text data loss</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the FB2 writer recursion stopped serializing section
+content beyond two nesting levels, dropping translated text for deeply
+structured books. Mutation-proven.</li>
+<li>Evidence: commit <code>71babe1</code></li>
+</ul>
+<h3
+id="4-atm-004-anthropic-client-dropped-all-content-blocks-after-the-first-truncating-translations">§4.
+[ATM-004] Anthropic client dropped all content blocks after the first,
+truncating translations</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the Anthropic response parser read only
+<code>content[0]</code>, so multi-block responses were truncated or
+emptied. Mutation-proven.</li>
+<li>Evidence: commit <code>87a8048</code></li>
+</ul>
+<h3
+id="5-atm-005-distributed-resultcache-spurious-eviction-on-update--round-robin-index-panic-after-pool-shrink">§5.
+[ATM-005] Distributed ResultCache spurious eviction on update +
+round-robin index panic after pool shrink</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: cache update path evicted a still-valid entry, and the
+round-robin worker index was not re-bounded after the pool shrank,
+causing an out-of-range panic. Mutation-proven.</li>
+<li>Evidence: commit <code>edadd73</code></li>
+</ul>
+<h3
+id="6-atm-006-epub-percent-encodedrelative-hrefs-dropped-chapters-and-cover-html-test-hack-corrupted-content">§6.
+[ATM-006] EPUB percent-encoded/relative hrefs dropped chapters and
+cover; HTML test-hack corrupted content</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the EPUB parser failed to resolve percent-encoded /
+relative manifest hrefs (losing chapters + cover) and a leftover
+hardcoded test-hack corrupted HTML content. Mutation-proven.</li>
+<li>Evidence: commit <code>47ea69d</code></li>
+</ul>
+<h3
+id="7-atm-007-verification-parsenote-dropped-examples-terminated-notes-produced-nan-confidence-under-counted-multipass-sections">§7.
+[ATM-007] Verification parseNote dropped EXAMPLES-terminated notes,
+produced NaN confidence, under-counted multipass sections</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: note parsing terminated early on EXAMPLES, divided by
+zero into NaN confidence, and the multipass section counter was off.
+Mutation-proven.</li>
+<li>Evidence: commit <code>34e09f8</code></li>
+</ul>
+<h3
+id="8-atm-008-redis-makecachekey-metadata-delimiter-injection-collision-served-the-wrong-translation">§8.
+[ATM-008] Redis makeCacheKey metadata delimiter-injection collision
+served the wrong translation</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the Redis cache key concatenated metadata with a
+delimiter that could appear in the data, letting distinct inputs hash to
+the same key and return a wrong cached translation.
+Mutation-proven.</li>
+<li>Evidence: commit <code>9946d85</code></li>
+</ul>
+<h3
+id="9-atm-009-epubmarkdown-round-trip-destroyed-code-blocks-lost-gfm-tables-corrupted-backslash-escapes">§9.
+[ATM-009] EPUB↔︎Markdown round-trip destroyed code blocks, lost GFM
+tables, corrupted backslash-escapes</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the markdown round-trip converter mishandled fenced code
+blocks, GFM tables, and backslash escapes, losing or corrupting content
+on the EPUB→MD→EPUB path. Mutation-proven.</li>
+<li>Evidence: commit <code>d055b8c</code></li>
+</ul>
+<h3
+id="10-atm-010-api-translatetext-silently-dropped-scriptcyrillic-and-accepted-invalid-script-verifier-handlers-returned-wrong-http-status">§10.
+[ATM-010] API translateText silently dropped script=cyrillic and
+accepted invalid script; verifier handlers returned wrong HTTP
+status</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the translate API ignored the cyrillic script flag and
+did not validate the script value; verifier handlers mapped every
+GetModel error to one wrong status code. Mutation-proven.</li>
+<li>Evidence: commit <code>b8bc3ec</code></li>
+</ul>
+<h3
+id="11-atm-011-verifier-fallback-chain-randomly-shuffled-lost-score-order-openrouter-pricing-decode-failed-on-string-values">§11.
+[ATM-011] Verifier fallback chain randomly shuffled (lost score order);
+OpenRouter pricing decode failed on string values</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the fallback chain was non-deterministically shuffled,
+discarding score-priority order, and OpenRouter pricing decoding assumed
+numeric JSON where the API returns strings. Mutation-proven.</li>
+<li>Evidence: commit <code>4a95b06</code></li>
+</ul>
+<h3
+id="12-atm-012-grpc-gettranslationstatus-returned-the-wrong-error-code-cleanupoldsessions-leaked-a-timeout-context">§12.
+[ATM-012] gRPC GetTranslationStatus returned the wrong error code;
+cleanupOldSessions leaked a timeout context</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: status lookup returned an incorrect gRPC code for
+missing sessions, and the session-cleanup loop never cancelled its
+per-iteration timeout context. Mutation-proven.</li>
+<li>Evidence: commit <code>45f6152</code></li>
+</ul>
+<h3
+id="13-atm-013-cwe-208-username-enumeration-timing-oracle-in-authenticateuser">§13.
+[ATM-013] CWE-208 username-enumeration timing oracle in
+AuthenticateUser</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: authentication short-circuited on unknown usernames
+before the password hash compare, leaking account existence via response
+timing. Mutation-proven.</li>
+<li>Evidence: commit <code>5871848</code></li>
+</ul>
+<h3
+id="14-atm-014-preparation-failed-chapter-analysis-misattribution--nested-subsection-analysis-content-loss">§14.
+[ATM-014] Preparation failed-chapter analysis misattribution +
+nested-subsection analysis content loss</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: a failed chapter analysis was attributed to the wrong
+chapter index and nested subsection content was dropped from the
+analysis pass. Mutation-proven.</li>
+<li>Evidence: commit <code>367d88b</code></li>
+</ul>
+<h3
+id="15-atm-015-directory-batch-to-a-non-existent-output-dir-collided-all-files-onto-one-path-data-loss">§15.
+[ATM-015] Directory batch to a non-existent output dir collided all
+files onto one path (data loss)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: batch directory translation did not create the output
+directory and computed a single colliding output path, so every file
+overwrote one another. Mutation-proven.</li>
+<li>Evidence: commit <code>53b5056</code></li>
+</ul>
+<h3
+id="16-atm-016-coordination-translatewithretry-ignored-ctx-cancellation-consensus-skipped-available-instances">§16.
+[ATM-016] Coordination TranslateWithRetry ignored ctx cancellation;
+consensus skipped available instances</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the retry loop did not honor context cancellation, and
+the consensus selector skipped instances that were actually available.
+Mutation-proven.</li>
+<li>Evidence: commit <code>df8a8cb</code></li>
+</ul>
+<h3
+id="17-atm-017-successful-but-empty-translation-silently-wiped-source-content-data-loss">§17.
+[ATM-017] Successful-but-empty translation silently wiped source content
+(data loss)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: when a provider returned an empty string with a success
+status, the pipeline wrote the empty result over the source instead of
+preserving the original. Mutation-proven.</li>
+<li>Evidence: commit <code>837f528</code></li>
+</ul>
+<h3
+id="18-atm-018-dashboard-eta-formatduration-trailing-space--non-unique-progress-event-ids">§18.
+[ATM-018] Dashboard ETA formatDuration trailing space + non-unique
+progress event IDs</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: <code>formatDuration</code> emitted a trailing space and
+progress event IDs were not unique, breaking dashboard event
+de-duplication. Mutation-proven.</li>
+<li>Evidence: commit <code>b1b747f</code></li>
+</ul>
+<h3
+id="19-atm-019-qwen-client-posted-to-native-dashscope-path-under-an-openai-compatible-base-wrong-url--response-shape-mismatch">§19.
+[ATM-019] Qwen client posted to native DashScope path under an
+OpenAI-compatible base (wrong URL + response-shape mismatch)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the Qwen client mixed the native DashScope endpoint with
+an OpenAI-compatible base URL, producing a wrong request URL and a
+response shape the parser could not read. Mutation-proven.</li>
+<li>Evidence: commit <code>556002d</code></li>
+</ul>
+<h3
+id="20-atm-020-preparation-translator--providers-flag-silently-ignored-cli-explicit--provider-overridden-by-config">§20.
+[ATM-020] preparation-translator -providers flag silently ignored; CLI
+explicit -provider overridden by config</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the <code>-providers</code> flag was parsed but never
+consumed, and an explicit <code>-provider</code> was overwritten by the
+config value. Mutation-proven.</li>
+<li>Evidence: commit <code>5dfe003</code></li>
+</ul>
+<h3
+id="21-atm-021-storage-cache-dup-tuple-served-stale-translation-added-unique-lookup-hash-index--idempotent-upsert">§21.
+[ATM-021] Storage cache dup-tuple served stale translation (added UNIQUE
+lookup-hash index + idempotent UPSERT)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: duplicate lookup tuples could store divergent rows with
+no uniqueness constraint, serving a stale translation; fixed with a
+UNIQUE index, idempotent UPSERT, and migration. Mutation-proven.</li>
+<li>Evidence: commit <code>367adce</code></li>
+</ul>
+<h3
+id="22-atm-022-versionmanagermetrics-data-race--lost-updates--11485-stresschaos-suites">§22.
+[ATM-022] VersionManager.metrics data race / lost updates (+ §11.4.85
+stress/chaos suites)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: concurrent metric updates in the distributed
+VersionManager raced and lost increments; fixed with synchronization
+plus stress/chaos coverage. Mutation-proven.</li>
+<li>Evidence: commit <code>bf81517</code></li>
+</ul>
+<h3
+id="23-atm-023-qwen-compatible-mode-alignment-to-default-base--11498-honest-live-test">§23.
+[ATM-023] Qwen compatible-mode alignment to default base +
+§11.4.98-honest live test</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: Qwen compatible-mode used an inconsistent base URL;
+aligned to the default compatible base and made the live test honest per
+§11.4.98.</li>
+<li>Evidence: commit <code>2f0e359</code></li>
+</ul>
+<h3
+id="24-atm-024-docx-input-non-functional-license-gated-unioffice--rewritten-as-a-stdlib-ooxml-parser">§24.
+[ATM-024] DOCX input non-functional (license-gated unioffice) —
+rewritten as a stdlib OOXML parser</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: DOCX parsing depended on the license-gated unioffice
+library and was inert; rewritten as a stdlib OOXML parser, dropping the
+dependency. Real-artifact proven.</li>
+<li>Evidence: commit <code>d433210</code></li>
+</ul>
+<h3
+id="25-atm-025-api-key-gate-ignored-provider-env-vars-deepseek_api_key-etc-in-unified-translator">§25.
+[ATM-025] API-key gate ignored provider env vars (DEEPSEEK_API_KEY etc.)
+in unified-translator</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the unified CLI API-key gate did not read
+provider-specific environment variables, blocking otherwise-valid
+providers. Real DeepSeek E2E proof committed.</li>
+<li>Evidence: commit <code>c6c2930</code></li>
+</ul>
+<h3
+id="26-atm-026-docx-rejected-by-the-cli-pipeline-despite-a-working-parser-detectorissupported-missing-docx">§26.
+[ATM-026] DOCX rejected by the CLI pipeline despite a working parser
+(detector.IsSupported missing DOCX)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the format detector's supported-set omitted DOCX, so the
+CLI rejected files the parser could handle. Real E2E proven.</li>
+<li>Evidence: commit <code>6304f60</code></li>
+</ul>
+<h3
+id="27-atm-027-fb2--epub-input-broken-end-to-end-converttomarkdown-re-parsed-already-extracted-text">§27.
+[ATM-027] FB2 + EPUB input broken end-to-end (convertToMarkdown
+re-parsed already-extracted text)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the unified pipeline re-ran
+<code>convertToMarkdown</code> over already-extracted FB2/EPUB text,
+corrupting the content; fixed so all five input formats translate. Real
+E2E matrix proven.</li>
+<li>Evidence: commit <code>41063cb</code></li>
+</ul>
+<h3
+id="28-atm-028-zhipu-missing-from-the-api-key-env-map-in-unified-translator--stale-allowlist-audit">§28.
+[ATM-028] Zhipu missing from the API-key env map in unified-translator
+(+ stale-allowlist audit)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the Zhipu provider was absent from the env-key map, so
+its key was never picked up. Multi-provider E2E proof + stale-allowlist
+audit committed.</li>
+<li>Evidence: commit <code>9821e0f</code></li>
+</ul>
+<h3
+id="29-atm-029-stale-provider-model-allowlists-blocked-current-geminigroqzhipu-models">§29.
+[ATM-029] Stale provider model-allowlists blocked current
+gemini/groq/zhipu models</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: hardcoded model allowlists predated current provider
+catalogs, rejecting valid current models; added current models,
+live-proven.</li>
+<li>Evidence: commit <code>b23bcac</code></li>
+</ul>
+<h3
+id="30-atm-030-coordination-consensus-tie-break-was-non-deterministic-map-iteration-order">§30.
+[ATM-030] Coordination consensus tie-break was non-deterministic
+(map-iteration order)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: consensus tie-breaking iterated a map, producing
+non-deterministic winners across runs; made deterministic.
+Mutation-proven.</li>
+<li>Evidence: commit <code>77a0c15</code></li>
+</ul>
+<h3
+id="31-atm-031-multipass-verification-chapter-loop-panicked-when-translation-has-fewer-chapters-than-original">§31.
+[ATM-031] Multipass verification chapter loop panicked when translation
+has fewer chapters than original</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the multipass loop indexed the translation by the
+original's chapter count, panicking when the translation had fewer
+chapters.</li>
+<li>Evidence: commit <code>9640a00</code></li>
+</ul>
+<h3 id="32-atm-032-fb2-writer-dropped-sectionsubsection-titles">§32.
+[ATM-032] FB2 writer dropped section/subsection titles</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the FB2 writer omitted section and subsection
+<code>&lt;title&gt;</code> elements from the serialized output, losing
+chapter headings. Mutation-proven.</li>
+<li>Evidence: commit <code>b83038c</code></li>
+</ul>
+<h3
+id="33-atm-033-pdf-input-revived--replaced-license-gated-unipdf-with-mit-ledongthucpdf">§33.
+[ATM-033] PDF input revived — replaced license-gated unipdf with MIT
+ledongthuc/pdf</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: PDF input was dead behind the license-gated unipdf
+dependency; replaced with the MIT ledongthuc/pdf library.
+Real-translation proven.</li>
+<li>Evidence: commit <code>18d6f73</code></li>
+</ul>
+<h3
+id="34-atm-034-cli-ignored--o-output-format--always-emitted-epub">§34.
+[ATM-034] CLI ignored -o output format — always emitted EPUB</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the CLI hardcoded EPUB output regardless of the
+<code>-o</code> extension; now honors <code>.txt/.fb2/.md/.epub</code>
+(+ 2 §11.4.120 gate reconciliations).</li>
+<li>Evidence: commit <code>ca5608f</code></li>
+</ul>
+<h3
+id="35-atm-035-add-htmlhtm-cli-output-format-completes-the-5-output-matrix">§35.
+[ATM-035] Add .html/.htm CLI output format (completes the 5-output
+matrix)</h3>
+<p><strong>Status:</strong> Implemented (→ Fixed.md)
+<strong>Type:</strong> Feature</p>
+<ul>
+<li>Summary: added HTML-escaped <code>.html/.htm</code> output,
+completing the output-format matrix. Real-translation proven.</li>
+<li>Evidence: commit <code>fb07a59</code></li>
+</ul>
+<h3
+id="36-atm-036-deepseek-model-allowlist-un-staled-accept-deepseek-v4-flashv4-pro">§36.
+[ATM-036] DeepSeek model allowlist un-staled (accept
+deepseek-v4-flash/v4-pro)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the DeepSeek allowlist predated v4 models and rejected
+them; updated via live <code>/models</code> + real-translation
+verification (the canonical allowlist-refresh template).</li>
+<li>Evidence: commit <code>0fd1a34</code></li>
+</ul>
+<h3
+id="37-atm-037-websocket-monitoring-test-harness-data-races--fatal-map-panic">§37.
+[ATM-037] WebSocket monitoring test harness data races + fatal map
+panic</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Task</p>
+<ul>
+<li>Root cause: the monitoring test harness had concurrent map access
+causing data races and a fatal map-write panic; serialized access in the
+harness.</li>
+<li>Evidence: commit <code>ab7db0e</code></li>
+</ul>
+<h3
+id="38-atm-038-testssherrorhandling-brittle-error-string-assertion-1141">§38.
+[ATM-038] TestSSHErrorHandling brittle error-string assertion
+(§11.4.1)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Task</p>
+<ul>
+<li>Root cause: the SSH error test asserted an exact error substring
+that varied by environment, producing FAIL-bluffs; assert on a stable
+condition instead.</li>
+<li>Evidence: commit <code>817b9dd</code></li>
+</ul>
+<h3
+id="39-atm-039-preparation-per-chapter-analysis-stamped-no-authoritative-chapter-number">§39.
+[ATM-039] Preparation per-chapter analysis stamped no authoritative
+chapter number</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: per-chapter analysis records lacked the authoritative
+chapter number, breaking downstream attribution; now stamped.</li>
+<li>Evidence: commit <code>0df25d9</code></li>
+</ul>
+<h3
+id="40-atm-040-hardware-parselscpucores-undercounts-physical-cores-on-multi-socket-hosts">§40.
+[ATM-040] hardware parseLscpuCores undercounts physical cores on
+multi-socket hosts</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: <code>parseLscpuCores</code> counted cores per socket
+once instead of multiplying across sockets, undercounting on
+multi-socket machines and mis-tuning concurrency.</li>
+<li>Evidence: commit <code>80d627b</code></li>
+</ul>
+<h3
+id="41-atm-041-batch-same-stemdifferent-ext-inputs-collided-onto-one-output-file-data-loss">§41.
+[ATM-041] Batch same-stem/different-ext inputs collided onto one output
+file (data loss)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: batch output naming used only the file stem, so
+<code>a.txt</code> and <code>a.fb2</code> produced the same output path
+and overwrote each other.</li>
+<li>Evidence: commit <code>c3117f8</code></li>
+</ul>
+<h3
+id="42-atm-042-security-refreshtoken-resurrected-expiredunbounded-sessions-into-fresh-valid-tokens">§42.
+[ATM-042] Security RefreshToken resurrected expired/unbounded sessions
+into fresh valid tokens</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: token refresh did not re-check session expiry/bounds, so
+an expired session could be exchanged for a fresh valid token.</li>
+<li>Evidence: commit <code>d0fe40a</code></li>
+</ul>
+<h3
+id="43-atm-043-emptynull-llmsverifier-envelope-modelsnull-failed-to-decode-breaking-apiv1verified-models">§43.
+[ATM-043] Empty/null LLMsVerifier envelope ({"models":null}) failed to
+decode, breaking /api/v1/verified-models</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the verified-models decoder did not tolerate a null
+models array, so the endpoint broke whenever zero models were verified.
+Mutation-proven.</li>
+<li>Evidence: commit <code>d8142e5</code></li>
+</ul>
+<h3 id="44-atm-044-fb2--dropped-inline-element-text">§44. [ATM-044] FB2
+<v>/<subtitle>/<text-author> dropped inline-element text</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the FB2 parser did not descend into inline elements
+inside <code>&lt;v&gt;</code>, <code>&lt;subtitle&gt;</code>, and
+<code>&lt;text-author&gt;</code>, dropping their text.
+Mutation-proven.</li>
+<li>Evidence: commit <code>8f52370</code></li>
+</ul>
+<h3
+id="45-atm-045-distributed-fallback-getfailurerate-fabricated-a-100-rate-on-window-expiry--zero-window">§45.
+[ATM-045] Distributed fallback getFailureRate fabricated a 100% rate on
+window expiry / zero window</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the failure-rate calculation divided by an empty/expired
+window and reported a fabricated 100% failure rate, triggering needless
+fallback.</li>
+<li>Evidence: commit <code>20beda7</code></li>
+</ul>
+<h3
+id="46-atm-046-markdownepub-chapter--shipped-unescaped--malformed-xhtml">§46.
+[ATM-046] markdown→EPUB chapter <title> shipped unescaped — malformed
+XHTML</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the markdown→EPUB writer wrote chapter titles into XHTML
+without escaping <code>&amp;</code>/<code>&lt;</code>/<code>&gt;</code>,
+producing malformed XHTML for those titles. Mutation-proven.</li>
+<li>Evidence: commit <code>be81550</code></li>
+</ul>
+<h3
+id="47-atm-047-verification-polishchapterpolishsectionrecursive-index-out-of-range-on-shorter-translations">§47.
+[ATM-047] Verification polishChapter/polishSectionRecursive
+index-out-of-range on shorter translations</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the polish pass indexed by the original
+section/subsection count and went out of range when the translation had
+fewer. Mutation-proven.</li>
+<li>Evidence: commit <code>7434ee4</code></li>
+</ul>
+<h3
+id="48-atm-048-ollama-client-dropped-temperaturemax_tokens--never-sent-options-to-apigenerate">§48.
+[ATM-048] Ollama client dropped temperature/max_tokens — never sent
+options to /api/generate</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the Ollama client never populated the
+<code>options</code> field, so temperature and max_tokens were silently
+ignored. Mutation-proven.</li>
+<li>Evidence: commit <code>a728e57</code></li>
+</ul>
+<h3
+id="49-atm-049-epub-chapter-text-shipped-html-entities-literally-to-readers">§49.
+[ATM-049] EPUB chapter text shipped HTML entities literally to
+readers</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: EPUB chapter text was emitted with HTML entities
+un-decoded, so readers saw literal entity sequences.
+Mutation-proven.</li>
+<li>Evidence: commit <code>107e570</code></li>
+</ul>
+<h3
+id="50-atm-050-grpc-subscribeevents-delivered-lifecycle-events-with-an-empty-session_id">§50.
+[ATM-050] gRPC SubscribeEvents delivered lifecycle events with an empty
+session_id</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the SubscribeEvents stream forwarded lifecycle events
+without populating <code>session_id</code>, breaking client-side session
+filtering.</li>
+<li>Evidence: commit <code>fd07e18</code></li>
+</ul>
+<h3
+id="51-atm-051-loadconfig-nil-map-panic-when-config-omits-translationproviders-and-a-provider-key-env-var-is-set">§51.
+[ATM-051] LoadConfig nil-map panic when config omits
+translation.providers and a provider key env var is set</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: <code>LoadConfig</code> wrote into a nil providers map
+when the config omitted <code>translation.providers</code> but a
+provider API-key env var was present, panicking on startup.</li>
+<li>Evidence: commit <code>fa35d2e</code></li>
+</ul>
+<h3
+id="52-atm-052-epub-cover-image-mislabeled-imagejpeg-on-round-trip-broke-pnggifwebpsvg-covers">§52.
+[ATM-052] EPUB cover image mislabeled image/jpeg on round-trip (broke
+PNG/GIF/WEBP/SVG covers)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the EPUB writer hardcoded <code>image/jpeg</code> for
+the cover media type, breaking non-JPEG covers on round-trip.</li>
+<li>Evidence: commit <code>c416bd8</code></li>
+</ul>
+<h3
+id="53-atm-053-basetranslator-cachestats-data-race--concurrent-map-write-crash">§53.
+[ATM-053] BaseTranslator cache/stats data race + concurrent-map-write
+crash</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: concurrent translators accessed the cache/stats maps
+without synchronization, causing data races and a concurrent-map-write
+crash. Race-proven.</li>
+<li>Evidence: commit <code>8316e3f</code></li>
+</ul>
+<h3
+id="54-atm-054-markdown-translator--format-flag-unvalidated--unsupported-value-produced-no-output-yet-reported-success">§54.
+[ATM-054] markdown-translator -format flag unvalidated — unsupported
+value produced no output yet reported success</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the markdown-translator did not validate
+<code>-format</code> against <code>{epub,md}</code>, so an unsupported
+value silently produced no output while reporting success.</li>
+<li>Evidence: commit <code>85b3362</code></li>
+</ul>
+<h3
+id="55-atm-055-cli-ssh-provider-ignored--sourcetarget-lang--script--llama-binary-model-hardcoded-rusr-cyrillic">§55.
+[ATM-055] CLI SSH provider ignored -source/target-lang, -script,
+-llama-binary/-model (hardcoded ru→sr-cyrillic)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the SSH provider path hardcoded ru→sr-cyrillic and
+ignored the language/script/llama flags, so non-default jobs produced
+wrong output.</li>
+<li>Evidence: commit <code>36f740a</code></li>
+</ul>
+<h3
+id="56-atm-056-cmdapi-server-source-was-gitignored-committed-health-check-regression-guard">§56.
+[ATM-056] cmd/api-server source was gitignored; committed health-check
+regression guard</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Task</p>
+<ul>
+<li>Root cause: a <code>.gitignore</code> rule excluded
+<code>cmd/api-server/</code> source (§11.4.30 violation); un-ignored it
+and committed a health-check regression guard.</li>
+<li>Evidence: commit <code>4bbac9a</code></li>
+</ul>
+<h3
+id="57-atm-057-cmdcli-gemini_api_key-silently-ignored--gemini-missing-from-env-key-map">§57.
+[ATM-057] cmd/cli GEMINI_API_KEY silently ignored — gemini missing from
+env-key map</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the <code>cmd/cli</code> env-key map omitted gemini, so
+<code>GEMINI_API_KEY</code> was never read.</li>
+<li>Evidence: commit <code>309ca91</code></li>
+</ul>
+<h3
+id="58-atm-058-translate-ssh-delivered-the-translated-epub-to-the-wrong-path--output-ignored">§58.
+[ATM-058] translate-ssh delivered the translated EPUB to the wrong path;
+-output ignored</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the SSH worker wrote the translated EPUB to a derived
+path and ignored <code>-output</code>, delivering the result to the
+wrong location.</li>
+<li>Evidence: commit <code>86d10d4</code></li>
+</ul>
+<h3
+id="59-atm-059-grpc-server-ignored-documented-env-var-overrides-grpc_addressport-log_level-enable_metricsreflection">§59.
+[ATM-059] grpc-server ignored documented env-var overrides
+(GRPC_ADDRESS/PORT, LOG_LEVEL, ENABLE_METRICS/REFLECTION)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the gRPC server documented env-var overrides but never
+read them, so configuration via environment had no effect.</li>
+<li>Evidence: commit <code>21c2460</code></li>
+</ul>
+<h3
+id="60-atm-060-cmddeployment-status-action-panicked-on-container-ids-shorter-than-12-chars">§60.
+[ATM-060] cmd/deployment status action panicked on container IDs shorter
+than 12 chars</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the deployment status formatter sliced the container ID
+to 12 chars without a length check, panicking on shorter IDs.</li>
+<li>Evidence: commit <code>cde2e1a</code></li>
+</ul>
+<h3
+id="61-atm-061-grpc-servermonitor-server-dead--max-connections-flag-wired--monitor-start-error-no-longer-swallowed">§61.
+[ATM-061] grpc-server/monitor-server: dead -max-connections flag wired +
+monitor start error no longer swallowed</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the <code>-max-connections</code> flag was parsed but
+inert, and the monitor server's start error was discarded, hiding
+startup failures. Mutation-proven.</li>
+<li>Evidence: commit <code>93e89d7</code></li>
+</ul>
+<h3
+id="62-atm-062-logger-json-reserved-key-collision-silently-dropped-real-severitymessagetimestamp">§62.
+[ATM-062] logger JSON reserved-key collision silently dropped real
+severity/message/timestamp</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: structured log fields named like reserved keys
+(severity/message/timestamp) overwrote the real log values in the JSON
+output. Mutation-proven.</li>
+<li>Evidence: commit <code>daa2f70</code></li>
+</ul>
+<h3
+id="63-atm-063-enhancetranslation-capitalization-dead-for-cyrillicaccented-latin-first-letters-byte-indexed-guard">§63.
+[ATM-063] enhanceTranslation capitalization dead for
+Cyrillic/accented-Latin first letters (byte-indexed guard)</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>Root cause: the capitalization guard used a byte index assuming
+ASCII, so multi-byte Cyrillic/accented-Latin first letters were never
+capitalized. Mutation-proven.</li>
+<li>Evidence: commit <code>e520c4c</code></li>
+</ul>
+<h3
+id="64-atm-064-single-source-binary-version-from-authoritative-version">§64.
+[ATM-064] Single-source binary version from authoritative VERSION</h3>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Task</p>
+<ul>
+<li>Root cause: binaries hardcoded divergent <code>appVersion</code>
+literals; reconciled to read the single authoritative
+<code>VERSION</code> (P0.1). Mutation-proven.</li>
+<li>Evidence: commit <code>a36030e</code></li>
+</ul>
+<hr />
+<p><em>This archive is regenerated into <code>Fixed_Summary.md</code> by
+<code>scripts/testing/generate_fixed_summary.sh</code>. Do not hand-edit
+the summary.</em></p>
+</body>
+</html>

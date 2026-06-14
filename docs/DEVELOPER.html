@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DEVELOPER</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">DEVELOPER</h1>
+</header>
+<h1 id="developer-guide">Developer Guide</h1>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#architecture-overview">Architecture Overview</a></li>
+<li><a href="#development-environment-setup">Development Environment
+Setup</a></li>
+<li><a href="#code-structure">Code Structure</a></li>
+<li><a href="#building-and-testing">Building and Testing</a></li>
+<li><a href="#adding-new-translation-providers">Adding New Translation
+Providers</a></li>
+<li><a href="#file-format-support">File Format Support</a></li>
+<li><a href="#distributed-system-development">Distributed System
+Development</a></li>
+<li><a href="#api-development">API Development</a></li>
+<li><a href="#database-schema">Database Schema</a></li>
+<li><a href="#performance-optimization">Performance
+Optimization</a></li>
+<li><a href="#contributing-guidelines">Contributing Guidelines</a></li>
+</ol>
+<h2 id="architecture-overview">Architecture Overview</h2>
+<h3 id="system-components">System Components</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                    Web Interface/API                        │
+├─────────────────────────────────────────────────────────────┤
+│                 Translation Engine                          │
+│  ┌─────────────┬─────────────┬─────────────┬─────────────┐   │
+│  │   LLM       │  Dictionary │  Quality    │ Distributed │   │
+│  │  Providers  │ Translation │ Verification│  Processing │   │
+│  └─────────────┴─────────────┴─────────────┴─────────────┘   │
+├─────────────────────────────────────────────────────────────┤
+│                   File Processing                           │
+│  ┌─────────────┬─────────────┬─────────────┬─────────────┐   │
+│  │  FB2 Parser │ EPUB Parser │  HTML Parser │ TXT Parser  │   │
+│  └─────────────┴─────────────┴─────────────┴─────────────┘   │
+├─────────────────────────────────────────────────────────────┤
+│                    Storage Layer                            │
+│  ┌─────────────┬─────────────┬─────────────┬─────────────┐   │
+│  │  Database   │   Cache     │ File System │  Queuing    │   │
+│  └─────────────┴─────────────┴─────────────┴─────────────┘   │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<h3 id="core-packages">Core Packages</h3>
+<ul>
+<li><strong>pkg/translator</strong>: Translation engine and LLM
+providers</li>
+<li><strong>pkg/ebook</strong>: File format parsers and writers</li>
+<li><strong>pkg/distributed</strong>: Distributed processing system</li>
+<li><strong>pkg/verification</strong>: Quality verification system</li>
+<li><strong>pkg/api</strong>: REST API implementation</li>
+<li><strong>pkg/websocket</strong>: Real-time communication</li>
+<li><strong>internal/</strong>: Internal utilities and
+configuration</li>
+</ul>
+<h3 id="data-flow">Data Flow</h3>
+<pre><code>Input File → Parser → Translation Engine → Verification → Writer → Output File
+     ↓              ↓              ↓              ↓
+   Metadata    Segmentation   LLM Provider   Quality Check
+     ↓              ↓              ↓              ↓
+   Storage      Queue        Caching        Reporting</code></pre>
+<h2 id="development-environment-setup">Development Environment
+Setup</h2>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li><strong>Go</strong>: Version 1.21 or higher</li>
+<li><strong>Git</strong>: For version control</li>
+<li><strong>Docker</strong>: For containerized development</li>
+<li><strong>Make</strong>: For build automation</li>
+<li><strong>Node.js</strong>: Version 18+ (for web interface
+development)</li>
+</ul>
+<h3 id="setup-steps">Setup Steps</h3>
+<ol type="1">
+<li><p><strong>Clone the Repository</strong>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/digital-vasic/translator.git</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> translator</span></code></pre></div></li>
+<li><p><strong>Install Dependencies</strong>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod download</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> deps</span></code></pre></div></li>
+<li><p><strong>Set Environment Variables</strong>:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> .env.example .env</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Edit .env with your API keys</span></span></code></pre></div></li>
+<li><p><strong>Set Up Database</strong> (optional):</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> db-setup</span></code></pre></div></li>
+<li><p><strong>Run Tests</strong>:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test</span></code></pre></div></li>
+<li><p><strong>Start Development Server</strong>:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> dev</span></code></pre></div></li>
+</ol>
+<h3 id="ide-configuration">IDE Configuration</h3>
+<h4 id="vs-code">VS Code</h4>
+<p>Install these extensions:</p>
+<ul>
+<li>Go (golang.go)</li>
+<li>Docker (ms-azuretools.vscode-docker)</li>
+<li>REST Client (humao.rest-client)</li>
+</ul>
+<p>Configure workspace settings:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;go.useLanguageServer&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;go.testFlags&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;-v&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;go.buildFlags&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;-v&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;go.lintOnSave&quot;</span><span class="fu">:</span> <span class="st">&quot;package&quot;</span><span class="fu">,</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;go.vetOnSave&quot;</span><span class="fu">:</span> <span class="st">&quot;package&quot;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h4 id="goland">GoLand</h4>
+<ul>
+<li>Enable Go modules support</li>
+<li>Configure run configurations for tests</li>
+<li>Set up database integration</li>
+<li>Configure Docker integration</li>
+</ul>
+<h2 id="code-structure">Code Structure</h2>
+<h3 id="project-layout">Project Layout</h3>
+<pre><code>translator/
+├── cmd/                     # Command-line applications
+│   ├── cli/                # CLI application
+│   ├── server/             # Web server
+│   └── worker/             # Distributed worker
+├── pkg/                    # Public packages
+│   ├── translator/         # Translation engine
+│   │   ├── llm/           # LLM providers
+│   │   └── dictionary/    # Dictionary translation
+│   ├── ebook/             # File format handling
+│   ├── distributed/       # Distributed processing
+│   ├── verification/      # Quality verification
+│   ├── api/              # REST API
+│   └── websocket/        # WebSocket handlers
+├── internal/              # Internal packages
+│   ├── config/           # Configuration management
+│   ├── cache/            # Caching layer
+│   ├── database/         # Database operations
+│   └── utils/            # Utilities
+├── test/                  # Test utilities and mocks
+├── docs/                  # Documentation
+├── scripts/               # Build and deployment scripts
+├── web/                   # Web interface assets
+└── configs/              # Configuration files</code></pre>
+<h3 id="package-dependencies">Package Dependencies</h3>
+<pre><code>cmd/             → pkg/translator, pkg/ebook, pkg/api
+pkg/translator   → internal/config, internal/cache
+pkg/ebook         → pkg/translator
+pkg/distributed   → pkg/translator, internal/database
+pkg/api           → pkg/translator, pkg/websocket
+pkg/websocket     → pkg/distributed
+internal/         → External dependencies only</code></pre>
+<h3 id="interface-contracts">Interface Contracts</h3>
+<h4 id="translation-provider-interface">Translation Provider
+Interface</h4>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TranslationProvider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    Translate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>TranslationRequest<span class="op">)</span> <span class="op">(*</span>TranslationResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    GetModels<span class="op">()</span> <span class="op">([]</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    ValidateConfig<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    GetCapabilities<span class="op">()</span> ProviderCapabilities</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TranslationRequest <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    Text       <span class="dt">string</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    SourceLang <span class="dt">string</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    TargetLang <span class="dt">string</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    Options    TranslationOptions</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TranslationResponse <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    TranslatedText <span class="dt">string</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    Confidence     <span class="dt">float64</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    Model         <span class="dt">string</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    TokensUsed    <span class="dt">int</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    Cost          <span class="dt">float64</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="file-parser-interface">File Parser Interface</h4>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Parser <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    Parse<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> data <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="op">(*</span>Ebook<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    Validate<span class="op">(</span>data <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    SupportedFormats<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    GetMetadata<span class="op">(</span>data <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="op">(*</span>Metadata<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Writer <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    Write<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> ebook <span class="op">*</span>Ebook<span class="op">)</span> <span class="op">([]</span><span class="dt">byte</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    SupportedFormats<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="building-and-testing">Building and Testing</h2>
+<h3 id="build-commands">Build Commands</h3>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build all binaries</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Build specific component</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-cli</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-server</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-worker</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Build for different platforms</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-all-platforms</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Build Docker images</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> docker-build</span></code></pre></div>
+<h3 id="testing">Testing</h3>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run all tests</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Run specific test suite</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-unit</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-integration</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-e2e</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Run with coverage</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-coverage</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Run benchmarks</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-bench</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Race condition tests</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-race</span></code></pre></div>
+<h3 id="code-quality">Code Quality</h3>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Lint code</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> lint</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Format code</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> fmt</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Security audit</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> security-audit</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Dependency check</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> deps-check</span></code></pre></div>
+<h3 id="development-workflow">Development Workflow</h3>
+<ol type="1">
+<li><p><strong>Create Feature Branch</strong>:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="at">-b</span> feature/new-provider</span></code></pre></div></li>
+<li><p><strong>Make Changes</strong> with tests:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Write code</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./pkg/translator/llm/...</span></code></pre></div></li>
+<li><p><strong>Run Full Test Suite</strong>:</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-all</span></code></pre></div></li>
+<li><p><strong>Commit Changes</strong>:</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat: add new translation provider&quot;</span></span></code></pre></div></li>
+<li><p><strong>Push and Create PR</strong>:</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin feature/new-provider</span></code></pre></div></li>
+</ol>
+<h2 id="adding-new-translation-providers">Adding New Translation
+Providers</h2>
+<h3 id="step-1-create-provider-implementation">Step 1: Create Provider
+Implementation</h3>
+<p>Create <code>pkg/translator/llm/newprovider/provider.go</code>:</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> newprovider</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/digital-vasic/translator/pkg/translator&quot;</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Provider <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    config <span class="op">*</span>Config</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    client <span class="op">*</span>Client</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Config <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    APIKey      <span class="dt">string</span> <span class="st">`yaml:&quot;api_key&quot;`</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    BaseURL     <span class="dt">string</span> <span class="st">`yaml:&quot;base_url&quot;`</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    Model       <span class="dt">string</span> <span class="st">`yaml:&quot;model&quot;`</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>    Temperature <span class="dt">float64</span> <span class="st">`yaml:&quot;temperature&quot;`</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    MaxTokens   <span class="dt">int</span>    <span class="st">`yaml:&quot;max_tokens&quot;`</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Client <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>    apiKey  <span class="dt">string</span></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>    baseURL <span class="dt">string</span></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewProvider<span class="op">(</span>config <span class="op">*</span>Config<span class="op">)</span> <span class="op">*</span>Provider <span class="op">{</span></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>Provider<span class="op">{</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>        config<span class="op">:</span> config<span class="op">,</span></span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>        client<span class="op">:</span> <span class="op">&amp;</span>Client<span class="op">{</span></span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>            apiKey<span class="op">:</span>  config<span class="op">.</span>APIKey<span class="op">,</span></span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>            baseURL<span class="op">:</span> config<span class="op">.</span>BaseURL<span class="op">,</span></span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>Provider<span class="op">)</span> Translate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>translator<span class="op">.</span>TranslationRequest<span class="op">)</span> <span class="op">(*</span>translator<span class="op">.</span>TranslationResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Implementation here</span></span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>translator<span class="op">.</span>TranslationResponse<span class="op">{</span></span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>        TranslatedText<span class="op">:</span> <span class="st">&quot;Translated text&quot;</span><span class="op">,</span></span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a>        Confidence<span class="op">:</span>     <span class="fl">0.95</span><span class="op">,</span></span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a>        Model<span class="op">:</span>         p<span class="op">.</span>config<span class="op">.</span>Model<span class="op">,</span></span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a>        TokensUsed<span class="op">:</span>    <span class="dv">100</span><span class="op">,</span></span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a>        Cost<span class="op">:</span>          <span class="fl">0.001</span><span class="op">,</span></span>
+<span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>Provider<span class="op">)</span> GetModels<span class="op">()</span> <span class="op">([]</span>translator<span class="op">.</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">[]</span>translator<span class="op">.</span>Model<span class="op">{</span></span>
+<span id="cb22-50"><a href="#cb22-50" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb22-51"><a href="#cb22-51" aria-hidden="true" tabindex="-1"></a>            Name<span class="op">:</span>        <span class="st">&quot;model-name&quot;</span><span class="op">,</span></span>
+<span id="cb22-52"><a href="#cb22-52" aria-hidden="true" tabindex="-1"></a>            DisplayName<span class="op">:</span> <span class="st">&quot;Model Display Name&quot;</span><span class="op">,</span></span>
+<span id="cb22-53"><a href="#cb22-53" aria-hidden="true" tabindex="-1"></a>            MaxTokens<span class="op">:</span>   <span class="dv">4096</span><span class="op">,</span></span>
+<span id="cb22-54"><a href="#cb22-54" aria-hidden="true" tabindex="-1"></a>            CostPer1K<span class="op">:</span>   <span class="fl">0.002</span><span class="op">,</span></span>
+<span id="cb22-55"><a href="#cb22-55" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb22-56"><a href="#cb22-56" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb22-57"><a href="#cb22-57" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb22-58"><a href="#cb22-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-59"><a href="#cb22-59" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>Provider<span class="op">)</span> ValidateConfig<span class="op">()</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb22-60"><a href="#cb22-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> p<span class="op">.</span>config<span class="op">.</span>APIKey <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb22-61"><a href="#cb22-61" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;API key is required&quot;</span><span class="op">)</span></span>
+<span id="cb22-62"><a href="#cb22-62" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb22-63"><a href="#cb22-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb22-64"><a href="#cb22-64" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb22-65"><a href="#cb22-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-66"><a href="#cb22-66" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>Provider<span class="op">)</span> GetCapabilities<span class="op">()</span> translator<span class="op">.</span>ProviderCapabilities <span class="op">{</span></span>
+<span id="cb22-67"><a href="#cb22-67" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> translator<span class="op">.</span>ProviderCapabilities<span class="op">{</span></span>
+<span id="cb22-68"><a href="#cb22-68" aria-hidden="true" tabindex="-1"></a>        SupportsStreaming<span class="op">:</span>   <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb22-69"><a href="#cb22-69" aria-hidden="true" tabindex="-1"></a>        SupportsBatch<span class="op">:</span>      <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb22-70"><a href="#cb22-70" aria-hidden="true" tabindex="-1"></a>        SupportsLanguages<span class="op">:</span>  <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;en&quot;</span><span class="op">,</span> <span class="st">&quot;ru&quot;</span><span class="op">,</span> <span class="st">&quot;sr&quot;</span><span class="op">},</span></span>
+<span id="cb22-71"><a href="#cb22-71" aria-hidden="true" tabindex="-1"></a>        MaxInputTokens<span class="op">:</span>     <span class="dv">4096</span><span class="op">,</span></span>
+<span id="cb22-72"><a href="#cb22-72" aria-hidden="true" tabindex="-1"></a>        MaxOutputTokens<span class="op">:</span>    <span class="dv">4096</span><span class="op">,</span></span>
+<span id="cb22-73"><a href="#cb22-73" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb22-74"><a href="#cb22-74" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="step-2-create-tests">Step 2: Create Tests</h3>
+<p>Create
+<code>pkg/translator/llm/newprovider/provider_test.go</code>:</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> newprovider</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;testing&quot;</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/assert&quot;</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/require&quot;</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestProvider_Translate<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    config <span class="op">:=</span> <span class="op">&amp;</span>Config<span class="op">{</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>        APIKey<span class="op">:</span> <span class="st">&quot;test-key&quot;</span><span class="op">,</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>        Model<span class="op">:</span>  <span class="st">&quot;test-model&quot;</span><span class="op">,</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    provider <span class="op">:=</span> NewProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    req <span class="op">:=</span> <span class="op">&amp;</span>translator<span class="op">.</span>TranslationRequest<span class="op">{</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>        Text<span class="op">:</span>       <span class="st">&quot;Hello, world!&quot;</span><span class="op">,</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>        SourceLang<span class="op">:</span> <span class="st">&quot;en&quot;</span><span class="op">,</span></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>        TargetLang<span class="op">:</span> <span class="st">&quot;sr&quot;</span><span class="op">,</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> provider<span class="op">.</span>Translate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> req<span class="op">)</span></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>NotNil<span class="op">(</span>t<span class="op">,</span> resp<span class="op">)</span></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> resp<span class="op">.</span>TranslatedText<span class="op">)</span></span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Greater<span class="op">(</span>t<span class="op">,</span> resp<span class="op">.</span>Confidence<span class="op">,</span> <span class="fl">0.0</span><span class="op">)</span></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestProvider_ValidateConfig<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>    tests <span class="op">:=</span> <span class="op">[]</span><span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>        name    <span class="dt">string</span></span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>        config  <span class="op">*</span>Config</span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>        wantErr <span class="dt">bool</span></span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}{</span></span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a>            name<span class="op">:</span>    <span class="st">&quot;valid config&quot;</span><span class="op">,</span></span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a>            config<span class="op">:</span>  <span class="op">&amp;</span>Config<span class="op">{</span>APIKey<span class="op">:</span> <span class="st">&quot;valid-key&quot;</span><span class="op">},</span></span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a>            wantErr<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a>            name<span class="op">:</span>    <span class="st">&quot;missing API key&quot;</span><span class="op">,</span></span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>            config<span class="op">:</span>  <span class="op">&amp;</span>Config<span class="op">{},</span></span>
+<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a>            wantErr<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> tt <span class="op">:=</span> <span class="kw">range</span> tests <span class="op">{</span></span>
+<span id="cb23-50"><a href="#cb23-50" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Run<span class="op">(</span>tt<span class="op">.</span>name<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb23-51"><a href="#cb23-51" aria-hidden="true" tabindex="-1"></a>            provider <span class="op">:=</span> NewProvider<span class="op">(</span>tt<span class="op">.</span>config<span class="op">)</span></span>
+<span id="cb23-52"><a href="#cb23-52" aria-hidden="true" tabindex="-1"></a>            err <span class="op">:=</span> provider<span class="op">.</span>ValidateConfig<span class="op">()</span></span>
+<span id="cb23-53"><a href="#cb23-53" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> tt<span class="op">.</span>wantErr <span class="op">{</span></span>
+<span id="cb23-54"><a href="#cb23-54" aria-hidden="true" tabindex="-1"></a>                assert<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb23-55"><a href="#cb23-55" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb23-56"><a href="#cb23-56" aria-hidden="true" tabindex="-1"></a>                assert<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb23-57"><a href="#cb23-57" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb23-58"><a href="#cb23-58" aria-hidden="true" tabindex="-1"></a>        <span class="op">})</span></span>
+<span id="cb23-59"><a href="#cb23-59" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-60"><a href="#cb23-60" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="step-3-register-provider">Step 3: Register Provider</h3>
+<p>Update <code>pkg/translator/llm/registry.go</code>:</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// existing imports</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/digital-vasic/translator/pkg/translator/llm/newprovider&quot;</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> RegisterAll<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// existing providers</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    providers<span class="op">[</span><span class="st">&quot;newprovider&quot;</span><span class="op">]</span> <span class="op">=</span> <span class="kw">func</span><span class="op">(</span>config <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span>translator<span class="op">.</span>Provider<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>        cfg <span class="op">:=</span> <span class="op">&amp;</span>newprovider<span class="op">.</span>Config<span class="op">{}</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> mapstructure<span class="op">.</span>Decode<span class="op">(</span>config<span class="op">,</span> cfg<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> newprovider<span class="op">.</span>NewProvider<span class="op">(</span>cfg<span class="op">),</span> <span class="ot">nil</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="step-4-update-configuration">Step 4: Update Configuration</h3>
+<p>Add to configuration schema in
+<code>internal/config/types.go</code>:</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TranslationConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    DefaultProvider <span class="dt">string</span>                    <span class="st">`yaml:&quot;default_provider&quot;`</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    Providers      <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>ProviderConfig <span class="st">`yaml:&quot;providers&quot;`</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    Type     <span class="dt">string</span>                 <span class="st">`yaml:&quot;type&quot;`</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    Settings <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span> <span class="st">`yaml:&quot;settings&quot;`</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="file-format-support">File Format Support</h2>
+<h3 id="adding-new-parser">Adding New Parser</h3>
+<ol type="1">
+<li><strong>Implement Parser Interface</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> NewFormatParser <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    config <span class="op">*</span>ParserConfig</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>NewFormatParser<span class="op">)</span> Parse<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> data <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="op">(*</span>Ebook<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Parse implementation</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>NewFormatParser<span class="op">)</span> Validate<span class="op">(</span>data <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Validation logic</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>NewFormatParser<span class="op">)</span> SupportedFormats<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;newformat&quot;</span><span class="op">}</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>NewFormatParser<span class="op">)</span> GetMetadata<span class="op">(</span>data <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="op">(*</span>Metadata<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Metadata extraction</span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ol start="2" type="1">
+<li><strong>Register Parser</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> RegisterParser<span class="op">(</span>format <span class="dt">string</span><span class="op">,</span> parser Parser<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    parsers<span class="op">[</span>format<span class="op">]</span> <span class="op">=</span> parser</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="co">// In init()</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>RegisterParser<span class="op">(</span><span class="st">&quot;newformat&quot;</span><span class="op">,</span> <span class="op">&amp;</span>NewFormatParser<span class="op">{})</span></span></code></pre></div>
+<ol start="3" type="1">
+<li><strong>Add Tests</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNewFormatParser_Parse<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    parser <span class="op">:=</span> <span class="op">&amp;</span>NewFormatParser<span class="op">{}</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Test with valid data</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    data <span class="op">:=</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;...valid newformat data...&quot;</span><span class="op">)</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    ebook<span class="op">,</span> err <span class="op">:=</span> parser<span class="op">.</span>Parse<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> data<span class="op">)</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>NotNil<span class="op">(</span>t<span class="op">,</span> ebook<span class="op">)</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Test with invalid data</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    invalidData <span class="op">:=</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;invalid data&quot;</span><span class="op">)</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">=</span> parser<span class="op">.</span>Parse<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> invalidData<span class="op">)</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="adding-new-writer">Adding New Writer</h3>
+<p>Similar to parser, implement the <code>Writer</code> interface:</p>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> NewFormatWriter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    config <span class="op">*</span>WriterConfig</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>NewFormatWriter<span class="op">)</span> Write<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> ebook <span class="op">*</span>Ebook<span class="op">)</span> <span class="op">([]</span><span class="dt">byte</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Write implementation</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>NewFormatWriter<span class="op">)</span> SupportedFormats<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;newformat&quot;</span><span class="op">}</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="distributed-system-development">Distributed System
+Development</h2>
+<h3 id="node-registration">Node Registration</h3>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Node <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    ID       <span class="dt">string</span>    <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    Address  <span class="dt">string</span>    <span class="st">`json:&quot;address&quot;`</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    Status   <span class="dt">string</span>    <span class="st">`json:&quot;status&quot;`</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    Load     <span class="dt">float64</span>   <span class="st">`json:&quot;load&quot;`</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    LastSeen time<span class="op">.</span>Time <span class="st">`json:&quot;last_seen&quot;`</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Coordinator<span class="op">)</span> RegisterNode<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> node <span class="op">*</span>Node<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Register node with the coordinator</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> c<span class="op">.</span>registry<span class="op">.</span>Register<span class="op">(</span>node<span class="op">)</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="task-distribution">Task Distribution</h3>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Task <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    ID       <span class="dt">string</span>            <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    Type     <span class="dt">string</span>            <span class="st">`json:&quot;type&quot;`</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    Payload  <span class="kw">interface</span><span class="op">{}</span>       <span class="st">`json:&quot;payload&quot;`</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    Options  <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span> <span class="st">`json:&quot;options&quot;`</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    Status   <span class="dt">string</span>            <span class="st">`json:&quot;status&quot;`</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Coordinator<span class="op">)</span> DistributeTask<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> task <span class="op">*</span>Task<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Select appropriate node based on load and capabilities</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>    node <span class="op">:=</span> c<span class="op">.</span>selectNode<span class="op">(</span>task<span class="op">)</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Send task to selected node</span></span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> c<span class="op">.</span>sendTask<span class="op">(</span>node<span class="op">,</span> task<span class="op">)</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="load-balancing">Load Balancing</h3>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LoadBalancer <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    strategy <span class="dt">string</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    nodes    <span class="op">[]*</span>Node</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>lb <span class="op">*</span>LoadBalancer<span class="op">)</span> SelectNode<span class="op">(</span>task <span class="op">*</span>Task<span class="op">)</span> <span class="op">*</span>Node <span class="op">{</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> lb<span class="op">.</span>strategy <span class="op">{</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;round_robin&quot;</span><span class="op">:</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> lb<span class="op">.</span>roundRobinSelect<span class="op">()</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;least_loaded&quot;</span><span class="op">:</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> lb<span class="op">.</span>leastLoadedSelect<span class="op">()</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;capability_based&quot;</span><span class="op">:</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> lb<span class="op">.</span>capabilityBasedSelect<span class="op">(</span>task<span class="op">)</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> lb<span class="op">.</span>roundRobinSelect<span class="op">()</span></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="api-development">API Development</h2>
+<h3 id="adding-new-endpoint">Adding New Endpoint</h3>
+<ol type="1">
+<li><strong>Define Handler</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb33"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/api/handlers.go</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>Handler<span class="op">)</span> NewEndpoint<span class="op">(</span>w http<span class="op">.</span>ResponseWriter<span class="op">,</span> r <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> req NewEndpointRequest</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> json<span class="op">.</span>NewDecoder<span class="op">(</span>r<span class="op">.</span>Body<span class="op">).</span>Decode<span class="op">(&amp;</span>req<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>        http<span class="op">.</span>Error<span class="op">(</span>w<span class="op">,</span> <span class="st">&quot;Invalid request&quot;</span><span class="op">,</span> http<span class="op">.</span>StatusBadRequest<span class="op">)</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Process request</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>    result<span class="op">,</span> err <span class="op">:=</span> h<span class="op">.</span>service<span class="op">.</span>ProcessNewEndpoint<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>        http<span class="op">.</span>Error<span class="op">(</span>w<span class="op">,</span> err<span class="op">.</span>Error<span class="op">(),</span> http<span class="op">.</span>StatusInternalServerError<span class="op">)</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>    w<span class="op">.</span>Header<span class="op">().</span>Set<span class="op">(</span><span class="st">&quot;Content-Type&quot;</span><span class="op">,</span> <span class="st">&quot;application/json&quot;</span><span class="op">)</span></span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>    json<span class="op">.</span>NewEncoder<span class="op">(</span>w<span class="op">).</span>Encode<span class="op">(</span>result<span class="op">)</span></span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ol start="2" type="1">
+<li><strong>Register Route</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb34"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/api/router.go</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Router<span class="op">)</span> setupRoutes<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>HandleFunc<span class="op">(</span><span class="st">&quot;/api/v1/new-endpoint&quot;</span><span class="op">,</span> h<span class="op">.</span>NewEndpoint<span class="op">).</span>Methods<span class="op">(</span><span class="st">&quot;POST&quot;</span><span class="op">)</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ol start="3" type="1">
+<li><strong>Add Documentation</strong>:</li>
+</ol>
+<p>Update OpenAPI specification in
+<code>docs/api/openapi.yaml</code>:</p>
+<div class="sourceCode" id="cb35"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paths</span><span class="kw">:</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">/api/v1/new-endpoint</span><span class="kw">:</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">post</span><span class="kw">:</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">summary</span><span class="kw">:</span><span class="at"> New endpoint description</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">requestBody</span><span class="kw">:</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">required</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">content</span><span class="kw">:</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">application/json</span><span class="kw">:</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">schema</span><span class="kw">:</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">$ref</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;#/components/schemas/NewEndpointRequest&#39;</span></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">responses</span><span class="kw">:</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">&#39;200&#39;</span><span class="kw">:</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">description</span><span class="kw">:</span><span class="at"> Successful response</span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">content</span><span class="kw">:</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">application/json</span><span class="kw">:</span></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">schema</span><span class="kw">:</span></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a><span class="at">                </span><span class="fu">$ref</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;#/components/schemas/NewEndpointResponse&#39;</span></span></code></pre></div>
+<h3 id="middleware">Middleware</h3>
+<div class="sourceCode" id="cb36"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> AuthMiddleware<span class="op">(</span>next http<span class="op">.</span>Handler<span class="op">)</span> http<span class="op">.</span>Handler <span class="op">{</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> http<span class="op">.</span>HandlerFunc<span class="op">(</span><span class="kw">func</span><span class="op">(</span>w http<span class="op">.</span>ResponseWriter<span class="op">,</span> r <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>        token <span class="op">:=</span> r<span class="op">.</span>Header<span class="op">.</span>Get<span class="op">(</span><span class="st">&quot;Authorization&quot;</span><span class="op">)</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">!</span>isValidToken<span class="op">(</span>token<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>            http<span class="op">.</span>Error<span class="op">(</span>w<span class="op">,</span> <span class="st">&quot;Unauthorized&quot;</span><span class="op">,</span> http<span class="op">.</span>StatusUnauthorized<span class="op">)</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>        next<span class="op">.</span>ServeHTTP<span class="op">(</span>w<span class="op">,</span> r<span class="op">)</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> LoggingMiddleware<span class="op">(</span>next http<span class="op">.</span>Handler<span class="op">)</span> http<span class="op">.</span>Handler <span class="op">{</span></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> http<span class="op">.</span>HandlerFunc<span class="op">(</span><span class="kw">func</span><span class="op">(</span>w http<span class="op">.</span>ResponseWriter<span class="op">,</span> r <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>        start <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">()</span></span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Log request</span></span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>        log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;%s %s %s&quot;</span><span class="op">,</span> r<span class="op">.</span>Method<span class="op">,</span> r<span class="op">.</span>URL<span class="op">.</span>Path<span class="op">,</span> r<span class="op">.</span>RemoteAddr<span class="op">)</span></span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Process request</span></span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>        next<span class="op">.</span>ServeHTTP<span class="op">(</span>w<span class="op">,</span> r<span class="op">)</span></span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Log response time</span></span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>        log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Request processed in %v&quot;</span><span class="op">,</span> time<span class="op">.</span>Since<span class="op">(</span>start<span class="op">))</span></span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="database-schema">Database Schema</h2>
+<h3 id="migration-files">Migration Files</h3>
+<p>Create migration in
+<code>migrations/001_initial_schema.up.sql</code>:</p>
+<div class="sourceCode" id="cb37"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> translations (</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> SERIAL <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    source_text TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    translated_text TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    source_lang <span class="dt">VARCHAR</span>(<span class="dv">10</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    target_lang <span class="dt">VARCHAR</span>(<span class="dv">10</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>    provider <span class="dt">VARCHAR</span>(<span class="dv">50</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    model <span class="dt">VARCHAR</span>(<span class="dv">100</span>),</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>    confidence <span class="dt">DECIMAL</span>(<span class="dv">3</span>,<span class="dv">2</span>),</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>    tokens_used <span class="dt">INTEGER</span>,</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">cost</span> <span class="dt">DECIMAL</span>(<span class="dv">10</span>,<span class="dv">6</span>),</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>    created_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>    updated_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span></span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_translations_lang_pair <span class="kw">ON</span> translations(source_lang, target_lang);</span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_translations_provider <span class="kw">ON</span> translations(provider);</span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_translations_created_at <span class="kw">ON</span> translations(created_at);</span></code></pre></div>
+<h3 id="models">Models</h3>
+<div class="sourceCode" id="cb38"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Translation <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    ID            <span class="dt">int</span>       <span class="st">`json:&quot;id&quot; db:&quot;id&quot;`</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    SourceText    <span class="dt">string</span>    <span class="st">`json:&quot;source_text&quot; db:&quot;source_text&quot;`</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    TranslatedText <span class="dt">string</span>   <span class="st">`json:&quot;translated_text&quot; db:&quot;translated_text&quot;`</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    SourceLang    <span class="dt">string</span>    <span class="st">`json:&quot;source_lang&quot; db:&quot;source_lang&quot;`</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    TargetLang    <span class="dt">string</span>    <span class="st">`json:&quot;target_lang&quot; db:&quot;target_lang&quot;`</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    Provider      <span class="dt">string</span>    <span class="st">`json:&quot;provider&quot; db:&quot;provider&quot;`</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>    Model         <span class="op">*</span><span class="dt">string</span>   <span class="st">`json:&quot;model&quot; db:&quot;model&quot;`</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    Confidence    <span class="op">*</span><span class="dt">float64</span>  <span class="st">`json:&quot;confidence&quot; db:&quot;confidence&quot;`</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>    TokensUsed    <span class="op">*</span><span class="dt">int</span>      <span class="st">`json:&quot;tokens_used&quot; db:&quot;tokens_used&quot;`</span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>    Cost          <span class="op">*</span><span class="dt">float64</span>  <span class="st">`json:&quot;cost&quot; db:&quot;cost&quot;`</span></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>    CreatedAt     time<span class="op">.</span>Time <span class="st">`json:&quot;created_at&quot; db:&quot;created_at&quot;`</span></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>    UpdatedAt     time<span class="op">.</span>Time <span class="st">`json:&quot;updated_at&quot; db:&quot;updated_at&quot;`</span></span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="repository-pattern">Repository Pattern</h3>
+<div class="sourceCode" id="cb39"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TranslationRepository <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    Create<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> translation <span class="op">*</span>Translation<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    GetByID<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">int</span><span class="op">)</span> <span class="op">(*</span>Translation<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    GetByLangPair<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sourceLang<span class="op">,</span> targetLang <span class="dt">string</span><span class="op">,</span> limit<span class="op">,</span> offset <span class="dt">int</span><span class="op">)</span> <span class="op">([]*</span>Translation<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    Update<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> translation <span class="op">*</span>Translation<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    Delete<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">int</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> translationRepository <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    db <span class="op">*</span>sqlx<span class="op">.</span>DB</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewTranslationRepository<span class="op">(</span>db <span class="op">*</span>sqlx<span class="op">.</span>DB<span class="op">)</span> TranslationRepository <span class="op">{</span></span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>translationRepository<span class="op">{</span>db<span class="op">:</span> db<span class="op">}</span></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>translationRepository<span class="op">)</span> Create<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> translation <span class="op">*</span>Translation<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>    query <span class="op">:=</span> <span class="st">`</span></span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a><span class="st">        INSERT INTO translations (source_text, translated_text, source_lang, target_lang, provider, model, confidence, tokens_used, cost)</span></span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a><span class="st">        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)</span></span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a><span class="st">        RETURNING id, created_at, updated_at</span></span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a><span class="st">    `</span></span>
+<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> r<span class="op">.</span>db<span class="op">.</span>QueryRowContext<span class="op">(</span>ctx<span class="op">,</span> query<span class="op">,</span></span>
+<span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a>        translation<span class="op">.</span>SourceText<span class="op">,</span></span>
+<span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a>        translation<span class="op">.</span>TranslatedText<span class="op">,</span></span>
+<span id="cb39-27"><a href="#cb39-27" aria-hidden="true" tabindex="-1"></a>        translation<span class="op">.</span>SourceLang<span class="op">,</span></span>
+<span id="cb39-28"><a href="#cb39-28" aria-hidden="true" tabindex="-1"></a>        translation<span class="op">.</span>TargetLang<span class="op">,</span></span>
+<span id="cb39-29"><a href="#cb39-29" aria-hidden="true" tabindex="-1"></a>        translation<span class="op">.</span>Provider<span class="op">,</span></span>
+<span id="cb39-30"><a href="#cb39-30" aria-hidden="true" tabindex="-1"></a>        translation<span class="op">.</span>Model<span class="op">,</span></span>
+<span id="cb39-31"><a href="#cb39-31" aria-hidden="true" tabindex="-1"></a>        translation<span class="op">.</span>Confidence<span class="op">,</span></span>
+<span id="cb39-32"><a href="#cb39-32" aria-hidden="true" tabindex="-1"></a>        translation<span class="op">.</span>TokensUsed<span class="op">,</span></span>
+<span id="cb39-33"><a href="#cb39-33" aria-hidden="true" tabindex="-1"></a>        translation<span class="op">.</span>Cost<span class="op">,</span></span>
+<span id="cb39-34"><a href="#cb39-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">).</span>Scan<span class="op">(&amp;</span>translation<span class="op">.</span>ID<span class="op">,</span> <span class="op">&amp;</span>translation<span class="op">.</span>CreatedAt<span class="op">,</span> <span class="op">&amp;</span>translation<span class="op">.</span>UpdatedAt<span class="op">)</span></span>
+<span id="cb39-35"><a href="#cb39-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="performance-optimization">Performance Optimization</h2>
+<h3 id="caching-strategy">Caching Strategy</h3>
+<div class="sourceCode" id="cb40"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Cache <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    redis  <span class="op">*</span>redis<span class="op">.</span>Client</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    local  <span class="op">*</span>lru<span class="op">.</span>Cache</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    ttl    time<span class="op">.</span>Duration</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Cache<span class="op">)</span> Get<span class="op">(</span>key <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Try local cache first</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> value<span class="op">,</span> ok <span class="op">:=</span> c<span class="op">.</span>local<span class="op">.</span>Get<span class="op">(</span>key<span class="op">);</span> ok <span class="op">{</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> value<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Try Redis cache</span></span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>    value<span class="op">,</span> err <span class="op">:=</span> c<span class="op">.</span>redis<span class="op">.</span>Get<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> key<span class="op">).</span>Result<span class="op">()</span></span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Store in local cache</span></span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>local<span class="op">.</span>Add<span class="op">(</span>key<span class="op">,</span> value<span class="op">)</span></span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> value<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Cache<span class="op">)</span> Set<span class="op">(</span>key <span class="dt">string</span><span class="op">,</span> value <span class="kw">interface</span><span class="op">{},</span> ttl time<span class="op">.</span>Duration<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set in Redis</span></span>
+<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> c<span class="op">.</span>redis<span class="op">.</span>Set<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> key<span class="op">,</span> value<span class="op">,</span> ttl<span class="op">).</span>Err<span class="op">();</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> err</span>
+<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set in local cache</span></span>
+<span id="cb40-31"><a href="#cb40-31" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>local<span class="op">.</span>Add<span class="op">(</span>key<span class="op">,</span> value<span class="op">)</span></span>
+<span id="cb40-32"><a href="#cb40-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb40-33"><a href="#cb40-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="database-optimization">Database Optimization</h3>
+<div class="sourceCode" id="cb41"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>translationRepository<span class="op">)</span> GetByLangPairOptimized<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sourceLang<span class="op">,</span> targetLang <span class="dt">string</span><span class="op">,</span> limit<span class="op">,</span> offset <span class="dt">int</span><span class="op">)</span> <span class="op">([]*</span>Translation<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Use prepared statements</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    query <span class="op">:=</span> <span class="st">`</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="st">        SELECT id, source_text, translated_text, source_lang, target_lang, </span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="st">               provider, model, confidence, tokens_used, cost, created_at, updated_at</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="st">        FROM translations </span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="st">        WHERE source_lang = $1 AND target_lang = $2</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="st">        ORDER BY created_at DESC</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a><span class="st">        LIMIT $3 OFFSET $4</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a><span class="st">    `</span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>    stmt<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>db<span class="op">.</span>PreparexContext<span class="op">(</span>ctx<span class="op">,</span> query<span class="op">)</span></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> stmt<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> translations <span class="op">[]*</span>Translation</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>    err <span class="op">=</span> stmt<span class="op">.</span>SelectContext<span class="op">(</span>ctx<span class="op">,</span> <span class="op">&amp;</span>translations<span class="op">,</span> sourceLang<span class="op">,</span> targetLang<span class="op">,</span> limit<span class="op">,</span> offset<span class="op">)</span></span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> translations<span class="op">,</span> err</span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="memory-management">Memory Management</h3>
+<div class="sourceCode" id="cb42"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MemoryPool <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    buffers sync<span class="op">.</span>Pool</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewMemoryPool<span class="op">()</span> <span class="op">*</span>MemoryPool <span class="op">{</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>MemoryPool<span class="op">{</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>        buffers<span class="op">:</span> sync<span class="op">.</span>Pool<span class="op">{</span></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>            New<span class="op">:</span> <span class="kw">func</span><span class="op">()</span> <span class="kw">interface</span><span class="op">{}</span> <span class="op">{</span></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="bu">make</span><span class="op">([]</span><span class="dt">byte</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">4096</span><span class="op">)</span></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>            <span class="op">},</span></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>MemoryPool<span class="op">)</span> GetBuffer<span class="op">()</span> <span class="op">[]</span><span class="dt">byte</span> <span class="op">{</span></span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> p<span class="op">.</span>buffers<span class="op">.</span>Get<span class="op">().([]</span><span class="dt">byte</span><span class="op">)[:</span><span class="dv">0</span><span class="op">]</span></span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>MemoryPool<span class="op">)</span> PutBuffer<span class="op">(</span>buf <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">cap</span><span class="op">(</span>buf<span class="op">)</span> <span class="op">&gt;=</span> <span class="dv">4096</span> <span class="op">{</span> <span class="co">// Only reuse reasonable sized buffers</span></span>
+<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a>        p<span class="op">.</span>buffers<span class="op">.</span>Put<span class="op">(</span>buf<span class="op">)</span></span>
+<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb42-24"><a href="#cb42-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-25"><a href="#cb42-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Client<span class="op">)</span> ProcessLargeText<span class="op">(</span>text <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb42-26"><a href="#cb42-26" aria-hidden="true" tabindex="-1"></a>    buf <span class="op">:=</span> c<span class="op">.</span>pool<span class="op">.</span>GetBuffer<span class="op">()</span></span>
+<span id="cb42-27"><a href="#cb42-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> c<span class="op">.</span>pool<span class="op">.</span>PutBuffer<span class="op">(</span>buf<span class="op">)</span></span>
+<span id="cb42-28"><a href="#cb42-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb42-29"><a href="#cb42-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Process text in chunks</span></span>
+<span id="cb42-30"><a href="#cb42-30" aria-hidden="true" tabindex="-1"></a>    chunks <span class="op">:=</span> chunkText<span class="op">(</span>text<span class="op">,</span> <span class="dv">4096</span><span class="op">)</span></span>
+<span id="cb42-31"><a href="#cb42-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> chunk <span class="op">:=</span> <span class="kw">range</span> chunks <span class="op">{</span></span>
+<span id="cb42-32"><a href="#cb42-32" aria-hidden="true" tabindex="-1"></a>        buf <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>buf<span class="op">,</span> chunk<span class="op">...)</span></span>
+<span id="cb42-33"><a href="#cb42-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Process buffer</span></span>
+<span id="cb42-34"><a href="#cb42-34" aria-hidden="true" tabindex="-1"></a>        processChunk<span class="op">(</span>buf<span class="op">)</span></span>
+<span id="cb42-35"><a href="#cb42-35" aria-hidden="true" tabindex="-1"></a>        buf <span class="op">=</span> buf<span class="op">[:</span><span class="dv">0</span><span class="op">]</span> <span class="co">// Reset buffer</span></span>
+<span id="cb42-36"><a href="#cb42-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb42-37"><a href="#cb42-37" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb42-38"><a href="#cb42-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb42-39"><a href="#cb42-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="contributing-guidelines">Contributing Guidelines</h2>
+<h3 id="code-standards">Code Standards</h3>
+<ol type="1">
+<li><strong>Go Conventions</strong>: Follow <a
+href="https://golang.org/doc/effective_go.html">Effective Go</a></li>
+<li><strong>Naming</strong>: Use descriptive names, avoid
+abbreviations</li>
+<li><strong>Comments</strong>: Document public functions and complex
+logic</li>
+<li><strong>Error Handling</strong>: Always handle errors, use
+descriptive error messages</li>
+<li><strong>Testing</strong>: Aim for 80%+ coverage, write tests for new
+features</li>
+</ol>
+<h3 id="pull-request-process">Pull Request Process</h3>
+<ol type="1">
+<li><p><strong>Create Feature Branch</strong>:</p>
+<div class="sourceCode" id="cb43"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="at">-b</span> feature/your-feature-name</span></code></pre></div></li>
+<li><p><strong>Make Changes</strong>:</p>
+<ul>
+<li>Write code following the standards</li>
+<li>Add comprehensive tests</li>
+<li>Update documentation</li>
+</ul></li>
+<li><p><strong>Run Tests</strong>:</p>
+<div class="sourceCode" id="cb44"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-all</span></code></pre></div></li>
+<li><p><strong>Submit PR</strong>:</p>
+<ul>
+<li>Provide clear description</li>
+<li>Link to relevant issues</li>
+<li>Include screenshots for UI changes</li>
+</ul></li>
+</ol>
+<h3 id="code-review-checklist">Code Review Checklist</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />Code follows style
+guidelines</label></li>
+<li><label><input type="checkbox" />Tests cover edge cases</label></li>
+<li><label><input type="checkbox" />Documentation is
+updated</label></li>
+<li><label><input type="checkbox" />No hardcoded values</label></li>
+<li><label><input type="checkbox" />Error handling is
+comprehensive</label></li>
+<li><label><input type="checkbox" />Security considerations
+addressed</label></li>
+<li><label><input type="checkbox" />Performance impact
+considered</label></li>
+</ul>
+<h3 id="release-process">Release Process</h3>
+<ol type="1">
+<li><p><strong>Update Version</strong>:</p>
+<div class="sourceCode" id="cb45"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Update version in go.mod</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Update CHANGELOG.md</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Create Git tag</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> tag v1.2.3</span></code></pre></div></li>
+<li><p><strong>Build Release</strong>:</p>
+<div class="sourceCode" id="cb46"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> release</span></code></pre></div></li>
+<li><p><strong>Deploy</strong>:</p>
+<div class="sourceCode" id="cb47"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> deploy</span></code></pre></div></li>
+</ol>
+<h3 id="security-considerations">Security Considerations</h3>
+<ol type="1">
+<li><strong>API Keys</strong>: Never commit API keys, use environment
+variables</li>
+<li><strong>Input Validation</strong>: Always validate user input</li>
+<li><strong>SQL Injection</strong>: Use parameterized queries</li>
+<li><strong>XSS Prevention</strong>: Sanitize output for web
+interface</li>
+<li><strong>Rate Limiting</strong>: Implement rate limiting for API
+endpoints</li>
+</ol>
+<h3 id="performance-benchmarks">Performance Benchmarks</h3>
+<p>Run benchmarks regularly:</p>
+<div class="sourceCode" id="cb48"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> bench</span></code></pre></div>
+<p>Target performance metrics:</p>
+<ul>
+<li><strong>Translation API</strong>: &lt;2 seconds average response
+time</li>
+<li><strong>File Processing</strong>: &lt;5 seconds per 100KB</li>
+<li><strong>Concurrent Users</strong>: Support 1000+ concurrent
+users</li>
+<li><strong>Memory Usage</strong>: &lt;512MB for typical workload</li>
+</ul>
+<hr />
+<h2 id="resources">Resources</h2>
+<ul>
+<li><a href="https://golang.org/doc/">Go Documentation</a></li>
+<li><a href="https://golang.org/doc/effective_go.html">Effective
+Go</a></li>
+<li><a href="https://github.com/golang/go/wiki/CodeReviewComments">Go
+Code Review Comments</a></li>
+<li><a href="https://google.github.io/styleguide/jsonapi.html">API Style
+Guide</a></li>
+<li><a href="https://use-the-index-luke.com/">Database Design Best
+Practices</a></li>
+</ul>
+</body>
+</html>

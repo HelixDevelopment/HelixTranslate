@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixagent-comprehensive-analysis</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixagent-comprehensive-analysis</h1>
+</header>
+<h1
+id="comprehensive-analysis-helixagent-repository-with-special-focus-on-llmsverifier-integration">COMPREHENSIVE
+ANALYSIS: HelixAgent Repository with Special Focus on LLMsVerifier
+Integration</h1>
+<p><strong>Repository</strong>: <a
+href="https://github.com/HelixDevelopment/HelixAgent">https://github.com/HelixDevelopment/HelixAgent</a>
+<strong>Module</strong>: <code>dev.helix.agent</code>
+<strong>Language</strong>: Go 1.26 <strong>Analysis Date</strong>: 2026
+<strong>Method</strong>: GitHub API + Raw Content Endpoints</p>
+<hr />
+<h2 id="a-project-overview">A. PROJECT OVERVIEW</h2>
+<p>HelixAgent is a <strong>production-ready, AI-powered ensemble LLM
+service</strong> written in Go that:</p>
+<ul>
+<li>Aggregates responses from <strong>51+ LLM providers</strong> to
+provide the most accurate outputs</li>
+<li>Exposes an <strong>OpenAI-compatible REST API</strong> + gRPC
+facade</li>
+<li>Implements <strong>multi-round AI debate orchestration</strong> (5
+positions x 5 LLMs = 25 total)</li>
+<li>Supports <strong>MCP (Model Context Protocol)</strong>, <strong>ACP
+(Agent Coordination Protocol)</strong>, <strong>LSP (Language Server
+Protocol)</strong></li>
+<li>Provides <strong>embeddings</strong>, <strong>vision</strong>,
+<strong>RAG</strong>, and <strong>containerized
+infrastructure</strong></li>
+<li>Uses <strong>dynamic provider selection</strong> via LLMsVerifier
+verification scores</li>
+<li>Monorepo with <strong>~60 submodules</strong> across 8 phases of
+extraction</li>
+</ul>
+<h3 id="key-metrics">Key Metrics</h3>
+<ul>
+<li><strong>51+ LLM providers</strong> supported (see
+<code>internal/llm/providers/</code>)</li>
+<li><strong>13 embedding providers</strong></li>
+<li><strong>35 MCP implementations</strong></li>
+<li><strong>10 LSP servers</strong></li>
+<li><strong>24+ power features</strong></li>
+<li><strong>65.6% test coverage</strong></li>
+<li><strong>193+ validation challenge scripts</strong> with 1500+
+tests</li>
+<li><strong>48 CLI agents</strong> supported with auto-generated
+configs</li>
+<li><strong>32+ code formatters</strong> (11 native, 14 service, 7
+built-in)</li>
+<li><strong>45+ MCP adapters</strong></li>
+</ul>
+<h3 id="architecture-diagram">Architecture Diagram</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                         HelixAgent                               │
+│  ┌──────────────┐  ┌──────────────┐  ┌────────────────────────┐ │
+│  │   Web API    │  │  AI Debate   │  │   LLMsVerifier         │ │
+│  │    (Gin)     │  │ Orchestrator │  │   (Dynamic Scoring)    │ │
+│  └──────┬───────┘  └──────┬───────┘  └──────────┬─────────────┘ │
+│         │                  │                     │               │
+│         └──────────────────┼─────────────────────┘               │
+└───────────────────────────┬┬─────────────────────────────────────┘
+                            ││
+         ┌──────────────────┼┼──────────────────┐
+         ▼                  ▼▼                  ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   PostgreSQL    │    │     Redis       │    │  51 LLM Providers│
+│   - Sessions    │    │   - Caching     │    │  (Dynamic sel.)  │
+│   - Analytics   │    │   - Queues      │    └─────────────────┘
+│   - Debates     │    │   - Tasks       │
+└─────────────────┘    └─────────────────┘</code></pre>
+<hr />
+<h2 id="b-complete-directory-structure">B. COMPLETE DIRECTORY
+STRUCTURE</h2>
+<pre><code>HelixAgent/
+├── cmd/                          # 8 application entry points
+│   ├── helixagent/               # Main production server (port 8100)
+│   ├── api/                      # Standalone demo API (port 8080)
+│   ├── grpc-server/              # gRPC service endpoint
+│   ├── mcp-bridge/               # MCP SSE bridge (port 8103)
+│   ├── cognee-mock/              # Mock Cognee service
+│   ├── sanity-check/             # System validation tool
+│   ├── generate-constitution/    # Constitution generator
+│   └── audit/                    # Audit utility
+│
+├── internal/                     # Core application code (~50+ packages)
+│   ├── adapters/                 # External submodule adapters (containers, db, auth, memory)
+│   ├── agentic/                  # Agentic behavior framework
+│   ├── agents/                   # CLI agent registry (48 agents)
+│   ├── analytics/                # Usage analytics
+│   ├── audit/                    # Audit logging
+│   ├── auth/                     # JWT, OAuth credential reading
+│   ├── background/               # Background task management
+│   ├── benchmark/                # Performance benchmarks
+│   ├── bigdata/                  # Infinite context, distributed memory
+│   ├── browser/                  # Playwright browser automation
+│   ├── cache/                    # Caching layer (Redis)
+│   ├── challenges/               # Challenge framework
+│   ├── config/                   # Centralized env-var configuration
+│   ├── database/                 # PostgreSQL connectivity + migrations
+│   ├── debate/                   # Debate orchestration
+│   ├── embeddings/               # Embedding providers (13)
+│   ├── eventbus/                 # Event-driven architecture
+│   ├── features/                 # Feature flags
+│   ├── formatters/               # Code formatters (32+)
+│   ├── handlers/                 # HTTP handlers (~40 files)
+│   ├── health/                   # Health check system
+│   ├── llm/                      # LLM abstraction layer
+│   │   ├── providers/            # 51+ provider implementations
+│   │   │   ├── ai21/
+│   │   │   ├── anthropic/
+│   │   │   ├── anthropic_cu/
+│   │   │   ├── azure/
+│   │   │   ├── cerebras/
+│   │   │   ├── chutes/
+│   │   │   ├── claude/
+│   │   │   ├── cloudflare/
+│   │   │   ├── codestral/
+│   │   │   ├── cohere/
+│   │   │   ├── deepseek/
+│   │   │   ├── fireworks/
+│   │   │   ├── gemini/
+│   │   │   ├── githubmodels/
+│   │   │   ├── groq/
+│   │   │   ├── huggingface/
+│   │   │   ├── hyperbolic/
+│   │   │   ├── junie/
+│   │   │   ├── kilo/
+│   │   │   ├── kimi/
+│   │   │   ├── kimicode/
+│   │   │   ├── lmstudio/
+│   │   │   ├── mistral/
+│   │   │   ├── modal/
+│   │   │   ├── nia/
+│   │   │   ├── nlpcloud/
+│   │   │   ├── novita/
+│   │   │   ├── nvidia/
+│   │   │   ├── ollama/
+│   │   │   ├── openai/
+│   │   │   ├── openrouter/
+│   │   │   ├── perplexity/
+│   │   │   ├── publicai/
+│   │   │   ├── qwen/
+│   │   │   ├── replicate/
+│   │   │   ├── sambanova/
+│   │   │   ├── sarvam/
+│   │   │   ├── siliconflow/
+│   │   │   ├── together/
+│   │   │   ├── upstage/
+│   │   │   ├── venice/
+│   │   │   ├── vertex/
+│   │   │   ├── vulavula/
+│   │   │   ├── xai/
+│   │   │   ├── zai/
+│   │   │   ├── zen/
+│   │   │   └── zhipu/
+│   ├── mcp/                      # MCP server registry + connection pooling
+│   ├── middleware/               # Auth, compression, concurrency limits
+│   ├── models/                   # Core domain types
+│   ├── ports/                    # Centralized port registry
+│   ├── router/                   # Gin router setup + service initialization
+│   ├── security/                 # Guardrails, red-team, PII detection
+│   ├── services/                 # Business logic layer
+│   │   ├── llmsverifier_score_adapter.go   # LLMsVerifier score adapter
+│   │   ├── provider_registry.go            # Provider registry
+│   │   ├── debate_service.go               # Debate orchestration
+│   │   ├── acp_client.go                   # ACP client
+│   │   ├── acp_manager.go                  # ACP manager
+│   │   └── ...
+│   ├── streaming/                # Real-time streaming responses
+│   ├── transport/                # HTTP/3 (QUIC) + Brotli compression
+│   ├── utils/                    # Shared utilities
+│   └── verifier/                 # LLMsVerifier integration layer
+│       ├── doc.go                # Package documentation
+│       ├── config.go             # Verifier configuration
+│       ├── config_test.go        # Config tests
+│       ├── discovery.go          # Model discovery service
+│       ├── discovery_test.go     # Discovery tests
+│       ├── database.go           # SQLite database operations
+│       ├── database_test.go      # Database tests
+│       ├── enhanced_scoring.go   # 7-component scoring engine
+│       ├── health.go             # Health monitoring
+│       ├── provider_types.go     # UnifiedProvider, UnifiedModel types
+│       ├── scoring.go            # 5-component scoring engine
+│       ├── startup.go            # Startup verification orchestrator
+│       ├── verification.go       # Verification service
+│       └── adapters/
+│           ├── provider_adapter.go           # Provider interface adapter
+│           ├── free_adapter.go               # Free provider (Zen, OpenRouter)
+│           ├── oauth_adapter.go              # OAuth provider (Claude, Qwen)
+│           ├── extended_providers_adapter.go  # Extended providers (Grok, Perplexity, etc.)
+│           └── extended_registry.go          # Extended provider registry
+│
+├── pkg/api/                      # Generated protobuf code
+├── tests/                        # Test suites organized by type
+│   ├── unit/                     # Unit tests (mocks allowed, -short)
+│   ├── integration/              # Cross-service integration tests
+│   ├── e2e/                      # End-to-end workflows
+│   ├── security/                 # Vulnerability scans
+│   ├── stress/                   # Load/saturation tests
+│   ├── chaos/                    # Fault injection
+│   ├── challenge/                # Competition tests
+│   ├── performance/              # Benchmarks (//go:build performance)
+│   ├── fixtures/                 # Shared test data
+│   └── testutils/                # Shared helpers
+│
+├── challenges/                   # 193+ validation scripts
+│   └── scripts/
+│       ├── llmsverifier_cliagents_challenge.sh
+│       ├── llmsverifier_startup_verification_challenge.sh
+│       ├── llmsverifier_submodule_smoke_challenge.sh
+│       ├── startup_verifier_debate_team_challenge.sh
+│       ├── verifier_filtering_challenge.sh
+│       └── ... (190+ more)
+│
+├── configs/
+│   └── verifier.yaml             # LLMsVerifier configuration
+│
+├── docs/                         # Comprehensive documentation
+│   ├── guides/llms-verifier.md
+│   ├── integration/LLMSVERIFIER_INTEGRATION_PLAN.md
+│   ├── verifier/
+│   │   ├── API.md
+│   │   ├── README.md
+│   │   ├── USER_GUIDE.md
+│   │   └── LLMSVERIFIER_POWER_FEATURES.md
+│   └── ...
+│
+├── LLMsVerifier/                 # Git submodule (vasic-digital/LLMsVerifier)
+│   └── llm-verifier/             # The actual verifier code
+│       ├── api_keys/             # API key tracking
+│       ├── pkg/cliagents/        # CLI agent unified generator
+│       └── ...
+│
+├── MCP/                          # MCP submodule with 35+ submodules
+├── cli_agents/                   # 48 CLI agent submodules
+├── Toolkit/                      # Provider toolkits
+├── k8s/                          # Kubernetes manifests
+├── monitoring/                   # Prometheus + Grafana configs
+├── scripts/                      # 90+ build/test/deploy scripts
+│
+├── .gitmodules                   # 60+ submodules defined
+├── go.mod                        # Go module with replace directives
+├── package.json                  # Playwright dependency only
+├── Makefile                      # Comprehensive build/test targets
+├── Dockerfile
+├── docker-compose.yml
+├── .env.example                  # Environment configuration template
+├── .env.mcp.example              # MCP configuration template
+├── CLAUDE.md                     # AI agent hard stops + rules
+├── AGENTS.md                     # Authoritative agent guide
+├── CONSTITUTION.md               # 33 mandatory rules
+└── README.md</code></pre>
+<hr />
+<h2 id="c-llmsverifier-integration-analysis-most-critical">C.
+LLMsVerifier INTEGRATION ANALYSIS (MOST CRITICAL)</h2>
+<h3 id="c1-llmsverifier-as-git-submodule">C.1 LLMsVerifier as Git
+Submodule</h3>
+<p><strong>Location</strong>: <code>LLMsVerifier/</code> (external
+submodule) <strong>Repository</strong>:
+<code>git@github.com:vasic-digital/LLMsVerifier.git</code>
+<strong>Commit</strong>:
+<code>1d53ae3b72c77c1f27171c0677431c48d2d02bdd</code></p>
+<h3 id="c2-go-module-integration">C.2 Go Module Integration</h3>
+<p><strong>go.mod dependency</strong>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>digital<span class="op">.</span>vasic<span class="op">.</span>llmsverifier v0<span class="fl">.0</span><span class="er">.0</span></span></code></pre></div>
+<p><strong>go.mod replace directive</strong> (maps local submodule):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Part of the extensive replace block for local submodules</span></span></code></pre></div>
+<h3 id="c3-import-statements-exact">C.3 Import Statements (EXACT)</h3>
+<p><strong>Import 1</strong> - CLI agent configuration generation:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// File: cmd/helixagent/main.go</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>digital<span class="op">.</span>vasic<span class="op">.</span>llmsverifier<span class="op">/</span>pkg<span class="op">/</span>cliagents</span></code></pre></div>
+<p><strong>Import 2</strong> - API key management:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// File: internal/verifier/startup.go</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>digital<span class="op">.</span>vasic<span class="op">.</span>llmsverifier<span class="op">/</span>api_keys</span></code></pre></div>
+<h3 id="c4-initialization-pattern">C.4 Initialization Pattern</h3>
+<p><strong>File</strong>: <code>cmd/helixagent/main.go</code></p>
+<p>The LLMsVerifier is initialized as part of the
+<code>StartupVerifier</code> which orchestrates the complete provider
+verification pipeline:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// In main.go - the startup flow:</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">// 1. Load Config &amp; Environment</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">// 2. Initialize StartupVerifier (Scoring + Verification + Health)</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">// 3. Discover ALL Providers (API Key + OAuth + Free)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">// 4. Verify ALL Providers in Parallel (8-test pipeline)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">// 5. Score ALL Verified Providers (5-component weighted)</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">// 6. Rank by Score</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">// 7. Select AI Debate Team (up to 25 LLMs)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">// 8. Start Server with Verified Configuration</span></span></code></pre></div>
+<p><strong>Key initialization in
+<code>internal/verifier/startup.go</code></strong>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// NewStartupVerifier creates the orchestrator</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewStartupVerifier<span class="op">(</span>cfg <span class="op">*</span>StartupConfig<span class="op">,</span> log <span class="op">*</span>logrus<span class="op">.</span>Logger<span class="op">)</span> <span class="op">*</span>StartupVerifier <span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Initialize services</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    verifierCfg <span class="op">:=</span> DefaultConfig<span class="op">()</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    verifierSvc <span class="op">:=</span> NewVerificationService<span class="op">(</span>verifierCfg<span class="op">)</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    scoringSvc<span class="op">,</span> err <span class="op">:=</span> NewScoringService<span class="op">(</span>verifierCfg<span class="op">)</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Initialize enhanced scoring service (Phase 1: 7-component scoring)</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    enhancedScoring <span class="op">:=</span> NewEnhancedScoringService<span class="op">(</span>scoringSvc<span class="op">)</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>StartupVerifier<span class="op">{</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        config<span class="op">:</span>               cfg<span class="op">,</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        verifierSvc<span class="op">:</span>          verifierSvc<span class="op">,</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        scoringSvc<span class="op">:</span>           scoringSvc<span class="op">,</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        enhancedScoring<span class="op">:</span>      enhancedScoring<span class="op">,</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        subscriptionDetector<span class="op">:</span> NewSubscriptionDetector<span class="op">(</span>log<span class="op">),</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ...</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="c5-configuration-routing-how-api-keys-flow">C.5 Configuration
+Routing (How API Keys Flow)</h3>
+<p><strong>Configuration file</strong>:
+<code>configs/verifier.yaml</code></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">verifier</span><span class="kw">:</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">verification</span><span class="kw">:</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">mandatory_code_check</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">code_visibility_prompt</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Do you see my code?&quot;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">verification_timeout</span><span class="kw">:</span><span class="at"> 60s</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">retry_count</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">retry_delay</span><span class="kw">:</span><span class="at"> 5s</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tests</span><span class="kw">:</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> existence</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> responsiveness</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> latency</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> streaming</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> function_calling</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> coding_capability</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> error_detection</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> code_visibility</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">scoring</span><span class="kw">:</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">weights</span><span class="kw">:</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">response_speed</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.25</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">model_efficiency</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">cost_effectiveness</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.25</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">capability</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">recency</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.10</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">cache_ttl</span><span class="kw">:</span><span class="at"> 24h</span></span></code></pre></div>
+<p><strong>Environment Variables</strong> (from
+<code>.env.example</code>):</p>
+<ul>
+<li><code>OPENAI_API_KEY=sk-your-openai-key</code></li>
+<li><code>ANTHROPIC_API_KEY=sk-ant-your-anthropic-key</code></li>
+<li><code>DEEPSEEK_API_KEY=sk-your-deepseek-key</code></li>
+<li><code>GROQ_API_KEY=gsk-your-groq-key</code></li>
+<li><code>MISTRAL_API_KEY=your-mistral-key</code></li>
+<li><code>COHERE_API_KEY=your-cohere-key</code></li>
+<li><code>PERPLEXITY_API_KEY=pplx-your-perplexity-key</code></li>
+<li><code>GEMINI_API_KEY=your-gemini-key</code></li>
+<li><code>TOGETHER_API_KEY=your-together-key</code></li>
+<li><code>XAI_API_KEY=your-xai-key</code></li>
+<li><code>CEREBRAS_API_KEY=your-cerebras-key</code></li>
+<li><code>CLOUDFLARE_API_KEY=your-cloudflare-key</code></li>
+<li><code>SILICONFLOW_API_KEY=your-siliconflow-key</code></li>
+</ul>
+<h3 id="c6-model-consumption-pattern">C.6 Model Consumption Pattern</h3>
+<p><strong>5-Component Weighted Scoring</strong>: | Component | Weight |
+Description | |-----------|--------|-------------| | ResponseSpeed | 25%
+| API response latency | | ModelEfficiency | 20% | Token efficiency | |
+CostEffectiveness | 25% | Cost per token | | Capability | 20% | Model
+capability score | | Recency | 10% | Model release date |</p>
+<p><strong>7-Component Enhanced Scoring</strong> (Phase 1): | Component
+| Weight | Description | |-----------|--------|-------------| |
+ResponseSpeed | 20% | API latency | | ModelEfficiency | 15% | Token
+efficiency | | CostEffectiveness | 20% | Cost per 1K tokens | |
+Capability | 15% | Model capability tier | | Recency | 5% | Model
+release date | | CodeQuality | 15% | Code generation benchmarks | |
+ReasoningScore | 10% | Reasoning task performance |</p>
+<h3 id="c7-all-files-referencing-llmsverifier">C.7 All Files Referencing
+LLMsVerifier</h3>
+<ol type="1">
+<li><code>cmd/helixagent/main.go</code> - Imports
+<code>digital.vasic.llmsverifier/pkg/cliagents</code></li>
+<li><code>internal/verifier/startup.go</code> - Imports
+<code>digital.vasic.llmsverifier/api_keys</code></li>
+<li><code>internal/services/llmsverifier_score_adapter.go</code> - Score
+adapter connecting ProviderDiscovery to LLMsVerifier scoring</li>
+<li><code>internal/services/llmsverifier_score_adapter_test.go</code> -
+Tests for score adapter</li>
+<li><code>configs/verifier.yaml</code> - Configuration file</li>
+<li><code>internal/verifier/</code> - Complete integration layer (~15
+files)</li>
+<li><code>challenges/scripts/llmsverifier_*.sh</code> - 4 challenge
+scripts</li>
+<li><code>docs/guides/llms-verifier.md</code></li>
+<li><code>docs/integration/LLMSVERIFIER_INTEGRATION_PLAN.md</code></li>
+<li><code>docs/verifier/*.md</code></li>
+<li><code>challenge-results/llmsverifier-*/</code></li>
+</ol>
+<h3 id="c8-integration-architecture-diagram-text-based">C.8 Integration
+Architecture Diagram (Text-Based)</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────────┐
+│                         HELIXAGENT MAIN (cmd/helixagent)                     │
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                    STARTUP VERIFIER PIPELINE                          │   │
+│  │                                                                       │   │
+│  │  Phase 1: Discover Providers                                          │   │
+│  │    ├── API Key Providers (from env vars)                              │   │
+│  │    ├── OAuth Providers (Claude, Qwen CLI credentials)                 │   │
+│  │    └── Free Providers (Zen, OpenRouter :free)                         │   │
+│  │                                                                       │   │
+│  │  Phase 2: Verify All Providers (8-test pipeline)                      │   │
+│  │    ├── API connectivity                                               │   │
+│  │    ├── Authentication                                                 │   │
+│  │    ├── Model availability                                             │   │
+│  │    ├── Basic completion                                               │   │
+│  │    ├── Streaming support                                              │   │
+│  │    ├── Error handling                                                 │   │
+│  │    ├── Rate limit behavior                                            │   │
+│  │    └── Response quality                                               │   │
+│  │                                                                       │   │
+│  │  Phase 3: Score Verified Providers                                    │   │
+│  │    ├── 5-component scoring (ResponseSpeed, Efficiency, Cost,          │   │
+│  │    │   Capability, Recency)                                           │   │
+│  │    └── 7-component enhanced scoring (+CodeQuality, Reasoning)         │   │
+│  │                                                                       │   │
+│  │  Phase 4: Rank by Score                                               │   │
+│  │    └── Sort by overall score descending                               │   │
+│  │                                                                       │   │
+│  │  Phase 5: Select AI Debate Team                                       │   │
+│  │    ├── Up to 25 LLMs (5 positions x 5 LLMs)                          │   │
+│  │    ├── 5 primary + up to 20 fallbacks                                │   │
+│  │    └── Min score threshold: 5.0                                       │   │
+│  │                                                                       │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                              │                                               │
+│                              ▼                                               │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │              LLMsVerifier INTEGRATION LAYER                          │   │
+│  │              (internal/verifier/)                                     │   │
+│  │                                                                       │   │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐  │   │
+│  │  │   Scoring    │  │ Verification │  │    Discovery Service     │  │   │
+│  │  │   Service    │  │   Service    │  │                          │  │   │
+│  │  │              │  │              │  │  - Provider discovery    │  │   │
+│  │  │ 5-component  │  │ 8-test pipe  │  │  - Model discovery       │  │   │
+│  │  │ 7-component  │  │ Code vis.    │  │  - Subscription detect   │  │   │
+│  │  │ Cache (safe) │  │ Retry logic  │  │  - Health monitoring     │  │   │
+│  │  └──────┬───────┘  └──────┬───────┘  └──────────┬───────────────┘  │   │
+│  │         │                  │                     │                   │   │
+│  │         └──────────────────┼─────────────────────┘                   │   │
+│  │                            ▼                                         │   │
+│  │  ┌─────────────────────────────────────────────────────────────┐    │   │
+│  │  │                    ADAPTER LAYER                             │    │   │
+│  │  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────────────┐  │    │   │
+│  │  │  │  OAuth   │ │   Free   │ │  API Key │ │   Extended     │  │    │   │
+│  │  │  │ Adapter  │ │ Adapter  │ │ Adapter  │ │   Providers    │  │    │   │
+│  │  │  │          │ │          │ │          │ │   Adapter      │  │    │   │
+│  │  │  │ Claude   │ │   Zen    │ │ Standard │ │ (Grok, Perp.,  │  │    │   │
+│  │  │  │ Qwen     │ │OpenRouter│ │  OpenAI  │ │  Cohere, etc.) │  │    │   │
+│  │  │  └──────────┘ └──────────┘ └──────────┘ └────────────────┘  │    │   │
+│  │  └─────────────────────────────────────────────────────────────┘    │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                              │                                               │
+│                              ▼                                               │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │              LLMsVerifier SUBMODULE (LLMsVerifier/)                   │   │
+│  │              (git@github.com:vasic-digital/LLMsVerifier.git)          │   │
+│  │                                                                       │   │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐  │   │
+│  │  │  pkg/        │  │  api_keys/   │  │  llm-verifier/           │  │   │
+│  │  │  cliagents/  │  │              │  │                          │  │   │
+│  │  │              │  │ - manager.go │  │ - Provider mgmt          │  │   │
+│  │  │ - Unified    │  │ - env_scanner│  │ - Model discovery        │  │   │
+│  │  │   generator  │  │ - priority   │  │ - SQLite storage         │  │   │
+│  │  │ - 48 agents  │  │              │  │ - REST API               │  │   │
+│  │  │   support    │  │              │  │ - Challenge system       │  │   │
+│  │  └──────────────┘  └──────────────┘  └──────────────────────────┘  │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr />
+<h2 id="d-configuration-system">D. CONFIGURATION SYSTEM</h2>
+<h3 id="d1-all-env-variables">D.1 All .env Variables</h3>
+<p>Key environment variable categories from
+<code>.env.example</code>:</p>
+<p><strong>LLM Provider API Keys</strong>:</p>
+<pre><code>OPENAI_API_KEY=sk-your-openai-key
+ANTHROPIC_API_KEY=sk-ant-your-anthropic-key
+DEEPSEEK_API_KEY=sk-your-deepseek-key
+GROQ_API_KEY=gsk-your-groq-key
+MISTRAL_API_KEY=your-mistral-key
+COHERE_API_KEY=your-cohere-key
+PERPLEXITY_API_KEY=pplx-your-perplexity-key
+GEMINI_API_KEY=your-gemini-key
+TOGETHER_API_KEY=your-together-key
+XAI_API_KEY=your-xai-key
+CEREBRAS_API_KEY=your-cerebras-key
+CLOUDFLARE_API_KEY=your-cloudflare-key
+SILICONFLOW_API_KEY=your-siliconflow-key</code></pre>
+<p><strong>Infrastructure</strong>:</p>
+<pre><code>DB_HOST=localhost
+DB_PORT=8101
+DB_USER=helixagent
+DB_PASSWORD=helixagent123
+REDIS_HOST=localhost
+REDIS_PORT=8102
+REDIS_PASSWORD=helixagent123
+PORT=8100
+GIN_MODE=release
+JWT_SECRET=your-secret-key-here</code></pre>
+<p><strong>HelixMemory</strong>:</p>
+<pre><code>HELIX_MEMORY_MODE=local
+HELIX_MEMORY_COGNEE_ENDPOINT=http://localhost:8000
+HELIX_MEMORY_MEM0_ENDPOINT=http://localhost:8001
+HELIX_MEMORY_LETTA_ENDPOINT=http://localhost:8283</code></pre>
+<p><strong>HelixLLM</strong>:</p>
+<pre><code>USE_HELIX_LLM=true
+HELIX_LLM_ENDPOINT=http://localhost:8443
+HELIX_LLM_MODE=full</code></pre>
+<p><strong>Port Registry</strong>:</p>
+<pre><code>HELIXAGENT_PORT_PREFIX=8
+HELIXAGENT_PORT_HTTP=8100
+HELIXAGENT_PORT_POSTGRES=8101
+HELIXAGENT_PORT_REDIS=8102
+HELIXAGENT_PORT_MCP_BRIDGE=8103</code></pre>
+<h3 id="d2-how-llmsverifier-gets-its-config">D.2 How LLMsVerifier Gets
+Its Config</h3>
+<ol type="1">
+<li><strong>Primary</strong>: <code>configs/verifier.yaml</code> -
+Structured YAML with provider configs, scoring weights, test
+configuration</li>
+<li><strong>Secondary</strong>: Environment variables injected into YAML
+via <code>${VAR}</code> interpolation</li>
+<li><strong>Tertiary</strong>: <code>.env</code> file loaded via
+<code>godotenv</code> at startup</li>
+</ol>
+<h3 id="d3-all-providers-configured">D.3 All Providers Configured</h3>
+<p>From <code>configs/verifier.yaml</code>:</p>
+<ul>
+<li><strong>openai</strong>: gpt-4, gpt-4-turbo, gpt-4o,
+gpt-3.5-turbo</li>
+<li><strong>anthropic</strong>: claude-3-5-sonnet, claude-3-opus,
+claude-3-sonnet, claude-3-haiku</li>
+<li><strong>google</strong>: gemini-1.5-pro, gemini-1.5-flash,
+gemini-pro</li>
+<li><strong>groq</strong>: llama-3.3-70b, llama-3.1-8b,
+mixtral-8x7b</li>
+<li><strong>together</strong>: meta-llama/Llama-3-70b,
+mistralai/Mixtral-8x7B</li>
+<li><strong>mistral</strong>: mistral-large, mistral-medium,
+mistral-small</li>
+<li><strong>deepseek</strong>: deepseek-chat, deepseek-coder</li>
+<li><strong>xai</strong>: grok-beta (disabled by default)</li>
+<li><strong>cerebras</strong>: llama-3.3-70b (disabled by default)</li>
+<li><strong>cloudflare</strong>: @cf/meta/llama-2-7b (disabled by
+default)</li>
+<li><strong>siliconflow</strong>: deepseek-ai/DeepSeek-V2.5 (disabled by
+default)</li>
+<li><strong>replicate</strong>: meta/llama-2-70b (disabled by
+default)</li>
+<li><strong>openrouter</strong>: anthropic/claude-3.5, openai/gpt-4,
+meta/llama-3.1-405b</li>
+<li><strong>ollama</strong>: DEPRECATED (score: 5.0, development
+only)</li>
+</ul>
+<h3 id="d4-mcp-configuration">D.4 MCP Configuration</h3>
+<p>From <code>.env.mcp.example</code>:</p>
+<ul>
+<li>35 MCP server submodules configured</li>
+<li>SSE bridge on port 8103</li>
+<li>Auto-start on HelixAgent boot</li>
+<li>Working-only mode (skip API-key-required MCPs by default)</li>
+</ul>
+<hr />
+<h2 id="e-all-capabilities">E. ALL CAPABILITIES</h2>
+<h3 id="e1-providers-supported-51">E.1 Providers Supported (51+)</h3>
+<p><strong>Tier 1 (Primary - Always enabled)</strong>:</p>
+<ol type="1">
+<li>Claude (Anthropic)</li>
+<li>DeepSeek</li>
+<li>Gemini (Google)</li>
+<li>Groq</li>
+<li>Mistral</li>
+<li>OpenAI</li>
+<li>Together AI</li>
+<li>OpenRouter</li>
+<li>Qwen (Alibaba)</li>
+</ol>
+<p><strong>Tier 2 (Extended)</strong>: 10. AI21 11. Anthropic (CU
+variant) 12. Azure 13. Cerebras 14. Chutes 15. Cloudflare Workers AI 16.
+Codestral 17. Cohere 18. Fireworks 19. GitHub Models 20. HuggingFace 21.
+Hyperbolic 22. Junie 23. Kilo 24. Kimi 25. Kimi Code 26. LM Studio 27.
+Modal 28. NIA 29. NLP Cloud 30. Novita 31. NVIDIA 32. Ollama
+(DEPRECATED) 33. Perplexity 34. PublicAI 35. Replicate 36. SambaNova 37.
+Sarvam 38. SiliconFlow 39. Upstage 40. Venice 41. Vertex (Google) 42.
+VulaVula 43. xAI (Grok) 44. ZAI 45. Zen (OpenCode) 46. Zhipu</p>
+<h3 id="e2-mcps-integrated-35">E.2 MCPs Integrated (35+)</h3>
+<p>Full MCP submodule list from <code>.gitmodules</code>:</p>
+<ul>
+<li>microsoft-mcp, python-sdk, typescript-sdk</li>
+<li>brave-search, notion-mcp-server</li>
+<li>sentry-mcp, github-mcp-server</li>
+<li>playwright-mcp, browserbase-mcp</li>
+<li>qdrant-mcp, supabase-mcp, redis-mcp</li>
+<li>elasticsearch-mcp, obsidian-mcp, firecrawl-mcp</li>
+<li>cloudflare-mcp, workers-mcp, aws-mcp</li>
+<li>kubernetes-mcp, k8s-mcp-server</li>
+<li>slack-mcp, telegram-mcp</li>
+<li>airtable-mcp, trello-mcp, heroku-mcp</li>
+<li>mongodb-mcp, atlassian-mcp</li>
+<li>perplexity-mcp, omnisearch-mcp</li>
+<li>context7-mcp, langchain-mcp, llamaindex-mcp</li>
+<li>docs-mcp, all-in-one-mcp</li>
+</ul>
+<h3 id="e3-lsps-integrated-10">E.3 LSPs Integrated (10)</h3>
+<p>Referenced in documentation (server implementations via
+<code>sourcegraph/jsonrpc2</code>):</p>
+<ul>
+<li>gopls, pylsp, typescript-language-server</li>
+<li>rust-analyzer, clangd</li>
+<li>And 4 more</li>
+</ul>
+<h3 id="e4-acps-integrated">E.4 ACPs Integrated</h3>
+<ul>
+<li>ACP Manager on port 8300</li>
+<li>JSON-RPC protocol support</li>
+<li>Tool calling + context management</li>
+<li>Agent registration/execution endpoints</li>
+</ul>
+<h3 id="e5-embeddings-systems-13">E.5 Embeddings Systems (13)</h3>
+<p>Via <code>internal/embeddings/</code> + <code>Embeddings/</code>
+submodule:</p>
+<ul>
+<li>OpenAI, Cohere, Mistral embeddings</li>
+<li>Local embeddings (all-mpnet-base-v2)</li>
+<li>Provider-specific embedding endpoints</li>
+</ul>
+<h3 id="e6-rag-systems">E.6 RAG Systems</h3>
+<ul>
+<li><code>RAG/</code> submodule</li>
+<li>NVIDIA RAG container support</li>
+<li>ChromaDB, Qdrant, Neo4j vector stores</li>
+<li>Chunking: 1000 tokens, 200 overlap, top_k=5</li>
+</ul>
+<h3 id="e7-skills-system">E.7 Skills System</h3>
+<ul>
+<li>Skill definitions in provider configurations</li>
+<li>Capability detection per model</li>
+<li>Specialization tagging (code, reasoning, general)</li>
+</ul>
+<h3 id="e8-plugins-system">E.8 Plugins System</h3>
+<ul>
+<li><code>Plugins/</code> submodule</li>
+<li>Hot reloading support</li>
+<li>Auto-discovery on startup</li>
+</ul>
+<hr />
+<h2 id="f-test--challenge-structure">F. TEST &amp; CHALLENGE
+STRUCTURE</h2>
+<h3 id="f1-challenge-scripts-193">F.1 Challenge Scripts (193+)</h3>
+<p>Located in <code>challenges/scripts/</code>. Key LLMsVerifier
+challenges:</p>
+<ol type="1">
+<li><strong><code>llmsverifier_cliagents_challenge.sh</code></strong> -
+Tests unified CLI agent config generation</li>
+<li><strong><code>llmsverifier_startup_verification_challenge.sh</code></strong>
+- Tests API key tracking + provider verification</li>
+<li><strong><code>llmsverifier_submodule_smoke_challenge.sh</code></strong>
+- Tests submodule compilation</li>
+<li><strong><code>startup_verifier_debate_team_challenge.sh</code></strong>
+- Tests debate team selection</li>
+<li><strong><code>verifier_filtering_challenge.sh</code></strong> -
+Tests provider filtering by score</li>
+</ol>
+<p><strong>Challenge structure</strong>:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Color-coded output (GREEN=pass, RED=fail, YELLOW=test, BLUE=header)</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Manual pass/fail counting (TESTS_PASSED, TESTS_FAILED)</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Each test function: print_test → test logic → pass_test/fail_test</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Final summary with exit 0 (all pass) or exit 1 (any fail)</span></span></code></pre></div>
+<h3 id="f2-test-files">F.2 Test Files</h3>
+<p><strong>Unit tests</strong> (mocks allowed, <code>-short</code>
+flag):</p>
+<ul>
+<li><code>internal/verifier/config_test.go</code> - 11,346 bytes</li>
+<li><code>internal/verifier/database_test.go</code> - 6,291 bytes</li>
+<li><code>internal/verifier/discovery_test.go</code> - 18,344 bytes</li>
+<li><code>internal/services/llmsverifier_score_adapter_test.go</code></li>
+<li>All provider <code>*_test.go</code> files</li>
+</ul>
+<p><strong>Integration tests</strong> (REAL infrastructure
+required):</p>
+<ul>
+<li><code>tests/integration/</code> - Cross-service tests</li>
+<li><code>tests/e2e/</code> - End-to-end workflows</li>
+<li><code>tests/security/</code> - Vulnerability scans</li>
+<li><code>tests/stress/</code> - Load tests</li>
+<li><code>tests/chaos/</code> - Fault injection</li>
+</ul>
+<h3 id="f3-anti-bluff-testing-patterns">F.3 Anti-Bluff Testing
+Patterns</h3>
+<p>From <code>CLAUDE.md</code> / <code>CONSTITUTION.md</code>:</p>
+<ul>
+<li><strong>CONST-002a</strong>: NO mocks/stubs in production code</li>
+<li><strong>CONST-002</strong>: 100% test coverage across ALL test
+types</li>
+<li><strong>CONST-030</strong>: Real infrastructure for ALL non-unit
+tests</li>
+<li><strong>Rule</strong>: "Mocks/stubs ONLY in unit tests; all other
+tests use real data and live services"</li>
+<li><strong>Enforcement</strong>: <code>make no-mocks-above-unit</code>
+with strict allowlist ratchet</li>
+</ul>
+<h3 id="f4-test-frameworks-used">F.4 Test Frameworks Used</h3>
+<ul>
+<li><strong>Go testing</strong>: Standard <code>go test</code> +
+testify</li>
+<li><strong>Playwright</strong>: Browser automation tests</li>
+<li><strong>Challenge scripts</strong>: Bash-based validation (193+
+scripts)</li>
+<li><strong>HelixQA</strong>: Quality assurance framework (separate
+submodule)</li>
+</ul>
+<hr />
+<h2 id="g-documentation-governance">G. DOCUMENTATION GOVERNANCE</h2>
+<h3 id="g1-claudemd-analysis">G.1 CLAUDE.md Analysis</h3>
+<p><strong>File</strong>: <code>CLAUDE.md</code> (comprehensive -
+~20,000+ bytes)</p>
+<p><strong>Hard Stops</strong> (NON-NEGOTIABLE):</p>
+<ol type="1">
+<li><strong>NO CI/CD pipelines</strong> - No
+<code>.github/workflows/</code>, <code>.gitlab-ci.yml</code>, etc.</li>
+<li><strong>NO manual container commands</strong> - Only
+<code>./bin/helixagent</code> orchestrates containers</li>
+<li><strong>NO HTTPS for Git</strong> - SSH URLs only
+(<code>git@github.com:...</code>)</li>
+<li><strong>Run <code>go mod vendor</code> after touching
+submodules</strong></li>
+</ol>
+<p><strong>Constitution Rules Extracted</strong>:</p>
+<ul>
+<li>CONST-001 through CONST-033 (33 mandatory rules)</li>
+<li>CONST-029: Concurrent-safe containers (safe.Store/safe.Slice)</li>
+<li>CONST-030: Real infrastructure for all non-unit tests</li>
+</ul>
+<h3 id="g2-agentsmd-analysis">G.2 AGENTS.md Analysis</h3>
+<p><strong>File</strong>: <code>AGENTS.md</code> (authoritative guide
+for AI agents)</p>
+<p><strong>Key sections</strong>:</p>
+<ul>
+<li>Project overview (Go 1.26, module <code>dev.helix.agent</code>)</li>
+<li>Technology stack table</li>
+<li>Code organization diagram</li>
+<li>Build/test commands</li>
+<li>Code style rules</li>
+<li>Provider patterns</li>
+</ul>
+<h3 id="g3-constitutionmd">G.3 CONSTITUTION.md</h3>
+<p><strong>File</strong>: <code>CONSTITUTION.md</code></p>
+<p><strong>33 mandatory rules</strong> across 17 categories: | Category
+| Count | Key Rules | |----------|-------|-----------| | Quality | 2 |
+No broken components, no dead code | | Safety | 1 | Memory safety | |
+Security | 1 | Security scanning | | Performance | 2 | Monitoring, lazy
+loading | | Containerization | 4 | Full containerization, orchestration
+flow | | Configuration | 2 | Unified config, non-interactive execution |
+| Testing | 8 | 100% coverage, challenges, stress tests | |
+Documentation | 2 | Complete docs, synchronization | | Principles | 2 |
+KISS/DRY/SOLID, design patterns | | Stability | 1 | Rock-solid changes |
+| Observability | 1 | Health and monitoring | | GitOps | 2 | GitSpec
+compliance, SSH only | | CI/CD | 1 | Manual CI/CD only | | Networking |
+1 | HTTP/3 (QUIC) + Brotli | | Resource Management | 1 | Test resource
+limits | | Concurrency | 1 | safe.Store/safe.Slice |</p>
+<h3 id="g4-quality-requirements">G.4 Quality Requirements</h3>
+<ol type="1">
+<li><strong>100% Test Coverage</strong> - Every component: unit,
+integration, E2E, security, stress, chaos, automation, benchmark</li>
+<li><strong>Challenge Coverage</strong> - Every component MUST have
+challenge scripts</li>
+<li><strong>Containerization</strong> - All services in containers</li>
+<li><strong>Real Data</strong> - Beyond unit tests: actual API calls,
+real databases, live services</li>
+<li><strong>No False Positives</strong> - Tests validate actual
+behavior, not return codes</li>
+</ol>
+<hr />
+<h2 id="h-dependencies--packagejson">H. DEPENDENCIES &amp;
+PACKAGE.JSON</h2>
+<h3 id="h1-packagejson">H.1 package.json</h3>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;dependencies&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;playwright&quot;</span><span class="fu">:</span> <span class="st">&quot;^1.58.2&quot;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><strong>Note</strong>: Playwright is used for browser automation
+testing only. The project is <strong>Go-based</strong>, not Node.js.</p>
+<h3 id="h2-gomod-key-dependencies">H.2 go.mod Key Dependencies</h3>
+<p><strong>HelixAgent module</strong>: <code>dev.helix.agent</code>
+<strong>Go version</strong>: 1.26</p>
+<p><strong>Key external dependencies</strong>:</p>
+<ul>
+<li><code>github.com/gin-gonic/gin v1.12.0</code> - HTTP framework</li>
+<li><code>github.com/jackc/pgx/v5</code> - PostgreSQL driver</li>
+<li><code>github.com/redis/go-redis/v9</code> - Redis client</li>
+<li><code>github.com/sirupsen/logrus</code> - Structured logging</li>
+<li><code>github.com/prometheus/client_golang</code> - Metrics</li>
+<li><code>github.com/docker/docker</code> - Docker API</li>
+<li><code>github.com/neo4j/neo4j-go-driver/v5</code> - Neo4j</li>
+<li><code>github.com/ClickHouse/clickhouse-go/v2</code> -
+ClickHouse</li>
+<li><code>github.com/minio/minio-go/v7</code> - MinIO/S3</li>
+<li><code>github.com/playwright-community/playwright-go</code> -
+Playwright Go bindings</li>
+<li><code>github.com/quic-go/quic-go</code> - HTTP/3 (QUIC)</li>
+<li><code>github.com/andybalholm/brotli</code> - Brotli compression</li>
+<li><code>go.opentelemetry.io/otel</code> - OpenTelemetry</li>
+<li><code>google.golang.org/grpc</code> - gRPC</li>
+</ul>
+<p><strong>Internal submodules</strong> (41 extracted modules):</p>
+<ul>
+<li><code>digital.vasic.llmsverifier</code> - LLMsVerifier</li>
+<li><code>digital.vasic.mcp</code> - MCP module</li>
+<li><code>digital.vasic.helixmemory</code> - Memory system</li>
+<li><code>digital.vasic.helixqa</code> - QA framework</li>
+<li><code>digital.vasic.helixspecifier</code> - Spec generation</li>
+<li><code>digital.vasic.concurrency</code> - Safe concurrent data
+structures</li>
+<li><code>digital.vasic.llmprovider</code> - LLM provider
+abstraction</li>
+<li><code>digital.vasic.llmorchestrator</code> - LLM orchestration</li>
+<li>And 33 more...</li>
+</ul>
+<hr />
+<h2 id="i-key-source-files-analysis">I. KEY SOURCE FILES ANALYSIS</h2>
+<h3 id="i1-internalverifierstartupgo-critical">I.1
+<code>internal/verifier/startup.go</code> (CRITICAL)</h3>
+<p><strong>Purpose</strong>: Orchestrates the complete startup
+verification pipeline</p>
+<p><strong>Key functions</strong>:</p>
+<ul>
+<li><code>NewStartupVerifier()</code> - Creates the orchestrator with
+all services</li>
+<li><code>VerifyAllProviders()</code> - 5-phase verification
+pipeline</li>
+<li><code>discoverProviders()</code> - Discovers API key + OAuth + free
+providers</li>
+<li><code>verifyProviders()</code> - 8-test parallel verification</li>
+<li><code>scoreProviders()</code> - 5/7-component weighted scoring</li>
+<li><code>selectDebateTeam()</code> - Selects up to 25 LLMs for
+debate</li>
+</ul>
+<p><strong>LLMsVerifier imports used</strong>:</p>
+<ul>
+<li><code>digital.vasic.llmsverifier/api_keys</code> - API key
+tracking</li>
+</ul>
+<h3 id="i2-internalservicesllmsverifier_score_adaptergo-critical">I.2
+<code>internal/services/llmsverifier_score_adapter.go</code>
+(CRITICAL)</h3>
+<p><strong>Purpose</strong>: Bridges ProviderDiscovery to LLMsVerifier
+scoring system</p>
+<p><strong>Key features</strong>:</p>
+<ul>
+<li><code>LLMsVerifierScoreAdapter</code> struct with
+<code>safe.Store</code> for thread safety</li>
+<li><code>GetProviderScore()</code> / <code>GetModelScore()</code> -
+Normalizes 0-100 to 0-10</li>
+<li><code>RefreshScores()</code> - Periodic score refresh (5-minute
+interval)</li>
+<li><code>inferProviderFromModel()</code> - Dynamic provider inference
+from model ID patterns</li>
+</ul>
+<h3 id="i3-internalverifierdiscoverygo-critical">I.3
+<code>internal/verifier/discovery.go</code> (CRITICAL)</h3>
+<p><strong>Purpose</strong>: Automatic model discovery from all
+configured providers</p>
+<p><strong>Key features</strong>:</p>
+<ul>
+<li><code>ModelDiscoveryService</code> - Concurrent-safe discovery</li>
+<li><code>discoverAllModels()</code> - Parallel discovery from all
+provider endpoints</li>
+<li><code>verifyDiscoveredModels()</code> - Parallel model
+verification</li>
+<li><code>selectTopModels()</code> - Score-based model selection for
+ensemble</li>
+</ul>
+<h3 id="i4-internalverifierscoringgo-critical">I.4
+<code>internal/verifier/scoring.go</code> (CRITICAL)</h3>
+<p><strong>Purpose</strong>: 5-component weighted scoring engine</p>
+<p><strong>Key features</strong>:</p>
+<ul>
+<li><code>ScoringService</code> with cache (safe.Store)</li>
+<li><code>CalculateScore()</code> - Dynamic model class inference</li>
+<li><code>inferModelClassScore()</code> - Pattern-based scoring (not
+hardcoded)</li>
+<li><code>BatchCalculateScores()</code> - Parallel score
+computation</li>
+</ul>
+<h3 id="i5-internalverifierenhanced_scoringgo-critical">I.5
+<code>internal/verifier/enhanced_scoring.go</code> (CRITICAL)</h3>
+<p><strong>Purpose</strong>: 7-component enhanced scoring for debate
+team selection</p>
+<p><strong>Key features</strong>:</p>
+<ul>
+<li><code>EnhancedScoringService</code> with <code>safe.Store</code>
+cache</li>
+<li><code>CalculateEnhancedScore()</code> - Full 7-component
+calculation</li>
+<li><code>calculateComponents()</code> - All component score
+calculations</li>
+<li><code>calculateDiversityBonus()</code> - Diversity-aware team
+selection</li>
+</ul>
+<h3 id="i6-internalservicesprovider_registrygo-critical">I.6
+<code>internal/services/provider_registry.go</code> (CRITICAL)</h3>
+<p><strong>Purpose</strong>: Manages LLM provider registration with
+LLMsVerifier integration</p>
+<p><strong>Key features</strong>:</p>
+<ul>
+<li><code>ProviderRegistry</code> with <code>safe.Store</code> for all
+collections</li>
+<li><code>scoreAdapter</code> field - LLMsVerifier score adapter</li>
+<li><code>startupVerifier</code> field - Atomic pointer to startup
+verifier</li>
+<li>51+ provider imports</li>
+</ul>
+<h3 id="i7-internalverifieradaptersoauth_adaptergo">I.7
+<code>internal/verifier/adapters/oauth_adapter.go</code></h3>
+<p><strong>Purpose</strong>: Handles OAuth-based providers (Claude,
+Qwen)</p>
+<p><strong>Key insight</strong>: Claude OAuth tokens from Claude Code
+CLI are <strong>PRODUCT-RESTRICTED</strong> - they can only be used with
+Claude Code itself, not the standard Anthropic API. The adapter marks
+these as unverified and excludes them from the debate team.</p>
+<h3 id="i8-internalverifieradaptersfree_adaptergo">I.8
+<code>internal/verifier/adapters/free_adapter.go</code></h3>
+<p><strong>Purpose</strong>: Handles free providers (Zen/OpenCode,
+OpenRouter :free)</p>
+<p><strong>Key features</strong>:</p>
+<ul>
+<li>Two-phase verification (direct API → CLI facade fallback)</li>
+<li>Base score 6.0-7.0 for free providers</li>
+<li>ZenCLIProvider for models that fail direct API verification</li>
+</ul>
+<hr />
+<h2 id="j-integration-architecture-summary">J. INTEGRATION ARCHITECTURE
+SUMMARY</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                    INTEGRATION DATA FLOW                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  1. ENV LOADER (.env) ──→ API keys read from environment        │
+│         │                                                        │
+│         ▼                                                        │
+│  2. CONFIG LOADER ──→ configs/verifier.yaml + env interpolation │
+│         │                                                        │
+│         ▼                                                        │
+│  3. STARTUP VERIFIER (internal/verifier/startup.go)             │
+│     ┌─────────────────────────────────────┐                      │
+│     │ Phase 1: Discover providers         │                      │
+│     │ Phase 2: Verify (8-test pipeline)   │                      │
+│     │ Phase 3: Score (5/7 components)     │                      │
+│     │ Phase 4: Rank by score              │                      │
+│     │ Phase 5: Select debate team         │                      │
+│     └─────────────────────────────────────┘                      │
+│         │                                                        │
+│         ▼                                                        │
+│  4. SCORE ADAPTER (llmsverifier_score_adapter.go)               │
+│     - Normalizes scores (0-100 → 0-10)                          │
+│     - Caches in safe.Store                                       │
+│     - Refreshes every 5 minutes                                  │
+│         │                                                        │
+│         ▼                                                        │
+│  5. PROVIDER REGISTRY (provider_registry.go)                    │
+│     - Uses scores for dynamic provider ordering                  │
+│     - Circuit breakers + concurrency limits                      │
+│         │                                                        │
+│         ▼                                                        │
+│  6. ENSEMBLE SERVICE ──→ Routes requests to best providers      │
+│         │                                                        │
+│         ▼                                                        │
+│  7. DEBATE SERVICE ──→ Multi-round AI debates                   │
+│     - Uses debate team from startup verification                 │
+│     - 5 positions x 5 LLMs = 25 total participants               │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+<hr />
+<h2 id="k-blueprint-for-helixtranslate-integration">K. BLUEPRINT FOR
+HelixTranslate INTEGRATION</h2>
+<p>Based on this comprehensive analysis, the key integration points for
+adding LLMsVerifier to HelixTranslate are:</p>
+<h3 id="k1-required-components">K.1 Required Components</h3>
+<ol type="1">
+<li><strong>Git Submodule</strong>: Add <code>LLMsVerifier</code> as a
+submodule (or copy key packages)</li>
+<li><strong>Go Module Integration</strong>: Add
+<code>digital.vasic.llmsverifier</code> to go.mod with replace
+directive</li>
+<li><strong>Verifier Package</strong>: Create
+<code>internal/verifier/</code> with:
+<ul>
+<li><code>startup.go</code> - Startup verification orchestrator</li>
+<li><code>scoring.go</code> - 5-component scoring engine</li>
+<li><code>discovery.go</code> - Model discovery service</li>
+<li><code>provider_types.go</code> - Unified types</li>
+<li><code>adapters/</code> - Provider-specific adapters</li>
+</ul></li>
+<li><strong>Score Adapter</strong>: Create
+<code>internal/services/llmsverifier_score_adapter.go</code></li>
+<li><strong>Configuration</strong>: Add
+<code>configs/verifier.yaml</code></li>
+</ol>
+<h3 id="k2-critical-import-paths">K.2 Critical Import Paths</h3>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">// For CLI agent config generation</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;digital.vasic.llmsverifier/pkg/cliagents&quot;</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">// For API key tracking</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;digital.vasic.llmsverifier/api_keys&quot;</span></span></code></pre></div>
+<h3 id="k3-configuration-pattern">K.3 Configuration Pattern</h3>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># configs/verifier.yaml</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">verifier</span><span class="kw">:</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">verification</span><span class="kw">:</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">mandatory_code_check</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tests</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">existence</span><span class="kw">,</span><span class="at"> responsiveness</span><span class="kw">,</span><span class="at"> latency</span><span class="kw">,</span><span class="at"> streaming</span><span class="kw">,</span><span class="at"> code_visibility</span><span class="kw">]</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">scoring</span><span class="kw">:</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">weights</span><span class="kw">:</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">response_speed</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.25</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">model_efficiency</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">cost_effectiveness</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.25</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">capability</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">recency</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.10</span></span></code></pre></div>
+<h3 id="k4-startup-verification-pattern">K.4 Startup Verification
+Pattern</h3>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Create verifier</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>verifier <span class="op">:=</span> verifier<span class="op">.</span>NewStartupVerifier<span class="op">(</span>config<span class="op">,</span> logger<span class="op">)</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Run verification</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>results<span class="op">,</span> err <span class="op">:=</span> verifier<span class="op">.</span>VerifyAllProviders<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Fatal<span class="op">(</span><span class="st">&quot;Verification failed:&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="co">// Get debate team</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>team <span class="op">:=</span> verifier<span class="op">.</span>SelectDebateTeam<span class="op">()</span></span></code></pre></div>
+<hr />
+<p><strong>End of Comprehensive Analysis</strong></p>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>REPORT</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">REPORT</h1>
+</header>
+<h1
+id="llmsverifier-real-key-verification--qa-evidence-11483">LLMsVerifier
+real-key verification — QA evidence (§11.4.83)</h1>
+<p><strong>Run id:</strong> llmsverifier_20260613_182600 ·
+<strong>Date:</strong> 2026-06-13 · <strong>Tested by:</strong> AI-agent
+(subagent + conductor re-verification)</p>
+<p>Keys sourced from <code>$HOME/api_keys.sh</code> inline only —
+<strong>no key value printed, logged, or committed</strong> (§11.4.10).
+This directory contains only key-free captured server output.</p>
+<h2 id="what-ran-mandatory-steps">What ran (mandatory steps)</h2>
+<ol type="1">
+<li>Built the LLMsVerifier submodule
+(<code>digital.vasic.llmsverifier</code>, <code>go build ./cmd</code>
+exit 0).</li>
+<li>Ran real provider discovery/verification with the operator's real
+keys (<code>config_full.yaml</code>, <code>${VAR}</code>
+env-expansion).</li>
+<li>Started the verifier REST server; consumed its
+<code>/api/health</code>, <code>/api/providers</code>,
+<code>/api/models</code>.</li>
+<li>Drove the <strong>System's own</strong>
+<code>internal/verifier</code> client against the live server — proving
+verified models flow end-to-end into the System.</li>
+</ol>
+<h2 id="real-result">Real result</h2>
+<ul>
+<li><strong>89 verified models</strong> served (DeepSeek 2, Cerebras 2,
+Groq 16, Mistral 69), all <code>status:"verified"</code>, scores 92–95.
+See <code>api_models_head.json</code>, <code>api_providers.json</code>,
+<code>api_health.json</code>.</li>
+<li>Providers authenticated with real keys: <strong>DeepSeek, Cerebras,
+Groq, Mistral</strong> (others, e.g. OpenAI/Anthropic, have no key in
+<code>api_keys.sh</code> → honest auth failure, correct real behavior —
+§11.4.6).</li>
+<li><strong>System client fetched 89 models</strong> end-to-end (after
+the Bug B fix below).</li>
+</ul>
+<h2 id="two-real-bugs-found--fixed-mutation-proven-114135-guards">Two
+real bugs found + fixed (mutation-proven §11.4.135 guards)</h2>
+<ul>
+<li><strong>Bug A (submodule <code>llmverifier/models.go</code>, commit
+95fb1cce):</strong> <code>context_window</code> numeric form (Groq)
+crashed the whole provider decode → 0 models. Fixed via tolerant
+<code>UnmarshalJSON</code>. Guard:
+<code>llmverifier/context_window_unmarshal_test.go</code>.</li>
+<li><strong>Bug B (main <code>internal/verifier/client.go</code>) —
+load-bearing:</strong> the System's SSOT client could not decode the
+server's <code>{"count":N,"models":[...]}</code> envelope (different
+field names) → System consumed <strong>zero</strong> verified models
+while the server reported healthy. Fixed via envelope-aware
+<code>decodeModelsResponse</code> (+ bare-array fallback). Guard:
+<code>internal/verifier/client_envelope_test.go</code> (FAILs with the
+exact production error when reverted).</li>
+</ul>
+<h2 id="honest-gaps-not-bluffed">Honest gaps (not bluffed)</h2>
+<ul>
+<li>The submodule's <code>verify</code> (report) pipeline and the
+<code>server</code> (SQLite DB) have no bridge — the served DB was
+populated via live discovery using the verifier's own client+database
+packages. Tracked architectural item.</li>
+<li>Full 30-provider exhaustive scoring of every model was time-bounded
+(not completed in one pass); per-provider reliability scoring was
+exercised on the seeded set.</li>
+</ul>
+</body>
+</html>

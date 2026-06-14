@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Troubleshooting_Guide</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Troubleshooting_Guide</h1>
+</header>
+<h1 id="websocket-monitoring-system---troubleshooting-guide">WebSocket
+Monitoring System - Troubleshooting Guide</h1>
+<h2 id="common-issues-and-solutions">Common Issues and Solutions</h2>
+<h3 id="rotating_light-critical-issues">🚨 Critical Issues</h3>
+<h4 id="issue-websocket-connection-failed"><strong>Issue: WebSocket
+Connection Failed</strong></h4>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Dashboard shows "Disconnected" status</li>
+<li>No events appear in monitoring</li>
+<li>Error: <code>WebSocket connection failed</code></li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol type="1">
+<li><p><strong>Check if monitoring server is running:</strong></p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsof</span> <span class="at">-i</span> :8090</span></code></pre></div></li>
+<li><p><strong>Start monitoring server:</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/monitor-server</span></code></pre></div></li>
+<li><p><strong>Verify correct port in configuration:</strong></p>
+<ul>
+<li>Server must run on port 8090</li>
+<li>Check <code>internal/working/config.distributed.json</code></li>
+</ul></li>
+<li><p><strong>Check firewall settings:</strong></p>
+<ul>
+<li>Ensure port 8090 is not blocked</li>
+<li>Test with: <code>telnet localhost 8090</code></li>
+</ul></li>
+</ol>
+<hr />
+<h4 id="issue-ssh-worker-connection-failed"><strong>Issue: SSH Worker
+Connection Failed</strong></h4>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Error: "Failed to connect to SSH worker"</li>
+<li>Demo falls back to local mode</li>
+<li>Status shows connection errors</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol type="1">
+<li><p><strong>Test SSH connection manually:</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-o</span> ConnectTimeout=10 milosvasic@localhost <span class="st">&#39;echo &quot;SSH works&quot;&#39;</span></span></code></pre></div></li>
+<li><p><strong>Check SSH credentials:</strong></p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Host: </span><span class="va">$SSH_WORKER_HOST</span><span class="st">&quot;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;User: </span><span class="va">$SSH_WORKER_USER</span><span class="st">&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Port: </span><span class="va">$SSH_WORKER_PORT</span><span class="st">&quot;</span></span></code></pre></div></li>
+<li><p><strong>Verify SSH service:</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check if SSH server is running</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl status sshd</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check if SSH port is open</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">netstat</span> <span class="at">-tlnp</span> <span class="kw">|</span> <span class="fu">grep</span> :22</span></code></pre></div></li>
+<li><p><strong>Configure SSH key authentication
+(recommended):</strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate SSH key if not exists</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> rsa <span class="at">-b</span> 4096</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Copy key to remote host</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="ex">ssh-copy-id</span> milosvasic@localhost</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Set environment variable</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">SSH_PRIVATE_KEY_PATH</span><span class="op">=</span>~/.ssh/id_rsa</span></code></pre></div></li>
+</ol>
+<hr />
+<h4 id="issue-llm-api-authentication-failed"><strong>Issue: LLM API
+Authentication Failed</strong></h4>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Error: "API authentication failed"</li>
+<li>Translation stops immediately</li>
+<li>No progress updates</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol type="1">
+<li><p><strong>Check API key:</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$OPENAI_API_KEY</span>  <span class="co"># Should not be empty</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$ANTHROPIC_API_KEY</span>  <span class="co"># For Claude</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$DEEPSEEK_API_KEY</span>  <span class="co"># For DeepSeek</span></span></code></pre></div></li>
+<li><p><strong>Set API key:</strong></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OPENAI_API_KEY</span><span class="op">=</span>your_actual_api_key_here</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Or add to ~/.bashrc for permanent</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&#39;export OPENAI_API_KEY=your_key&#39;</span> <span class="op">&gt;&gt;</span> ~/.bashrc</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span></code></pre></div></li>
+<li><p><strong>Test API key:</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: Bearer </span><span class="va">$OPENAI_API_KEY</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>     https://api.openai.com/v1/models</span></code></pre></div></li>
+</ol>
+<hr />
+<h3 id="wrench-configuration-issues">🔧 Configuration Issues</h3>
+<h4 id="issue-port-already-in-use"><strong>Issue: Port Already in
+Use</strong></h4>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Error: "bind: address already in use"</li>
+<li>Server fails to start</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol type="1">
+<li><p><strong>Find process using port:</strong></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lsof</span> <span class="at">-i</span> :8090</span></code></pre></div></li>
+<li><p><strong>Kill the process:</strong></p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">kill</span> <span class="at">-9</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Or find and kill by name</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="ex">pkill</span> <span class="at">-f</span> <span class="st">&quot;monitor-server&quot;</span></span></code></pre></div></li>
+<li><p><strong>Change port in configuration:</strong></p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;server&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;port&quot;</span><span class="fu">:</span> <span class="dv">8091</span>  <span class="er">//</span> <span class="er">Use</span> <span class="er">different</span> <span class="er">port</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div></li>
+</ol>
+<h4 id="issue-file-not-found"><strong>Issue: File Not
+Found</strong></h4>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Error: "no such file or directory"</li>
+<li>Demo fails to start</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol type="1">
+<li><p><strong>Check required files:</strong></p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test input file</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> test/fixtures/ebooks/russian_sample.txt</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Demo files</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> demo-<span class="pp">*</span>-monitoring<span class="pp">*</span>.go</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Config files</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> internal/working/config.distributed.json</span></code></pre></div></li>
+<li><p><strong>Create missing files:</strong></p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create test directory if missing</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> test/fixtures/ebooks/</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create sample input file</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Это образец русского текста.&quot;</span> <span class="op">&gt;</span> test/fixtures/ebooks/russian_sample.txt</span></code></pre></div></li>
+</ol>
+<hr />
+<h3 id="globe_with_meridians-network-issues">🌐 Network Issues</h3>
+<h4 id="issue-websocket-connection-timed-out"><strong>Issue: WebSocket
+Connection Timed Out</strong></h4>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Connection attempts hang</li>
+<li>Dashboard shows loading state</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol type="1">
+<li><p><strong>Check network connectivity:</strong></p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test basic connectivity</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ping</span> localhost</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Test WebSocket endpoint</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-i</span> <span class="at">-N</span> <span class="at">-H</span> <span class="st">&quot;Connection: Upgrade&quot;</span> <span class="dt">\</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">-H</span> <span class="st">&quot;Upgrade: websocket&quot;</span> <span class="dt">\</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">-H</span> <span class="st">&quot;Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==&quot;</span> <span class="dt">\</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">-H</span> <span class="st">&quot;Sec-WebSocket-Version: 13&quot;</span> <span class="dt">\</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>     http://localhost:8090/ws</span></code></pre></div></li>
+<li><p><strong>Check server logs:</strong></p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span> <span class="at">-f</span> monitor-server.log</span></code></pre></div></li>
+<li><p><strong>Increase timeout:</strong></p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">// In client code</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>dialer <span class="op">:=</span> websocket<span class="op">.</span>DefaultDialer</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>dialer<span class="op">.</span>HandshakeTimeout <span class="op">=</span> <span class="dv">10</span> <span class="op">*</span> time<span class="op">.</span>Second</span></code></pre></div></li>
+</ol>
+<hr />
+<h3 id="bug-performance-issues">🐛 Performance Issues</h3>
+<h4 id="issue-slow-progress-updates"><strong>Issue: Slow Progress
+Updates</strong></h4>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Progress bar updates slowly</li>
+<li>Large delays between events</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol type="1">
+<li><p><strong>Check system resources:</strong></p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CPU usage</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="ex">top</span> <span class="at">-p</span> <span class="op">&lt;</span>monitor_server_pid<span class="op">&gt;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Memory usage</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> aux <span class="kw">|</span> <span class="fu">grep</span> monitor-server</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Network connections</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="fu">netstat</span> <span class="at">-an</span> <span class="kw">|</span> <span class="fu">grep</span> :8090</span></code></pre></div></li>
+<li><p><strong>Reduce event frequency:</strong></p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">// In translation code</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> time<span class="op">.</span>Since<span class="op">(</span>lastUpdate<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">100</span><span class="op">*</span>time<span class="op">.</span>Millisecond <span class="op">{</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    emitProgressEvent<span class="op">(...)</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    lastUpdate <span class="op">=</span> time<span class="op">.</span>Now<span class="op">()</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div></li>
+<li><p><strong>Enable debug mode:</strong></p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">LOG_LEVEL</span><span class="op">=</span>debug</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/monitor-server</span></code></pre></div></li>
+</ol>
+<hr />
+<h3 id="bar_chart-dashboard-issues">📊 Dashboard Issues</h3>
+<h4 id="issue-dashboard-not-loading"><strong>Issue: Dashboard Not
+Loading</strong></h4>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Browser shows blank page</li>
+<li>JavaScript errors in console</li>
+<li>Styles not applied</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol type="1">
+<li><p><strong>Check browser console:</strong></p>
+<ul>
+<li>Press F12 → Console tab</li>
+<li>Look for JavaScript errors</li>
+<li>Check network requests</li>
+</ul></li>
+<li><p><strong>Verify file paths:</strong></p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check monitor.html exists</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> monitor.html</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check file permissions</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> monitor.html <span class="kw">|</span> <span class="fu">head</span> <span class="at">-5</span></span></code></pre></div></li>
+<li><p><strong>Test with different browser:</strong></p>
+<ul>
+<li>Chrome/Firefox/Safari</li>
+<li>Clear browser cache</li>
+<li>Disable extensions</li>
+</ul></li>
+</ol>
+<h4 id="issue-charts-not-displaying"><strong>Issue: Charts Not
+Displaying</strong></h4>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Progress charts empty</li>
+<li>Chart.js errors</li>
+<li>Data not visualized</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol type="1">
+<li><p><strong>Check Chart.js loading:</strong></p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Verify this line exists in HTML --&gt;</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="ot"> src</span><span class="op">=</span><span class="st">&quot;https://cdn.tailwindcss.com&quot;</span><span class="dt">&gt;&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="ot"> src</span><span class="op">=</span><span class="st">&quot;https://cdn.jsdelivr.net/npm/chart.js&quot;</span><span class="dt">&gt;&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span></code></pre></div></li>
+<li><p><strong>Check browser network tab:</strong></p>
+<ul>
+<li>Chart.js should load successfully</li>
+<li>No 404 errors for CDN resources</li>
+</ul></li>
+<li><p><strong>Test Chart.js manually:</strong></p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">// In browser console</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="kw">typeof</span> Chart)<span class="op">;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Should output &quot;function&quot;</span></span></code></pre></div></li>
+</ol>
+<hr />
+<h3 id="mag-debug-mode">🔍 Debug Mode</h3>
+<h4 id="enable-comprehensive-logging"><strong>Enable Comprehensive
+Logging</strong></h4>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Enable debug logging for server</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">LOG_LEVEL</span><span class="op">=</span>debug</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Enable debug for translation</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">DEBUG</span><span class="op">=</span>true</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Run with verbose output</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/monitor-server <span class="at">-v</span> <span class="at">-log-level</span><span class="op">=</span>debug</span></code></pre></div>
+<h4 id="monitor-system-resources"><strong>Monitor System
+Resources</strong></h4>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Monitor all system resources</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="ex">htop</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Monitor network connections</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="ex">watch</span> <span class="at">-n</span> 1 <span class="st">&#39;netstat -an | grep :8090&#39;</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Monitor WebSocket connections</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="ex">watch</span> <span class="at">-n</span> 1 <span class="st">&#39;lsof -i :8090&#39;</span></span></code></pre></div>
+<h4 id="use-wireshark-for-network-debugging"><strong>Use Wireshark for
+Network Debugging</strong></h4>
+<ol type="1">
+<li>Start Wireshark</li>
+<li>Filter: <code>tcp.port == 8090</code></li>
+<li>Start monitoring server</li>
+<li>Connect client</li>
+<li>Analyze WebSocket handshake</li>
+</ol>
+<hr />
+<h3 id="clipboard-error-code-reference">📋 Error Code Reference</h3>
+<table>
+<thead>
+<tr>
+<th>Error Code</th>
+<th>Description</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ECONNREFUSED</code></td>
+<td>Connection refused</td>
+<td>Start monitoring server</td>
+</tr>
+<tr>
+<td><code>ETIMEDOUT</code></td>
+<td>Connection timeout</td>
+<td>Check network/firewall</td>
+</tr>
+<tr>
+<td><code>EADDRINUSE</code></td>
+<td>Port already in use</td>
+<td>Kill process or change port</td>
+</tr>
+<tr>
+<td><code>EACCES</code></td>
+<td>Permission denied</td>
+<td>Check file permissions</td>
+</tr>
+<tr>
+<td><code>ENOTFOUND</code></td>
+<td>Host not found</td>
+<td>Check DNS/host names</td>
+</tr>
+<tr>
+<td><code>EPIPE</code></td>
+<td>Broken pipe</td>
+<td>Reconnect WebSocket</td>
+</tr>
+<tr>
+<td><code>ECONNRESET</code></td>
+<td>Connection reset</td>
+<td>Check server stability</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="hammer_and_wrench-advanced-troubleshooting">🛠️ Advanced
+Troubleshooting</h3>
+<h4 id="websocket-protocol-debugging"><strong>WebSocket Protocol
+Debugging</strong></h4>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use websocat for testing</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="ex">brew</span> install websocat</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="ex">websocat</span> ws://localhost:8090/ws</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Or use wscat</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="at">-g</span> wscat</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="ex">wscat</span> <span class="at">-c</span> ws://localhost:8090/ws</span></code></pre></div>
+<h4 id="ssltls-issues-if-using-https"><strong>SSL/TLS Issues (if using
+HTTPS)</strong></h4>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check certificate</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="ex">openssl</span> s_client <span class="at">-connect</span> localhost:8443</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify certificate chain</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="ex">openssl</span> verify server.crt</span></code></pre></div>
+<h4 id="memory-leak-detection"><strong>Memory Leak
+Detection</strong></h4>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Monitor memory usage over time</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="fu">true</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ps</span> aux <span class="kw">|</span> <span class="fu">grep</span> monitor-server <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> grep</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sleep</span> 5</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Or use pmap</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="ex">pmap</span> <span class="op">&lt;</span>monitor_server_pid<span class="op">&gt;</span></span></code></pre></div>
+<hr />
+<h3 id="telephone_receiver-getting-help">📞 Getting Help</h3>
+<h4 id="collect-debug-information"><strong>Collect Debug
+Information</strong></h4>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create debug report</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> debug-report.txt <span class="op">&lt;&lt; EOF</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="st">=== WebSocket Monitoring Debug Report ===</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="st">Date: </span><span class="va">$(</span><span class="fu">date</span><span class="va">)</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="st">System: </span><span class="va">$(</span><span class="fu">uname</span> <span class="at">-a</span><span class="va">)</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="st">Go Version: </span><span class="va">$(</span><span class="ex">go</span> version<span class="va">)</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="st">=== Running Processes ===</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="va">$(</span><span class="fu">ps</span> aux <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;(monitor|translate)&quot;</span><span class="va">)</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="st">=== Network Status ===</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="va">$(</span><span class="fu">netstat</span> <span class="at">-an</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;(8090|8080)&quot;</span><span class="va">)</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="st">=== Environment Variables ===</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="st">SSH_WORKER_HOST: </span><span class="va">$SSH_WORKER_HOST</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a><span class="st">SSH_WORKER_USER: </span><span class="va">$SSH_WORKER_USER</span></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a><span class="st">OPENAI_API_KEY: </span><span class="va">${OPENAI_API_KEY</span><span class="op">:</span><span class="dv">0</span><span class="op">:</span><span class="dv">10</span><span class="va">}</span><span class="st">...</span></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a><span class="st">=== Recent Logs ===</span></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a><span class="va">$(</span><span class="fu">tail</span> <span class="at">-20</span> monitor-server.log <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;No logs found&quot;</span><span class="va">)</span></span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Debug report saved to debug-report.txt&quot;</span></span></code></pre></div>
+<h4 id="create-minimal-reproduction"><strong>Create Minimal
+Reproduction</strong></h4>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Minimal WebSocket test</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;package main</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="st">import (</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="st">    </span><span class="dt">\&quot;</span><span class="st">fmt</span><span class="dt">\&quot;</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="st">    </span><span class="dt">\&quot;</span><span class="st">time</span><span class="dt">\&quot;</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="st">    </span><span class="dt">\&quot;</span><span class="st">github.com/gorilla/websocket</span><span class="dt">\&quot;</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="st">func main() {</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a><span class="st">    conn, _, err := websocket.DefaultDialer.Dial(</span><span class="dt">\&quot;</span><span class="st">ws://localhost:8090/ws</span><span class="dt">\&quot;</span><span class="st">, nil)</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a><span class="st">    if err != nil {</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="st">        fmt.Printf(</span><span class="dt">\&quot;</span><span class="st">Connection failed: %v</span><span class="dt">\\</span><span class="st">n</span><span class="dt">\&quot;</span><span class="st">, err)</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a><span class="st">        return</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a><span class="st">    }</span></span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a><span class="st">    defer conn.Close()</span></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a><span class="st">    fmt.Println(</span><span class="dt">\&quot;</span><span class="st">Connected successfully!</span><span class="dt">\&quot;</span><span class="st">)</span></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a><span class="st">    for i := 0; i &lt; 10; i++ {</span></span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a><span class="st">        err := conn.WriteJSON(map[string]interface{}{</span></span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a><span class="st">            </span><span class="dt">\&quot;</span><span class="st">type</span><span class="dt">\&quot;</span><span class="st">: </span><span class="dt">\&quot;</span><span class="st">test</span><span class="dt">\&quot;</span><span class="st">,</span></span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a><span class="st">            </span><span class="dt">\&quot;</span><span class="st">message</span><span class="dt">\&quot;</span><span class="st">: fmt.Sprintf(</span><span class="dt">\&quot;</span><span class="st">Test message %d</span><span class="dt">\&quot;</span><span class="st">, i),</span></span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a><span class="st">        })</span></span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a><span class="st">        if err != nil {</span></span>
+<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a><span class="st">            fmt.Printf(</span><span class="dt">\&quot;</span><span class="st">Write error: %v</span><span class="dt">\\</span><span class="st">n</span><span class="dt">\&quot;</span><span class="st">, err)</span></span>
+<span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a><span class="st">            return</span></span>
+<span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a><span class="st">        }</span></span>
+<span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a><span class="st">        time.Sleep(1 * time.Second)</span></span>
+<span id="cb30-30"><a href="#cb30-30" aria-hidden="true" tabindex="-1"></a><span class="st">    }</span></span>
+<span id="cb30-31"><a href="#cb30-31" aria-hidden="true" tabindex="-1"></a><span class="st">}&quot;</span> <span class="op">&gt;</span> minimal-websocket-test.go</span>
+<span id="cb30-32"><a href="#cb30-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-33"><a href="#cb30-33" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run minimal-websocket-test.go</span></code></pre></div>
+<hr />
+<h3 id="arrows_counterclockwise-recovery-procedures">🔄 Recovery
+Procedures</h3>
+<h4 id="complete-system-reset"><strong>Complete System
+Reset</strong></h4>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Reset monitoring system</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Kill all related processes</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="ex">pkill</span> <span class="at">-f</span> <span class="st">&quot;monitor-server&quot;</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="ex">pkill</span> <span class="at">-f</span> <span class="st">&quot;demo-.*monitoring&quot;</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Clean up temporary files</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-f</span> <span class="pp">*</span>.log</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-f</span> demo_<span class="pp">*</span>_output.md</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Reset ports</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> lsof <span class="at">-ti:8090</span> <span class="kw">|</span> <span class="fu">xargs</span> <span class="at">-r</span> sudo kill <span class="at">-9</span></span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Restart services</span></span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/monitor-server <span class="kw">&amp;</span></span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;System reset completed&quot;</span></span></code></pre></div>
+<h4 id="databasestate-reset"><strong>Database/State Reset</strong></h4>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clear session state</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-rf</span> /tmp/translate-ssh-<span class="pp">*</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-f</span> .session-cache</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Reset WebSocket connections</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> POST http://localhost:8090/reset</span></code></pre></div>
+<hr />
+<h2 id="quick-reference-commands">Quick Reference Commands</h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lsof -i :8090</code></td>
+<td>Check if monitoring server is running</td>
+</tr>
+<tr>
+<td><code>go run ./cmd/monitor-server</code></td>
+<td>Start monitoring server</td>
+</tr>
+<tr>
+<td><code>tail -f monitor-server.log</code></td>
+<td>Monitor server logs</td>
+</tr>
+<tr>
+<td><code>echo $OPENAI_API_KEY</code></td>
+<td>Check API key</td>
+</tr>
+<tr>
+<td><code>ssh milosvasic@localhost</code></td>
+<td>Test SSH connection</td>
+</tr>
+<tr>
+<td><code>curl http://localhost:8090/status</code></td>
+<td>Check server status</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>Remember</strong>: Most issues are caused by:</p>
+<ol type="1">
+<li>Server not running</li>
+<li>Incorrect configuration</li>
+<li>Network/firewall problems</li>
+<li>Missing environment variables</li>
+</ol>
+<p>Start with the simplest check and work through the solutions
+systematically!</p>
+</body>
+</html>

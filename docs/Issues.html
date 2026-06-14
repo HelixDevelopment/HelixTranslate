@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Issues</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Issues</h1>
+</header>
+<h1 id="helixtranslate--issues-open-workable-items">HelixTranslate —
+Issues (Open Workable Items)</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-14T15:37:53Z <strong>Authority:</strong> §11.4.15 (status) ·
+§11.4.16 (type) · §11.4.19 (column-alignment) · §11.4.21
+(Operator-blocked details) · §11.4.54 (ATM-NNN ticket IDs) · §11.4.91
+(clear descriptions) <strong>Scope:</strong> the open-work tracker.
+Every entry carries a stable <code>[ATM-NNN]</code> id, a
+<code>**Status:**</code>, a <code>**Type:**</code>, and — for
+Operator-blocked items — an <code>**Operator-Block-Details:**</code>
+line (§11.4.21). Source of truth for the open items is
+<code>docs/WORKING_PLAN.md</code>; this file is the
+constitution-mandated tracker view of it.</p>
+<p>Status vocabulary (open): <code>Queued</code> ·
+<code>Operator-blocked</code> · <code>Design</code> (architecture
+decision pending) · <code>Blocked</code> (another session / external
+dependency).</p>
+<p>ATM ids continue the monotonic sequence after
+<code>docs/Fixed.md</code> (last allocated ATM-064).</p>
+<hr />
+<h3
+id="1-atm-065-decide-the-single-authoritative-version-number-23x-vs-300">§1.
+[ATM-065] Decide the single authoritative version number (2.3.x vs
+3.0.0)</h3>
+<p><strong>Status:</strong> Operator-blocked <strong>Type:</strong>
+Task</p>
+<ul>
+<li>WHAT: <code>VERSION</code>=2.3.0 but Makefile/binaries historically
+referenced 3.0.0. The single-source wiring landed (ATM-064); the actual
+number to ship is an operator decision.</li>
+<li><strong>Operator-Block-Details:</strong> WHAT — pick 2.3.x or 3.0.0
+as the next release version. WHY — CLAUDE.md says treat
+<code>VERSION</code> (2.3.0) as authoritative while the Makefile
+references 3.0.0; the agent cannot decide product versioning.
+Self-resolution exhausted: single-source wiring already done (a36030e),
+value choice is purely a product call. UNBLOCK CONDITION — operator
+states the canonical number; agent sets <code>VERSION</code> and re-runs
+the version test. WHO — operator (Milos Vasic).</li>
+</ul>
+<h3
+id="2-atm-066-provider-credentials-absentinvalid-openaianthropicgeminizhipu-block-allowlist-refresh">§2.
+[ATM-066] Provider credentials absent/invalid
+(OpenAI/Anthropic/Gemini/Zhipu) block allowlist refresh</h3>
+<p><strong>Status:</strong> Operator-blocked <strong>Type:</strong>
+Bug</p>
+<ul>
+<li>WHAT: OPENAI_API_KEY and ANTHROPIC_API_KEY absent → those providers
+unverified and their model allowlists stale; GEMINI_API_KEY invalid
+(live <code>/models</code> returns "API Key not found"); Zhipu account
+out of balance (error 1113 余额不足) so its current models
+(glm-4.5/4.6/5/5.1…) cannot be translation-verified.</li>
+<li><strong>Operator-Block-Details:</strong> WHAT — add/refresh
+OPENAI/ANTHROPIC/GEMINI keys and recharge the Zhipu account. WHY — the
+proven deepseek pattern (live <code>/models</code> → verify-translate →
+additive allowlist + RED gate) requires a working key to verify the
+response shape; refreshing an allowlist without verification would be a
+§11.4 bluff. Self-resolution exhausted: live <code>/models</code> probes
+captured, deepseek fix <code>0fd1a34</code> is the ready template.
+UNBLOCK CONDITION — funded/valid keys present in the environment. WHO —
+operator (Milos Vasic).</li>
+</ul>
+<h3
+id="3-atm-067-30-other-provider-allowlists-not-audited-against-live-current-models">§3.
+[ATM-067] ~30 other provider allowlists not audited against live current
+models</h3>
+<p><strong>Status:</strong> Operator-blocked <strong>Type:</strong>
+Task</p>
+<ul>
+<li>WHAT: qwen, groq, cohere, mistral, xai, replicate, cerebras,
+cloudflare, siliconflow, hyperbolic, togetherai, sambanova, kimi,
+novita, nlpcloud, upstage, sarvam, modal, publicai, nia, vulavula —
+allowlists unverified against current live catalogs.</li>
+<li><strong>Operator-Block-Details:</strong> WHAT — provide funded keys
+per provider. WHY — each allowlist refresh needs a live verify-translate
++ string-content shape check before adding (deepseek pattern); without
+keys the verification cannot run. Self-resolution exhausted: pattern
+proven, only credentials missing. UNBLOCK CONDITION — per-provider
+funded keys. WHO — operator (Milos Vasic).</li>
+</ul>
+<h3
+id="4-atm-068-inert-cli-flags-in-unified-translator--chunk-size-workers-concurrency-verify--monitoring-stub">§4.
+[ATM-068] Inert CLI flags in unified-translator
+(-chunk-size/-workers/-concurrency/-verify, -monitoring stub)</h3>
+<p><strong>Status:</strong> Design <strong>Type:</strong> Task</p>
+<ul>
+<li>WHAT: <code>cmd/unified-translator</code> parses
+<code>-chunk-size</code>, <code>-workers</code>,
+<code>-concurrency</code>, <code>-verify</code> but never consumes them
+(chunking is automatic+correct via
+<code>translateWithRetry</code>/<code>splitText</code>);
+<code>startMonitoringServer</code> is a print-only stub. Decision
+needed: wire each flag to real semantics OR remove it (removing a
+user-facing flag needs operator confirmation per §11.4.122). Not a blind
+autonomous fix.</li>
+</ul>
+<h3
+id="5-atm-069-inert-config-fields-docxconfigmintextlengthignorestyles-pdfconfigmintextlength">§5.
+[ATM-069] Inert config fields (DOCXConfig.MinTextLength/IgnoreStyles,
+PDFConfig.MinTextLength)</h3>
+<p><strong>Status:</strong> Design <strong>Type:</strong> Task</p>
+<ul>
+<li>WHAT: <code>DOCXConfig.MinTextLength</code>,
+<code>DOCXConfig.IgnoreStyles</code>, and
+<code>PDFConfig.MinTextLength</code> are declared/documented but never
+consumed. Decision: wire (filter short paragraphs / honor ignore-styles)
+or drop. Wiring <code>MinTextLength</code> changes output, so it needs
+care + tests.</li>
+</ul>
+<h3
+id="6-atm-070-verifier-minscorethreshold-scale-inconsistency-0-100-raw-vs-0-10-normalized">§6.
+[ATM-070] Verifier MinScoreThreshold scale inconsistency (0-100 raw vs
+0-10 normalized)</h3>
+<p><strong>Status:</strong> Design <strong>Type:</strong> Bug</p>
+<ul>
+<li>WHAT: the handler (<code>pkg/api/verifier_handlers.go</code>)
+compares <code>MinScoreThreshold</code> against raw 0-100
+<code>OverallScore</code>; the adapter
+(<code>internal/services/llmsverifier_score_adapter.go</code>) compares
+it against the normalized 0-10 score. The two contracts contradict and
+<code>GetPreferences</code>/<code>GetProviderScore</code> have no
+production caller. Canonical scale must be declared before either path
+is wired (fixing one side blindly breaks the other's test,
+§11.4.120).</li>
+</ul>
+<h3
+id="7-atm-071-reasoning-model-structured-content-support-content-as-list-not-string">§7.
+[ATM-071] Reasoning-model structured-content support (content as LIST,
+not STRING)</h3>
+<p><strong>Status:</strong> Design <strong>Type:</strong> Feature</p>
+<ul>
+<li>WHAT: OpenAI-compatible clients assume <code>content</code> is a
+string; some reasoning models return <code>content</code> as a
+structured list (verified Mistral <code>magistral-medium-latest</code>;
+likely glm-5 / deepseek-reasoner class), which the clients silently
+drop. Adding structured-content handling would unlock those models.
+Non-trivial; design + tests required.</li>
+</ul>
+<h3 id="8-atm-072-markdown-not-a-first-class-cli-input-format">§8.
+[ATM-072] Markdown not a first-class CLI input format</h3>
+<p><strong>Status:</strong> Design <strong>Type:</strong> Feature</p>
+<ul>
+<li>WHAT: <code>.md</code> input is detected as TXT and translated as
+plain text (works, but markdown structure is not preserved). First-class
+markdown input that preserves structure is an enhancement.</li>
+</ul>
+<h3
+id="9-atm-073-cmdtranslator-intermediate-markdown-download-dir-inconsistency-needs-live-ssh">§9.
+[ATM-073] cmd/translator intermediate-markdown download-dir
+inconsistency (needs live SSH)</h3>
+<p><strong>Status:</strong> Blocked <strong>Type:</strong> Bug</p>
+<ul>
+<li>WHAT: intermediate <code>.md</code> downloads to
+<code>Dir(InputFile)</code> in one path vs <code>Dir(OutputFile)</code>
+in another; manifests only under live SSH with <code>-o</code> in a
+different dir. Not unit-testable without real SSH infra; reproduce via
+the §11.4.76 Containers submodule (boot an SSH worker container) → RED →
+fix → GREEN. Gated on containerized SSH test infrastructure.</li>
+</ul>
+<h3
+id="10-atm-074-pkghash-is-a-dead-package-zero-importers--investigate-per-114124">§10.
+[ATM-074] pkg/hash is a dead package (zero importers) — investigate per
+§11.4.124</h3>
+<p><strong>Status:</strong> Operator-blocked <strong>Type:</strong>
+Task</p>
+<ul>
+<li>WHAT: <code>pkg/hash</code> (393 LOC) is a <code>package main</code>
+duplicate of <code>pkg/version.CodebaseHasher</code> with zero importers
+(confirmed; documented in commit <code>981ced9</code>). Per §11.4.124 it
+must not be removed without git-history investigation; per §11.4.122
+removing a shipped package needs operator confirmation.</li>
+<li><strong>Operator-Block-Details:</strong> WHAT — confirm
+keep-or-remove of the dead <code>pkg/hash</code> package. WHY —
+§11.4.122 forbids silently removing an existing component, and §11.4.124
+requires operator confirmation before deleting a shipped package even
+with git-history proof. Self-resolution exhausted: investigation done
+(981ced9 captures it as a dead duplicate). UNBLOCK CONDITION — operator
+says remove (then a separate descriptive commit cites the evidence) or
+keep/wire-in. WHO — operator (Milos Vasic).</li>
+</ul>
+<h3 id="11-atm-075-pre-build-cm--gate-suite-not-implemented">§11.
+[ATM-075] Pre-build CM-* gate suite not implemented</h3>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task</p>
+<ul>
+<li>WHAT: the constitution references dozens of <code>CM-*</code>
+pre-build gates + paired §1.1 mutations; this project has only
+<code>scripts/testing/meta_test_constitution_inheritance.sh</code> and
+partial seeds. Implement the highest-value gates first (anti-bluff
+smoke, doc-sync, regression-guard-registered, no-fakes-beyond-unit,
+gitignore-precommit-audit), each with a paired mutation, wired into
+<code>scripts/pre_build_verification.sh</code>. (P4.2 — a sibling
+session owns <code>pre_build_verification.sh</code>.)</li>
+</ul>
+<h3
+id="12-atm-076-11465-universal-markdown-export-audit-across-all-tracked-docs">§12.
+[ATM-076] §11.4.65 universal markdown export audit across all tracked
+docs</h3>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task</p>
+<ul>
+<li>WHAT: every tracked non-source <code>.md</code> must have synced
+<code>.html</code>+<code>.pdf</code> siblings. The commit wrapper
+auto-syncs, but a full audit (including WORKING_PLAN.md and all docs/)
+is needed to confirm every <code>docs/*.md</code> has fresh
+exports.</li>
+</ul>
+<h3
+id="13-atm-077-owned-submodule-bug-hunt--brittle-test-fixes-11428-equal-codebase">§13.
+[ATM-077] Owned-submodule bug-hunt + brittle-test fixes (§11.4.28
+equal-codebase)</h3>
+<p><strong>Status:</strong> Blocked <strong>Type:</strong> Task</p>
+<ul>
+<li>WHAT: owned submodules (challenges, containers, helix_qa,
+doc_processor, llm_orchestrator, llm_provider, vision_engine,
+llms_verifier, docs_chain) are §11.4.28 equal-codebase and carry the
+brittle "connection refused" env-coupled test class fixed in the main
+module this session.</li>
+<li>WHY-BLOCKED: evidence shows another session is actively working
+<code>helix_qa</code> (<code>go test -race</code> observed); per
+§11.4.119 single-owner do not collide. After operator confirms
+ownership/coordination, run per-submodule bug-hunt waves (separate
+go.mod, separate upstreams).</li>
+</ul>
+<h3
+id="14-atm-078-per-feature-test-type-matrix--helixqa--challenges-coverage-1142511427">§14.
+[ATM-078] Per-feature test-type matrix + HelixQA + Challenges coverage
+(§11.4.25/§11.4.27)</h3>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task</p>
+<ul>
+<li>WHAT: §11.4.27 mandates 100% coverage with every test type. This
+session added unit/integration + some stress/chaos + real E2E proofs;
+the full matrix per feature (perf/benchmark for the pipeline, chaos for
+distributed/storage, Challenges entries per shipped feature, full
+HelixQA autonomous sessions) is unfilled. Build the §11.4.25 coverage
+ledger and fill highest-value gaps.</li>
+</ul>
+<h3 id="15-atm-079-docsqa-evidence-per-shipped-feature-11483">§15.
+[ATM-079] docs/qa/<run-id> evidence per shipped feature (§11.4.83)</h3>
+<p><strong>Status:</strong> Queued <strong>Type:</strong> Task</p>
+<ul>
+<li>WHAT: §11.4.83 requires a recorded e2e transcript per shipped
+feature. E2E proofs exist for PDF input, the output-format matrix, and
+deepseek-v4; the remaining user-visible features from this session's
+fixes need per-feature evidence dirs under <code>docs/qa/</code>.</li>
+</ul>
+<h3 id="16-atm-080-full-11440-7-step-release-retest-not-yet-run">§16.
+[ATM-080] Full §11.4.40 7-step release retest not yet run</h3>
+<p><strong>Status:</strong> Operator-blocked <strong>Type:</strong>
+Task</p>
+<ul>
+<li>WHAT: release requires the complete §11.4.40 7-step retest
+(pre-build sweep, post-build sweep, on-device cycle, meta-test mutation
+sweep, Challenge bank sweep, Issues/Fixed audit, CONTINUATION sync) on a
+clean baseline. Repeated full <code>go test ./... -p 1</code> sweeps are
+green but the full 7-step ritual is not done.</li>
+<li><strong>Operator-Block-Details:</strong> WHAT — authorize and run
+the full release retest. WHY — sequenced after the gate suite (ATM-075),
+Challenges/HelixQA (ATM-078), and §11.4.151 release-prefix tagging;
+requires operator confirmation of the release scope. Self-resolution
+exhausted: dependencies tracked as their own items. UNBLOCK CONDITION —
+ATM-075/ATM-078 closed + operator green-lights the release. WHO —
+operator (Milos Vasic).</li>
+</ul>
+<h3 id="17-atm-081-no-114151-prefixed-release-tag-yet">§17. [ATM-081] No
+§11.4.151 prefixed release tag yet</h3>
+<p><strong>Status:</strong> Operator-blocked <strong>Type:</strong>
+Task</p>
+<ul>
+<li>WHAT: no release tag exists. Per §11.4.151 the tag must be
+<code>helix_translate-&lt;version&gt;</code> (prefix from
+<code>HELIX_RELEASE_PREFIX</code> env or lowercased root dir name) on
+the main repo + every owned submodule, fanned to all upstreams with no
+force-push (§11.4.113).</li>
+<li><strong>Operator-Block-Details:</strong> WHAT — green-light creating
+the prefixed release tag. WHY — gated on ATM-080 (the full retest must
+pass first) and the operator-chosen version (ATM-065); a tag cannot
+precede a clean retest per §11.4.40. Self-resolution exhausted: tag
+mechanics ready, only the go-ahead + passing retest missing. UNBLOCK
+CONDITION — ATM-080 GREEN + ATM-065 decided. WHO — operator (Milos
+Vasic).</li>
+</ul>
+<hr />
+<p><em>This tracker is regenerated into <code>Issues_Summary.md</code>
+by <code>scripts/testing/generate_issues_summary.sh</code>. Do not
+hand-edit the summary. When an item closes it migrates atomically to
+<code>Fixed.md</code> (§11.4.19).</em></p>
+</body>
+</html>

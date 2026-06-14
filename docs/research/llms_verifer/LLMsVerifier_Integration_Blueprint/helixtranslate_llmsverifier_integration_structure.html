@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixtranslate_llmsverifier_integration_structure</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixtranslate_llmsverifier_integration_structure</h1>
+</header>
+<h1
+id="helixtranslate-llmsverifier-integration-plan--complete-document-structure">HelixTranslate
+LLMsVerifier Integration Plan — Complete Document Structure</h1>
+<hr />
+<h2 id="document-metrics-summary">Document Metrics Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Total Target Words</strong></td>
+<td>~22,500</td>
+</tr>
+<tr>
+<td><strong>Chapters (H2)</strong></td>
+<td>8</td>
+</tr>
+<tr>
+<td><strong>Sections (H3)</strong></td>
+<td>47</td>
+</tr>
+<tr>
+<td><strong>Content Points (H4)</strong></td>
+<td>142</td>
+</tr>
+<tr>
+<td><strong>Estimated Code Blocks</strong></td>
+<td>38</td>
+</tr>
+<tr>
+<td><strong>Estimated Tables</strong></td>
+<td>24</td>
+</tr>
+<tr>
+<td><strong>Estimated Diagrams</strong></td>
+<td>6</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="h1-helixtranslate-llmsverifier-integration-plan">H1:
+HelixTranslate LLMsVerifier Integration Plan</h2>
+<blockquote>
+<p><strong>Title page only.</strong> Subtitle: "Enterprise-Grade Model
+Verification, Discovery, and Scoring — Phase-Based Implementation
+Guide"</p>
+</blockquote>
+<hr />
+<h2
+id="h2-chapter-1--executive-summary--integration-architecture-overview">H2:
+Chapter 1 — Executive Summary &amp; Integration Architecture
+Overview</h2>
+<p><strong>Target Word Count:</strong> 1,800 | <strong>Code
+Blocks:</strong> 2 | <strong>Tables:</strong> 3 |
+<strong>Diagrams:</strong> 1</p>
+<h3 id="h3-11-integration-vision--goals">H3: 1.1 Integration Vision
+&amp; Goals</h3>
+<h4
+id="h4-define-the-single-source-of-truth-mandate-for-model-metadata">H4:
+Define the single-source-of-truth mandate for model metadata</h4>
+<h4
+id="h4-map-current-helixtranslate-provider-chaos-9-factories-no-validation-to-target-state">H4:
+Map current HelixTranslate provider chaos (9 factories, no validation)
+to target state</h4>
+<h4
+id="h4-list-the-three-non-negotiable-ux-guarantees-validated-only-positively-scored-auto-discovered">H4:
+List the three non-negotiable UX guarantees: validated-only,
+positively-scored, auto-discovered</h4>
+<h3 id="h3-12-reference-architecture-from-helixagent">H3: 1.2 Reference
+Architecture from HelixAgent</h3>
+<h4 id="h4-present-the-helixagent-8-phase-startup-pipeline-diagram">H4:
+Present the HelixAgent 8-phase startup pipeline diagram</h4>
+<h4
+id="h4-map-helixagents-internalverifierstartupgo-phases-to-helixtranslate-equivalents">H4:
+Map HelixAgent's <code>internal/verifier/startup.go</code> phases to
+HelixTranslate equivalents</h4>
+<h4
+id="h4-extract-the-score-adapter-pattern-from-internalservicesllmsverifier_score_adaptergo">H4:
+Extract the score adapter pattern from
+<code>internal/services/llmsverifier_score_adapter.go</code></h4>
+<h3 id="h3-13-high-level-component-map">H3: 1.3 High-Level Component
+Map</h3>
+<h4
+id="h4-table-component-mapping--helixagent--helixtranslate-8-components-verifier-scoring-discovery-verification-challenges-adapters-constitution-docs">H4:
+Table: Component mapping — HelixAgent → HelixTranslate (8 components:
+verifier, scoring, discovery, verification, challenges, adapters,
+constitution, docs)</h4>
+<h4
+id="h4-diagram-data-flow-from-llmsverifier-discovery--verification--scoring--helixtranslate-provider-factory">H4:
+Diagram: Data flow from LLMsVerifier discovery → verification → scoring
+→ HelixTranslate provider factory</h4>
+<h4
+id="h4-table-file-to-file-integration-mapping-with-line-number-references-for-all-3-repos">H4:
+Table: File-to-file integration mapping with line-number references for
+all 3 repos</h4>
+<h3 id="h3-14-phase-overview">H3: 1.4 Phase Overview</h3>
+<h4
+id="h4-present-the-8-phase-timeline-table-with-week-allocations-deliverables-and-success-criteria">H4:
+Present the 8-phase timeline table with week allocations, deliverables,
+and success criteria</h4>
+<h4
+id="h4-define-the-gating-criteria-between-each-phase-must-pass-to-proceed">H4:
+Define the gating criteria between each phase (must pass to
+proceed)</h4>
+<hr />
+<h2 id="h2-chapter-2--phase-1-foundation--repository-preparation">H2:
+Chapter 2 — Phase 1: Foundation &amp; Repository Preparation</h2>
+<p><strong>Target Word Count:</strong> 2,200 | <strong>Code
+Blocks:</strong> 6 | <strong>Tables:</strong> 2 |
+<strong>Diagrams:</strong> 1</p>
+<h3 id="h3-21-dependency-management--module-configuration">H3: 2.1
+Dependency Management &amp; Module Configuration</h3>
+<h4
+id="h4-add-llmsverifier-module-import-to-gomod--exact-command-and-require-block">H4:
+Add LLMsVerifier module import to <code>go.mod</code> — exact command
+and require block</h4>
+<h4
+id="h4-resolve-go-version-conflict-helixtranslate-1252-vs-llmsverifier-1253-vs-helixagent-126">H4:
+Resolve Go version conflict: HelixTranslate 1.25.2 vs LLMsVerifier
+1.25.3 vs HelixAgent 1.26</h4>
+<h4
+id="h4-run-go-mod-tidy-and-document-expected-transitive-dependencies">H4:
+Run <code>go mod tidy</code> and document expected transitive
+dependencies</h4>
+<h4
+id="h4-table-direct-dependency-audit--before-vs-after-integration">H4:
+Table: Direct dependency audit — before vs after integration</h4>
+<h3 id="h3-22-project-structure-creation">H3: 2.2 Project Structure
+Creation</h3>
+<h4
+id="h4-create-internalverifier-directory-with-subdirectories-scoring-discovery-verification-challenges">H4:
+Create <code>internal/verifier/</code> directory with subdirectories:
+<code>scoring/</code>, <code>discovery/</code>,
+<code>verification/</code>, <code>challenges/</code></h4>
+<h4 id="h4-create-internalservices-directory-for-score-adapter">H4:
+Create <code>internal/services/</code> directory for score adapter</h4>
+<h4
+id="h4-create-internalverifierconfig-for-verifier-specific-configuration-structs">H4:
+Create <code>internal/verifier/config/</code> for verifier-specific
+configuration structs</h4>
+<h4
+id="h4-code-block-expected-directory-tree-output-from-tree-internalverifier">H4:
+Code block: Expected directory tree output from
+<code>tree internal/verifier/</code></h4>
+<h3 id="h3-23-configuration-schema-design">H3: 2.3 Configuration Schema
+Design</h3>
+<h4
+id="h4-extend-internalconfigconfiggo-with-llmsverifierconfig-struct--exact-lines-to-modify">H4:
+Extend <code>internal/config/config.go</code> with
+<code>LLMsVerifierConfig</code> struct — exact lines to modify</h4>
+<h4
+id="h4-define-env-variables-llmsverifier_enabled-llmsverifier_api_url-llmsverifier_api_key-llmsverifier_db_path-llmsverifier_cache_ttl">H4:
+Define <code>.env</code> variables: <code>LLMSVERIFIER_ENABLED</code>,
+<code>LLMSVERIFIER_API_URL</code>, <code>LLMSVERIFIER_API_KEY</code>,
+<code>LLMSVERIFIER_DB_PATH</code>,
+<code>LLMSVERIFIER_CACHE_TTL</code></h4>
+<h4
+id="h4-add-yaml-config-section-under-new-verifier-key-with-all-nested-fields">H4:
+Add YAML config section under new <code>verifier:</code> key with all
+nested fields</h4>
+<h4
+id="h4-code-block-complete-llmsverifierconfig-struct-with-json-tags-and-validation">H4:
+Code block: Complete <code>LLMsVerifierConfig</code> struct with JSON
+tags and validation</h4>
+<h3 id="h3-24-interface-alignment">H3: 2.4 Interface Alignment</h3>
+<h4
+id="h4-compare-helixtranslate-pkgtranslatorllmprovidergo-llmclient-interface-with-llmsverifier-provider-interface">H4:
+Compare HelixTranslate <code>pkg/translator/llm/provider.go</code>
+<code>LLMClient</code> interface with LLMsVerifier provider
+interface</h4>
+<h4
+id="h4-define-the-bridging-interface-in-internalverifierbridgego">H4:
+Define the bridging interface in
+<code>internal/verifier/bridge.go</code></h4>
+<h4
+id="h4-code-block-full-verifiedprovider-interface-with-method-signatures">H4:
+Code block: Full <code>VerifiedProvider</code> interface with method
+signatures</h4>
+<h4
+id="h4-document-the-adapter-pattern-how-verified-models-feed-into-existing-pkgtranslatorllm-factory">H4:
+Document the adapter pattern: how verified models feed into existing
+<code>pkg/translator/llm/</code> factory</h4>
+<h3 id="h3-25-constitution--governance-files-setup">H3: 2.5 Constitution
+&amp; Governance Files Setup</h3>
+<h4
+id="h4-create-internalverifierconstitutionmd--33-rule-template-adapted-from-helixagent">H4:
+Create <code>internal/verifier/CONSTITUTION.md</code> — 33-rule template
+adapted from HelixAgent</h4>
+<h4
+id="h4-review-and-update-claudemd-with-llmsverifier-context--exact-sections-to-append">H4:
+Review and update <code>CLAUDE.md</code> with LLMsVerifier context —
+exact sections to append</h4>
+<h4
+id="h4-review-and-update-agentsmd-with-verifier-agent-instructions--exact-sections-to-append">H4:
+Review and update <code>AGENTS.md</code> with verifier agent
+instructions — exact sections to append</h4>
+<h4
+id="h4-table-rule-mapping--helixagent-constitution-rules--helixtranslate-equivalents">H4:
+Table: Rule mapping — HelixAgent constitution rules → HelixTranslate
+equivalents</h4>
+<hr />
+<h2 id="h2-chapter-3--phase-2-core-verification-engine-integration">H2:
+Chapter 3 — Phase 2: Core Verification Engine Integration</h2>
+<p><strong>Target Word Count:</strong> 3,000 | <strong>Code
+Blocks:</strong> 8 | <strong>Tables:</strong> 3 |
+<strong>Diagrams:</strong> 1</p>
+<h3 id="h3-31-verifier-client-initialization">H3: 3.1 Verifier Client
+Initialization</h3>
+<h4
+id="h4-implement-internalverifierclientgo-with-newverifierclient-constructor">H4:
+Implement <code>internal/verifier/client.go</code> with
+<code>NewVerifierClient()</code> constructor</h4>
+<h4
+id="h4-code-block-newverifierclient-with-config-injection-jwt-auth-setup-and-connection-pooling">H4:
+Code block: <code>NewVerifierClient()</code> with config injection, JWT
+auth setup, and connection pooling</h4>
+<h4
+id="h4-integrate-verifier-client-initialization-into-existing-helixtranslate-startup-sequence">H4:
+Integrate verifier client initialization into existing HelixTranslate
+startup sequence</h4>
+<h4
+id="h4-add-health-check-endpoint-internalverifierhealthgo-with-ping-method">H4:
+Add health-check endpoint: <code>internal/verifier/health.go</code> with
+<code>Ping()</code> method</h4>
+<h3 id="h3-32-the-8-step-verification-pipeline-binding">H3: 3.2 The
+8-Step Verification Pipeline Binding</h3>
+<h4
+id="h4-table-pipeline-step-mapping--llmsverifier-step-name--helixtranslate-handler-function--file-location">H4:
+Table: Pipeline step mapping — LLMsVerifier step name → HelixTranslate
+handler function → file location</h4>
+<h4
+id="h4-implement-internalverifierpipelinego--verificationpipeline-struct-with-8-ordered-steps">H4:
+Implement <code>internal/verifier/pipeline.go</code> —
+<code>VerificationPipeline</code> struct with 8 ordered steps</h4>
+<h4
+id="h4-code-block-pipeline-definition-with-step-ordering-existence--responsive--feature_detect--code_visibility--coding--perf--cost--validate">H4:
+Code block: Pipeline definition with step ordering: existence →
+responsive → feature_detect → code_visibility → coding → perf → cost →
+validate</h4>
+<h4
+id="h4-code-block-per-step-error-handling-and-retry-logic-with-exponential-backoff">H4:
+Code block: Per-step error handling and retry logic with exponential
+backoff</h4>
+<h3 id="h3-33-existence-verification-implementation">H3: 3.3 Existence
+Verification Implementation</h3>
+<h4
+id="h4-bind-llmsverifier-existence-check-to-verifierverify-for-model-availability">H4:
+Bind LLMsVerifier existence check to <code>verifier.Verify()</code> for
+model availability</h4>
+<h4
+id="h4-code-block-verifymodelexistencemodelid-string-bool-error-implementation">H4:
+Code block:
+<code>VerifyModelExistence(modelID string) (bool, error)</code>
+implementation</h4>
+<h4 id="h4-cache-existence-results-in-sqlite-with-ttl-from-config">H4:
+Cache existence results in SQLite with TTL from config</h4>
+<h3 id="h3-34-responsive--feature-detection">H3: 3.4 Responsive &amp;
+Feature Detection</h3>
+<h4
+id="h4-implement-internalverifierresponsivego--latency-threshold-checking">H4:
+Implement <code>internal/verifier/responsive.go</code> — latency
+threshold checking</h4>
+<h4
+id="h4-implement-internalverifierfeature_detectgo--capability-flag-extraction">H4:
+Implement <code>internal/verifier/feature_detect.go</code> — capability
+flag extraction</h4>
+<h4
+id="h4-code-block-feature-detection-result-mapping-to-helixtranslate-capability-enums">H4:
+Code block: Feature detection result mapping to HelixTranslate
+capability enums</h4>
+<h4
+id="h4-table-feature-flags--helixtranslate-provider-capability-matrix">H4:
+Table: Feature flags → HelixTranslate provider capability matrix</h4>
+<h3 id="h3-35-code-visibility--coding-challenge-execution">H3: 3.5 Code
+Visibility &amp; Coding Challenge Execution</h3>
+<h4
+id="h4-implement-internalverifiercode_visibilitygo--context-window-and-code-comprehension-test">H4:
+Implement <code>internal/verifier/code_visibility.go</code> — context
+window and code comprehension test</h4>
+<h4
+id="h4-implement-internalverifiercoding_challengego--challenge-runner-interface">H4:
+Implement <code>internal/verifier/coding_challenge.go</code> — challenge
+runner interface</h4>
+<h4
+id="h4-code-block-challenge-execution-with-timeout-sandbox-isolation-and-result-collection">H4:
+Code block: Challenge execution with timeout, sandbox isolation, and
+result collection</h4>
+<h4
+id="h4-table-193-helixagent-challenge-categories-mapped-to-helixtranslate-translation-relevant-subset">H4:
+Table: 193+ HelixAgent challenge categories mapped to HelixTranslate
+translation-relevant subset</h4>
+<h3 id="h3-36-performance-benchmarking">H3: 3.6 Performance
+Benchmarking</h3>
+<h4
+id="h4-implement-internalverifierperfgo--throughput-and-latency-benchmarking">H4:
+Implement <code>internal/verifier/perf.go</code> — throughput and
+latency benchmarking</h4>
+<h4
+id="h4-define-translation-specific-benchmarks-tokenssec-first-token-latency-total-translation-time">H4:
+Define translation-specific benchmarks: tokens/sec, first-token latency,
+total translation time</h4>
+<h4
+id="h4-code-block-benchmarktranslationmodelid-string-sampletexts-string-perfresult-error">H4:
+Code block:
+<code>BenchmarkTranslation(modelID string, sampleTexts []string) (*PerfResult, error)</code></h4>
+<h3 id="h3-37-cost-analysis-integration">H3: 3.7 Cost Analysis
+Integration</h3>
+<h4
+id="h4-implement-internalverifiercostgo--per-token-cost-calculation">H4:
+Implement <code>internal/verifier/cost.go</code> — per-token cost
+calculation</h4>
+<h4
+id="h4-bind-llmsverifier-cost-api-to-helixtranslate-cost-tracking">H4:
+Bind LLMsVerifier cost API to HelixTranslate cost tracking</h4>
+<h4
+id="h4-code-block-cost-normalization-across-25-provider-pricing-models">H4:
+Code block: Cost normalization across 25+ provider pricing models</h4>
+<hr />
+<h2 id="h2-chapter-4--phase-3-scoring-engine--score-adapter">H2: Chapter
+4 — Phase 3: Scoring Engine &amp; Score Adapter</h2>
+<p><strong>Target Word Count:</strong> 2,800 | <strong>Code
+Blocks:</strong> 7 | <strong>Tables:</strong> 4 |
+<strong>Diagrams:</strong> 1</p>
+<h3 id="h3-41-scoring-engine-initialization">H3: 4.1 Scoring Engine
+Initialization</h3>
+<h4
+id="h4-implement-internalverifierscoringenginego--scoringengine-wrapper-around-scoringnewscoringengine">H4:
+Implement <code>internal/verifier/scoring/engine.go</code> —
+<code>ScoringEngine</code> wrapper around
+<code>scoring.NewScoringEngine()</code></h4>
+<h4
+id="h4-code-block-engine-constructor-with-config-driven-weight-overrides">H4:
+Code block: Engine constructor with config-driven weight overrides</h4>
+<h4
+id="h4-document-thread-safety-scoring-engine-is-read-heavy-concurrent-safe-design">H4:
+Document thread-safety: scoring engine is read-heavy, concurrent-safe
+design</h4>
+<h3 id="h3-42-five-component-score-calculation">H3: 4.2 Five-Component
+Score Calculation</h3>
+<h4
+id="h4-table-weight-configuration--helixagent-defaults--helixtranslate-translation-optimized-weights">H4:
+Table: Weight configuration — HelixAgent defaults → HelixTranslate
+translation-optimized weights</h4>
+<h4
+id="h4-implement-internalverifierscoringcomponentsgo--individual-component-calculators">H4:
+Implement <code>internal/verifier/scoring/components.go</code> —
+individual component calculators</h4>
+<h4
+id="h4-code-block-calculateresponsespeedscore--25-weight-latency-based">H4:
+Code block: <code>CalculateResponseSpeedScore()</code> — 25% weight,
+latency-based</h4>
+<h4
+id="h4-code-block-calculatecostscore--25-weight-price-per-token-based">H4:
+Code block: <code>CalculateCostScore()</code> — 25% weight,
+price-per-token based</h4>
+<h4
+id="h4-code-block-calculateefficiencyscore--20-weight-throughput-ratio">H4:
+Code block: <code>CalculateEfficiencyScore()</code> — 20% weight,
+throughput ratio</h4>
+<h4
+id="h4-code-block-calculatecapabilityscore--20-weight-challenge-pass-rate">H4:
+Code block: <code>CalculateCapabilityScore()</code> — 20% weight,
+challenge pass rate</h4>
+<h4
+id="h4-code-block-calculaterecencyscore--10-weight-model-age-decay-function">H4:
+Code block: <code>CalculateRecencyScore()</code> — 10% weight, model age
+decay function</h4>
+<h3 id="h3-43-composite-score--threshold-management">H3: 4.3 Composite
+Score &amp; Threshold Management</h3>
+<h4
+id="h4-implement-internalverifierscoringcompositego--weighted-sum-aggregator">H4:
+Implement <code>internal/verifier/scoring/composite.go</code> — weighted
+sum aggregator</h4>
+<h4
+id="h4-define-minimum-score-thresholds-per-provider-tier-premium-085-standard-070-budget-055">H4:
+Define minimum score thresholds per provider tier (premium ≥0.85,
+standard ≥0.70, budget ≥0.55)</h4>
+<h4
+id="h4-code-block-ismodelqualifiedmodelid-string-minscore-float64-bool-compositescore-error">H4:
+Code block:
+<code>IsModelQualified(modelID string, minScore float64) (bool, *CompositeScore, error)</code></h4>
+<h3 id="h3-44-score-adapter-service">H3: 4.4 Score Adapter Service</h3>
+<h4
+id="h4-implement-internalservicesllmsverifier_score_adaptergo--one-to-one-with-helixagent-reference">H4:
+Implement <code>internal/services/llmsverifier_score_adapter.go</code> —
+one-to-one with HelixAgent reference</h4>
+<h4
+id="h4-code-block-full-scoreadapter-struct-with-adapt-method-converting-llmsverifier-scores-to-helixtranslate-providerscore">H4:
+Code block: Full <code>ScoreAdapter</code> struct with
+<code>Adapt()</code> method converting LLMsVerifier scores to
+HelixTranslate <code>ProviderScore</code></h4>
+<h4
+id="h4-table-field-mapping--llmsverifier-score-struct--helixtranslate-providerscore-struct">H4:
+Table: Field mapping — LLMsVerifier <code>Score</code> struct →
+HelixTranslate <code>ProviderScore</code> struct</h4>
+<h4 id="h4-code-block-score-caching-with-invalidation-triggers">H4: Code
+block: Score caching with invalidation triggers</h4>
+<h3 id="h3-45-score-persistence--historical-tracking">H3: 4.5 Score
+Persistence &amp; Historical Tracking</h3>
+<h4
+id="h4-implement-internalverifierscoringhistorygo--sqlite-backed-score-history">H4:
+Implement <code>internal/verifier/scoring/history.go</code> —
+SQLite-backed score history</h4>
+<h4
+id="h4-code-block-schema-for-model_scores-table-with-timestamp-model_id-component-scores-composite-score">H4:
+Code block: Schema for <code>model_scores</code> table with timestamp,
+model_id, component scores, composite score</h4>
+<h4
+id="h4-implement-score-trend-analysis-improving-stable-declining-classification">H4:
+Implement score trend analysis: improving, stable, declining
+classification</h4>
+<hr />
+<h2 id="h2-chapter-5--phase-4-model-discovery--registry-integration">H2:
+Chapter 5 — Phase 4: Model Discovery &amp; Registry Integration</h2>
+<p><strong>Target Word Count:</strong> 2,600 | <strong>Code
+Blocks:</strong> 6 | <strong>Tables:</strong> 3 |
+<strong>Diagrams:</strong> 1</p>
+<h3 id="h3-51-three-tier-discovery-service">H3: 5.1 Three-Tier Discovery
+Service</h3>
+<h4
+id="h4-implement-internalverifierdiscoveryservicego--discoveryservice-wrapping-discoverynewservice">H4:
+Implement <code>internal/verifier/discovery/service.go</code> —
+<code>DiscoveryService</code> wrapping
+<code>discovery.NewService()</code></h4>
+<h4
+id="h4-code-block-three-tier-discovery-logic-user-config--provider-api--modelsdev">H4:
+Code block: Three-tier discovery logic: user config → provider API →
+models.dev</h4>
+<h4
+id="h4-table-discovery-source-priority-fallback-order-and-timeout-settings">H4:
+Table: Discovery source priority, fallback order, and timeout
+settings</h4>
+<h3 id="h3-52-provider-api-model-enumeration">H3: 5.2 Provider API Model
+Enumeration</h3>
+<h4
+id="h4-implement-discovery-adapters-for-all-9-helixtranslate-providers-openai-anthropic-deepseek-zhipu-qwen-gemini-ollama-llamacpp-mock">H4:
+Implement discovery adapters for all 9 HelixTranslate providers: OpenAI,
+Anthropic, DeepSeek, Zhipu, Qwen, Gemini, Ollama, LlamaCpp, Mock</h4>
+<h4
+id="h4-code-block-generic-provider-discovery-interface-and-per-provider-implementations">H4:
+Code block: Generic provider discovery interface and per-provider
+implementations</h4>
+<h4
+id="h4-rate-limiting-and-pagination-handling-for-provider-api-enumeration">H4:
+Rate-limiting and pagination handling for provider API enumeration</h4>
+<h3 id="h3-53-model-registry--single-source-of-truth">H3: 5.3 Model
+Registry &amp; Single Source of Truth</h3>
+<h4
+id="h4-implement-internalverifierdiscoveryregistrygo--unified-model-registry">H4:
+Implement <code>internal/verifier/discovery/registry.go</code> — unified
+model registry</h4>
+<h4
+id="h4-code-block-modelregistry-struct-with-crud-operations-and-searchindexing">H4:
+Code block: <code>ModelRegistry</code> struct with CRUD operations and
+search/indexing</h4>
+<h4
+id="h4-sqlite-schema-for-verified_models-table-with-all-metadata-fields">H4:
+SQLite schema for <code>verified_models</code> table with all metadata
+fields</h4>
+<h4
+id="h4-code-block-registry-query-api--listmodels-getmodel-filterbyscore-filterbyprovider">H4:
+Code block: Registry query API — <code>ListModels()</code>,
+<code>GetModel()</code>, <code>FilterByScore()</code>,
+<code>FilterByProvider()</code></h4>
+<h3 id="h3-54-verified-model-filtering--gatekeeping">H3: 5.4 Verified
+Model Filtering &amp; Gatekeeping</h3>
+<h4
+id="h4-implement-internalverifierdiscoverygatekeepergo--model-access-control">H4:
+Implement <code>internal/verifier/discovery/gatekeeper.go</code> — model
+access control</h4>
+<h4
+id="h4-code-block-gatekeeper-struct-with-ismodelavailablemodelid-that-checks-verification--score-threshold">H4:
+Code block: <code>Gatekeeper</code> struct with
+<code>IsModelAvailable(modelID)</code> that checks verification + score
+threshold</h4>
+<h4
+id="h4-table-gatekeeping-rules--verification-status--score-threshold--provider-status--availability">H4:
+Table: Gatekeeping rules — verification status × score threshold ×
+provider status → availability</h4>
+<h4
+id="h4-integration-point-gatekeeper-feeds-into-pkgtranslatorllm-factory-model-list">H4:
+Integration point: gatekeeper feeds into
+<code>pkg/translator/llm/</code> factory model list</h4>
+<h3 id="h3-55-background-discovery--sync">H3: 5.5 Background Discovery
+&amp; Sync</h3>
+<h4
+id="h4-implement-internalverifierdiscoverysyncgo--periodic-background-discovery-runner">H4:
+Implement <code>internal/verifier/discovery/sync.go</code> — periodic
+background discovery runner</h4>
+<h4
+id="h4-code-block-cron-based-sync-with-configurable-intervals-per-provider">H4:
+Code block: Cron-based sync with configurable intervals per
+provider</h4>
+<h4
+id="h4-event-integration-publish-modeldiscovered-modelupdated-modelremoved-events-to-pkgevents-bus">H4:
+Event integration: publish <code>ModelDiscovered</code>,
+<code>ModelUpdated</code>, <code>ModelRemoved</code> events to
+<code>pkg/events/</code> bus</h4>
+<h3 id="h3-56-api-endpoint-model-catalog">H3: 5.6 API Endpoint: Model
+Catalog</h3>
+<h4
+id="h4-add-apiv1models-endpoint-to-pkgapihandlergo--list-all-verified-models">H4:
+Add <code>/api/v1/models</code> endpoint to
+<code>pkg/api/handler.go</code> — list all verified models</h4>
+<h4
+id="h4-add-apiv1modelsid-endpoint--detailed-model-info-with-scores">H4:
+Add <code>/api/v1/models/{id}</code> endpoint — detailed model info with
+scores</h4>
+<h4
+id="h4-add-apiv1modelsdiscover-endpoint--trigger-on-demand-discovery">H4:
+Add <code>/api/v1/models/discover</code> endpoint — trigger on-demand
+discovery</h4>
+<h4
+id="h4-code-block-complete-handler-implementations-with-pagination-and-filtering">H4:
+Code block: Complete handler implementations with pagination and
+filtering</h4>
+<hr />
+<h2
+id="h2-chapter-6--phase-5-provider-factory-integration--runtime-model-selection">H2:
+Chapter 6 — Phase 5: Provider Factory Integration &amp; Runtime Model
+Selection</h2>
+<p><strong>Target Word Count:</strong> 2,800 | <strong>Code
+Blocks:</strong> 7 | <strong>Tables:</strong> 3 |
+<strong>Diagrams:</strong> 1</p>
+<h3 id="h3-61-verified-provider-factory-refactoring">H3: 6.1 Verified
+Provider Factory Refactoring</h3>
+<h4
+id="h4-modify-pkgtranslatorllmprovidergo--add-verifiedllmclient-wrapping-llmclient-with-verification-metadata">H4:
+Modify <code>pkg/translator/llm/provider.go</code> — add
+<code>VerifiedLLMClient</code> wrapping <code>LLMClient</code> with
+verification metadata</h4>
+<h4
+id="h4-code-block-verifiedllmclient-struct-with-embedded-llmclient--verificationstatus--compositescore">H4:
+Code block: <code>VerifiedLLMClient</code> struct with embedded
+<code>LLMClient</code> + <code>VerificationStatus</code> +
+<code>CompositeScore</code></h4>
+<h4
+id="h4-refactor-existing-9-provider-factories-to-return-verifiedllmclient-instances">H4:
+Refactor existing 9 provider factories to return
+<code>VerifiedLLMClient</code> instances</h4>
+<h3 id="h3-62-runtime-model-selection-engine">H3: 6.2 Runtime Model
+Selection Engine</h3>
+<h4
+id="h4-implement-internalverifierselectionenginego--intelligent-model-selection">H4:
+Implement <code>internal/verifier/selection/engine.go</code> —
+intelligent model selection</h4>
+<h4
+id="h4-code-block-selectmodeltask-taskrequirements-verifiedllmclient-error-with-multi-criteria-optimization">H4:
+Code block:
+<code>SelectModel(task TaskRequirements) (*VerifiedLLMClient, error)</code>
+with multi-criteria optimization</h4>
+<h4
+id="h4-selection-strategies-best-score-lowest-cost-fastest-balanced-configurable">H4:
+Selection strategies: best-score, lowest-cost, fastest, balanced
+(configurable)</h4>
+<h4
+id="h4-table-task-type--selection-strategy-mapping-legal-medical-technical-creative-etc">H4:
+Table: Task type → selection strategy mapping (legal, medical,
+technical, creative, etc.)</h4>
+<h3 id="h3-63-fallback--degradation-chain">H3: 6.3 Fallback &amp;
+Degradation Chain</h3>
+<h4
+id="h4-implement-internalverifierselectionfallbackgo--ordered-fallback-chain">H4:
+Implement <code>internal/verifier/selection/fallback.go</code> — ordered
+fallback chain</h4>
+<h4
+id="h4-code-block-fallback-chain-construction-from-score-sorted-model-list-with-provider-diversity">H4:
+Code block: Fallback chain construction from score-sorted model list
+with provider diversity</h4>
+<h4
+id="h4-degradation-policy-on-provider-failure-retry-same-model-2--next-model--human-escalation">H4:
+Degradation policy: on provider failure, retry same model ×2 → next
+model → human escalation</h4>
+<h3 id="h3-64-event-bus-integration-for-model-lifecycle">H3: 6.4 Event
+Bus Integration for Model Lifecycle</h3>
+<h4
+id="h4-publish-model-lifecycle-events-to-pkgevents-bus-modelselected-modelfailed-modelretired">H4:
+Publish model lifecycle events to <code>pkg/events/</code> bus:
+<code>ModelSelected</code>, <code>ModelFailed</code>,
+<code>ModelRetired</code></h4>
+<h4
+id="h4-subscribe-to-verification-events-auto-deselect-on-score-drop-below-threshold">H4:
+Subscribe to verification events: auto-deselect on score drop below
+threshold</h4>
+<h4 id="h4-code-block-event-handlers-in-internalverifiereventsgo">H4:
+Code block: Event handlers in
+<code>internal/verifier/events.go</code></h4>
+<h3
+id="h3-65-mcp-lsp-acp-embedding-rag-skill-plugin-integration-points">H3:
+6.5 MCP, LSP, ACP, Embedding, RAG, Skill, Plugin Integration Points</h3>
+<h4
+id="h4-table-all-35-mcps-10-lsps-acp-13-embeddings-rags-skills-plugins--model-requirements">H4:
+Table: All 35 MCPs, 10 LSPs, ACP, 13 embeddings, RAGs, skills, plugins →
+model requirements</h4>
+<h4
+id="h4-implement-capability-advertisement-each-component-declares-model-requirements">H4:
+Implement capability advertisement: each component declares model
+requirements</h4>
+<h4
+id="h4-code-block-capabilityrequirements-struct-and-matching-logic-against-verified-model-features">H4:
+Code block: <code>CapabilityRequirements</code> struct and matching
+logic against verified model features</h4>
+<h4
+id="h4-integration-mcp-tool-selection-uses-verified-model-capability-flags">H4:
+Integration: MCP tool selection uses verified model capability
+flags</h4>
+<h3 id="h3-66-api-key-management-through-config">H3: 6.6 API Key
+Management Through Config</h3>
+<h4
+id="h4-extend-internalconfigconfiggo-with-per-provider-api-key-validation-through-llmsverifier">H4:
+Extend <code>internal/config/config.go</code> with per-provider API key
+validation through LLMsVerifier</h4>
+<h4
+id="h4-code-block-api-key-test-on-startup--validateapikeyprovider-key-bool-error">H4:
+Code block: API key test on startup —
+<code>ValidateAPIKey(provider, key) (bool, error)</code></h4>
+<h4
+id="h4-document-env-key-naming-convention-provider_api_key-format-maintained">H4:
+Document <code>.env</code> key naming convention:
+<code>{PROVIDER}_API_KEY</code> format maintained</h4>
+<hr />
+<h2
+id="h2-chapter-7--phase-6-testing-quality-assurance--anti-bluff-verification">H2:
+Chapter 7 — Phase 6: Testing, Quality Assurance &amp; Anti-Bluff
+Verification</h2>
+<p><strong>Target Word Count:</strong> 3,500 | <strong>Code
+Blocks:</strong> 8 | <strong>Tables:</strong> 4 |
+<strong>Diagrams:</strong> 1</p>
+<h3 id="h3-71-testing-strategy-overview">H3: 7.1 Testing Strategy
+Overview</h3>
+<h4
+id="h4-table-test-pyramid--unit-70-integration-20-e2e-10-with-target-counts">H4:
+Table: Test pyramid — unit (70%), integration (20%), e2e (10%) with
+target counts</h4>
+<h4
+id="h4-table-current-436-coverage-gap-analysis-by-package--before-vs-after-targets">H4:
+Table: Current 43.6% coverage gap analysis by package — before vs after
+targets</h4>
+<h4
+id="h4-testing-philosophy-anti-bluff--every-test-proves-real-behavior-no-mock-only-coverage">H4:
+Testing philosophy: "anti-bluff" — every test proves real behavior, no
+mock-only coverage</h4>
+<h3 id="h3-72-unit-testing--core-verification-components">H3: 7.2 Unit
+Testing — Core Verification Components</h3>
+<h4
+id="h4-test-internalverifierclientgo--mock-llmsverifier-server-with-httptest">H4:
+Test <code>internal/verifier/client.go</code> — mock LLMsVerifier server
+with httptest</h4>
+<h4
+id="h4-code-block-client_testgo--constructor-health-check-error-handling-target-95-coverage">H4:
+Code block: <code>client_test.go</code> — constructor, health check,
+error handling (target: 95% coverage)</h4>
+<h4
+id="h4-test-internalverifierpipelinego--each-of-8-steps-with-injected-passfail">H4:
+Test <code>internal/verifier/pipeline.go</code> — each of 8 steps with
+injected pass/fail</h4>
+<h4
+id="h4-code-block-pipeline_testgo--step-ordering-error-propagation-retry-logic">H4:
+Code block: <code>pipeline_test.go</code> — step ordering, error
+propagation, retry logic</h4>
+<h3 id="h3-73-unit-testing--scoring-engine">H3: 7.3 Unit Testing —
+Scoring Engine</h3>
+<h4
+id="h4-test-internalverifierscoringenginego--known-inputexpected-output-table">H4:
+Test <code>internal/verifier/scoring/engine.go</code> —
+known-input/expected-output table</h4>
+<h4
+id="h4-code-block-engine_testgo--20-test-cases-covering-all-5-components">H4:
+Code block: <code>engine_test.go</code> — 20 test cases covering all 5
+components</h4>
+<h4
+id="h4-test-weight-boundary-conditions-0-100-negative-should-error">H4:
+Test weight boundary conditions: 0%, 100%, negative (should error)</h4>
+<h4
+id="h4-test-composite-score-calculation-with-floating-point-tolerance">H4:
+Test composite score calculation with floating-point tolerance</h4>
+<h3 id="h3-74-unit-testing--score-adapter">H3: 7.4 Unit Testing — Score
+Adapter</h3>
+<h4
+id="h4-test-internalservicesllmsverifier_score_adaptergo--field-by-field-mapping-verification">H4:
+Test <code>internal/services/llmsverifier_score_adapter.go</code> —
+field-by-field mapping verification</h4>
+<h4
+id="h4-code-block-score_adapter_testgo--llmsverifier-score-input--helixtranslate-score-output">H4:
+Code block: <code>score_adapter_test.go</code> — LLMsVerifier score
+input → HelixTranslate score output</h4>
+<h4 id="h4-test-cache-hitmissinvalidation-scenarios">H4: Test cache
+hit/miss/invalidation scenarios</h4>
+<h3 id="h3-75-unit-testing--discovery--registry">H3: 7.5 Unit Testing —
+Discovery &amp; Registry</h3>
+<h4
+id="h4-test-internalverifierdiscoveryservicego--mock-all-3-tiers">H4:
+Test <code>internal/verifier/discovery/service.go</code> — mock all 3
+tiers</h4>
+<h4
+id="h4-code-block-discovery_testgo--tier-fallback-timeout-handling-deduplication">H4:
+Code block: <code>discovery_test.go</code> — tier fallback, timeout
+handling, deduplication</h4>
+<h4
+id="h4-test-internalverifierdiscoveryregistrygo--crud-operations-search-filtering">H4:
+Test <code>internal/verifier/discovery/registry.go</code> — CRUD
+operations, search, filtering</h4>
+<h4
+id="h4-test-internalverifierdiscoverygatekeepergo--all-availability-rule-combinations">H4:
+Test <code>internal/verifier/discovery/gatekeeper.go</code> — all
+availability rule combinations</h4>
+<h3 id="h3-76-integration-testing--end-to-end-verification-flow">H3: 7.6
+Integration Testing — End-to-End Verification Flow</h3>
+<h4
+id="h4-implement-testsintegrationverifier_flow_testgo--full-pipeline-with-dockerized-llmsverifier">H4:
+Implement <code>tests/integration/verifier_flow_test.go</code> — full
+pipeline with dockerized LLMsVerifier</h4>
+<h4
+id="h4-code-block-docker-compose-setup-for-integration-test-environment">H4:
+Code block: Docker Compose setup for integration test environment</h4>
+<h4
+id="h4-test-scenario-discover--verify--score--select--translate--validate">H4:
+Test scenario: discover → verify → score → select → translate →
+validate</h4>
+<h4
+id="h4-test-scenario-model-score-drops-below-threshold--auto-removal-from-available-list">H4:
+Test scenario: model score drops below threshold → auto-removal from
+available list</h4>
+<h3 id="h3-77-integration-testing--api-endpoints">H3: 7.7 Integration
+Testing — API Endpoints</h3>
+<h4 id="h4-test-pkgapihandlergo-new-endpoints-apiv1models">H4: Test
+<code>pkg/api/handler.go</code> new endpoints:
+<code>/api/v1/models/*</code></h4>
+<h4
+id="h4-code-block-api-integration-tests-with-jwt-auth-pagination-filtering">H4:
+Code block: API integration tests with JWT auth, pagination,
+filtering</h4>
+<h4
+id="h4-test-model-selection-endpoint-with-various-task-requirements">H4:
+Test model selection endpoint with various task requirements</h4>
+<h3 id="h3-78-anti-bluff-challenge-testing">H3: 7.8 Anti-Bluff Challenge
+Testing</h3>
+<h4
+id="h4-implement-4-llmsverifier-specific-challenges-in-internalverifierchallenges">H4:
+Implement 4 LLMsVerifier-specific challenges in
+<code>internal/verifier/challenges/</code></h4>
+<h4
+id="h4-code-block-challenge-1--score-adapter-accuracy-challenge-known-scores--verify-output">H4:
+Code block: Challenge 1 — Score adapter accuracy challenge (known scores
+→ verify output)</h4>
+<h4
+id="h4-code-block-challenge-2--gatekeeping-logic-challenge-edge-cases--verify-availability">H4:
+Code block: Challenge 2 — Gatekeeping logic challenge (edge cases →
+verify availability)</h4>
+<h4
+id="h4-code-block-challenge-3--discovery-resilience-challenge-provider-failures--verify-fallback">H4:
+Code block: Challenge 3 — Discovery resilience challenge (provider
+failures → verify fallback)</h4>
+<h4
+id="h4-code-block-challenge-4--selection-fairness-challenge-load-distribution--verify-diversity">H4:
+Code block: Challenge 4 — Selection fairness challenge (load
+distribution → verify diversity)</h4>
+<h4
+id="h4-table-193-total-challenges--breakdown-by-subsystem-and-pass-criteria">H4:
+Table: 193+ total challenges — breakdown by subsystem and pass
+criteria</h4>
+<h3 id="h3-79-performance--load-testing">H3: 7.9 Performance &amp; Load
+Testing</h3>
+<h4
+id="h4-implement-testsperfverifier_perf_testgo--scoring-engine-under-concurrent-load">H4:
+Implement <code>tests/perf/verifier_perf_test.go</code> — scoring engine
+under concurrent load</h4>
+<h4
+id="h4-code-block-load-test-1000-concurrent-score-requests-p50p95p99-latency-targets">H4:
+Code block: Load test: 1000 concurrent score requests, p50/p95/p99
+latency targets</h4>
+<h4
+id="h4-memory-leak-detection-1-hour-sustained-load-test-with-heap-profiling">H4:
+Memory leak detection: 1-hour sustained load test with heap
+profiling</h4>
+<h4 id="h4-table-performance-benchmarks-and-sla-targets">H4: Table:
+Performance benchmarks and SLA targets</h4>
+<hr />
+<h2
+id="h2-chapter-8--phase-7--8-documentation-deployment--operational-runbook">H2:
+Chapter 8 — Phase 7 &amp; 8: Documentation, Deployment &amp; Operational
+Runbook</h2>
+<p><strong>Target Word Count:</strong> 3,800 | <strong>Code
+Blocks:</strong> 4 | <strong>Tables:</strong> 5 |
+<strong>Diagrams:</strong> 2</p>
+<h3 id="h3-81-constitution-update--internalverifierconstitutionmd">H3:
+8.1 Constitution Update —
+<code>internal/verifier/CONSTITUTION.md</code></h3>
+<h4
+id="h4-write-all-33-mandatory-rules-adapted-for-helixtranslate-translation-context">H4:
+Write all 33 mandatory rules adapted for HelixTranslate translation
+context</h4>
+<h4
+id="h4-code-block-complete-constitutionmd-template-with-placeholder-fills">H4:
+Code block: Complete CONSTITUTION.md template with placeholder
+fills</h4>
+<h4
+id="h4-table-rule-category-breakdown--scoring-8-verification-8-discovery-5-selection-5-testing-4-ops-3">H4:
+Table: Rule category breakdown — scoring (8), verification (8),
+discovery (5), selection (5), testing (4), ops (3)</h4>
+<h3 id="h3-82-claudemd-update">H3: 8.2 CLAUDE.md Update</h3>
+<h4
+id="h4-append-llmsverifier-context-to-existing-claudemd-12kb--exact-insertion-point-at-line-reference">H4:
+Append LLMsVerifier context to existing <code>CLAUDE.md</code> (~12KB) —
+exact insertion point at line reference</h4>
+<h4
+id="h4-document-architecture-context-key-files-verification-pipeline-scoring-weights-troubleshooting">H4:
+Document: architecture context, key files, verification pipeline,
+scoring weights, troubleshooting</h4>
+<h4 id="h4-code-block-complete-claudemd-diff-showing-additions">H4: Code
+block: Complete CLAUDE.md diff showing additions</h4>
+<h3 id="h3-83-agentsmd-update">H3: 8.3 AGENTS.md Update</h3>
+<h4
+id="h4-append-verifier-agent-instructions-to-existing-agentsmd-20kb--exact-insertion-point">H4:
+Append verifier agent instructions to existing <code>AGENTS.md</code>
+(~20KB) — exact insertion point</h4>
+<h4
+id="h4-define-3-agent-roles-discovery-agent-verification-agent-scoring-agent">H4:
+Define 3 agent roles: discovery agent, verification agent, scoring
+agent</h4>
+<h4
+id="h4-code-block-agent-instruction-templates-with-context-window-constraints">H4:
+Code block: Agent instruction templates with context window
+constraints</h4>
+<h3 id="h3-84-submodule-documentation">H3: 8.4 Submodule
+Documentation</h3>
+<h4
+id="h4-table-all-submodules-challenges-containers--documentation-status-checklist">H4:
+Table: All submodules (Challenges, Containers) — documentation status
+checklist</h4>
+<h4
+id="h4-write-internalverifierreadmemd--complete-api-reference-for-the-verifier-package">H4:
+Write <code>internal/verifier/README.md</code> — complete API reference
+for the verifier package</h4>
+<h4
+id="h4-write-internalverifierchallengesreadmemd--challenge-catalog-with-descriptions-and-pass-criteria">H4:
+Write <code>internal/verifier/challenges/README.md</code> — challenge
+catalog with descriptions and pass criteria</h4>
+<h3 id="h3-85-user-facing-documentation">H3: 8.5 User-Facing
+Documentation</h3>
+<h4
+id="h4-write-docsllmsverifier-integrationmd--high-level-integration-overview-for-users">H4:
+Write <code>docs/llmsverifier-integration.md</code> — high-level
+integration overview for users</h4>
+<h4
+id="h4-table-environment-variables-reference-with-descriptions-defaults-and-validation-rules">H4:
+Table: Environment variables reference with descriptions, defaults, and
+validation rules</h4>
+<h4
+id="h4-document-the-model-selection-ux-how-users-see-only-verified-positively-scored-models">H4:
+Document the model selection UX: how users see only verified,
+positively-scored models</h4>
+<h4
+id="h4-write-troubleshooting-guide-10-common-issues-and-resolutions">H4:
+Write troubleshooting guide: 10 common issues and resolutions</h4>
+<h3 id="h3-86-operational-runbook">H3: 8.6 Operational Runbook</h3>
+<h4
+id="h4-table-monitoring-metrics--what-to-watch-thresholds-alert-definitions">H4:
+Table: Monitoring metrics — what to watch, thresholds, alert
+definitions</h4>
+<h4
+id="h4-document-log-analysis-key-log-patterns-in-internalverifierlogginggo">H4:
+Document log analysis: key log patterns in
+<code>internal/verifier/logging.go</code></h4>
+<h4
+id="h4-runbook-model-score-dropped-below-threshold--detection-diagnosis-remediation-steps">H4:
+Runbook: "Model score dropped below threshold" — detection, diagnosis,
+remediation steps</h4>
+<h4
+id="h4-runbook-discovery-service-failure--fallback-procedures-and-manual-model-registration">H4:
+Runbook: "Discovery service failure" — fallback procedures and manual
+model registration</h4>
+<h4
+id="h4-runbook-new-provider-onboarding--adding-the-10th-provider-to-the-verified-pipeline">H4:
+Runbook: "New provider onboarding" — adding the 10th provider to the
+verified pipeline</h4>
+<h3 id="h3-87-deployment-configuration">H3: 8.7 Deployment
+Configuration</h3>
+<h4
+id="h4-docker-compose-extension-add-llmsverifier-service-to-existing-helixtranslate-compose">H4:
+Docker Compose extension: add LLMsVerifier service to existing
+HelixTranslate compose</h4>
+<h4
+id="h4-code-block-docker-composeverifieryml-with-sqlite-volume-network-health-checks">H4:
+Code block: <code>docker-compose.verifier.yml</code> with SQLite volume,
+network, health checks</h4>
+<h4
+id="h4-kubernetes-manifests-verifier-deploymentyaml-verifier-serviceyaml-verifier-configmapyaml">H4:
+Kubernetes manifests: <code>verifier-deployment.yaml</code>,
+<code>verifier-service.yaml</code>,
+<code>verifier-configmap.yaml</code></h4>
+<h4
+id="h4-table-resource-requirements--cpu-memory-storage-per-environment-devstagingprod">H4:
+Table: Resource requirements — CPU, memory, storage per environment
+(dev/staging/prod)</h4>
+<h3 id="h3-88-migration--rollback-plan">H3: 8.8 Migration &amp; Rollback
+Plan</h3>
+<h4
+id="h4-migration-script-scriptsmigrate-to-verifiersh--feature-flag-gradual-rollout">H4:
+Migration script: <code>scripts/migrate-to-verifier.sh</code> — feature
+flag gradual rollout</h4>
+<h4
+id="h4-table-rollout-phases--5--25--50--100-with-duration-and-exit-criteria">H4:
+Table: Rollout phases — 5% → 25% → 50% → 100% with duration and exit
+criteria</h4>
+<h4
+id="h4-rollback-procedure-immediate-switch-to-legacy-provider-factory-via-feature-flag">H4:
+Rollback procedure: immediate switch to legacy provider factory via
+feature flag</h4>
+<h4
+id="h4-data-migration-existing-model-configs--verified-model-registry-mapping">H4:
+Data migration: existing model configs → verified model registry
+mapping</h4>
+<h3 id="h3-89-final-checklist--sign-off">H3: 8.9 Final Checklist &amp;
+Sign-Off</h3>
+<h4
+id="h4-master-checklist-50-items-across-all-8-phases-with-status-owner-and-sign-off">H4:
+Master checklist: 50 items across all 8 phases with status, owner, and
+sign-off</h4>
+<h4
+id="h4-quality-gates-100-test-coverage-all-193-challenges-passing-all-docs-complete">H4:
+Quality gates: 100% test coverage, all 193+ challenges passing, all docs
+complete</h4>
+<h4
+id="h4-definition-of-done-final-criteria-for-marking-integration-complete">H4:
+Definition of Done: final criteria for marking integration complete</h4>
+<hr />
+<h2 id="appendix-a-complete-file-inventory">Appendix A: Complete File
+Inventory</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>File Path</th>
+<th>Purpose</th>
+<th>Phase</th>
+<th>Lines (est.)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>internal/verifier/client.go</code></td>
+<td>Verifier client</td>
+<td>2</td>
+<td>120</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>internal/verifier/pipeline.go</code></td>
+<td>8-step pipeline</td>
+<td>3</td>
+<td>200</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>internal/verifier/scoring/engine.go</code></td>
+<td>Scoring engine</td>
+<td>4</td>
+<td>180</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>internal/verifier/scoring/components.go</code></td>
+<td>Component calculators</td>
+<td>4</td>
+<td>250</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>internal/verifier/scoring/composite.go</code></td>
+<td>Score aggregator</td>
+<td>4</td>
+<td>100</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>internal/verifier/scoring/history.go</code></td>
+<td>Score persistence</td>
+<td>4</td>
+<td>150</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>internal/verifier/discovery/service.go</code></td>
+<td>Discovery service</td>
+<td>5</td>
+<td>200</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>internal/verifier/discovery/registry.go</code></td>
+<td>Model registry</td>
+<td>5</td>
+<td>220</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>internal/verifier/discovery/gatekeeper.go</code></td>
+<td>Access control</td>
+<td>5</td>
+<td>120</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>internal/verifier/discovery/sync.go</code></td>
+<td>Background sync</td>
+<td>5</td>
+<td>130</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>internal/verifier/selection/engine.go</code></td>
+<td>Model selection</td>
+<td>6</td>
+<td>180</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>internal/verifier/selection/fallback.go</code></td>
+<td>Fallback chain</td>
+<td>6</td>
+<td>140</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>internal/services/llmsverifier_score_adapter.go</code></td>
+<td>Score adapter</td>
+<td>4</td>
+<td>160</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>internal/verifier/bridge.go</code></td>
+<td>Interface bridge</td>
+<td>2</td>
+<td>80</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>internal/verifier/health.go</code></td>
+<td>Health checks</td>
+<td>2</td>
+<td>60</td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>internal/verifier/config.go</code></td>
+<td>Verifier config</td>
+<td>2</td>
+<td>100</td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>internal/verifier/events.go</code></td>
+<td>Event handlers</td>
+<td>6</td>
+<td>110</td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>internal/verifier/CONSTITUTION.md</code></td>
+<td>Governance rules</td>
+<td>7</td>
+<td>150</td>
+</tr>
+<tr>
+<td>19-52</td>
+<td><code>internal/verifier/challenges/*.go</code></td>
+<td>4 challenge files + tests</td>
+<td>6</td>
+<td>800</td>
+</tr>
+<tr>
+<td>53-70</td>
+<td><code>*_test.go</code> files (18 files)</td>
+<td>Test files</td>
+<td>6</td>
+<td>2400</td>
+</tr>
+<tr>
+<td>71</td>
+<td><code>pkg/api/handler.go</code> (modified)</td>
+<td>API handlers</td>
+<td>5</td>
+<td>+120</td>
+</tr>
+<tr>
+<td>72</td>
+<td><code>pkg/translator/llm/provider.go</code> (modified)</td>
+<td>Provider interface</td>
+<td>6</td>
+<td>+60</td>
+</tr>
+<tr>
+<td>73</td>
+<td><code>internal/config/config.go</code> (modified)</td>
+<td>Config struct</td>
+<td>2</td>
+<td>+40</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="appendix-b-glossary">Appendix B: Glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LLMsVerifier</strong></td>
+<td>The external Go module (<code>digital.vasic.llmsverifier</code>)
+providing model verification, scoring, and discovery</td>
+</tr>
+<tr>
+<td><strong>Verified Model</strong></td>
+<td>A model that has passed all 8 verification pipeline steps</td>
+</tr>
+<tr>
+<td><strong>Composite Score</strong></td>
+<td>Weighted sum of 5 component scores (speed, cost, efficiency,
+capability, recency)</td>
+</tr>
+<tr>
+<td><strong>Gatekeeper</strong></td>
+<td>Component that controls model availability based on verification
+status and score thresholds</td>
+</tr>
+<tr>
+<td><strong>Discovery Service</strong></td>
+<td>Three-tier system for finding available models across providers</td>
+</tr>
+<tr>
+<td><strong>Score Adapter</strong></td>
+<td>Translation layer between LLMsVerifier score format and
+HelixTranslate internal format</td>
+</tr>
+<tr>
+<td><strong>Anti-Bluff Test</strong></td>
+<td>A test that validates real system behavior, not just mocked
+interactions</td>
+</tr>
+<tr>
+<td><strong>Challenge</strong></td>
+<td>A structured validation test with defined inputs, expected behavior,
+and pass criteria</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="appendix-c-cross-reference-index">Appendix C: Cross-Reference
+Index</h2>
+<table>
+<thead>
+<tr>
+<th>HelixAgent Reference File</th>
+<th>HelixTranslate Target File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>internal/verifier/startup.go</code></td>
+<td><code>internal/verifier/client.go</code></td>
+<td>Client initialization</td>
+</tr>
+<tr>
+<td><code>internal/verifier/scoring.go</code></td>
+<td><code>internal/verifier/scoring/engine.go</code></td>
+<td>Scoring engine</td>
+</tr>
+<tr>
+<td><code>internal/verifier/enhanced_scoring.go</code></td>
+<td><code>internal/verifier/scoring/components.go</code></td>
+<td>Component scoring</td>
+</tr>
+<tr>
+<td><code>internal/verifier/discovery.go</code></td>
+<td><code>internal/verifier/discovery/service.go</code></td>
+<td>Discovery service</td>
+</tr>
+<tr>
+<td><code>internal/verifier/verification.go</code></td>
+<td><code>internal/verifier/pipeline.go</code></td>
+<td>Verification pipeline</td>
+</tr>
+<tr>
+<td><code>internal/services/llmsverifier_score_adapter.go</code></td>
+<td><code>internal/services/llmsverifier_score_adapter.go</code></td>
+<td>Score adapter (same name)</td>
+</tr>
+<tr>
+<td><code>CONSTITUTION.md</code></td>
+<td><code>internal/verifier/CONSTITUTION.md</code></td>
+<td>Governance rules</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>End of Document Structure — 8 Chapters, 47 Sections, 142 Content
+Points, ~22,500 words</em></p>
+</body>
+</html>

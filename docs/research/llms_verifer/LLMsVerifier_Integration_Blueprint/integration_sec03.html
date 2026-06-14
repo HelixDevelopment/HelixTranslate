@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>integration_sec03</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">integration_sec03</h1>
+</header>
+<h1 id="3-phase-2-core-verification-engine-integration">3. Phase 2: Core
+Verification Engine Integration</h1>
+<p>Phase 2 forms the operational heart of the LLMsVerifier integration
+by establishing the full verification engine within the HelixTranslate
+service boundary. Where Phase 1 concentrated on configuration
+scaffolding and service discovery, Phase 2 moves into implementation
+territory: constructing the Go-based verifier client, defining the
+eight-step pipeline architecture, implementing each verification stage
+from existence checks through final validation, and wiring the entire
+apparatus into the existing HelixTranslate startup sequence. The
+deliverables of this phase are concrete, production-hardened Go source
+files that reside in <code>internal/verifier/</code> and are imported by
+<code>cmd/helix-translate/main.go</code>. Every component introduced in
+this chapter is designed with observability, fault tolerance, and
+horizontal scalability as first-class concerns. The design assumes that
+the verifier may reside on a separate host, may experience transient
+failures under load, and must not block the translation hot path for
+longer than strictly necessary.</p>
+<p>The architectural philosophy guiding this phase is one of defensive
+composition: each verification step is an isolated unit that exposes a
+common <code>Step</code> interface, participates in a group-based
+execution strategy (parallel versus sequential), carries its own timeout
+budget, and reports success or failure through a uniform
+<code>StepResult</code> structure. Steps that are marked as critical can
+halt the entire pipeline and prevent a model from entering the active
+pool, while non-critical steps merely contribute to a composite score.
+This distinction allows HelixTranslate to adopt a graduated gating
+strategy—models must pass all critical checks but can be admitted with
+warnings on secondary dimensions such as advanced feature availability
+or cost competitiveness. The pipeline is orchestrated by a
+<code>VerificationPipeline</code> struct that uses Go's
+<code>errgroup</code> package for concurrent step execution within Group
+1, followed by a straightforward sequential loop for Group 2. Retry
+logic with exponential backoff and circuit-breaker awareness protects
+against transient network failures and thundering-herd scenarios when
+multiple verification cycles are triggered simultaneously.</p>
+<p>Throughout this chapter, references to file paths assume the standard
+Go project layout: domain logic lives under
+<code>internal/verifier/</code>, configuration structures are defined in
+<code>internal/config/</code>, shared cache abstractions reside in
+<code>internal/cache/</code>, and the service entry point is
+<code>cmd/helix-translate/main.go</code>. All timeout values, retry
+parameters, and threshold constants presented here are defaults that can
+be overridden through the <code>LLMsVerifierConfig</code> structure
+documented in Phase 1. The implementation also respects context
+cancellation, ensuring that a shutdown signal propagates cleanly through
+long-running verification steps and causes the pipeline to return
+immediately rather than hanging on an outbound HTTP call.</p>
+<hr />
+<h2 id="31-verifier-client-initialization">3.1 Verifier Client
+Initialization</h2>
+<p>The first concrete task in Phase 2 is to create the
+<code>VerifierClient</code> struct and its constructor, which
+encapsulates all communication between HelixTranslate and the
+LLMsVerifier backend service. This client is intentionally thin: it is
+responsible for connection management, request signing via JWT bearer
+tokens, and response deserialization, but it delegates all business
+logic to the pipeline layer above it. Keeping the client thin simplifies
+unit testing—mocking the verifier backend requires only a small HTTP
+test server—and reduces the blast radius of any API contract changes on
+the verifier side.</p>
+<p>The client is defined in <code>internal/verifier/client.go</code>. It
+holds four fields: an <code>*http.Client</code> instance configured with
+a timeout derived from the global configuration, a <code>baseURL</code>
+string representing the verifier service endpoint, an
+<code>apiKey</code> used for Bearer-token authentication in every
+outbound request, and a <code>timeout</code> field cached locally for
+diagnostic logging. The constructor <code>NewVerifierClient</code>
+performs strict validation: both <code>APIURL</code> and
+<code>APIKey</code> are required fields, and the function returns an
+explicit error rather than silently substituting defaults for values
+that represent security-sensitive or connectivity-critical
+configuration. The timeout is sourced from <code>cfg.CacheTTL</code> as
+a sensible default, but falls back to thirty seconds if that value is
+zero, ensuring that the client is usable even in minimally configured
+deployments.</p>
+<p><strong>CODE BLOCK 1:
+<code>internal/verifier/client.go</code></strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerifierClient <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    httpClient <span class="op">*</span>http<span class="op">.</span>Client</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    baseURL    <span class="dt">string</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    apiKey     <span class="dt">string</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    timeout    time<span class="op">.</span>Duration</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewVerifierClient<span class="op">(</span>cfg <span class="op">*</span>config<span class="op">.</span>LLMsVerifierConfig<span class="op">)</span> <span class="op">(*</span>VerifierClient<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cfg<span class="op">.</span>APIURL <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;APIURL is required&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cfg<span class="op">.</span>APIKey <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;APIKey is required&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    timeout <span class="op">:=</span> cfg<span class="op">.</span>CacheTTL</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> timeout <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span> timeout <span class="op">=</span> <span class="dv">30</span> <span class="op">*</span> time<span class="op">.</span>Second <span class="op">}</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>VerifierClient<span class="op">{</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        httpClient<span class="op">:</span> <span class="op">&amp;</span>http<span class="op">.</span>Client<span class="op">{</span>Timeout<span class="op">:</span> timeout<span class="op">},</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        baseURL<span class="op">:</span>    strings<span class="op">.</span>TrimRight<span class="op">(</span>cfg<span class="op">.</span>APIURL<span class="op">,</span> <span class="st">&quot;/&quot;</span><span class="op">),</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        apiKey<span class="op">:</span>     cfg<span class="op">.</span>APIKey<span class="op">,</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        timeout<span class="op">:</span>    timeout<span class="op">,</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>VerifierClient<span class="op">)</span> Ping<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    req<span class="op">,</span> err <span class="op">:=</span> http<span class="op">.</span>NewRequestWithContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;GET&quot;</span><span class="op">,</span> c<span class="op">.</span>baseURL<span class="op">+</span><span class="st">&quot;/health&quot;</span><span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> err <span class="op">}</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    req<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;Authorization&quot;</span><span class="op">,</span> <span class="st">&quot;Bearer &quot;</span><span class="op">+</span>c<span class="op">.</span>apiKey<span class="op">)</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> c<span class="op">.</span>httpClient<span class="op">.</span>Do<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> err <span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> resp<span class="op">.</span>Body<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> resp<span class="op">.</span>StatusCode <span class="op">!=</span> http<span class="op">.</span>StatusOK <span class="op">{</span> <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;verifier unhealthy: %d&quot;</span><span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>Ping</code> method is the simplest possible health-check:
+it sends a <code>GET</code> request to the verifier's
+<code>/health</code> endpoint, injects the Bearer token into the
+<code>Authorization</code> header, and validates that the response
+status is exactly <code>200 OK</code>. This method is intentionally
+lightweight so that it can be called frequently during startup and
+during periodic liveness checks without placing meaningful load on
+either service. The method respects context cancellation, meaning that
+if the parent context expires or is cancelled, the outbound HTTP request
+will abort immediately rather than continuing to occupy a connection
+slot.</p>
+<p>During service startup in <code>cmd/helix-translate/main.go</code>,
+the client initialization must occur after configuration parsing but
+before the translation service begins accepting traffic. The recommended
+startup sequence is: parse flags and environment variables into
+<code>config.LLMsVerifierConfig</code>; invoke
+<code>NewVerifierClient(cfg)</code> and check the returned error,
+logging a <code>Fatal</code> if either required field is missing; then
+call <code>WaitForHealthy</code> (defined below) with a context bounded
+by a configurable maximum wait duration, typically thirty to sixty
+seconds. Only after the verifier reports a healthy status does the
+service proceed to initialize its model pool and start the HTTP or gRPC
+server. This ordering guarantees that no translation request can arrive
+before the verification subsystem is operational.</p>
+<p>Beyond basic connectivity, the client struct serves as the single
+point of configuration for HTTP connection pooling. The
+<code>http.Client</code> instantiated by the constructor uses Go's
+default transport, which already supports persistent connections and
+connection reuse. For high-throughput deployments, operators may wish to
+customize the transport with <code>MaxIdleConns</code>,
+<code>MaxIdleConnsPerHost</code>, and <code>IdleConnTimeout</code>
+values. Because the transport is created inside the constructor, this
+customization can be exposed through additional fields in
+<code>LLMsVerifierConfig</code> without changing the call sites of
+<code>NewVerifierClient</code>. The key design invariant is that every
+outbound request to the verifier service is made through this single
+client instance, ensuring consistent timeout behavior and authentication
+across all verification operations.</p>
+<p><strong>CODE BLOCK 2:
+<code>internal/verifier/health.go</code></strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>VerifierClient<span class="op">)</span> WaitForHealthy<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> maxWait time<span class="op">.</span>Duration<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    deadline <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">().</span>Add<span class="op">(</span>maxWait<span class="op">)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> time<span class="op">.</span>Now<span class="op">().</span>Before<span class="op">(</span>deadline<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> c<span class="op">.</span>Ping<span class="op">(</span>ctx<span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        time<span class="op">.</span>Sleep<span class="op">(</span>time<span class="op">.</span>Second<span class="op">)</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;verifier not healthy after %v&quot;</span><span class="op">,</span> maxWait<span class="op">)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>WaitForHealthy</code> helper complements <code>Ping</code>
+by providing a blocking poll loop with a hard deadline. It is intended
+for use exclusively during startup, when HelixTranslate must delay its
+own readiness until the verifier is available. The loop polls once per
+second, a cadence chosen to be frequent enough to minimize startup
+latency without generating excessive log noise or network traffic. The
+deadline is computed from <code>maxWait</code>, which should be provided
+from configuration (e.g., <code>cfg.StartupMaxWait</code>) so that
+operators can tune it based on their deployment topology. If the
+verifier does not become healthy within the allotted window, the
+function returns a descriptive error that should be treated as fatal by
+the caller: attempting to operate a translation service without a
+functioning verification backend violates the safety guarantees of the
+integrated system.</p>
+<hr />
+<h2 id="32-the-8-step-verification-pipeline">3.2 The 8-Step Verification
+Pipeline</h2>
+<p>With the client initialized, the next deliverable is the pipeline
+orchestrator that sequences the eight verification steps. The pipeline
+is the central abstraction of Phase 2: it receives a model identifier,
+coordinates the execution of all verification handlers, aggregates their
+individual results into a composite report, and makes the final
+admission decision. The design splits the eight steps into two execution
+groups based on dependency constraints and latency characteristics.</p>
+<p>Group 1 contains the first four steps—Existence, Responsiveness,
+Feature Detection, and Code Visibility. These steps are independent of
+one another and are relatively fast (timeouts ranging from five to
+twenty seconds). They are executed in parallel using an
+<code>errgroup.Group</code>, which both bounds concurrency and provides
+unified error propagation: if any critical step in Group 1 fails, the
+group context is cancelled and the remaining goroutines receive the
+cancellation signal, preventing wasted work. Group 2 contains the final
+four steps—Coding Challenge, Performance, Cost Analysis, and Final
+Validation. These steps must run sequentially because each step may
+depend on the results or side effects of its predecessor. For example,
+the Performance benchmark may use a model configuration discovered
+during Feature Detection, and Final Validation cannot execute until all
+prior results are available.</p>
+<p><strong>TABLE 1: Pipeline Step Mapping</strong></p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Name</th>
+<th>Handler File</th>
+<th>Timeout</th>
+<th>Critical</th>
+<th>Parallel Group</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Existence</td>
+<td><code>internal/verifier/existence.go</code></td>
+<td>5s</td>
+<td>Yes</td>
+<td>Group 1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Responsiveness</td>
+<td><code>internal/verifier/responsive.go</code></td>
+<td>10s</td>
+<td>Yes</td>
+<td>Group 1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Feature Detection</td>
+<td><code>internal/verifier/feature_detect.go</code></td>
+<td>15s</td>
+<td>No</td>
+<td>Group 1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Code Visibility</td>
+<td><code>internal/verifier/code_visibility.go</code></td>
+<td>20s</td>
+<td>No</td>
+<td>Group 1</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Coding Challenge</td>
+<td><code>internal/verifier/coding_challenge.go</code></td>
+<td>60s</td>
+<td>No</td>
+<td>Group 2</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Performance</td>
+<td><code>internal/verifier/perf.go</code></td>
+<td>120s</td>
+<td>No</td>
+<td>Group 2</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Cost Analysis</td>
+<td><code>internal/verifier/cost.go</code></td>
+<td>10s</td>
+<td>No</td>
+<td>Group 2</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Final Validation</td>
+<td><code>internal/verifier/validation.go</code></td>
+<td>5s</td>
+<td>Yes</td>
+<td>Group 2</td>
+</tr>
+</tbody>
+</table>
+<p>Each step in the pipeline implements the <code>Step</code> interface,
+which normalizes interaction between the orchestrator and the individual
+handlers regardless of their internal complexity.</p>
+<p><strong>CODE BLOCK 3: Pipeline with Parallel Groups</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Step <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>StepResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Timeout<span class="op">()</span> time<span class="op">.</span>Duration</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    IsCritical<span class="op">()</span> <span class="dt">bool</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerificationPipeline <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    group1 <span class="op">[]</span>Step <span class="co">// parallel: existence, responsive, feature, code</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    group2 <span class="op">[]</span>Step <span class="co">// sequential: coding, perf, cost, validation</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>VerificationPipeline<span class="op">)</span> Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>PipelineResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    g<span class="op">,</span> ctx <span class="op">:=</span> errgroup<span class="op">.</span>WithContext<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    results <span class="op">:=</span> <span class="bu">make</span><span class="op">([]*</span>StepResult<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">8</span><span class="op">)</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Group 1: parallel</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> step <span class="op">:=</span> <span class="kw">range</span> p<span class="op">.</span>group1 <span class="op">{</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        s <span class="op">:=</span> step</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        g<span class="op">.</span>Go<span class="op">(</span><span class="kw">func</span><span class="op">()</span> <span class="dt">error</span> <span class="op">{</span> r<span class="op">,</span> err <span class="op">:=</span> s<span class="op">.</span>Execute<span class="op">(</span>ctx<span class="op">,</span> modelID<span class="op">);</span> results <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>results<span class="op">,</span> r<span class="op">);</span> <span class="cf">return</span> err <span class="op">})</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> g<span class="op">.</span>Wait<span class="op">();</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Group 2: sequential</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> step <span class="op">:=</span> <span class="kw">range</span> p<span class="op">.</span>group2 <span class="op">{</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        r<span class="op">,</span> err <span class="op">:=</span> step<span class="op">.</span>Execute<span class="op">(</span>ctx<span class="op">,</span> modelID<span class="op">)</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>        results <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>results<span class="op">,</span> r<span class="op">)</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> step<span class="op">.</span>IsCritical<span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> aggregateResults<span class="op">(</span>results<span class="op">),</span> <span class="ot">nil</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>Step</code> interface enforces four methods.
+<code>Name()</code> returns a human-readable identifier used for
+logging, metrics tagging, and error messages. <code>Execute()</code>
+performs the actual verification work against a specific model
+identifier and returns a <code>*StepResult</code> containing a boolean
+<code>Passed</code> field, structured output data, and timing metadata.
+<code>Timeout()</code> declares the maximum duration the step is allowed
+to run before its context is cancelled. <code>IsCritical()</code>
+determines whether a failure in this step should cause the entire
+pipeline to abort. This last attribute is what enables the graduated
+admission policy: Existence and Responsiveness are critical because a
+model that does not exist or cannot respond is fundamentally unusable,
+while Feature Detection and Code Visibility are non-critical because
+their absence only limits functionality rather than preventing basic
+operation.</p>
+<p>The <code>VerificationPipeline.Run</code> method is the engine's
+entry point. It begins by creating an
+<code>errgroup.WithContext(ctx)</code>, which derives a child context
+that is cancelled if any goroutine in the group returns a non-nil error.
+This is essential for the Group 1 parallel execution: if the Existence
+check fails critically, the derived context is cancelled, causing
+in-flight Feature Detection and Code Visibility calls to abort early.
+After Group 1 completes (either successfully or with a critical
+failure), Group 2 executes in a simple <code>for</code> loop. Each
+step's result is appended to the shared <code>results</code> slice, and
+critical failures immediately halt further progress. The final call to
+<code>aggregateResults</code> computes the <code>PipelineResult</code>,
+including the overall pass/fail determination and a summary of per-step
+outcomes.</p>
+<p>Individual steps, particularly those that make network calls to
+external model APIs, are subject to transient failures. To prevent a
+single timeout or <code>503 Service Unavailable</code> from causing a
+model to be incorrectly rejected, each step's <code>Execute</code>
+method should be wrapped in a retry decorator. The retry logic uses
+exponential backoff with jitter to avoid synchronized retry storms, and
+it respects the circuit-breaker pattern by tracking recent failure rates
+and temporarily bypassing steps that have exceeded a failure
+threshold.</p>
+<p><strong>CODE BLOCK 4: Retry with Circuit Breaker</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> executeStepWithRetry<span class="op">(</span>step Step<span class="op">,</span> ctx context<span class="op">.</span>Context<span class="op">,</span> modelID <span class="dt">string</span><span class="op">,</span> cfg RetryConfig<span class="op">)</span> <span class="op">(*</span>StepResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> lastErr <span class="dt">error</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> attempt <span class="op">:=</span> <span class="dv">0</span><span class="op">;</span> attempt <span class="op">&lt;</span> cfg<span class="op">.</span>MaxAttempts<span class="op">;</span> attempt<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> attempt <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span> time<span class="op">.</span>Sleep<span class="op">(</span>cfg<span class="op">.</span>Backoff <span class="op">*</span> time<span class="op">.</span>Duration<span class="op">(</span><span class="dv">1</span><span class="op">&lt;&lt;</span>attempt<span class="op">))</span> <span class="op">}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        result<span class="op">,</span> err <span class="op">:=</span> step<span class="op">.</span>Execute<span class="op">(</span>ctx<span class="op">,</span> modelID<span class="op">)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> result<span class="op">,</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        lastErr <span class="op">=</span> err</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> step<span class="op">.</span>IsCritical<span class="op">()</span> <span class="op">&amp;&amp;</span> attempt <span class="op">&lt;</span> cfg<span class="op">.</span>MaxAttempts<span class="op">-</span><span class="dv">1</span> <span class="op">{</span> <span class="cf">continue</span> <span class="op">}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;step %s failed after %d attempts: %w&quot;</span><span class="op">,</span> step<span class="op">.</span>Name<span class="op">(),</span> cfg<span class="op">.</span>MaxAttempts<span class="op">,</span> lastErr<span class="op">)</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>executeStepWithRetry</code> function applies a configurable
+number of retry attempts with exponential backoff. The backoff
+calculation uses
+<code>cfg.Backoff * time.Duration(1&lt;&lt;attempt)</code>, producing
+delays that double on each subsequent retry: if the base backoff is one
+second, the delays are one second, two seconds, and four seconds for
+attempts two, three, and four respectively. This aggressive backoff
+prevents the verifier client from hammering an already-stressed upstream
+API. The loop continues only for critical steps: if a non-critical step
+fails on every attempt, the function returns the final error but does
+not propagate it as a pipeline-halting failure. Instead, the caller
+records the step as failed but allows subsequent steps to proceed. For
+critical steps, the loop exhausts all retries before returning the
+wrapped error, which <code>VerificationPipeline.Run</code> then treats
+as a reason to abort the entire pipeline. The circuit-breaker
+integration, while not shown inline here, is realized by checking a
+<code>CircuitBreaker.Allow()</code> predicate at the start of
+<code>Execute</code>; if the breaker is open, the method returns
+immediately with a sentinel error that bypasses the retry loop.</p>
+<hr />
+<h2 id="33-existence-and-responsiveness-verification">3.3 Existence and
+Responsiveness Verification</h2>
+<p>The first two pipeline steps establish the most fundamental
+prerequisites: that the model identifier corresponds to a real,
+queryable model in the target provider's catalog, and that the model's
+inference endpoint responds within acceptable latency. These checks are
+both critical and fast, making them ideal candidates for Group 1
+parallel execution.</p>
+<p>Existence verification queries the model provider's API (or the
+verifier service's cached model registry) to confirm that the model ID
+is valid and the model is not deprecated or access-restricted. Because
+model catalogs change infrequently, the existence check benefits heavily
+from caching. A positive result is cached for five minutes, while a
+negative result is cached for thirty seconds to prevent rapid
+re-querying of a model that is legitimately unavailable. The cache key
+is a composite string formed as <code>"existence:" + modelID</code>,
+namespaced to avoid collisions with other cached verification data.</p>
+<p><strong>CODE BLOCK 5: Existence and Responsiveness with
+Caching</strong></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>Verifier<span class="op">)</span> VerifyModelExistence<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">bool</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cached<span class="op">,</span> ok <span class="op">:=</span> v<span class="op">.</span>cache<span class="op">.</span>Get<span class="op">(</span><span class="st">&quot;existence&quot;</span><span class="op">,</span> modelID<span class="op">);</span> ok <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> cached<span class="op">.(</span><span class="dt">bool</span><span class="op">),</span> <span class="ot">nil</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    exists<span class="op">,</span> err <span class="op">:=</span> v<span class="op">.</span>client<span class="op">.</span>CheckModelExists<span class="op">(</span>ctx<span class="op">,</span> modelID<span class="op">)</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> v<span class="op">.</span>cache<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;existence&quot;</span><span class="op">,</span> modelID<span class="op">,</span> exists<span class="op">,</span> <span class="dv">5</span><span class="op">*</span>time<span class="op">.</span>Minute<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> exists<span class="op">,</span> err</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>VerifyModelExistence</code> method begins by consulting the
+cache abstraction injected into the <code>Verifier</code> struct at
+construction time. The cache interface is defined in
+<code>internal/cache/</code> and supports pluggable backends (in-memory
+LRU for single-instance deployments, Redis for replicated deployments).
+If a cached value is found, it is returned immediately without any
+network call, reducing the latency of the Existence step to
+microseconds. On a cache miss, the method delegates to
+<code>v.client.CheckModelExists</code>, which performs an HTTP
+<code>HEAD</code> or <code>GET</code> request against the verifier
+service's model registry endpoint. The result is written back to the
+cache only on success, ensuring that transient errors do not poison the
+cache with false negatives.</p>
+<p>Responsiveness verification complements existence by measuring the
+round-trip time to the model's inference endpoint. This step does not
+perform a full translation; instead, it sends a minimal prompt (such as
+a single-word echo request) and validates that a response is received
+within the ten-second timeout. The measured latency is recorded in the
+<code>StepResult</code> and contributes to the composite health score,
+but the step's criticality is based solely on whether any response is
+received at all. A model that exists but cannot serve inference within
+the timeout window is treated as unavailable and is not admitted to the
+active pool. Like existence, responsiveness results are cached, but with
+a shorter TTL of one minute to ensure that the system reacts promptly to
+restored connectivity.</p>
+<p>Together, these two steps form the "gatekeeping" layer of the
+verification pipeline. They are the fastest steps but carry the highest
+stakes: a failure here means the model is either phantom or unreachable,
+and no amount of feature richness or performance benchmarking can
+compensate. The caching strategy is particularly important at scale,
+where hundreds of models may be verified in a tight loop during a
+provider catalog refresh. Without caching, the system would generate a
+thundering herd of existence queries against the verifier service; with
+caching, only the first verification of each model in a five-minute
+window incurs network overhead.</p>
+<hr />
+<h2 id="34-feature-detection-and-code-visibility">3.4 Feature Detection
+and Code Visibility</h2>
+<p>Once a model's existence and basic responsiveness are confirmed, the
+pipeline proceeds to assess its functional capabilities. Feature
+Detection enumerates which LLM capabilities are supported by the target
+model, while Code Visibility evaluates the model's effectiveness with
+programming-language content. These two steps are non-critical because
+HelixTranslate can operate in a degraded mode when advanced features are
+unavailable, but their results are essential for routing decisions and
+for presenting accurate capability metadata to downstream consumers.</p>
+<p>Feature detection uses a capability bitmap approach, which is both
+compact and efficient for comparison operations. Each capability is
+assigned a bit position in a <code>uint32</code> mask, allowing the full
+feature set of a model to be represented as a single integer. This
+representation enables fast subset queries—for example, checking whether
+a model supports both streaming and function calling is a single bitwise
+<code>AND</code> operation rather than a map lookup or string
+comparison.</p>
+<p><strong>CODE BLOCK 6: Feature Detection</strong></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CapabilityBitmap <span class="dt">uint32</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    CapStreaming CapabilityBitmap <span class="op">=</span> <span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="ot">iota</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    CapFunctionCalling</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    CapVision</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    CapCodeGeneration</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    CapJSONMode</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    CapSystemPrompts</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    CapLargeContext</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    CapMultilingual</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> DetectFeatures<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> client VerifierClient<span class="op">,</span> modelID <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>CapabilityBitmap<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    caps <span class="op">:=</span> CapabilityBitmap<span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> hasStreaming<span class="op">(</span>ctx<span class="op">,</span> client<span class="op">,</span> modelID<span class="op">)</span> <span class="op">{</span> caps <span class="op">|=</span> CapStreaming <span class="op">}</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> hasFunctions<span class="op">(</span>ctx<span class="op">,</span> client<span class="op">,</span> modelID<span class="op">)</span> <span class="op">{</span> caps <span class="op">|=</span> CapFunctionCalling <span class="op">}</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> hasVision<span class="op">(</span>ctx<span class="op">,</span> client<span class="op">,</span> modelID<span class="op">)</span> <span class="op">{</span> caps <span class="op">|=</span> CapVision <span class="op">}</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> caps<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>CapabilityBitmap</code> type defines eight capability flags
+at present, with the most significant bit positions reserved for future
+expansion. The <code>DetectFeatures</code> function initializes an empty
+bitmap and then probes each capability independently. Each probe
+function (<code>hasStreaming</code>, <code>hasFunctions</code>,
+<code>hasVision</code>) sends a targeted test request to the model:
+<code>hasStreaming</code> checks whether the model returns a
+<code>text/event-stream</code> response for a streaming-enabled request;
+<code>hasFunctions</code> sends a prompt with a tool definition and
+validates that the model's response includes a structured tool call;
+<code>hasVision</code> submits a prompt containing a base64-encoded
+image and checks for coherent visual understanding in the response. Each
+probe is wrapped in its own timeout context (typically three to five
+seconds) so that a slow probe for one capability does not block the
+detection of others.</p>
+<p><strong>TABLE 2: Feature Flags to HelixTranslate
+Capabilities</strong></p>
+<table>
+<thead>
+<tr>
+<th>Feature Flag</th>
+<th>Bit Value</th>
+<th>HelixTranslate Capability</th>
+<th>Fallback Behavior When Absent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CapStreaming</code></td>
+<td>0x01</td>
+<td>Real-time translation with incremental output</td>
+<td>Buffer complete response before delivering to client</td>
+</tr>
+<tr>
+<td><code>CapFunctionCalling</code></td>
+<td>0x02</td>
+<td>Structured glossary/terminology injection via tools</td>
+<td>Prepend glossary terms to system prompt</td>
+</tr>
+<tr>
+<td><code>CapVision</code></td>
+<td>0x04</td>
+<td>Translation of image-embedded documents (OCR + translate)</td>
+<td>Reject image inputs with unsupported-media error</td>
+</tr>
+<tr>
+<td><code>CapCodeGeneration</code></td>
+<td>0x08</td>
+<td>Context-aware code translation with syntax preservation</td>
+<td>Use generic text translation with code-postprocessing</td>
+</tr>
+<tr>
+<td><code>CapJSONMode</code></td>
+<td>0x10</td>
+<td>Structured output schemas (response format enforcement)</td>
+<td>Parse free-form response with JSON heuristics</td>
+</tr>
+<tr>
+<td><code>CapSystemPrompts</code></td>
+<td>0x20</td>
+<td>Per-request behavior customization via system messages</td>
+<td>Embed instructions in the user prompt prefix</td>
+</tr>
+<tr>
+<td><code>CapLargeContext</code></td>
+<td>0x40</td>
+<td>Document-level translation (&gt;32K tokens input)</td>
+<td>Split document into chunks with overlap stitching</td>
+</tr>
+<tr>
+<td><code>CapMultilingual</code></td>
+<td>0x80</td>
+<td>Single-model multi-directional translation</td>
+<td>Route through language-pair-specific model selection</td>
+</tr>
+</tbody>
+</table>
+<p>Table 2 maps each feature flag to the corresponding HelixTranslate
+capability and describes the fallback strategy used when the flag is not
+set. This mapping is the bridge between raw model capability detection
+and actionable routing logic. For example, when
+<code>CapStreaming</code> is absent, the translation handler switches
+from a streaming response writer to a full-response buffer, delivering
+the complete translation only after the model finishes generation. When
+<code>CapVision</code> is absent, the API layer returns a
+<code>422 Unprocessable Entity</code> response with a descriptive error
+code, rather than attempting translation and producing garbled output.
+The fallback behaviors are implemented in the translation handlers
+themselves, which read the model's cached capability bitmap at request
+time.</p>
+<p>Code Visibility evaluation assesses whether the model can accurately
+process and translate programming language content. This step is
+distinct from <code>CapCodeGeneration</code> because a model may support
+generating code (the ability to produce syntactically valid output)
+without correctly translating existing code comments, variable names, or
+string literals between natural languages. The Code Visibility step
+sends a curated set of code snippets containing translatable comments
+and documentation strings, then evaluates whether the model preserves
+syntax structure while accurately translating the natural-language
+content. The evaluation uses a combination of static analysis (AST
+parsing to verify structural integrity) and semantic similarity scoring
+(comparing translated comments against reference translations using
+embedding-based cosine similarity). Models that score below a
+configurable threshold on code visibility are still admitted to the pool
+but are excluded from the code-translation routing tier, ensuring that
+sensitive programming content is not routed to linguistically capable
+but code-naive models.</p>
+<hr />
+<h2 id="35-coding-challenge-and-performance-benchmarking">3.5 Coding
+Challenge and Performance Benchmarking</h2>
+<p>Group 2 of the pipeline begins with two resource-intensive steps: the
+Coding Challenge and the Performance Benchmark. These steps are
+sequential because both generate load on the target model, and running
+them concurrently would skew latency measurements and potentially
+trigger rate limiting from the model provider.</p>
+<p>The Coding Challenge step is a specialized variant of Code Visibility
+that focuses on active problem-solving rather than passive translation.
+It presents the model with a small set of well-known coding problems
+(e.g., implementing a specific algorithm, fixing a buggy function, or
+explaining a code snippet's behavior in another language) and evaluates
+the correctness of the response. This step serves two purposes: it
+validates that the model has retained its coding reasoning capabilities
+under the target inference configuration, and it produces a confidence
+score that feeds into the model's overall quality rating. The step is
+non-critical because a model that fails the coding challenge may still
+be perfectly adequate for general text translation, but the failure is
+recorded and used to downgrade the model's ranking in the selection
+algorithm.</p>
+<p>The Performance Benchmark step is the longest-running step in the
+entire pipeline, with a timeout budget of 120 seconds. It measures the
+model's end-to-end translation latency across a representative sample
+set, computing percentile distributions and throughput metrics that
+directly inform routing decisions. The benchmark protocol follows a
+strict measurement discipline to ensure reproducible and comparable
+results across models and providers.</p>
+<p><strong>CODE BLOCK 7: Performance Benchmark</strong></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> BenchmarkTranslation<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID <span class="dt">string</span><span class="op">,</span> samples <span class="op">[]</span><span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>PerfResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> latencies <span class="op">[]</span>time<span class="op">.</span>Duration</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> tokens <span class="dt">int</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> text <span class="op">:=</span> <span class="kw">range</span> samples <span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        start <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">()</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        result<span class="op">,</span> err <span class="op">:=</span> client<span class="op">.</span>Translate<span class="op">(</span>ctx<span class="op">,</span> modelID<span class="op">,</span> text<span class="op">)</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        latencies <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>latencies<span class="op">,</span> time<span class="op">.</span>Since<span class="op">(</span>start<span class="op">))</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        tokens <span class="op">+=</span> result<span class="op">.</span>TokenCount</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>PerfResult<span class="op">{</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        P50Latency<span class="op">:</span> percentile<span class="op">(</span>latencies<span class="op">,</span> <span class="fl">0.50</span><span class="op">),</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        P95Latency<span class="op">:</span> percentile<span class="op">(</span>latencies<span class="op">,</span> <span class="fl">0.95</span><span class="op">),</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        P99Latency<span class="op">:</span> percentile<span class="op">(</span>latencies<span class="op">,</span> <span class="fl">0.99</span><span class="op">),</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        TokensPerSec<span class="op">:</span> <span class="dt">float64</span><span class="op">(</span>tokens<span class="op">)</span> <span class="op">/</span> totalTime<span class="op">.</span>Seconds<span class="op">(),</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>BenchmarkTranslation</code> function takes a context, a
+model identifier, and a slice of sample texts of varying lengths. It
+iterates over each sample, records the wall-clock latency of the
+translation call, and accumulates the total token count from the
+response metadata. The function returns a <code>PerfResult</code> struct
+containing the P50, P95, and P99 latency percentiles, along with the
+average tokens-per-second throughput. These metrics are computed using a
+standard percentile function that sorts the latency slice and indexes
+into the sorted array.</p>
+<p><strong>TABLE 3: Benchmark Parameters</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Warm-up iterations</td>
+<td>3</td>
+<td>Performed before measurement to populate caches and establish
+connection pools; results are discarded</td>
+</tr>
+<tr>
+<td>Sample texts</td>
+<td>10</td>
+<td>Curated to cover varied lengths from 100 to 5,000 characters,
+spanning short phrases, paragraphs, and multi-paragraph documents</td>
+</tr>
+<tr>
+<td>Measurement duration</td>
+<td>60s maximum</td>
+<td>Hard cap per model to prevent benchmark runs from monopolizing the
+verification worker; early termination if all samples complete
+sooner</td>
+</tr>
+<tr>
+<td>P95 TTFT target</td>
+<td>&lt; 5s</td>
+<td>Time-to-first-token target; models exceeding this threshold receive
+a latency penalty in the scoring algorithm</td>
+</tr>
+<tr>
+<td>P50 TPS target</td>
+<td>&gt; 10</td>
+<td>Median tokens-per-second target; models below this threshold are
+flagged as low-throughput and deprioritized in routing</td>
+</tr>
+</tbody>
+</table>
+<p>Table 3 enumerates the benchmark's measurement parameters. The
+warm-up iterations are critical for fairness: without them, cold-start
+models (or models accessed over freshly established TLS connections)
+would report artificially high latencies that do not reflect
+steady-state performance. The ten sample texts are drawn from a curated
+corpus stored in <code>internal/verifier/benchmark_samples.json</code>,
+which includes short phrases (100 characters), standard paragraphs
+(1,000 characters), and long-form documents (5,000 characters) across
+multiple languages and domains. This diversity ensures that the
+benchmark score reflects real-world translation workloads rather than a
+single text length. The 60-second measurement cap prevents a single slow
+model from blocking the verification pipeline indefinitely; if all
+samples are not processed within the cap, partial results are
+extrapolated with a warning annotation. The P95 TTFT and P50 TPS targets
+are service-level objectives that feed into the admission scoring: a
+model meeting both targets receives a latency bonus, while a model
+missing either receives a penalty that affects its position in the
+routing priority queue.</p>
+<p>The <code>PerfResult</code> is persisted alongside the model's record
+in the verification cache, where it is refreshed on each scheduled
+verification cycle. Translation request handlers query this cached
+performance data when selecting a model from the active pool, preferring
+models with lower P95 latency for latency-sensitive requests and models
+with higher TPS for throughput-oriented batch jobs.</p>
+<hr />
+<h2 id="36-cost-analysis-and-final-validation">3.6 Cost Analysis and
+Final Validation</h2>
+<p>The final two steps of the pipeline transition from technical
+measurement to economic assessment and composite decision-making. Cost
+Analysis evaluates the financial efficiency of using the model for
+translation workloads, while Final Validation aggregates all preceding
+step results into a definitive admission verdict.</p>
+<p>Cost analysis operates on the pricing data exposed by each model
+provider, which typically reports costs as separate rates for input
+tokens and output tokens. Because different providers use different
+pricing granularities (per 1K tokens, per 1M tokens, per character) and
+currencies, a normalization step is required before costs can be
+compared across the model pool.</p>
+<p><strong>CODE BLOCK 8: Cost Normalization and Final
+Validation</strong></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NormalizeCost<span class="op">(</span>providerID <span class="dt">string</span><span class="op">,</span> inputCost<span class="op">,</span> outputCost <span class="dt">float64</span><span class="op">)</span> <span class="dt">float64</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Normalize to cost per 1M tokens across all providers</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    total <span class="op">:=</span> inputCost <span class="op">+</span> outputCost<span class="op">*</span><span class="dv">2</span> <span class="co">// weight output higher</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">10.0</span> <span class="op">*</span> math<span class="op">.</span>Exp<span class="op">(-</span>total<span class="op">/</span><span class="fl">10.0</span><span class="op">)</span> <span class="co">// exponential decay score 0-10</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> FinalValidation<span class="op">(</span>results <span class="op">[]*</span>StepResult<span class="op">)</span> <span class="op">*</span>VerificationReport <span class="op">{</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    passed <span class="op">:=</span> <span class="dv">0</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> r <span class="op">:=</span> <span class="kw">range</span> results <span class="op">{</span> <span class="cf">if</span> r<span class="op">.</span>Passed <span class="op">{</span> passed<span class="op">++</span> <span class="op">}</span> <span class="op">}</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>VerificationReport<span class="op">{</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        TotalSteps<span class="op">:</span> <span class="bu">len</span><span class="op">(</span>results<span class="op">),</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        Passed<span class="op">:</span> passed<span class="op">,</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        Failed<span class="op">:</span> <span class="bu">len</span><span class="op">(</span>results<span class="op">)</span> <span class="op">-</span> passed<span class="op">,</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        OverallPass<span class="op">:</span> passed <span class="op">&gt;=</span> <span class="dv">6</span><span class="op">,</span> <span class="co">// 75% threshold</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>NormalizeCost</code> function converts raw pricing data
+into a dimensionless score on a 0-to-10 scale, where 10 represents the
+most cost-effective model and 0 represents the most expensive. The
+normalization formula uses an exponential decay:
+<code>10.0 * math.Exp(-total/10.0)</code>, where <code>total</code> is
+the weighted sum of input and output costs. Output tokens are weighted
+at 2x relative to input tokens because translation workloads typically
+generate output that is comparable in length to the input, and in many
+language pairs the output is longer due to morphological expansion. The
+exponential decay ensures that the score remains bounded and that small
+differences in low-cost models are amplified while large differences
+among high-cost models are compressed. For example, a model costing
+$0.50 per 1M tokens receives a score near 9.5, while a model costing
+$20.00 per 1M tokens receives a score near 1.4. This score is stored in
+the model's metadata and used by the cost-aware router to prefer
+economical models when quality differences are negligible.</p>
+<p>Cost analysis also accounts for provider-specific billing models.
+Some providers charge for API calls in addition to token consumption;
+others offer volume discounts or reserved throughput pricing. The cost
+step queries the verifier service's pricing endpoint, which maintains a
+normalized pricing database across all supported providers. The step's
+timeout is intentionally short (10 seconds) because pricing data is
+cached at the verifier level and should not require live API calls.</p>
+<p>The Final Validation step is the pipeline's terminal node. It
+receives the slice of all <code>StepResult</code> values produced by the
+preceding seven steps and computes the aggregate
+<code>VerificationReport</code>. The report contains the total number of
+steps, the count of passed and failed steps, and a boolean
+<code>OverallPass</code> field that applies the admission threshold. The
+default threshold requires at least six of eight steps to pass,
+corresponding to a 75% success rate. This threshold is configurable via
+<code>LLMsVerifierConfig.MinPassingSteps</code> and can be tightened or
+relaxed based on operational requirements.</p>
+<p>The threshold logic is intentionally lenient on non-critical steps.
+Because only three steps are marked as critical (Existence,
+Responsiveness, and Final Validation itself), a model can fail up to two
+non-critical steps and still achieve overall passage. For example, a
+model that passes Existence and Responsiveness but fails Feature
+Detection (because it lacks streaming support) and Code Visibility
+(because it performs poorly on code translation) would score six of
+eight passes, clearing the threshold and being admitted as a
+general-purpose text translation model with noted limitations.
+Conversely, a model that passes all non-critical steps but fails either
+Existence or Responsiveness is automatically rejected regardless of its
+other scores, because a non-existent or unreachable model cannot perform
+any translation.</p>
+<p>The <code>VerificationReport</code> is the return value of
+<code>VerificationPipeline.Run</code> and is consumed by two downstream
+systems. First, it is written to the model cache, where the
+<code>OverallPass</code> flag determines whether the model is included
+in the active translation pool. Second, it is emitted as a structured
+log event and a Prometheus metric, enabling operations dashboards to
+track verification success rates, per-step failure frequencies, and
+model pool health over time. When a model transitions from passing to
+failing (or vice versa) between verification cycles, an alert is
+triggered so that operators can investigate provider outages, API
+changes, or model deprecation events.</p>
+<p>The wiring of the entire Phase 2 engine into HelixTranslate is
+completed in <code>cmd/helix-translate/main.go</code>. After the
+configuration is loaded and the verifier client is initialized (as
+described in Section 3.1), the <code>VerificationPipeline</code> is
+constructed with its eight steps populated from the handler files in
+<code>internal/verifier/</code>. The pipeline is then passed to a
+background verification worker that runs on a configurable interval
+(default: five minutes), cycling through all registered models and
+refreshing their verification reports. The worker uses a bounded
+goroutine pool to control concurrency, ensuring that the verification
+load does not overwhelm either the HelixTranslate host or the upstream
+model providers. On each cycle, models with updated reports are
+re-evaluated for pool membership, and the translation router is notified
+of any changes to the active model set.</p>
+<p>Phase 2 thus delivers a fully autonomous verification subsystem that
+continuously assesses model health, capability, performance, and cost,
+making dynamic admission decisions without human intervention. The
+combination of parallel fast checks, sequential deep checks, retry
+resilience, and composite scoring provides a robust foundation for the
+intelligent routing layer that will be built in Phase 3.</p>
+</body>
+</html>

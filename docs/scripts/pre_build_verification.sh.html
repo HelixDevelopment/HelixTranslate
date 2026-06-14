@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>pre_build_verification.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">pre_build_verification.sh</h1>
+</header>
+<h1
+id="pre_build_verificationsh--companion-guide">pre_build_verification.sh
+— companion guide</h1>
+<p><strong>Revision:</strong> 3 <strong>Last modified:</strong>
+2026-06-14T16:30:00Z</p>
+<h2 id="overview">Overview</h2>
+<p><code>scripts/pre_build_verification.sh</code> is the project's
+pre-build gate-suite runner (WORKING_PLAN item P4.2). It runs a small
+set of GENUINE, mechanically-checkable <code>CM-*</code> gates BEFORE
+every build, per the inherited Constitution's <strong>MANDATORY TESTING
+CONSTRAINTS</strong> ("Pre-build / pre-merge verification — BEFORE every
+build"). It is the first real <code>CM-*</code> gate runner for this
+project; before P4.2 only the constitution-inheritance meta-test
+existed.</p>
+<p>Each gate fails ONLY on a real, user-visible repository-hygiene
+violation — never on a script-internal bug (§11.4.1) — and each is
+backed by a PAIRED §1.1 mutation test under
+<code>scripts/testing/</code> that proves the gate is not a bluff.</p>
+<h2 id="implemented-gates">Implemented gates</h2>
+<table>
+<thead>
+<tr>
+<th>Gate ID</th>
+<th>Anchor</th>
+<th>What it asserts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CM-GITIGNORE-PRECOMMIT-AUDIT</code></td>
+<td>§11.4.30</td>
+<td>No tracked file matches the forbidden build-artifact / secret
+classes the project's <code>.gitignore</code> declares. Includes the
+<strong>cmd/api-server anchoring regression guard</strong>: the prebuilt
+root <code>api-server</code> binary must stay anchored as
+<code>/api-server</code> so the bare token never re-hides the SOURCE
+directory.</td>
+</tr>
+<tr>
+<td><code>CM-NO-FAKES-BEYOND-UNIT</code></td>
+<td>§11.4.27</td>
+<td>Non-unit Go test files (build-tagged
+<code>integration</code>/<code>e2e</code>/<code>stress</code>/<code>performance</code>/<code>security</code>)
+do not import a mock/stub/fake package path. Mocks are permitted in unit
+tests only.</td>
+</tr>
+<tr>
+<td><code>CM-SCRIPT-TARGET-SHELL-PARSEABLE</code></td>
+<td>§11.4.67</td>
+<td>Every tracked <code>*.sh</code> under <code>scripts/</code> +
+<code>scripts/testing/</code> parses cleanly under <code>bash -n</code>;
+any script declaring an <strong>sh-family shebang</strong>
+(<code>#!/bin/sh</code>, <code>#!/usr/bin/env sh</code>) or <strong>no
+recognised shell shebang</strong> must ALSO parse under
+<code>sh -n</code>. A script with an honest <strong>bash</strong>
+shebang is only required to be bash-parseable (invoked via its shebang
+it never runs under <code>sh</code>), so its bash-only constructs
+(<code>mapfile</code>, <code>&lt; &lt;(...)</code>, <code>[[ ]]</code>,
+arrays) are legitimate and must NOT be false-FAILed.</td>
+</tr>
+<tr>
+<td><code>CM-VERSION-SINGLE-SOURCE</code></td>
+<td>P0.1 / <code>a36030e</code></td>
+<td>No <code>cmd/*/main.go</code> declares a hardcoded semver version
+literal (e.g. <code>appVersion = "3.0.0"</code>); every binary's version
+derives from <code>pkg/version.AppVersion</code> (== authoritative
+<code>VERSION</code> file). A fast grep complement of the Go test
+<code>TestNoBinaryDeclaresDivergentVersionLiteral</code>.</td>
+</tr>
+<tr>
+<td><code>CM-TRACKER-DOCS-PRESENT</code></td>
+<td>§11.4.15 / .16 / .53 / .44</td>
+<td>The four canonical workable-item tracker docs
+(<code>docs/Issues.md</code>, <code>docs/Fixed.md</code>,
+<code>docs/Issues_Summary.md</code>, <code>docs/Fixed_Summary.md</code>)
+all exist AND each carries a §11.4.44 revision header — both a
+<code>**Revision:**</code> line and a <code>**Last modified:**</code>
+line in its header block. A missing doc or a missing header line is a
+documentation-layer violation (the tracker constellation is incomplete /
+unversioned).</td>
+</tr>
+<tr>
+<td><code>CM-ATM-TICKET-IDS</code></td>
+<td>§11.4.54</td>
+<td>Every <code>###</code>/<code>##</code> <code>§X.</code>
+workable-item heading in <code>docs/Issues.md</code> +
+<code>docs/Fixed.md</code> carries an <code>[ATM-NNN]</code> token; the
+union of all ids is <strong>unique</strong> and <strong>monotonic with
+no gaps</strong> — the contiguous sequence
+<code>ATM-001..ATM-NNN</code>. A heading without a token, a duplicate
+id, or a gap in the sequence is a §11.4.54 violation.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li><code>sh</code> (or <code>bash</code>) and <code>git</code> on
+<code>PATH</code>. <code>grep</code>, <code>head</code>.</li>
+<li>Run from anywhere inside the repo; the script resolves the git
+toplevel.</li>
+<li>No <code>pandoc</code> / <code>weasyprint</code> / <code>go</code>
+required — the suite is git-index + grep only, and runs in well under a
+second (no build, no network).</li>
+</ul>
+<h2 id="usage-examples">Usage examples</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the whole suite (CI / pre-build hook):</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/pre_build_verification.sh</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># List gate ids:</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/pre_build_verification.sh</span> <span class="at">--list</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Run a single gate:</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/pre_build_verification.sh</span> <span class="at">--gate</span> CM-GITIGNORE-PRECOMMIT-AUDIT</span></code></pre></div>
+<p>Exit codes: <code>0</code> all selected gates passed · <code>1</code>
+at least one real violation · <code>2</code> usage / harness error
+(unknown gate, not a git repo).</p>
+<h2 id="edge-cases--honest-limitations-1146">Edge cases &amp; honest
+limitations (§11.4.6)</h2>
+<ul>
+<li><strong>CM-GITIGNORE-PRECOMMIT-AUDIT</strong> mirrors the classes
+this project's <code>.gitignore</code> declares (the named
+<code>build/*</code> outputs, real <code>.env</code> files,
+<code>config_with_keys.json</code> / <code>api_keys.json</code> /
+<code>secrets.*</code> / <code>keys.*</code>). It does NOT flag every
+conceivable build artifact (e.g. arbitrary <code>*.exe</code>), because
+the project's declared policy is class-specific and the working tree is
+compliant with that declared policy. Widening the forbidden set is
+future work and would require the tree to be brought into compliance
+first.</li>
+<li><code>.env.example</code> is explicitly allow-listed (the project's
+<code>.gitignore</code> carries <code>!.env.example</code>) and must NOT
+be flagged.</li>
+<li><strong>CM-NO-FAKES-BEYOND-UNIT</strong> is line-grep based, not
+AST-based. It matches import-path string literals ending in
+<code>/mock(s)</code>, <code>/stub(s)</code>, <code>/fake(s)</code> in
+files carrying a non-unit build tag in their first 15 lines. A mock
+referenced indirectly (a re-exported type from a differently-named
+package) is NOT caught. Untagged <code>_test.go</code> files are treated
+as unit tests (mocks allowed), matching the convention that
+integration/e2e suites carry build tags. This is a high-value cheap
+probe, not a complete proof; AST-grade enforcement is tracked as future
+work.</li>
+<li><strong>CM-SCRIPT-TARGET-SHELL-PARSEABLE</strong> is faithful to
+§11.4.67's "every shell script that may be invoked under a target shell
+OTHER than the one in its shebang MUST parse cleanly under that target
+shell." It does NOT force <code>sh -n</code> on an
+honest-<code>bash</code> script, because such a script invoked via its
+shebang only ever runs under bash — doing so would itself be a §11.4.1
+FAIL-bluff (the project's <code>scripts/demo-all.sh</code> is exactly
+this case: genuine bash with <code>mapfile</code> + process
+substitution, correctly PASSes). It requires <code>bash</code> AND
+<code>sh</code> on <code>PATH</code>; if either is absent it returns
+<code>2</code> (harness error), never a false PASS. Scope is the tracked
+<code>scripts/</code> tree (incl. <code>scripts/testing/</code>).</li>
+<li><strong>CM-VERSION-SINGLE-SOURCE</strong> is grep-based: it matches
+a Go assignment of a 3-part semver string literal to an identifier named
+<code>(app)version</code>. A version built at runtime
+(<code>fmt.Sprintf</code>) or held in a differently-named identifier is
+NOT caught; a compliant <code>appVersion = version.AppVersion</code>
+reference and a 2-part XML/EPUB attr (<code>version="1.0"</code>) are
+correctly NOT flagged. It and the Go test
+<code>TestNoBinaryDeclaresDivergentVersionLiteral</code> together are
+the high-value probe, not an AST-grade proof.</li>
+<li><strong>CM-TRACKER-DOCS-PRESENT</strong> checks the §11.4.44 header
+over the first 12 lines of each doc (where the header block lives). It
+asserts presence of the two header lines and the four files; it does NOT
+validate the revision <em>value</em> or the timestamp <em>freshness</em>
+(that is §11.4.44 / §11.4.60 sync-gate territory, owned by the
+markdown-export sync path). A well-formed constellation is never
+false-FAILed.</li>
+<li><strong>CM-ATM-TICKET-IDS</strong> matches workable-item headings as
+lines of the form <code>^#{2,3} §</code> (the project's <code>§X.</code>
+heading convention). Non-item headings (the doc H1, <code>---</code>
+rules) are not items and are not required to carry an id, so they are
+never false-FAILed (§11.4.1). It is a fast grep probe faithful to the
+tree's actual heading convention (Issues <code>§1..N</code>, Fixed
+<code>§1..N</code>); the unique + contiguous-<code>001..N</code>
+invariant is computed from the union of both files.</li>
+</ul>
+<h2 id="internal-behaviour">Internal behaviour</h2>
+<p>The script is read-only over the git index + working tree (no writes,
+no build, no network). It is written in POSIX-portable shell (no arrays,
+no <code>[[ ]]</code>, no process substitution) and parses cleanly under
+both <code>bash -n</code> and <code>sh -n</code> per §11.4.67.</p>
+<p>The mutation tests build disposable git repos under
+<code>mktemp</code> and point the gate at them via the
+<code>PBV_REPO_ROOT</code> env var, so the real working tree is never
+mutated.</p>
+<h2 id="related-scripts">Related scripts</h2>
+<ul>
+<li><code>scripts/testing/meta_test_gitignore_precommit_audit.sh</code>
+— paired §1.1 mutation proof for
+<code>CM-GITIGNORE-PRECOMMIT-AUDIT</code>.</li>
+<li><code>scripts/testing/meta_test_no_fakes_beyond_unit.sh</code> —
+paired §1.1 mutation proof for
+<code>CM-NO-FAKES-BEYOND-UNIT</code>.</li>
+<li><code>scripts/testing/meta_test_script_target_shell_parseable.sh</code>
+— paired §1.1 mutation proof for
+<code>CM-SCRIPT-TARGET-SHELL-PARSEABLE</code>.</li>
+<li><code>scripts/testing/meta_test_version_single_source.sh</code> —
+paired §1.1 mutation proof for
+<code>CM-VERSION-SINGLE-SOURCE</code>.</li>
+<li><code>scripts/testing/meta_test_tracker_docs_present.sh</code> —
+paired §1.1 mutation proof for
+<code>CM-TRACKER-DOCS-PRESENT</code>.</li>
+<li><code>scripts/testing/meta_test_atm_ticket_ids.sh</code> — paired
+§1.1 mutation proof for <code>CM-ATM-TICKET-IDS</code>.</li>
+<li><code>scripts/testing/meta_test_constitution_inheritance.sh</code> —
+the pre-existing inheritance meta-test (sibling discipline).</li>
+<li><code>scripts/commit_all.sh</code> — the authorised commit + push
+wrapper.</li>
+</ul>
+<p><strong>Last verified:</strong> 2026-06-14 (all 6 gates PASS on
+current tree; all six paired mutation tests PASS — every gate FAILs on a
+real violation and PASSes when restored. CM-TRACKER-DOCS-PRESENT catches
+a missing doc + a missing Revision/Last-modified header;
+CM-ATM-TICKET-IDS catches missing tokens, duplicate ids, and sequence
+gaps without false-FAILing a non-item heading; and the prior negatives
+confirm honest-bash scripts and the compliant
+<code>version.AppVersion</code> form are never wrongly flagged).</p>
+</body>
+</html>

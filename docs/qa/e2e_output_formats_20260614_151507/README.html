@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">README</h1>
+</header>
+<h1
+id="e2e-proof--cli-honors--o-output-format-was-always-emitted-epub">E2E
+Proof — CLI honors -o output format (was: always emitted EPUB)</h1>
+<p><strong>Date:</strong> 2026-06-14 <strong>Constitution:</strong>
+§11.4 anti-bluff, §11.4.98 self-driving tests, §11.4.107 captured
+evidence, §11.4.120 gate reconciliation, §11.4.135 regression guard,
+§11.4.146 reproduce→fix→extend</p>
+<h2 id="defect">Defect</h2>
+<p><code>cmd/unified-translator</code> ALWAYS called
+<code>generateEPUB</code> for the output step, ignoring the
+<code>-o</code> extension. <code>-o book.txt</code> /
+<code>-o book.fb2</code> wrote EPUB (PK-zip) bytes into a misnamed file
+— a silent wrong-output defect (§11.4: user asks for one format,
+silently gets another).</p>
+<h2 id="fix">Fix</h2>
+<p>New <code>generateOutput(content, outputPath, inputFile)</code>
+dispatches on the output extension: <code>.epub</code> (default) → EPUB;
+<code>.txt</code>/<code>.md</code> → translated text written directly;
+<code>.fb2</code> → <code>ebook.FB2Writer</code>; unsupported extension
+→ explicit error (§11.4.6), never a misnamed EPUB.</p>
+<h2 id="real-system-proof-this-directory">Real-system proof (this
+directory)</h2>
+<p>Same English PDF → real DeepSeek deepseek-chat → two output
+formats:</p>
+<ul>
+<li><code>out.txt</code> — UTF-8 plain text (first bytes
+<code>d0a1</code> = Cyrillic 'С', NOT <code>PK</code>), 135 Cyrillic
+chars, real Serbian content.</li>
+<li><code>out.fb2</code> — valid <code>&lt;FictionBook&gt;</code> XML,
+138 Cyrillic chars.</li>
+<li><code>run_txt.log</code>, <code>run_fb2.log</code> — translator logs
+(no API-key printing).</li>
+</ul>
+<h3 id="outtxt-content">out.txt content</h3>
+<blockquote>
+<p>Садржај документа Храбри витез јахао је кроз тиху долину у зору.
+Носио је старо писмо запечаћено црвеним воском. Планине су стајале тихо
+под бледим јутарњим небом.</p>
+</blockquote>
+<h2 id="permanent-regression-guard-114135">Permanent regression guard
+(§11.4.135)</h2>
+<p><code>cmd/unified-translator/output_format_test.go</code> — asserts
+.txt is not a zip, .fb2 is FictionBook XML, unsupported ext errors.
+MUTATION-PROVEN: forcing generateOutput to always-EPUB → .txt + .fb2
+subtests FAIL (verified this session).</p>
+<h2 id="companion-gate-reconciliations-114120">Companion gate
+reconciliations (§11.4.120)</h2>
+<ul>
+<li><code>test/unit/format_detector_test.go</code> — PDF + DOCX moved to
+supportedFormats (their real extractors landed); MOBI stays
+unsupported.</li>
+<li><code>cmd/cli/main_comprehensive_test.go</code>
+TestTranslateEbookFunction/with_app_config — was a §11.4.98 bluff:
+skip-guard fired only when NO key present, then forced openai + a fake
+"config-key", dialled REAL OpenAI, 401'd, and failed NoError whenever
+any other provider key was in env. Rewritten to a self-driving httptest
+OpenAI mock (config BaseURL → mock); asserts success + mock-was-hit +
+non-empty output. No real network, no env dependency.</li>
+</ul>
+</body>
+</html>

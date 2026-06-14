@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">README</h1>
+</header>
+<h1
+id="earth_africa-universal-multi-format-multi-language-ebook-translation-system">🌍
+Universal Multi-Format Multi-Language Ebook Translation System</h1>
+<p>A high-performance, enterprise-grade <strong>UNIVERSAL</strong> ebook
+translation toolkit supporting <strong>ANY ebook format</strong> and
+<strong>ANY language pair</strong> (100+ languages), featuring multiple
+translation engines, REST API with HTTP/3 support, and real-time
+WebSocket events.</p>
+<h2 id="rocket-truly-universal-capabilities">🚀 Truly Universal
+Capabilities</h2>
+<h3 id="books-all-ebook-formats-supported">📚 <strong>ALL EBOOK FORMATS
+SUPPORTED</strong></h3>
+<ul>
+<li><strong>Input</strong>: FB2, EPUB, TXT, HTML, PDF, DOCX
+(auto-detected)</li>
+<li><strong>Output</strong>: EPUB, TXT, FB2, HTML (seamless
+conversion)</li>
+<li><strong>Zero format limitations</strong> - translate between any
+formats</li>
+</ul>
+<h3 id="globe_with_meridians-all-languages-supported">🌐 <strong>ALL
+LANGUAGES SUPPORTED</strong></h3>
+<ul>
+<li><strong>100+ languages</strong> with automatic detection</li>
+<li><strong>Any-to-any translation</strong> (no restricted pairs)</li>
+<li><strong>Multi-script support</strong>: Cyrillic, Latin, Arabic,
+Chinese, etc.</li>
+<li><strong>Auto-detect source</strong> language or specify
+manually</li>
+</ul>
+<h3 id="robot-all-translation-methods">🤖 <strong>ALL TRANSLATION
+METHODS</strong></h3>
+<ul>
+<li><strong>AI Services</strong>: OpenAI, Anthropic, Zhipu, DeepSeek,
+Google</li>
+<li><strong>Local Models</strong>: Ollama, llama.cpp (GPU
+accelerated)</li>
+<li><strong>Offline</strong>: Dictionary-based translation</li>
+<li><strong>Distributed</strong>: Multi-LLM coordination with automatic
+fallback</li>
+</ul>
+<h2 id="rocket-key-features-v20">🚀 Key Features (v2.0)</h2>
+<h3 id="universal-format-support">Universal Format Support</h3>
+<ul>
+<li><strong>Input Formats</strong>: FB2, EPUB, TXT, HTML
+(auto-detected)</li>
+<li><strong>Output Formats</strong>: <strong>EPUB (default)</strong>,
+TXT, FB2</li>
+<li>Automatic format detection</li>
+<li>Seamless format conversion</li>
+</ul>
+<h3 id="universal-language-support">Universal Language Support</h3>
+<ul>
+<li><strong>Any language pair</strong> supported</li>
+<li><strong>Automatic language detection</strong> for source text</li>
+<li><strong>18+ pre-configured languages</strong> with easy
+expansion</li>
+<li>Case-insensitive language specification (<code>--locale=de</code> or
+<code>--language=German</code>)</li>
+<li>Default target: English (fully configurable to any language)</li>
+</ul>
+<h3 id="multiple-translation-engines">Multiple Translation Engines</h3>
+<ul>
+<li><strong>Dictionary</strong>: Fast, offline translation</li>
+<li><strong>LLM Providers</strong>: OpenAI GPT, Anthropic Claude, Zhipu
+AI (GLM-4), DeepSeek, Local Ollama</li>
+<li><strong>Local LLMs</strong>: llama.cpp with automatic hardware
+detection and model selection</li>
+<li><strong>Context-aware</strong> translation preserving literary
+style</li>
+</ul>
+<h3 id="modern-architecture">Modern Architecture</h3>
+<ul>
+<li>Built with <strong>Go</strong> for high performance</li>
+<li><strong>REST API</strong> with Gin Gonic framework</li>
+<li><strong>HTTP/3 (QUIC)</strong> support for reduced latency</li>
+<li><strong>WebSocket</strong> support for real-time progress
+tracking</li>
+<li>Event-driven architecture</li>
+</ul>
+<h3 id="security--performance">Security &amp; Performance</h3>
+<ul>
+<li>JWT authentication &amp; API keys</li>
+<li>Rate limiting &amp; TLS 1.3 encryption</li>
+<li>Translation caching</li>
+<li>Concurrent processing</li>
+<li>5-10x faster than Python implementation</li>
+<li><strong>Automatic retry &amp; text splitting</strong> for large
+sections (See <a
+href="Documentation/RETRY_MECHANISM.md">RETRY_MECHANISM.md</a>)</li>
+<li><strong>Comprehensive test coverage</strong>: 50+ unit, integration,
+performance &amp; security tests</li>
+</ul>
+<h2 id="package-installation">📦 Installation</h2>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>Go 1.21 or higher</li>
+<li>Make (optional)</li>
+<li>OpenSSL (for TLS certificates)</li>
+</ul>
+<h3 id="build-from-source">Build from Source</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clone and build</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="op">&lt;</span>repository-url<span class="op">&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> Translate</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> deps</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Binaries will be in build/</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> build/</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># translator (6MB)  translator-server (20MB)</span></span></code></pre></div>
+<h3 id="docker">Docker</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> docker-build</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> docker-run</span></code></pre></div>
+<h2 id="dart-quick-start">🎯 Quick Start</h2>
+<h3 id="cli-usage">CLI Usage</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Translate any ebook to English (auto-detect source language)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/translator</span> <span class="at">-input</span> book.epub</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Translate EPUB to German</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/translator</span> <span class="at">-input</span> book.epub <span class="at">-locale</span> de</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Translate FB2 to French with case-insensitive language name</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/translator</span> <span class="at">-input</span> book.fb2 <span class="at">-language</span> french</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Translate TXT to Spanish with OpenAI GPT-4</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OPENAI_API_KEY</span><span class="op">=</span><span class="st">&quot;your-key&quot;</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/translator</span> <span class="at">-input</span> book.txt <span class="at">-locale</span> es <span class="at">-provider</span> openai <span class="at">-model</span> gpt-4</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Detect source language only</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/translator</span> <span class="at">-input</span> mystery_book.epub <span class="at">-detect</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Custom script output (cyrillic, latin, arabic, etc.)</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/translator</span> <span class="at">-input</span> book.fb2 <span class="at">-script</span> latin</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Output as plain text</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/translator</span> <span class="at">-input</span> book.epub <span class="at">-locale</span> de <span class="at">-format</span> txt</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Local offline translation with Ollama</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/translator</span> <span class="at">-input</span> book.txt <span class="at">-locale</span> ru <span class="at">-provider</span> ollama <span class="at">-model</span> llama3:8b</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Local translation with llama.cpp (auto hardware detection)</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Install llama.cpp: brew install llama.cpp</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/translator</span> <span class="at">-input</span> book.epub <span class="at">-locale</span> sr <span class="at">-provider</span> llamacpp</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Multi-LLM coordinator with API providers only (skip local LLMs)</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OPENAI_API_KEY</span><span class="op">=</span><span class="st">&quot;your-key&quot;</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">DEEPSEEK_API_KEY</span><span class="op">=</span><span class="st">&quot;your-key&quot;</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/translator</span> <span class="at">-input</span> book.epub <span class="at">-provider</span> multi-llm <span class="at">-disable-local-llms</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Multi-LLM coordinator preferring distributed workers</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/translator</span> <span class="at">-input</span> book.epub <span class="at">-provider</span> multi-llm <span class="at">-prefer-distributed</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Version</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/translator</span> <span class="at">-version</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co"># Universal Ebook Translator v2.0.0</span></span></code></pre></div>
+<h3 id="rest-api-server">REST API Server</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate TLS certificates for HTTP/3</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> generate-certs</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Start server</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/translator-server</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Server starts on:</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># - HTTP/3 (QUIC): https://localhost:8443</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># - HTTP/2 (fallback): https://localhost:8443</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># - WebSocket: wss://localhost:8443/ws</span></span></code></pre></div>
+<h2 id="open_book-comprehensive-documentation">📖 Comprehensive
+Documentation</h2>
+<ul>
+<li><strong><a href="Documentation/CLI.md">CLI Reference</a></strong> -
+Complete command-line guide</li>
+<li><strong><a href="Documentation/API.md">API
+Documentation</a></strong> - REST API reference</li>
+<li><strong><a
+href="Documentation/ARCHITECTURE.md">Architecture</a></strong> - System
+design</li>
+<li><strong><a href="Documentation/LANGUAGES.md">Language
+Support</a></strong> - Supported languages</li>
+<li><strong><a href="Documentation/FORMATS.md">Format
+Support</a></strong> - Ebook formats</li>
+<li><strong><a href="Documentation/RETRY_MECHANISM.md">Retry
+Mechanism</a></strong> - Automatic text splitting &amp; retry</li>
+<li><strong><a href="Documentation/VERIFICATION_SYSTEM.md">Verification
+System</a></strong> - Multi-LLM quality verification &amp;
+polishing</li>
+<li><strong><a href="Documentation/MULTIPASS_POLISHING.md">Multi-Pass
+Polishing</a></strong> - Iterative refinement with note-taking &amp;
+database</li>
+<li><strong><a href="Documentation/TESTING_GUIDE.md">Testing
+Guide</a></strong> - Comprehensive test coverage and execution</li>
+<li><strong><a href="LLAMACPP_IMPLEMENTATION.md">llama.cpp
+Guide</a></strong> - Local LLM translation with hardware
+auto-detection</li>
+</ul>
+<h2 id="earth_africa-supported-languages">🌍 Supported Languages</h2>
+<p><strong>18+ Languages</strong> with easy expansion:</p>
+<table>
+<thead>
+<tr>
+<th>Language</th>
+<th>Code</th>
+<th>Native Name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>English</td>
+<td>en</td>
+<td>English</td>
+</tr>
+<tr>
+<td>Russian</td>
+<td>ru</td>
+<td>Русский</td>
+</tr>
+<tr>
+<td><strong>Serbian</strong></td>
+<td><strong>sr</strong></td>
+<td><strong>Српски</strong> (default)</td>
+</tr>
+<tr>
+<td>German</td>
+<td>de</td>
+<td>Deutsch</td>
+</tr>
+<tr>
+<td>French</td>
+<td>fr</td>
+<td>Français</td>
+</tr>
+<tr>
+<td>Spanish</td>
+<td>es</td>
+<td>Español</td>
+</tr>
+<tr>
+<td>Italian</td>
+<td>it</td>
+<td>Italiano</td>
+</tr>
+<tr>
+<td>Portuguese</td>
+<td>pt</td>
+<td>Português</td>
+</tr>
+<tr>
+<td>Chinese</td>
+<td>zh</td>
+<td>中文</td>
+</tr>
+<tr>
+<td>Japanese</td>
+<td>ja</td>
+<td>日本語</td>
+</tr>
+<tr>
+<td>Korean</td>
+<td>ko</td>
+<td>한국어</td>
+</tr>
+<tr>
+<td>Arabic</td>
+<td>ar</td>
+<td>العربية</td>
+</tr>
+<tr>
+<td>Polish</td>
+<td>pl</td>
+<td>Polski</td>
+</tr>
+<tr>
+<td>Ukrainian</td>
+<td>uk</td>
+<td>Українська</td>
+</tr>
+<tr>
+<td>Czech</td>
+<td>cs</td>
+<td>Čeština</td>
+</tr>
+<tr>
+<td>Slovak</td>
+<td>sk</td>
+<td>Slovenčina</td>
+</tr>
+<tr>
+<td>Croatian</td>
+<td>hr</td>
+<td>Hrvatski</td>
+</tr>
+<tr>
+<td>Bulgarian</td>
+<td>bg</td>
+<td>Български</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Specify target language</strong>:</p>
+<ul>
+<li>By locale: <code>--locale=de</code> or <code>--locale=DE</code>
+(case-insensitive)</li>
+<li>By name: <code>--language=German</code> or
+<code>--language=german</code> (case-insensitive)</li>
+</ul>
+<h2 id="books-supported-formats">📚 Supported Formats</h2>
+<h3 id="input-formats">Input Formats</h3>
+<ul>
+<li><strong>FB2</strong> (FictionBook2) - Full XML parsing</li>
+<li><strong>EPUB</strong> - ZIP-based ebook format</li>
+<li><strong>TXT</strong> - Plain text files</li>
+<li><strong>HTML</strong> - HTML documents</li>
+<li>Auto-detection based on file content and extension</li>
+</ul>
+<h3 id="output-formats">Output Formats</h3>
+<ul>
+<li><strong>EPUB</strong> (default) - Universal ebook format</li>
+<li><strong>TXT</strong> - Plain text export</li>
+<li><strong>FB2</strong> - FictionBook2 (planned)</li>
+</ul>
+<h2 id="art-usage-examples">🎨 Usage Examples</h2>
+<h3 id="basic-translation">Basic Translation</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Any format to Serbian (default)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> book.epub</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> book.fb2</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> article.html</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> story.txt</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Output: book_sr.epub (default format)</span></span></code></pre></div>
+<h3 id="multi-language-translation">Multi-Language Translation</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Russian book to German</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> russian_book.epub <span class="at">-locale</span> de</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># English book to French</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> english_book.fb2 <span class="at">-language</span> French</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Auto-detect source, translate to Spanish</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> mystery_book.txt <span class="at">-locale</span> ES</span></code></pre></div>
+<h3 id="advanced-options">Advanced Options</h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify source language (skip auto-detection)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> book.epub <span class="at">-source</span> ru <span class="at">-locale</span> de</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># LLM translation with specific model</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OPENAI_API_KEY</span><span class="op">=</span><span class="st">&quot;sk-...&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> book.epub <span class="at">-locale</span> fr <span class="dt">\</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">-provider</span> openai <span class="at">-model</span> gpt-4</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Use Anthropic Claude</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ANTHROPIC_API_KEY</span><span class="op">=</span><span class="st">&quot;sk-ant-...&quot;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> book.fb2 <span class="at">-language</span> spanish <span class="dt">\</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">-provider</span> anthropic <span class="at">-model</span> claude-3-sonnet-20240229</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Cost-effective DeepSeek</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">DEEPSEEK_API_KEY</span><span class="op">=</span><span class="st">&quot;...&quot;</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> book.txt <span class="at">-locale</span> de <span class="dt">\</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">-provider</span> deepseek</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Free local Ollama (offline)</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> book.epub <span class="at">-locale</span> ru <span class="dt">\</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">-provider</span> ollama <span class="at">-model</span> llama3:8b</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Custom output filename and format</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> book.epub <span class="at">-locale</span> de <span class="dt">\</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">-output</span> german_book.epub <span class="at">-format</span> epub</span></code></pre></div>
+<h3 id="format-conversion">Format Conversion</h3>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert FB2 to EPUB (no translation)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> book.fb2 <span class="at">-source</span> sr <span class="at">-locale</span> sr <span class="at">-format</span> epub</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert EPUB to TXT</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-input</span> book.epub <span class="at">-source</span> en <span class="at">-locale</span> en <span class="at">-format</span> txt</span></code></pre></div>
+<h2 id="wrench-configuration">🔧 Configuration</h2>
+<h3 id="environment-variables">Environment Variables</h3>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># LLM Provider API Keys</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OPENAI_API_KEY</span><span class="op">=</span><span class="st">&quot;your-openai-key&quot;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ANTHROPIC_API_KEY</span><span class="op">=</span><span class="st">&quot;your-anthropic-key&quot;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ZHIPU_API_KEY</span><span class="op">=</span><span class="st">&quot;your-zhipu-key&quot;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">DEEPSEEK_API_KEY</span><span class="op">=</span><span class="st">&quot;your-deepseek-key&quot;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Server Security</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">JWT_SECRET</span><span class="op">=</span><span class="st">&quot;your-secret-key&quot;</span></span></code></pre></div>
+<h3 id="configuration-file">Configuration File</h3>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create template</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">-create-config</span> config.json</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># config.json</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="kw">{</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;provider&quot;</span><span class="ex">:</span> <span class="st">&quot;openai&quot;</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;model&quot;</span><span class="ex">:</span> <span class="st">&quot;gpt-4&quot;</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;temperature&quot;</span><span class="ex">:</span> 0.3,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;max_tokens&quot;</span><span class="ex">:</span> 4000,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;target_language&quot;</span><span class="ex">:</span> <span class="st">&quot;sr&quot;</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;output_format&quot;</span><span class="ex">:</span> <span class="st">&quot;epub&quot;</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;script&quot;</span><span class="ex">:</span> <span class="st">&quot;cyrillic&quot;</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span></code></pre></div>
+<h2 id="test_tube-testing">🧪 Testing</h2>
+<p><strong>Comprehensive Test Coverage: 50+ Tests</strong></p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># All tests</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick tests (unit only)</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./... <span class="at">-short</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Component-specific tests</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./pkg/hardware/...     <span class="co"># Hardware detection (11 tests)</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./pkg/models/...       <span class="co"># Model registry &amp; downloader (27+ tests)</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./pkg/translator/llm/... <span class="co"># LLM integrations (8+ tests)</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Integration tests (full pipeline)</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./pkg/translator/... <span class="at">-run</span> Integration</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Performance &amp; stress tests</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./pkg/translator/... <span class="at">-run</span> Performance</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Security tests (vulnerability testing)</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./pkg/translator/... <span class="at">-run</span> Security</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Coverage report</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-coverage</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./... <span class="at">-coverprofile</span><span class="op">=</span>coverage.out</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> tool cover <span class="at">-html</span><span class="op">=</span>coverage.out</span></code></pre></div>
+<p><strong>Test Categories:</strong></p>
+<ul>
+<li><strong>Unit Tests</strong>: Hardware detection, model selection,
+downloader, LLM clients</li>
+<li><strong>Integration Tests</strong>: Full pipeline from hardware
+detection to translation</li>
+<li><strong>Performance Tests</strong>: Benchmarks, stress tests,
+concurrent operations</li>
+<li><strong>Security Tests</strong>: Path traversal, input validation,
+API key exposure, DOS protection</li>
+</ul>
+<h2 id="building_construction-development">🏗️ Development</h2>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Format code</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> fmt</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Lint</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> lint</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Build for all platforms</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-all</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> clean</span></code></pre></div>
+<h2 id="rocket-deployment">🚀 Deployment</h2>
+<h3 id="docker-1">Docker</h3>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> build <span class="at">-t</span> translator:latest .</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-d</span> <span class="dt">\</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-p</span> 8443:8443 <span class="dt">\</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-v</span> <span class="va">$(</span><span class="bu">pwd</span><span class="va">)</span>/certs:/app/certs <span class="dt">\</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-e</span> OPENAI_API_KEY=<span class="va">$OPENAI_API_KEY</span> <span class="dt">\</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  translator:latest</span></code></pre></div>
+<h3 id="kubernetes-ready">Kubernetes Ready</h3>
+<ul>
+<li>Health checks ✅</li>
+<li>Resource limits ✅</li>
+<li>Auto-scaling compatible ✅</li>
+<li>ConfigMaps/Secrets support ✅</li>
+</ul>
+<h2 id="star2-translation-quality">🌟 Translation Quality</h2>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Quality</th>
+<th>Speed</th>
+<th>Cost</th>
+<th>Offline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OpenAI GPT-4</strong></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>Medium</td>
+<td>$$$</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>Anthropic Claude</strong></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>Medium</td>
+<td>$$$</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>Zhipu GLM-4</strong></td>
+<td>⭐⭐⭐⭐</td>
+<td>Fast</td>
+<td>$$</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>DeepSeek</strong></td>
+<td>⭐⭐⭐⭐</td>
+<td>Fast</td>
+<td>$</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>llama.cpp (Local)</strong></td>
+<td>⭐⭐⭐⭐</td>
+<td>Medium</td>
+<td>Free</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>Ollama (Local)</strong></td>
+<td>⭐⭐⭐⭐</td>
+<td>Medium</td>
+<td>Free</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>Dictionary</strong></td>
+<td>⭐⭐⭐</td>
+<td>Instant</td>
+<td>Free</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h2 id="bar_chart-performance">📊 Performance</h2>
+<ul>
+<li><strong>CLI Translation</strong>: &lt; 1s per page (dictionary),
+2-5s per page (LLM)</li>
+<li><strong>API Latency</strong>: &lt; 100ms (dictionary), &lt; 2s
+(LLM)</li>
+<li><strong>WebSocket</strong>: 1000+ concurrent connections</li>
+<li><strong>Throughput</strong>: 100+ requests/second</li>
+<li><strong>Memory</strong>: &lt; 100MB baseline</li>
+</ul>
+<h2 id="lock-security">🔒 Security</h2>
+<ul>
+<li>TLS 1.3 encryption ✅</li>
+<li>HTTP/3 (QUIC) support ✅</li>
+<li>JWT authentication ✅</li>
+<li>API key management ✅</li>
+<li>Rate limiting (10 RPS default) ✅</li>
+<li>CORS configuration ✅</li>
+<li>Environment variable secrets ✅</li>
+</ul>
+<h2 id="pencil-whats-new-in-v20">📝 What's New in v2.0</h2>
+<h3 id="major-features">Major Features</h3>
+<ul>
+<li>✨ <strong>Universal format support</strong> (FB2, EPUB, TXT,
+HTML)</li>
+<li>✨ <strong>Any language pair</strong> translation</li>
+<li>✨ <strong>Automatic language detection</strong></li>
+<li>✨ <strong>EPUB as default output</strong> format</li>
+<li>✨ <strong>Case-insensitive</strong> language specification</li>
+<li>✨ <strong>18+ pre-configured languages</strong></li>
+<li>✨ Enhanced CLI with <code>--locale</code> and
+<code>--language</code> flags</li>
+<li>✨ <code>--detect</code> flag for language detection only</li>
+<li>✨ Automatic format detection</li>
+</ul>
+<h3 id="improvements">Improvements</h3>
+<ul>
+<li>🚀 Universal ebook parser architecture</li>
+<li>🚀 Language detection with LLM + heuristic fallback</li>
+<li>🚀 EPUB writer with proper structure</li>
+<li>🚀 Enhanced translator supporting any language pair</li>
+<li>🚀 Extended test coverage</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<ul>
+<li>Default output format changed from FB2 to <strong>EPUB</strong></li>
+<li>CLI now requires <code>-input</code> flag (old positional argument
+deprecated)</li>
+<li>Output filename format changed to
+<code>{name}_{lang}.{format}</code></li>
+</ul>
+<h2 id="world_map-roadmap">🗺️ Roadmap</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />PDF input support</label></li>
+<li><label><input type="checkbox" />MOBI input/output
+support</label></li>
+<li><label><input type="checkbox" />FB2 output format</label></li>
+<li><label><input type="checkbox" />Enhanced LLM-based language
+detection</label></li>
+<li><label><input type="checkbox" />Translation memory</label></li>
+<li><label><input type="checkbox" />Glossary support</label></li>
+<li><label><input type="checkbox" />Progress persistence</label></li>
+<li><label><input type="checkbox" />Batch processing API</label></li>
+<li><label><input type="checkbox" />Web UI dashboard</label></li>
+</ul>
+<h2 id="bug-known-limitations">🐛 Known Limitations</h2>
+<ul>
+<li>PDF input requires external library (planned)</li>
+<li>MOBI format support pending</li>
+<li>FB2 output format in development</li>
+<li>LLM language detection not yet integrated (fallback works)</li>
+</ul>
+<h2 id="telephone_receiver-support">📞 Support</h2>
+<ul>
+<li><strong>Documentation</strong>: <code>/Documentation</code></li>
+<li><strong>Examples</strong>: <code>/api/examples</code></li>
+<li><strong>Issues</strong>: [GitHub Issues]</li>
+<li><strong>Legacy Python</strong>: <code>/Legacy</code> directory</li>
+</ul>
+<h2 id="scroll-license">📜 License</h2>
+<p>[Specify your license]</p>
+<h2 id="pray-credits">🙏 Credits</h2>
+<p>Built with ❤️ using:</p>
+<ul>
+<li>Go programming language</li>
+<li>Gin Gonic web framework</li>
+<li>QUIC/HTTP3 protocol</li>
+<li>Modern cloud-native technologies</li>
+</ul>
+<hr />
+<p><strong>Universal Ebook Translator v2.0</strong> - Translate any
+ebook, any language, any format 🌍📚🚀</p>
+</body>
+</html>

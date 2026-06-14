@@ -1,0 +1,2307 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>COMPLETE_DOCUMENTATION_PLAN</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">COMPLETE_DOCUMENTATION_PLAN</h1>
+</header>
+<h1 id="complete-project-documentation-plan">COMPLETE PROJECT
+DOCUMENTATION PLAN</h1>
+<h2
+id="universal-multi-format-multi-language-ebook-translation-system">Universal
+Multi-Format Multi-Language Ebook Translation System</h2>
+<p><strong>Version:</strong> 1.0<br />
+<strong>Date:</strong> November 24, 2025<br />
+<strong>Documentation Coverage:</strong> 100% of all modules, APIs, and
+features</p>
+<hr />
+<h2 id="books-documentation-architecture">📚 DOCUMENTATION
+ARCHITECTURE</h2>
+<h3 id="documentation-hierarchy">Documentation Hierarchy</h3>
+<pre><code>Documentation/
+├── 01_Executive_Summary/
+│   ├── project_overview.md
+│   ├── business_case.md
+│   └── success_metrics.md
+├── 02_Technical_Documentation/
+│   ├── architecture/
+│   ├── api/
+│   ├── modules/
+│   └── deployment/
+├── 03_User_Documentation/
+│   ├── user_manuals/
+│   ├── tutorials/
+│   └── troubleshooting/
+├── 04_Developer_Documentation/
+│   ├── development_guide/
+│   ├── contribution_guide/
+│   └── code_standards/
+├── 05_Operational_Documentation/
+│   ├── deployment/
+│   ├── monitoring/
+│   └── maintenance/
+└── 06_Quality_Documentation/
+    ├── testing/
+    ├── security/
+    └── performance/</code></pre>
+<hr />
+<h2 id="building_construction-02_technical_documentation">🏗️
+02_TECHNICAL_DOCUMENTATION</h2>
+<h3 id="architecture-documentation">Architecture Documentation</h3>
+<h4 id="211-system-architecture">2.1.1 System Architecture</h4>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># System Architecture</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overview</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>The Universal Ebook Translator is a distributed microservices architecture designed for high-performance, multi-format ebook translation.</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">## Components</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Translation Engine Core</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Provider Integration Layer</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Format Processing Pipeline</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Distributed Coordination</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Security &amp; Authentication</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Storage &amp; Caching</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>API Gateway</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Monitoring &amp; Logging</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## Data Flow</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Input parsing and format detection</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Content extraction and normalization</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Translation request routing</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Provider execution with fallback</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Result aggregation and validation</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Output generation and format conversion</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="fu">## Technology Stack</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Go 1.21+ (primary language)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Docker (containerization)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Kubernetes (orchestration)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>PostgreSQL (primary storage)</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Redis (caching layer)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Nginx (load balancing)</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Prometheus/Grafana (monitoring)</span></code></pre></div>
+<h4 id="212-module-architecture">2.1.2 Module Architecture</h4>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Module Architecture</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Core Modules</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">### Translation Engine (`pkg/translator/`)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Universal translator interface</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Provider implementations</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Translation coordination</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Quality assurance</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Performance optimization</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">### Format Processing (`pkg/ebook/`, `pkg/format/`)</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Multi-format parsers</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Content extraction</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Metadata handling</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Output generation</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Format conversion</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="fu">### Distributed System (`pkg/distributed/`)</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Worker coordination</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Load balancing</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Failover handling</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Version management</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Security orchestration</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="fu">### Security Layer (`pkg/security/`)</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Authentication</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Authorization</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Input validation</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Rate limiting</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Audit logging</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="fu">### API Layer (`pkg/api/`)</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>REST API handlers</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>WebSocket support</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Request validation</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Response formatting</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Documentation generation</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="fu">## Module Dependencies</span></span></code></pre></div>
+<p>Translation Engine → Format Processing Translation Engine → Security
+Layer Translation Engine → Distributed System API Layer → Translation
+Engine API Layer → Security Layer All Modules → Configuration &amp;
+Logging</p>
+<pre><code>
+#### 2.1.3 Data Architecture
+```markdown
+# Data Architecture
+
+## Data Models
+
+### Translation Request
+```go
+type TranslationRequest struct {
+    ID          string                 `json:&quot;id&quot;`
+    Input       InputFile             `json:&quot;input&quot;`
+    Output      OutputFormat          `json:&quot;output&quot;`
+    Languages   LanguagePair          `json:&quot;languages&quot;`
+    Providers   []Provider            `json:&quot;providers&quot;`
+    Options     TranslationOptions    `json:&quot;options&quot;`
+    CreatedAt   time.Time            `json:&quot;created_at&quot;`
+}</code></pre>
+<h3 id="translation-result">Translation Result</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TranslationResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    ID          <span class="dt">string</span>              <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    RequestID   <span class="dt">string</span>              <span class="st">`json:&quot;request_id&quot;`</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    Content     TranslatedContent   <span class="st">`json:&quot;content&quot;`</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    Metadata    TranslationMetadata <span class="st">`json:&quot;metadata&quot;`</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    Provider    ProviderInfo        <span class="st">`json:&quot;provider&quot;`</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    Quality     QualityMetrics      <span class="st">`json:&quot;quality&quot;`</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    Duration    time<span class="op">.</span>Duration       <span class="st">`json:&quot;duration&quot;`</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    CreatedAt   time<span class="op">.</span>Time          <span class="st">`json:&quot;created_at&quot;`</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="database-schema">Database Schema</h2>
+<h3 id="primary-tables">Primary Tables</h3>
+<ul>
+<li>translations</li>
+<li>translation_sessions</li>
+<li>translation_providers</li>
+<li>user_preferences</li>
+<li>audit_logs</li>
+<li>performance_metrics</li>
+</ul>
+<h2 id="caching-strategy">Caching Strategy</h2>
+<ul>
+<li>Translation cache (Redis)</li>
+<li>Session cache (Redis)</li>
+<li>Content cache (File system)</li>
+<li>Metadata cache (Memory)</li>
+</ul>
+<h2 id="storage-architecture">Storage Architecture</h2>
+<ul>
+<li>Primary storage: PostgreSQL</li>
+<li>Cache layer: Redis</li>
+<li>File storage: Local + S3</li>
+<li>Backup storage: S3 Glacier</li>
+</ul>
+<pre><code>
+### API Documentation
+
+#### 2.2.1 REST API Reference
+```markdown
+# REST API Reference
+
+## Base URL</code></pre>
+<p><a
+href="https://api.universalebooktranslator.com/v1">https://api.universalebooktranslator.com/v1</a></p>
+<pre><code>
+## Authentication
+- API Key (Header: `X-API-Key`)
+- JWT Token (Header: `Authorization: Bearer &lt;token&gt;`)
+- OAuth 2.0 (For web applications)
+
+## Rate Limiting
+- Free tier: 100 requests/hour
+- Basic tier: 1000 requests/hour
+- Premium tier: 10000 requests/hour
+- Enterprise: Custom limits
+
+## Endpoints
+
+### Translation Endpoints
+
+#### POST /translate
+Translate single text content.
+
+**Request:**
+```json
+{
+  &quot;text&quot;: &quot;Hello world&quot;,
+  &quot;from&quot;: &quot;en&quot;,
+  &quot;to&quot;: &quot;es&quot;,
+  &quot;provider&quot;: &quot;openai&quot;,
+  &quot;options&quot;: {
+    &quot;quality&quot;: &quot;high&quot;,
+    &quot;style&quot;: &quot;formal&quot;
+  }
+}</code></pre>
+<p><strong>Response:</strong></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;translated_text&quot;</span><span class="fu">:</span> <span class="st">&quot;Hola mundo&quot;</span><span class="fu">,</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;provider&quot;</span><span class="fu">:</span> <span class="st">&quot;openai&quot;</span><span class="fu">,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;confidence&quot;</span><span class="fu">:</span> <span class="fl">0.95</span><span class="fu">,</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;duration&quot;</span><span class="fu">:</span> <span class="st">&quot;1.2s&quot;</span><span class="fu">,</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;usage&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;characters&quot;</span><span class="fu">:</span> <span class="dv">12</span><span class="fu">,</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;tokens&quot;</span><span class="fu">:</span> <span class="dv">4</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h4 id="post-translatefile">POST /translate/file</h4>
+<p>Translate entire file (EPUB, FB2, TXT, HTML).</p>
+<p><strong>Request:</strong> <code>multipart/form-data</code></p>
+<ul>
+<li><code>file</code>: File to translate</li>
+<li><code>from</code>: Source language</li>
+<li><code>to</code>: Target language</li>
+<li><code>provider</code>: Translation provider</li>
+<li><code>options</code>: JSON string of options</li>
+</ul>
+<p><strong>Response:</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;job_id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid-v4-job-id&quot;</span><span class="fu">,</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="st">&quot;processing&quot;</span><span class="fu">,</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;estimated_time&quot;</span><span class="fu">:</span> <span class="st">&quot;2m 30s&quot;</span><span class="fu">,</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;webhook_url&quot;</span><span class="fu">:</span> <span class="st">&quot;https://your-app.com/webhook&quot;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h4 id="get-translatefilejob_id">GET /translate/file/{job_id}</h4>
+<p>Check translation job status.</p>
+<p><strong>Response:</strong></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;job_id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid-v4-job-id&quot;</span><span class="fu">,</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="st">&quot;completed&quot;</span><span class="fu">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;progress&quot;</span><span class="fu">:</span> <span class="dv">100</span><span class="fu">,</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;result_url&quot;</span><span class="fu">:</span> <span class="st">&quot;https://api.universalebooktranslator.com/v1/files/download/translated-file.epub&quot;</span><span class="fu">,</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;metadata&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;original_size&quot;</span><span class="fu">:</span> <span class="dv">1024000</span><span class="fu">,</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;translated_size&quot;</span><span class="fu">:</span> <span class="dv">1050000</span><span class="fu">,</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;chapters&quot;</span><span class="fu">:</span> <span class="dv">15</span><span class="fu">,</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;total_characters&quot;</span><span class="fu">:</span> <span class="dv">50000</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="batch-processing-endpoints">Batch Processing Endpoints</h3>
+<h4 id="post-batchtranslate">POST /batch/translate</h4>
+<p>Process multiple files in batch.</p>
+<p><strong>Request:</strong></p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;files&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;file1.epub&quot;</span><span class="ot">,</span> <span class="st">&quot;file2.fb2&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;from&quot;</span><span class="fu">:</span> <span class="st">&quot;en&quot;</span><span class="fu">,</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;to&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;es&quot;</span><span class="ot">,</span> <span class="st">&quot;fr&quot;</span><span class="ot">,</span> <span class="st">&quot;de&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;providers&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;openai&quot;</span><span class="ot">,</span> <span class="st">&quot;anthropic&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;options&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;parallel&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;quality&quot;</span><span class="fu">:</span> <span class="st">&quot;high&quot;</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><strong>Response:</strong></p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;batch_id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid-v4-batch-id&quot;</span><span class="fu">,</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;total_files&quot;</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;total_translations&quot;</span><span class="fu">:</span> <span class="dv">6</span><span class="fu">,</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="st">&quot;processing&quot;</span><span class="fu">,</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;estimated_time&quot;</span><span class="fu">:</span> <span class="st">&quot;15m&quot;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="provider-management">Provider Management</h3>
+<h4 id="get-providers">GET /providers</h4>
+<p>List available translation providers.</p>
+<p><strong>Response:</strong></p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;providers&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;openai&quot;</span><span class="fu">,</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;display_name&quot;</span><span class="fu">:</span> <span class="st">&quot;OpenAI GPT-4&quot;</span><span class="fu">,</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="st">&quot;available&quot;</span><span class="fu">,</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;models&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;gpt-4&quot;</span><span class="ot">,</span> <span class="st">&quot;gpt-3.5-turbo&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;pricing&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;per_token&quot;</span><span class="fu">:</span> <span class="fl">0.00002</span><span class="fu">,</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;currency&quot;</span><span class="fu">:</span> <span class="st">&quot;USD&quot;</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">},</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;features&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;high_quality&quot;</span><span class="ot">,</span> <span class="st">&quot;context_aware&quot;</span><span class="ot">]</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h4 id="get-providersprovidermodels">GET
+/providers/{provider}/models</h4>
+<p>List models for specific provider.</p>
+<h3 id="language-detection">Language Detection</h3>
+<h4 id="post-detect">POST /detect</h4>
+<p>Detect language of provided text.</p>
+<p><strong>Request:</strong></p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;Bonjour le monde&quot;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><strong>Response:</strong></p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;language&quot;</span><span class="fu">:</span> <span class="st">&quot;fr&quot;</span><span class="fu">,</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;confidence&quot;</span><span class="fu">:</span> <span class="fl">0.98</span><span class="fu">,</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;alternatives&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;language&quot;</span><span class="fu">:</span> <span class="st">&quot;fr-ca&quot;</span><span class="fu">,</span> <span class="dt">&quot;confidence&quot;</span><span class="fu">:</span> <span class="fl">0.85</span><span class="fu">}</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="format-detection">Format Detection</h3>
+<h4 id="post-formatsdetect">POST /formats/detect</h4>
+<p>Detect format of uploaded file.</p>
+<p><strong>Request:</strong> <code>multipart/form-data</code></p>
+<ul>
+<li><code>file</code>: File to analyze</li>
+</ul>
+<p><strong>Response:</strong></p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;format&quot;</span><span class="fu">:</span> <span class="st">&quot;epub&quot;</span><span class="fu">,</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="st">&quot;3.0&quot;</span><span class="fu">,</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;confidence&quot;</span><span class="fu">:</span> <span class="fl">0.99</span><span class="fu">,</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;metadata&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Sample Book&quot;</span><span class="fu">,</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;author&quot;</span><span class="fu">:</span> <span class="st">&quot;Sample Author&quot;</span><span class="fu">,</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;chapters&quot;</span><span class="fu">:</span> <span class="dv">10</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="websocket-api">WebSocket API</h2>
+<h3 id="wstranslate">/ws/translate</h3>
+<p>Real-time translation with progress updates.</p>
+<p><strong>Connection:</strong></p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> ws <span class="op">=</span> <span class="kw">new</span> <span class="bu">WebSocket</span>(<span class="st">&#39;wss://api.universalebooktranslator.com/v1/ws/translate&#39;</span>)<span class="op">;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>ws<span class="op">.</span><span class="at">onopen</span> <span class="op">=</span> <span class="kw">function</span>() {</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Send translation request</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  ws<span class="op">.</span><span class="fu">send</span>(<span class="bu">JSON</span><span class="op">.</span><span class="fu">stringify</span>({</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">text</span><span class="op">:</span> <span class="st">&quot;Hello world&quot;</span><span class="op">,</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">from</span><span class="op">:</span> <span class="st">&quot;en&quot;</span><span class="op">,</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">to</span><span class="op">:</span> <span class="st">&quot;es&quot;</span><span class="op">,</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">provider</span><span class="op">:</span> <span class="st">&quot;openai&quot;</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  }))<span class="op">;</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>ws<span class="op">.</span><span class="at">onmessage</span> <span class="op">=</span> <span class="kw">function</span>(<span class="bu">event</span>) {</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> data <span class="op">=</span> <span class="bu">JSON</span><span class="op">.</span><span class="fu">parse</span>(<span class="bu">event</span><span class="op">.</span><span class="at">data</span>)<span class="op">;</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  <span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">&#39;Progress:&#39;</span><span class="op">,</span> data<span class="op">.</span><span class="at">progress</span>)<span class="op">;</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  <span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">&#39;Status:&#39;</span><span class="op">,</span> data<span class="op">.</span><span class="at">status</span>)<span class="op">;</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+<p><strong>Message Format:</strong></p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;progress&quot;</span><span class="fu">,</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;progress&quot;</span><span class="fu">:</span> <span class="dv">75</span><span class="fu">,</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="st">&quot;translating&quot;</span><span class="fu">,</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;partial_result&quot;</span><span class="fu">:</span> <span class="st">&quot;Hola mu...&quot;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="error-handling">Error Handling</h2>
+<h3 id="error-response-format">Error Response Format</h3>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;error&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;code&quot;</span><span class="fu">:</span> <span class="st">&quot;INVALID_INPUT&quot;</span><span class="fu">,</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;message&quot;</span><span class="fu">:</span> <span class="st">&quot;Invalid input parameters&quot;</span><span class="fu">,</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;details&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;field&quot;</span><span class="fu">:</span> <span class="st">&quot;text&quot;</span><span class="fu">,</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;issue&quot;</span><span class="fu">:</span> <span class="st">&quot;cannot be empty&quot;</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;request_id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid-v4-request-id&quot;</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="common-error-codes">Common Error Codes</h3>
+<ul>
+<li><code>INVALID_INPUT</code>: Invalid request parameters</li>
+<li><code>UNSUPPORTED_FORMAT</code>: File format not supported</li>
+<li><code>RATE_LIMIT_EXCEEDED</code>: API rate limit exceeded</li>
+<li><code>INSUFFICIENT_CREDITS</code>: Insufficient API credits</li>
+<li><code>PROVIDER_ERROR</code>: Translation provider error</li>
+<li><code>NETWORK_ERROR</code>: Network connectivity issue</li>
+<li><code>INTERNAL_ERROR</code>: Internal server error</li>
+</ul>
+<h2 id="sdks">SDKs</h2>
+<h3 id="go-sdk">Go SDK</h3>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;github.com/universal-ebook-translator/go-sdk&quot;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>client <span class="op">:=</span> translator<span class="op">.</span>NewClient<span class="op">(</span><span class="st">&quot;your-api-key&quot;</span><span class="op">)</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>result<span class="op">,</span> err <span class="op">:=</span> client<span class="op">.</span>Translate<span class="op">(</span><span class="st">&quot;Hello&quot;</span><span class="op">,</span> <span class="st">&quot;en&quot;</span><span class="op">,</span> <span class="st">&quot;es&quot;</span><span class="op">)</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Fatal<span class="op">(</span>err<span class="op">)</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>fmt<span class="op">.</span>Println<span class="op">(</span>result<span class="op">.</span>Text<span class="op">)</span></span></code></pre></div>
+<h3 id="python-sdk">Python SDK</h3>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> universal_translator <span class="im">import</span> Translator</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> Translator(api_key<span class="op">=</span><span class="st">&quot;your-api-key&quot;</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> client.translate(<span class="st">&quot;Hello&quot;</span>, from_lang<span class="op">=</span><span class="st">&quot;en&quot;</span>, to_lang<span class="op">=</span><span class="st">&quot;es&quot;</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result.text)</span></code></pre></div>
+<h3 id="javascript-sdk">JavaScript SDK</h3>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { Translator } <span class="im">from</span> <span class="st">&#39;@universal-translator/js-sdk&#39;</span><span class="op">;</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> client <span class="op">=</span> <span class="kw">new</span> <span class="fu">Translator</span>({ <span class="dt">apiKey</span><span class="op">:</span> <span class="st">&#39;your-api-key&#39;</span> })<span class="op">;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> result <span class="op">=</span> <span class="cf">await</span> client<span class="op">.</span><span class="fu">translate</span>(<span class="st">&#39;Hello&#39;</span><span class="op">,</span> <span class="st">&#39;en&#39;</span><span class="op">,</span> <span class="st">&#39;es&#39;</span>)<span class="op">;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(result<span class="op">.</span><span class="at">text</span>)<span class="op">;</span></span></code></pre></div>
+<pre><code>
+#### 2.2.2 OpenAPI Specification
+```yaml
+# File: api/openapi/openapi.yaml
+openapi: 3.0.3
+info:
+  title: Universal Ebook Translator API
+  description: Advanced multi-format, multi-language ebook translation system
+  version: 1.0.0
+  contact:
+    name: Universal Ebook Translator Team
+    email: api@universalebooktranslator.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.universalebooktranslator.com/v1
+    description: Production server
+  - url: https://staging-api.universalebooktranslator.com/v1
+    description: Staging server
+
+paths:
+  /translate:
+    post:
+      summary: Translate text
+      description: Translate text from source language to target language
+      operationId: translateText
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: &#39;#/components/schemas/TranslationRequest&#39;
+      responses:
+        &#39;200&#39;:
+          description: Successful translation
+          content:
+            application/json:
+              schema:
+                $ref: &#39;#/components/schemas/TranslationResponse&#39;
+        &#39;400&#39;:
+          $ref: &#39;#/components/responses/BadRequest&#39;
+        &#39;401&#39;:
+          $ref: &#39;#/components/responses/Unauthorized&#39;
+        &#39;429&#39;:
+          $ref: &#39;#/components/responses/RateLimitExceeded&#39;
+        &#39;500&#39;:
+          $ref: &#39;#/components/responses/InternalError&#39;
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+
+  /translate/file:
+    post:
+      summary: Translate file
+      description: Translate entire file (EPUB, FB2, TXT, HTML)
+      operationId: translateFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - from
+                - to
+              properties:
+                file:
+                  type: string
+                  format: binary
+                from:
+                  type: string
+                  description: Source language code
+                to:
+                  type: string
+                  description: Target language code
+                provider:
+                  type: string
+                  description: Translation provider
+                options:
+                  type: string
+                  description: JSON string of translation options
+      responses:
+        &#39;200&#39;:
+          description: Translation job created
+          content:
+            application/json:
+              schema:
+                $ref: &#39;#/components/schemas/TranslationJob&#39;
+        &#39;400&#39;:
+          $ref: &#39;#/components/responses/BadRequest&#39;
+        &#39;413&#39;:
+          description: File too large
+          content:
+            application/json:
+              schema:
+                $ref: &#39;#/components/schemas/Error&#39;
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+
+components:
+  schemas:
+    TranslationRequest:
+      type: object
+      required:
+        - text
+        - from
+        - to
+      properties:
+        text:
+          type: string
+          description: Text to translate
+          maxLength: 100000
+        from:
+          type: string
+          description: Source language code (ISO 639-1)
+          pattern: &#39;^[a-z]{2}(-[A-Z]{2})?$&#39;
+        to:
+          type: string
+          description: Target language code (ISO 639-1)
+          pattern: &#39;^[a-z]{2}(-[A-Z]{2})?$&#39;
+        provider:
+          type: string
+          description: Translation provider
+          enum: [openai, anthropic, zhipu, deepseek, google, ollama, llamacpp]
+        options:
+          $ref: &#39;#/components/schemas/TranslationOptions&#39;
+
+    TranslationOptions:
+      type: object
+      properties:
+        quality:
+          type: string
+          enum: [low, medium, high]
+          default: medium
+        style:
+          type: string
+          enum: [formal, informal, creative]
+          default: formal
+        context:
+          type: string
+          description: Additional context for translation
+        preserve_formatting:
+          type: boolean
+          default: true
+        preserve_metadata:
+          type: boolean
+          default: true
+
+    TranslationResponse:
+      type: object
+      properties:
+        translated_text:
+          type: string
+          description: Translated text
+        provider:
+          type: string
+          description: Provider used for translation
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Translation confidence score
+        duration:
+          type: string
+          description: Translation duration
+        usage:
+          $ref: &#39;#/components/schemas/Usage&#39;
+
+    TranslationJob:
+      type: object
+      properties:
+        job_id:
+          type: string
+          format: uuid
+          description: Unique job identifier
+        status:
+          type: string
+          enum: [processing, completed, failed, cancelled]
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        estimated_time:
+          type: string
+          description: Estimated completion time
+        webhook_url:
+          type: string
+          format: uri
+          description: URL to receive completion notification
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: &#39;#/components/schemas/Error&#39;
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: &#39;#/components/schemas/Error&#39;
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: &#39;#/components/schemas/Error&#39;
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: &#39;#/components/schemas/Error&#39;
+
+tags:
+  - name: Translation
+    description: Translation operations
+  - name: File Processing
+    description: File translation operations
+  - name: Providers
+    description: Translation provider management</code></pre>
+<hr />
+<h2 id="open_book-03_user_documentation">📖 03_USER_DOCUMENTATION</h2>
+<h3 id="user-manuals">User Manuals</h3>
+<h4 id="311-getting-started-guide">3.1.1 Getting Started Guide</h4>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Getting Started Guide</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Welcome to Universal Ebook Translator</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>Universal Ebook Translator is a powerful translation system that supports multiple ebook formats (EPUB, FB2, TXT, HTML) and over 100 languages with various AI translation providers.</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="fu">## Quick Start</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="fu">### 1. Installation</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Binary Installation</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Download the latest release</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-L</span> https://github.com/universal-ebook-translator/releases/latest/download/translator-linux <span class="at">-o</span> translator</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Make executable</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x translator</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify installation</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> <span class="at">--version</span></span></code></pre></div>
+<h4 id="docker-installation">Docker Installation</h4>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pull the image</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> pull universalebooktranslator/translator:latest</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the container</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">--rm</span> universalebooktranslator/translator:latest <span class="at">--help</span></span></code></pre></div>
+<h4 id="source-installation">Source Installation</h4>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clone the repository</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/universal-ebook-translator/translator.git</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> translator</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Install dependencies</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Build the binary</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> translator ./cmd/cli</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Run tests</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./...</span></code></pre></div>
+<h3 id="2-configuration">2. Configuration</h3>
+<h4 id="basic-configuration">Basic Configuration</h4>
+<p>Create a configuration file <code>config.json</code>:</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;translation&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;default_provider&quot;</span><span class="fu">:</span> <span class="st">&quot;openai&quot;</span><span class="fu">,</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;fallback_providers&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;anthropic&quot;</span><span class="ot">,</span> <span class="st">&quot;zhipu&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;quality&quot;</span><span class="fu">:</span> <span class="st">&quot;high&quot;</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;api_keys&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;openai&quot;</span><span class="fu">:</span> <span class="st">&quot;your-openai-api-key&quot;</span><span class="fu">,</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;anthropic&quot;</span><span class="fu">:</span> <span class="st">&quot;your-anthropic-api-key&quot;</span><span class="fu">,</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;zhipu&quot;</span><span class="fu">:</span> <span class="st">&quot;your-zhipu-api-key&quot;</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;formats&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;supported&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;epub&quot;</span><span class="ot">,</span> <span class="st">&quot;fb2&quot;</span><span class="ot">,</span> <span class="st">&quot;txt&quot;</span><span class="ot">,</span> <span class="st">&quot;html&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;preserve_metadata&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;preserve_formatting&quot;</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h4 id="environment-variables">Environment Variables</h4>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">TRANSLATOR_CONFIG</span><span class="op">=</span>/path/to/config.json</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">TRANSLATOR_LOG_LEVEL</span><span class="op">=</span>info</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">TRANSLATOR_CACHE_DIR</span><span class="op">=</span>/tmp/translator_cache</span></code></pre></div>
+<h3 id="3-your-first-translation">3. Your First Translation</h3>
+<h4 id="text-translation">Text Translation</h4>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Simple text translation</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> translate <span class="dt">\</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--text</span> <span class="st">&quot;Hello world&quot;</span> <span class="dt">\</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> es <span class="dt">\</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--provider</span> openai</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Output:</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Hola mundo</span></span></code></pre></div>
+<h4 id="file-translation">File Translation</h4>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Translate an EPUB file</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> translate <span class="dt">\</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--file</span> book.epub <span class="dt">\</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> es <span class="dt">\</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output</span> book_es.epub <span class="dt">\</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--provider</span> openai</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Progress will be shown during translation</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="co"># [====================] 100% Translating Chapter 5/10</span></span></code></pre></div>
+<h4 id="batch-translation">Batch Translation</h4>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Translate multiple files</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> batch <span class="dt">\</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--input-dir</span> ./books <span class="dt">\</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output-dir</span> ./translated <span class="dt">\</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> es,fr,de <span class="dt">\</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--provider</span> openai</span></code></pre></div>
+<h2 id="supported-formats">Supported Formats</h2>
+<h3 id="input-formats">Input Formats</h3>
+<ul>
+<li><strong>EPUB</strong>: Standard ebook format with chapters and
+metadata</li>
+<li><strong>FB2</strong>: FictionBook format popular in Russian-speaking
+regions</li>
+<li><strong>TXT</strong>: Plain text files</li>
+<li><strong>HTML</strong>: Web pages with HTML markup</li>
+<li><strong>PDF</strong>: PDF documents (experimental)</li>
+<li><strong>DOCX</strong>: Microsoft Word documents (experimental)</li>
+</ul>
+<h3 id="output-formats">Output Formats</h3>
+<ul>
+<li><strong>EPUB</strong>: Standard ebook format</li>
+<li><strong>TXT</strong>: Plain text</li>
+<li><strong>FB2</strong>: FictionBook format</li>
+<li><strong>HTML</strong>: Web page format</li>
+</ul>
+<h2 id="supported-languages">Supported Languages</h2>
+<p>Universal Ebook Translator supports 100+ languages including:</p>
+<ul>
+<li><strong>Major languages</strong>: English, Spanish, French, German,
+Chinese, Japanese, Russian</li>
+<li><strong>European languages</strong>: Italian, Portuguese, Dutch,
+Polish, Swedish</li>
+<li><strong>Asian languages</strong>: Korean, Thai, Vietnamese, Hindi,
+Arabic</li>
+<li><strong>Regional variants</strong>: en-US, en-GB, es-ES, es-MX,
+fr-FR, fr-CA</li>
+</ul>
+<h2 id="translation-providers">Translation Providers</h2>
+<h3 id="cloud-providers">Cloud Providers</h3>
+<ul>
+<li><strong>OpenAI GPT-4</strong>: High-quality, context-aware
+translations</li>
+<li><strong>Anthropic Claude</strong>: Natural, nuanced
+translations</li>
+<li><strong>Zhipu AI GLM-4</strong>: Excellent for Asian languages</li>
+<li><strong>DeepSeek</strong>: Cost-effective for large volumes</li>
+<li><strong>Google Gemini</strong>: Fast and reliable</li>
+</ul>
+<h3 id="local-providers">Local Providers</h3>
+<ul>
+<li><strong>Ollama</strong>: Run local models on your machine</li>
+<li><strong>Llama.cpp</strong>: GPU-accelerated local translation</li>
+</ul>
+<h2 id="common-use-cases">Common Use Cases</h2>
+<h3 id="1-book-translation">1. Book Translation</h3>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> translate <span class="dt">\</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--file</span> my_book.epub <span class="dt">\</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> es <span class="dt">\</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--provider</span> openai <span class="dt">\</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--quality</span> high <span class="dt">\</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--preserve-formatting</span> true</span></code></pre></div>
+<h3 id="2-article-translation">2. Article Translation</h3>
+<div class="sourceCode" id="cb33"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> translate <span class="dt">\</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--file</span> article.html <span class="dt">\</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> fr <span class="dt">\</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--provider</span> anthropic <span class="dt">\</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--preserve-html</span> true</span></code></pre></div>
+<h3 id="3-document-translation">3. Document Translation</h3>
+<div class="sourceCode" id="cb34"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> translate <span class="dt">\</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--file</span> document.txt <span class="dt">\</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> de <span class="dt">\</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--provider</span> zhipu <span class="dt">\</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--style</span> formal</span></code></pre></div>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="common-issues">Common Issues</h3>
+<h4 id="1-api-key-not-found">1. "API key not found"</h4>
+<p>Ensure your API keys are properly configured:</p>
+<div class="sourceCode" id="cb35"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check configuration</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> config <span class="at">--show</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Set API key</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> config set api_keys.openai <span class="st">&quot;your-key&quot;</span></span></code></pre></div>
+<h4 id="2-unsupported-format">2. "Unsupported format"</h4>
+<p>Check if your file format is supported:</p>
+<div class="sourceCode" id="cb36"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Detect file format</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> detect <span class="at">--file</span> your_file</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co"># List supported formats</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> formats <span class="at">--list</span></span></code></pre></div>
+<h4 id="3-translation-failed">3. "Translation failed"</h4>
+<p>Check provider status and network connectivity:</p>
+<div class="sourceCode" id="cb37"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test provider connection</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> test <span class="at">--provider</span> openai</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check logs</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> logs <span class="at">--level</span> error</span></code></pre></div>
+<h3 id="getting-help">Getting Help</h3>
+<ul>
+<li><strong>Documentation</strong>: <a
+href="https://docs.universalebooktranslator.com">https://docs.universalebooktranslator.com</a></li>
+<li><strong>Community</strong>: <a
+href="https://community.universalebooktranslator.com">https://community.universalebooktranslator.com</a></li>
+<li><strong>Issues</strong>: <a
+href="https://github.com/universal-ebook-translator/issues">https://github.com/universal-ebook-translator/issues</a></li>
+<li><strong>Email</strong>: <a
+href="mailto:support@universalebooktranslator.com">support@universalebooktranslator.com</a></li>
+</ul>
+<h2 id="next-steps">Next Steps</h2>
+<ol type="1">
+<li>Read the <a href="advanced_user_manual.md">Advanced User
+Manual</a></li>
+<li>Explore the <a href="api_reference.md">API Reference</a></li>
+<li>Try the <a href="../video-course/">Video Tutorials</a></li>
+<li>Join our <a
+href="https://community.universalebooktranslator.com">Community
+Forum</a></li>
+</ol>
+<pre><code>
+#### 3.1.2 Advanced User Manual
+```markdown
+# Advanced User Manual
+
+## Advanced Configuration
+
+### Provider Configuration
+
+#### Multi-Provider Setup
+```json
+{
+  &quot;translation&quot;: {
+    &quot;providers&quot;: {
+      &quot;primary&quot;: {
+        &quot;name&quot;: &quot;openai&quot;,
+        &quot;model&quot;: &quot;gpt-4&quot;,
+        &quot;config&quot;: {
+          &quot;temperature&quot;: 0.3,
+          &quot;max_tokens&quot;: 4000,
+          &quot;top_p&quot;: 0.9
+        }
+      },
+      &quot;fallback&quot;: [
+        {
+          &quot;name&quot;: &quot;anthropic&quot;,
+          &quot;model&quot;: &quot;claude-3-sonnet&quot;,
+          &quot;trigger&quot;: &quot;rate_limit&quot;
+        },
+        {
+          &quot;name&quot;: &quot;zhipu&quot;,
+          &quot;model&quot;: &quot;glm-4&quot;,
+          &quot;trigger&quot;: &quot;error&quot;
+        }
+      ]
+    }
+  }
+}</code></pre>
+<h4 id="provider-specific-settings">Provider-Specific Settings</h4>
+<p><strong>OpenAI Configuration:</strong></p>
+<div class="sourceCode" id="cb39"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;providers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;openai&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;api_key&quot;</span><span class="fu">:</span> <span class="st">&quot;your-api-key&quot;</span><span class="fu">,</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;base_url&quot;</span><span class="fu">:</span> <span class="st">&quot;https://api.openai.com/v1&quot;</span><span class="fu">,</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;organization&quot;</span><span class="fu">:</span> <span class="st">&quot;your-org-id&quot;</span><span class="fu">,</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;model&quot;</span><span class="fu">:</span> <span class="st">&quot;gpt-4&quot;</span><span class="fu">,</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;timeout&quot;</span><span class="fu">:</span> <span class="st">&quot;30s&quot;</span><span class="fu">,</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;retry&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;max_attempts&quot;</span><span class="fu">:</span> <span class="dv">3</span><span class="fu">,</span></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;backoff&quot;</span><span class="fu">:</span> <span class="st">&quot;exponential&quot;</span></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><strong>Anthropic Configuration:</strong></p>
+<div class="sourceCode" id="cb40"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;providers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;anthropic&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;api_key&quot;</span><span class="fu">:</span> <span class="st">&quot;your-api-key&quot;</span><span class="fu">,</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;model&quot;</span><span class="fu">:</span> <span class="st">&quot;claude-3-sonnet-20240229&quot;</span><span class="fu">,</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;max_tokens&quot;</span><span class="fu">:</span> <span class="dv">4000</span><span class="fu">,</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;temperature&quot;</span><span class="fu">:</span> <span class="fl">0.3</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><strong>Ollama Configuration:</strong></p>
+<div class="sourceCode" id="cb41"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;providers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;ollama&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;base_url&quot;</span><span class="fu">:</span> <span class="st">&quot;http://localhost:11434&quot;</span><span class="fu">,</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;model&quot;</span><span class="fu">:</span> <span class="st">&quot;llama2&quot;</span><span class="fu">,</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;timeout&quot;</span><span class="fu">:</span> <span class="st">&quot;60s&quot;</span><span class="fu">,</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;gpu_layers&quot;</span><span class="fu">:</span> <span class="dv">35</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="translation-quality-settings">Translation Quality Settings</h3>
+<h4 id="quality-levels">Quality Levels</h4>
+<ul>
+<li><strong>Low</strong>: Fast translation, basic quality</li>
+<li><strong>Medium</strong>: Balanced speed and quality</li>
+<li><strong>High</strong>: Best quality, slower processing</li>
+<li><strong>Premium</strong>: Multiple passes, polishing</li>
+</ul>
+<h4 id="translation-styles">Translation Styles</h4>
+<ul>
+<li><strong>Formal</strong>: Professional, academic tone</li>
+<li><strong>Informal</strong>: Casual, conversational tone</li>
+<li><strong>Creative</strong>: Literary, artistic expression</li>
+<li><strong>Technical</strong>: Precise, technical terminology</li>
+</ul>
+<h4 id="context-and-domain">Context and Domain</h4>
+<div class="sourceCode" id="cb42"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;translation&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;context&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;domain&quot;</span><span class="fu">:</span> <span class="st">&quot;technical&quot;</span><span class="fu">,</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;audience&quot;</span><span class="fu">:</span> <span class="st">&quot;professionals&quot;</span><span class="fu">,</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;purpose&quot;</span><span class="fu">:</span> <span class="st">&quot;documentation&quot;</span><span class="fu">,</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;glossary&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;API&quot;</span><span class="fu">:</span> <span class="st">&quot;Application Programming Interface&quot;</span><span class="fu">,</span></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;SDK&quot;</span><span class="fu">:</span> <span class="st">&quot;Software Development Kit&quot;</span></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="advanced-features">Advanced Features</h2>
+<h3 id="1-batch-processing">1. Batch Processing</h3>
+<h4 id="distributed-batch-translation">Distributed Batch
+Translation</h4>
+<div class="sourceCode" id="cb43"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Setup distributed workers</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> worker start <span class="dt">\</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--config</span> worker-config.json <span class="dt">\</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--port</span> 8081</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a><span class="co"># On additional machines</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> worker start <span class="dt">\</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--config</span> worker-config.json <span class="dt">\</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--master</span> coordinator.example.com:8080</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Run distributed batch</span></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> batch <span class="dt">\</span></span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">--input-dir</span> ./large_corpus <span class="dt">\</span></span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output-dir</span> ./results <span class="dt">\</span></span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> es,fr,de <span class="dt">\</span></span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">--distributed</span> <span class="dt">\</span></span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">--workers</span> 10</span></code></pre></div>
+<h4 id="advanced-batch-options">Advanced Batch Options</h4>
+<div class="sourceCode" id="cb44"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;batch&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;parallel_jobs&quot;</span><span class="fu">:</span> <span class="dv">5</span><span class="fu">,</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;chunk_size&quot;</span><span class="fu">:</span> <span class="dv">1000</span><span class="fu">,</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;resume_on_failure&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;output_format&quot;</span><span class="fu">:</span> <span class="st">&quot;preserve_original&quot;</span><span class="fu">,</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;naming_pattern&quot;</span><span class="fu">:</span> <span class="st">&quot;{original}_{lang}.{ext}&quot;</span><span class="fu">,</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;metadata&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;preserve_original&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;add_translation_info&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;timestamp_format&quot;</span><span class="fu">:</span> <span class="st">&quot;2006-01-02T15:04:05Z&quot;</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="2-custom-workflows">2. Custom Workflows</h3>
+<h4 id="multi-pass-translation">Multi-Pass Translation</h4>
+<div class="sourceCode" id="cb45"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># First pass: Basic translation</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> translate <span class="dt">\</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--file</span> book.epub <span class="dt">\</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> es <span class="dt">\</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--provider</span> openai <span class="dt">\</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--quality</span> medium <span class="dt">\</span></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output</span> pass1.epub</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Second pass: Quality improvement</span></span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> polish <span class="dt">\</span></span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">--file</span> pass1.epub <span class="dt">\</span></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">--provider</span> anthropic <span class="dt">\</span></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">--style</span> formal <span class="dt">\</span></span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output</span> pass2.epub</span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Third pass: Final review</span></span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> review <span class="dt">\</span></span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">--file</span> pass2.epub <span class="dt">\</span></span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">--provider</span> zhipu <span class="dt">\</span></span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">--check</span> consistency <span class="dt">\</span></span>
+<span id="cb45-22"><a href="#cb45-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output</span> final.epub</span></code></pre></div>
+<h4 id="translation-verification">Translation Verification</h4>
+<div class="sourceCode" id="cb46"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify translation quality</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> verify <span class="dt">\</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--file</span> translated.epub <span class="dt">\</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--original</span> original.epub <span class="dt">\</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> es <span class="dt">\</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--metrics</span> accuracy,fluency,consistency <span class="dt">\</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--report</span> verification_report.html</span></code></pre></div>
+<h3 id="3-custom-format-handling">3. Custom Format Handling</h3>
+<h4 id="custom-parsers">Custom Parsers</h4>
+<div class="sourceCode" id="cb47"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Example: Custom format parser</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CustomParser <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Custom parser implementation</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>CustomParser<span class="op">)</span> Parse<span class="op">(</span>filePath <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Book<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Parse custom format</span></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> book<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a><span class="co">// Register custom parser</span></span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>parser<span class="op">.</span>Register<span class="op">(</span><span class="st">&quot;custom&quot;</span><span class="op">,</span> <span class="op">&amp;</span>CustomParser<span class="op">{})</span></span></code></pre></div>
+<h4 id="format-conversion-rules">Format Conversion Rules</h4>
+<div class="sourceCode" id="cb48"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;formats&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;conversion_rules&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;pdf_to_epub&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;extract_images&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;preserve_tables&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;ocr_language&quot;</span><span class="fu">:</span> <span class="st">&quot;auto&quot;</span><span class="fu">,</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;table_detection&quot;</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">},</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;docx_to_epub&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;preserve_styles&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;convert_tables&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;extract_images&quot;</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="performance-optimization">Performance Optimization</h2>
+<h3 id="1-caching-strategies">1. Caching Strategies</h3>
+<h4 id="translation-cache">Translation Cache</h4>
+<div class="sourceCode" id="cb49"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;cache&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;translation&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;backend&quot;</span><span class="fu">:</span> <span class="st">&quot;redis&quot;</span><span class="fu">,</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;ttl&quot;</span><span class="fu">:</span> <span class="st">&quot;24h&quot;</span><span class="fu">,</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;max_size&quot;</span><span class="fu">:</span> <span class="st">&quot;1GB&quot;</span><span class="fu">,</span></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;key_pattern&quot;</span><span class="fu">:</span> <span class="st">&quot;{text_hash}:{from}:{to}:{provider}&quot;</span></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h4 id="content-cache">Content Cache</h4>
+<div class="sourceCode" id="cb50"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;cache&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;backend&quot;</span><span class="fu">:</span> <span class="st">&quot;filesystem&quot;</span><span class="fu">,</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;directory&quot;</span><span class="fu">:</span> <span class="st">&quot;/tmp/translator_cache&quot;</span><span class="fu">,</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;compression&quot;</span><span class="fu">:</span> <span class="st">&quot;gzip&quot;</span><span class="fu">,</span></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;max_file_size&quot;</span><span class="fu">:</span> <span class="st">&quot;100MB&quot;</span></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="2-resource-management">2. Resource Management</h3>
+<h4 id="memory-optimization">Memory Optimization</h4>
+<div class="sourceCode" id="cb51"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;performance&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;memory&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;max_workers&quot;</span><span class="fu">:</span> <span class="dv">10</span><span class="fu">,</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;chunk_size&quot;</span><span class="fu">:</span> <span class="st">&quot;10MB&quot;</span><span class="fu">,</span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;gc_interval&quot;</span><span class="fu">:</span> <span class="st">&quot;5m&quot;</span><span class="fu">,</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;stream_large_files&quot;</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h4 id="gpu-acceleration">GPU Acceleration</h4>
+<div class="sourceCode" id="cb52"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;gpu&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;device&quot;</span><span class="fu">:</span> <span class="st">&quot;cuda:0&quot;</span><span class="fu">,</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;memory_fraction&quot;</span><span class="fu">:</span> <span class="fl">0.8</span><span class="fu">,</span></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;precision&quot;</span><span class="fu">:</span> <span class="st">&quot;fp16&quot;</span></span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="security-and-privacy">Security and Privacy</h2>
+<h3 id="1-data-protection">1. Data Protection</h3>
+<h4 id="encryption-settings">Encryption Settings</h4>
+<div class="sourceCode" id="cb53"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;security&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;encryption&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;algorithm&quot;</span><span class="fu">:</span> <span class="st">&quot;AES-256-GCM&quot;</span><span class="fu">,</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;key_source&quot;</span><span class="fu">:</span> <span class="st">&quot;file&quot;</span><span class="fu">,</span></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;key_file&quot;</span><span class="fu">:</span> <span class="st">&quot;/path/to/encryption.key&quot;</span></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h4 id="privacy-controls">Privacy Controls</h4>
+<div class="sourceCode" id="cb54"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;privacy&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;data_retention&quot;</span><span class="fu">:</span> <span class="st">&quot;30d&quot;</span><span class="fu">,</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;anonymize_logs&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;disable_telemetry&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;local_processing_only&quot;</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="2-access-control">2. Access Control</h3>
+<h4 id="api-security">API Security</h4>
+<div class="sourceCode" id="cb55"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;api&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;security&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;authentication&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;method&quot;</span><span class="fu">:</span> <span class="st">&quot;jwt&quot;</span><span class="fu">,</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;secret&quot;</span><span class="fu">:</span> <span class="st">&quot;your-jwt-secret&quot;</span><span class="fu">,</span></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;expiration&quot;</span><span class="fu">:</span> <span class="st">&quot;24h&quot;</span></span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">},</span></span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;rate_limiting&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;requests_per_minute&quot;</span><span class="fu">:</span> <span class="dv">100</span><span class="fu">,</span></span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;burst_size&quot;</span><span class="fu">:</span> <span class="dv">20</span></span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="monitoring-and-analytics">Monitoring and Analytics</h2>
+<h3 id="1-translation-metrics">1. Translation Metrics</h3>
+<h4 id="quality-metrics">Quality Metrics</h4>
+<div class="sourceCode" id="cb56"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Enable quality tracking</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> translate <span class="dt">\</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--file</span> book.epub <span class="dt">\</span></span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> es <span class="dt">\</span></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--quality-tracking</span> <span class="dt">\</span></span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--metrics</span> accuracy,fluency,style</span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a><span class="co"># View quality report</span></span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> metrics <span class="at">--job-id</span> <span class="op">&lt;</span>job-id<span class="op">&gt;</span> --format html</span></code></pre></div>
+<h4 id="performance-metrics">Performance Metrics</h4>
+<div class="sourceCode" id="cb57"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Monitor resource usage</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> monitor <span class="at">--resource</span> cpu,memory,network</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Export metrics</span></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> metrics <span class="at">--export</span> prometheus <span class="at">--port</span> 9090</span></code></pre></div>
+<h3 id="2-logging-and-debugging">2. Logging and Debugging</h3>
+<h4 id="advanced-logging">Advanced Logging</h4>
+<div class="sourceCode" id="cb58"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;logging&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;level&quot;</span><span class="fu">:</span> <span class="st">&quot;debug&quot;</span><span class="fu">,</span></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;format&quot;</span><span class="fu">:</span> <span class="st">&quot;json&quot;</span><span class="fu">,</span></span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;outputs&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;file&quot;</span><span class="fu">,</span></span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;path&quot;</span><span class="fu">:</span> <span class="st">&quot;/var/log/translator.log&quot;</span><span class="fu">,</span></span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;rotation&quot;</span><span class="fu">:</span> <span class="st">&quot;daily&quot;</span></span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;syslog&quot;</span><span class="fu">,</span></span>
+<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;facility&quot;</span><span class="fu">:</span> <span class="st">&quot;local0&quot;</span></span>
+<span id="cb58-14"><a href="#cb58-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb58-15"><a href="#cb58-15" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb58-16"><a href="#cb58-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;fields&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb58-17"><a href="#cb58-17" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb58-18"><a href="#cb58-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;request_id&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb58-19"><a href="#cb58-19" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;user_id&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb58-20"><a href="#cb58-20" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;provider&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb58-21"><a href="#cb58-21" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;duration&quot;</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb58-22"><a href="#cb58-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb58-23"><a href="#cb58-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb58-24"><a href="#cb58-24" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="troubleshooting-advanced-issues">Troubleshooting Advanced
+Issues</h2>
+<h3 id="1-provider-failures">1. Provider Failures</h3>
+<h4 id="fallback-mechanisms">Fallback Mechanisms</h4>
+<div class="sourceCode" id="cb59"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;translation&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;fallback&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;triggers&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;rate_limit&quot;</span><span class="ot">,</span> <span class="st">&quot;error&quot;</span><span class="ot">,</span> <span class="st">&quot;timeout&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;max_attempts&quot;</span><span class="fu">:</span> <span class="dv">3</span><span class="fu">,</span></span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;backoff&quot;</span><span class="fu">:</span> <span class="st">&quot;exponential&quot;</span></span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb59-10"><a href="#cb59-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h4 id="error-analysis">Error Analysis</h4>
+<div class="sourceCode" id="cb60"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Analyze translation errors</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> analyze <span class="dt">\</span></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--job-id</span> <span class="op">&lt;</span>job-id<span class="op">&gt;</span> <span class="dt">\</span></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--error-types</span> provider,format,network <span class="dt">\</span></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--report</span> error_analysis.html</span></code></pre></div>
+<h3 id="2-performance-issues">2. Performance Issues</h3>
+<h4 id="profiling">Profiling</h4>
+<div class="sourceCode" id="cb61"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Enable CPU profiling</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> translate <span class="dt">\</span></span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--file</span> large_book.epub <span class="dt">\</span></span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> es <span class="dt">\</span></span>
+<span id="cb61-6"><a href="#cb61-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--profile-cpu</span> cpu.prof</span>
+<span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-8"><a href="#cb61-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Enable memory profiling</span></span>
+<span id="cb61-9"><a href="#cb61-9" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> translate <span class="dt">\</span></span>
+<span id="cb61-10"><a href="#cb61-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">--file</span> large_book.epub <span class="dt">\</span></span>
+<span id="cb61-11"><a href="#cb61-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb61-12"><a href="#cb61-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> es <span class="dt">\</span></span>
+<span id="cb61-13"><a href="#cb61-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">--profile-mem</span> mem.prof</span>
+<span id="cb61-14"><a href="#cb61-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-15"><a href="#cb61-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Analyze profiles</span></span>
+<span id="cb61-16"><a href="#cb61-16" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> tool pprof cpu.prof</span>
+<span id="cb61-17"><a href="#cb61-17" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> tool pprof mem.prof</span></code></pre></div>
+<h2 id="integration-examples">Integration Examples</h2>
+<h3 id="1-cli-integration">1. CLI Integration</h3>
+<h4 id="shell-scripts">Shell Scripts</h4>
+<div class="sourceCode" id="cb62"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a><span class="co"># translate_directory.sh</span></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a><span class="va">INPUT_DIR</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$1</span><span class="st">&quot;</span></span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a><span class="va">FROM_LANG</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$2</span><span class="st">&quot;</span></span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a><span class="va">TO_LANG</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$3</span><span class="st">&quot;</span></span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a><span class="va">OUTPUT_DIR</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$4</span><span class="st">&quot;</span></span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> file <span class="kw">in</span> <span class="st">&quot;</span><span class="va">$INPUT_DIR</span><span class="st">&quot;</span>/<span class="pp">*</span>.<span class="dt">{epub</span><span class="op">,</span><span class="dt">fb2</span><span class="op">,</span><span class="dt">txt</span><span class="op">,</span><span class="dt">html}</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;Translating </span><span class="va">$file</span><span class="st">...&quot;</span></span>
+<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a>  <span class="ex">./translator</span> translate <span class="dt">\</span></span>
+<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">--file</span> <span class="st">&quot;</span><span class="va">$file</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">--from</span> <span class="st">&quot;</span><span class="va">$FROM_LANG</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb62-14"><a href="#cb62-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">--to</span> <span class="st">&quot;</span><span class="va">$TO_LANG</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb62-15"><a href="#cb62-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">--output</span> <span class="st">&quot;</span><span class="va">$OUTPUT_DIR</span><span class="st">/</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">&quot;</span><span class="va">$file</span><span class="st">&quot;</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb62-16"><a href="#cb62-16" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<h3 id="2-api-integration">2. API Integration</h3>
+<h4 id="python-client">Python Client</h4>
+<div class="sourceCode" id="cb63"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> UniversalTranslator:</span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, api_key, base_url<span class="op">=</span><span class="st">&quot;https://api.universalebooktranslator.com/v1&quot;</span>):</span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.api_key <span class="op">=</span> api_key</span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.base_url <span class="op">=</span> base_url</span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.headers <span class="op">=</span> {</span>
+<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;X-API-Key&quot;</span>: api_key,</span>
+<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;Content-Type&quot;</span>: <span class="st">&quot;application/json&quot;</span></span>
+<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> translate_text(<span class="va">self</span>, text, from_lang, to_lang, provider<span class="op">=</span><span class="st">&quot;openai&quot;</span>):</span>
+<span id="cb63-14"><a href="#cb63-14" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> {</span>
+<span id="cb63-15"><a href="#cb63-15" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;text&quot;</span>: text,</span>
+<span id="cb63-16"><a href="#cb63-16" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;from&quot;</span>: from_lang,</span>
+<span id="cb63-17"><a href="#cb63-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;to&quot;</span>: to_lang,</span>
+<span id="cb63-18"><a href="#cb63-18" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;provider&quot;</span>: provider</span>
+<span id="cb63-19"><a href="#cb63-19" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb63-20"><a href="#cb63-20" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb63-21"><a href="#cb63-21" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> requests.post(</span>
+<span id="cb63-22"><a href="#cb63-22" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f&quot;</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>base_url<span class="sc">}</span><span class="ss">/translate&quot;</span>,</span>
+<span id="cb63-23"><a href="#cb63-23" aria-hidden="true" tabindex="-1"></a>            headers<span class="op">=</span><span class="va">self</span>.headers,</span>
+<span id="cb63-24"><a href="#cb63-24" aria-hidden="true" tabindex="-1"></a>            json<span class="op">=</span>data</span>
+<span id="cb63-25"><a href="#cb63-25" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb63-26"><a href="#cb63-26" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb63-27"><a href="#cb63-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> response.json()</span>
+<span id="cb63-28"><a href="#cb63-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb63-29"><a href="#cb63-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> translate_file(<span class="va">self</span>, file_path, from_lang, to_lang, provider<span class="op">=</span><span class="st">&quot;openai&quot;</span>):</span>
+<span id="cb63-30"><a href="#cb63-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> <span class="bu">open</span>(file_path, <span class="st">&#39;rb&#39;</span>) <span class="im">as</span> f:</span>
+<span id="cb63-31"><a href="#cb63-31" aria-hidden="true" tabindex="-1"></a>            files <span class="op">=</span> {<span class="st">&#39;file&#39;</span>: f}</span>
+<span id="cb63-32"><a href="#cb63-32" aria-hidden="true" tabindex="-1"></a>            data <span class="op">=</span> {</span>
+<span id="cb63-33"><a href="#cb63-33" aria-hidden="true" tabindex="-1"></a>                <span class="st">&#39;from&#39;</span>: from_lang,</span>
+<span id="cb63-34"><a href="#cb63-34" aria-hidden="true" tabindex="-1"></a>                <span class="st">&#39;to&#39;</span>: to_lang,</span>
+<span id="cb63-35"><a href="#cb63-35" aria-hidden="true" tabindex="-1"></a>                <span class="st">&#39;provider&#39;</span>: provider</span>
+<span id="cb63-36"><a href="#cb63-36" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb63-37"><a href="#cb63-37" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb63-38"><a href="#cb63-38" aria-hidden="true" tabindex="-1"></a>            response <span class="op">=</span> requests.post(</span>
+<span id="cb63-39"><a href="#cb63-39" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f&quot;</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>base_url<span class="sc">}</span><span class="ss">/translate/file&quot;</span>,</span>
+<span id="cb63-40"><a href="#cb63-40" aria-hidden="true" tabindex="-1"></a>                headers<span class="op">=</span>{<span class="st">&quot;X-API-Key&quot;</span>: <span class="va">self</span>.api_key},</span>
+<span id="cb63-41"><a href="#cb63-41" aria-hidden="true" tabindex="-1"></a>                files<span class="op">=</span>files,</span>
+<span id="cb63-42"><a href="#cb63-42" aria-hidden="true" tabindex="-1"></a>                data<span class="op">=</span>data</span>
+<span id="cb63-43"><a href="#cb63-43" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb63-44"><a href="#cb63-44" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb63-45"><a href="#cb63-45" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> response.json()</span>
+<span id="cb63-46"><a href="#cb63-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-47"><a href="#cb63-47" aria-hidden="true" tabindex="-1"></a><span class="co"># Usage</span></span>
+<span id="cb63-48"><a href="#cb63-48" aria-hidden="true" tabindex="-1"></a>translator <span class="op">=</span> UniversalTranslator(<span class="st">&quot;your-api-key&quot;</span>)</span>
+<span id="cb63-49"><a href="#cb63-49" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> translator.translate_text(<span class="st">&quot;Hello world&quot;</span>, <span class="st">&quot;en&quot;</span>, <span class="st">&quot;es&quot;</span>)</span>
+<span id="cb63-50"><a href="#cb63-50" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result[<span class="st">&#39;translated_text&#39;</span>])</span></code></pre></div>
+<h2 id="migration-and-upgrades">Migration and Upgrades</h2>
+<h3 id="1-configuration-migration">1. Configuration Migration</h3>
+<h4 id="legacy-configuration-converter">Legacy Configuration
+Converter</h4>
+<div class="sourceCode" id="cb64"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert old config to new format</span></span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> migrate <span class="dt">\</span></span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--config</span> old_config.json <span class="dt">\</span></span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output</span> new_config.json <span class="dt">\</span></span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--version</span> latest</span></code></pre></div>
+<h3 id="2-data-migration">2. Data Migration</h3>
+<h4 id="translation-cache-migration">Translation Cache Migration</h4>
+<div class="sourceCode" id="cb65"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Migrate translation cache</span></span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> cache migrate <span class="dt">\</span></span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> sqlite <span class="dt">\</span></span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> redis <span class="dt">\</span></span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--source</span> /path/to/old/cache.db <span class="dt">\</span></span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--target</span> redis://localhost:6379</span></code></pre></div>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="1-translation-quality">1. Translation Quality</h3>
+<ul>
+<li>Use appropriate quality settings for your use case</li>
+<li>Provide context when translating technical content</li>
+<li>Use domain-specific terminology in glossaries</li>
+<li>Verify translations for critical content</li>
+</ul>
+<h3 id="2-performance">2. Performance</h3>
+<ul>
+<li>Enable caching for repeated translations</li>
+<li>Use appropriate batch sizes for large jobs</li>
+<li>Monitor resource usage during translation</li>
+<li>Use distributed processing for large corpora</li>
+</ul>
+<h3 id="3-security">3. Security</h3>
+<ul>
+<li>Secure your API keys</li>
+<li>Use HTTPS for all API communications</li>
+<li>Enable encryption for sensitive content</li>
+<li>Regularly rotate API keys and certificates</li>
+</ul>
+<h3 id="4-cost-management">4. Cost Management</h3>
+<ul>
+<li>Monitor API usage and costs</li>
+<li>Use cost-effective providers for bulk translation</li>
+<li>Implement rate limiting to control costs</li>
+<li>Cache translations to avoid repeated requests</li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="api_reference.md">API Reference</a></li>
+<li><a href="configuration_reference.md">Configuration
+Reference</a></li>
+<li><a href="troubleshooting_guide.md">Troubleshooting Guide</a></li>
+<li><a href="best_practices.md">Best Practices Guide</a></li>
+<li><a href="migration_guide.md">Migration Guide</a></li>
+</ul>
+<pre><code>
+---
+
+## 🎥 04_VIDEO_COURSE_CONTENT
+
+### Video Course Structure
+
+#### 4.1 Getting Started Course (5 Videos)
+
+**Video 1: Introduction and Overview (15 minutes)**
+```markdown
+# Video Script: Introduction to Universal Ebook Translator
+
+## Opening Scene
+[Visual: Logo animation with tagline &quot;Translate Any Format, Any Language&quot;]
+
+Narrator: &quot;Welcome to Universal Ebook Translator, the most powerful multi-format, multi-language translation system available today.&quot;
+
+## Section 1: What is Universal Ebook Translator? (3 minutes)
+
+[Visual: Show supported formats - EPUB, FB2, TXT, HTML files]
+Narrator: &quot;Universal Ebook Translator is a professional-grade translation system that supports multiple ebook formats and over 100 languages.&quot;
+
+[Visual: Language selector showing 100+ languages]
+Narrator: &quot;Whether you need to translate a novel from English to Spanish, a technical document from German to Chinese, or poetry from Russian to English, we&#39;ve got you covered.&quot;
+
+[Visual: Provider logos - OpenAI, Anthropic, Zhipu, DeepSeek, Google]
+Narrator: &quot;Powered by the latest AI translation providers, you get high-quality, context-aware translations that preserve the meaning and style of your original content.&quot;
+
+## Section 2: Key Features (4 minutes)
+
+[Visual: Feature comparison table]
+Narrator: &quot;Universal Ebook Translator offers enterprise-grade features including:
+
+Multi-format support - EPUB, FB2, TXT, HTML, and more
+Batch processing - Translate entire libraries at once
+Distributed processing - Scale across multiple machines
+Quality assurance - Built-in verification and polishing
+Security - Encrypted processing and data protection
+API access - Integrate with your existing workflows&quot;
+
+[Visual: Performance metrics dashboard]
+Narrator: &quot;With performance optimizations, you can translate a 300-page book in under 10 minutes, making it perfect for publishers, translators, and content creators.&quot;
+
+## Section 3: Who Uses Universal Ebook Translator? (3 minutes)
+
+[Visual: User personas - Publisher, Translator, Developer, Researcher]
+Narrator: &quot;Our system is designed for professionals who need reliable, high-quality translation at scale.&quot;
+
+[Visual: Publishing workflow]
+Narrator: &quot;Publishers use it to expand into international markets, translating entire catalogs efficiently.&quot;
+
+[Visual: Translator workspace]
+Narrator: &quot;Professional translators use it as a powerful assistant, handling the initial translation while they focus on refinement and quality.&quot;
+
+[Visual: Developer environment]
+Narrator: &quot;Developers integrate it into their applications using our comprehensive API and SDKs.&quot;
+
+[Visual: Research data]
+Narrator: &quot;Researchers use it to access global knowledge, translating academic papers and research documents.&quot;
+
+## Section 4: What You&#39;ll Learn (2 minutes)
+
+[Visual: Course outline]
+Narrator: &quot;In this getting started course, you&#39;ll learn:
+
+How to install and configure Universal Ebook Translator
+How to translate your first file
+How to work with different formats and languages
+How to use batch processing for multiple files
+How to integrate with external providers
+Best practices for high-quality translations&quot;
+
+## Section 5: Prerequisites (2 minutes)
+
+[Visual: System requirements]
+Narrator: &quot;Before we begin, make sure you have:
+
+A computer running Windows, macOS, or Linux
+An internet connection for cloud providers
+At least 1GB of free disk space
+API keys for your preferred translation providers&quot;
+
+[Visual: Provider signup links]
+Narrator: &quot;Don&#39;t worry about the API keys yet - I&#39;ll show you exactly how to get them in the next video.&quot;
+
+## Closing (1 minute)
+
+[Visual: Call to action]
+Narrator: &quot;Ready to transform your translation workflow? Let&#39;s get started with the installation process in the next video.&quot;
+
+[Visual: Next video preview]
+Narrator: &quot;Coming up next: Installation and setup guide. I&#39;ll walk you through every step, from downloading the software to your first translation.&quot;
+
+[End screen with links to resources and next video]</code></pre>
+<p><strong>Video 2: Installation and Setup (20 minutes)</strong></p>
+<div class="sourceCode" id="cb67"><pre
+class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Video Script: Installation and Setup</span></span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Opening Scene</span></span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Visual: System compatibility matrix - Windows, macOS, Linux</span><span class="co">]</span></span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>Narrator: &quot;Welcome back to Universal Ebook Translator training. In this video, I&#39;ll guide you through the complete installation and setup process.&quot;</span>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-8"><a href="#cb67-8" aria-hidden="true" tabindex="-1"></a><span class="fu">## Section 1: System Requirements (3 minutes)</span></span>
+<span id="cb67-9"><a href="#cb67-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-10"><a href="#cb67-10" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Visual: Minimum and recommended specifications</span><span class="co">]</span></span>
+<span id="cb67-11"><a href="#cb67-11" aria-hidden="true" tabindex="-1"></a>Narrator: &quot;Universal Ebook Translator runs on all major operating systems. Here are the requirements:</span>
+<span id="cb67-12"><a href="#cb67-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-13"><a href="#cb67-13" aria-hidden="true" tabindex="-1"></a>Minimum:</span>
+<span id="cb67-14"><a href="#cb67-14" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>2GB RAM</span>
+<span id="cb67-15"><a href="#cb67-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>1GB free disk space</span>
+<span id="cb67-16"><a href="#cb67-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Internet connection</span>
+<span id="cb67-17"><a href="#cb67-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>64-bit processor</span>
+<span id="cb67-18"><a href="#cb67-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-19"><a href="#cb67-19" aria-hidden="true" tabindex="-1"></a>Recommended:</span>
+<span id="cb67-20"><a href="#cb67-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>4GB RAM</span>
+<span id="cb67-21"><a href="#cb67-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>5GB free disk space</span>
+<span id="cb67-22"><a href="#cb67-22" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Stable internet connection</span>
+<span id="cb67-23"><a href="#cb67-23" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Multi-core processor&quot;</span>
+<span id="cb67-24"><a href="#cb67-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-25"><a href="#cb67-25" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Visual: Architecture comparison</span><span class="co">]</span></span>
+<span id="cb67-26"><a href="#cb67-26" aria-hidden="true" tabindex="-1"></a>Narrator: &quot;The system is available as a native binary for maximum performance, or as a Docker container for easy deployment.&quot;</span>
+<span id="cb67-27"><a href="#cb67-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-28"><a href="#cb67-28" aria-hidden="true" tabindex="-1"></a><span class="fu">## Section 2: Installation Methods (8 minutes)</span></span>
+<span id="cb67-29"><a href="#cb67-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-30"><a href="#cb67-30" aria-hidden="true" tabindex="-1"></a><span class="fu">### Method 1: Binary Installation</span></span>
+<span id="cb67-31"><a href="#cb67-31" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Visual: Download page with system selection</span><span class="co">]</span></span>
+<span id="cb67-32"><a href="#cb67-32" aria-hidden="true" tabindex="-1"></a>Narrator: &quot;Let&#39;s start with the simplest method - downloading the native binary. Navigate to our releases page...&quot;</span>
+<span id="cb67-33"><a href="#cb67-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-34"><a href="#cb67-34" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Screen recording: Downloading appropriate binary</span><span class="co">]</span></span>
+<span id="cb67-35"><a href="#cb67-35" aria-hidden="true" tabindex="-1"></a>Narrator: &quot;Select your operating system and architecture. For most users, this will be the 64-bit version.&quot;</span>
+<span id="cb67-36"><a href="#cb67-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-37"><a href="#cb67-37" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Screen recording: Terminal commands</span><span class="co">]</span></span>
+<span id="cb67-38"><a href="#cb67-38" aria-hidden="true" tabindex="-1"></a>Narrator: &quot;Once downloaded, open your terminal and make the file executable...&quot;</span>
+<span id="cb67-39"><a href="#cb67-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-40"><a href="#cb67-40" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb67-41"><a href="#cb67-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Make the binary executable</span></span>
+<span id="cb67-42"><a href="#cb67-42" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x translator</span>
+<span id="cb67-43"><a href="#cb67-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-44"><a href="#cb67-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Move to system path (optional)</span></span>
+<span id="cb67-45"><a href="#cb67-45" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mv translator /usr/local/bin/</span>
+<span id="cb67-46"><a href="#cb67-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-47"><a href="#cb67-47" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify installation</span></span>
+<span id="cb67-48"><a href="#cb67-48" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> <span class="at">--version</span></span></code></pre></div>
+<h3 id="method-2-docker-installation">Method 2: Docker Installation</h3>
+<p>[Visual: Docker Hub page] Narrator: "For Docker users, installation
+is even simpler..."</p>
+<p>[Screen recording: Docker commands]</p>
+<div class="sourceCode" id="cb68"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pull the image</span></span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> pull universalebooktranslator/translator:latest</span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Test the installation</span></span>
+<span id="cb68-5"><a href="#cb68-5" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">--rm</span> universalebooktranslator/translator:latest <span class="at">--version</span></span></code></pre></div>
+<h3 id="method-3-source-installation">Method 3: Source Installation</h3>
+<p>[Visual: GitHub repository] Narrator: "For developers who want to
+modify the code, you can build from source..."</p>
+<p>[Screen recording: Git clone and build process]</p>
+<div class="sourceCode" id="cb69"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clone the repository</span></span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/universal-ebook-translator/translator.git</span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> translator</span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Install dependencies</span></span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span>
+<span id="cb69-7"><a href="#cb69-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-8"><a href="#cb69-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Build the binary</span></span>
+<span id="cb69-9"><a href="#cb69-9" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> translator ./cmd/cli</span>
+<span id="cb69-10"><a href="#cb69-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-11"><a href="#cb69-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Run tests to verify</span></span>
+<span id="cb69-12"><a href="#cb69-12" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./...</span></code></pre></div>
+<h2 id="section-3-initial-configuration-6-minutes">Section 3: Initial
+Configuration (6 minutes)</h2>
+<p>[Visual: Configuration wizard] Narrator: "With the software
+installed, let's set up your initial configuration."</p>
+<h3 id="basic-configuration-1">Basic Configuration</h3>
+<p>[Screen recording: Running initial setup]</p>
+<div class="sourceCode" id="cb70"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the configuration wizard</span></span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> setup</span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a><span class="co"># This will guide you through:</span></span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a><span class="co"># - Setting API keys</span></span>
+<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a><span class="co"># - Choosing default providers</span></span>
+<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a><span class="co"># - Configuring cache settings</span></span>
+<span id="cb70-8"><a href="#cb70-8" aria-hidden="true" tabindex="-1"></a><span class="co"># - Setting language preferences</span></span></code></pre></div>
+<p>[Visual: API key setup screen] Narrator: "You'll need API keys for
+translation providers. Let me show you how to get them..."</p>
+<h3 id="getting-api-keys">Getting API Keys</h3>
+<p>[Visual: Provider setup guides]</p>
+<p><strong>OpenAI:</strong></p>
+<ol type="1">
+<li>Go to platform.openai.com</li>
+<li>Create an account or sign in</li>
+<li>Navigate to API keys</li>
+<li>Create new key</li>
+<li>Copy key safely</li>
+</ol>
+<p><strong>Anthropic:</strong></p>
+<ol type="1">
+<li>Go to console.anthropic.com</li>
+<li>Sign up for Claude API access</li>
+<li>Navigate to API keys</li>
+<li>Generate new key</li>
+<li>Save key securely</li>
+</ol>
+<p><strong>Zhipu AI:</strong></p>
+<ol type="1">
+<li>Go to open.bigmodel.cn</li>
+<li>Register for API access</li>
+<li>Generate API key</li>
+<li>Configure usage limits</li>
+</ol>
+<p>[Screen recording: Entering API keys in configuration]</p>
+<div class="sourceCode" id="cb71"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add API keys to configuration</span></span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> config set api_keys.openai <span class="st">&quot;sk-...&quot;</span></span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> config set api_keys.anthropic <span class="st">&quot;sk-ant-...&quot;</span></span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> config set api_keys.zhipu <span class="st">&quot;your-zhipu-key&quot;</span></span></code></pre></div>
+<h3 id="provider-configuration">Provider Configuration</h3>
+<p>[Visual: Provider selection interface] Narrator: "Now let's configure
+your translation providers..."</p>
+<p>[Screen recording: Provider setup]</p>
+<div class="sourceCode" id="cb72"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set primary provider</span></span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> config set translation.default_provider openai</span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Configure fallback providers</span></span>
+<span id="cb72-5"><a href="#cb72-5" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> config set translation.fallback_providers anthropic,zhipu</span>
+<span id="cb72-6"><a href="#cb72-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb72-7"><a href="#cb72-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Test provider connections</span></span>
+<span id="cb72-8"><a href="#cb72-8" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> test <span class="at">--provider</span> openai</span>
+<span id="cb72-9"><a href="#cb72-9" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> test <span class="at">--provider</span> anthropic</span>
+<span id="cb72-10"><a href="#cb72-10" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> test <span class="at">--provider</span> zhipu</span></code></pre></div>
+<h2 id="section-4-testing-your-installation-2-minutes">Section 4:
+Testing Your Installation (2 minutes)</h2>
+<p>[Visual: Test command execution] Narrator: "Let's verify everything
+is working correctly with a simple translation test."</p>
+<p>[Screen recording: Test translation]</p>
+<div class="sourceCode" id="cb73"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test basic translation</span></span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> translate <span class="at">--text</span> <span class="st">&quot;Hello world&quot;</span> <span class="at">--from</span> en <span class="at">--to</span> es</span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-4"><a href="#cb73-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected output:</span></span>
+<span id="cb73-5"><a href="#cb73-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Hola mundo</span></span></code></pre></div>
+<p>[Visual: Test results] Narrator: "If you see the translated text,
+congratulations! Your installation is complete and working."</p>
+<h2 id="section-5-troubleshooting-common-issues-1-minute">Section 5:
+Troubleshooting Common Issues (1 minute)</h2>
+<p>[Visual: Common error messages and solutions]</p>
+<p><strong>Issue: "API key not found"</strong> Solution: Check your
+configuration with <code>translator config show</code></p>
+<p><strong>Issue: "Permission denied"</strong> Solution: Ensure the
+binary has execute permissions</p>
+<p><strong>Issue: "Connection timeout"</strong> Solution: Check internet
+connection and API provider status</p>
+<h2 id="closing-05-minutes">Closing (0.5 minutes)</h2>
+<p>[Visual: Success confirmation] Narrator: "Perfect! You now have
+Universal Ebook Translator installed and configured. In the next video,
+we'll translate your first file."</p>
+<p>[End screen with configuration file download link]</p>
+<pre><code>
+**Video 3: Your First Translation (15 minutes)**
+```markdown
+# Video Script: Your First Translation
+
+## Opening Scene
+[Visual: Sample ebook files - EPUB, FB2, TXT]
+
+Narrator: &quot;Welcome back! Now that you have Universal Ebook Translator installed, let&#39;s translate your first file.&quot;
+
+## Section 1: Preparing Your File (3 minutes)
+
+[Visual: Supported file formats]
+Narrator: &quot;Universal Ebook Translator supports multiple formats. Let&#39;s look at how to prepare each one.&quot;
+
+### EPUB Files
+[Visual: EPUB file structure]
+Narrator: &quot;EPUB is the most popular ebook format. It includes chapters, images, and metadata. No special preparation is needed.&quot;
+
+### FB2 Files
+[Visual: FB2 file structure]
+Narrator: &quot;FB2 is popular in Russian-speaking regions. It&#39;s XML-based and works well with our system.&quot;
+
+### TXT Files
+[Visual: Plain text file]
+Narrator: &quot;Plain text files are the simplest. Just ensure proper encoding (UTF-8 recommended).&quot;
+
+### HTML Files
+[Visual: Web page structure]
+Narrator: &quot;HTML files can include styling and images. We&#39;ll preserve the structure during translation.&quot;
+
+[Visual: Sample files download]
+Narrator: &quot;For this tutorial, I&#39;ve prepared sample files. Download them from the link below.&quot;
+
+## Section 2: Basic Text Translation (4 minutes)
+
+[Visual: Command line interface]
+Narrator: &quot;Let&#39;s start with the simplest translation - a short text.&quot;
+
+[Screen recording: Text translation]
+```bash
+# Basic text translation
+translator translate \
+  --text &quot;Welcome to Universal Ebook Translator&quot; \
+  --from en \
+  --to es \
+  --provider openai
+
+# Output: Bienvenido a Universal Ebook Translator</code></pre>
+<p>[Visual: Translation options] Narrator: "Let's try with different
+options..."</p>
+<p>[Screen recording: Advanced text translation]</p>
+<div class="sourceCode" id="cb75"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Translation with quality settings</span></span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> translate <span class="dt">\</span></span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--text</span> <span class="st">&quot;The quick brown fox jumps over the lazy dog&quot;</span> <span class="dt">\</span></span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> fr <span class="dt">\</span></span>
+<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--provider</span> anthropic <span class="dt">\</span></span>
+<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--quality</span> high <span class="dt">\</span></span>
+<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--style</span> formal</span>
+<span id="cb75-9"><a href="#cb75-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-10"><a href="#cb75-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Output: Le rapide renard brun saute par-dessus le chien paresseux</span></span></code></pre></div>
+<h2 id="section-3-file-translation-6-minutes">Section 3: File
+Translation (6 minutes)</h2>
+<p>[Visual: File selection] Narrator: "Now let's translate a complete
+ebook file."</p>
+<p>[Screen recording: Single file translation]</p>
+<div class="sourceCode" id="cb76"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Translate an EPUB file</span></span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> translate <span class="dt">\</span></span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--file</span> sample_book.epub <span class="dt">\</span></span>
+<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> es <span class="dt">\</span></span>
+<span id="cb76-6"><a href="#cb76-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--provider</span> openai <span class="dt">\</span></span>
+<span id="cb76-7"><a href="#cb76-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output</span> sample_book_es.epub</span>
+<span id="cb76-8"><a href="#cb76-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-9"><a href="#cb76-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Progress output:</span></span>
+<span id="cb76-10"><a href="#cb76-10" aria-hidden="true" tabindex="-1"></a><span class="co"># [====              ] 20% Processing Chapter 1/5</span></span>
+<span id="cb76-11"><a href="#cb76-11" aria-hidden="true" tabindex="-1"></a><span class="co"># [==========        ] 50% Translating Chapter 3/5</span></span>
+<span id="cb76-12"><a href="#cb76-12" aria-hidden="true" tabindex="-1"></a><span class="co"># [==================] 100% Translation completed</span></span></code></pre></div>
+<p>[Visual: Progress indicators] Narrator: "The system shows real-time
+progress as it processes each chapter."</p>
+<h3 id="translation-options">Translation Options</h3>
+<p>[Screen recording: Translation with options]</p>
+<div class="sourceCode" id="cb77"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Translation with advanced options</span></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> translate <span class="dt">\</span></span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--file</span> sample_book.epub <span class="dt">\</span></span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> es <span class="dt">\</span></span>
+<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--provider</span> openai <span class="dt">\</span></span>
+<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--quality</span> high <span class="dt">\</span></span>
+<span id="cb77-8"><a href="#cb77-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--preserve-formatting</span> true <span class="dt">\</span></span>
+<span id="cb77-9"><a href="#cb77-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--preserve-metadata</span> true <span class="dt">\</span></span>
+<span id="cb77-10"><a href="#cb77-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output</span> sample_book_es.epub</span></code></pre></div>
+<p>[Visual: Before/after comparison] Narrator: "The translated file
+maintains the original structure, formatting, and metadata."</p>
+<h2 id="section-4-quality-verification-15-minutes">Section 4: Quality
+Verification (1.5 minutes)</h2>
+<p>[Visual: Translation quality tools] Narrator: "Universal Ebook
+Translator includes tools to verify translation quality."</p>
+<p>[Screen recording: Quality check]</p>
+<div class="sourceCode" id="cb78"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check translation quality</span></span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> verify <span class="dt">\</span></span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--file</span> sample_book_es.epub <span class="dt">\</span></span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--original</span> sample_book.epub <span class="dt">\</span></span>
+<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--from</span> en <span class="dt">\</span></span>
+<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--to</span> es</span>
+<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Quality report:</span></span>
+<span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Overall score: 92/100</span></span>
+<span id="cb78-10"><a href="#cb78-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Accuracy: 95%</span></span>
+<span id="cb78-11"><a href="#cb78-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Fluency: 90%</span></span>
+<span id="cb78-12"><a href="#cb78-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Consistency: 91%</span></span></code></pre></div>
+<h2 id="section-5-common-translation-scenarios-05-minutes">Section 5:
+Common Translation Scenarios (0.5 minutes)</h2>
+<p>[Visual: Translation examples]</p>
+<p><strong>Scenario 1: Novel Translation</strong></p>
+<div class="sourceCode" id="cb79"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Literary text with style preservation</span></span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> translate <span class="at">--file</span> novel.epub <span class="at">--from</span> en <span class="at">--to</span> fr <span class="at">--provider</span> anthropic <span class="at">--style</span> creative</span></code></pre></div>
+<p><strong>Scenario 2: Technical Document</strong></p>
+<div class="sourceCode" id="cb80"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Technical documentation with formal style</span></span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> translate <span class="at">--file</span> manual.txt <span class="at">--from</span> en <span class="at">--to</span> de <span class="at">--provider</span> openai <span class="at">--style</span> formal <span class="at">--domain</span> technical</span></code></pre></div>
+<p><strong>Scenario 3: Web Content</strong></p>
+<div class="sourceCode" id="cb81"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Web page with HTML preservation</span></span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a><span class="ex">translator</span> translate <span class="at">--file</span> article.html <span class="at">--from</span> en <span class="at">--to</span> es <span class="at">--provider</span> zhipu <span class="at">--preserve-html</span> true</span></code></pre></div>
+<h2 id="closing-05-minutes-1">Closing (0.5 minutes)</h2>
+<p>[Visual: Successful translation celebration] Narrator:
+"Congratulations! You've successfully translated your first file. The
+system has preserved formatting, metadata, and structure."</p>
+<p>[Visual: Next video preview] Narrator: "Coming up next: Working with
+different formats and languages. I'll show you how to handle complex
+documents and language pairs."</p>
+<p>[End screen with resources]</p>
+<pre><code>
+---
+
+## 🌐 05_WEBSITE_CONTENT_UPDATES
+
+### Complete Website Content Structure
+
+#### 5.1 Homepage Content
+```markdown
+---
+title: &quot;Universal Ebook Translator&quot;
+description: &quot;Advanced multi-format, multi-language ebook translation system with support for FB2, EPUB, TXT, HTML formats and multiple translation providers.&quot;
+layout: &quot;homepage&quot;
+hero:
+  title: &quot;Translate Any Format, Any Language&quot;
+  subtitle: &quot;Professional-grade ebook translation powered by advanced AI&quot;
+  buttons:
+    - text: &quot;Try Now&quot;
+      link: &quot;/demo/&quot;
+      primary: true
+    - text: &quot;Download&quot;
+      link: &quot;/download/&quot;
+      primary: false
+features:
+  - title: &quot;Multi-Format Support&quot;
+    description: &quot;EPUB, FB2, TXT, HTML and more&quot;
+    icon: &quot;book&quot;
+  - title: &quot;100+ Languages&quot;
+    description: &quot;Comprehensive language support with automatic detection&quot;
+    icon: &quot;language&quot;
+  - title: &quot;AI-Powered&quot;
+    description: &quot;Powered by OpenAI, Anthropic, Zhipu, and more&quot;
+    icon: &quot;brain&quot;
+  - title: &quot;Batch Processing&quot;
+    description: &quot;Translate entire libraries efficiently&quot;
+    icon: &quot;layers&quot;
+  - title: &quot;API Access&quot;
+    description: &quot;Integrate with your existing workflows&quot;
+    icon: &quot;code&quot;
+  - title: &quot;Privacy First&quot;
+    description: &quot;Secure processing with data encryption&quot;
+    icon: &quot;shield&quot;
+---
+
+# Universal Ebook Translator
+
+## Transform Your Content, Reach Global Audiences
+
+Universal Ebook Translator is a professional-grade translation system designed for publishers, translators, and content creators who need reliable, high-quality translations at scale.
+
+## Why Choose Universal Ebook Translator?
+
+### 🚀 Unmatched Performance
+Translate a 300-page book in under 10 minutes with our optimized processing pipeline and distributed architecture.
+
+### 🎯 Superior Quality
+Powered by the latest AI models including GPT-4, Claude-3, GLM-4, and more. Get context-aware translations that preserve meaning and style.
+
+### 📚 Comprehensive Format Support
+- **EPUB** - Standard ebook format with full structure preservation
+- **FB2** - FictionBook format popular in Eastern Europe
+- **TXT** - Plain text with encoding detection
+- **HTML** - Web pages with structure preservation
+- **PDF** - PDF documents with OCR support (experimental)
+- **DOCX** - Microsoft Word with formatting preservation (experimental)
+
+### 🌍 Global Language Coverage
+Support for 100+ languages including:
+- Major languages: English, Spanish, French, German, Chinese, Japanese, Russian
+- European languages: Italian, Portuguese, Dutch, Polish, Swedish
+- Asian languages: Korean, Thai, Vietnamese, Hindi, Arabic
+- Regional variants with proper localization
+
+### 🤖 Multiple Translation Providers
+Choose from the best AI translation providers:
+- **OpenAI GPT-4** - Industry leader for quality
+- **Anthropic Claude** - Natural, nuanced translations
+- **Zhipu AI GLM-4** - Excellent for Asian languages
+- **DeepSeek** - Cost-effective for large volumes
+- **Google Gemini** - Fast and reliable
+- **Ollama** - Run local models privately
+- **Llama.cpp** - GPU-accelerated local processing
+
+## Use Cases
+
+### 📖 Publishing
+Expand your catalog into international markets. Translate entire libraries while preserving formatting, metadata, and quality.
+
+### 🔤 Professional Translation
+Enhance your translation workflow with AI assistance. Handle bulk translations while you focus on refinement and cultural adaptation.
+
+### 🔬 Research &amp; Academia
+Access global knowledge by translating research papers, journals, and academic documents in any language.
+
+### 💼 Business &amp; Enterprise
+Localize documentation, training materials, and business communications for global teams and customers.
+
+## Key Features
+
+### 🔄 Batch Processing
+Translate multiple files simultaneously with intelligent queuing and progress tracking.
+
+### 🏗️ Distributed Architecture
+Scale across multiple machines for large translation projects with automatic load balancing.
+
+### 🛡️ Enterprise Security
+End-to-end encryption, secure API key management, and compliance with data protection regulations.
+
+### 📊 Quality Assurance
+Built-in translation quality metrics, consistency checking, and multi-pass polishing.
+
+### 🔌 API Integration
+Comprehensive REST API with WebSocket support for real-time translation progress.
+
+### 💾 Smart Caching
+Intelligent caching system to avoid re-translation of identical content and reduce costs.
+
+## Getting Started
+
+### 1. Install Universal Ebook Translator
+```bash
+# Download and install
+curl -L https://github.com/universal-ebook-translator/releases/latest/download/translator-linux -o translator
+chmod +x translator
+
+# Verify installation
+./translator --version</code></pre>
+<h3 id="2-configure-your-api-keys">2. Configure Your API Keys</h3>
+<div class="sourceCode" id="cb83"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add your API keys</span></span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> config set api_keys.openai <span class="st">&quot;your-openai-key&quot;</span></span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> config set api_keys.anthropic <span class="st">&quot;your-anthropic-key&quot;</span></span></code></pre></div>
+<h3 id="3-translate-your-first-file">3. Translate Your First File</h3>
+<div class="sourceCode" id="cb84"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Translate an EPUB file</span></span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./translator</span> translate <span class="at">--file</span> book.epub <span class="at">--from</span> en <span class="at">--to</span> es <span class="at">--output</span> book_es.epub</span></code></pre></div>
+<h2 id="performance-metrics-1">Performance Metrics</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Translation Speed</td>
+<td>30,000 words/minute</td>
+</tr>
+<tr>
+<td>Supported Formats</td>
+<td>6+ major formats</td>
+</tr>
+<tr>
+<td>Language Support</td>
+<td>100+ languages</td>
+</tr>
+<tr>
+<td>Translation Providers</td>
+<td>8+ AI providers</td>
+</tr>
+<tr>
+<td>API Response Time</td>
+<td>&lt;2 seconds average</td>
+</tr>
+<tr>
+<td>Uptime</td>
+<td>99.9%</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pricing">Pricing</h2>
+<h3 id="free-tier">Free Tier</h3>
+<ul>
+<li>100,000 characters/month</li>
+<li>2 translation providers</li>
+<li>Basic format support</li>
+<li>Community support</li>
+</ul>
+<h3 id="professional">Professional</h3>
+<ul>
+<li>$49/month</li>
+<li>10,000,000 characters/month</li>
+<li>All translation providers</li>
+<li>All formats supported</li>
+<li>Priority support</li>
+<li>API access</li>
+</ul>
+<h3 id="enterprise">Enterprise</h3>
+<ul>
+<li>Custom pricing</li>
+<li>Unlimited translations</li>
+<li>Dedicated infrastructure</li>
+<li>Custom integrations</li>
+<li>Premium support</li>
+<li>SLA guarantee</li>
+</ul>
+<h2 id="what-our-users-say">What Our Users Say</h2>
+<blockquote>
+<p>"Universal Ebook Translator has transformed our publishing workflow.
+We can now launch books in 10 languages simultaneously instead of
+sequential releases." — <strong>Sarah Chen</strong>, International
+Publishing Director</p>
+</blockquote>
+<blockquote>
+<p>"The quality of translations is exceptional. We use it as a first
+pass, then our human translators focus on refinement, cutting our
+translation time by 70%." — <strong>Mikhail Petrov</strong>, Translation
+Agency Owner</p>
+</blockquote>
+<blockquote>
+<p>"The API integration was seamless. We built it into our content
+management system and now translations happen automatically." —
+<strong>David Kumar</strong>, CTO, EdTech Startup</p>
+</blockquote>
+<h2 id="ready-to-transform-your-translation-workflow">Ready to Transform
+Your Translation Workflow?</h2>
+<p><a href="/getting-started/">Get Started Now</a> <a href="/demo/">Try
+Live Demo</a> <a href="/docs/">View Documentation</a> <a
+href="/download/">Download Now</a></p>
+<h2 id="stay-connected">Stay Connected</h2>
+<ul>
+<li><a href="/docs/">Documentation</a></li>
+<li><a href="/api/">API Reference</a></li>
+<li><a href="https://community.universalebooktranslator.com">Community
+Forum</a></li>
+<li><a href="https://github.com/universal-ebook-translator">GitHub
+Repository</a></li>
+<li><a href="https://twitter.com/UEbookTranslator">Twitter</a></li>
+</ul>
+<hr />
+<p><em>Universal Ebook Translator - Breaking language barriers, one book
+at a time.</em></p>
+<pre><code>
+---
+
+This comprehensive documentation plan provides the foundation for completing all project documentation requirements. Each section includes detailed implementation guidelines, examples, and best practices to ensure 100% coverage of all modules, APIs, and features.
+
+The plan is structured to be implemented incrementally, with clear priorities and dependencies between sections, ensuring efficient completion within the project timeline.
+</code></pre>
+</body>
+</html>

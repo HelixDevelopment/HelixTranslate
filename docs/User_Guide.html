@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>User_Guide</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">User_Guide</h1>
+</header>
+<h1 id="websocket-monitoring-system---user-guide">WebSocket Monitoring
+System - User Guide</h1>
+<h2 id="getting-started">Getting Started</h2>
+<p>This guide helps you monitor your translation workflows in real-time
+using WebSocket-based monitoring.</p>
+<h2 id="what-you-can-monitor">What You Can Monitor</h2>
+<ul>
+<li><strong>Translation Progress</strong>: See real-time progress
+updates as your documents are translated</li>
+<li><strong>SSH Workers</strong>: Monitor remote translation workers and
+their performance</li>
+<li><strong>Error Tracking</strong>: Get immediate alerts when errors
+occur</li>
+<li><strong>Session History</strong>: View past translation sessions and
+their results</li>
+<li><strong>Performance Metrics</strong>: Track translation speed and
+worker efficiency</li>
+</ul>
+<h2 id="step-by-step-instructions">Step-by-Step Instructions</h2>
+<h3 id="step-1-start-the-monitoring-server">Step 1: Start the Monitoring
+Server</h3>
+<ol type="1">
+<li>Open your terminal</li>
+<li>Navigate to your project directory:
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /Users/milosvasic/Projects/Translate</span></code></pre></div></li>
+<li>Start the monitoring server:
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/monitor-server</span></code></pre></div></li>
+<li>You should see output like:
+<pre><code>🚀 Starting Translation Monitoring Server
+📡 WebSocket server listening on ws://localhost:8090/ws
+🌐 Web dashboard available at http://localhost:8090/monitor</code></pre></li>
+</ol>
+<p><strong>Keep this terminal open</strong> - the monitoring server
+needs to keep running.</p>
+<h3 id="step-2-open-the-monitoring-dashboard">Step 2: Open the
+Monitoring Dashboard</h3>
+<ol type="1">
+<li>Open your web browser</li>
+<li>Go to: <code>http://localhost:8090/monitor</code></li>
+<li>You should see a monitoring dashboard with:
+<ul>
+<li>Active sessions counter</li>
+<li>Connection status indicator</li>
+<li>Event log area</li>
+<li>Progress tracking section</li>
+</ul></li>
+</ol>
+<p><strong>For advanced features</strong>, you can also open:
+<code>file:///Users/milosvasic/Projects/Translate/enhanced-monitor.html</code></p>
+<h3 id="step-3-run-a-translation-with-monitoring">Step 3: Run a
+Translation with Monitoring</h3>
+<p>Choose one of the following options:</p>
+<h4 id="option-a-quick-demo-easiest">Option A: Quick Demo (Easiest)</h4>
+<ol type="1">
+<li>Open a <strong>new terminal window</strong></li>
+<li>Run the basic demo:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /Users/milosvasic/Projects/Translate</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run demo-translation-with-monitoring-fixed.go</span></code></pre></div></li>
+<li>Watch the dashboard update in real-time!</li>
+</ol>
+<h4 id="option-b-real-ai-translation">Option B: Real AI Translation</h4>
+<ol type="1">
+<li><strong>Optional</strong>: Set up your OpenAI API key:
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OPENAI_API_KEY</span><span class="op">=</span>your_api_key_here</span></code></pre></div></li>
+<li>Run the real LLM demo:
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run demo-real-llm-with-monitoring.go</span></code></pre></div></li>
+</ol>
+<h4 id="option-c-ssh-worker-translation">Option C: SSH Worker
+Translation</h4>
+<ol type="1">
+<li><strong>Optional</strong>: Configure SSH worker (if you have remote
+workers):
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">SSH_WORKER_HOST</span><span class="op">=</span>localhost</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">SSH_WORKER_USER</span><span class="op">=</span>milosvasic</span></code></pre></div></li>
+<li>Run the SSH worker demo:
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run demo-ssh-worker-with-monitoring.go</span></code></pre></div></li>
+</ol>
+<h3 id="step-4-monitor-your-translation">Step 4: Monitor Your
+Translation</h3>
+<p>As your translation runs, you'll see in the dashboard:</p>
+<h4 id="real-time-updates">Real-time Updates</h4>
+<ul>
+<li><strong>Progress Bar</strong>: Shows overall completion
+percentage</li>
+<li><strong>Current Step</strong>: What's happening right now (reading,
+translating, etc.)</li>
+<li><strong>Event Log</strong>: Detailed log of all activities</li>
+<li><strong>Session ID</strong>: Unique identifier for your translation
+session</li>
+</ul>
+<h4 id="what-the-progress-means">What the Progress Means</h4>
+<ul>
+<li><strong>0-10%</strong>: Reading and parsing input files</li>
+<li><strong>10-25%</strong>: Content preparation and conversion</li>
+<li><strong>25-85%</strong>: Actual translation work</li>
+<li><strong>85-100%</strong>: Generating output files</li>
+</ul>
+<h4 id="color-coded-status">Color-Coded Status</h4>
+<ul>
+<li>🟡 <strong>Yellow</strong>: Starting up or in progress</li>
+<li>🟢 <strong>Green</strong>: Successfully completed</li>
+<li>🔴 <strong>Red</strong>: Error occurred</li>
+<li>⚪ <strong>Gray</strong>: Pending or idle</li>
+</ul>
+<h3 id="step-5-understanding-the-results">Step 5: Understanding the
+Results</h3>
+<h4 id="when-translation-completes-successfully">When Translation
+Completes Successfully</h4>
+<p>You'll see:</p>
+<ul>
+<li>✅ Green "Completed" status</li>
+<li>100% progress bar</li>
+<li>Output file location</li>
+<li>Total time taken</li>
+<li>Any worker information (for SSH translations)</li>
+</ul>
+<h4 id="if-errors-occur">If Errors Occur</h4>
+<p>You'll see:</p>
+<ul>
+<li>🔴 Red error status</li>
+<li>Detailed error message</li>
+<li>Step where error occurred</li>
+<li>Troubleshooting suggestions</li>
+</ul>
+<h2 id="advanced-features">Advanced Features</h2>
+<h3 id="monitoring-multiple-sessions">Monitoring Multiple Sessions</h3>
+<ol type="1">
+<li>Run multiple translations in parallel:
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Terminal 1</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run demo-translation-with-monitoring-fixed.go</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Terminal 2 (simultaneously)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run demo-translation-with-monitoring-fixed.go</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Terminal 3 (simultaneously)</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run demo-translation-with-monitoring-fixed.go</span></code></pre></div></li>
+<li>The dashboard will show all active sessions</li>
+</ol>
+<h3 id="ssh-worker-monitoring">SSH Worker Monitoring</h3>
+<p>If you have remote SSH workers configured:</p>
+<ul>
+<li>You'll see worker host and connection info</li>
+<li>Worker model and capacity details</li>
+<li>Real-time worker performance</li>
+<li>Connection status for each worker</li>
+</ul>
+<h3 id="custom-session-monitoring">Custom Session Monitoring</h3>
+<ol type="1">
+<li>In the dashboard, enter a specific session ID</li>
+<li>Click "Monitor Session" to focus on one translation</li>
+<li>View detailed progress and events for that session</li>
+</ol>
+<h2 id="troubleshooting-common-issues">Troubleshooting Common
+Issues</h2>
+<h3 id="cannot-connect-to-websocket-server">"Cannot connect to WebSocket
+server"</h3>
+<p><strong>Solution</strong>: Make sure the monitoring server is
+running:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check if server is running</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">lsof</span> <span class="at">-i</span> :8090</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># If not running, start it:</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/monitor-server</span></code></pre></div>
+<h3 id="no-events-appearing-in-dashboard">"No events appearing in
+dashboard"</h3>
+<p><strong>Solutions</strong>:</p>
+<ol type="1">
+<li>Check that a translation is actually running</li>
+<li>Verify the translation process includes monitoring code</li>
+<li>Check browser console for JavaScript errors</li>
+</ol>
+<h3 id="ssh-worker-connection-failed">"SSH worker connection
+failed"</h3>
+<p><strong>Solutions</strong>:</p>
+<ol type="1">
+<li>Verify SSH credentials are correct</li>
+<li>Test SSH connection manually:
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> milosvasic@localhost <span class="st">&#39;echo &quot;SSH works&quot;&#39;</span></span></code></pre></div></li>
+<li>Check worker configuration in config files</li>
+</ol>
+<h3 id="llm-api-authentication-failed">"LLM API authentication
+failed"</h3>
+<p><strong>Solutions</strong>:</p>
+<ol type="1">
+<li>Verify your API key is set:
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$OPENAI_API_KEY</span></span></code></pre></div></li>
+<li>Set the API key:
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OPENAI_API_KEY</span><span class="op">=</span>your_actual_api_key</span></code></pre></div></li>
+</ol>
+<h3 id="port-already-in-use">"Port already in use"</h3>
+<p><strong>Solution</strong>: Kill the process using port 8090:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Find the process</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">lsof</span> <span class="at">-i</span> :8090</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Kill it (replace PID with actual process ID)</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="bu">kill</span> <span class="at">-9</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Restart server</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/monitor-server</span></code></pre></div>
+<h2 id="performance-tips">Performance Tips</h2>
+<h3 id="for-best-experience">For Best Experience</h3>
+<ul>
+<li>Use a modern web browser (Chrome, Firefox, Safari)</li>
+<li>Keep the monitoring server on a stable network</li>
+<li>Don't run too many translations simultaneously on a slow
+computer</li>
+</ul>
+<h3 id="monitoring-multiple-workers">Monitoring Multiple Workers</h3>
+<ul>
+<li>Use the enhanced dashboard for better multi-worker support</li>
+<li>Consider increasing WebSocket timeout for slow connections</li>
+<li>Monitor worker capacity to avoid overloading</li>
+</ul>
+<h3 id="large-translation-files">Large Translation Files</h3>
+<ul>
+<li>Progress updates may be less frequent for large files</li>
+<li>Monitor memory usage on the translation machine</li>
+<li>Consider breaking very large files into smaller chunks</li>
+</ul>
+<h2 id="faq">FAQ</h2>
+<p><strong>Q: Do I need to keep the monitoring server running?</strong>
+A: Yes, the monitoring server must stay running to track translations
+and serve the dashboard.</p>
+<p><strong>Q: Can I monitor translations running on different
+machines?</strong> A: Yes! Configure the translation clients to connect
+to your monitoring server's IP address instead of localhost.</p>
+<p><strong>Q: How long does the monitoring history last?</strong> A:
+Session history is stored in memory and lasts until you restart the
+monitoring server.</p>
+<p><strong>Q: Is my data secure?</strong> A: For development, data is
+sent over plain WebSocket. In production, consider using WSS (WebSocket
+Secure) and authentication.</p>
+<p><strong>Q: Can I export the monitoring data?</strong> A: Currently,
+data is displayed in the dashboard only. Export functionality is planned
+for future versions.</p>
+<h2 id="getting-help">Getting Help</h2>
+<p>If you encounter issues:</p>
+<ol type="1">
+<li><strong>Check the logs</strong> in your terminal windows</li>
+<li><strong>Look at browser console</strong> (F12 → Console tab)</li>
+<li><strong>Try the basic demo first</strong> to ensure the system
+works</li>
+<li><strong>Review the technical documentation</strong> in
+<code>docs/WebSocket_Monitoring_Guide.md</code></li>
+<li><strong>Check configuration files</strong> for any incorrect
+settings</li>
+</ol>
+<h2 id="keyboard-shortcuts-dashboard">Keyboard Shortcuts
+(Dashboard)</h2>
+<ul>
+<li><strong>Ctrl+R</strong>: Refresh dashboard</li>
+<li><strong>Ctrl+L</strong>: Clear event log</li>
+<li><strong>F5</strong>: Full page refresh</li>
+</ul>
+<h2 id="quick-reference">Quick Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>go run ./cmd/monitor-server</code></td>
+<td>Start monitoring server</td>
+</tr>
+<tr>
+<td><code>go run demo-translation-with-monitoring-fixed.go</code></td>
+<td>Run basic demo</td>
+</tr>
+<tr>
+<td><code>go run demo-real-llm-with-monitoring.go</code></td>
+<td>Run real LLM demo</td>
+</tr>
+<tr>
+<td><code>go run demo-ssh-worker-with-monitoring.go</code></td>
+<td>Run SSH worker demo</td>
+</tr>
+<tr>
+<td><code>http://localhost:8090/monitor</code></td>
+<td>Basic dashboard</td>
+</tr>
+<tr>
+<td><code>enhanced-monitor.html</code></td>
+<td>Advanced dashboard</td>
+</tr>
+</tbody>
+</table>
+<h2 id="success-checklist">Success Checklist</h2>
+<p>Before you start monitoring real translations:</p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Monitoring server running without
+errors</label></li>
+<li><label><input type="checkbox" />Dashboard accessible in
+browser</label></li>
+<li><label><input type="checkbox" />At least one demo runs
+successfully</label></li>
+<li><label><input type="checkbox" />Real-time updates appear in
+dashboard</label></li>
+<li><label><input type="checkbox" />No connection errors in browser
+console</label></li>
+<li><label><input type="checkbox" />Translation output files are
+created</label></li>
+</ul>
+<p>When all items are checked, you're ready to monitor your actual
+translation workflows!</p>
+<hr />
+<p><strong>Happy Monitoring! 🚀</strong></p>
+</body>
+</html>

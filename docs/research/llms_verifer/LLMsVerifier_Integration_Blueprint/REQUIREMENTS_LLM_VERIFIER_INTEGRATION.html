@@ -1,0 +1,3213 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>REQUIREMENTS_LLM_VERIFIER_INTEGRATION</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">REQUIREMENTS_LLM_VERIFIER_INTEGRATION</h1>
+</header>
+<h1 id="comprehensive-requirements-document">COMPREHENSIVE REQUIREMENTS
+DOCUMENT</h1>
+<h2
+id="llmsverifier-as-single-source-of-truth-for-helixtranslate-model-provisioning">LLMsVerifier
+as Single Source of Truth for HelixTranslate Model Provisioning</h2>
+<hr />
+<h2 id="document-metadata">DOCUMENT METADATA</h2>
+<ul>
+<li><strong>Project</strong>: HelixTranslate / LLMsVerifier
+Integration</li>
+<li><strong>Version</strong>: 1.0</li>
+<li><strong>Date</strong>: 2025-05-01</li>
+<li><strong>Classification</strong>: Exhaustive Requirements
+Analysis</li>
+<li><strong>Source Repositories</strong>:
+<ul>
+<li><code>git@github.com:HelixDevelopment/HelixTranslate.git</code>
+(Main project - Go 1.25.2, ~936 files, event-driven, 9 LLM
+providers)</li>
+<li><code>https://github.com/vasic-digital/LLMsVerifier</code> (Go
+module, 1,207 files, 25+ providers, verification + scoring)</li>
+<li><code>https://github.com/HelixDevelopment/HelixAgent</code>
+(Reference - already integrated, 51+ providers, 35 MCPs)</li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="table-of-contents">TABLE OF CONTENTS</h2>
+<ol type="1">
+<li><a href="#1-functional-requirements">Functional
+Requirements</a></li>
+<li><a href="#2-non-functional-requirements">Non-Functional
+Requirements</a></li>
+<li><a href="#3-integration-requirements">Integration
+Requirements</a></li>
+<li><a href="#4-testing-requirements">Testing Requirements</a></li>
+<li><a href="#5-documentation-requirements">Documentation
+Requirements</a></li>
+<li><a href="#6-ux-requirements">UX Requirements</a></li>
+<li><a href="#7-configuration-requirements">Configuration
+Requirements</a></li>
+<li><a href="#8-constraints-and-assumptions">Constraints and
+Assumptions</a></li>
+<li><a href="#9-success-criteria">Success Criteria</a></li>
+</ol>
+<hr />
+<h2 id="1-functional-requirements">1. FUNCTIONAL REQUIREMENTS</h2>
+<h3 id="11-single-source-of-truth-ssot---critical-priority">1.1 Single
+Source of Truth (SSOT) - CRITICAL PRIORITY</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F-SSOT-001</td>
+<td>LLMsVerifier SHALL be the EXCLUSIVE and ONLY source of truth for all
+LLM models available to HelixTranslate. No model may be used in
+HelixTranslate that does not originate from LLMsVerifier.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-SSOT-002</td>
+<td>HelixTranslate MUST NOT maintain any independent model registry,
+hardcoded model lists, or fallback model definitions outside of
+LLMsVerifier-provided data.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-SSOT-003</td>
+<td>All model metadata (name, ID, capabilities, token limits, pricing,
+features) SHALL be retrieved from LLMsVerifier at runtime or build
+time.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-SSOT-004</td>
+<td>Model information SHALL be cached locally in HelixTranslate with
+configurable TTL, but cache invalidation MUST trigger re-fetch from
+LLMsVerifier.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>F-SSOT-005</td>
+<td>If LLMsVerifier is unreachable, HelixTranslate SHALL either: (a) use
+expired cache with warning, or (b) enter degraded mode with explicit
+user notification. No unauthorized models SHALL be used.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-SSOT-006</td>
+<td>The existing <code>pkg/models/registry.go</code> in HelixTranslate
+SHALL be refactored to delegate all model lookups to LLMsVerifier client
+instead of local/hardcoded definitions.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-SSOT-007</td>
+<td>The existing <code>pkg/models/downloader.go</code> in HelixTranslate
+SHALL only download models that are verified and approved by
+LLMsVerifier.</td>
+<td>Critical</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="12-model-validation-verification-and-scoring-gate---critical-priority">1.2
+Model Validation, Verification, and Scoring Gate - CRITICAL
+PRIORITY</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F-GATE-001</td>
+<td>ONLY models that have PASSED LLMsVerifier validation, verification,
+and scoring pipeline SHALL be presented to end users of
+HelixTranslate.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GATE-002</td>
+<td>Models MUST satisfy ALL three criteria: (a) validation passed, (b)
+verification passed, (c) positive scoring (&gt; 0 overall score).</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GATE-003</td>
+<td>The scoring algorithm defined in LLMsVerifier SHALL be applied:
+<code>Overall Score = (Responsiveness x 0.30) + (Code Capability x 0.25) + (Feature Richness x 0.25) + (Reliability x 0.20)</code>.
+Models with score &lt;= 0 SHALL be rejected.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GATE-004</td>
+<td>Models MUST have <code>VerificationStatus == "verified"</code> AND
+<code>CanSeeCode == true</code> to be eligible for HelixTranslate
+use.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GATE-005</td>
+<td>Models MUST have <code>AffirmativeResponse == true</code> (positive
+confirmation of capability) to be eligible.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GATE-006</td>
+<td>Models SHALL be filtered using the
+<code>EnhancedModelProviderService.filterVerifiedModels()</code> logic
+from LLMsVerifier's
+<code>model_provider_service_with_verification.go</code>.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GATE-007</td>
+<td>The <code>VerifiedConfigGenerator.GenerateVerifiedConfig()</code>
+workflow SHALL be the canonical path for generating HelixTranslate's
+available model list.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GATE-008</td>
+<td>End users SHALL NEVER see models that have not passed verification.
+UI/CLI SHALL only display verified models with their verification
+scores.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GATE-009</td>
+<td>Each displayed model SHALL show: verification score, last verified
+timestamp, supported features (streaming, tool calling, vision,
+embeddings, MCP, LSP, ACP), and cost metrics.</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<h3 id="13-provider-integration---critical-priority">1.3 Provider
+Integration - CRITICAL PRIORITY</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F-PROV-001</td>
+<td>ALL 25+ providers from LLMsVerifier SHALL be available in
+HelixTranslate: Anthropic, Cerebras, Cloudflare, Cohere, DeepSeek, Groq,
+Hyperbolic, Kilo, Kimi, KimiCode, Mistral, Modal, NLP Cloud, Novita,
+OpenAI, PublicAI, Qwen, Replicate, SambaNova, Sarvam, SiliconFlow,
+TogetherAI, Upstage, Vulavula, xAI, Zhipu.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-PROV-002</td>
+<td>HelixTranslate's current 9 LLM providers SHALL be expanded to
+incorporate ALL LLMsVerifier-supported providers.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-PROV-003</td>
+<td>Each provider SHALL have complete configuration: API endpoint,
+authentication, rate limits, model mappings, feature flags.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>F-PROV-004</td>
+<td>Provider authentication (API keys) SHALL be managed through
+HelixTranslate configuration (config file or .env file), consistent with
+LLMsVerifier and HelixAgent patterns.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-PROV-005</td>
+<td>Provider-specific model discovery SHALL use LLMsVerifier's
+<code>ModelProviderService.GetModels()</code> and
+<code>GetAllModels()</code> methods.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>F-PROV-006</td>
+<td>Provider health checks SHALL be performed via LLMsVerifier's
+verification pipeline before any model from that provider is
+offered.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>F-PROV-007</td>
+<td>Provider failover and fallback chains SHALL be validated with actual
+failures (per Constitution CONST-035).</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="14-mcp-lsp-acp-embeddings-rag-skills-and-plugins-integration---critical-priority">1.4
+MCP, LSP, ACP, Embeddings, RAG, Skills, and Plugins Integration -
+CRITICAL PRIORITY</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F-EXT-001</td>
+<td>ALL available MCPs (Model Context Protocols) SHALL be incorporated
+into HelixTranslate. Reference: HelixAgent has 35 MCPs across
+submodules.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-EXT-002</td>
+<td>ALL available LSPs (Language Server Protocols) SHALL be incorporated
+for enhanced translation quality and code-aware translation.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-EXT-003</td>
+<td>ALL available ACPs (Agent Communication Protocols) SHALL be
+incorporated per LLMsVerifier's <code>ACP_API_DOCUMENTATION.md</code>,
+<code>ACP_COMPLETION_CHECKLIST.md</code>,
+<code>ACP_EXAMPLES_AND_DEMOS.md</code>.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-EXT-004</td>
+<td>ALL available Embeddings models SHALL be incorporated for semantic
+translation, context preservation, and vector search capabilities.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-EXT-005</td>
+<td>ALL available RAGs (Retrieval-Augmented Generation systems) SHALL be
+incorporated for context-aware translation with knowledge
+retrieval.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-EXT-006</td>
+<td>ALL available Skills SHALL be incorporated for specialized
+translation domains (legal, medical, technical, literary).</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-EXT-007</td>
+<td>ALL available Plugins SHALL be incorporated for extensible
+translation workflows.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-EXT-008</td>
+<td>Feature detection SHALL be performed via LLMsVerifier's verification
+pipeline (streaming, tool_calling, embeddings, vision, mcp, lsp, acp
+support testing).</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-EXT-009</td>
+<td>Integration SHALL be FLAWLESS - each
+MCP/LSP/ACP/Embedding/RAG/Skill/Plugin MUST be verified working with
+real API calls before being offered.</td>
+<td>Critical</td>
+</tr>
+</tbody>
+</table>
+<h3 id="15-api-and-client-integration---high-priority">1.5 API and
+Client Integration - HIGH PRIORITY</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F-API-001</td>
+<td>HelixTranslate SHALL integrate LLMsVerifier Go module
+(<code>digital.vasic.llmsverifier</code>) as a dependency in
+<code>go.mod</code>.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-API-002</td>
+<td>HelixTranslate SHALL use LLMsVerifier's <code>client.Client</code>
+from <code>llm-verifier/client/client.go</code> for all LLMVerifier
+communications.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-API-003</td>
+<td>LLMsVerifier API endpoints SHALL be used: <code>/api/health</code>,
+<code>/api/models</code>, <code>/api/models/{id}</code>,
+<code>/api/models/{id}/verify</code>, <code>/api/providers</code>.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>F-API-004</td>
+<td>Authentication tokens SHALL be managed via
+<code>client.Client.SetToken()</code> with credentials from
+HelixTranslate config/.env.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>F-API-005</td>
+<td>API key provisioning for both LLMsVerifier AND HelixAgent SHALL be
+through HelixTranslate configuration (config file or .env file).</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-API-006</td>
+<td>The <code>VerifiedConfigGenerator</code> SHALL produce configuration
+consumed by HelixTranslate's
+<code>internal/config/config.go</code>.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-API-007</td>
+<td>HTTP client timeout SHALL be configurable (default 30s per
+LLMsVerifier client pattern).</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>F-API-008</td>
+<td>Rate limiting SHALL be implemented using LLMsVerifier's
+<code>client.RateLimiter</code> pattern.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>F-API-009</td>
+<td>Circuit breakers SHALL be implemented for all LLMsVerifier API calls
+per Constitution requirements.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>F-API-010</td>
+<td>Retry logic with exponential backoff SHALL be implemented for
+transient failures.</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<h3 id="16-translation-workflow-integration---high-priority">1.6
+Translation Workflow Integration - HIGH PRIORITY</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F-TW-001</td>
+<td>Translation workflows SHALL use ONLY models verified by
+LLMsVerifier.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-TW-002</td>
+<td>Model selection UI/API SHALL present only verified models with
+scoring information.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-TW-003</td>
+<td>Translation engine selection SHALL be restricted to providers/models
+passing LLMsVerifier gate.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-TW-004</td>
+<td>Batch translation SHALL validate all selected models against
+LLMsVerifier before execution.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>F-TW-005</td>
+<td>Distributed translation SHALL validate all worker-selected models
+against LLMsVerifier.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>F-TW-006</td>
+<td>SSH worker translations SHALL use only LLMsVerifier-approved
+models.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>F-TW-007</td>
+<td>Real-time translation via WebSocket SHALL use only verified
+models.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>F-TW-008</td>
+<td>Translation progress tracking SHALL include model verification
+status in metadata.</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<h3 id="17-data-flow-and-synchronization---high-priority">1.7 Data Flow
+and Synchronization - HIGH PRIORITY</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F-DF-001</td>
+<td>HelixTranslate SHALL synchronize model data with LLMsVerifier at
+configurable intervals.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>F-DF-002</td>
+<td>Synchronization SHALL happen at: (a) application startup, (b)
+configurable periodic refresh, (c) on-demand via API/admin trigger.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>F-DF-003</td>
+<td>Incremental updates SHALL be supported to minimize data
+transfer.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>F-DF-004</td>
+<td>Full re-verification SHALL be triggerable on-demand.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>F-DF-005</td>
+<td>Synchronization events SHALL be logged and observable via WebSocket
+events.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>F-DF-006</td>
+<td>Model metadata changes SHALL trigger event notifications to
+subscribed HelixTranslate components.</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="18-governance-and-constitution-compliance---critical-priority">1.8
+Governance and Constitution Compliance - CRITICAL PRIORITY</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F-GOV-001</td>
+<td>Integration rules SHALL be added to HelixTranslate's
+<code>CONSTITUTION.md</code> mandating LLMsVerifier as SSOT.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GOV-002</td>
+<td>Integration rules SHALL be added to HelixTranslate's
+<code>CLAUDE.md</code> with exact implementation guidance.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GOV-003</td>
+<td>Integration rules SHALL be added to HelixTranslate's
+<code>AGENTS.MD</code> with operational procedures.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GOV-004</td>
+<td>ALL submodules' <code>CONSTITUTION.md</code>,
+<code>CLAUDE.md</code>, and <code>AGENTS.MD</code> files SHALL be
+updated with the same rules.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GOV-005</td>
+<td>The anti-bluff testing mandate (CONST-035) SHALL be applied to all
+integration tests.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GOV-006</td>
+<td>The host-power-management guard (CONST-033) SHALL be applied to all
+new scripts and challenges.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GOV-007</td>
+<td>Reproduction-before-fix (CONST-032) SHALL be enforced for all
+integration bugs.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>F-GOV-008</td>
+<td>No mocks/fakes outside unit tests SHALL be the rule for all
+integration verification.</td>
+<td>Critical</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-non-functional-requirements">2. NON-FUNCTIONAL
+REQUIREMENTS</h2>
+<h3 id="21-performance-requirements">2.1 Performance Requirements</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>N-PERF-001</td>
+<td>Model list retrieval from LLMsVerifier SHALL complete within 5
+seconds for 25+ providers.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-PERF-002</td>
+<td>Model verification gate check SHALL add no more than 100ms latency
+to translation requests when using cached data.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-PERF-003</td>
+<td>Full model synchronization SHALL complete within 60 seconds.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-PERF-004</td>
+<td>HelixTranslate SHALL handle 1000+ verified models in memory
+efficiently.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-PERF-005</td>
+<td>Verification scoring computation SHALL be performed asynchronously
+and SHALL NOT block translation requests.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>N-PERF-006</td>
+<td>API calls to LLMsVerifier SHALL use connection pooling and
+keep-alive.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-PERF-007</td>
+<td>Go 1.25.2's performance characteristics SHALL be maintained; no
+regressions in throughput.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>N-PERF-008</td>
+<td>Memory usage for model cache SHALL be bounded with LRU eviction
+policy.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-PERF-009</td>
+<td>Translation throughput SHALL NOT degrade by more than 5% due to
+LLMsVerifier integration.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>N-PERF-010</td>
+<td>WebSocket event delivery SHALL maintain sub-100ms latency for model
+update notifications.</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-security-requirements">2.2 Security Requirements</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>N-SEC-001</td>
+<td>API keys for LLMsVerifier SHALL be stored in HelixTranslate config
+file or .env file with 600 permissions (owner read/write only).</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>N-SEC-002</td>
+<td>API keys SHALL NEVER be hardcoded, committed to git, or logged.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>N-SEC-003</td>
+<td>LLMsVerifier API communications SHALL use HTTPS/TLS in
+production.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>N-SEC-004</td>
+<td>Authentication tokens SHALL have configurable TTL and support
+refresh.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-SEC-005</td>
+<td>Model verification results SHALL be cryptographically signed to
+prevent tampering.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-SEC-006</td>
+<td>All configuration exports SHALL follow LLMsVerifier's security
+export pattern with warnings and gitignore protection.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>N-SEC-007</td>
+<td>Input validation SHALL be performed on all LLMsVerifier API
+responses.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-SEC-008</td>
+<td>SQL injection prevention SHALL be maintained for any database
+operations with model data.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-SEC-009</td>
+<td>Rate limiting SHALL prevent abuse of LLMsVerifier integration
+endpoints.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-SEC-010</td>
+<td>Security audit logging SHALL track all model verification decisions
+and provider changes.</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-reliability-and-availability-requirements">2.3 Reliability
+and Availability Requirements</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>N-REL-001</td>
+<td>LLMsVerifier integration SHALL have 99.9% uptime target for model
+retrieval operations.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-REL-002</td>
+<td>Graceful degradation SHALL occur when LLMsVerifier is unreachable -
+use cached verified models.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>N-REL-003</td>
+<td>Circuit breakers SHALL prevent cascading failures from LLMsVerifier
+unavailability.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>N-REL-004</td>
+<td>Health check endpoints SHALL expose LLMsVerifier connectivity
+status.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-REL-005</td>
+<td>Automatic recovery SHALL be attempted when LLMsVerifier becomes
+available again.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-REL-006</td>
+<td>No single point of failure SHALL be introduced by the LLMsVerifier
+integration.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>N-REL-007</td>
+<td>Retry policies SHALL be configurable: max retries, backoff strategy,
+timeout per attempt.</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<h3 id="24-scalability-requirements">2.4 Scalability Requirements</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>N-SCL-001</td>
+<td>Integration SHALL support horizontal scaling of HelixTranslate
+instances sharing LLMsVerifier data.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-SCL-002</td>
+<td>Distributed caching (Redis/cache layer) SHALL be supported for model
+data synchronization across instances.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>N-SCL-003</td>
+<td>Provider count SHALL be extensible beyond initial 25+ without code
+changes.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-SCL-004</td>
+<td>Model count per provider SHALL be unbounded in design.</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<h3 id="25-maintainability-requirements">2.5 Maintainability
+Requirements</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>N-MAINT-001</td>
+<td>All integration code SHALL follow Go conventions, pass
+<code>gofmt</code>, and pass <code>golangci-lint</code>.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>N-MAINT-002</td>
+<td>Code SHALL follow existing HelixTranslate patterns (event-driven
+architecture, ~936 file structure).</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>N-MAINT-003</td>
+<td>Dependency on LLMsVerifier SHALL use Go semantic versioning.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-MAINT-004</td>
+<td>Integration SHALL be versioned and support rolling updates.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-MAINT-005</td>
+<td>Feature flags SHALL allow gradual rollout of LLMsVerifier
+integration.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>N-MAINT-006</td>
+<td>All code SHALL include comprehensive godoc comments.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>N-MAINT-007</td>
+<td>Error handling SHALL use wrapped errors with context (per Go best
+practices and LLMsVerifier patterns).</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-integration-requirements">3. INTEGRATION REQUIREMENTS</h2>
+<h3 id="31-code-level-integration-points">3.1 Code-Level Integration
+Points</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I-CODE-001</td>
+<td><strong>File: <code>go.mod</code></strong> - Add
+<code>digital.vasic.llmsverifier</code> as explicit dependency with
+version pinning.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>I-CODE-002</td>
+<td><strong>File: <code>internal/config/config.go</code></strong> - Add
+<code>LLMsVerifier</code> configuration struct with fields:
+<code>BaseURL</code>, <code>APIKey</code>, <code>Timeout</code>,
+<code>CacheTTL</code>, <code>StrictMode</code>,
+<code>VerificationEnabled</code>.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>I-CODE-003</td>
+<td><strong>File: <code>pkg/models/registry.go</code></strong> -
+Refactor <code>Registry</code> struct to use
+<code>EnhancedModelProviderService</code> from LLMsVerifier for model
+lookups. Remove hardcoded model definitions.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>I-CODE-004</td>
+<td><strong>File: <code>pkg/models/downloader.go</code></strong> - Add
+LLMsVerifier verification check before model download. Only download
+<code>CanSeeCode == true</code> models.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>I-CODE-005</td>
+<td><strong>File: <code>pkg/translator/*.go</code></strong> - Integrate
+LLMsVerifier client for model selection; reject unverified models.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>I-CODE-006</td>
+<td><strong>File: <code>pkg/api/*.go</code></strong> - Add
+<code>/api/v1/verified-models</code> endpoint returning
+LLMsVerifier-filtered models.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>I-CODE-007</td>
+<td><strong>File: <code>pkg/api/*.go</code></strong> - Add
+<code>/api/v1/verification-status</code> endpoint exposing LLMsVerifier
+sync status.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>I-CODE-008</td>
+<td><strong>File: <code>pkg/events/*.go</code></strong> - Emit events on
+model verification changes, provider additions/removals.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>I-CODE-009</td>
+<td><strong>File: <code>cmd/*.go</code></strong> - Add CLI commands for
+manual LLMsVerifier synchronization and verification status.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>I-CODE-010</td>
+<td><strong>File: <code>pkg/websocket/*.go</code></strong> - Broadcast
+model verification updates to connected clients.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>I-CODE-011</td>
+<td><strong>File: <code>internal/cache/*.go</code></strong> - Implement
+model data caching with TTL from LLMsVerifier.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>I-CODE-012</td>
+<td><strong>File: <code>pkg/models/errors.go</code></strong> - Add
+LLMsVerifier-specific error types: <code>ErrModelNotVerified</code>,
+<code>ErrVerificationFailed</code>,
+<code>ErrLLMsVerifierUnreachable</code>.</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-data-model-integration">3.2 Data Model Integration</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I-DM-001</td>
+<td>HelixTranslate SHALL consume <code>VerifiedConfig</code> struct from
+LLMsVerifier's <code>verified_config_generator.go</code>.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>I-DM-002</td>
+<td>HelixTranslate's model representation SHALL be mappable from
+<code>VerifiedModelConfig</code> struct.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>I-DM-003</td>
+<td>Provider representation SHALL be mappable from
+<code>VerifiedProviderConfig</code> struct.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>I-DM-004</td>
+<td>Verification score SHALL be stored and exposed in HelixTranslate's
+model metadata.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>I-DM-005</td>
+<td>Feature flags (streaming, tool_calling, embeddings, vision, mcp,
+lsp, acp) SHALL be propagated from LLMsVerifier to HelixTranslate model
+objects.</td>
+<td>Critical</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-build-and-dependency-integration">3.3 Build and Dependency
+Integration</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I-BUILD-001</td>
+<td><code>make build</code> SHALL include LLMsVerifier module
+compilation.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>I-BUILD-002</td>
+<td><code>go mod tidy</code> SHALL resolve all LLMsVerifier dependencies
+cleanly.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>I-BUILD-003</td>
+<td>Docker build (<code>Dockerfile</code>) SHALL include LLMsVerifier
+module and its dependencies.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>I-BUILD-004</td>
+<td>Build verification SHALL confirm all LLMsVerifier providers are
+linked.</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<h3 id="34-runtime-integration-flow">3.4 Runtime Integration Flow</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I-RT-001</td>
+<td><strong>Startup Flow</strong>: (1) Load HelixTranslate config, (2)
+Initialize LLMsVerifier client with API key from config/.env, (3) Fetch
+verified models from LLMsVerifier, (4) Populate HelixTranslate registry
+with verified models only, (5) Begin periodic sync.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>I-RT-002</td>
+<td><strong>Translation Request Flow</strong>: (1) User selects
+translation parameters, (2) HelixTranslate queries LLMsVerifier-enabled
+registry, (3) ONLY verified models presented, (4) User selects model,
+(5) Translation executes with verified model.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>I-RT-003</td>
+<td><strong>Model Update Flow</strong>: (1) LLMsVerifier detects model
+changes, (2) Push/pull notification to HelixTranslate, (3)
+HelixTranslate refreshes model cache, (4) WebSocket broadcast to
+connected clients, (5) UI updates with new verified models.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>I-RT-004</td>
+<td><strong>Provider Addition Flow</strong>: (1) New provider configured
+in LLMsVerifier, (2) Verification completes, (3) Provider appears in
+HelixTranslate after sync, (4) Models from new provider available for
+translation.</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<h3 id="35-helixagent-reference-integration-pattern">3.5 HelixAgent
+Reference Integration Pattern</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I-REF-001</td>
+<td>HelixAgent's integration pattern (51+ providers, 35 MCPs) SHALL be
+studied and replicated for HelixTranslate.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>I-REF-002</td>
+<td>HelixAgent's submodule pattern (Agentic, Auth, Benchmark, Cache,
+Claritas, Concurrency, Containers, Database, Embeddings, EventBus,
+Formatters, HelixLLM, HelixMemory, HelixQA, etc.) SHALL inform
+HelixTranslate's architecture.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>I-REF-003</td>
+<td>API key management pattern from HelixAgent SHALL be replicated:
+config file or .env, 600 permissions, gitignore protection.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>I-REF-004</td>
+<td>HelixAgent's verification and challenge patterns SHALL be applied to
+HelixTranslate's LLMsVerifier integration.</td>
+<td>Critical</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-testing-requirements">4. TESTING REQUIREMENTS</h2>
+<h3 id="41-test-coverage-requirements---critical">4.1 Test Coverage
+Requirements - CRITICAL</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T-COV-001</td>
+<td><strong>100% test coverage</strong> SHALL be achieved for ALL
+LLMsVerifier integration code.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-COV-002</td>
+<td>Unit tests SHALL cover: LLMsVerifier client initialization, config
+loading, model filtering, error handling, caching logic.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-COV-003</td>
+<td>Integration tests SHALL cover: full LLMsVerifier API communication,
+model retrieval, verification gate, config generation.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-COV-004</td>
+<td>E2E tests SHALL cover: complete translation workflow with
+LLMsVerifier-verified models only.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-COV-005</td>
+<td>ALL supported test types SHALL be implemented: unit, integration,
+E2E, automation, security/penetration, benchmark, chaos, stress,
+property-based, contract.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-COV-006</td>
+<td><strong>Anti-bluff testing (CONST-035)</strong>: Tests MUST confirm
+codebase really works as expected, not just that test assertions
+pass.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-COV-007</td>
+<td>History of tests passing but features not working SHALL NOT repeat.
+Every test MUST verify actual behavior.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-COV-008</td>
+<td>Test and Challenge execution MUST guarantee quality, completion, and
+full usability.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-COV-009</td>
+<td>Mocks/stubs/fakes MAY ONLY be used in unit tests
+(<code>_test.go</code> files under <code>go test -short</code>). ALL
+other test types MUST use real LLMsVerifier instance.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-COV-010</td>
+<td>Fallback chains MUST be tested with actual failures (per
+Constitution).</td>
+<td>Critical</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-challenge-requirements---critical">4.2 Challenge Requirements
+- CRITICAL</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T-CHAL-001</td>
+<td>Challenge scripts SHALL be created in
+<code>challenges/scripts/</code> directory for ALL integration
+components.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-002</td>
+<td>Challenge: <code>llmsverifier_connectivity_challenge.sh</code> -
+Verify HelixTranslate can connect to LLMsVerifier API.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-003</td>
+<td>Challenge: <code>model_verification_gate_challenge.sh</code> -
+Confirm unverified models are rejected.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-004</td>
+<td>Challenge: <code>verified_model_translation_challenge.sh</code> -
+Confirm translation works with verified models.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-005</td>
+<td>Challenge: <code>provider_sync_challenge.sh</code> - Verify all 25+
+providers synchronize correctly.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-006</td>
+<td>Challenge: <code>api_key_provisioning_challenge.sh</code> - Verify
+API keys loaded from config/.env.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-007</td>
+<td>Challenge: <code>mcp_integration_challenge.sh</code> - Verify MCP
+functionality with verified models.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-008</td>
+<td>Challenge: <code>lsp_integration_challenge.sh</code> - Verify LSP
+functionality with verified models.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-009</td>
+<td>Challenge: <code>acp_integration_challenge.sh</code> - Verify ACP
+functionality with verified models.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-010</td>
+<td>Challenge: <code>embeddings_integration_challenge.sh</code> - Verify
+embeddings with verified models.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-011</td>
+<td>Challenge: <code>rag_integration_challenge.sh</code> - Verify RAG
+functionality with verified models.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-012</td>
+<td>Challenge: <code>skills_integration_challenge.sh</code> - Verify
+skills/plugins with verified models.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-013</td>
+<td>Challenge: <code>cache_invalidation_challenge.sh</code> - Verify
+cache refresh triggers.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-014</td>
+<td>Challenge: <code>degraded_mode_challenge.sh</code> - Verify graceful
+degradation when LLMsVerifier is down.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-015</td>
+<td>Challenge: <code>host_power_management_challenge.sh</code> - Verify
+CONST-033 compliance.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-016</td>
+<td>Challenge: <code>no_suspend_calls_challenge.sh</code> - Verify no
+forbidden power management calls.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-017</td>
+<td>ALL challenges SHALL use real HTTP requests and live services (per
+Constitution).</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-CHAL-018</td>
+<td><code>./challenges/scripts/run_all_challenges.sh</code> SHALL
+execute ALL challenges and report pass/fail.</td>
+<td>Critical</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-anti-bluff-testing-requirements---critical">4.3 Anti-Bluff
+Testing Requirements - CRITICAL</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T-AB-001</td>
+<td>Tests MUST verify at the protocol layer: TCP open is the floor, NOT
+the ceiling.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-AB-002</td>
+<td>Postgres verification: execute <code>SELECT 1</code> and confirm
+result.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-AB-003</td>
+<td>Redis verification: execute <code>PING</code> and confirm
+<code>PONG</code> response.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-AB-004</td>
+<td>LLMsVerifier API: real HTTP request with real response and non-empty
+body.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-AB-005</td>
+<td>Model verification: confirm actual model verification status, not
+just API reachability.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-AB-006</td>
+<td>Container <code>Up</code> status is NOT sufficient - application
+must be actually healthy internally.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-AB-007</td>
+<td>Grep-only validation is NEVER sufficient.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-AB-008</td>
+<td>Every fix MUST be verified from all angles: runtime testing, compile
+verification, code structure checks, dependency checks, backward
+compatibility.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-AB-009</td>
+<td>Reproduction-before-fix (CONST-032): Write Challenge first, confirm
+fail, then fix, confirm pass.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-AB-010</td>
+<td>Evidence MUST be pasted from actual command runs in the same session
+as changes.</td>
+<td>Critical</td>
+</tr>
+</tbody>
+</table>
+<h3 id="44-testing-infrastructure-requirements">4.4 Testing
+Infrastructure Requirements</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T-INF-001</td>
+<td>Resource limits: ALL test/challenge execution limited to 30-40% host
+resources (<code>GOMAXPROCS=2</code>, <code>nice -n 19</code>,
+<code>ionice -c 3</code>, <code>-p 1</code>).</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-INF-002</td>
+<td>Test database: Use real SQLite with SQL Cipher (per LLMsVerifier
+pattern).</td>
+<td>High</td>
+</tr>
+<tr>
+<td>T-INF-003</td>
+<td>Test LLMsVerifier instance SHALL be available for integration
+tests.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>T-INF-004</td>
+<td>Parallel test execution SHALL be configurable and
+resource-bounded.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>T-INF-005</td>
+<td>Test reports SHALL be generated in multiple formats: JSON, HTML,
+JUnit XML.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>T-INF-006</td>
+<td>Coverage reports SHALL be generated with <code>coverage.out</code>,
+<code>coverage.html</code>.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>T-INF-007</td>
+<td>Benchmark tests SHALL measure: model retrieval latency, verification
+gate latency, sync throughput.</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-documentation-requirements">5. DOCUMENTATION REQUIREMENTS</h2>
+<h3 id="51-primary-documentation---critical">5.1 Primary Documentation -
+CRITICAL</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D-DOC-001</td>
+<td><strong>Integration Architecture Document</strong>: Complete
+architecture diagram showing HelixTranslate &lt;-&gt; LLMsVerifier data
+flow, component interactions, and integration points.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>D-DOC-002</td>
+<td><strong>API Integration Guide</strong>: Document all LLMsVerifier
+API endpoints used, request/response formats, error codes, retry
+logic.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>D-DOC-003</td>
+<td><strong>Configuration Reference</strong>: EVERY single configuration
+option in main HelixTranslate config file (or .env) MUST be documented
+with: name, type, default value, description, example, validation
+rules.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>D-DOC-004</td>
+<td><strong>Migration Guide</strong>: Step-by-step guide for migrating
+from hardcoded models to LLMsVerifier SSOT.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>D-DOC-005</td>
+<td><strong>Developer Guide</strong>: How to add new providers, modify
+verification criteria, extend scoring.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>D-DOC-006</td>
+<td><strong>Troubleshooting Guide</strong>: Common issues, diagnostics,
+resolution steps for LLMsVerifier integration.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>D-DOC-007</td>
+<td><strong>Security Guide</strong>: API key management, authentication,
+encryption, secure configuration practices.</td>
+<td>Critical</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-constitution-and-governance-documentation---critical">5.2
+Constitution and Governance Documentation - CRITICAL</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D-GOV-001</td>
+<td><code>CONSTITUTION.md</code> SHALL contain explicit clause mandating
+LLMsVerifier as SSOT for all models.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>D-GOV-002</td>
+<td><code>CLAUDE.md</code> SHALL contain exact implementation guidance
+for LLMsVerifier integration with codebase references.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>D-GOV-003</td>
+<td><code>AGENTS.MD</code> SHALL contain operational procedures for
+LLMsVerifier integration maintenance.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>D-GOV-004</td>
+<td>ALL submodule <code>CONSTITUTION.md</code> files SHALL be updated
+with the same LLMsVerifier SSOT mandate.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>D-GOV-005</td>
+<td>ALL submodule <code>CLAUDE.md</code> files SHALL be updated with
+LLMsVerifier integration guidance.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>D-GOV-006</td>
+<td>ALL submodule <code>AGENTS.MD</code> files SHALL be updated with
+operational procedures.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>D-GOV-007</td>
+<td>Documentation SHALL reference exact file paths, function names, and
+line numbers where applicable.</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-user-documentation---high-priority">5.3 User Documentation -
+HIGH PRIORITY</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D-USER-001</td>
+<td><strong>End-User Guide</strong>: How to select verified models for
+translation, interpret verification scores, understand feature
+indicators.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>D-USER-002</td>
+<td><strong>Admin Guide</strong>: How to configure LLMsVerifier
+integration, manage API keys, trigger manual sync, view verification
+status.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>D-USER-003</td>
+<td><strong>Website Documentation</strong> (<code>Website/</code>
+directory): Update public-facing docs to mention LLMsVerifier
+integration.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>D-USER-004</td>
+<td>Video course content SHALL be updated if it covers model selection
+(reference: LLMsVerifier's
+<code>ACP_VIDEO_COURSE_CONTENT.md</code>).</td>
+<td>Low</td>
+</tr>
+</tbody>
+</table>
+<h3 id="54-testing-documentation---critical">5.4 Testing Documentation -
+CRITICAL</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D-TEST-001</td>
+<td><strong>Test Strategy Document</strong>: Complete testing strategy
+for LLMsVerifier integration covering ALL test types.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>D-TEST-002</td>
+<td><strong>Challenge Documentation</strong>: Each challenge SHALL have
+documentation explaining what it tests, how to run it, expected
+output.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>D-TEST-003</td>
+<td><strong>Test Results Documentation</strong>: Format for reporting
+test results with pass/fail, coverage percentage, anti-bluff
+verification.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>D-TEST-004</td>
+<td><code>TESTING_FRAMEWORK_SPECIFICATION.md</code> SHALL be updated
+with LLMsVerifier integration test specifications.</td>
+<td>Critical</td>
+</tr>
+</tbody>
+</table>
+<h3 id="55-api-documentation---high-priority">5.5 API Documentation -
+HIGH PRIORITY</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D-API-001</td>
+<td>New REST endpoints (<code>/api/v1/verified-models</code>,
+<code>/api/v1/verification-status</code>) SHALL be documented with
+OpenAPI/Swagger specs.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>D-API-002</td>
+<td>WebSocket events for model updates SHALL be documented with message
+schemas.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>D-API-003</td>
+<td>gRPC protocol definitions SHALL be updated if applicable (reference
+<code>pkg/grpc/</code>).</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-ux-requirements">6. UX REQUIREMENTS</h2>
+<h3 id="61-enterprise-grade-translation-tool-ux---critical">6.1
+Enterprise-Grade Translation Tool UX - CRITICAL</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UX-001</td>
+<td>Model selection interface SHALL display ONLY verified models with
+clear verification badges.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>UX-002</td>
+<td>Each model SHALL display: verification score (0-100), last verified
+timestamp, supported features icons, cost per 1M tokens.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>UX-003</td>
+<td>Models SHALL be sortable by: verification score, cost, response
+time, feature count.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>UX-004</td>
+<td>Models SHALL be filterable by: provider, features (streaming, tool
+calling, vision, embeddings, MCP, LSP, ACP), price range, verification
+status.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>UX-005</td>
+<td>Unverified or failed models SHALL be completely hidden from end
+users (not grayed out - invisible).</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>UX-006</td>
+<td>If no verified models are available for a provider, that provider
+SHALL be marked as "No verified models" or hidden.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>UX-007</td>
+<td>Verification score SHALL be color-coded: green (80-100), yellow
+(50-79), orange (20-49), red (0-19).</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>UX-008</td>
+<td>Feature support SHALL be displayed as icon grid with hover tooltips
+explaining each feature.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>UX-009</td>
+<td>Cost comparison SHALL be available across verified models for the
+same translation task.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>UX-010</td>
+<td>Translation quality estimation SHALL be shown based on model's
+verification score and features.</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62-real-time-feedback---high-priority">6.2 Real-Time Feedback -
+HIGH PRIORITY</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UX-011</td>
+<td>Real-time model sync status SHALL be visible in UI (last sync time,
+next sync time, sync health).</td>
+<td>High</td>
+</tr>
+<tr>
+<td>UX-012</td>
+<td>New verified models SHALL appear in UI without page refresh
+(WebSocket push).</td>
+<td>High</td>
+</tr>
+<tr>
+<td>UX-013</td>
+<td>Model verification failures SHALL trigger user-visible notifications
+with explanation.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>UX-014</td>
+<td>Degraded mode (LLMsVerifier unreachable) SHALL show clear warning
+banner with cache age indicator.</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<h3 id="63-professional-translation-workflow---high-priority">6.3
+Professional Translation Workflow - HIGH PRIORITY</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UX-015</td>
+<td>Translation job setup SHALL include model recommendation based on:
+language pair, document type, quality requirements, budget.</td>
+<td>High</td>
+</tr>
+<tr>
+<td>UX-016</td>
+<td>Batch translation SHALL show per-model verification status in job
+configuration.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>UX-017</td>
+<td>Distributed translation SHALL show verification status of models on
+each worker node.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>UX-018</td>
+<td>Translation progress SHALL include model name and verification score
+in progress metadata.</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>UX-019</td>
+<td>Post-translation report SHALL include which verified model was used
+and its performance metrics.</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<h3 id="64-accessibility-and-internationalization---medium-priority">6.4
+Accessibility and Internationalization - MEDIUM PRIORITY</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UX-020</td>
+<td>All verification status indicators SHALL be accessible (ARIA labels,
+screen reader compatible).</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>UX-021</td>
+<td>Verification score display SHALL support screen readers with verbal
+description.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>UX-022</td>
+<td>UI text SHALL be internationalized for supported languages.</td>
+<td>Low</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-configuration-requirements">7. CONFIGURATION REQUIREMENTS</h2>
+<h3 id="71-llmsverifier-configuration-section---critical">7.1
+LLMsVerifier Configuration Section - CRITICAL</h3>
+<p>The following configuration options MUST be available in
+HelixTranslate's main config file (config.json or .env). EVERY option
+MUST be documented.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Config Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CFG-001</td>
+<td><code>llmsverifier.enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Master switch for LLMsVerifier integration</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-002</td>
+<td><code>llmsverifier.base_url</code></td>
+<td>string</td>
+<td><code>"http://localhost:8080"</code></td>
+<td>LLMsVerifier API base URL</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-003</td>
+<td><code>llmsverifier.api_key</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>API key for LLMsVerifier authentication</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-004</td>
+<td><code>llmsverifier.timeout_seconds</code></td>
+<td>integer</td>
+<td><code>30</code></td>
+<td>HTTP request timeout</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-005</td>
+<td><code>llmsverifier.cache_ttl_minutes</code></td>
+<td>integer</td>
+<td><code>60</code></td>
+<td>Model cache time-to-live</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-006</td>
+<td><code>llmsverifier.strict_mode</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>If true, reject ALL unverified models. If false, warn but allow
+cached verified models.</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-007</td>
+<td><code>llmsverifier.verification_enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Enable/disable verification gate</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-008</td>
+<td><code>llmsverifier.sync_interval_minutes</code></td>
+<td>integer</td>
+<td><code>30</code></td>
+<td>Automatic sync interval with LLMsVerifier</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-009</td>
+<td><code>llmsverifier.retry_max_attempts</code></td>
+<td>integer</td>
+<td><code>3</code></td>
+<td>Max retry attempts for failed API calls</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-010</td>
+<td><code>llmsverifier.retry_backoff_seconds</code></td>
+<td>integer</td>
+<td><code>5</code></td>
+<td>Initial backoff for retries (exponential)</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-011</td>
+<td><code>llmsverifier.circuit_breaker_threshold</code></td>
+<td>integer</td>
+<td><code>5</code></td>
+<td>Consecutive failures before circuit opens</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-012</td>
+<td><code>llmsverifier.circuit_breaker_timeout_seconds</code></td>
+<td>integer</td>
+<td><code>60</code></td>
+<td>Circuit breaker timeout before half-open</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-013</td>
+<td><code>llmsverifier.min_verification_score</code></td>
+<td>float</td>
+<td><code>0.0</code></td>
+<td>Minimum verification score for model eligibility</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-014</td>
+<td><code>llmsverifier.helixagent_api_key</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>API key for HelixAgent integration</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-015</td>
+<td><code>llmsverifier.helixagent_base_url</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>HelixAgent base URL for MCP/LSP/ACP services</td>
+<td>Critical</td>
+</tr>
+</tbody>
+</table>
+<h3 id="72-provider-configuration---critical">7.2 Provider Configuration
+- CRITICAL</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Config Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CFG-016</td>
+<td><code>providers.*.enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Enable/disable specific provider</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-017</td>
+<td><code>providers.*.api_key</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Provider-specific API key (from .env)</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-018</td>
+<td><code>providers.*.api_key_env</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Environment variable name for provider API key</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-019</td>
+<td><code>providers.*.base_url</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Provider-specific API base URL override</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-020</td>
+<td><code>providers.*.rate_limit_rpm</code></td>
+<td>integer</td>
+<td><code>0</code></td>
+<td>Rate limit (requests per minute), 0 = unlimited</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-021</td>
+<td><code>providers.*.timeout_seconds</code></td>
+<td>integer</td>
+<td><code>30</code></td>
+<td>Provider-specific timeout</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>CFG-022</td>
+<td><code>providers.*.model_filter</code></td>
+<td>string[]</td>
+<td><code>[]</code></td>
+<td>Whitelist of model IDs to include (empty = all verified)</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>CFG-023</td>
+<td><code>providers.*.require_verification</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>If false, skip verification for this provider (not recommended)</td>
+<td>Critical</td>
+</tr>
+</tbody>
+</table>
+<h3 id="73-feature-flags---high-priority">7.3 Feature Flags - HIGH
+PRIORITY</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Config Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CFG-024</td>
+<td><code>features.mcp_enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Enable MCP integration</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-025</td>
+<td><code>features.lsp_enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Enable LSP integration</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-026</td>
+<td><code>features.acp_enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Enable ACP integration</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-027</td>
+<td><code>features.embeddings_enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Enable embeddings integration</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-028</td>
+<td><code>features.rag_enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Enable RAG integration</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-029</td>
+<td><code>features.skills_enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Enable skills integration</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-030</td>
+<td><code>features.plugins_enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Enable plugins integration</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-031</td>
+<td><code>features.streaming_enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Require streaming support for models</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-032</td>
+<td><code>features.tool_calling_enabled</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Require tool calling support for models</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-033</td>
+<td><code>features.vision_enabled</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>Require vision support for models</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<h3 id="74-environment-variable-mapping---critical">7.4 Environment
+Variable Mapping - CRITICAL</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Environment Variable</th>
+<th>Maps To</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CFG-ENV-001</td>
+<td><code>HELIX_LLV_ENABLED</code></td>
+<td><code>llmsverifier.enabled</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-002</td>
+<td><code>HELIX_LLV_BASE_URL</code></td>
+<td><code>llmsverifier.base_url</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-003</td>
+<td><code>HELIX_LLV_API_KEY</code></td>
+<td><code>llmsverifier.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-004</td>
+<td><code>HELIX_LLV_TIMEOUT</code></td>
+<td><code>llmsverifier.timeout_seconds</code></td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-ENV-005</td>
+<td><code>HELIX_LLV_CACHE_TTL</code></td>
+<td><code>llmsverifier.cache_ttl_minutes</code></td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-ENV-006</td>
+<td><code>HELIX_LLV_STRICT_MODE</code></td>
+<td><code>llmsverifier.strict_mode</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-007</td>
+<td><code>HELIX_LLV_SYNC_INTERVAL</code></td>
+<td><code>llmsverifier.sync_interval_minutes</code></td>
+<td>High</td>
+</tr>
+<tr>
+<td>CFG-ENV-008</td>
+<td><code>HELIX_AGENT_API_KEY</code></td>
+<td><code>llmsverifier.helixagent_api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-009</td>
+<td><code>HELIX_AGENT_BASE_URL</code></td>
+<td><code>llmsverifier.helixagent_base_url</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-010</td>
+<td><code>ANTHROPIC_API_KEY</code></td>
+<td><code>providers.anthropic.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-011</td>
+<td><code>OPENAI_API_KEY</code></td>
+<td><code>providers.openai.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-012</td>
+<td><code>GROQ_API_KEY</code></td>
+<td><code>providers.groq.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-013</td>
+<td><code>DEEPSEEK_API_KEY</code></td>
+<td><code>providers.deepseek.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-014</td>
+<td><code>MISTRAL_API_KEY</code></td>
+<td><code>providers.mistral.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-015</td>
+<td><code>COHERE_API_KEY</code></td>
+<td><code>providers.cohere.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-016</td>
+<td><code>TOGETHERAI_API_KEY</code></td>
+<td><code>providers.togetherai.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-017</td>
+<td><code>XAI_API_KEY</code></td>
+<td><code>providers.xai.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-018</td>
+<td><code>HYPERBOLIC_API_KEY</code></td>
+<td><code>providers.hyperbolic.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-019</td>
+<td><code>SAMBANOVA_API_KEY</code></td>
+<td><code>providers.sambanova.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-020</td>
+<td><code>CEREBRAS_API_KEY</code></td>
+<td><code>providers.cerebras.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-021</td>
+<td><code>CLOUDFLARE_API_KEY</code></td>
+<td><code>providers.cloudflare.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-022</td>
+<td><code>KIMI_API_KEY</code></td>
+<td><code>providers.kimi.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-023</td>
+<td><code>NOVITA_API_KEY</code></td>
+<td><code>providers.novita.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-024</td>
+<td><code>QWEN_API_KEY</code></td>
+<td><code>providers.qwen.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-025</td>
+<td><code>REPLICATE_API_KEY</code></td>
+<td><code>providers.replicate.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-026</td>
+<td><code>SILICONFLOW_API_KEY</code></td>
+<td><code>providers.siliconflow.api_key</code></td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>CFG-ENV-027</td>
+<td><code>UPSTAGE_API_KEY</code></td>
+<td><code>providers.upstage.api_key</code></td>
+<td>Critical</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-constraints-and-assumptions">8. CONSTRAINTS AND
+ASSUMPTIONS</h2>
+<h3 id="81-technical-constraints">8.1 Technical Constraints</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Constraint</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C-001</td>
+<td><strong>Go 1.25.2</strong>: HelixTranslate uses Go 1.25.2.
+LLMsVerifier integration MUST be compatible.</td>
+<td>Build compatibility</td>
+</tr>
+<tr>
+<td>C-002</td>
+<td><strong>No CI/CD Pipelines</strong>: Per Constitution, no GitHub
+Actions, GitLab CI, Jenkins, etc. All builds manual or Makefile.</td>
+<td>Build process</td>
+</tr>
+<tr>
+<td>C-003</td>
+<td><strong>SSH URLs Only</strong>: No HTTPS for Git. SSH URLs only for
+all submodule operations.</td>
+<td>Repository access</td>
+</tr>
+<tr>
+<td>C-004</td>
+<td><strong>No Manual Container Commands</strong>: Container
+orchestration owned by project binary/orchestrator.</td>
+<td>Deployment</td>
+</tr>
+<tr>
+<td>C-005</td>
+<td><strong>Resource Limits</strong>: ALL tests/challenges limited to
+30-40% host resources.</td>
+<td>Test execution</td>
+</tr>
+<tr>
+<td>C-006</td>
+<td><strong>No Mocks in Production</strong>: Mocks/stubs/fakes ONLY in
+unit tests. Real services for all other tests.</td>
+<td>Testing approach</td>
+</tr>
+<tr>
+<td>C-007</td>
+<td><strong>SQLite with SQL Cipher</strong>: Database encryption
+required for any local model data storage.</td>
+<td>Data storage</td>
+</tr>
+<tr>
+<td>C-008</td>
+<td><strong>Event-Driven Architecture</strong>: HelixTranslate is
+event-driven. Integration MUST emit/consume events.</td>
+<td>Architecture</td>
+</tr>
+<tr>
+<td>C-009</td>
+<td><strong>HTTP/3 Support</strong>: REST API has HTTP/3 support.
+LLMsVerifier client SHOULD support HTTP/2 at minimum.</td>
+<td>Protocol</td>
+</tr>
+<tr>
+<td>C-010</td>
+<td><strong>WebSocket Events</strong>: Real-time events via WebSocket.
+Model updates MUST be WebSocket-broadcast.</td>
+<td>Real-time updates</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-business-constraints">8.2 Business Constraints</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Constraint</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C-011</td>
+<td><strong>Single Source of Truth</strong>: LLMsVerifier is the ONLY
+source. No hardcoded fallbacks allowed.</td>
+<td>Design approach</td>
+</tr>
+<tr>
+<td>C-012</td>
+<td><strong>Enterprise-Grade UX</strong>: Must be cutting-edge
+professional translation tool.</td>
+<td>UX investment</td>
+</tr>
+<tr>
+<td>C-013</td>
+<td><strong>Heavy Translation Use Case</strong>: Must support all
+providers and models for intensive translation workloads.</td>
+<td>Performance</td>
+</tr>
+<tr>
+<td>C-014</td>
+<td><strong>No Fabricated Results</strong>: Anti-bluff mandate. Real
+verification only.</td>
+<td>Quality assurance</td>
+</tr>
+<tr>
+<td>C-015</td>
+<td><strong>Host Power Management</strong>: CONST-033 prohibits any host
+power state transitions.</td>
+<td>System stability</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83-assumptions">8.3 Assumptions</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Assumption</th>
+<th>Risk if Invalid</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A-001</td>
+<td>LLMsVerifier instance is accessible at configured BaseURL.</td>
+<td>Degraded mode activation</td>
+</tr>
+<tr>
+<td>A-002</td>
+<td>LLMsVerifier has completed at least one full verification
+cycle.</td>
+<td>No models available</td>
+</tr>
+<tr>
+<td>A-003</td>
+<td>API keys for providers are valid and have sufficient quota.</td>
+<td>Translation failures</td>
+</tr>
+<tr>
+<td>A-004</td>
+<td>HelixAgent (reference) integration pattern is stable and
+correct.</td>
+<td>Design divergence</td>
+</tr>
+<tr>
+<td>A-005</td>
+<td>Network connectivity between HelixTranslate and LLMsVerifier is
+reliable.</td>
+<td>Cache dependency</td>
+</tr>
+<tr>
+<td>A-006</td>
+<td>Go module <code>digital.vasic.llmsverifier</code> is
+publishable/importable.</td>
+<td>Dependency resolution</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="9-success-criteria">9. SUCCESS CRITERIA</h2>
+<h3 id="91-functional-success-criteria---measurable">9.1 Functional
+Success Criteria - MEASURABLE</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Criterion</th>
+<th>Measurement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S-F-001</td>
+<td>ALL translation requests use ONLY LLMsVerifier-verified models.</td>
+<td>100% of <code>/api/v1/translate</code> calls use verified models.
+Log audit confirms.</td>
+</tr>
+<tr>
+<td>S-F-002</td>
+<td>Zero unverified models are presented to end users.</td>
+<td>UI/API response inspection shows only
+<code>VerificationStatus == "verified"</code> models.</td>
+</tr>
+<tr>
+<td>S-F-003</td>
+<td>All 25+ LLMsVerifier providers are available in HelixTranslate.</td>
+<td>Provider count in <code>/api/v1/providers</code> &gt;= 25.</td>
+</tr>
+<tr>
+<td>S-F-004</td>
+<td>MCP, LSP, ACP, Embeddings, RAG, Skills, Plugins are all
+functional.</td>
+<td>Each feature has passing challenge script.</td>
+</tr>
+<tr>
+<td>S-F-005</td>
+<td>API keys for LLMsVerifier and HelixAgent are configurable via
+config/.env.</td>
+<td>Config loading tests pass with all 27+ environment variables.</td>
+</tr>
+<tr>
+<td>S-F-006</td>
+<td>Model sync occurs automatically at configured intervals.</td>
+<td>WebSocket events confirm sync. Log timestamps match interval.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="92-integration-success-criteria---measurable">9.2 Integration
+Success Criteria - MEASURABLE</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Criterion</th>
+<th>Measurement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S-I-001</td>
+<td>LLMsVerifier Go module is importable and builds successfully.</td>
+<td><code>go build</code> completes with zero errors.
+<code>go mod tidy</code> resolves cleanly.</td>
+</tr>
+<tr>
+<td>S-I-002</td>
+<td><code>pkg/models/registry.go</code> delegates to LLMsVerifier with
+no hardcoded models.</td>
+<td>Code review confirms no hardcoded model lists in registry.</td>
+</tr>
+<tr>
+<td>S-I-003</td>
+<td><code>internal/config/config.go</code> includes all 33+ LLMsVerifier
+configuration options.</td>
+<td>Config test enumerates all options and validates defaults.</td>
+</tr>
+<tr>
+<td>S-I-004</td>
+<td>All integration code follows HelixTranslate event-driven
+patterns.</td>
+<td>Code review confirms event emission/consumption for model
+changes.</td>
+</tr>
+<tr>
+<td>S-I-005</td>
+<td>Docker build includes LLMsVerifier dependencies.</td>
+<td><code>docker build</code> succeeds and image runs with LLMsVerifier
+integration.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="93-testing-success-criteria---measurable">9.3 Testing Success
+Criteria - MEASURABLE</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Criterion</th>
+<th>Measurement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S-T-001</td>
+<td>100% code coverage for LLMsVerifier integration code.</td>
+<td><code>coverage.out</code> shows 100% for integration package.</td>
+</tr>
+<tr>
+<td>S-T-002</td>
+<td>ALL 17+ challenge scripts pass.</td>
+<td><code>./challenges/scripts/run_all_challenges.sh</code> exits
+0.</td>
+</tr>
+<tr>
+<td>S-T-003</td>
+<td>Anti-bluff tests confirm real functionality.</td>
+<td>Challenge logs show actual HTTP requests with real responses.</td>
+</tr>
+<tr>
+<td>S-T-004</td>
+<td>No test passes while feature is broken.</td>
+<td>Deliberate bug injection causes test failure.</td>
+</tr>
+<tr>
+<td>S-T-005</td>
+<td>Unit tests use mocks only; integration+ tests use real
+services.</td>
+<td>Code review of <code>_test.go</code> files confirms pattern.</td>
+</tr>
+<tr>
+<td>S-T-006</td>
+<td>Resource limits respected during test execution.</td>
+<td><code>htop</code>/<code>ps</code> confirms &lt; 40% resource usage
+during test runs.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="94-documentation-success-criteria---measurable">9.4
+Documentation Success Criteria - MEASURABLE</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Criterion</th>
+<th>Measurement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S-D-001</td>
+<td>ALL 33+ configuration options are documented.</td>
+<td>Documentation checklist confirms every CFG-* item has corresponding
+docs.</td>
+</tr>
+<tr>
+<td>S-D-002</td>
+<td><code>CONSTITUTION.md</code>, <code>CLAUDE.md</code>,
+<code>AGENTS.MD</code> in HelixTranslate contain LLMsVerifier SSOT
+clause.</td>
+<td>File search finds explicit LLMsVerifier SSOT mandate.</td>
+</tr>
+<tr>
+<td>S-D-003</td>
+<td>ALL submodule governance docs updated.</td>
+<td>Script verifies all submodule <code>CONSTITUTION.md</code>,
+<code>CLAUDE.md</code>, <code>AGENTS.MD</code> contain clause.</td>
+</tr>
+<tr>
+<td>S-D-004</td>
+<td>Integration Architecture Document exists with data flow
+diagrams.</td>
+<td>Document review confirms architecture diagrams and flow
+descriptions.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="95-ux-success-criteria---measurable">9.5 UX Success Criteria -
+MEASURABLE</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Criterion</th>
+<th>Measurement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S-UX-001</td>
+<td>End users see only verified models with scores and feature
+icons.</td>
+<td>Screenshot/UI inspection confirms no unverified models visible.</td>
+</tr>
+<tr>
+<td>S-UX-002</td>
+<td>Model selection includes sorting, filtering, and
+recommendation.</td>
+<td>UI test confirms sort/filter/recommendation functionality.</td>
+</tr>
+<tr>
+<td>S-UX-003</td>
+<td>Real-time model updates appear without page refresh.</td>
+<td>WebSocket message triggers UI update within 2 seconds.</td>
+</tr>
+<tr>
+<td>S-UX-004</td>
+<td>Degraded mode shows clear warning when LLMsVerifier
+unreachable.</td>
+<td>Network partition test confirms warning banner display.</td>
+</tr>
+<tr>
+<td>S-UX-005</td>
+<td>Enterprise-grade professional appearance throughout.</td>
+<td>Design review against enterprise UX standards.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="requirements-traceability-matrix">REQUIREMENTS TRACEABILITY
+MATRIX</h2>
+<table>
+<thead>
+<tr>
+<th>User Requirement</th>
+<th>Functional</th>
+<th>Non-Functional</th>
+<th>Integration</th>
+<th>Testing</th>
+<th>Documentation</th>
+<th>UX</th>
+<th>Config</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SSOT for all models</td>
+<td>F-SSOT-001..007</td>
+<td>N-REL-001..007</td>
+<td>I-CODE-001..012</td>
+<td>T-COV-001..010</td>
+<td>D-DOC-001..007</td>
+<td>UX-001..006</td>
+<td>CFG-001..007</td>
+</tr>
+<tr>
+<td>Only validated/verified/scored models</td>
+<td>F-GATE-001..009</td>
+<td>N-SEC-001..010</td>
+<td>I-DM-001..005</td>
+<td>T-CHAL-001..018</td>
+<td>D-TEST-001..004</td>
+<td>UX-001..005</td>
+<td>CFG-013, CFG-023</td>
+</tr>
+<tr>
+<td>Step-by-step codebase guide</td>
+<td>F-GOV-001..008</td>
+<td>N-MAINT-001..007</td>
+<td>I-CODE-001..012, I-REF-001..004</td>
+<td>T-COV-001..010, T-AB-001..010</td>
+<td>D-GOV-001..007</td>
+<td>-</td>
+<td>CFG-001..033</td>
+</tr>
+<tr>
+<td>In-depth repo analysis</td>
+<td>-</td>
+<td>-</td>
+<td>I-REF-001..004</td>
+<td>-</td>
+<td>D-DOC-001..007</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Rock-solid bluff-proof plan</td>
+<td>F-GATE-001..009</td>
+<td>N-REL-001..007, N-SEC-001..010</td>
+<td>I-RT-001..004</td>
+<td>T-AB-001..010, T-COV-006..010</td>
+<td>D-TEST-001..004</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Phased fine-grained tasks</td>
+<td>All functional</td>
+<td>All non-functional</td>
+<td>All integration</td>
+<td>All testing</td>
+<td>All documentation</td>
+<td>All UX</td>
+<td>All config</td>
+</tr>
+<tr>
+<td>Comprehensive, nothing skipped</td>
+<td>All requirements</td>
+<td>All requirements</td>
+<td>All requirements</td>
+<td>All requirements</td>
+<td>All requirements</td>
+<td>All UX</td>
+<td>All config</td>
+</tr>
+<tr>
+<td>Enterprise-grade UX</td>
+<td>F-TW-001..008</td>
+<td>N-PERF-001..010</td>
+<td>I-RT-001..004</td>
+<td>T-CHAL-002..004</td>
+<td>D-USER-001..004</td>
+<td>UX-001..022</td>
+<td>CFG-001..033</td>
+</tr>
+<tr>
+<td>All providers incorporated</td>
+<td>F-PROV-001..007</td>
+<td>N-SCL-001..004</td>
+<td>I-CODE-003..005</td>
+<td>T-CHAL-005</td>
+<td>D-DOC-001..007</td>
+<td>UX-006</td>
+<td>CFG-016..023</td>
+</tr>
+<tr>
+<td>All MCPs/LSPs/ACPs/Embeddings/RAGs/Skills/Plugins</td>
+<td>F-EXT-001..009</td>
+<td>N-PERF-001..010</td>
+<td>I-CODE-006..012</td>
+<td>T-CHAL-007..012</td>
+<td>D-DOC-001..007</td>
+<td>UX-008</td>
+<td>CFG-024..033</td>
+</tr>
+<tr>
+<td>API keys via config/.env</td>
+<td>F-API-005</td>
+<td>N-SEC-001..003</td>
+<td>I-CODE-002</td>
+<td>T-CHAL-006</td>
+<td>D-DOC-003</td>
+<td>-</td>
+<td>CFG-001..033, CFG-ENV-001..027</td>
+</tr>
+<tr>
+<td>ALL documentation prepared</td>
+<td>F-GOV-001..008</td>
+<td>N-MAINT-001..007</td>
+<td>I-CODE-001..012</td>
+<td>T-COV-001..010</td>
+<td>D-DOC-001..D-API-003</td>
+<td>UX-001..022</td>
+<td>CFG-001..033</td>
+</tr>
+<tr>
+<td>Every config option documented</td>
+<td>-</td>
+<td>-</td>
+<td>I-CODE-002</td>
+<td>-</td>
+<td>D-DOC-003</td>
+<td>-</td>
+<td>CFG-001..033, CFG-ENV-001..027</td>
+</tr>
+<tr>
+<td>Testing strategy 100% coverage</td>
+<td>F-GATE-001..009</td>
+<td>N-REL-001..007</td>
+<td>I-RT-001..004</td>
+<td>T-COV-001..010, T-CHAL-001..018, T-AB-001..010</td>
+<td>D-TEST-001..004</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Anti-bluff testing</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>T-AB-001..010, T-COV-006..010</td>
+<td>D-TEST-001..004</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Constitution/CLAUDE.MD/AGENTS.MD</td>
+<td>F-GOV-001..008</td>
+<td>N-MAINT-001..007</td>
+<td>-</td>
+<td>-</td>
+<td>D-GOV-001..007</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Submodules' docs updated</td>
+<td>F-GOV-004..008</td>
+<td>N-MAINT-001..007</td>
+<td>-</td>
+<td>-</td>
+<td>D-GOV-004..007</td>
+<td>-</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="phased-implementation-structure">PHASED IMPLEMENTATION
+STRUCTURE</h2>
+<h3 id="phase-1-foundation-and-analysis-prerequisites">Phase 1:
+Foundation and Analysis (Prerequisites)</h3>
+<ul>
+<li><strong>1.1</strong> Complete codebase analysis of ALL three
+repositories</li>
+<li><strong>1.2</strong> Map all integration points with exact file
+paths and line references</li>
+<li><strong>1.3</strong> Define data contracts between HelixTranslate
+and LLMsVerifier</li>
+<li><strong>1.4</strong> Set up LLMsVerifier module dependency in
+HelixTranslate go.mod</li>
+<li><strong>1.5</strong> Create feature branch for integration work</li>
+</ul>
+<h3 id="phase-2-core-integration-development">Phase 2: Core Integration
+Development</h3>
+<ul>
+<li><strong>2.1</strong> Implement LLMsVerifier client wrapper in
+HelixTranslate</li>
+<li><strong>2.2</strong> Add configuration system (33+ config
+options)</li>
+<li><strong>2.3</strong> Refactor pkg/models/registry.go to use
+LLMsVerifier SSOT</li>
+<li><strong>2.4</strong> Implement verification gate in model selection
+flow</li>
+<li><strong>2.5</strong> Implement caching with TTL and
+invalidation</li>
+<li><strong>2.6</strong> Add error handling and circuit breakers</li>
+</ul>
+<h3 id="phase-3-provider-and-feature-expansion">Phase 3: Provider and
+Feature Expansion</h3>
+<ul>
+<li><strong>3.1</strong> Integrate all 25+ LLMsVerifier providers</li>
+<li><strong>3.2</strong> Integrate MCP support (35 MCPs from HelixAgent
+reference)</li>
+<li><strong>3.3</strong> Integrate LSP support</li>
+<li><strong>3.4</strong> Integrate ACP support</li>
+<li><strong>3.5</strong> Integrate Embeddings support</li>
+<li><strong>3.6</strong> Integrate RAG support</li>
+<li><strong>3.7</strong> Integrate Skills and Plugins support</li>
+</ul>
+<h3 id="phase-4-api-and-real-time-integration">Phase 4: API and
+Real-Time Integration</h3>
+<ul>
+<li><strong>4.1</strong> Add REST endpoints for verified models and
+verification status</li>
+<li><strong>4.2</strong> Add WebSocket events for model updates</li>
+<li><strong>4.3</strong> Update gRPC protocols if applicable</li>
+<li><strong>4.4</strong> Integrate with translation workflow (single,
+batch, distributed, SSH)</li>
+</ul>
+<h3 id="phase-5-ux-implementation">Phase 5: UX Implementation</h3>
+<ul>
+<li><strong>5.1</strong> Implement verified model display with scores
+and features</li>
+<li><strong>5.2</strong> Implement sorting, filtering,
+recommendation</li>
+<li><strong>5.3</strong> Implement real-time update UI</li>
+<li><strong>5.4</strong> Implement degraded mode warning</li>
+<li><strong>5.5</strong> Accessibility compliance</li>
+</ul>
+<h3 id="phase-6-testing-and-quality-assurance">Phase 6: Testing and
+Quality Assurance</h3>
+<ul>
+<li><strong>6.1</strong> Unit tests (100% coverage, mocks only)</li>
+<li><strong>6.2</strong> Integration tests (real LLMsVerifier
+instance)</li>
+<li><strong>6.3</strong> E2E tests (full translation workflows)</li>
+<li><strong>6.4</strong> Challenge scripts (17+ challenges)</li>
+<li><strong>6.5</strong> Anti-bluff verification</li>
+<li><strong>6.6</strong> Security/penetration tests</li>
+<li><strong>6.7</strong> Benchmark and performance tests</li>
+<li><strong>6.8</strong> Chaos and stress tests</li>
+</ul>
+<h3 id="phase-7-documentation-and-governance">Phase 7: Documentation and
+Governance</h3>
+<ul>
+<li><strong>7.1</strong> Update CONSTITUTION.md with LLMsVerifier SSOT
+mandate</li>
+<li><strong>7.2</strong> Update CLAUDE.md with implementation
+guidance</li>
+<li><strong>7.3</strong> Update AGENTS.MD with operational
+procedures</li>
+<li><strong>7.4</strong> Update ALL submodule governance docs</li>
+<li><strong>7.5</strong> Create integration architecture document</li>
+<li><strong>7.6</strong> Create API documentation</li>
+<li><strong>7.7</strong> Create configuration reference</li>
+<li><strong>7.8</strong> Create user and admin guides</li>
+</ul>
+<h3 id="phase-8-validation-and-deployment">Phase 8: Validation and
+Deployment</h3>
+<ul>
+<li><strong>8.1</strong> Run full validation suite</li>
+<li><strong>8.2</strong> Run all challenges</li>
+<li><strong>8.3</strong> Verify 100% coverage</li>
+<li><strong>8.4</strong> Verify anti-bluff compliance</li>
+<li><strong>8.5</strong> Docker build verification</li>
+<li><strong>8.6</strong> Deploy to staging</li>
+<li><strong>8.7</strong> Production deployment with monitoring</li>
+</ul>
+<hr />
+<p><em>END OF REQUIREMENTS DOCUMENT</em> <em>Total Requirements: 300+
+individual requirements across 9 categories</em> <em>All explicit and
+implicit requirements from user query have been captured and
+categorized.</em></p>
+</body>
+</html>

@@ -1,0 +1,2662 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>COMPREHENSIVE_TECHNICAL_SYNTHESIS</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">COMPREHENSIVE_TECHNICAL_SYNTHESIS</h1>
+</header>
+<h1
+id="comprehensive-technical-synthesis-helixtranslate--llmsverifier--helixagent-integration">COMPREHENSIVE
+TECHNICAL SYNTHESIS: HelixTranslate + LLMsVerifier + HelixAgent
+Integration</h1>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>This document synthesizes deep repository analysis of three Go-based
+systems to provide an actionable integration blueprint. The core goal:
+integrate LLMsVerifier into HelixTranslate as the single source of truth
+for model provisioning, verification, and scoring, using HelixAgent's
+existing integration as the reference implementation.</p>
+<p><strong>Key Systems:</strong> | System | Module | Go Version |
+Primary Role | |--------|--------|------------|--------------| |
+HelixTranslate | <code>digital.vasic.translator</code> | 1.25.2 |
+Universal multi-format ebook translation engine | | LLMsVerifier |
+<code>digital.vasic.llmsverifier</code> | 1.25.3 | Enterprise LLM
+verification &amp; benchmarking platform | | HelixAgent |
+<code>dev.helix.agent</code> | 1.26 | AI ensemble LLM service (reference
+integration) |</p>
+<hr />
+<h2 id="1-architecture-mapping">1. ARCHITECTURE MAPPING</h2>
+<h3 id="11-component-cross-reference-matrix">1.1 Component
+Cross-Reference Matrix</h3>
+<pre><code>HelixTranslate                    LLMsVerifier                     HelixAgent
+------------------------------    ------------------------------   ------------------------------
+cmd/api-server/main.go      &lt;--&gt;  api/server.go                  &lt;--&gt; cmd/helixagent/main.go
+cmd/grpc-server/main.go     &lt;--&gt;  (gRPC via google.golang.org)   &lt;--&gt; cmd/grpc-server/main.go
+cmd/unified-translator/     &lt;--&gt;  cmd/main.go                    &lt;--&gt; cmd/helixagent/main.go
+pkg/api/handler.go          &lt;--&gt;  api/handlers.go                &lt;--&gt; internal/handlers/*.go
+pkg/translator/llm/*.go     &lt;--&gt;  providers/*.go                 &lt;--&gt; internal/llm/providers/*/
+internal/config/config.go   &lt;--&gt;  config/config.go               &lt;--&gt; internal/config/*.go
+pkg/events/events.go        &lt;--&gt;  api/event system               &lt;--&gt; internal/eventbus/*.go
+pkg/verification/*.go       &lt;--&gt;  verification/*.go              &lt;--&gt; internal/verifier/*.go
+pkg/websocket/hub.go        &lt;--&gt;  (not present)                  &lt;--&gt; (streaming handlers)
+pkg/distributed/*.go        &lt;--&gt;  (not present)                  &lt;--&gt; internal/llm/orchestration
+pkg/models/registry.go      &lt;--&gt;  providers/model_provider_service.go &lt;--&gt; internal/verifier/discovery.go</code></pre>
+<h3 id="12-data-flow-architecture-target-state">1.2 Data Flow
+Architecture (Target State)</h3>
+<pre><code>[HelixTranslate Application]
+    |
+    | 1. Config Load
+    v
+[internal/verifier/startup.go]  &lt;-- NEW (modeled after HelixAgent)
+    |
+    | 2. Verify All Providers
+    v
+[digital.vasic.llmsverifier/llmverifier]
+    |---&gt; providers/ (25+ adapters)
+    |---&gt; verification/ (8-test pipeline)
+    |---&gt; scoring/ (5/7-component scoring)
+    |---&gt; database/ (SQLite + SQLCipher)
+    |
+    | 3. Return Verified + Scored Models
+    v
+[internal/services/llmsverifier_score_adapter.go]  &lt;-- NEW
+    |
+    | 4. Score Normalization (0-100 -&gt; 0-10)
+    v
+[pkg/translator/llm/llm.go]  &lt;-- MODIFIED
+    |
+    | 5. Translation via Verified Providers
+    v
+[LLM Provider APIs]</code></pre>
+<h3 id="13-architectural-pattern-alignment">1.3 Architectural Pattern
+Alignment</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>HelixTranslate</th>
+<th>LLMsVerifier</th>
+<th>HelixAgent</th>
+<th>Alignment Strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Provider Factory</td>
+<td><code>pkg/translator/llm/llm.go</code> switch</td>
+<td><code>providers/</code> 25+ adapters</td>
+<td><code>internal/llm/providers/*/</code> per-provider</td>
+<td>Unify via LLMsVerifier adapter registry</td>
+</tr>
+<tr>
+<td>Config Loading</td>
+<td><code>internal/config/config.go</code> JSON</td>
+<td><code>config/config.go</code> Viper (YAML/JSON/TOML)</td>
+<td><code>internal/config/</code> env-var centralized</td>
+<td>Adopt Viper + env interpolation</td>
+</tr>
+<tr>
+<td>Event Bus</td>
+<td><code>pkg/events/events.go</code> pub/sub</td>
+<td>API-based events</td>
+<td><code>internal/eventbus/*.go</code></td>
+<td>Bridge LLMsVerifier events to HT event bus</td>
+</tr>
+<tr>
+<td>Auth</td>
+<td>JWT + API key</td>
+<td>JWT + RBAC + LDAP</td>
+<td>JWT + OAuth credential reading</td>
+<td>Upgrade to LLMsVerifier RBAC</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>PostgreSQL + Redis + SQLite</td>
+<td>SQLite + SQLCipher</td>
+<td>PostgreSQL + Redis</td>
+<td>Keep PG for translation data; add SQLite for verification</td>
+</tr>
+<tr>
+<td>Scoring</td>
+<td>N/A (no scoring)</td>
+<td><code>scoring/</code> 5-component weighted</td>
+<td><code>internal/verifier/scoring.go</code></td>
+<td>Port HelixAgent scoring pattern</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-integration-points-inventory">2. INTEGRATION POINTS
+INVENTORY</h2>
+<h3 id="21-files-to-modify-in-helixtranslate">2.1 Files to MODIFY in
+HelixTranslate</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>File Path</th>
+<th>Modification Type</th>
+<th>Specific Changes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M1</td>
+<td><code>go.mod</code></td>
+<td>Add dependency</td>
+<td>Add <code>digital.vasic.llmsverifier v0.0.0</code> +
+<code>replace</code> directive</td>
+</tr>
+<tr>
+<td>M2</td>
+<td><code>pkg/translator/llm/llm.go</code></td>
+<td>Extend enum + factory</td>
+<td>Add <code>ProviderLLMsVerifier</code> to Provider enum; add
+<code>ValidModels</code> entries; extend factory switch</td>
+</tr>
+<tr>
+<td>M3</td>
+<td><code>pkg/translator/llm/llm.go</code></td>
+<td>Extend <code>LLMClient</code> interface</td>
+<td>Add <code>GetVerificationScore() float64</code> method</td>
+</tr>
+<tr>
+<td>M4</td>
+<td><code>pkg/translator/llm/llm.go</code></td>
+<td>Add import</td>
+<td><code>digital.vasic.llmsverifier/providers</code></td>
+</tr>
+<tr>
+<td>M5</td>
+<td><code>internal/config/config.go</code></td>
+<td>Add struct fields</td>
+<td>Add <code>LLMsVerifierConfig</code> struct section</td>
+</tr>
+<tr>
+<td>M6</td>
+<td><code>internal/config/config.go</code></td>
+<td>Add env vars</td>
+<td><code>LLMSVERIFIER_ENABLED</code>,
+<code>LLMSVERIFIER_API_KEY</code>, <code>LLMSVERIFIER_BASE_URL</code>,
+<code>LLMSVERIFIER_DB_PATH</code></td>
+</tr>
+<tr>
+<td>M7</td>
+<td><code>pkg/api/handler.go</code></td>
+<td>Extend routes</td>
+<td>Add <code>/api/v1/verify</code>, <code>/api/v1/verify/:id</code>,
+<code>/api/v1/translate-with-verification</code></td>
+</tr>
+<tr>
+<td>M8</td>
+<td><code>pkg/api/handler.go</code></td>
+<td>Add handler fields</td>
+<td>Add <code>VerifierService</code>, <code>ScoreAdapter</code>
+fields</td>
+</tr>
+<tr>
+<td>M9</td>
+<td><code>pkg/grpc/translator.proto</code></td>
+<td>Add RPCs</td>
+<td><code>VerifyTranslation</code>,
+<code>StreamVerificationProgress</code></td>
+</tr>
+<tr>
+<td>M10</td>
+<td><code>cmd/api-server/main.go</code></td>
+<td>Add initialization</td>
+<td>Initialize verifier service, score adapter</td>
+</tr>
+<tr>
+<td>M11</td>
+<td><code>cmd/unified-translator/main.go</code></td>
+<td>Add flags</td>
+<td><code>-verifier-enabled</code>, <code>-verifier-config</code></td>
+</tr>
+<tr>
+<td>M12</td>
+<td><code>pkg/verification/*.go</code></td>
+<td>Integration point</td>
+<td>Wire LLMsVerifier as backend</td>
+</tr>
+<tr>
+<td>M13</td>
+<td><code>config.json</code></td>
+<td>Add section</td>
+<td><code>"llmsverifier": { ... }</code> section</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-files-to-create-in-helixtranslate">2.2 Files to CREATE in
+HelixTranslate</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>File Path</th>
+<th>Purpose</th>
+<th>Pattern Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C1</td>
+<td><code>pkg/translator/llm/llmsverifier.go</code></td>
+<td>LLMsVerifier provider adapter</td>
+<td><code>internal/llm/providers/openai/</code> (HelixAgent)</td>
+</tr>
+<tr>
+<td>C2</td>
+<td><code>internal/verifier/startup.go</code></td>
+<td>Startup verification orchestrator</td>
+<td><code>internal/verifier/startup.go</code> (HelixAgent)</td>
+</tr>
+<tr>
+<td>C3</td>
+<td><code>internal/verifier/config.go</code></td>
+<td>Verifier configuration types</td>
+<td><code>internal/verifier/config.go</code> (HelixAgent)</td>
+</tr>
+<tr>
+<td>C4</td>
+<td><code>internal/verifier/discovery.go</code></td>
+<td>Model discovery service</td>
+<td><code>internal/verifier/discovery.go</code> (HelixAgent)</td>
+</tr>
+<tr>
+<td>C5</td>
+<td><code>internal/verifier/scoring.go</code></td>
+<td>5-component scoring engine</td>
+<td><code>internal/verifier/scoring.go</code> (HelixAgent)</td>
+</tr>
+<tr>
+<td>C6</td>
+<td><code>internal/verifier/enhanced_scoring.go</code></td>
+<td>7-component enhanced scoring</td>
+<td><code>internal/verifier/enhanced_scoring.go</code> (HelixAgent)</td>
+</tr>
+<tr>
+<td>C7</td>
+<td><code>internal/verifier/provider_types.go</code></td>
+<td>Unified provider/model types</td>
+<td><code>internal/verifier/provider_types.go</code> (HelixAgent)</td>
+</tr>
+<tr>
+<td>C8</td>
+<td><code>internal/verifier/health.go</code></td>
+<td>Health monitoring</td>
+<td><code>internal/verifier/health.go</code> (HelixAgent)</td>
+</tr>
+<tr>
+<td>C9</td>
+<td><code>internal/verifier/verification.go</code></td>
+<td>Verification service wrapper</td>
+<td><code>internal/verifier/verification.go</code> (HelixAgent)</td>
+</tr>
+<tr>
+<td>C10</td>
+<td><code>internal/verifier/adapters/provider_adapter.go</code></td>
+<td>Provider interface adapter</td>
+<td><code>internal/verifier/adapters/provider_adapter.go</code>
+(HelixAgent)</td>
+</tr>
+<tr>
+<td>C11</td>
+<td><code>internal/services/llmsverifier_score_adapter.go</code></td>
+<td>Score normalization bridge</td>
+<td><code>internal/services/llmsverifier_score_adapter.go</code>
+(HelixAgent)</td>
+</tr>
+<tr>
+<td>C12</td>
+<td><code>pkg/verification/llmsverifier_backend.go</code></td>
+<td>Verification backend integration</td>
+<td><code>pkg/verification/</code> existing pattern</td>
+</tr>
+<tr>
+<td>C13</td>
+<td><code>configs/verifier.yaml</code></td>
+<td>LLMsVerifier configuration</td>
+<td><code>configs/verifier.yaml</code> (HelixAgent)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-exact-function-signatures-required">2.3 Exact Function
+Signatures Required</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// C1: pkg/translator/llm/llmsverifier.go</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LLMsVerifierClient <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    providerService <span class="op">*</span>providers<span class="op">.</span>ModelProviderService</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    scoringEngine <span class="op">*</span>scoring<span class="op">.</span>ScoringEngine</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    modelID       <span class="dt">string</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    baseURL       <span class="dt">string</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    apiKey        <span class="dt">string</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewLLMsVerifierClient<span class="op">(</span>config ProviderConfig<span class="op">)</span> <span class="op">(*</span>LLMsVerifierClient<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LLMsVerifierClient<span class="op">)</span> Translate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> text<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LLMsVerifierClient<span class="op">)</span> GetProviderName<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LLMsVerifierClient<span class="op">)</span> GetVerificationScore<span class="op">()</span> <span class="dt">float64</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">// C2: internal/verifier/startup.go</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> StartupVerifier <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    config               <span class="op">*</span>StartupConfig</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    verifierSvc          <span class="op">*</span>VerificationService</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    scoringSvc           <span class="op">*</span>ScoringService</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    enhancedScoring      <span class="op">*</span>EnhancedScoringService</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    subscriptionDetector <span class="op">*</span>SubscriptionDetector</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    logger               <span class="op">*</span>logrus<span class="op">.</span>Logger</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    scoreAdapter         <span class="op">*</span>ScoreAdapter</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewStartupVerifier<span class="op">(</span>cfg <span class="op">*</span>StartupConfig<span class="op">,</span> log <span class="op">*</span>logrus<span class="op">.</span>Logger<span class="op">)</span> <span class="op">*</span>StartupVerifier</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>sv <span class="op">*</span>StartupVerifier<span class="op">)</span> VerifyAllProviders<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">([]*</span>UnifiedProvider<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>sv <span class="op">*</span>StartupVerifier<span class="op">)</span> SelectDebateTeam<span class="op">()</span> <span class="op">([]*</span>UnifiedModel<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>sv <span class="op">*</span>StartupVerifier<span class="op">)</span> GetScoreAdapter<span class="op">()</span> <span class="op">*</span>ScoreAdapter</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">// C11: internal/services/llmsverifier_score_adapter.go</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LLMsVerifierScoreAdapter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    scores     <span class="op">*</span>safe<span class="op">.</span>Store<span class="op">[</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">float64</span><span class="op">]</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    refreshMu  sync<span class="op">.</span>RWMutex</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    lastRefresh time<span class="op">.</span>Time</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewLLMsVerifierScoreAdapter<span class="op">()</span> <span class="op">*</span>LLMsVerifierScoreAdapter</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>a <span class="op">*</span>LLMsVerifierScoreAdapter<span class="op">)</span> GetProviderScore<span class="op">(</span>providerID <span class="dt">string</span><span class="op">)</span> <span class="dt">float64</span>  <span class="co">// Returns 0-10</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>a <span class="op">*</span>LLMsVerifierScoreAdapter<span class="op">)</span> GetModelScore<span class="op">(</span>modelID <span class="dt">string</span><span class="op">)</span> <span class="dt">float64</span>        <span class="co">// Returns 0-10</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>a <span class="op">*</span>LLMsVerifierScoreAdapter<span class="op">)</span> RefreshScores<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>a <span class="op">*</span>LLMsVerifierScoreAdapter<span class="op">)</span> inferProviderFromModel<span class="op">(</span>modelID <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span></span></code></pre></div>
+<hr />
+<h2 id="3-api-surface-analysis">3. API SURFACE ANALYSIS</h2>
+<h3
+id="31-all-public-apis-from-llmsverifier-that-helixtranslate-must-consume">3.1
+All Public APIs from LLMsVerifier That HelixTranslate Must Consume</h3>
+<h4 id="package-digitalvasicllmsverifierllmverifier">Package:
+<code>digital.vasic.llmsverifier/llmverifier</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Signature</th>
+<th>Purpose</th>
+<th>Call Site in HelixTranslate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>New</code></td>
+<td><code>New(cfg *config.Config) *Verifier</code></td>
+<td>Create verifier</td>
+<td><code>internal/verifier/startup.go</code></td>
+</tr>
+<tr>
+<td><code>Verify</code></td>
+<td><code>(v *Verifier) Verify() ([]VerificationResult, error)</code></td>
+<td>Run full verification</td>
+<td><code>internal/verifier/startup.go</code></td>
+</tr>
+<tr>
+<td><code>GenerateMarkdownReport</code></td>
+<td><code>(v *Verifier) GenerateMarkdownReport(results []VerificationResult, dir string) error</code></td>
+<td>Generate reports</td>
+<td><code>pkg/report/</code></td>
+</tr>
+<tr>
+<td><code>GenerateJSONReport</code></td>
+<td><code>(v *Verifier) GenerateJSONReport(results []VerificationResult, dir string) error</code></td>
+<td>Generate reports</td>
+<td><code>pkg/report/</code></td>
+</tr>
+<tr>
+<td><code>GetGlobalClient</code></td>
+<td><code>(v *Verifier) GetGlobalClient() *LLMClient</code></td>
+<td>Get HTTP client</td>
+<td><code>internal/verifier/</code></td>
+</tr>
+<tr>
+<td><code>SummarizeConversation</code></td>
+<td><code>(v *Verifier) SummarizeConversation(messages []string) (*ConversationSummary, error)</code></td>
+<td>Conversation analysis</td>
+<td><code>pkg/coordination/</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="package-digitalvasicllmsverifierproviders">Package:
+<code>digital.vasic.llmsverifier/providers</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Signature</th>
+<th>Purpose</th>
+<th>Call Site</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NewProviderRegistry</code></td>
+<td><code>NewProviderRegistry() *ProviderRegistry</code></td>
+<td>Create registry</td>
+<td><code>internal/verifier/discovery.go</code></td>
+</tr>
+<tr>
+<td><code>ProviderRegistry.GetConfig</code></td>
+<td><code>(pr *ProviderRegistry) GetConfig(name string) (*ProviderConfig, bool)</code></td>
+<td>Get provider config</td>
+<td><code>pkg/translator/llm/llm.go</code></td>
+</tr>
+<tr>
+<td><code>ProviderRegistry.RegisterProvider</code></td>
+<td><code>(pr *ProviderRegistry) RegisterProvider(config *ProviderConfig)</code></td>
+<td>Register provider</td>
+<td><code>internal/verifier/startup.go</code></td>
+</tr>
+<tr>
+<td><code>NewModelProviderService</code></td>
+<td><code>NewModelProviderService(configPath string, logger *logging.Logger) *ModelProviderService</code></td>
+<td>3-tier discovery</td>
+<td><code>internal/verifier/discovery.go</code></td>
+</tr>
+<tr>
+<td><code>ModelProviderService.RegisterProvider</code></td>
+<td><code>(mps *ModelProviderService) RegisterProvider(providerID, baseURL, apiKey string)</code></td>
+<td>Register for discovery</td>
+<td><code>internal/verifier/startup.go</code></td>
+</tr>
+<tr>
+<td><code>ModelProviderService.GetAllModelsWithVerification</code></td>
+<td><code>(mps *ModelProviderService) GetAllModelsWithVerification(ctx context.Context) (map[string][]Model, error)</code></td>
+<td>Discover all models</td>
+<td><code>internal/verifier/discovery.go</code></td>
+</tr>
+<tr>
+<td><code>ModelProviderService.GetModels</code></td>
+<td><code>(mps *ModelProviderService) GetModels(ctx context.Context, providerID string) ([]Model, error)</code></td>
+<td>Get provider models</td>
+<td><code>internal/verifier/discovery.go</code></td>
+</tr>
+<tr>
+<td><code>NewVerifiedConfigGenerator</code></td>
+<td><code>NewVerifiedConfigGenerator(service *EnhancedModelProviderService, logger *logging.Logger, outputDir string) *VerifiedConfigGenerator</code></td>
+<td>Generate configs</td>
+<td><code>internal/services/</code></td>
+</tr>
+<tr>
+<td><code>NewErrorClassifier</code></td>
+<td><code>NewErrorClassifier(provider string) *ErrorClassifier</code></td>
+<td>Error classification</td>
+<td><code>pkg/translator/llm/llm.go</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="package-digitalvasicllmsverifierverification">Package:
+<code>digital.vasic.llmsverifier/verification</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Signature</th>
+<th>Purpose</th>
+<th>Call Site</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NewVerifier</code></td>
+<td><code>NewVerifier(db *database.Database) *Verifier</code></td>
+<td>Create verification service</td>
+<td><code>internal/verifier/verification.go</code></td>
+</tr>
+<tr>
+<td><code>Verifier.Verify</code></td>
+<td><code>(v *Verifier) Verify(ctx context.Context, req *Request) (*database.VerificationResult, error)</code></td>
+<td>Single model verify</td>
+<td><code>pkg/verification/llmsverifier_backend.go</code></td>
+</tr>
+<tr>
+<td><code>NewCodeVerificationService</code></td>
+<td><code>NewCodeVerificationService(httpClient *client.HTTPClient, logger *logging.Logger) *CodeVerificationService</code></td>
+<td>Code verification</td>
+<td><code>pkg/verification/llmsverifier_backend.go</code></td>
+</tr>
+<tr>
+<td><code>CodeVerificationService.VerifyModelCodeVisibility</code></td>
+<td><code>(cvs *CodeVerificationService) VerifyModelCodeVisibility(ctx context.Context, modelID, providerID string, client ProviderClientInterface) (*CodeVerificationResult, error)</code></td>
+<td>"Do you see my code?" test</td>
+<td><code>pkg/verification/llmsverifier_backend.go</code></td>
+</tr>
+<tr>
+<td><code>NewCodingCapabilityVerificationService</code></td>
+<td><code>NewCodingCapabilityVerificationService(httpClient *client.HTTPClient, logger *logging.Logger) *CodingCapabilityVerificationService</code></td>
+<td>Coding capability</td>
+<td><code>pkg/verification/llmsverifier_backend.go</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="package-digitalvasicllmsverifierscoring">Package:
+<code>digital.vasic.llmsverifier/scoring</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Signature</th>
+<th>Purpose</th>
+<th>Call Site</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NewScoringEngine</code></td>
+<td><code>NewScoringEngine(db *database.Database, modelsDevClient ModelsDevClientInterface, logger interface{}) *ScoringEngine</code></td>
+<td>Create engine</td>
+<td><code>internal/verifier/scoring.go</code></td>
+</tr>
+<tr>
+<td><code>ScoringEngine.CalculateComprehensiveScore</code></td>
+<td><code>(se *ScoringEngine) CalculateComprehensiveScore(ctx context.Context, modelID string, config ScoringConfig) (*ComprehensiveScore, error)</code></td>
+<td>Calculate score</td>
+<td><code>internal/verifier/scoring.go</code></td>
+</tr>
+<tr>
+<td><code>DefaultScoringConfig</code></td>
+<td><code>DefaultScoringConfig() ScoringConfig</code></td>
+<td>Default weights</td>
+<td><code>internal/verifier/scoring.go</code></td>
+</tr>
+<tr>
+<td><code>DefaultScoreWeights</code></td>
+<td><code>DefaultScoreWeights() ScoreWeights</code></td>
+<td>Default weights</td>
+<td><code>internal/verifier/scoring.go</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="package-digitalvasicllmsverifierconfig">Package:
+<code>digital.vasic.llmsverifier/config</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Signature</th>
+<th>Purpose</th>
+<th>Call Site</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LoadFromFile</code></td>
+<td><code>LoadFromFile(path string) (*Config, error)</code></td>
+<td>Load config</td>
+<td><code>cmd/api-server/main.go</code>,
+<code>cmd/unified-translator/main.go</code></td>
+</tr>
+<tr>
+<td><code>SaveToFile</code></td>
+<td><code>SaveToFile(cfg *Config, path string) error</code></td>
+<td>Save config</td>
+<td><code>internal/config/config.go</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="package-digitalvasicllmsverifierdatabase">Package:
+<code>digital.vasic.llmsverifier/database</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Signature</th>
+<th>Purpose</th>
+<th>Call Site</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>New</code></td>
+<td><code>New(path, encryptionKey string) (*Database, error)</code></td>
+<td>Open database</td>
+<td><code>cmd/api-server/main.go</code></td>
+</tr>
+<tr>
+<td><code>Database.Ping</code></td>
+<td><code>(db *Database) Ping() error</code></td>
+<td>Health check</td>
+<td><code>internal/health/*.go</code></td>
+</tr>
+<tr>
+<td><code>Database.CreateProvider</code></td>
+<td><code>(db *Database) CreateProvider(p *Provider) (int64, error)</code></td>
+<td>CRUD</td>
+<td><code>internal/verifier/</code></td>
+</tr>
+<tr>
+<td><code>Database.ListModels</code></td>
+<td><code>(db *Database) ListModels(filters map[string]interface{}) ([]*Model, error)</code></td>
+<td>Query models</td>
+<td><code>internal/services/</code></td>
+</tr>
+<tr>
+<td><code>Database.GetTopScoringModels</code></td>
+<td><code>(db *Database) GetTopScoringModels(limit int) ([]*Model, error)</code></td>
+<td>Rank models</td>
+<td><code>internal/services/llmsverifier_score_adapter.go</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="package-digitalvasicllmsverifiercapabilities">Package:
+<code>digital.vasic.llmsverifier/capabilities</code></h4>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Signature</th>
+<th>Purpose</th>
+<th>Call Site</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NewDetector</code></td>
+<td><code>NewDetector() *Detector</code></td>
+<td>Create detector</td>
+<td><code>internal/verifier/discovery.go</code></td>
+</tr>
+<tr>
+<td><code>Detector.DetectProviderCapabilities</code></td>
+<td><code>(d *Detector) DetectProviderCapabilities(ctx context.Context, provider, apiKey string) (*ProviderCapabilities, error)</code></td>
+<td>Feature detection</td>
+<td><code>internal/verifier/discovery.go</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-rest-api-endpoints-llmsverifier--helixtranslate-bridge">3.2
+REST API Endpoints (LLMsVerifier → HelixTranslate Bridge)</h3>
+<pre><code>LLMsVerifier Endpoints                    HelixTranslate Bridge
+--------------------                      --------------------
+GET  /api/health                    --&gt;   GET /api/v1/verifier/health
+GET  /api/models?provider_id=       --&gt;   GET /api/v1/verifier/models
+GET  /api/models/{id}               --&gt;   GET /api/v1/verifier/models/:id
+POST /api/models/{id}/verify        --&gt;   POST /api/v1/verifier/models/:id/verify
+GET  /api/providers                 --&gt;   GET /api/v1/verifier/providers
+POST /api/providers                 --&gt;   POST /api/v1/verifier/providers</code></pre>
+<hr />
+<h2 id="4-configuration-mapping">4. CONFIGURATION MAPPING</h2>
+<h3 id="41-current-helixtranslate-config-configjson--fields-to-add">4.1
+Current HelixTranslate Config (<code>config.json</code>) — Fields to
+Add</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;server&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="er">/*</span> <span class="er">existing</span> <span class="er">*/</span> <span class="fu">},</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;security&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="er">/*</span> <span class="er">existing</span> <span class="er">*/</span> <span class="fu">},</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;translation&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="er">/*</span> <span class="er">existing</span> <span class="er">*/</span> <span class="fu">},</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;llmsverifier&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;profile&quot;</span><span class="fu">:</span> <span class="st">&quot;production&quot;</span><span class="fu">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;database&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;path&quot;</span><span class="fu">:</span> <span class="st">&quot;./helix-verifier.db&quot;</span><span class="fu">,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;encryption_key&quot;</span><span class="fu">:</span> <span class="st">&quot;${VERIFIER_DB_ENCRYPTION_KEY}&quot;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;verification&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;mandatory_code_check&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;code_visibility_prompt&quot;</span><span class="fu">:</span> <span class="st">&quot;Do you see my code?&quot;</span><span class="fu">,</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;verification_timeout&quot;</span><span class="fu">:</span> <span class="st">&quot;60s&quot;</span><span class="fu">,</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;retry_count&quot;</span><span class="fu">:</span> <span class="dv">3</span><span class="fu">,</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;retry_delay&quot;</span><span class="fu">:</span> <span class="st">&quot;5s&quot;</span><span class="fu">,</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;tests&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;existence&quot;</span><span class="ot">,</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;responsiveness&quot;</span><span class="ot">,</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;latency&quot;</span><span class="ot">,</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;streaming&quot;</span><span class="ot">,</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;function_calling&quot;</span><span class="ot">,</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;coding_capability&quot;</span><span class="ot">,</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;error_detection&quot;</span><span class="ot">,</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;code_visibility&quot;</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>      <span class="ot">]</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;scoring&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;weights&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;response_speed&quot;</span><span class="fu">:</span> <span class="fl">0.25</span><span class="fu">,</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;model_efficiency&quot;</span><span class="fu">:</span> <span class="fl">0.20</span><span class="fu">,</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;cost_effectiveness&quot;</span><span class="fu">:</span> <span class="fl">0.25</span><span class="fu">,</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;capability&quot;</span><span class="fu">:</span> <span class="fl">0.20</span><span class="fu">,</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;recency&quot;</span><span class="fu">:</span> <span class="fl">0.10</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>      <span class="fu">},</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;cache_ttl&quot;</span><span class="fu">:</span> <span class="st">&quot;24h&quot;</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;providers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;auto_discover&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;verify_on_startup&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;min_score_threshold&quot;</span><span class="fu">:</span> <span class="fl">5.0</span><span class="fu">,</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;max_providers&quot;</span><span class="fu">:</span> <span class="dv">25</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="42-environment-variables-map">4.2 Environment Variables Map</h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Source System</th>
+<th>Purpose</th>
+<th>Destination in HelixTranslate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OPENAI_API_KEY</code></td>
+<td>HT existing</td>
+<td>OpenAI access</td>
+<td><code>translation.providers.openai.api_key</code> + LLMsVerifier
+<code>llms[].api_key</code></td>
+</tr>
+<tr>
+<td><code>ANTHROPIC_API_KEY</code></td>
+<td>HT existing</td>
+<td>Anthropic access</td>
+<td>Same dual-use</td>
+</tr>
+<tr>
+<td><code>DEEPSEEK_API_KEY</code></td>
+<td>HT existing</td>
+<td>DeepSeek access</td>
+<td>Same dual-use</td>
+</tr>
+<tr>
+<td><code>ZHIPU_API_KEY</code></td>
+<td>HT existing</td>
+<td>Zhipu access</td>
+<td>Same dual-use</td>
+</tr>
+<tr>
+<td><code>QWEN_API_KEY</code></td>
+<td>HT existing</td>
+<td>Qwen access</td>
+<td>Same dual-use</td>
+</tr>
+<tr>
+<td><code>GEMINI_API_KEY</code></td>
+<td>HT existing</td>
+<td>Gemini access</td>
+<td>Same dual-use</td>
+</tr>
+<tr>
+<td><code>GROQ_API_KEY</code></td>
+<td>LLMsVerifier</td>
+<td>Groq access</td>
+<td>NEW env var</td>
+</tr>
+<tr>
+<td><code>MISTRAL_API_KEY</code></td>
+<td>LLMsVerifier</td>
+<td>Mistral access</td>
+<td>NEW env var</td>
+</tr>
+<tr>
+<td><code>COHERE_API_KEY</code></td>
+<td>LLMsVerifier</td>
+<td>Cohere access</td>
+<td>NEW env var</td>
+</tr>
+<tr>
+<td><code>PERPLEXITY_API_KEY</code></td>
+<td>LLMsVerifier</td>
+<td>Perplexity access</td>
+<td>NEW env var</td>
+</tr>
+<tr>
+<td><code>TOGETHER_API_KEY</code></td>
+<td>LLMsVerifier</td>
+<td>Together AI access</td>
+<td>NEW env var</td>
+</tr>
+<tr>
+<td><code>XAI_API_KEY</code></td>
+<td>LLMsVerifier</td>
+<td>xAI/Grok access</td>
+<td>NEW env var</td>
+</tr>
+<tr>
+<td><code>CEREBRAS_API_KEY</code></td>
+<td>LLMsVerifier</td>
+<td>Cerebras access</td>
+<td>NEW env var</td>
+</tr>
+<tr>
+<td><code>CLOUDFLARE_API_KEY</code></td>
+<td>LLMsVerifier</td>
+<td>Cloudflare access</td>
+<td>NEW env var</td>
+</tr>
+<tr>
+<td><code>SILICONFLOW_API_KEY</code></td>
+<td>LLMsVerifier</td>
+<td>SiliconFlow access</td>
+<td>NEW env var</td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_ENABLED</code></td>
+<td>NEW</td>
+<td>Toggle integration</td>
+<td><code>llmsverifier.enabled</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_DB_PATH</code></td>
+<td>NEW</td>
+<td>SQLite path</td>
+<td><code>llmsverifier.database.path</code></td>
+</tr>
+<tr>
+<td><code>VERIFIER_DB_ENCRYPTION_KEY</code></td>
+<td>NEW</td>
+<td>SQLCipher key</td>
+<td><code>llmsverifier.database.encryption_key</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-go-config-struct-helixtranslate-extension">4.3 Go Config
+Struct (HelixTranslate Extension)</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/config/config.go - additions</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">// LLMsVerifierConfig holds the LLMsVerifier integration settings</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LLMsVerifierConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    Enabled        <span class="dt">bool</span>                        <span class="st">`json:&quot;enabled&quot;`</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    Profile        <span class="dt">string</span>                      <span class="st">`json:&quot;profile&quot;`</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    Database       VerifierDatabaseConfig      <span class="st">`json:&quot;database&quot;`</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    Verification   VerificationSettingsConfig  <span class="st">`json:&quot;verification&quot;`</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    Scoring        ScoringSettingsConfig       <span class="st">`json:&quot;scoring&quot;`</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    Providers      VerifierProviderSettings    <span class="st">`json:&quot;providers&quot;`</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerifierDatabaseConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    Path           <span class="dt">string</span> <span class="st">`json:&quot;path&quot;`</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    EncryptionKey  <span class="dt">string</span> <span class="st">`json:&quot;encryption_key&quot;`</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerificationSettingsConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    MandatoryCodeCheck     <span class="dt">bool</span>          <span class="st">`json:&quot;mandatory_code_check&quot;`</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    CodeVisibilityPrompt   <span class="dt">string</span>        <span class="st">`json:&quot;code_visibility_prompt&quot;`</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    VerificationTimeout    time<span class="op">.</span>Duration <span class="st">`json:&quot;verification_timeout&quot;`</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    RetryCount             <span class="dt">int</span>           <span class="st">`json:&quot;retry_count&quot;`</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    RetryDelay             time<span class="op">.</span>Duration <span class="st">`json:&quot;retry_delay&quot;`</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    Tests                  <span class="op">[]</span><span class="dt">string</span>      <span class="st">`json:&quot;tests&quot;`</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ScoringSettingsConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    Weights   ScoreWeightsConfig <span class="st">`json:&quot;weights&quot;`</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    CacheTTL  time<span class="op">.</span>Duration      <span class="st">`json:&quot;cache_ttl&quot;`</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ScoreWeightsConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    ResponseSpeed     <span class="dt">float64</span> <span class="st">`json:&quot;response_speed&quot;`</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    ModelEfficiency   <span class="dt">float64</span> <span class="st">`json:&quot;model_efficiency&quot;`</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    CostEffectiveness <span class="dt">float64</span> <span class="st">`json:&quot;cost_effectiveness&quot;`</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    Capability        <span class="dt">float64</span> <span class="st">`json:&quot;capability&quot;`</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    Recency           <span class="dt">float64</span> <span class="st">`json:&quot;recency&quot;`</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerifierProviderSettings <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    AutoDiscover      <span class="dt">bool</span>    <span class="st">`json:&quot;auto_discover&quot;`</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    VerifyOnStartup   <span class="dt">bool</span>    <span class="st">`json:&quot;verify_on_startup&quot;`</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    MinScoreThreshold <span class="dt">float64</span> <span class="st">`json:&quot;min_score_threshold&quot;`</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    MaxProviders      <span class="dt">int</span>     <span class="st">`json:&quot;max_providers&quot;`</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="co">// Add to existing Config struct:</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Config <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... existing fields ...</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    LLMsVerifier LLMsVerifierConfig <span class="st">`json:&quot;llmsverifier&quot;`</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="44-yaml-config-file-configsverifieryaml">4.4 YAML Config File
+(<code>configs/verifier.yaml</code>)</h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">verifier</span><span class="kw">:</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">profile</span><span class="kw">:</span><span class="at"> production</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">database</span><span class="kw">:</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;./helix-verifier.db&quot;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">encryption_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${VERIFIER_DB_ENCRYPTION_KEY}&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">verification</span><span class="kw">:</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">mandatory_code_check</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">code_visibility_prompt</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Do you see my code?&quot;</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">verification_timeout</span><span class="kw">:</span><span class="at"> 60s</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">retry_count</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">retry_delay</span><span class="kw">:</span><span class="at"> 5s</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tests</span><span class="kw">:</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> existence</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> responsiveness</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> latency</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> streaming</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> function_calling</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> coding_capability</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> error_detection</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> code_visibility</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="at">  </span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">scoring</span><span class="kw">:</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">weights</span><span class="kw">:</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">response_speed</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.25</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">model_efficiency</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">cost_effectiveness</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.25</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">capability</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">recency</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.10</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">cache_ttl</span><span class="kw">:</span><span class="at"> 24h</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="at">  </span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">auto_discover</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">verify_on_startup</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">min_score_threshold</span><span class="kw">:</span><span class="at"> </span><span class="fl">5.0</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">max_providers</span><span class="kw">:</span><span class="at"> </span><span class="dv">25</span></span></code></pre></div>
+<hr />
+<h2 id="5-provider-expansion-9--25-providers">5. PROVIDER EXPANSION: 9 →
+25+ Providers</h2>
+<h3 id="51-current-helixtranslate-providers-9">5.1 Current
+HelixTranslate Providers (9)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Provider</th>
+<th>File</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>OpenAI</td>
+<td><code>pkg/translator/llm/openai.go</code></td>
+<td>Native</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Anthropic</td>
+<td><code>pkg/translator/llm/anthropic.go</code></td>
+<td>Native</td>
+</tr>
+<tr>
+<td>3</td>
+<td>DeepSeek</td>
+<td><code>pkg/translator/llm/deepseek.go</code></td>
+<td>OpenAI-compatible</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Zhipu</td>
+<td><code>pkg/translator/llm/zhipu.go</code></td>
+<td>Native</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Qwen</td>
+<td><code>pkg/translator/llm/qwen.go</code></td>
+<td>Native</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Gemini</td>
+<td><code>pkg/translator/llm/gemini.go</code></td>
+<td>Native</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Ollama</td>
+<td><code>pkg/translator/llm/ollama.go</code></td>
+<td>Local</td>
+</tr>
+<tr>
+<td>8</td>
+<td>LlamaCpp</td>
+<td><code>pkg/translator/llm/llamacpp.go</code></td>
+<td>Local</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Mock</td>
+<td><code>pkg/translator/llm/mock.go</code></td>
+<td>Test</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-additional-providers-from-llmsverifier-16-to-add">5.2
+Additional Providers from LLMsVerifier (16+ to add)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Provider</th>
+<th>LLMsVerifier File</th>
+<th>Integration Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>Groq</td>
+<td><code>providers/groq.go</code></td>
+<td>Add <code>pkg/translator/llm/groq.go</code></td>
+</tr>
+<tr>
+<td>11</td>
+<td>Cohere</td>
+<td><code>providers/cohere.go</code></td>
+<td>Add <code>pkg/translator/llm/cohere.go</code></td>
+</tr>
+<tr>
+<td>12</td>
+<td>Mistral</td>
+<td><code>providers/mistral.go</code></td>
+<td>Add <code>pkg/translator/llm/mistral.go</code></td>
+</tr>
+<tr>
+<td>13</td>
+<td>xAI (Grok)</td>
+<td><code>providers/xai.go</code></td>
+<td>Add <code>pkg/translator/llm/xai.go</code></td>
+</tr>
+<tr>
+<td>14</td>
+<td>Replicate</td>
+<td><code>providers/replicate.go</code></td>
+<td>Add <code>pkg/translator/llm/replicate.go</code></td>
+</tr>
+<tr>
+<td>15</td>
+<td>Cerebras</td>
+<td><code>providers/cerebras.go</code></td>
+<td>Add <code>pkg/translator/llm/cerebras.go</code></td>
+</tr>
+<tr>
+<td>16</td>
+<td>Cloudflare Workers AI</td>
+<td><code>providers/cloudflare.go</code></td>
+<td>Add <code>pkg/translator/llm/cloudflare.go</code></td>
+</tr>
+<tr>
+<td>17</td>
+<td>SiliconFlow</td>
+<td><code>providers/siliconflow.go</code></td>
+<td>Add <code>pkg/translator/llm/siliconflow.go</code></td>
+</tr>
+<tr>
+<td>18</td>
+<td>Hyperbolic</td>
+<td><code>providers/hyperbolic.go</code></td>
+<td>Add <code>pkg/translator/llm/hyperbolic.go</code></td>
+</tr>
+<tr>
+<td>19</td>
+<td>Together AI</td>
+<td><code>providers/togetherai.go</code></td>
+<td>Add <code>pkg/translator/llm/togetherai.go</code></td>
+</tr>
+<tr>
+<td>20</td>
+<td>SambaNova</td>
+<td><code>providers/sambanova.go</code></td>
+<td>Add <code>pkg/translator/llm/sambanova.go</code></td>
+</tr>
+<tr>
+<td>21</td>
+<td>Moonshot/Kimi</td>
+<td><code>providers/kimi.go</code></td>
+<td>Add <code>pkg/translator/llm/kimi.go</code></td>
+</tr>
+<tr>
+<td>22</td>
+<td>Novita AI</td>
+<td><code>providers/novita.go</code></td>
+<td>Add <code>pkg/translator/llm/novita.go</code></td>
+</tr>
+<tr>
+<td>23</td>
+<td>NLP Cloud</td>
+<td><code>providers/nlpcloud.go</code></td>
+<td>Add <code>pkg/translator/llm/nlpcloud.go</code></td>
+</tr>
+<tr>
+<td>24</td>
+<td>Upstage</td>
+<td><code>providers/upstage.go</code></td>
+<td>Add <code>pkg/translator/llm/upstage.go</code></td>
+</tr>
+<tr>
+<td>25</td>
+<td>Sarvam</td>
+<td><code>providers/sarvam.go</code></td>
+<td>Add <code>pkg/translator/llm/sarvam.go</code></td>
+</tr>
+<tr>
+<td>26</td>
+<td>Modal</td>
+<td><code>providers/modal.go</code></td>
+<td>Add <code>pkg/translator/llm/modal.go</code></td>
+</tr>
+<tr>
+<td>27</td>
+<td>PublicAI</td>
+<td><code>providers/publicai.go</code></td>
+<td>Add <code>pkg/translator/llm/publicai.go</code></td>
+</tr>
+<tr>
+<td>28</td>
+<td>NIA</td>
+<td><code>providers/nia.go</code></td>
+<td>Add <code>pkg/translator/llm/nia.go</code></td>
+</tr>
+<tr>
+<td>29</td>
+<td>Vulavula</td>
+<td><code>providers/vulavula.go</code></td>
+<td>Add <code>pkg/translator/llm/vulavula.go</code></td>
+</tr>
+<tr>
+<td>30</td>
+<td>KimiCode</td>
+<td><code>providers/kimicode.go</code></td>
+<td>Add <code>pkg/translator/llm/kimicode.go</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-provider-factory-extension">5.3 Provider Factory
+Extension</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/translator/llm/llm.go - Factory switch extension</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewLLMTranslator<span class="op">(</span>config ProviderConfig<span class="op">)</span> <span class="op">(</span>LLMTranslator<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... existing validation ...</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> config<span class="op">.</span>Provider <span class="op">{</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... existing 9 cases ...</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// NEW: LLMsVerifier-verified providers</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderGroq<span class="op">:</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewGroqClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderCohere<span class="op">:</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewCohereClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderMistral<span class="op">:</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewMistralClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderXAI<span class="op">:</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewXAIClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderReplicate<span class="op">:</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewReplicateClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderCerebras<span class="op">:</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewCerebrasClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderCloudflare<span class="op">:</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewCloudflareClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderSiliconFlow<span class="op">:</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewSiliconFlowClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderHyperbolic<span class="op">:</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewHyperbolicClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTogetherAI<span class="op">:</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewTogetherAIClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderSambaNova<span class="op">:</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewSambaNovaClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderKimi<span class="op">:</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewKimiClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderNovita<span class="op">:</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewNovitaClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderNLPCloud<span class="op">:</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewNLPCloudClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderUpstage<span class="op">:</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewUpstageClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderSarvam<span class="op">:</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewSarvamClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderModal<span class="op">:</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewModalClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderPublicAI<span class="op">:</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewPublicAIClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderNIA<span class="op">:</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewNIAClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderVulavula<span class="op">:</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewVulavulaClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderKimiCode<span class="op">:</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>        client<span class="op">,</span> err <span class="op">=</span> NewKimiCodeClient<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LLMTranslator<span class="op">{},</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;unknown provider: %s&quot;</span><span class="op">,</span> config<span class="op">.</span>Provider<span class="op">)</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="54-validmodels-map-extension">5.4 ValidModels Map Extension</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/translator/llm/llm.go</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> ValidModels <span class="op">=</span> <span class="kw">map</span><span class="op">[</span>Provider<span class="op">][]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... existing mappings ...</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    ProviderGroq<span class="op">:</span>       <span class="op">{</span><span class="st">&quot;llama-3.3-70b&quot;</span><span class="op">,</span> <span class="st">&quot;llama-3.1-8b&quot;</span><span class="op">,</span> <span class="st">&quot;mixtral-8x7b&quot;</span><span class="op">},</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    ProviderCohere<span class="op">:</span>     <span class="op">{</span><span class="st">&quot;command-r&quot;</span><span class="op">,</span> <span class="st">&quot;command-r-plus&quot;</span><span class="op">,</span> <span class="st">&quot;command&quot;</span><span class="op">},</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    ProviderMistral<span class="op">:</span>    <span class="op">{</span><span class="st">&quot;mistral-large&quot;</span><span class="op">,</span> <span class="st">&quot;mistral-medium&quot;</span><span class="op">,</span> <span class="st">&quot;mistral-small&quot;</span><span class="op">},</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    ProviderXAI<span class="op">:</span>        <span class="op">{</span><span class="st">&quot;grok-beta&quot;</span><span class="op">,</span> <span class="st">&quot;grok-2&quot;</span><span class="op">},</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    ProviderReplicate<span class="op">:</span>  <span class="op">{</span><span class="st">&quot;meta/llama-2-70b&quot;</span><span class="op">},</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    ProviderCerebras<span class="op">:</span>   <span class="op">{</span><span class="st">&quot;llama-3.3-70b&quot;</span><span class="op">},</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    ProviderCloudflare<span class="op">:</span> <span class="op">{</span><span class="st">&quot;@cf/meta/llama-2-7b&quot;</span><span class="op">},</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    ProviderSiliconFlow<span class="op">:{</span><span class="st">&quot;deepseek-ai/DeepSeek-V2.5&quot;</span><span class="op">},</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    ProviderTogetherAI<span class="op">:</span> <span class="op">{</span><span class="st">&quot;meta-llama/Llama-3-70b&quot;</span><span class="op">,</span> <span class="st">&quot;mistralai/Mixtral-8x7B&quot;</span><span class="op">},</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    ProviderSambaNova<span class="op">:</span>  <span class="op">{</span><span class="st">&quot;llama-3.3-70b&quot;</span><span class="op">},</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    ProviderKimi<span class="op">:</span>       <span class="op">{</span><span class="st">&quot;moonshot-v1-8k&quot;</span><span class="op">,</span> <span class="st">&quot;moonshot-v1-32k&quot;</span><span class="op">},</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    ProviderNovita<span class="op">:</span>     <span class="op">{</span><span class="st">&quot;llama-3.3-70b&quot;</span><span class="op">},</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... etc</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="6-capability-integration-map">6. CAPABILITY INTEGRATION MAP</h2>
+<h3 id="61-mcps-model-context-protocol-integration">6.1 MCPs (Model
+Context Protocol) Integration</h3>
+<p><strong>Current State:</strong></p>
+<ul>
+<li>HelixTranslate: NO MCP support</li>
+<li>LLMsVerifier: Capability detection for MCP support
+(<code>FeatureDetectionResult.MCPs bool</code>)</li>
+<li>HelixAgent: 35 MCP implementations via <code>MCP/</code> submodule +
+SSE bridge on port 8103</li>
+</ul>
+<p><strong>Integration Path:</strong></p>
+<pre><code>1. Add MCP submodule: git submodule add MCP/
+2. File: `pkg/mcp/client.go` - NEW, wraps MCP client
+3. File: `internal/mcp/registry.go` - NEW, registers MCP servers
+4. Integration in `pkg/translator/translator.go`:
+   - Before translation: query MCP for context enrichment
+   - After translation: use MCP for terminology validation
+5. Config: Add `&quot;mcp_servers&quot;` array to `config.json`</code></pre>
+<h3 id="62-lsps-language-server-protocol-integration">6.2 LSPs (Language
+Server Protocol) Integration</h3>
+<p><strong>Current State:</strong></p>
+<ul>
+<li>HelixTranslate: NO LSP support</li>
+<li>LLMsVerifier: Capability detection for LSP
+(<code>FeatureDetectionResult.LSPs bool</code>)</li>
+<li>HelixAgent: 10 LSP servers (gopls, pylsp,
+typescript-language-server, rust-analyzer, clangd)</li>
+</ul>
+<p><strong>Integration Path:</strong></p>
+<pre><code>1. File: `pkg/lsp/client.go` - NEW, LSP client wrapper
+2. File: `internal/lsp/registry.go` - NEW, LSP server registry
+3. Integration in `pkg/translator/llm/*.go`:
+   - Code-aware translation: Use LSP for source code context
+   - Language detection enhancement via LSP
+4. Config: Add `&quot;lsp_servers&quot;` array to `config.json`</code></pre>
+<h3 id="63-acps-agent-coordination-protocol-integration">6.3 ACPs (Agent
+Coordination Protocol) Integration</h3>
+<p><strong>Current State:</strong></p>
+<ul>
+<li>HelixTranslate: NO ACP support</li>
+<li>LLMsVerifier: Capability detection
+(<code>FeatureDetectionResult.ACPs bool</code>)</li>
+<li>HelixAgent: Full ACP manager on port 8300, JSON-RPC protocol, tool
+calling + context management</li>
+</ul>
+<p><strong>Integration Path:</strong></p>
+<pre><code>1. File: `pkg/acp/client.go` - NEW, ACP client
+2. File: `internal/acp/manager.go` - NEW, ACP manager
+3. Integration points:
+   - `pkg/coordination/`: Multi-LLM coordination via ACP
+   - `pkg/translator/`: Translation agent orchestration
+4. Config: Add `&quot;acp&quot;` section to `config.json`</code></pre>
+<h3 id="64-embeddings-integration">6.4 Embeddings Integration</h3>
+<p><strong>Current State:</strong></p>
+<ul>
+<li>HelixTranslate: NO embeddings support</li>
+<li>LLMsVerifier: Capability detection
+(<code>FeatureDetectionResult.Embeddings bool</code>)</li>
+<li>HelixAgent: 13 embedding providers via
+<code>internal/embeddings/</code></li>
+</ul>
+<p><strong>Integration Path:</strong></p>
+<pre><code>1. File: `pkg/embeddings/client.go` - NEW, embedding client
+2. File: `pkg/embeddings/providers.go` - NEW, provider registry
+3. Use cases:
+   - RAG-based translation memory
+   - Semantic similarity for quality verification
+   - Terminology extraction
+4. Config: Add `&quot;embeddings&quot;` section to `config.json`</code></pre>
+<h3 id="65-rag-retrieval-augmented-generation-integration">6.5 RAG
+(Retrieval-Augmented Generation) Integration</h3>
+<p><strong>Current State:</strong></p>
+<ul>
+<li>HelixTranslate: NO RAG support</li>
+<li>LLMsVerifier: NO direct RAG support</li>
+<li>HelixAgent: <code>RAG/</code> submodule, ChromaDB/Qdrant/Neo4j,
+chunking (1000 tokens, 200 overlap, top_k=5)</li>
+</ul>
+<p><strong>Integration Path:</strong></p>
+<pre><code>1. File: `pkg/rag/engine.go` - NEW, RAG engine
+2. File: `pkg/rag/vector_store.go` - NEW, vector store interface
+3. Use cases:
+   - Translation memory retrieval
+   - Terminology consistency enforcement
+   - Style guide adherence
+4. Config: Add `&quot;rag&quot;` section to `config.json`</code></pre>
+<h3 id="66-skills-integration">6.6 Skills Integration</h3>
+<p><strong>Current State:</strong></p>
+<ul>
+<li>HelixTranslate: NO skills system</li>
+<li>LLMsVerifier: Capability-based skill inference from
+<code>VerificationResult</code></li>
+<li>HelixAgent: Skill definitions in provider configs, capability
+detection, specialization tagging</li>
+</ul>
+<p><strong>Integration Path:</strong></p>
+<pre><code>1. File: `pkg/skills/registry.go` - NEW, skill registry
+2. File: `pkg/skills/detector.go` - NEW, skill detection from LLMsVerifier results
+3. Skill types: `translation`, `terminology`, `cultural_adaptation`, `quality_verification`
+4. Config: Add `&quot;skills&quot;` section to `config.json`</code></pre>
+<h3 id="67-plugins-integration">6.7 Plugins Integration</h3>
+<p><strong>Current State:</strong></p>
+<ul>
+<li>HelixTranslate: NO plugin system</li>
+<li>LLMsVerifier: NO plugin system</li>
+<li>HelixAgent: <code>Plugins/</code> submodule, hot reloading,
+auto-discovery</li>
+</ul>
+<p><strong>Integration Path:</strong></p>
+<pre><code>1. File: `pkg/plugin/registry.go` - NEW, plugin registry
+2. File: `pkg/plugin/loader.go` - NEW, plugin loader with hot reload
+3. Plugin types: pre-processors, post-processors, format converters, quality checkers
+4. Config: Add `&quot;plugins&quot;` section to `config.json`</code></pre>
+<h3 id="68-capability-detection-integration-flow">6.8 Capability
+Detection Integration Flow</h3>
+<pre><code>[LLMsVerifier Verification]
+    |
+    v
+[FeatureDetectionResult]
+    ├── MCPs: bool          → Enable/disable MCP features
+    ├── LSPs: bool          → Enable/disable LSP features
+    ├── ACPs: bool          → Enable/disable ACP features
+    ├── Embeddings: bool    → Enable embedding-based features
+    ├── Streaming: bool     → Enable real-time translation
+    ├── JSONMode: bool      → Enable structured output
+    ├── Reasoning: bool     → Enable complex translation logic
+    ├── CodeGeneration: bool → Enable code-aware translation
+    └── Multimodal: bool    → Enable image/video translation
+    |
+    v
+[HelixTranslate Feature Gates]
+    - Each capability gates specific features
+    - Scores influence feature priority
+    - Unverified capabilities disabled by default</code></pre>
+<hr />
+<h2 id="7-code-references">7. CODE REFERENCES</h2>
+<h3 id="71-helixtranslate-specific-references">7.1 HelixTranslate
+Specific References</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Line(s)</th>
+<th>Context</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>go.mod</code></td>
+<td>N/A</td>
+<td>Module definition</td>
+<td>Add <code>require digital.vasic.llmsverifier v0.0.0</code> +
+<code>replace</code></td>
+</tr>
+<tr>
+<td><code>pkg/translator/llm/llm.go</code></td>
+<td>~30-50</td>
+<td><code>LLMClient</code> interface</td>
+<td>Add <code>GetVerificationScore() float64</code></td>
+</tr>
+<tr>
+<td><code>pkg/translator/llm/llm.go</code></td>
+<td>~55-70</td>
+<td><code>Provider</code> enum</td>
+<td>Add 21 new provider constants</td>
+</tr>
+<tr>
+<td><code>pkg/translator/llm/llm.go</code></td>
+<td>~75-120</td>
+<td><code>NewLLMTranslator()</code> factory</td>
+<td>Add 21 new switch cases</td>
+</tr>
+<tr>
+<td><code>pkg/translator/llm/llm.go</code></td>
+<td>~125-150</td>
+<td><code>ValidModels</code> map</td>
+<td>Add entries for 21 new providers</td>
+</tr>
+<tr>
+<td><code>internal/config/config.go</code></td>
+<td>~40-80</td>
+<td><code>Config</code> struct</td>
+<td>Add <code>LLMsVerifier</code> field</td>
+</tr>
+<tr>
+<td><code>internal/config/config.go</code></td>
+<td>~200-250</td>
+<td><code>LoadConfig()</code> function</td>
+<td>Add verifier config loading</td>
+</tr>
+<tr>
+<td><code>pkg/api/handler.go</code></td>
+<td>~40-60</td>
+<td><code>Handler</code> struct</td>
+<td>Add <code>verifierSvc</code>, <code>scoreAdapter</code> fields</td>
+</tr>
+<tr>
+<td><code>pkg/api/handler.go</code></td>
+<td>~100-150</td>
+<td><code>SetupRoutes()</code></td>
+<td>Add verifier route handlers</td>
+</tr>
+<tr>
+<td><code>pkg/verification/verifier.go</code></td>
+<td>N/A</td>
+<td>Existing verification</td>
+<td>Wire LLMsVerifier backend</td>
+</tr>
+<tr>
+<td><code>cmd/api-server/main.go</code></td>
+<td>~1-50</td>
+<td><code>main()</code> function</td>
+<td>Add verifier initialization</td>
+</tr>
+<tr>
+<td><code>cmd/unified-translator/main.go</code></td>
+<td>~50-100</td>
+<td>Flag definitions</td>
+<td>Add <code>-verifier-*</code> flags</td>
+</tr>
+<tr>
+<td><code>config.json</code></td>
+<td>N/A</td>
+<td>Root config</td>
+<td>Add <code>"llmsverifier"</code> section</td>
+</tr>
+</tbody>
+</table>
+<h3 id="72-llmsverifier-specific-references">7.2 LLMsVerifier Specific
+References</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Line(s)</th>
+<th>Context</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>llm-verifier/llmverifier/verifier.go</code></td>
+<td>~24-30</td>
+<td><code>New()</code> constructor</td>
+<td>Import and call from HelixTranslate</td>
+</tr>
+<tr>
+<td><code>llm-verifier/llmverifier/verifier.go</code></td>
+<td>~154-241</td>
+<td><code>Verify()</code> method</td>
+<td>Core verification orchestration</td>
+</tr>
+<tr>
+<td><code>llm-verifier/llmverifier/verifier.go</code></td>
+<td>~306-393</td>
+<td><code>verifySingleModel()</code></td>
+<td>Single model verification logic</td>
+</tr>
+<tr>
+<td><code>llm-verifier/providers/base.go</code></td>
+<td>~8-62</td>
+<td><code>BaseAdapter</code> struct</td>
+<td>Embed in new provider clients</td>
+</tr>
+<tr>
+<td><code>llm-verifier/providers/service.go</code></td>
+<td>N/A</td>
+<td><code>ProviderService</code> interface</td>
+<td>Implement for HelixTranslate</td>
+</tr>
+<tr>
+<td><code>llm-verifier/providers/model_provider_service.go</code></td>
+<td>N/A</td>
+<td>3-tier discovery</td>
+<td>Use for model discovery</td>
+</tr>
+<tr>
+<td><code>llm-verifier/scoring/scoring_engine.go</code></td>
+<td>~37-132</td>
+<td><code>CalculateComprehensiveScore()</code></td>
+<td>Core scoring logic</td>
+</tr>
+<tr>
+<td><code>llm-verifier/scoring/scoring_engine.go</code></td>
+<td>~356-364</td>
+<td><code>DefaultScoreWeights()</code></td>
+<td>Import default weights</td>
+</tr>
+<tr>
+<td><code>llm-verifier/config/config.go</code></td>
+<td>N/A</td>
+<td><code>Config</code> struct</td>
+<td>Map from HelixTranslate config</td>
+</tr>
+<tr>
+<td><code>llm-verifier/verification/verification.go</code></td>
+<td>N/A</td>
+<td>Core verification</td>
+<td>Use as verification backend</td>
+</tr>
+<tr>
+<td><code>llm-verifier/verification/code_verification.go</code></td>
+<td>N/A</td>
+<td>Code visibility test</td>
+<td>Mandatory integration</td>
+</tr>
+<tr>
+<td><code>llm-verifier/database/database.go</code></td>
+<td>N/A</td>
+<td>SQLite + SQLCipher</td>
+<td>Initialize for local state</td>
+</tr>
+</tbody>
+</table>
+<h3 id="73-helixagent-reference-implementation">7.3 HelixAgent Reference
+Implementation</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Line(s)</th>
+<th>Context</th>
+<th>Reference Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cmd/helixagent/main.go</code></td>
+<td>~1-100</td>
+<td>Startup flow</td>
+<td>Exact initialization order</td>
+</tr>
+<tr>
+<td><code>cmd/helixagent/main.go</code></td>
+<td>N/A</td>
+<td>Import</td>
+<td><code>digital.vasic.llmsverifier/pkg/cliagents</code></td>
+</tr>
+<tr>
+<td><code>internal/verifier/startup.go</code></td>
+<td>~1-50</td>
+<td><code>NewStartupVerifier()</code></td>
+<td>Constructor pattern</td>
+</tr>
+<tr>
+<td><code>internal/verifier/startup.go</code></td>
+<td>~51-200</td>
+<td><code>VerifyAllProviders()</code></td>
+<td>5-phase pipeline</td>
+</tr>
+<tr>
+<td><code>internal/verifier/startup.go</code></td>
+<td>N/A</td>
+<td>Import</td>
+<td><code>digital.vasic.llmsverifier/api_keys</code></td>
+</tr>
+<tr>
+<td><code>internal/verifier/config.go</code></td>
+<td>N/A</td>
+<td>Config types</td>
+<td>Copy config struct patterns</td>
+</tr>
+<tr>
+<td><code>internal/verifier/discovery.go</code></td>
+<td>N/A</td>
+<td>Discovery service</td>
+<td>Copy discovery patterns</td>
+</tr>
+<tr>
+<td><code>internal/verifier/scoring.go</code></td>
+<td>N/A</td>
+<td>5-component scoring</td>
+<td>Copy scoring implementation</td>
+</tr>
+<tr>
+<td><code>internal/verifier/enhanced_scoring.go</code></td>
+<td>N/A</td>
+<td>7-component scoring</td>
+<td>Copy enhanced scoring</td>
+</tr>
+<tr>
+<td><code>internal/verifier/provider_types.go</code></td>
+<td>N/A</td>
+<td>Unified types</td>
+<td>Copy type definitions</td>
+</tr>
+<tr>
+<td><code>internal/verifier/health.go</code></td>
+<td>N/A</td>
+<td>Health monitoring</td>
+<td>Copy health check patterns</td>
+</tr>
+<tr>
+<td><code>internal/services/llmsverifier_score_adapter.go</code></td>
+<td>N/A</td>
+<td>Score adapter</td>
+<td>Exact implementation pattern</td>
+</tr>
+<tr>
+<td><code>configs/verifier.yaml</code></td>
+<td>N/A</td>
+<td>YAML config</td>
+<td>Copy and adapt</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-risk-assessment">8. RISK ASSESSMENT</h2>
+<h3 id="81-technical-risks-matrix">8.1 Technical Risks Matrix</h3>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Severity</th>
+<th>Probability</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CGO dependency for SQLite</strong></td>
+<td>High</td>
+<td>High</td>
+<td>Build complexity</td>
+<td>Add build tags; provide pure-Go fallback; document CGO
+requirement</td>
+</tr>
+<tr>
+<td><strong>Provider API key explosion</strong></td>
+<td>Medium</td>
+<td>High</td>
+<td>Config complexity</td>
+<td>Unified key management; env var interpolation; secure vault
+integration</td>
+</tr>
+<tr>
+<td><strong>Test coverage drop</strong></td>
+<td>High</td>
+<td>High</td>
+<td>Quality regression</td>
+<td>Parallel test writing; coverage gates; anti-puff enforcement</td>
+</tr>
+<tr>
+<td><strong>Breaking changes in LLMsVerifier API</strong></td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Integration failure</td>
+<td>Pin submodule commit; integration tests; version compatibility
+layer</td>
+</tr>
+<tr>
+<td><strong>Performance degradation</strong></td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Slower translation</td>
+<td>Async verification; score caching; lazy provider discovery</td>
+</tr>
+<tr>
+<td><strong>Memory bloat from dual databases</strong></td>
+<td>Medium</td>
+<td>Low</td>
+<td>Resource consumption</td>
+<td>Shared connection pooling; SQLite WAL mode; cleanup routines</td>
+</tr>
+<tr>
+<td><strong>OAuth token restrictions</strong></td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Auth failures</td>
+<td>Mark restricted tokens; exclude from provider list; clear error
+messages</td>
+</tr>
+<tr>
+<td><strong>Provider rate limiting during verification</strong></td>
+<td>Low</td>
+<td>High</td>
+<td>Verification failures</td>
+<td>Configurable rate limits; staggered verification; retry with
+backoff</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-mitigation-strategies">8.2 Mitigation Strategies</h3>
+<pre><code>RISK-001: CGO Dependency
+- Strategy: Add `//go:build cgo` tags to SQLite-dependent files
+- Fallback: Use `modernc.org/sqlite` (pure Go) for builds without CGO
+- File: Create `pkg/database/sqlite_cgo.go` and `pkg/database/sqlite_nocgo.go`
+
+RISK-002: API Key Management
+- Strategy: Unified key storage in environment only
+- Implementation: `internal/config/env_loader.go` with interpolation
+- Security: Keys NEVER committed; `.gitignore` enforced
+
+RISK-003: Test Coverage
+- Strategy: Coverage ratchet - no PR reduces coverage
+- Implementation: `Makefile` target `make coverage-check`
+- Gate: Fail CI if coverage &lt; 43.6% (current) → target 80%+
+
+RISK-004: API Stability
+- Strategy: Submodule pin at known-good commit
+- Implementation: `git submodule update --init -- LLMsVerifier` at specific hash
+- Fallback: Wrapper layer that adapts API changes
+
+RISK-005: Performance
+- Strategy: Verification runs async on startup, NOT blocking
+- Implementation: Goroutine with context cancellation
+- Cache: `safe.Store` for scores with configurable TTL
+
+RISK-006: Memory
+- Strategy: SQLite with WAL mode, connection pooling
+- Implementation: `PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL`
+- Monitor: Add memory usage metrics to WebSocket dashboard</code></pre>
+<hr />
+<h2 id="9-implementation-sequence">9. IMPLEMENTATION SEQUENCE</h2>
+<h3 id="phase-1-foundation-week-1">Phase 1: Foundation (Week 1)</h3>
+<p><strong>Goal</strong>: Go module integration, configuration system,
+basic scaffolding</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Files</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.1</td>
+<td>Add LLMsVerifier as git submodule</td>
+<td><code>.gitmodules</code>, <code>go.mod</code></td>
+<td>Submodule initialized</td>
+</tr>
+<tr>
+<td>1.2</td>
+<td>Add go.mod require + replace</td>
+<td><code>go.mod</code></td>
+<td>Module importable</td>
+</tr>
+<tr>
+<td>1.3</td>
+<td>Extend Config struct</td>
+<td><code>internal/config/config.go</code></td>
+<td>Config types defined</td>
+</tr>
+<tr>
+<td>1.4</td>
+<td>Add env var loading</td>
+<td><code>internal/config/config.go</code></td>
+<td>Env vars loaded</td>
+</tr>
+<tr>
+<td>1.5</td>
+<td>Create <code>configs/verifier.yaml</code></td>
+<td>NEW</td>
+<td>YAML config template</td>
+</tr>
+<tr>
+<td>1.6</td>
+<td>Update <code>config.json</code> schema</td>
+<td><code>config.json</code></td>
+<td>Schema documented</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Anti-Puff Test</strong>: Build succeeds;
+<code>go mod tidy</code> clean; config loads from YAML</p>
+<h3 id="phase-2-core-llmsverifier-integration-week-2">Phase 2: Core
+LLMsVerifier Integration (Week 2)</h3>
+<p><strong>Goal</strong>: Provider discovery, verification, scoring
+operational</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Files</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2.1</td>
+<td>Create <code>internal/verifier/config.go</code></td>
+<td>NEW</td>
+<td>Config types for verifier</td>
+</tr>
+<tr>
+<td>2.2</td>
+<td>Create <code>internal/verifier/provider_types.go</code></td>
+<td>NEW</td>
+<td>UnifiedProvider, UnifiedModel types</td>
+</tr>
+<tr>
+<td>2.3</td>
+<td>Create <code>internal/verifier/startup.go</code></td>
+<td>NEW</td>
+<td>StartupVerifier orchestrator</td>
+</tr>
+<tr>
+<td>2.4</td>
+<td>Create <code>internal/verifier/discovery.go</code></td>
+<td>NEW</td>
+<td>Model discovery service</td>
+</tr>
+<tr>
+<td>2.5</td>
+<td>Create <code>internal/verifier/scoring.go</code></td>
+<td>NEW</td>
+<td>5-component scoring</td>
+</tr>
+<tr>
+<td>2.6</td>
+<td>Create <code>internal/verifier/verification.go</code></td>
+<td>NEW</td>
+<td>Verification service wrapper</td>
+</tr>
+<tr>
+<td>2.7</td>
+<td>Create <code>internal/verifier/health.go</code></td>
+<td>NEW</td>
+<td>Health monitoring</td>
+</tr>
+<tr>
+<td>2.8</td>
+<td>Create
+<code>internal/services/llmsverifier_score_adapter.go</code></td>
+<td>NEW</td>
+<td>Score normalization bridge</td>
+</tr>
+<tr>
+<td>2.9</td>
+<td>Initialize database on startup</td>
+<td><code>cmd/api-server/main.go</code></td>
+<td>SQLite initialized</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Anti-Puff Test</strong>: Startup runs verification pipeline;
+scores stored in DB; adapter returns normalized scores</p>
+<h3 id="phase-3-provider-expansion-week-3">Phase 3: Provider Expansion
+(Week 3)</h3>
+<p><strong>Goal</strong>: Add 21+ new providers via LLMsVerifier
+adapters</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Files</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.1</td>
+<td>Extend <code>Provider</code> enum</td>
+<td><code>pkg/translator/llm/llm.go</code></td>
+<td>All 30+ providers defined</td>
+</tr>
+<tr>
+<td>3.2</td>
+<td>Add provider constants</td>
+<td><code>pkg/translator/llm/llm.go</code></td>
+<td><code>ProviderGroq</code> through <code>ProviderKimiCode</code></td>
+</tr>
+<tr>
+<td>3.3</td>
+<td>Extend factory switch</td>
+<td><code>pkg/translator/llm/llm.go</code></td>
+<td>All providers constructable</td>
+</tr>
+<tr>
+<td>3.4</td>
+<td>Extend <code>ValidModels</code></td>
+<td><code>pkg/translator/llm/llm.go</code></td>
+<td>Model lists populated</td>
+</tr>
+<tr>
+<td>3.5</td>
+<td>Create provider client stubs (batch)</td>
+<td><code>pkg/translator/llm/*.go</code> (21 files)</td>
+<td>Each client implements <code>LLMClient</code></td>
+</tr>
+<tr>
+<td>3.6</td>
+<td>Add provider API key env vars</td>
+<td><code>internal/config/config.go</code></td>
+<td>All keys configurable</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Anti-Puff Test</strong>: Each provider instantiates; at least
+3 providers make live API calls successfully</p>
+<h3 id="phase-4-api-integration-week-4">Phase 4: API Integration (Week
+4)</h3>
+<p><strong>Goal</strong>: REST/gRPC endpoints for verification</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Files</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4.1</td>
+<td>Extend <code>Handler</code> struct</td>
+<td><code>pkg/api/handler.go</code></td>
+<td>Verifier fields added</td>
+</tr>
+<tr>
+<td>4.2</td>
+<td>Add verification routes</td>
+<td><code>pkg/api/handler.go</code></td>
+<td><code>/api/v1/verify/*</code> registered</td>
+</tr>
+<tr>
+<td>4.3</td>
+<td>Implement route handlers</td>
+<td><code>pkg/api/handler.go</code></td>
+<td>All handlers functional</td>
+</tr>
+<tr>
+<td>4.4</td>
+<td>Extend gRPC proto</td>
+<td><code>pkg/grpc/translator.proto</code></td>
+<td>Verification RPCs added</td>
+</tr>
+<tr>
+<td>4.5</td>
+<td>Regenerate protobuf</td>
+<td><code>pkg/grpc/*.go</code></td>
+<td>gRPC code regenerated</td>
+</tr>
+<tr>
+<td>4.6</td>
+<td>Add CLI flags</td>
+<td><code>cmd/unified-translator/main.go</code></td>
+<td><code>-verifier-*</code> flags added</td>
+</tr>
+<tr>
+<td>4.7</td>
+<td>Wire initialization</td>
+<td><code>cmd/api-server/main.go</code></td>
+<td>Full startup pipeline</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Anti-Puff Test</strong>:
+<code>curl /api/v1/verifier/health</code> returns 200; verify endpoint
+triggers actual verification</p>
+<h3 id="phase-5-capability-integration-week-5-6">Phase 5: Capability
+Integration (Week 5-6)</h3>
+<p><strong>Goal</strong>: MCP, LSP, ACP, Embeddings, RAG, Skills,
+Plugins</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Files</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5.1</td>
+<td>Create MCP client</td>
+<td><code>pkg/mcp/client.go</code></td>
+<td>MCP integration</td>
+</tr>
+<tr>
+<td>5.2</td>
+<td>Create LSP client</td>
+<td><code>pkg/lsp/client.go</code></td>
+<td>LSP integration</td>
+</tr>
+<tr>
+<td>5.3</td>
+<td>Create ACP client</td>
+<td><code>pkg/acp/client.go</code></td>
+<td>ACP integration</td>
+</tr>
+<tr>
+<td>5.4</td>
+<td>Create embeddings client</td>
+<td><code>pkg/embeddings/client.go</code></td>
+<td>Embeddings integration</td>
+</tr>
+<tr>
+<td>5.5</td>
+<td>Create RAG engine</td>
+<td><code>pkg/rag/engine.go</code></td>
+<td>RAG integration</td>
+</tr>
+<tr>
+<td>5.6</td>
+<td>Create skills registry</td>
+<td><code>pkg/skills/registry.go</code></td>
+<td>Skills system</td>
+</tr>
+<tr>
+<td>5.7</td>
+<td>Create plugin system</td>
+<td><code>pkg/plugin/registry.go</code></td>
+<td>Plugin system</td>
+</tr>
+<tr>
+<td>5.8</td>
+<td>Wire capability gates</td>
+<td><code>pkg/translator/translator.go</code></td>
+<td>Feature gating by capability</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Anti-Puff Test</strong>: Each capability has a working
+challenge script that validates real functionality</p>
+<h3 id="phase-6-quality--documentation-week-7">Phase 6: Quality &amp;
+Documentation (Week 7)</h3>
+<p><strong>Goal</strong>: Testing, challenges, documentation</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Files</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6.1</td>
+<td>Write unit tests for all new packages</td>
+<td><code>*_test.go</code> files</td>
+<td>&gt;80% coverage</td>
+</tr>
+<tr>
+<td>6.2</td>
+<td>Write integration tests</td>
+<td><code>test/integration/verifier_*_test.go</code></td>
+<td>Real infrastructure</td>
+</tr>
+<tr>
+<td>6.3</td>
+<td>Write challenge scripts</td>
+<td><code>challenges/scripts/helixtranslate_verifier_*.sh</code></td>
+<td>5+ scripts</td>
+</tr>
+<tr>
+<td>6.4</td>
+<td>Update AGENTS.md</td>
+<td><code>AGENTS.md</code></td>
+<td>Integration documented</td>
+</tr>
+<tr>
+<td>6.5</td>
+<td>Update CLAUDE.md</td>
+<td><code>CLAUDE.md</code></td>
+<td>Hard stops documented</td>
+</tr>
+<tr>
+<td>6.6</td>
+<td>Update API docs</td>
+<td><code>Documentation/API.md</code></td>
+<td>New endpoints documented</td>
+</tr>
+<tr>
+<td>6.7</td>
+<td>E2E workflow validation</td>
+<td><code>test/e2e/</code></td>
+<td>Full workflow passes</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="10-anti-puff-testing-requirements">10. ANTI-PUFF TESTING
+REQUIREMENTS</h2>
+<h3 id="101-testing-philosophy-from-helixagent-constitution">10.1
+Testing Philosophy (from HelixAgent Constitution)</h3>
+<pre><code>CONST-002a: NO mocks/stubs in production code
+CONST-002:  100% test coverage across ALL test types
+CONST-030:  Real infrastructure for ALL non-unit tests
+Rule:        &quot;Mocks/stubs ONLY in unit tests; all other tests use real data and live services&quot;
+Enforcement: `make no-mocks-above-unit` with strict allowlist ratchet</code></pre>
+<h3 id="102-test-categories--requirements">10.2 Test Categories &amp;
+Requirements</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Location</th>
+<th>Mocks Allowed</th>
+<th>Infrastructure</th>
+<th>Coverage Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td><code>*_test.go</code> alongside source</td>
+<td>Yes (interfaces)</td>
+<td>None</td>
+<td>80%+</td>
+</tr>
+<tr>
+<td>Integration</td>
+<td><code>test/integration/</code></td>
+<td>No</td>
+<td>Real SQLite, mock HTTP</td>
+<td>70%+</td>
+</tr>
+<tr>
+<td>E2E</td>
+<td><code>test/e2e/</code></td>
+<td>No</td>
+<td>Full stack running</td>
+<td>Full workflows</td>
+</tr>
+<tr>
+<td>Security</td>
+<td><code>test/security/</code></td>
+<td>No</td>
+<td>Real services</td>
+<td>All endpoints</td>
+</tr>
+<tr>
+<td>Stress</td>
+<td><code>test/stress/</code></td>
+<td>No</td>
+<td>Production-like</td>
+<td>Performance baselines</td>
+</tr>
+<tr>
+<td>Challenge</td>
+<td><code>challenges/scripts/</code></td>
+<td>No</td>
+<td>Real APIs</td>
+<td>Script-based validation</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td><code>test/performance/</code></td>
+<td>No</td>
+<td>Isolated environment</td>
+<td>Benchmark baselines</td>
+</tr>
+</tbody>
+</table>
+<h3 id="103-challenge-script-specifications">10.3 Challenge Script
+Specifications</h3>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co"># challenges/scripts/helixtranslate_verifier_integration.sh</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Test: LLMsVerifier integration into HelixTranslate</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Validates: Real provider discovery, verification, scoring</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Color codes</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="va">GREEN</span><span class="op">=</span><span class="st">&#39;\033[0;32m&#39;</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="va">RED</span><span class="op">=</span><span class="st">&#39;\033[0;31m&#39;</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="va">YELLOW</span><span class="op">=</span><span class="st">&#39;\033[1;33m&#39;</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="va">BLUE</span><span class="op">=</span><span class="st">&#39;\033[0;34m&#39;</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="va">NC</span><span class="op">=</span><span class="st">&#39;\033[0m&#39;</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="va">TESTS_PASSED</span><span class="op">=</span>0</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="va">TESTS_FAILED</span><span class="op">=</span>0</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="fu">print_test()</span> <span class="kw">{</span> <span class="bu">echo</span> <span class="at">-e</span> <span class="st">&quot;</span><span class="va">${YELLOW}</span><span class="st">TEST</span><span class="va">${NC}</span><span class="st"> </span><span class="va">$1</span><span class="st">&quot;</span><span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="fu">pass_test()</span> <span class="kw">{</span> <span class="bu">echo</span> <span class="at">-e</span> <span class="st">&quot;</span><span class="va">${GREEN}</span><span class="st">PASS</span><span class="va">${NC}</span><span class="st"> </span><span class="va">$1</span><span class="st">&quot;</span><span class="kw">;</span> <span class="va">TESTS_PASSED</span><span class="op">=</span><span class="va">$((TESTS_PASSED</span><span class="op">+</span><span class="dv">1</span><span class="va">))</span><span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="fu">fail_test()</span> <span class="kw">{</span> <span class="bu">echo</span> <span class="at">-e</span> <span class="st">&quot;</span><span class="va">${RED}</span><span class="st">FAIL</span><span class="va">${NC}</span><span class="st"> </span><span class="va">$1</span><span class="st">&quot;</span><span class="kw">;</span> <span class="va">TESTS_FAILED</span><span class="op">=</span><span class="va">$((TESTS_FAILED</span><span class="op">+</span><span class="dv">1</span><span class="va">))</span><span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TEST</span><span class="co"> 1: LLMsVerifier module imports successfully</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="ex">print_test</span> <span class="st">&quot;Module import&quot;</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run cmd/api-server/main.go <span class="at">--help</span> <span class="op">&gt;</span> /dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$?</span> <span class="ot">-eq</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span> <span class="ex">pass_test</span> <span class="st">&quot;Module imports&quot;</span><span class="kw">;</span> <span class="cf">else</span> <span class="ex">fail_test</span> <span class="st">&quot;Module imports&quot;</span><span class="kw">;</span> <span class="cf">fi</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TEST</span><span class="co"> 2: Config loads with verifier section</span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a><span class="ex">print_test</span> <span class="st">&quot;Config loading with verifier section&quot;</span></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/api-server</span> <span class="at">-config</span> configs/verifier.yaml <span class="kw">&amp;</span></span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a><span class="va">SERVER_PID</span><span class="op">=</span><span class="va">$!</span></span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a><span class="fu">sleep</span> 2</span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/api/v1/verifier/health <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-q</span> <span class="st">&quot;healthy&quot;</span></span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$?</span> <span class="ot">-eq</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span> <span class="ex">pass_test</span> <span class="st">&quot;Config loads&quot;</span><span class="kw">;</span> <span class="cf">else</span> <span class="ex">fail_test</span> <span class="st">&quot;Config loads&quot;</span><span class="kw">;</span> <span class="cf">fi</span></span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a><span class="bu">kill</span> <span class="va">$SERVER_PID</span></span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TEST</span><span class="co"> 3: Provider discovery returns real models</span></span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a><span class="ex">print_test</span> <span class="st">&quot;Provider discovery with live API&quot;</span></span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/api/v1/verifier/providers <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.providers | length&#39;</span> <span class="op">&gt;</span> /dev/null</span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a><span class="va">COUNT</span><span class="op">=</span><span class="va">$(</span><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/api/v1/verifier/providers <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.providers | length&#39;</span><span class="va">)</span></span>
+<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="st">&quot;</span><span class="va">$COUNT</span><span class="st">&quot;</span> <span class="ot">-gt</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span> <span class="ex">pass_test</span> <span class="st">&quot;Provider discovery (</span><span class="va">$COUNT</span><span class="st"> providers)&quot;</span><span class="kw">;</span> <span class="cf">else</span> <span class="ex">fail_test</span> <span class="st">&quot;Provider discovery&quot;</span><span class="kw">;</span> <span class="cf">fi</span></span>
+<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TEST</span><span class="co"> 4: Verification pipeline runs</span></span>
+<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a><span class="ex">print_test</span> <span class="st">&quot;Verification pipeline&quot;</span></span>
+<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a><span class="va">MODEL_ID</span><span class="op">=</span><span class="st">&quot;gpt-4&quot;</span></span>
+<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a><span class="va">RESULT</span><span class="op">=</span><span class="va">$(</span><span class="ex">curl</span> <span class="at">-s</span> <span class="at">-X</span> POST http://localhost:8080/api/v1/verifier/models/<span class="va">$MODEL_ID</span>/verify<span class="va">)</span></span>
+<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$RESULT</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-q</span> <span class="st">&quot;verified&quot;</span></span>
+<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$?</span> <span class="ot">-eq</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span> <span class="ex">pass_test</span> <span class="st">&quot;Verification pipeline&quot;</span><span class="kw">;</span> <span class="cf">else</span> <span class="ex">fail_test</span> <span class="st">&quot;Verification pipeline&quot;</span><span class="kw">;</span> <span class="cf">fi</span></span>
+<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TEST</span><span class="co"> 5: Score adapter returns normalized scores</span></span>
+<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a><span class="ex">print_test</span> <span class="st">&quot;Score normalization&quot;</span></span>
+<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a><span class="va">SCORE</span><span class="op">=</span><span class="va">$(</span><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/api/v1/verifier/models/<span class="va">$MODEL_ID</span> <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.score&#39;</span><span class="va">)</span></span>
+<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">((</span> <span class="va">$(</span><span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$SCORE</span><span class="st"> &gt; 0&quot;</span> <span class="kw">|</span> <span class="fu">bc</span> <span class="at">-l</span><span class="va">)</span> <span class="kw">));</span> <span class="cf">then</span> <span class="ex">pass_test</span> <span class="st">&quot;Score normalized (</span><span class="va">$SCORE</span><span class="st">)&quot;</span><span class="kw">;</span> <span class="cf">else</span> <span class="ex">fail_test</span> <span class="st">&quot;Score normalized&quot;</span><span class="kw">;</span> <span class="cf">fi</span></span>
+<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TEST</span><span class="co"> 6: Translation uses verified provider</span></span>
+<span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a><span class="ex">print_test</span> <span class="st">&quot;Translation with verified provider&quot;</span></span>
+<span id="cb20-55"><a href="#cb20-55" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/unified-translator</span> <span class="at">-input</span> test/fixtures/sample.fb2 <span class="at">-provider</span> openai <span class="at">-verifier-enabled</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-q</span> <span class="st">&quot;Translation completed&quot;</span></span>
+<span id="cb20-56"><a href="#cb20-56" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$?</span> <span class="ot">-eq</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span> <span class="ex">pass_test</span> <span class="st">&quot;Verified translation&quot;</span><span class="kw">;</span> <span class="cf">else</span> <span class="ex">fail_test</span> <span class="st">&quot;Verified translation&quot;</span><span class="kw">;</span> <span class="cf">fi</span></span>
+<span id="cb20-57"><a href="#cb20-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-58"><a href="#cb20-58" aria-hidden="true" tabindex="-1"></a><span class="co"># Summary</span></span>
+<span id="cb20-59"><a href="#cb20-59" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb20-60"><a href="#cb20-60" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;================================&quot;</span></span>
+<span id="cb20-61"><a href="#cb20-61" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Tests passed: </span><span class="va">$TESTS_PASSED</span><span class="st">&quot;</span></span>
+<span id="cb20-62"><a href="#cb20-62" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Tests failed: </span><span class="va">$TESTS_FAILED</span><span class="st">&quot;</span></span>
+<span id="cb20-63"><a href="#cb20-63" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;================================&quot;</span></span>
+<span id="cb20-64"><a href="#cb20-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-65"><a href="#cb20-65" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$TESTS_FAILED</span> <span class="ot">-eq</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span> <span class="bu">exit</span> 0<span class="kw">;</span> <span class="cf">else</span> <span class="bu">exit</span> 1<span class="kw">;</span> <span class="cf">fi</span></span></code></pre></div>
+<h3 id="104-unit-test-requirements-per-component">10.4 Unit Test
+Requirements (Per Component)</h3>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/verifier/startup_test.go</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStartupVerifier_VerifyAllProviders<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Setup: Create verifier with test config</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Execute: Run verification</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Assert: Results contain verified providers with scores &gt; 0</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Assert: No mock clients used</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStartupVerifier_SelectDebateTeam<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Setup: Pre-populate with scored providers</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Execute: Select team</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Assert: Team size &lt;= 25</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Assert: All selected providers have score &gt;= min threshold</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/services/llmsverifier_score_adapter_test.go</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestScoreAdapter_GetProviderScore<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Setup: Initialize adapter with known scores</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Execute: GetProviderScore(&quot;openai&quot;)</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Assert: Returns normalized value between 0-10</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Assert: Consistent across calls (cache hit)</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestScoreAdapter_RefreshScores<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Setup: Initialize adapter</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Execute: RefreshScores()</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Assert: lastRefresh updated</span></span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Assert: scores populated</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/translator/llm/llmsverifier_test.go</span></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLLMsVerifierClient_Translate<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Setup: Create client with test config</span></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Execute: Translate(ctx, &quot;Hello&quot;, &quot;Translate to French&quot;)</span></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Assert: Returns non-empty string</span></span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Assert: No errors</span></span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="105-anti-puff-checklist">10.5 Anti-Puff Checklist</h3>
+<p>For each integration point, the following MUST be true:</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Real API calls</strong>:
+Unit tests may mock; ALL other test types use live provider
+APIs</label></li>
+<li><label><input type="checkbox" /><strong>Real database</strong>:
+SQLite file created and queried; WAL mode verified</label></li>
+<li><label><input type="checkbox" /><strong>Real scores</strong>: Scores
+come from actual LLMsVerifier calculations, not hardcoded</label></li>
+<li><label><input type="checkbox" /><strong>Real provider
+discovery</strong>: Discovered models match actual provider API
+responses</label></li>
+<li><label><input type="checkbox" /><strong>Code visibility
+test</strong>: "Do you see my code?" test runs against real
+models</label></li>
+<li><label><input type="checkbox" /><strong>No hardcoded
+fallbacks</strong>: All model lists come from discovery, not static
+config</label></li>
+<li><label><input type="checkbox" /><strong>Coverage ratchet</strong>:
+Each PR increases or maintains coverage; never decreases</label></li>
+<li><label><input type="checkbox" /><strong>Challenge
+validation</strong>: Every feature has a bash challenge script that runs
+against the live system</label></li>
+<li><label><input type="checkbox" /><strong>Terminal output</strong>:
+Definition of Done requires pasted terminal output from real
+runs</label></li>
+<li><label><input type="checkbox" /><strong>No dead code</strong>: All
+functions called; all imports used; all configs referenced</label></li>
+</ul>
+<hr />
+<h2 id="appendix-a-file-inventory">Appendix A: File Inventory</h2>
+<h3 id="new-files-to-create-30-files">New Files to Create (30+
+files)</h3>
+<pre><code>pkg/translator/llm/llmsverifier.go
+pkg/translator/llm/groq.go
+pkg/translator/llm/cohere.go
+pkg/translator/llm/mistral.go
+pkg/translator/llm/xai.go
+pkg/translator/llm/replicate.go
+pkg/translator/llm/cerebras.go
+pkg/translator/llm/cloudflare.go
+pkg/translator/llm/siliconflow.go
+pkg/translator/llm/hyperbolic.go
+pkg/translator/llm/togetherai.go
+pkg/translator/llm/sambanova.go
+pkg/translator/llm/kimi.go
+pkg/translator/llm/novita.go
+pkg/translator/llm/nlpcloud.go
+pkg/translator/llm/upstage.go
+pkg/translator/llm/sarvam.go
+pkg/translator/llm/modal.go
+pkg/translator/llm/publicai.go
+pkg/translator/llm/nia.go
+pkg/translator/llm/vulavula.go
+pkg/translator/llm/kimicode.go
+internal/verifier/startup.go
+internal/verifier/config.go
+internal/verifier/discovery.go
+internal/verifier/scoring.go
+internal/verifier/enhanced_scoring.go
+internal/verifier/provider_types.go
+internal/verifier/health.go
+internal/verifier/verification.go
+internal/verifier/adapters/provider_adapter.go
+internal/services/llmsverifier_score_adapter.go
+pkg/verification/llmsverifier_backend.go
+pkg/mcp/client.go
+pkg/lsp/client.go
+pkg/acp/client.go
+pkg/embeddings/client.go
+pkg/rag/engine.go
+pkg/skills/registry.go
+pkg/plugin/registry.go
+configs/verifier.yaml</code></pre>
+<h3 id="files-to-modify-13-files">Files to Modify (13 files)</h3>
+<pre><code>go.mod
+pkg/translator/llm/llm.go
+internal/config/config.go
+pkg/api/handler.go
+pkg/grpc/translator.proto
+cmd/api-server/main.go
+cmd/unified-translator/main.go
+pkg/verification/verifier.go
+config.json
+AGENTS.md
+CLAUDE.md
+Makefile
+.gitmodules</code></pre>
+<h3 id="files-to-delete-0-files">Files to Delete (0 files)</h3>
+<p>No files need deletion.</p>
+<hr />
+<h2 id="appendix-b-module-dependencies">Appendix B: Module
+Dependencies</h2>
+<pre><code>digital.vasic.translator (HelixTranslate)
+  +-- digital.vasic.llmsverifier (LLMsVerifier)
+  |     +-- github.com/gin-gonic/gin v1.11.0
+  |     +-- github.com/spf13/cobra v1.10.2
+  |     +-- github.com/spf13/viper v1.21.0
+  |     +-- github.com/mattn/go-sqlite3 v1.14.32
+  |     +-- github.com/golang-jwt/jwt/v5 v5.3.0
+  |     +-- github.com/gorilla/websocket v1.5.3
+  |     +-- github.com/andybalholm/brotli v1.2.0
+  |     +-- golang.org/x/crypto v0.46.0
+  |     +-- google.golang.org/grpc v1.76.0
+  |     +-- ...
+  +-- github.com/gin-gonic/gin v1.11.0 (shared)
+  +-- github.com/golang-jwt/jwt/v5 v5.3.0 (shared)
+  +-- github.com/google/uuid v1.6.0 (shared)
+  +-- github.com/gorilla/websocket v1.5.3 (shared)
+  +-- github.com/lib/pq v1.10.9
+  +-- github.com/redis/go-redis/v9 v9.7.0
+  +-- github.com/quic-go/quic-go v0.56.0
+  +-- google.golang.org/grpc v1.77.0 (version mismatch!)</code></pre>
+<p><strong>Dependency Conflicts:</strong></p>
+<ul>
+<li><code>google.golang.org/grpc</code>: HelixTranslate uses v1.77.0,
+LLMsVerifier uses v1.76.0
+<ul>
+<li>Resolution: Upgrade LLMsVerifier or downgrade HelixTranslate to
+shared version</li>
+</ul></li>
+<li><code>github.com/gin-gonic/gin</code>: Both use v1.11.0
+(compatible)</li>
+<li><code>github.com/gorilla/websocket</code>: Both use v1.5.3
+(compatible)</li>
+</ul>
+<hr />
+<p><em>End of Comprehensive Technical Synthesis</em> <em>Generated from
+deep repository analysis of HelixTranslate, LLMsVerifier, and
+HelixAgent</em></p>
+</body>
+</html>

@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>STEP_BY_STEP_IMPLEMENTATION_GUIDE</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">STEP_BY_STEP_IMPLEMENTATION_GUIDE</h1>
+</header>
+<h1 id="step-by-step-implementation-guide">STEP-BY-STEP IMPLEMENTATION
+GUIDE</h1>
+<h2
+id="universal-multi-format-multi-language-ebook-translation-system">Universal
+Multi-Format Multi-Language Ebook Translation System</h2>
+<p><strong>Date:</strong> November 25, 2025<br />
+<strong>Guide Type:</strong> Detailed Implementation Roadmap<br />
+<strong>Duration:</strong> 14 Weeks Complete Implementation<br />
+<strong>Target:</strong> 100% Completion with Full Test Coverage</p>
+<hr />
+<h2 id="overview">OVERVIEW</h2>
+<p>This step-by-step implementation guide provides detailed instructions
+for completing the Universal Ebook Translator project from its current
+~60% completion state to a fully production-ready system. Each phase
+includes specific tasks, code examples, and validation criteria.</p>
+<h2 id="implementation-principles">IMPLEMENTATION PRINCIPLES</h2>
+<ol type="1">
+<li><strong>Test-First Approach</strong> - Write tests before
+implementation</li>
+<li><strong>Security-First Development</strong> - Prioritize security in
+all components</li>
+<li><strong>Incremental Delivery</strong> - Deliver working features
+incrementally</li>
+<li><strong>Documentation-Driven</strong> - Document all components
+comprehensively</li>
+<li><strong>Production-Ready Standards</strong> - Build for production
+from day one</li>
+</ol>
+<hr />
+<h2 id="phase-0-critical-infrastructure-stabilization-week-1">PHASE 0:
+CRITICAL INFRASTRUCTURE STABILIZATION (WEEK 1)</h2>
+<h3 id="day-1-build-system-fixes-4-hours">DAY 1: BUILD SYSTEM FIXES (4
+HOURS)</h3>
+<h4 id="task-11-remove-conflicting-main-functions">Task 1.1: Remove
+Conflicting Main Functions</h4>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create tools directory structure</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> tools/<span class="dt">{debug</span><span class="op">,</span><span class="dt">test</span><span class="op">,</span><span class="dt">setup}</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Move conflicting files</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> debug_<span class="pp">*</span>.go tools/debug/</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> test_<span class="pp">*</span>.go tools/test/</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> setup_linting.go tools/setup/</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> simple.go tools/debug/</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> create_test_epub.go tools/test/</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Create proper Go modules for tools</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> tools/debug</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod init digital.vasic.translator/tools/debug</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ../test</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod init digital.vasic.translator/tools/test</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ../setup</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod init digital.vasic.translator/tools/setup</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span></code></pre></div>
+<h4 id="task-12-fix-import-cycles-in-translator-package">Task 1.2: Fix
+Import Cycles in Translator Package</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// File: pkg/translator/universal_test.go</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> translator_test</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;testing&quot;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/assert&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/require&quot;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    translator <span class="st">&quot;github.com/universal-ebook-translator/pkg/translator&quot;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/universal-ebook-translator/test/mocks&quot;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestUniversalTranslator_Integration<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Setup mock translator to avoid import cycles</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    mockLLM <span class="op">:=</span> <span class="op">&amp;</span>mocks<span class="op">.</span>MockLLMProvider<span class="op">{}</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">:=</span> translator<span class="op">.</span>Config<span class="op">{</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        Provider<span class="op">:</span> <span class="st">&quot;mock&quot;</span><span class="op">,</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        Model<span class="op">:</span>    <span class="st">&quot;test-model&quot;</span><span class="op">,</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    trans<span class="op">,</span> err <span class="op">:=</span> translator<span class="op">.</span>New<span class="op">(</span>cfg<span class="op">,</span> translator<span class="op">.</span>WithLLMProvider<span class="op">(</span>mockLLM<span class="op">))</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Test translation</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    result<span class="op">,</span> err <span class="op">:=</span> trans<span class="op">.</span>Translate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="st">&quot;Hello&quot;</span><span class="op">,</span> <span class="st">&quot;en&quot;</span><span class="op">,</span> <span class="st">&quot;es&quot;</span><span class="op">)</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> result<span class="op">)</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="task-13-fix-missing-imports">Task 1.3: Fix Missing Imports</h4>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// File: cmd/translate-ssh/main_test.go</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> main</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span> <span class="co">// ADD THIS IMPORT</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;testing&quot;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;encoding/json&quot;</span> <span class="co">// ADD THIS IMPORT</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/assert&quot;</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/require&quot;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSSHCommand<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Test implementation with proper imports</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    tests <span class="op">:=</span> <span class="op">[]</span><span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        name     <span class="dt">string</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        args     <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        expected <span class="dt">int</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}{</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;help flag&quot;</span><span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;--help&quot;</span><span class="op">},</span> <span class="dv">0</span><span class="op">},</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;version flag&quot;</span><span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;--version&quot;</span><span class="op">},</span> <span class="dv">0</span><span class="op">},</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;invalid args&quot;</span><span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;--invalid&quot;</span><span class="op">},</span> <span class="dv">1</span><span class="op">},</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> tt <span class="op">:=</span> <span class="kw">range</span> tests <span class="op">{</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Run<span class="op">(</span>tt<span class="op">.</span>name<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Use proper JSON and fmt imports</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>            result <span class="op">:=</span> runCommand<span class="op">(</span>tt<span class="op">.</span>args<span class="op">)</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> tt<span class="op">.</span>expected<span class="op">,</span> result<span class="op">)</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>        <span class="op">})</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="validation-criteria">Validation Criteria</h4>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify all tests compile</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./... <span class="at">-v</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;(PASS|FAIL|ok)&quot;</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Should show no compilation errors</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected output:</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># ok      digital.vasic.translator/pkg/format     0.123s</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># ok      digital.vasic.translator/pkg/logger     0.045s</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># ... etc</span></span></code></pre></div>
+<h3 id="day-2-test-infrastructure-setup-4-hours">DAY 2: TEST
+INFRASTRUCTURE SETUP (4 HOURS)</h3>
+<h4 id="task-21-create-test-utilities-package">Task 2.1: Create Test
+Utilities Package</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// File: test/utils/helpers.go</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> utils</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os&quot;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;path/filepath&quot;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;testing&quot;</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/require&quot;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">// TestConfig provides configuration for tests</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TestConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    DatabaseURL <span class="dt">string</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    APIToken    <span class="dt">string</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    TestTimeout  time<span class="op">.</span>Duration</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co">// SetupTestEnvironment creates test environment</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> SetupTestEnvironment<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">*</span>TestConfig <span class="op">{</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Helper<span class="op">()</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    tempDir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    dbPath <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>tempDir<span class="op">,</span> <span class="st">&quot;test.db&quot;</span><span class="op">)</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>TestConfig<span class="op">{</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        DatabaseURL<span class="op">:</span> <span class="st">&quot;sqlite://&quot;</span> <span class="op">+</span> dbPath<span class="op">,</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        APIToken<span class="op">:</span>    <span class="st">&quot;test-token-&quot;</span> <span class="op">+</span> t<span class="op">.</span>Name<span class="op">(),</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        TestTimeout<span class="op">:</span>  <span class="dv">30</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">,</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="co">// CleanupTestEnvironment cleans up test resources</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> CleanupTestEnvironment<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">,</span> config <span class="op">*</span>TestConfig<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Helper<span class="op">()</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> config <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> config<span class="op">.</span>DatabaseURL <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>        os<span class="op">.</span>Remove<span class="op">(</span>config<span class="op">.</span>DatabaseURL<span class="op">)</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="co">// CreateTestEPUB creates a test EPUB file</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> CreateTestEPUB<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">,</span> title<span class="op">,</span> content <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Helper<span class="op">()</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    tempDir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>    epubPath <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>tempDir<span class="op">,</span> <span class="st">&quot;test.epub&quot;</span><span class="op">)</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create minimal EPUB structure</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    mimetype <span class="op">:=</span> <span class="st">&quot;application/epub+zip&quot;</span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create container.xml</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>    containerXML <span class="op">:=</span> <span class="st">`&lt;?xml version=&quot;1.0&quot;?&gt;</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;container version=&quot;1.0&quot; xmlns=&quot;urn:oasis:names:tc:opendocument:xmlns:container&quot;&gt;</span></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a><span class="st">  &lt;rootfiles&gt;</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a><span class="st">    &lt;rootfile full-path=&quot;OEBPS/content.opf&quot; media-type=&quot;application/oebps-package+xml&quot;/&gt;</span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a><span class="st">  &lt;/rootfiles&gt;</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;/container&gt;`</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create content.opf</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>    contentOPF <span class="op">:=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">`&lt;?xml version=&quot;1.0&quot;?&gt;</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;package version=&quot;3.0&quot; xmlns=&quot;http://www.idpf.org/2007/opf&quot;&gt;</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a><span class="st">  &lt;metadata&gt;</span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="st">    &lt;dc:title xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot;&gt;%s&lt;/dc:title&gt;</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a><span class="st">  &lt;/metadata&gt;</span></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a><span class="st">  &lt;manifest&gt;</span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a><span class="st">    &lt;item id=&quot;chapter1&quot; href=&quot;chapter1.xhtml&quot; media-type=&quot;application/xhtml+xml&quot;/&gt;</span></span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a><span class="st">  &lt;/manifest&gt;</span></span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a><span class="st">  &lt;spine&gt;</span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a><span class="st">    &lt;itemref idref=&quot;chapter1&quot;/&gt;</span></span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a><span class="st">  &lt;/spine&gt;</span></span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;/package&gt;`</span><span class="op">,</span> title<span class="op">)</span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create chapter1.xhtml</span></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>    chapterXHTML <span class="op">:=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">`&lt;?xml version=&quot;1.0&quot;?&gt;</span></span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;</span></span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;head&gt;&lt;title&gt;%s&lt;/title&gt;&lt;/head&gt;</span></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;body&gt;&lt;p&gt;%s&lt;/p&gt;&lt;/body&gt;</span></span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;/html&gt;`</span><span class="op">,</span> title<span class="op">,</span> content<span class="op">)</span></span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create EPUB file (simplified - real implementation would use zip)</span></span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>    <span class="co">// For tests, we&#39;ll create a placeholder file</span></span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>epubPath<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;test-epub-content&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> epubPath</span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a><span class="co">// CreateTestContext creates a test context with timeout</span></span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> CreateTestContext<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> context<span class="op">.</span>Context <span class="op">{</span></span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Helper<span class="op">()</span></span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>    ctx<span class="op">,</span> cancel <span class="op">:=</span> context<span class="op">.</span>WithTimeout<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="dv">30</span><span class="op">*</span>time<span class="op">.</span>Second<span class="op">)</span></span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Cleanup<span class="op">(</span>cancel<span class="op">)</span></span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ctx</span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="task-22-create-mock-implementations">Task 2.2: Create Mock
+Implementations</h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// File: test/mocks/llm_provider.go</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> mocks</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/mock&quot;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">// MockLLMProvider implements LLM provider interface for testing</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MockLLMProvider <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    mock<span class="op">.</span>Mock</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>MockLLMProvider<span class="op">)</span> Translate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> text<span class="op">,</span> from<span class="op">,</span> to <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    args <span class="op">:=</span> m<span class="op">.</span>Called<span class="op">(</span>ctx<span class="op">,</span> text<span class="op">,</span> from<span class="op">,</span> to<span class="op">)</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> args<span class="op">.</span>String<span class="op">(</span><span class="dv">0</span><span class="op">),</span> args<span class="op">.</span>Error<span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>MockLLMProvider<span class="op">)</span> GetProvider<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    args <span class="op">:=</span> m<span class="op">.</span>Called<span class="op">()</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> args<span class="op">.</span>String<span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>MockLLMProvider<span class="op">)</span> IsAvailable<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    args <span class="op">:=</span> m<span class="op">.</span>Called<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> args<span class="op">.</span>Bool<span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="co">// MockDatabase implements database interface for testing</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MockDatabase <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    mock<span class="op">.</span>Mock</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>MockDatabase<span class="op">)</span> SaveTranslation<span class="op">(</span>source<span class="op">,</span> target<span class="op">,</span> sourceLang<span class="op">,</span> targetLang <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    args <span class="op">:=</span> m<span class="op">.</span>Called<span class="op">(</span>source<span class="op">,</span> target<span class="op">,</span> sourceLang<span class="op">,</span> targetLang<span class="op">)</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> args<span class="op">.</span>Error<span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>MockDatabase<span class="op">)</span> GetTranslation<span class="op">(</span>source<span class="op">,</span> sourceLang<span class="op">,</span> targetLang <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    args <span class="op">:=</span> m<span class="op">.</span>Called<span class="op">(</span>source<span class="op">,</span> sourceLang<span class="op">,</span> targetLang<span class="op">)</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> args<span class="op">.</span>String<span class="op">(</span><span class="dv">0</span><span class="op">),</span> args<span class="op">.</span>Error<span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>MockDatabase<span class="op">)</span> Close<span class="op">()</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    args <span class="op">:=</span> m<span class="op">.</span>Called<span class="op">()</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> args<span class="op">.</span>Error<span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a><span class="co">// MockSecurityProvider implements security interface for testing</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MockSecurityProvider <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    mock<span class="op">.</span>Mock</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>MockSecurityProvider<span class="op">)</span> Authenticate<span class="op">(</span>token <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">bool</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>    args <span class="op">:=</span> m<span class="op">.</span>Called<span class="op">(</span>token<span class="op">)</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> args<span class="op">.</span>Bool<span class="op">(</span><span class="dv">0</span><span class="op">),</span> args<span class="op">.</span>Error<span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>MockSecurityProvider<span class="op">)</span> Authorize<span class="op">(</span>user<span class="op">,</span> resource <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">bool</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>    args <span class="op">:=</span> m<span class="op">.</span>Called<span class="op">(</span>user<span class="op">,</span> resource<span class="op">)</span></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> args<span class="op">.</span>Bool<span class="op">(</span><span class="dv">0</span><span class="op">),</span> args<span class="op">.</span>Error<span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="task-23-set-up-test-data">Task 2.3: Set Up Test Data</h4>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># File: test/fixtures/create_test_data.sh</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create test data directory</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> test/fixtures/ebooks</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> test/fixtures/translations</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> test/fixtures/configs</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Create test ebooks</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> test/fixtures/ebooks/sample.txt <span class="op">&lt;&lt; &#39;EOF&#39;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="st">This is a sample English text for testing translation functionality.</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="st">It contains multiple sentences and should be suitable for translation testing.</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> test/fixtures/ebooks/sample.html <span class="op">&lt;&lt; &#39;EOF&#39;</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;!DOCTYPE html&gt;</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;html&gt;</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;head&gt;&lt;title&gt;Sample Document&lt;/title&gt;&lt;/head&gt;</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;body&gt;</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;h1&gt;Test Document&lt;/h1&gt;</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;p&gt;This is a test HTML document for translation.&lt;/p&gt;</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;p&gt;It contains headings and paragraphs.&lt;/p&gt;</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;/body&gt;</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;/html&gt;</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> test/fixtures/ebooks/sample.fb2 <span class="op">&lt;&lt; &#39;EOF&#39;</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;FictionBook xmlns=&quot;http://www.gribuser.ru/xml/fictionbook/2.0&quot;&gt;</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;description&gt;</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;title-info&gt;</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;book-title&gt;Test Book&lt;/book-title&gt;</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;lang&gt;en&lt;/lang&gt;</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;/title-info&gt;</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;/description&gt;</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;body&gt;</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;section&gt;</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;title&gt;&lt;p&gt;Test Chapter&lt;/p&gt;&lt;/title&gt;</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;p&gt;This is a test FB2 document.&lt;/p&gt;</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;p&gt;It contains section titles and paragraphs.&lt;/p&gt;</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;/section&gt;</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;/body&gt;</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="st">&lt;/FictionBook&gt;</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Create test configurations</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> test/fixtures/configs/test_config.json <span class="op">&lt;&lt; &#39;EOF&#39;</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a><span class="st">{</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;provider&quot;: &quot;mock&quot;,</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;model&quot;: &quot;test-model&quot;,</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;temperature&quot;: 0.3,</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;max_tokens&quot;: 1000,</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;target_language&quot;: &quot;es&quot;,</span></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;output_format&quot;: &quot;epub&quot;</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> test/fixtures/configs/performance_test.json <span class="op">&lt;&lt; &#39;EOF&#39;</span></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a><span class="st">{</span></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;provider&quot;: &quot;mock&quot;,</span></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;model&quot;: &quot;performance-test&quot;,</span></span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;temperature&quot;: 0.1,</span></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;max_tokens&quot;: 2000,</span></span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;target_language&quot;: &quot;fr&quot;,</span></span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;output_format&quot;: &quot;txt&quot;</span></span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Test data created successfully&quot;</span></span></code></pre></div>
+<h4 id="validation-criteria-1">Validation Criteria</h4>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify test infrastructure</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./test/utils <span class="at">-v</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./test/mocks <span class="at">-v</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify test data creation</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> test/fixtures/</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Should show:</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># ebooks/    translations/    configs/</span></span></code></pre></div>
+<h3 id="day-3-coverage-analysis--prioritization-4-hours">DAY 3: COVERAGE
+ANALYSIS &amp; PRIORITIZATION (4 HOURS)</h3>
+<h4 id="task-31-generate-comprehensive-coverage-report">Task 3.1:
+Generate Comprehensive Coverage Report</h4>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># File: scripts/generate_coverage_report.sh</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Generating comprehensive coverage report...&quot;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean previous coverage files</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-f</span> coverage<span class="pp">*</span>.out coverage<span class="pp">*</span>.html</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate coverage for all packages</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./... <span class="at">-coverprofile</span><span class="op">=</span>coverage-full.out <span class="at">-v</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">tee</span> coverage-test.log</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate HTML report</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> tool cover <span class="at">-html</span><span class="op">=</span>coverage-full.out <span class="at">-o</span> coverage-full.html</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract coverage by package</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Coverage by package:&quot;</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> tool cover <span class="at">-func</span><span class="op">=</span>coverage-full.out <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;^pkg/&quot;</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="at">-k3</span> <span class="at">-n</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify low coverage packages</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Low coverage packages (&lt;80%):&quot;</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> tool cover <span class="at">-func</span><span class="op">=</span>coverage-full.out <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;$3 &lt; &quot;80.0%&quot; &amp;&amp; $1 ~ /^pkg/ {print $1, $3}&#39;</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify packages with no tests</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Packages with no tests:&quot;</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> pkg/ <span class="at">-name</span> <span class="st">&quot;*.go&quot;</span> <span class="at">-not</span> <span class="at">-name</span> <span class="st">&quot;*_test.go&quot;</span> <span class="kw">|</span> <span class="cf">while</span> <span class="bu">read</span> <span class="va">file</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="va">pkg</span><span class="op">=</span><span class="va">$(</span><span class="fu">dirname</span> <span class="st">&quot;</span><span class="va">$file</span><span class="st">&quot;</span><span class="va">)</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="ot">! </span><span class="ex">go</span> test <span class="st">&quot;./</span><span class="va">$pkg</span><span class="st">&quot;</span> <span class="at">-v</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-q</span> <span class="st">&quot;no test files&quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="ot">! </span><span class="fu">ls</span> <span class="st">&quot;</span><span class="va">$pkg</span><span class="st">&quot;</span>/<span class="pp">*</span>_test.go <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>            <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$pkg</span><span class="st">&quot;</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">fi</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="at">-u</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Coverage report generated: coverage-full.html&quot;</span></span></code></pre></div>
+<h4 id="task-32-create-priority-matrix">Task 3.2: Create Priority
+Matrix</h4>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// File: test/coverage/priority_matrix.go</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> coverage</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;sort&quot;</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PriorityLevel <span class="dt">int</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    Critical PriorityLevel <span class="op">=</span> <span class="ot">iota</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    High</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    Medium</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    Low</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Component <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    Package      <span class="dt">string</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    Current      <span class="dt">float64</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    Target       <span class="dt">float64</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    Priority     PriorityLevel</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    Security     <span class="dt">bool</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    CoreFunction <span class="dt">bool</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> GeneratePriorityMatrix<span class="op">()</span> <span class="op">[]</span>Component <span class="op">{</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">[]</span>Component<span class="op">{</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Critical Security Components</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;pkg/security/&quot;</span><span class="op">,</span> <span class="fl">20.0</span><span class="op">,</span> <span class="fl">95.0</span><span class="op">,</span> Critical<span class="op">,</span> <span class="ot">true</span><span class="op">,</span> <span class="ot">true</span><span class="op">},</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;pkg/distributed/&quot;</span><span class="op">,</span> <span class="fl">60.0</span><span class="op">,</span> <span class="fl">90.0</span><span class="op">,</span> Critical<span class="op">,</span> <span class="ot">true</span><span class="op">,</span> <span class="ot">true</span><span class="op">},</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Core Business Logic</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;pkg/translator/&quot;</span><span class="op">,</span> <span class="fl">33.0</span><span class="op">,</span> <span class="fl">90.0</span><span class="op">,</span> Critical<span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="ot">true</span><span class="op">},</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;pkg/models/&quot;</span><span class="op">,</span> <span class="fl">25.0</span><span class="op">,</span> <span class="fl">90.0</span><span class="op">,</span> High<span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="ot">true</span><span class="op">},</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;pkg/api/&quot;</span><span class="op">,</span> <span class="fl">33.0</span><span class="op">,</span> <span class="fl">85.0</span><span class="op">,</span> High<span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="ot">true</span><span class="op">},</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Supporting Components</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;pkg/markdown/&quot;</span><span class="op">,</span> <span class="fl">43.0</span><span class="op">,</span> <span class="fl">85.0</span><span class="op">,</span> Medium<span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="ot">false</span><span class="op">},</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;pkg/preparation/&quot;</span><span class="op">,</span> <span class="fl">25.0</span><span class="op">,</span> <span class="fl">85.0</span><span class="op">,</span> Medium<span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="ot">false</span><span class="op">},</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;pkg/report/&quot;</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">80.0</span><span class="op">,</span> Medium<span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="ot">false</span><span class="op">},</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Tools and Utilities</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;cmd/&quot;</span><span class="op">,</span> <span class="fl">10.0</span><span class="op">,</span> <span class="fl">70.0</span><span class="op">,</span> Low<span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="ot">false</span><span class="op">},</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c Component<span class="op">)</span> GetScore<span class="op">()</span> <span class="dt">float64</span> <span class="op">{</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>    score <span class="op">:=</span> c<span class="op">.</span>Target <span class="op">-</span> c<span class="op">.</span>Current</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> c<span class="op">.</span>Priority <span class="op">==</span> Critical <span class="op">{</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>        score <span class="op">*=</span> <span class="fl">3.0</span></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="cf">if</span> c<span class="op">.</span>Priority <span class="op">==</span> High <span class="op">{</span></span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>        score <span class="op">*=</span> <span class="fl">2.0</span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> c<span class="op">.</span>Security <span class="op">{</span></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>        score <span class="op">*=</span> <span class="fl">1.5</span></span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> c<span class="op">.</span>CoreFunction <span class="op">{</span></span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>        score <span class="op">*=</span> <span class="fl">1.2</span></span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> score</span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> PrintPriorityMatrix<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>    components <span class="op">:=</span> GeneratePriorityMatrix<span class="op">()</span></span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Sort by priority score (highest first)</span></span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>    sort<span class="op">.</span>Slice<span class="op">(</span>components<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>i<span class="op">,</span> j <span class="dt">int</span><span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> components<span class="op">[</span>i<span class="op">].</span>GetScore<span class="op">()</span> <span class="op">&gt;</span> components<span class="op">[</span>j<span class="op">].</span>GetScore<span class="op">()</span></span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;%-20s %-10s %-10s %-10s %-10s %-15s</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> </span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Package&quot;</span><span class="op">,</span> <span class="st">&quot;Current&quot;</span><span class="op">,</span> <span class="st">&quot;Target&quot;</span><span class="op">,</span> <span class="st">&quot;Priority&quot;</span><span class="op">,</span> <span class="st">&quot;Security&quot;</span><span class="op">,</span> <span class="st">&quot;Score&quot;</span><span class="op">)</span></span>
+<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Println<span class="op">(</span>strings<span class="op">.</span>Repeat<span class="op">(</span><span class="st">&quot;-&quot;</span><span class="op">,</span> <span class="dv">80</span><span class="op">))</span></span>
+<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> comp <span class="op">:=</span> <span class="kw">range</span> components <span class="op">{</span></span>
+<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a>        fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;%-20s %-9.1f%% %-9.1f%% %-10v %-10v %-14.1f</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span></span>
+<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a>            comp<span class="op">.</span>Package<span class="op">,</span> comp<span class="op">.</span>Current<span class="op">,</span> comp<span class="op">.</span>Target<span class="op">,</span> </span>
+<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a>            comp<span class="op">.</span>Priority<span class="op">,</span> comp<span class="op">.</span>Security<span class="op">,</span> comp<span class="op">.</span>GetScore<span class="op">())</span></span>
+<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="validation-criteria-2">Validation Criteria</h4>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate coverage report</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/generate_coverage_report.sh</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Should show:</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Complete coverage analysis</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Low coverage identification</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Priority matrix</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. HTML report for visualization</span></span></code></pre></div>
+<hr />
+<h2 id="phase-1-critical-test-coverage-implementation-weeks-2-4">PHASE
+1: CRITICAL TEST COVERAGE IMPLEMENTATION (WEEKS 2-4)</h2>
+<h3 id="week-2-security--distributed-system-tests">WEEK 2: SECURITY
+&amp; DISTRIBUTED SYSTEM TESTS</h3>
+<h4 id="day-4-5-security-package-tests">DAY 4-5: SECURITY PACKAGE
+TESTS</h4>
+<h5 id="task-41-user-authentication-tests">Task 4.1: User Authentication
+Tests</h5>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// File: pkg/security/user_auth_test.go</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> security</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;testing&quot;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/assert&quot;</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/require&quot;</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;golang.org/x/crypto/bcrypt&quot;</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestJWTAuthentication<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    auth <span class="op">:=</span> NewJWTAuthenticator<span class="op">(</span><span class="st">&quot;test-secret-key&quot;</span><span class="op">)</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;ValidTokenGeneration&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        userID <span class="op">:=</span> <span class="st">&quot;user123&quot;</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        token<span class="op">,</span> err <span class="op">:=</span> auth<span class="op">.</span>GenerateToken<span class="op">(</span>userID<span class="op">,</span> <span class="dv">24</span><span class="op">*</span>time<span class="op">.</span>Hour<span class="op">)</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> token<span class="op">)</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Verify token structure</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>        parts <span class="op">:=</span> strings<span class="op">.</span>Split<span class="op">(</span>token<span class="op">,</span> <span class="st">&quot;.&quot;</span><span class="op">)</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> parts<span class="op">,</span> <span class="dv">3</span><span class="op">)</span> <span class="co">// header.payload.signature</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;ValidTokenValidation&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>        userID <span class="op">:=</span> <span class="st">&quot;user123&quot;</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        token<span class="op">,</span> err <span class="op">:=</span> auth<span class="op">.</span>GenerateToken<span class="op">(</span>userID<span class="op">,</span> <span class="dv">24</span><span class="op">*</span>time<span class="op">.</span>Hour<span class="op">)</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>        parsedUserID<span class="op">,</span> err <span class="op">:=</span> auth<span class="op">.</span>ValidateToken<span class="op">(</span>token<span class="op">)</span></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> userID<span class="op">,</span> parsedUserID<span class="op">)</span></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;InvalidTokenRejection&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>        invalidTokens <span class="op">:=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;&quot;</span><span class="op">,</span>                    <span class="co">// Empty</span></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;invalid.token&quot;</span><span class="op">,</span>       <span class="co">// Malformed</span></span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;invalid.invalid.invalid&quot;</span><span class="op">,</span> <span class="co">// Invalid signature</span></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.&quot;</span><span class="op">,</span> <span class="co">// No signature</span></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> token <span class="op">:=</span> <span class="kw">range</span> invalidTokens <span class="op">{</span></span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>            _<span class="op">,</span> err <span class="op">:=</span> auth<span class="op">.</span>ValidateToken<span class="op">(</span>token<span class="op">)</span></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> <span class="st">&quot;Token %q should be invalid&quot;</span><span class="op">,</span> token<span class="op">)</span></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;ExpiredToken&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>        userID <span class="op">:=</span> <span class="st">&quot;user123&quot;</span></span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>        token<span class="op">,</span> err <span class="op">:=</span> auth<span class="op">.</span>GenerateToken<span class="op">(</span>userID<span class="op">,</span> <span class="dv">1</span><span class="op">*</span>time<span class="op">.</span>Millisecond<span class="op">)</span></span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Wait for token to expire</span></span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a>        time<span class="op">.</span>Sleep<span class="op">(</span><span class="dv">10</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">)</span></span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>        _<span class="op">,</span> err <span class="op">=</span> auth<span class="op">.</span>ValidateToken<span class="op">(</span>token<span class="op">)</span></span>
+<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> err<span class="op">.</span>Error<span class="op">(),</span> <span class="st">&quot;expired&quot;</span><span class="op">)</span></span>
+<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestPasswordHashing<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;PasswordHashing&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-67"><a href="#cb12-67" aria-hidden="true" tabindex="-1"></a>        password <span class="op">:=</span> <span class="st">&quot;secure-password-123&quot;</span></span>
+<span id="cb12-68"><a href="#cb12-68" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-69"><a href="#cb12-69" aria-hidden="true" tabindex="-1"></a>        hash<span class="op">,</span> err <span class="op">:=</span> HashPassword<span class="op">(</span>password<span class="op">)</span></span>
+<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-71"><a href="#cb12-71" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> hash<span class="op">)</span></span>
+<span id="cb12-72"><a href="#cb12-72" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>NotEqual<span class="op">(</span>t<span class="op">,</span> password<span class="op">,</span> hash<span class="op">)</span></span>
+<span id="cb12-73"><a href="#cb12-73" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-74"><a href="#cb12-74" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Verify hash starts with bcrypt prefix</span></span>
+<span id="cb12-75"><a href="#cb12-75" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> strings<span class="op">.</span>HasPrefix<span class="op">(</span>hash<span class="op">,</span> <span class="st">&quot;$2&quot;</span><span class="op">))</span></span>
+<span id="cb12-76"><a href="#cb12-76" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb12-77"><a href="#cb12-77" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-78"><a href="#cb12-78" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;PasswordVerification&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-79"><a href="#cb12-79" aria-hidden="true" tabindex="-1"></a>        password <span class="op">:=</span> <span class="st">&quot;secure-password-123&quot;</span></span>
+<span id="cb12-80"><a href="#cb12-80" aria-hidden="true" tabindex="-1"></a>        hash<span class="op">,</span> err <span class="op">:=</span> HashPassword<span class="op">(</span>password<span class="op">)</span></span>
+<span id="cb12-81"><a href="#cb12-81" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-82"><a href="#cb12-82" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-83"><a href="#cb12-83" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Correct password should validate</span></span>
+<span id="cb12-84"><a href="#cb12-84" aria-hidden="true" tabindex="-1"></a>        err <span class="op">=</span> VerifyPassword<span class="op">(</span>hash<span class="op">,</span> password<span class="op">)</span></span>
+<span id="cb12-85"><a href="#cb12-85" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-86"><a href="#cb12-86" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-87"><a href="#cb12-87" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Wrong password should not validate</span></span>
+<span id="cb12-88"><a href="#cb12-88" aria-hidden="true" tabindex="-1"></a>        err <span class="op">=</span> VerifyPassword<span class="op">(</span>hash<span class="op">,</span> <span class="st">&quot;wrong-password&quot;</span><span class="op">)</span></span>
+<span id="cb12-89"><a href="#cb12-89" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-90"><a href="#cb12-90" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> bcrypt<span class="op">.</span>ErrMismatchedHashAndPassword<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-91"><a href="#cb12-91" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb12-92"><a href="#cb12-92" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-93"><a href="#cb12-93" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;TimingAttackResistance&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-94"><a href="#cb12-94" aria-hidden="true" tabindex="-1"></a>        password <span class="op">:=</span> <span class="st">&quot;secure-password-123&quot;</span></span>
+<span id="cb12-95"><a href="#cb12-95" aria-hidden="true" tabindex="-1"></a>        hash<span class="op">,</span> err <span class="op">:=</span> HashPassword<span class="op">(</span>password<span class="op">)</span></span>
+<span id="cb12-96"><a href="#cb12-96" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-97"><a href="#cb12-97" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-98"><a href="#cb12-98" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Measure timing for correct password</span></span>
+<span id="cb12-99"><a href="#cb12-99" aria-hidden="true" tabindex="-1"></a>        start <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">()</span></span>
+<span id="cb12-100"><a href="#cb12-100" aria-hidden="true" tabindex="-1"></a>        VerifyPassword<span class="op">(</span>hash<span class="op">,</span> password<span class="op">)</span></span>
+<span id="cb12-101"><a href="#cb12-101" aria-hidden="true" tabindex="-1"></a>        correctDuration <span class="op">:=</span> time<span class="op">.</span>Since<span class="op">(</span>start<span class="op">)</span></span>
+<span id="cb12-102"><a href="#cb12-102" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-103"><a href="#cb12-103" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Measure timing for wrong password</span></span>
+<span id="cb12-104"><a href="#cb12-104" aria-hidden="true" tabindex="-1"></a>        start <span class="op">=</span> time<span class="op">.</span>Now<span class="op">()</span></span>
+<span id="cb12-105"><a href="#cb12-105" aria-hidden="true" tabindex="-1"></a>        VerifyPassword<span class="op">(</span>hash<span class="op">,</span> <span class="st">&quot;wrong-password&quot;</span><span class="op">)</span></span>
+<span id="cb12-106"><a href="#cb12-106" aria-hidden="true" tabindex="-1"></a>        wrongDuration <span class="op">:=</span> time<span class="op">.</span>Since<span class="op">(</span>start<span class="op">)</span></span>
+<span id="cb12-107"><a href="#cb12-107" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-108"><a href="#cb12-108" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Duration should be similar (within reasonable tolerance)</span></span>
+<span id="cb12-109"><a href="#cb12-109" aria-hidden="true" tabindex="-1"></a>        ratio <span class="op">:=</span> <span class="dt">float64</span><span class="op">(</span>wrongDuration<span class="op">)</span> <span class="op">/</span> <span class="dt">float64</span><span class="op">(</span>correctDuration<span class="op">)</span></span>
+<span id="cb12-110"><a href="#cb12-110" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Greater<span class="op">(</span>t<span class="op">,</span> ratio<span class="op">,</span> <span class="fl">0.5</span><span class="op">)</span> <span class="co">// Not more than 2x difference</span></span>
+<span id="cb12-111"><a href="#cb12-111" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Less<span class="op">(</span>t<span class="op">,</span> ratio<span class="op">,</span> <span class="fl">2.0</span><span class="op">)</span>    <span class="co">// Not less than 0.5x difference</span></span>
+<span id="cb12-112"><a href="#cb12-112" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb12-113"><a href="#cb12-113" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-114"><a href="#cb12-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-115"><a href="#cb12-115" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRateLimiting<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-116"><a href="#cb12-116" aria-hidden="true" tabindex="-1"></a>    limiter <span class="op">:=</span> NewRateLimiter<span class="op">(</span>RateLimiterConfig<span class="op">{</span></span>
+<span id="cb12-117"><a href="#cb12-117" aria-hidden="true" tabindex="-1"></a>        MaxRequests<span class="op">:</span> <span class="dv">5</span><span class="op">,</span></span>
+<span id="cb12-118"><a href="#cb12-118" aria-hidden="true" tabindex="-1"></a>        Window<span class="op">:</span>      time<span class="op">.</span>Minute<span class="op">,</span></span>
+<span id="cb12-119"><a href="#cb12-119" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb12-120"><a href="#cb12-120" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-121"><a href="#cb12-121" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;RateLimitWithinThreshold&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-122"><a href="#cb12-122" aria-hidden="true" tabindex="-1"></a>        userID <span class="op">:=</span> <span class="st">&quot;user123&quot;</span></span>
+<span id="cb12-123"><a href="#cb12-123" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-124"><a href="#cb12-124" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Should allow requests within limit</span></span>
+<span id="cb12-125"><a href="#cb12-125" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="op">:=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">5</span><span class="op">;</span> i<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb12-126"><a href="#cb12-126" aria-hidden="true" tabindex="-1"></a>            allowed <span class="op">:=</span> limiter<span class="op">.</span>Allow<span class="op">(</span>userID<span class="op">)</span></span>
+<span id="cb12-127"><a href="#cb12-127" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> allowed<span class="op">,</span> <span class="st">&quot;Request %d should be allowed&quot;</span><span class="op">,</span> i<span class="op">+</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb12-128"><a href="#cb12-128" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-129"><a href="#cb12-129" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb12-130"><a href="#cb12-130" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-131"><a href="#cb12-131" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;RateLimitExceedsThreshold&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-132"><a href="#cb12-132" aria-hidden="true" tabindex="-1"></a>        userID <span class="op">:=</span> <span class="st">&quot;user456&quot;</span></span>
+<span id="cb12-133"><a href="#cb12-133" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-134"><a href="#cb12-134" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Exceed limit</span></span>
+<span id="cb12-135"><a href="#cb12-135" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="op">:=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">10</span><span class="op">;</span> i<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb12-136"><a href="#cb12-136" aria-hidden="true" tabindex="-1"></a>            limiter<span class="op">.</span>Allow<span class="op">(</span>userID<span class="op">)</span></span>
+<span id="cb12-137"><a href="#cb12-137" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-138"><a href="#cb12-138" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-139"><a href="#cb12-139" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Next request should be denied</span></span>
+<span id="cb12-140"><a href="#cb12-140" aria-hidden="true" tabindex="-1"></a>        allowed <span class="op">:=</span> limiter<span class="op">.</span>Allow<span class="op">(</span>userID<span class="op">)</span></span>
+<span id="cb12-141"><a href="#cb12-141" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> allowed<span class="op">,</span> <span class="st">&quot;Request exceeding limit should be denied&quot;</span><span class="op">)</span></span>
+<span id="cb12-142"><a href="#cb12-142" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb12-143"><a href="#cb12-143" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-144"><a href="#cb12-144" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;RateLimitReset&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-145"><a href="#cb12-145" aria-hidden="true" tabindex="-1"></a>        userID <span class="op">:=</span> <span class="st">&quot;user789&quot;</span></span>
+<span id="cb12-146"><a href="#cb12-146" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-147"><a href="#cb12-147" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Fill up the rate limit</span></span>
+<span id="cb12-148"><a href="#cb12-148" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="op">:=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">5</span><span class="op">;</span> i<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb12-149"><a href="#cb12-149" aria-hidden="true" tabindex="-1"></a>            limiter<span class="op">.</span>Allow<span class="op">(</span>userID<span class="op">)</span></span>
+<span id="cb12-150"><a href="#cb12-150" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-151"><a href="#cb12-151" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-152"><a href="#cb12-152" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Should be denied</span></span>
+<span id="cb12-153"><a href="#cb12-153" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> limiter<span class="op">.</span>Allow<span class="op">(</span>userID<span class="op">))</span></span>
+<span id="cb12-154"><a href="#cb12-154" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-155"><a href="#cb12-155" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Simulate time window passing (in real implementation, this would be time-based)</span></span>
+<span id="cb12-156"><a href="#cb12-156" aria-hidden="true" tabindex="-1"></a>        limiter<span class="op">.</span>ResetWindow<span class="op">(</span>userID<span class="op">)</span></span>
+<span id="cb12-157"><a href="#cb12-157" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-158"><a href="#cb12-158" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Should be allowed again</span></span>
+<span id="cb12-159"><a href="#cb12-159" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> limiter<span class="op">.</span>Allow<span class="op">(</span>userID<span class="op">))</span></span>
+<span id="cb12-160"><a href="#cb12-160" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb12-161"><a href="#cb12-161" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-162"><a href="#cb12-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-163"><a href="#cb12-163" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestInputSanitization<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-164"><a href="#cb12-164" aria-hidden="true" tabindex="-1"></a>    sanitizer <span class="op">:=</span> NewInputSanitizer<span class="op">()</span></span>
+<span id="cb12-165"><a href="#cb12-165" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-166"><a href="#cb12-166" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;SQLInjectionPrevention&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-167"><a href="#cb12-167" aria-hidden="true" tabindex="-1"></a>        maliciousInputs <span class="op">:=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb12-168"><a href="#cb12-168" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;&#39;; DROP TABLE users; --&quot;</span><span class="op">,</span></span>
+<span id="cb12-169"><a href="#cb12-169" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;&#39;; DELETE FROM translations; --&quot;</span><span class="op">,</span></span>
+<span id="cb12-170"><a href="#cb12-170" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;&#39; OR &#39;1&#39;=&#39;1&quot;</span><span class="op">,</span></span>
+<span id="cb12-171"><a href="#cb12-171" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;1&#39;; UPDATE users SET password=&#39;hacked&#39; WHERE &#39;1&#39;=&#39;1&#39;; --&quot;</span><span class="op">,</span></span>
+<span id="cb12-172"><a href="#cb12-172" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-173"><a href="#cb12-173" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-174"><a href="#cb12-174" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> input <span class="op">:=</span> <span class="kw">range</span> maliciousInputs <span class="op">{</span></span>
+<span id="cb12-175"><a href="#cb12-175" aria-hidden="true" tabindex="-1"></a>            sanitized <span class="op">:=</span> sanitizer<span class="op">.</span>Sanitize<span class="op">(</span>input<span class="op">)</span></span>
+<span id="cb12-176"><a href="#cb12-176" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> sanitized<span class="op">,</span> <span class="st">&quot;DROP&quot;</span><span class="op">,</span> <span class="st">&quot;Input should not contain DROP keyword&quot;</span><span class="op">)</span></span>
+<span id="cb12-177"><a href="#cb12-177" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> sanitized<span class="op">,</span> <span class="st">&quot;DELETE&quot;</span><span class="op">,</span> <span class="st">&quot;Input should not contain DELETE keyword&quot;</span><span class="op">)</span></span>
+<span id="cb12-178"><a href="#cb12-178" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> sanitized<span class="op">,</span> <span class="st">&quot;UPDATE&quot;</span><span class="op">,</span> <span class="st">&quot;Input should not contain UPDATE keyword&quot;</span><span class="op">)</span></span>
+<span id="cb12-179"><a href="#cb12-179" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> sanitized<span class="op">,</span> <span class="st">&quot;--&quot;</span><span class="op">,</span> <span class="st">&quot;Input should not contain SQL comment&quot;</span><span class="op">)</span></span>
+<span id="cb12-180"><a href="#cb12-180" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-181"><a href="#cb12-181" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb12-182"><a href="#cb12-182" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-183"><a href="#cb12-183" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;XSSPrevention&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-184"><a href="#cb12-184" aria-hidden="true" tabindex="-1"></a>        maliciousInputs <span class="op">:=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb12-185"><a href="#cb12-185" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;&quot;</span><span class="op">,</span></span>
+<span id="cb12-186"><a href="#cb12-186" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;&lt;img src=x onerror=alert(&#39;xss&#39;)&gt;&quot;</span><span class="op">,</span></span>
+<span id="cb12-187"><a href="#cb12-187" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;&lt;svg onload=alert(&#39;xss&#39;)&gt;&quot;</span><span class="op">,</span></span>
+<span id="cb12-188"><a href="#cb12-188" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;javascript:alert(&#39;xss&#39;)&quot;</span><span class="op">,</span></span>
+<span id="cb12-189"><a href="#cb12-189" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-190"><a href="#cb12-190" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-191"><a href="#cb12-191" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> input <span class="op">:=</span> <span class="kw">range</span> maliciousInputs <span class="op">{</span></span>
+<span id="cb12-192"><a href="#cb12-192" aria-hidden="true" tabindex="-1"></a>            sanitized <span class="op">:=</span> sanitizer<span class="op">.</span>Sanitize<span class="op">(</span>input<span class="op">)</span></span>
+<span id="cb12-193"><a href="#cb12-193" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> sanitized<span class="op">,</span> <span class="st">&quot;&lt;script&gt;&quot;</span><span class="op">,</span> <span class="st">&quot;Input should not contain script tags&quot;</span><span class="op">)</span></span>
+<span id="cb12-194"><a href="#cb12-194" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> sanitized<span class="op">,</span> <span class="st">&quot;onerror=&quot;</span><span class="op">,</span> <span class="st">&quot;Input should not contain event handlers&quot;</span><span class="op">)</span></span>
+<span id="cb12-195"><a href="#cb12-195" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> sanitized<span class="op">,</span> <span class="st">&quot;onload=&quot;</span><span class="op">,</span> <span class="st">&quot;Input should not contain event handlers&quot;</span><span class="op">)</span></span>
+<span id="cb12-196"><a href="#cb12-196" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> sanitized<span class="op">,</span> <span class="st">&quot;javascript:&quot;</span><span class="op">,</span> <span class="st">&quot;Input should not contain javascript protocol&quot;</span><span class="op">)</span></span>
+<span id="cb12-197"><a href="#cb12-197" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-198"><a href="#cb12-198" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb12-199"><a href="#cb12-199" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-200"><a href="#cb12-200" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;PathTraversalPrevention&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-201"><a href="#cb12-201" aria-hidden="true" tabindex="-1"></a>        maliciousInputs <span class="op">:=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb12-202"><a href="#cb12-202" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;../../../etc/passwd&quot;</span><span class="op">,</span></span>
+<span id="cb12-203"><a href="#cb12-203" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;..</span><span class="ch">\\</span><span class="st">..</span><span class="ch">\\</span><span class="st">..</span><span class="ch">\\</span><span class="st">windows</span><span class="ch">\\</span><span class="st">system32</span><span class="ch">\\</span><span class="st">config</span><span class="ch">\\</span><span class="st">sam&quot;</span><span class="op">,</span></span>
+<span id="cb12-204"><a href="#cb12-204" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;....//....//....//etc/passwd&quot;</span><span class="op">,</span></span>
+<span id="cb12-205"><a href="#cb12-205" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd&quot;</span><span class="op">,</span></span>
+<span id="cb12-206"><a href="#cb12-206" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-207"><a href="#cb12-207" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-208"><a href="#cb12-208" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> input <span class="op">:=</span> <span class="kw">range</span> maliciousInputs <span class="op">{</span></span>
+<span id="cb12-209"><a href="#cb12-209" aria-hidden="true" tabindex="-1"></a>            sanitized <span class="op">:=</span> sanitizer<span class="op">.</span>Sanitize<span class="op">(</span>input<span class="op">)</span></span>
+<span id="cb12-210"><a href="#cb12-210" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> sanitized<span class="op">,</span> <span class="st">&quot;..&quot;</span><span class="op">,</span> <span class="st">&quot;Input should not contain directory traversal&quot;</span><span class="op">)</span></span>
+<span id="cb12-211"><a href="#cb12-211" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> sanitized<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\\</span><span class="st">&quot;</span><span class="op">,</span> <span class="st">&quot;Input should not contain backslashes&quot;</span><span class="op">)</span></span>
+<span id="cb12-212"><a href="#cb12-212" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-213"><a href="#cb12-213" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb12-214"><a href="#cb12-214" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h5 id="task-42-security-integration-tests">Task 4.2: Security
+Integration Tests</h5>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// File: pkg/security/security_integration_test.go</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> security_test</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;net/http&quot;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;net/http/httptest&quot;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;testing&quot;</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/assert&quot;</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/require&quot;</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/universal-ebook-translator/pkg/security&quot;</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/universal-ebook-translator/pkg/api&quot;</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSecurityIntegration<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Setup test server with security middleware</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    auth <span class="op">:=</span> security<span class="op">.</span>NewJWTAuthenticator<span class="op">(</span><span class="st">&quot;test-secret&quot;</span><span class="op">)</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    limiter <span class="op">:=</span> security<span class="op">.</span>NewRateLimiter<span class="op">(</span>security<span class="op">.</span>RateLimiterConfig<span class="op">{</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        MaxRequests<span class="op">:</span> <span class="dv">10</span><span class="op">,</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>        Window<span class="op">:</span>      time<span class="op">.</span>Minute<span class="op">,</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    server <span class="op">:=</span> httptest<span class="op">.</span>NewServer<span class="op">(</span>api<span class="op">.</span>SetupSecurityMiddleware<span class="op">(</span>http<span class="op">.</span>HandlerFunc<span class="op">(</span><span class="kw">func</span><span class="op">(</span>w http<span class="op">.</span>ResponseWriter<span class="op">,</span> r <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>        w<span class="op">.</span>WriteHeader<span class="op">(</span>http<span class="op">.</span>StatusOK<span class="op">)</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>        w<span class="op">.</span>Write<span class="op">([]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;success&quot;</span><span class="op">))</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}),</span> auth<span class="op">,</span> limiter<span class="op">))</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> server<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;ValidAuthentication&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>        token<span class="op">,</span> err <span class="op">:=</span> auth<span class="op">.</span>GenerateToken<span class="op">(</span><span class="st">&quot;testuser&quot;</span><span class="op">,</span> time<span class="op">.</span>Hour<span class="op">)</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>        req<span class="op">,</span> err <span class="op">:=</span> http<span class="op">.</span>NewRequest<span class="op">(</span><span class="st">&quot;GET&quot;</span><span class="op">,</span> server<span class="op">.</span>URL<span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>        req<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;Authorization&quot;</span><span class="op">,</span> <span class="st">&quot;Bearer &quot;</span><span class="op">+</span>token<span class="op">)</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>        resp<span class="op">,</span> err <span class="op">:=</span> http<span class="op">.</span>DefaultClient<span class="op">.</span>Do<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">defer</span> resp<span class="op">.</span>Body<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> http<span class="op">.</span>StatusOK<span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">)</span></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;InvalidAuthentication&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>        req<span class="op">,</span> err <span class="op">:=</span> http<span class="op">.</span>NewRequest<span class="op">(</span><span class="st">&quot;GET&quot;</span><span class="op">,</span> server<span class="op">.</span>URL<span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>        req<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;Authorization&quot;</span><span class="op">,</span> <span class="st">&quot;Bearer invalid-token&quot;</span><span class="op">)</span></span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>        resp<span class="op">,</span> err <span class="op">:=</span> http<span class="op">.</span>DefaultClient<span class="op">.</span>Do<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">defer</span> resp<span class="op">.</span>Body<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> http<span class="op">.</span>StatusUnauthorized<span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">)</span></span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Run<span class="op">(</span><span class="st">&quot;RateLimitingIntegration&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>        token<span class="op">,</span> err <span class="op">:=</span> auth<span class="op">.</span>GenerateToken<span class="op">(</span><span class="st">&quot;testuser2&quot;</span><span class="op">,</span> time<span class="op">.</span>Hour<span class="op">)</span></span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Make requests up to the limit</span></span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="op">:=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">10</span><span class="op">;</span> i<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a>            req<span class="op">,</span> err <span class="op">:=</span> http<span class="op">.</span>NewRequest<span class="op">(</span><span class="st">&quot;GET&quot;</span><span class="op">,</span> server<span class="op">.</span>URL<span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>            require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>            req<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;Authorization&quot;</span><span class="op">,</span> <span class="st">&quot;Bearer &quot;</span><span class="op">+</span>token<span class="op">)</span></span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a>            resp<span class="op">,</span> err <span class="op">:=</span> http<span class="op">.</span>DefaultClient<span class="op">.</span>Do<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>            require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>            resp<span class="op">.</span>Body<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> i <span class="op">&lt;</span> <span class="dv">9</span> <span class="op">{</span></span>
+<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a>                assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> http<span class="op">.</span>StatusOK<span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">,</span> <span class="st">&quot;Request %d should succeed&quot;</span><span class="op">,</span> i<span class="op">+</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Next request should be rate limited</span></span>
+<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a>        req<span class="op">,</span> err <span class="op">:=</span> http<span class="op">.</span>NewRequest<span class="op">(</span><span class="st">&quot;GET&quot;</span><span class="op">,</span> server<span class="op">.</span>URL<span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-79"><a href="#cb13-79" aria-hidden="true" tabindex="-1"></a>        req<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;Authorization&quot;</span><span class="op">,</span> <span class="st">&quot;Bearer &quot;</span><span class="op">+</span>token<span class="op">)</span></span>
+<span id="cb13-80"><a href="#cb13-80" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-81"><a href="#cb13-81" aria-hidden="true" tabindex="-1"></a>        resp<span class="op">,</span> err <span class="op">:=</span> http<span class="op">.</span>DefaultClient<span class="op">.</span>Do<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb13-82"><a href="#cb13-82" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-83"><a href="#cb13-83" aria-hidden="true" tabindex="-1"></a>        <span class="cf">defer</span> resp<span class="op">.</span>Body<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb13-84"><a href="#cb13-84" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-85"><a href="#cb13-85" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> http<span class="op">.</span>StatusTooManyRequests<span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">)</span></span>
+<span id="cb13-86"><a href="#cb13-86" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb13-87"><a href="#cb13-87" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="validation-criteria-3">Validation Criteria</h4>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run security tests</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./pkg/security <span class="at">-v</span> <span class="at">-race</span> <span class="at">-cover</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected results:</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ok      digital.vasic.translator/pkg/security     1.234s  coverage: 95.2% of statements</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Run integration tests</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./test/integration/security_test.go <span class="at">-v</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected results:</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co"># ok      security integration tests      0.456s</span></span></code></pre></div>
+<hr />
+<h2 id="continuing-guide-structure">CONTINUING GUIDE STRUCTURE</h2>
+<p>Due to space constraints, I've outlined the beginning of this
+comprehensive implementation guide. The complete guide would continue
+with:</p>
+<h3 id="week-2-3-remaining-critical-tests">WEEK 2-3: Remaining Critical
+Tests</h3>
+<ul>
+<li>Distributed system tests (SSH, connection pooling)</li>
+<li>Core translator tests (LLM providers, translation logic)</li>
+<li>API handler tests (all endpoints, authentication, rate
+limiting)</li>
+</ul>
+<h3 id="week-4-integration--performance-tests">WEEK 4: Integration &amp;
+Performance Tests</h3>
+<ul>
+<li>Database integration tests</li>
+<li>External service integration tests</li>
+<li>Performance benchmarks and stress tests</li>
+</ul>
+<h3 id="week-5-6-comprehensive-test-framework">WEEK 5-6: Comprehensive
+Test Framework</h3>
+<ul>
+<li>Security test suite completion</li>
+<li>User acceptance tests</li>
+<li>Test automation and CI/CD integration</li>
+</ul>
+<h3 id="week-7-8-documentation-completion">WEEK 7-8: Documentation
+Completion</h3>
+<ul>
+<li>Architecture documentation with diagrams</li>
+<li>API documentation with interactive examples</li>
+<li>User manuals and troubleshooting guides</li>
+</ul>
+<h3 id="week-9-10-website-development">WEEK 9-10: Website
+Development</h3>
+<ul>
+<li>Interactive demos and API playground</li>
+<li>Video course integration</li>
+<li>Content management system setup</li>
+</ul>
+<h3 id="week-11-12-video-course-production">WEEK 11-12: Video Course
+Production</h3>
+<ul>
+<li>19 professional videos across 3 course series</li>
+<li>Production quality standards and review process</li>
+<li>Supplementary materials and transcripts</li>
+</ul>
+<h3 id="week-13-14-production-readiness">WEEK 13-14: Production
+Readiness</h3>
+<ul>
+<li>Monitoring and observability infrastructure</li>
+<li>Security hardening and audit</li>
+<li>Production deployment and CI/CD</li>
+</ul>
+<hr />
+<h2 id="daily-implementation-schedule">DAILY IMPLEMENTATION
+SCHEDULE</h2>
+<h3 id="daily-structure-monday-friday-8-hoursday">Daily Structure
+(Monday-Friday, 8 hours/day)</h3>
+<ul>
+<li><strong>2 hours</strong>: Code implementation and testing</li>
+<li><strong>1 hour</strong>: Documentation writing</li>
+<li><strong>1 hour</strong>: Code review and quality assurance</li>
+<li><strong>2 hours</strong>: Additional development/implementation</li>
+<li><strong>1 hour</strong>: Integration testing</li>
+<li><strong>1 hour</strong>: Daily progress review and planning</li>
+</ul>
+<h3 id="weekly-milestones">Weekly Milestones</h3>
+<p>Each week ends with a comprehensive review and delivery of specific
+components as outlined in the validation criteria.</p>
+<hr />
+<h2 id="success-metrics">SUCCESS METRICS</h2>
+<h3 id="weekly-deliverables">Weekly Deliverables</h3>
+<ul>
+<li>All code passes tests with 95%+ coverage</li>
+<li>Documentation is complete and accurate</li>
+<li>Components are production-ready</li>
+<li>No broken or disabled modules remain</li>
+</ul>
+<h3 id="final-success-criteria">Final Success Criteria</h3>
+<ul>
+<li>✅ 100% test coverage across all packages</li>
+<li>✅ Complete documentation suite</li>
+<li>✅ 19 professional video courses</li>
+<li>✅ Full-featured website with interactive demos</li>
+<li>✅ Production-ready monitoring and security</li>
+</ul>
+<hr />
+<p>This detailed step-by-step guide provides the complete roadmap to
+transform the Universal Ebook Translator from its current state to a
+fully production-ready system with comprehensive testing, documentation,
+and user resources.</p>
+<p><em>Guide generated November 25, 2025</em> <em>Next update: Weekly
+progress reports during implementation</em></p>
+</body>
+</html>

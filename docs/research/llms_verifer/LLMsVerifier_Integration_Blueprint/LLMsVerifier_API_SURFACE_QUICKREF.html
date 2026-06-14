@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>LLMsVerifier_API_SURFACE_QUICKREF</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">LLMsVerifier_API_SURFACE_QUICKREF</h1>
+</header>
+<h1 id="llmsverifier---api-surface-quick-reference">LLMsVerifier - API
+Surface Quick Reference</h1>
+<h2 id="package-hierarchy">Package Hierarchy</h2>
+<pre><code>digital.vasic.llmsverifier/
+├── llmverifier/       # Core verification engine
+├── providers/          # 25+ LLM provider adapters
+├── verification/       # Verification pipeline
+├── scoring/            # Scoring &amp; ranking system
+├── api/                # REST API server
+├── database/           # SQLite + SQLCipher storage
+├── config/             # Configuration management
+├── client/             # HTTP client for LLM APIs
+├── auth/               # JWT + RBAC + LDAP auth
+├── capabilities/       # Dynamic capability detection
+├── ai/                 # AI-powered recommendations
+├── analytics/          # Predictive analytics
+├── enhanced/           # Enterprise features
+├── tui/                # Terminal UI
+├── web/                # Web application
+├── sdk/                # Language SDKs
+├── messaging/          # Message broker factory
+├── monitoring/         # Metrics &amp; monitoring
+├── scheduler/          # Job scheduler
+├── notifications/      # Notification system
+├── security/           # Security features
+├── failover/           # Failover mechanisms
+├── performance/        # Performance testing
+├── multimodal/         # Multimodal support
+├── events/             # Event system
+└── logging/            # Logging system</code></pre>
+<h2 id="top-50-most-important-functions">Top 50 Most Important
+Functions</h2>
+<h3 id="verification">Verification</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>llmverifier.New(cfg)</code></td>
+<td>llmverifier</td>
+<td>Create Verifier instance</td>
+</tr>
+<tr>
+<td><code>llmverifier.LoadConfig(path)</code></td>
+<td>llmverifier</td>
+<td>Load config from YAML</td>
+</tr>
+<tr>
+<td><code>Verifier.Verify()</code></td>
+<td>llmverifier</td>
+<td>Run full verification</td>
+</tr>
+<tr>
+<td><code>Verifier.GenerateMarkdownReport(results, dir)</code></td>
+<td>llmverifier</td>
+<td>Generate MD report</td>
+</tr>
+<tr>
+<td><code>Verifier.GenerateJSONReport(results, dir)</code></td>
+<td>llmverifier</td>
+<td>Generate JSON report</td>
+</tr>
+<tr>
+<td><code>verification.NewVerifier(db)</code></td>
+<td>verification</td>
+<td>Create verification service</td>
+</tr>
+<tr>
+<td><code>Verifier.Verify(ctx, req)</code></td>
+<td>verification</td>
+<td>Verify single model</td>
+</tr>
+<tr>
+<td><code>NewCodeVerificationService(httpClient, logger)</code></td>
+<td>verification</td>
+<td>Code verification service</td>
+</tr>
+<tr>
+<td><code>VerifyModelCodeVisibility(ctx, modelID, providerID, client)</code></td>
+<td>verification</td>
+<td>"Do you see my code?" test</td>
+</tr>
+<tr>
+<td><code>NewCodingCapabilityVerificationService(httpClient, logger)</code></td>
+<td>verification</td>
+<td>Coding capability service</td>
+</tr>
+<tr>
+<td><code>VerifyModelCodingCapabilities(ctx, modelID, providerID, client)</code></td>
+<td>verification</td>
+<td>Full coding test</td>
+</tr>
+</tbody>
+</table>
+<h3 id="providers">Providers</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>providers.NewProviderRegistry()</code></td>
+<td>providers</td>
+<td>Create provider registry</td>
+</tr>
+<tr>
+<td><code>ProviderRegistry.GetConfig(name)</code></td>
+<td>providers</td>
+<td>Get provider config</td>
+</tr>
+<tr>
+<td><code>NewModelProviderService(configPath, logger)</code></td>
+<td>providers</td>
+<td>3-tier discovery service</td>
+</tr>
+<tr>
+<td><code>ModelProviderService.RegisterProvider(id, baseURL, apiKey)</code></td>
+<td>providers</td>
+<td>Register provider</td>
+</tr>
+<tr>
+<td><code>ModelProviderService.GetAllModelsWithVerification(ctx)</code></td>
+<td>providers</td>
+<td>Get all verified models</td>
+</tr>
+<tr>
+<td><code>NewVerifiedConfigGenerator(service, logger, outputDir)</code></td>
+<td>providers</td>
+<td>Generate verified configs</td>
+</tr>
+<tr>
+<td><code>VerifiedConfigGenerator.GenerateVerifiedConfig()</code></td>
+<td>providers</td>
+<td>Create verified config</td>
+</tr>
+<tr>
+<td><code>NewErrorClassifier(provider)</code></td>
+<td>providers</td>
+<td>Classify API errors</td>
+</tr>
+</tbody>
+</table>
+<h3 id="scoring">Scoring</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scoring.NewScoringEngine(db, client, logger)</code></td>
+<td>scoring</td>
+<td>Create scoring engine</td>
+</tr>
+<tr>
+<td><code>ScoringEngine.CalculateComprehensiveScore(ctx, modelID, config)</code></td>
+<td>scoring</td>
+<td>Calculate full score</td>
+</tr>
+<tr>
+<td><code>scoring.DefaultScoringConfig()</code></td>
+<td>scoring</td>
+<td>Default scoring weights</td>
+</tr>
+</tbody>
+</table>
+<h3 id="api">API</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>api.NewServer(cfg, db)</code></td>
+<td>api</td>
+<td>Create API server</td>
+</tr>
+<tr>
+<td><code>Server.Start(port)</code></td>
+<td>api</td>
+<td>Start HTTP server</td>
+</tr>
+<tr>
+<td><code>Server.Stop()</code></td>
+<td>api</td>
+<td>Stop server</td>
+</tr>
+</tbody>
+</table>
+<h3 id="database">Database</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>database.New(path, encryptionKey)</code></td>
+<td>database</td>
+<td>Open encrypted SQLite</td>
+</tr>
+<tr>
+<td><code>Database.CreateProvider(p)</code></td>
+<td>database</td>
+<td>Create provider</td>
+</tr>
+<tr>
+<td><code>Database.GetProvider(id)</code></td>
+<td>database</td>
+<td>Get provider by ID</td>
+</tr>
+<tr>
+<td><code>Database.ListProviders(filters)</code></td>
+<td>database</td>
+<td>List providers</td>
+</tr>
+<tr>
+<td><code>Database.CreateModel(m)</code></td>
+<td>database</td>
+<td>Create model</td>
+</tr>
+<tr>
+<td><code>Database.GetModel(id)</code></td>
+<td>database</td>
+<td>Get model by ID</td>
+</tr>
+<tr>
+<td><code>Database.ListModels(filters)</code></td>
+<td>database</td>
+<td>List models with filters</td>
+</tr>
+<tr>
+<td><code>Database.CreateVerificationResult(r)</code></td>
+<td>database</td>
+<td>Save verification</td>
+</tr>
+<tr>
+<td><code>Database.Ping()</code></td>
+<td>database</td>
+<td>Health check</td>
+</tr>
+</tbody>
+</table>
+<h3 id="config">Config</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config.LoadFromFile(path)</code></td>
+<td>config</td>
+<td>Load config (YAML/JSON/TOML)</td>
+</tr>
+<tr>
+<td><code>config.SaveToFile(cfg, path)</code></td>
+<td>config</td>
+<td>Save config to file</td>
+</tr>
+</tbody>
+</table>
+<h3 id="auth">Auth</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auth.NewAuthManager(jwtSecret, ldapConfig)</code></td>
+<td>auth</td>
+<td>Create auth manager</td>
+</tr>
+<tr>
+<td><code>AuthManager.RegisterClient(name, desc, perms, rateLimit)</code></td>
+<td>auth</td>
+<td>Register API client</td>
+</tr>
+<tr>
+<td><code>AuthManager.GenerateJWT(client)</code></td>
+<td>auth</td>
+<td>Generate JWT token</td>
+</tr>
+<tr>
+<td><code>AuthManager.ValidateJWT(token)</code></td>
+<td>auth</td>
+<td>Validate JWT</td>
+</tr>
+</tbody>
+</table>
+<h3 id="client">Client</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>client.New(baseURL)</code></td>
+<td>client</td>
+<td>Create API client</td>
+</tr>
+<tr>
+<td><code>Client.Login(username, password)</code></td>
+<td>client</td>
+<td>Authenticate</td>
+</tr>
+<tr>
+<td><code>Client.GetModels()</code></td>
+<td>client</td>
+<td>List models via API</td>
+</tr>
+</tbody>
+</table>
+<h3 id="capabilities">Capabilities</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>capabilities.NewDetector()</code></td>
+<td>capabilities</td>
+<td>Create capability detector</td>
+</tr>
+<tr>
+<td><code>Detector.DetectProviderCapabilities(ctx, provider, apiKey)</code></td>
+<td>capabilities</td>
+<td>Detect capabilities</td>
+</tr>
+</tbody>
+</table>
+<h2 id="configuration-schema">Configuration Schema</h2>
+<h3 id="minimal-config">Minimal Config</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">global</span><span class="kw">:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${API_KEY}&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">database</span><span class="kw">:</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;./verifier.db&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">api</span><span class="kw">:</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;8080&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">jwt_secret</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;secret&quot;</span></span></code></pre></div>
+<h3 id="full-config">Full Config</h3>
+<p>See main analysis document Section H.</p>
+<h2 id="api-endpoints">API Endpoints</h2>
+<pre><code>GET  /api/health              -&gt; {&quot;status&quot;: &quot;healthy&quot;, &quot;timestamp&quot;: 1234}
+GET  /api/models?provider_id=1&amp;status=verified&amp;min_score=7.0&amp;search=gpt&amp;limit=50
+GET  /api/models/{id}
+POST /api/models/{id}/verify
+GET  /api/providers
+POST /api/providers</code></pre>
+<h2 id="provider-support-matrix">Provider Support Matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>File</th>
+<th>Streaming</th>
+<th>Vision</th>
+<th>Function Calling</th>
+<th>Code</th>
+<th>Embeddings</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI</td>
+<td>openai.go</td>
+<td>SSE</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td>anthropic.go</td>
+<td>SSE</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Groq</td>
+<td>groq.go</td>
+<td>SSE</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>DeepSeek</td>
+<td>deepseek.go</td>
+<td>SSE</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Cohere</td>
+<td>cohere.go</td>
+<td>SSE</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Mistral</td>
+<td>mistral.go</td>
+<td>SSE</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>xAI</td>
+<td>xai.go</td>
+<td>SSE</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Replicate</td>
+<td>replicate.go</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Cerebras</td>
+<td>cerebras.go</td>
+<td>SSE</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Cloudflare</td>
+<td>cloudflare.go</td>
+<td>SSE</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>SiliconFlow</td>
+<td>siliconflow.go</td>
+<td>SSE</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Together AI</td>
+<td>togetherai.go</td>
+<td>SSE</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Hyperbolic</td>
+<td>hyperbolic.go</td>
+<td>SSE</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>SambaNova</td>
+<td>sambanova.go</td>
+<td>SSE</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Moonshot/Kimi</td>
+<td>kimi.go</td>
+<td>SSE</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Qwen/DashScope</td>
+<td>qwen.go</td>
+<td>SSE</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>10+ more</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h2 id="scoring-weights">Scoring Weights</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>DefaultScoreWeights<span class="op">()</span> <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    ResponseSpeed<span class="op">:</span>      <span class="fl">0.25</span>  <span class="co">// Latency</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    ModelEfficiency<span class="op">:</span>    <span class="fl">0.20</span>  <span class="co">// Throughput, context window</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    CostEffectiveness<span class="op">:</span>  <span class="fl">0.25</span>  <span class="co">// Price per token</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Capability<span class="op">:</span>         <span class="fl">0.20</span>  <span class="co">// Feature breadth</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    Recency<span class="op">:</span>            <span class="fl">0.10</span>  <span class="co">// Last update date</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Score range: 0.0 - 10.0</p>
+<h2 id="database-schema-key-tables">Database Schema (Key Tables)</h2>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>providers          <span class="co">-- Provider configurations</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>models             <span class="co">-- Model metadata and capabilities</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>verification_results <span class="co">-- Verification outcomes</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>api_keys           <span class="co">-- API key storage</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>config_exports     <span class="co">-- Exported configurations</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="kw">events</span>             <span class="co">-- System events</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>issues             <span class="co">-- Detected issues</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>schedules          <span class="co">-- Verification schedules</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>pricing            <span class="co">-- Model pricing data</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>users              <span class="co">-- User accounts</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>sessions           <span class="co">-- Active sessions</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>migrations         <span class="co">-- Schema migrations</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>verification_scores <span class="co">-- Calculated scores</span></span></code></pre></div>
+<h2 id="integration-for-helixtranslate">Integration for
+HelixTranslate</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 1. Import</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">go</span> get digital<span class="op">.</span>vasic<span class="op">.</span>llmsverifier</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">// 2. Load config</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>cfg<span class="op">,</span> _ <span class="op">:=</span> config<span class="op">.</span>LoadFromFile<span class="op">(</span><span class="st">&quot;config.yaml&quot;</span><span class="op">)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">// 3. Create verifier</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>v <span class="op">:=</span> llmverifier<span class="op">.</span>New<span class="op">(</span>cfg<span class="op">)</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">// 4. Verify</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>results<span class="op">,</span> _ <span class="op">:=</span> v<span class="op">.</span>Verify<span class="op">()</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">// 5. Score</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>db<span class="op">,</span> _ <span class="op">:=</span> database<span class="op">.</span>New<span class="op">(</span>cfg<span class="op">.</span>Database<span class="op">.</span>Path<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>engine <span class="op">:=</span> scoring<span class="op">.</span>NewScoringEngine<span class="op">(</span>db<span class="op">,</span> modelsDevClient<span class="op">,</span> logger<span class="op">)</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>score<span class="op">,</span> _ <span class="op">:=</span> engine<span class="op">.</span>CalculateComprehensiveScore<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;model-id&quot;</span><span class="op">,</span> scoring<span class="op">.</span>DefaultScoringConfig<span class="op">())</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">// 6. Report</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>v<span class="op">.</span>GenerateMarkdownReport<span class="op">(</span>results<span class="op">,</span> <span class="st">&quot;./reports&quot;</span><span class="op">)</span></span></code></pre></div>
+</body>
+</html>

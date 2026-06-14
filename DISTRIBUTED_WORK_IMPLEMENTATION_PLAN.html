@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DISTRIBUTED_WORK_IMPLEMENTATION_PLAN</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">DISTRIBUTED_WORK_IMPLEMENTATION_PLAN</h1>
+</header>
+<h1 id="distributed-work-extension-plan">DISTRIBUTED WORK EXTENSION
+PLAN</h1>
+<h2 id="overview">Overview</h2>
+<p>This document outlines the complete implementation of distributed
+work support for the Universal Ebook Translator system. The
+implementation will enable a pool of SSH connections to remote machines,
+allowing distributed processing of translation workloads.</p>
+<h2 id="current-implementation-status">Current Implementation
+Status</h2>
+<h3 id="completed-components">Completed Components</h3>
+<ol type="1">
+<li><p><strong>SSH Connection Pool</strong>
+(<code>pkg/distributed/ssh_pool.go</code>)</p>
+<ul>
+<li>Basic SSH connection management</li>
+<li>Worker configuration structure</li>
+<li>Connection lifecycle management</li>
+</ul></li>
+<li><p><strong>Distributed Coordinator</strong>
+(<code>pkg/distributed/coordinator.go</code>)</p>
+<ul>
+<li>Basic remote LLM instance management</li>
+<li>Local/remote coordination structure</li>
+<li>Event system integration</li>
+</ul></li>
+<li><p><strong>Supporting Infrastructure</strong></p>
+<ul>
+<li>Version management</li>
+<li>Fallback mechanisms</li>
+<li>API communication logging</li>
+</ul></li>
+</ol>
+<h2 id="implementation-plan">Implementation Plan</h2>
+<h3 id="phase-1-secure-pairing-protocol">Phase 1: Secure Pairing
+Protocol</h3>
+<h4 id="11-http3quic-based-pairing">1.1 HTTP3/QUIC-based Pairing</h4>
+<p><strong>Timeline</strong>: Days 1-3</p>
+<p><strong>Tasks</strong>:</p>
+<ol type="1">
+<li>Implement HTTP3/QUIC server for pairing</li>
+<li>Create secure pairing protocol</li>
+<li>Implement certificate-based authentication</li>
+<li>Add pairing state management</li>
+</ol>
+<p><strong>Implementation Details</strong>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// In pkg/distributed/pairing.go</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PairingProtocol <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    localID      <span class="dt">string</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    privateKeys  <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>crypto<span class="op">.</span>PrivateKey</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    peerCerts    <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>x509<span class="op">.</span>Certificate</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    quicListener <span class="op">*</span>quic<span class="op">.</span>Listener</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    eventBus     <span class="op">*</span>events<span class="op">.</span>EventBus</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PairingRequest <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    WorkerID    <span class="dt">string</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    PublicKey   <span class="op">[]</span><span class="dt">byte</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    Capabilities WorkerCapabilities</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    Timestamp   time<span class="op">.</span>Time</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PairingResponse <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    Accepted    <span class="dt">bool</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    LocalID     <span class="dt">string</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    PublicKey   <span class="op">[]</span><span class="dt">byte</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    SessionKey  <span class="op">[]</span><span class="dt">byte</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="12-worker-authentication">1.2 Worker Authentication</h4>
+<p><strong>Timeline</strong>: Day 4</p>
+<p><strong>Tasks</strong>:</p>
+<ol type="1">
+<li>Implement worker certificate verification</li>
+<li>Add mutual authentication</li>
+<li>Create session key exchange</li>
+<li>Implement replay protection</li>
+</ol>
+<h3 id="phase-2-remote-service-discovery">Phase 2: Remote Service
+Discovery</h3>
+<h4 id="21-rest-service-detection">2.1 REST Service Detection</h4>
+<p><strong>Timeline</strong>: Days 5-6</p>
+<p><strong>Tasks</strong>:</p>
+<ol type="1">
+<li>Implement remote service detection</li>
+<li>Check for running translator instances</li>
+<li>Version compatibility checking</li>
+<li>Service capability reporting</li>
+</ol>
+<p><strong>Implementation Details</strong>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// In pkg/distributed/discovery.go</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ServiceDiscovery <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    sshPool     <span class="op">*</span>SSHPool</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    eventBus    <span class="op">*</span>events<span class="op">.</span>EventBus</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    httpClient  <span class="op">*</span>http<span class="op">.</span>Client</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RemoteServiceInfo <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    WorkerID      <span class="dt">string</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    Endpoints     <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    Version       <span class="dt">string</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    Capabilities  ServiceCapabilities</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    LLMInstances  <span class="op">[]</span>LLMInstanceInfo</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    HealthStatus  HealthStatus</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>sd <span class="op">*</span>ServiceDiscovery<span class="op">)</span> DetectServices<span class="op">(</span>workerID <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>RemoteServiceInfo<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Connect via SSH</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Check for running services</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Query capabilities</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Return service info</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="22-llm-instance-discovery">2.2 LLM Instance Discovery</h4>
+<p><strong>Timeline</strong>: Day 7</p>
+<p><strong>Tasks</strong>:</p>
+<ol type="1">
+<li>Detect available LLM providers</li>
+<li>Query model availability</li>
+<li>Check API key configurations</li>
+<li>Assess local LLM capabilities</li>
+</ol>
+<h3 id="phase-3-resource-allocation">Phase 3: Resource Allocation</h3>
+<h4 id="31-hardware-capability-assessment">3.1 Hardware Capability
+Assessment</h4>
+<p><strong>Timeline</strong>: Days 8-9</p>
+<p><strong>Tasks</strong>:</p>
+<ol type="1">
+<li>Extend hardware detection for remote workers</li>
+<li>Implement memory and CPU assessment</li>
+<li>GPU capability detection</li>
+<li>Concurrent instance calculation</li>
+</ol>
+<p><strong>Implementation Details</strong>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// In pkg/distributed/resource_manager.go</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ResourceManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    sshPool           <span class="op">*</span>SSHPool</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    localCoordinator  <span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    allocationTable   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>ResourceAllocation</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ResourceAllocation <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    WorkerID        <span class="dt">string</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    TotalMemory     <span class="dt">uint64</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    AvailableMemory <span class="dt">uint64</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    TotalCPU        <span class="dt">int</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    AvailableCPU    <span class="dt">int</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    GPUInfo         <span class="op">[]</span>GPUInfo</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    MaxLLMInstances <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">int</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    CurrentUsage    <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">int</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>rm <span class="op">*</span>ResourceManager<span class="op">)</span> AssessWorkerCapabilities<span class="op">(</span>workerID <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>ResourceAllocation<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Query hardware via SSH</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Calculate optimal instance counts</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Return allocation plan</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="32-dynamic-instance-allocation">3.2 Dynamic Instance
+Allocation</h4>
+<p><strong>Timeline</strong>: Days 10-11</p>
+<p><strong>Tasks</strong>:</p>
+<ol type="1">
+<li>Implement dynamic LLM instance allocation</li>
+<li>Create load balancing algorithm</li>
+<li>Add capacity management</li>
+<li>Implement scaling logic</li>
+</ol>
+<h3 id="phase-4-distributed-translation-workflow">Phase 4: Distributed
+Translation Workflow</h3>
+<h4 id="41-work-distribution">4.1 Work Distribution</h4>
+<p><strong>Timeline</strong>: Days 12-14</p>
+<p><strong>Tasks</strong>:</p>
+<ol type="1">
+<li>Implement work queue distribution</li>
+<li>Create task assignment logic</li>
+<li>Add progress tracking</li>
+<li>Implement result collection</li>
+</ol>
+<p><strong>Implementation Details</strong>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// In pkg/distributed/workflow.go</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DistributedWorkflow <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    coordinator    <span class="op">*</span>DistributedCoordinator</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    workQueue      <span class="kw">chan</span> <span class="op">*</span>TranslationTask</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    activeTasks    <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>ActiveTask</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    resultCollector <span class="op">*</span>ResultCollector</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TranslationTask <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    ID          <span class="dt">string</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    Content     <span class="dt">string</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    Context     <span class="dt">string</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    Provider    <span class="dt">string</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    Model       <span class="dt">string</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    Priority    <span class="dt">int</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    AssignedTo  <span class="dt">string</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    Status      TaskStatus</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    Result      <span class="op">*</span>TranslationResult</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>dw <span class="op">*</span>DistributedWorkflow<span class="op">)</span> DistributeWork<span class="op">(</span>tasks <span class="op">[]*</span>TranslationTask<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Analyze tasks</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Assess worker capabilities</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Assign tasks to optimal workers</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Monitor progress</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="42-event-propagation">4.2 Event Propagation</h4>
+<p><strong>Timeline</strong>: Day 15</p>
+<p><strong>Tasks</strong>:</p>
+<ol type="1">
+<li>Implement event forwarding from workers</li>
+<li>Create event aggregation</li>
+<li>Add event filtering</li>
+<li>Implement event replay</li>
+</ol>
+<h3 id="phase-5-security-implementation">Phase 5: Security
+Implementation</h3>
+<h4 id="51-configuration-security">5.1 Configuration Security</h4>
+<p><strong>Timeline</strong>: Days 16-17</p>
+<p><strong>Tasks</strong>:</p>
+<ol type="1">
+<li>Create example configuration templates</li>
+<li>Implement configuration encryption</li>
+<li>Add secrets management</li>
+<li>Create secure deployment scripts</li>
+</ol>
+<p><strong>Configuration Template</strong>:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;distributed&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;workers&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;worker-01&quot;</span><span class="fu">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;Primary Translation Worker&quot;</span><span class="fu">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;ssh&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;host&quot;</span><span class="fu">:</span> <span class="st">&quot;worker01.example.com&quot;</span><span class="fu">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;port&quot;</span><span class="fu">:</span> <span class="dv">22</span><span class="fu">,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;user&quot;</span><span class="fu">:</span> <span class="st">&quot;translator&quot;</span><span class="fu">,</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;key_file&quot;</span><span class="fu">:</span> <span class="st">&quot;~/.ssh/translator_key&quot;</span><span class="fu">,</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;timeout&quot;</span><span class="fu">:</span> <span class="st">&quot;30s&quot;</span><span class="fu">,</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;max_retries&quot;</span><span class="fu">:</span> <span class="dv">3</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">},</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;tags&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;gpu&quot;</span><span class="ot">,</span> <span class="st">&quot;production&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;max_capacity&quot;</span><span class="fu">:</span> <span class="dv">10</span><span class="fu">,</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;pairing&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;protocol&quot;</span><span class="fu">:</span> <span class="st">&quot;http3&quot;</span><span class="fu">,</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;port&quot;</span><span class="fu">:</span> <span class="dv">8443</span><span class="fu">,</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;cert_file&quot;</span><span class="fu">:</span> <span class="st">&quot;/app/certs/server.crt&quot;</span><span class="fu">,</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;key_file&quot;</span><span class="fu">:</span> <span class="st">&quot;/app/certs/server.key&quot;</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h4 id="52-communication-security">5.2 Communication Security</h4>
+<p><strong>Timeline</strong>: Days 18-19</p>
+<p><strong>Tasks</strong>:</p>
+<ol type="1">
+<li>Implement end-to-end encryption</li>
+<li>Add message authentication</li>
+<li>Create secure tunneling</li>
+<li>Implement audit logging</li>
+</ol>
+<h3 id="phase-6-testing-infrastructure">Phase 6: Testing
+Infrastructure</h3>
+<h4 id="61-docker-test-environment">6.1 Docker Test Environment</h4>
+<p><strong>Timeline</strong>: Days 20-21</p>
+<p><strong>Tasks</strong>:</p>
+<ol type="1">
+<li>Create test worker Docker image</li>
+<li>Set up test network topology</li>
+<li>Create test scenarios</li>
+<li>Implement test orchestration</li>
+</ol>
+<p><strong>Docker Compose Test</strong>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;3.8&#39;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">coordinator</span><span class="kw">:</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">build</span><span class="kw">:</span><span class="at"> .</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">command</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;./test/distributed/coordinator&quot;</span><span class="kw">]</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;8443:8443&quot;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> TEST_MODE=true</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">test-worker-1</span><span class="kw">:</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">build</span><span class="kw">:</span><span class="at"> </span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">context</span><span class="kw">:</span><span class="at"> .</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dockerfile</span><span class="kw">:</span><span class="at"> test/distributed/Dockerfile.worker</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> WORKER_ID=test-worker-1</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> COORDINATOR_HOST=coordinator</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="at">      </span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">test-worker-2</span><span class="kw">:</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">build</span><span class="kw">:</span><span class="at"> </span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">context</span><span class="kw">:</span><span class="at"> .</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dockerfile</span><span class="kw">:</span><span class="at"> test/distributed/Dockerfile.worker</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> WORKER_ID=test-worker-2</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> COORDINATOR_HOST=coordinator</span></span></code></pre></div>
+<h4 id="62-test-suite-implementation">6.2 Test Suite Implementation</h4>
+<p><strong>Timeline</strong>: Days 22-23</p>
+<p><strong>Test Types</strong>:</p>
+<ol type="1">
+<li><p><strong>Unit Tests</strong> (100% coverage)</p>
+<ul>
+<li>SSH connection management</li>
+<li>Pairing protocol</li>
+<li>Resource allocation</li>
+<li>Work distribution</li>
+</ul></li>
+<li><p><strong>Integration Tests</strong></p>
+<ul>
+<li>End-to-end distributed workflow</li>
+<li>Multi-worker coordination</li>
+<li>Failure scenarios</li>
+<li>Performance under load</li>
+</ul></li>
+<li><p><strong>Security Tests</strong></p>
+<ul>
+<li>Authentication flow</li>
+<li>Encryption verification</li>
+<li>Injection attempts</li>
+<li>Unauthorized access</li>
+</ul></li>
+<li><p><strong>Performance Tests</strong></p>
+<ul>
+<li>Large workload distribution</li>
+<li>Network latency handling</li>
+<li>Resource optimization</li>
+<li>Scalability limits</li>
+</ul></li>
+<li><p><strong>Stress Tests</strong></p>
+<ul>
+<li>Maximum worker count</li>
+<li>Network partition recovery</li>
+<li>Resource exhaustion</li>
+<li>Long-running stability</li>
+</ul></li>
+</ol>
+<h3 id="phase-7-api-extensions">Phase 7: API Extensions</h3>
+<h4 id="71-rest-api-updates">7.1 REST API Updates</h4>
+<p><strong>Timeline</strong>: Days 24-25</p>
+<p><strong>New Endpoints</strong>:</p>
+<pre><code>POST   /api/v1/distributed/workers          - Add worker
+GET    /api/v1/distributed/workers          - List workers
+GET    /api/v1/distributed/workers/{id}     - Worker details
+PUT    /api/v1/distributed/workers/{id}     - Update worker
+DELETE /api/v1/distributed/workers/{id}     - Remove worker
+
+POST   /api/v1/distributed/pair             - Initiate pairing
+GET    /api/v1/distributed/status           - System status
+GET    /api/v1/distributed/capabilities      - Worker capabilities
+
+POST   /api/v1/distributed/tasks            - Submit distributed task
+GET    /api/v1/distributed/tasks            - List tasks
+GET    /api/v1/distributed/tasks/{id}       - Task status
+DELETE /api/v1/distributed/tasks/{id}       - Cancel task</code></pre>
+<h4 id="72-websocket-events">7.2 WebSocket Events</h4>
+<p><strong>Timeline</strong>: Day 26</p>
+<p><strong>New Events</strong>:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;worker_connected&quot;</span><span class="fu">,</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;worker_id&quot;</span><span class="fu">:</span> <span class="st">&quot;worker-01&quot;</span><span class="fu">,</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;capabilities&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">}</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;task_distributed&quot;</span><span class="fu">,</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;task_id&quot;</span><span class="fu">:</span> <span class="st">&quot;task-123&quot;</span><span class="fu">,</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;assigned_to&quot;</span><span class="fu">:</span> <span class="st">&quot;worker-01&quot;</span><span class="fu">,</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;provider&quot;</span><span class="fu">:</span> <span class="st">&quot;openai&quot;</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;worker_disconnected&quot;</span><span class="fu">,</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;worker_id&quot;</span><span class="fu">:</span> <span class="st">&quot;worker-01&quot;</span><span class="fu">,</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;reason&quot;</span><span class="fu">:</span> <span class="st">&quot;timeout&quot;</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="phase-8-documentation">Phase 8: Documentation</h3>
+<h4 id="81-distributed-system-guide">8.1 Distributed System Guide</h4>
+<p><strong>Timeline</strong>: Days 27-28</p>
+<p><strong>Documentation Sections</strong>:</p>
+<ol type="1">
+<li>Architecture overview</li>
+<li>Worker setup guide</li>
+<li>SSH key management</li>
+<li>Network configuration</li>
+<li>Security best practices</li>
+<li>Troubleshooting guide</li>
+</ol>
+<h4 id="82-api-documentation">8.2 API Documentation</h4>
+<p><strong>Timeline</strong>: Day 29</p>
+<p><strong>Documentation</strong>:</p>
+<ol type="1">
+<li>New endpoint documentation</li>
+<li>Event reference</li>
+<li>Example workflows</li>
+<li>Client integration guides</li>
+</ol>
+<h3 id="phase-9-final-integration">Phase 9: Final Integration</h3>
+<h4 id="91-integration-with-existing-components">9.1 Integration with
+Existing Components</h4>
+<p><strong>Timeline</strong>: Days 30-31</p>
+<p><strong>Tasks</strong>:</p>
+<ol type="1">
+<li>Integrate with main coordinator</li>
+<li>Update CLI tools for distributed mode</li>
+<li>Extend monitoring dashboard</li>
+<li>Update deployment scripts</li>
+</ol>
+<h4 id="92-quality-assurance">9.2 Quality Assurance</h4>
+<p><strong>Timeline</strong>: Days 32-33</p>
+<p><strong>Tasks</strong>:</p>
+<ol type="1">
+<li>Full system testing</li>
+<li>Performance benchmarking</li>
+<li>Security audit</li>
+<li>Documentation review</li>
+</ol>
+<h2 id="implementation-guidelines">Implementation Guidelines</h2>
+<h3 id="security-requirements">Security Requirements</h3>
+<ol type="1">
+<li>Never commit worker configurations with sensitive data</li>
+<li>Use example configurations for version control</li>
+<li>Implement proper key rotation</li>
+<li>Audit all communication channels</li>
+</ol>
+<h3 id="performance-requirements">Performance Requirements</h3>
+<ol type="1">
+<li>Minimize SSH connection overhead</li>
+<li>Optimize work distribution algorithms</li>
+<li>Implement intelligent caching</li>
+<li>Monitor resource usage</li>
+</ol>
+<h3 id="reliability-requirements">Reliability Requirements</h3>
+<ol type="1">
+<li>Handle network partitions gracefully</li>
+<li>Implement automatic recovery</li>
+<li>Provide fallback mechanisms</li>
+<li>Maintain system state consistency</li>
+</ol>
+<h2 id="success-metrics">Success Metrics</h2>
+<h3 id="functional-metrics">Functional Metrics</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />Workers can be securely
+paired</label></li>
+<li><label><input type="checkbox" />Remote LLM instances are
+discovered</label></li>
+<li><label><input type="checkbox" />Work is distributed
+optimally</label></li>
+<li><label><input type="checkbox" />All events propagate
+correctly</label></li>
+<li><label><input type="checkbox" />System handles failures
+gracefully</label></li>
+</ul>
+<h3 id="performance-metrics">Performance Metrics</h3>
+<ul>
+<li><label><input type="checkbox" />&lt;1s worker pairing
+time</label></li>
+<li><label><input type="checkbox" />&lt;5s task distribution
+latency</label></li>
+<li>☐
+<blockquote>
+<p>95% resource utilization efficiency</p>
+</blockquote></li>
+<li><label><input type="checkbox" />&lt;100ms event propagation
+delay</label></li>
+</ul>
+<h3 id="security-metrics">Security Metrics</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />All communications
+encrypted</label></li>
+<li><label><input type="checkbox" />Proper authentication for all
+actions</label></li>
+<li><label><input type="checkbox" />Zero leaked sensitive
+information</label></li>
+<li><label><input type="checkbox" />Audit trail for all
+operations</label></li>
+</ul>
+<h2 id="risk-mitigation">Risk Mitigation</h2>
+<h3 id="technical-risks">Technical Risks</h3>
+<ol type="1">
+<li><strong>SSH Connection Issues</strong>: Implement retry logic and
+connection pooling</li>
+<li><strong>Network Latency</strong>: Optimize protocols and implement
+local caching</li>
+<li><strong>Resource Exhaustion</strong>: Implement proper limits and
+monitoring</li>
+<li><strong>Security Vulnerabilities</strong>: Regular security audits
+and penetration testing</li>
+</ol>
+<h3 id="operational-risks">Operational Risks</h3>
+<ol type="1">
+<li><strong>Worker Misconfiguration</strong>: Create validation tools
+and clear documentation</li>
+<li><strong>Key Management</strong>: Implement automated key rotation
+and backup procedures</li>
+<li><strong>Version Incompatibility</strong>: Implement version checking
+and compatibility matrix</li>
+</ol>
+<h2 id="deliverables">Deliverables</h2>
+<h3 id="code-deliverables">Code Deliverables</h3>
+<ol type="1">
+<li>Complete distributed implementation (100% test coverage)</li>
+<li>Docker test environment</li>
+<li>Configuration templates</li>
+<li>Deployment scripts</li>
+</ol>
+<h3 id="documentation-deliverables">Documentation Deliverables</h3>
+<ol type="1">
+<li>Distributed system guide</li>
+<li>API documentation updates</li>
+<li>Security configuration guide</li>
+<li>Troubleshooting guide</li>
+</ol>
+<h3 id="test-deliverables">Test Deliverables</h3>
+<ol type="1">
+<li>Comprehensive test suite (6 test types)</li>
+<li>Performance benchmarks</li>
+<li>Security test reports</li>
+<li>Stress test results</li>
+</ol>
+<p>This plan ensures robust, secure, and efficient distributed
+processing capabilities for the Universal Ebook Translator system.</p>
+</body>
+</html>

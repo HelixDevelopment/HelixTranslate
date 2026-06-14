@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>integration_sec01</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">integration_sec01</h1>
+</header>
+<h1 id="chapter-1-executive-summary--integration-architecture">Chapter
+1: Executive Summary &amp; Integration Architecture</h1>
+<h2 id="11-integration-vision-and-goals">1.1 Integration Vision and
+Goals</h2>
+<p>The integration of LLMsVerifier into HelixTranslate represents a
+fundamental architectural transformation: the replacement of nine
+manually configured LLM providers with a unified, verification-driven
+provider management system that treats model quality as a first-class
+operational concern. This is not an incremental feature addition. It is
+a structural redefinition of how HelixTranslate discovers, validates,
+scores, and selects translation models. The central mandate is that
+<strong>LLMsVerifier becomes the single source of truth</strong> for all
+model availability, validation status, and performance ranking within
+the HelixTranslate ecosystem. No model reaches the user interface
+without passing through LLMsVerifier's eight-step verification pipeline.
+No model participates in translation without carrying a computed score
+from the five-component scoring engine. No provider remains invisible to
+the discovery system. These constraints are non-negotiable by
+design.</p>
+<p>The current HelixTranslate architecture maintains provider
+integrations as discrete, hand-coded implementations scattered across
+<code>pkg/translator/llm/</code>. Each provider — whether OpenAI,
+Anthropic, Google Vertex, Azure OpenAI, Cohere, Mistral, Together AI, or
+local Ollama instances — exists as a standalone factory implementation
+that must be manually registered, individually configured with API keys,
+and separately maintained when endpoints or model catalogs change. This
+pattern, while functional for a small number of providers, creates
+compounding maintenance overhead as the LLM marketplace expands. Adding
+a tenth provider requires touching at minimum three files: the provider
+implementation, the factory registration, and the configuration schema.
+Adding a twentieth provider becomes a development sprint unto itself.
+The target architecture eliminates this friction entirely by delegating
+all provider lifecycle management to LLMsVerifier's automated discovery
+and verification pipeline.</p>
+<p>Three UX guarantees govern this integration and serve as the
+definition of done for every implementation phase. <strong>First: only
+validated models are available.</strong> Any model that has not
+completed the full eight-step verification pipeline — covering API
+reachability, authentication, model existence, response format
+validation, latency measurement, capability detection, rate limit
+compliance, and error handling behavior — is invisible to the
+HelixTranslate runtime. There is no bypass mechanism, no emergency
+override, no administrator backdoor. <strong>Second: only positively
+scored models participate in translation.</strong> The five-component
+scoring engine evaluates latency, throughput, cost efficiency,
+capability breadth, and reliability history. A model that passes
+verification but receives a composite score below the configurable
+threshold is gated from selection. <strong>Third: automatic discovery of
+all supported providers.</strong> When a new provider appears in the
+LLMsVerifier registry, or when an existing provider adds new models,
+HelixTranslate learns of them without code changes, configuration edits,
+or deployments. The discovery tier system — primary, secondary, and
+tertiary — polls provider registries, public model databases, and
+community endpoints on configurable intervals, feeding a continuously
+updated model catalog that the translation engine consumes in real
+time.</p>
+<p>These guarantees translate directly into operational outcomes.
+Translation quality improves because only proven-capable models serve
+requests. Operational costs decrease because cost-efficiency scoring
+automatically prefer low-price-per-token models for appropriate
+workloads. Incident recovery accelerates because the health-check layer
+automatically removes degraded providers from rotation without human
+intervention. Development velocity increases because adding provider
+support requires zero code changes in HelixTranslate proper.</p>
+<h2 id="12-reference-architecture-from-helixagent">1.2 Reference
+Architecture from HelixAgent</h2>
+<p>The integration blueprint is drawn directly from LLMsVerifier's
+production implementation in the HelixAgent project, where the
+eight-phase startup pipeline has been running in production environments
+for multiple release cycles. Understanding this pipeline is prerequisite
+to mapping its components correctly into HelixTranslate's codebase. The
+pipeline, implemented in <code>internal/verifier/startup.go</code>,
+executes sequentially during HelixAgent process initialization and
+establishes the complete verification and scoring infrastructure before
+any translation request is accepted.</p>
+<p>The pipeline begins with <strong>Phase 1: Config Load</strong>. The
+<code>LoadVerifierConfig()</code> function reads
+<code>configs/verifier.yaml</code> and unmarshals it into the
+<code>VerifierConfig</code> struct defined in
+<code>internal/verifier/config.go</code>. This configuration specifies
+provider API keys, discovery intervals, verification timeout thresholds,
+scoring weights, health check frequencies, and gating thresholds. The
+configuration is validated against a JSON Schema embedded at
+<code>internal/verifier/config/schema.json</code> — any missing required
+field or type mismatch causes a fatal startup error. This strict
+validation ensures that the verification pipeline never operates with
+incomplete or ambiguous configuration.</p>
+<p><strong>Phase 2: StartupVerifier Initialization</strong> instantiates
+the <code>StartupVerifier</code> struct, the central coordinator for all
+subsequent phases. This struct maintains references to the discovery
+service, verification pipeline, scoring engine, model registry, and
+health monitor. It also owns a <code>sync.WaitGroup</code> that gates
+server startup until all asynchronous initialization completes. The
+<code>StartupVerifier.Init()</code> method allocates these subsystems
+but does not yet execute them — that sequencing is controlled by the
+subsequent phases.</p>
+<p><strong>Phase 3: Provider Discovery</strong> triggers the three-tier
+discovery system implemented in
+<code>internal/verifier/discovery.go</code>. The <strong>primary
+tier</strong> queries well-known provider endpoints — OpenAI's
+<code>/models</code> endpoint, Anthropic's model listing API, Google's
+model catalog — using the stored API keys from configuration. The
+<strong>secondary tier</strong> scans public model registries including
+Hugging Face's API, Replicate's model listing, and Together AI's model
+catalog. The <strong>tertiary tier</strong> probes community-discovered
+endpoints and user-configured custom providers. Each tier runs in its
+own goroutine and writes discovered models into a thread-safe
+<code>DiscoveryResult</code> channel. Discovery respects rate limits
+through a token bucket implemented in
+<code>internal/verifier/ratelimit/bucket.go</code>.</p>
+<p><strong>Phase 4: Provider Verification</strong> executes the
+eight-step verification pipeline for every discovered model, implemented
+in <code>internal/verifier/verification.go</code>. The eight steps are:
+(1) <code>CheckAPIReachability</code> — confirms the provider endpoint
+responds to HTTP requests within the configured timeout; (2)
+<code>CheckAuthentication</code> — validates that the stored API key has
+necessary permissions; (3) <code>CheckModelExistence</code> — confirms
+the specific model ID is available on the provider; (4)
+<code>ValidateResponseFormat</code> — sends a minimal prompt and
+confirms the response matches expected schema; (5)
+<code>MeasureLatency</code> — records p50, p95, and p99 response times
+over 10 warmup requests; (6) <code>DetectCapabilities</code> —
+identifies supported features (function calling, JSON mode, vision,
+streaming, tool use); (7) <code>CheckRateLimits</code> — determines
+request-per-minute and token-per-minute ceilings; (8)
+<code>ValidateErrorHandling</code> — confirms graceful error responses
+for malformed requests and rate limit exceeded scenarios. Each step
+produces a <code>VerificationStepResult</code> that feeds into the
+aggregate <code>ProviderVerification</code> record. A single step
+failure does not abort the pipeline — remaining steps continue so that
+the scoring engine can operate on partial data where appropriate.</p>
+<p><strong>Phase 5: Provider Scoring</strong> invokes the five-component
+scoring engine defined in <code>internal/verifier/scoring.go</code>.
+Each model receives five component scores: <strong>Latency
+Score</strong> (lower p95 latency = higher score, logarithmic scale),
+<strong>Throughput Score</strong> (higher sustainable tokens-per-second
+= higher score), <strong>CostEfficiency Score</strong> (lower cost per
+million tokens = higher score, normalized against market median),
+<strong>Capability Score</strong> (breadth of detected capabilities
+mapped to a rubric), and <strong>Reliability Score</strong> (historical
+uptime percentage from health check records). The composite score is a
+weighted sum:
+<code>Composite = w1*Latency + w2*Throughput + w3*CostEfficiency + w4*Capability + w5*Reliability</code>,
+where weights default to 0.20 each but are configurable per-deployment.
+Scores persist to <code>internal/verifier/persistence/scores.db</code>
+(SQLite) with timestamps for trend analysis.</p>
+<p><strong>Phase 6: Ranking</strong> sorts all verified models by
+composite score descending and assigns rank positions. Ties are broken
+by latency score (lower wins), then by capability score (higher wins).
+The ranked list is exposed through
+<code>internal/verifier/registry.go</code> as a thread-safe slice with
+copy-on-read semantics. The registry also maintains a map from
+<code>provider/model-id</code> tuples to their current rank and score,
+enabling O(1) lookups during translation request routing.</p>
+<p><strong>Phase 7: AI Debate Team Selection</strong> configures the
+multi-model consensus layer used for high-confidence translations. This
+component, implemented in <code>internal/verifier/debate.go</code>,
+selects the top-N models from the ranked list (default N=3) to serve as
+a "debate team" — each model independently translates the same input,
+and their outputs are compared for consistency. Divergence triggers
+automatic re-translation with a confidence warning. This layer is the
+final consumer of the scoring pipeline's output.</p>
+<p><strong>Phase 8: Server Start</strong> releases the
+<code>StartupVerifier.WaitGroup</code>, allowing the main HTTP/gRPC
+servers in <code>cmd/server/main.go</code> to begin accepting
+connections. All phases 1-7 must complete before this release; the
+server literally cannot start with unverified or unranked models in its
+configuration.</p>
+<p>The score adapter pattern, extracted from
+<code>internal/services/llmsverifier_score_adapter.go</code>, serves as
+the critical bridge between LLMsVerifier's scoring world and
+HelixTranslate's provider selection logic. This adapter implements a
+single exported function:
+<code>Adapt(scores []verifier.ModelScore) ([]translation.ProviderPreference, error)</code>.
+It translates LLMsVerifier's internal score representation — which
+includes detailed component scores, rank metadata, and capability flags
+— into HelixTranslate's <code>ProviderPreference</code> struct, which
+carries only the fields the translation engine needs:
+<code>ProviderID</code>, <code>ModelID</code>, <code>Weight</code>, and
+<code>FallbackOrder</code>. The adapter is the single point of coupling
+between the two systems, deliberately designed to absorb schema changes
+on either side without propagating them. When LLMsVerifier adds a new
+scoring component, only the adapter's weight calculation changes. When
+HelixTranslate changes its preference format, only the adapter's output
+struct changes.</p>
+<h2 id="13-component-architecture-and-data-flow">1.3 Component
+Architecture and Data Flow</h2>
+<p>The integration maps components across three repositories: HelixAgent
+(the source of proven, production LLMsVerifier code), LLMsVerifier (the
+API and library boundary), and HelixTranslate (the target system). The
+mapping is not a naive copy-paste operation. Each HelixAgent source file
+provides a behavioral specification that is consumed through the
+LLMsVerifier library API and reimplemented in HelixTranslate with
+domain-specific adaptations for the translation workload.</p>
+<p><strong>TABLE 1: Complete Component Mapping Across
+Repositories</strong></p>
+<table>
+<thead>
+<tr>
+<th>HelixAgent Source File</th>
+<th>LLMsVerifier API</th>
+<th>HelixTranslate Target File</th>
+<th>Integration Pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>internal/verifier/startup.go</code></td>
+<td><code>llmverifier.New(config *Config) (*Verifier, error)</code></td>
+<td><code>internal/verifier/client.go</code></td>
+<td>Construction: HelixTranslate instantiates the verifier client during
+its own startup sequence, passing translated configuration</td>
+</tr>
+<tr>
+<td><code>internal/verifier/scoring.go</code></td>
+<td><code>scoring.NewScoringEngine(cfg ScoringConfig) *Engine</code></td>
+<td><code>internal/verifier/scoring/engine.go</code></td>
+<td>Delegation: HelixTranslate wraps the scoring engine with
+translation-specific weight defaults and capability-to-task
+mappings</td>
+</tr>
+<tr>
+<td><code>internal/verifier/discovery.go</code></td>
+<td><code>discovery.NewService(cfg DiscoveryConfig) *Service</code></td>
+<td><code>internal/verifier/discovery/service.go</code></td>
+<td>Embedding: Discovery service runs as a background goroutine started
+by the verifier client, writing results to a shared registry</td>
+</tr>
+<tr>
+<td><code>internal/verifier/verification.go</code></td>
+<td><code>verifier.Verify(ctx, provider, model) (*VerificationResult, error)</code></td>
+<td><code>internal/verifier/pipeline.go</code></td>
+<td>Orchestration: HelixTranslate's pipeline coordinates LLMsVerifier's
+verification steps with its own health check and circuit breaker
+logic</td>
+</tr>
+<tr>
+<td><code>internal/verifier/registry.go</code></td>
+<td><code>registry.GetRankedModels() []RankedModel</code></td>
+<td><code>internal/verifier/registry/adapter.go</code></td>
+<td>Translation: Ranked models from LLMsVerifier's registry are adapted
+into HelixTranslate's provider preference list at configurable
+intervals</td>
+</tr>
+<tr>
+<td><code>internal/verifier/health.go</code></td>
+<td><code>health.NewMonitor(cfg HealthConfig) *Monitor</code></td>
+<td><code>internal/verifier/health/monitor.go</code></td>
+<td>Integration: Health monitor feeds status updates directly into
+HelixTranslate's existing circuit breaker in
+<code>pkg/circuitbreaker/</code></td>
+</tr>
+<tr>
+<td><code>internal/services/llmsverifier_score_adapter.go</code></td>
+<td><code>ScoreAdapter.Adapt(scores []ModelScore) []ProviderPreference</code></td>
+<td><code>internal/services/llmsverifier_score_adapter.go</code></td>
+<td>Direct Port: The adapter file is ported nearly verbatim, with struct
+field names updated for HelixTranslate conventions</td>
+</tr>
+<tr>
+<td><code>internal/verifier/debate.go</code></td>
+<td><code>debate.NewTeam(cfg DebateConfig) *Team</code></td>
+<td><code>internal/verifier/debate/team.go</code></td>
+<td>Extension: Debate team configuration is extended with
+translation-specific consensus heuristics</td>
+</tr>
+<tr>
+<td><code>internal/verifier/persistence.go</code></td>
+<td><code>persistence.NewStore(path string) (*Store, error)</code></td>
+<td><code>internal/verifier/persistence/store.go</code></td>
+<td>Shared Store: SQLite score database is co-located with
+HelixTranslate's data directory for unified backup</td>
+</tr>
+<tr>
+<td><code>internal/verifier/ratelimit/bucket.go</code></td>
+<td><code>ratelimit.NewBucket(rate, burst int) *Bucket</code></td>
+<td><code>internal/verifier/ratelimit/bucket.go</code></td>
+<td>Direct Port: Token bucket implementation is dependency-free and
+copies directly</td>
+</tr>
+</tbody>
+</table>
+<p>The data flow through this architecture follows a directed pipeline
+with clear ownership boundaries. At the leftmost intake, LLMsVerifier's
+discovery service executes its three-tier poll cycle: primary tier
+queries provider APIs every 15 minutes, secondary tier scans public
+registries every 60 minutes, tertiary tier checks community endpoints
+every 240 minutes. Each poll produces a set of
+<code>DiscoveredModel</code> records containing provider name, model ID,
+endpoint URL, detected capabilities, and cost metadata. These records
+flow into the verification pipeline, which executes the eight-step
+validation sequence for each new or changed model. Successfully verified
+models receive a <code>VerificationResult</code> containing per-step
+pass/fail status, latency measurements, capability flags, and rate limit
+parameters.</p>
+<p>Verified models then enter the scoring engine, which computes the
+five component scores and the weighted composite. The scoring engine
+reads historical performance data from the SQLite persistence store and
+writes updated scores back after each computation cycle. The scored and
+ranked model list is then consumed by the score adapter, which
+translates it into the <code>ProviderPreference</code> format that
+HelixTranslate's existing provider factory understands. This adapter
+runs on a 5-minute refresh interval by default, ensuring that
+HelixTranslate's view of available providers tracks LLMsVerifier's
+current rankings without imposing synchronous coupling.</p>
+<p>On the HelixTranslate side, the adapted provider preferences feed
+into a new verification-aware provider factory located at
+<code>pkg/translator/llm/verified_factory.go</code>. This factory
+implements the same <code>ProviderFactory</code> interface as the
+existing nine manual providers —
+<code>Create(config ProviderConfig) (Provider, error)</code> — but its
+implementation queries the LLMsVerifier adapter rather than
+instantiating hard-coded provider structs. The existing nine providers
+are not deleted; they are reimplemented as thin wrappers that delegate
+to the verified factory when LLMsVerifier is enabled, with a feature
+flag (<code>--use-llms-verifier</code>) controlling the routing. This
+preserves backward compatibility during the transition period and
+enables rollback without code changes.</p>
+<p><strong>TABLE 2: Before/After Architecture Comparison</strong></p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Before (Current State)</th>
+<th>After (Target State)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Provider Count</strong></td>
+<td>9 manually configured providers (OpenAI, Anthropic, Vertex, Azure
+OpenAI, Cohere, Mistral, Together AI, Ollama, Custom)</td>
+<td>30+ automatically discovered providers via 3-tier discovery, with
+the set growing as new providers enter the market</td>
+</tr>
+<tr>
+<td><strong>Validation Depth</strong></td>
+<td>No validation; any configured provider is assumed reachable and
+functional</td>
+<td>8-step verification pipeline: API reachability, authentication,
+model existence, response format, latency measurement, capability
+detection, rate limit compliance, error handling validation</td>
+</tr>
+<tr>
+<td><strong>Scoring System</strong></td>
+<td>None; provider selection is either random, round-robin, or
+hard-coded priority</td>
+<td>5-component weighted scoring: latency, throughput, cost efficiency,
+capability breadth, reliability history, producing a composite rank</td>
+</tr>
+<tr>
+<td><strong>Configuration Model</strong></td>
+<td>Per-provider API keys, endpoints, and model IDs in
+<code>configs/translators.yaml</code>; manual edits required for any
+change</td>
+<td>Single <code>configs/verifier.yaml</code> with provider credentials
+and scoring weights; all model catalogs auto-discovered and kept
+current</td>
+</tr>
+<tr>
+<td><strong>Failure Handling</strong></td>
+<td>Static fallback to secondary provider with manual configuration</td>
+<td>Automatic circuit breaker integration; health monitor removes
+degraded models; fallback chains adapt based on real-time scores</td>
+</tr>
+<tr>
+<td><strong>New Provider Onboarding</strong></td>
+<td>Development task: implement provider interface, add factory
+registration, update config schema, add tests, deploy</td>
+<td>Operational task: add API key to <code>verifier.yaml</code>;
+discovery and verification happen automatically within the next poll
+cycle</td>
+</tr>
+<tr>
+<td><strong>Model Quality Assurance</strong></td>
+<td>Reactive: user complaints drive investigation and provider
+removal</td>
+<td>Proactive: scoring engine continuously evaluates; gating threshold
+prevents low-scoring models from serving requests</td>
+</tr>
+<tr>
+<td><strong>Multi-Model Consensus</strong></td>
+<td>Not available</td>
+<td>AI Debate Team: top-3 ranked models translate independently;
+divergence detection triggers confidence warnings and automatic
+re-translation</td>
+</tr>
+</tbody>
+</table>
+<h2 id="14-implementation-phase-overview">1.4 Implementation Phase
+Overview</h2>
+<p>The integration is structured as eight sequential phases spanning
+sixteen weeks. Phase boundaries are defined by gating criteria, not
+calendar dates — a phase does not advance until its gating criteria are
+demonstrably met. This ensures that each layer of the integration is
+solid before the next layer is built upon it. The sixteen-week timeline
+assumes two backend engineers with prior Go experience, one DevOps
+engineer for deployment pipeline configuration, and part-time frontend
+capacity for the enterprise UX phase.</p>
+<p><strong>TABLE 3: Master Phase Timeline</strong></p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Weeks</th>
+<th>Key Deliverables</th>
+<th>Dependencies</th>
+<th>Gating Criteria</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Foundation</strong></td>
+<td>1–2</td>
+<td><code>go.mod</code> updates with LLMsVerifier module requirement;
+<code>configs/verifier.yaml</code> schema definition;
+<code>internal/verifier/</code> project structure; CODEOWNERS and
+governance documentation; CI pipeline extension for verification
+tests</td>
+<td>LLMsVerifier v1.x release tag available; Go 1.25.3 toolchain
+installed</td>
+<td>Module compiles without errors; <code>go vet</code> passes; config
+schema validates against all known provider types; directory structure
+follows HelixTranslate conventions</td>
+</tr>
+<tr>
+<td><strong>2. Verification Engine</strong></td>
+<td>3–4</td>
+<td>8-step verification pipeline implementation in
+<code>internal/verifier/pipeline.go</code>; LLMsVerifier client wrapper
+in <code>internal/verifier/client.go</code>; health check integration
+with existing circuit breaker; provider-specific test vectors for all 9
+current providers</td>
+<td>Phase 1 completion; API keys for at least 5 providers available in
+CI secrets</td>
+<td>All 8 verification steps execute independently with deterministic
+pass/fail; each step produces structured output; pipeline completes
+within 30 seconds per model in CI; no data races detected by
+<code>go test -race</code></td>
+</tr>
+<tr>
+<td><strong>3. Scoring Engine</strong></td>
+<td>5–6</td>
+<td>5-component scoring engine in
+<code>internal/verifier/scoring/engine.go</code>; score adapter port in
+<code>internal/services/llmsverifier_score_adapter.go</code>; SQLite
+persistence layer in
+<code>internal/verifier/persistence/store.go</code>; scoring weight
+configuration in <code>verifier.yaml</code>; score calculation
+verification harness</td>
+<td>Phase 2 completion; historical cost data available for pricing
+normalization</td>
+<td>Score calculations produce deterministic output for identical
+inputs; weight adjustments propagate correctly; persistence round-trip
+verified; adapter output matches HelixTranslate
+<code>ProviderPreference</code> schema</td>
+</tr>
+<tr>
+<td><strong>4. Discovery &amp; Registry</strong></td>
+<td>7–8</td>
+<td>3-tier discovery service in
+<code>internal/verifier/discovery/service.go</code>; in-memory model
+registry with copy-on-read in
+<code>internal/verifier/registry/adapter.go</code>; gating threshold
+enforcement; background poll scheduler; rate limit bucket
+integration</td>
+<td>Phase 3 completion; network access to provider APIs from staging
+environment</td>
+<td>Models discovered from all three tiers within configured intervals;
+registry serves ranked lookups in &lt;1ms; gating threshold correctly
+filters sub-threshold models; rate limiter prevents API quota
+exhaustion</td>
+</tr>
+<tr>
+<td><strong>5. Runtime Integration</strong></td>
+<td>9–10</td>
+<td>Verification-aware provider factory in
+<code>pkg/translator/llm/verified_factory.go</code>; selection engine
+with score-based weighting; fallback chain construction from ranked
+list; feature flag <code>--use-llms-verifier</code>; backward
+compatibility layer for existing 9 providers</td>
+<td>Phase 4 completion; HelixTranslate translation test suite passes on
+main branch</td>
+<td>End-to-end translation requests complete successfully through
+LLMsVerifier-routed providers; fallback chains activate correctly on
+simulated failures; feature flag toggle switches between old and new
+paths without restart; p99 latency regression &lt;5% compared to
+baseline</td>
+</tr>
+<tr>
+<td><strong>6. Enterprise UX</strong></td>
+<td>11–12</td>
+<td>Model selection UI showing verification status, scores, and ranks;
+real-time provider health dashboard; batch translation interface with
+model preference pinning; admin panel for scoring weight adjustment;
+user-facing model quality indicators</td>
+<td>Phase 5 completion; frontend component library updated; API
+contracts stable</td>
+<td>UX designs reviewed and approved by product team; model status
+indicators update within 30 seconds of health changes; admin weight
+adjustments apply without restart; accessibility audit passes WCAG 2.1
+AA</td>
+</tr>
+<tr>
+<td><strong>7. Testing &amp; QA</strong></td>
+<td>13–14</td>
+<td>Unit test suite achieving 100% coverage of
+<code>internal/verifier/</code>; integration test suite covering all 8
+verification steps against live provider sandboxes; chaos engineering
+challenges (provider failure injection, network partition simulation,
+rate limit exhaustion); performance benchmark suite establishing latency
+and throughput baselines</td>
+<td>Phase 6 completion; staging environment mirrors production
+topology</td>
+<td>All unit tests pass with <code>-race</code> flag; integration tests
+pass against 5+ live providers; all chaos challenges resolve within 60
+seconds; benchmarks show no p99 latency regression &gt;5% and no
+throughput regression &gt;10%</td>
+</tr>
+<tr>
+<td><strong>8. Documentation &amp; Deploy</strong></td>
+<td>15–16</td>
+<td>Complete API reference for all <code>internal/verifier/</code>
+packages; deployment runbook with rollback procedures; migration guide
+for existing provider configurations; operational playbooks for incident
+response; architecture decision records (ADRs) for all design choices;
+final security review and sign-off</td>
+<td>Phase 7 completion; production deployment pipeline configured</td>
+<td>All documentation reviewed and signed off by tech lead and product
+owner; deployment to staging completes via automated pipeline in &lt;10
+minutes; rollback procedure tested and verified; security review
+identifies no high or critical findings</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Resource Requirements.</strong> The integration requires API
+keys for a minimum of 25 providers to exercise the full discovery and
+verification pipeline. The core set includes: OpenAI (GPT-4o,
+GPT-4o-mini, GPT-3.5-turbo), Anthropic (Claude 3.5 Sonnet, Claude 3
+Haiku, Claude 3 Opus), Google Vertex AI (Gemini 1.5 Pro, Gemini 1.5
+Flash), Azure OpenAI (deployed via organization's Azure subscription),
+Cohere (Command R, Command R Plus), Mistral (Large, Medium, Small),
+Together AI (Llama 3.1, Mixtral), AI21 Labs (Jamba), Perplexity, Groq,
+Fireworks AI, Replicate, Ollama (local endpoint), DeepSeek, Moonshot AI,
+OpenRouter, and Anyscale. For the testing phase, sandbox or low-quota
+keys are sufficient — the verification pipeline sends only minimal test
+prompts, and the discovery tier primarily reads model catalog endpoints
+rather than generating completions.</p>
+<p>Go version alignment is a hard dependency. Both HelixTranslate and
+LLMsVerifier must compile with Go 1.25.3 to ensure compatible standard
+library behavior, particularly around the <code>slices</code> and
+<code>maps</code> generic functions, <code>log/slog</code> structured
+logging, and <code>runtime.Pinner</code> for CGO interactions if local
+model inference is enabled. The <code>go.mod</code> file changes reflect
+this alignment.</p>
+<p><strong>Code Block 1: Required <code>go.mod</code>
+Changes</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// go.mod — additions for LLMsVerifier integration</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>require <span class="op">(</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... existing requirements ...</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// LLMsVerifier core library</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>helixagent<span class="op">/</span>llmsverifier v1<span class="fl">.4</span><span class="er">.2</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// LLMsVerifier indirect dependencies (auto-resolved by go mod tidy)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// github.com/helixagent/llmsverifier/scoring v1.4.2</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// github.com/helixagent/llmsverifier/discovery v1.4.2</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// github.com/helixagent/llmsverifier/verification v1.4.2</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">// Replace directives for local development and staging builds.</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">// Remove or comment out for production builds that consume published tags.</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>replace github<span class="op">.</span>com<span class="op">/</span>helixagent<span class="op">/</span>llmsverifier <span class="op">=&gt;</span> <span class="op">../</span>llmsverifier</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">// Verify Go toolchain alignment.</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="cf">go</span> <span class="fl">1.25</span><span class="er">.3</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>toolchain go1<span class="fl">.25</span><span class="er">.3</span></span></code></pre></div>
+<p>The <code>replace</code> directive supports local development
+workflows where engineers have both repositories checked out
+side-by-side. In CI and production builds, the directive is removed and
+the published <code>v1.4.2</code> tag is consumed from the module proxy.
+The <code>go 1.25.3</code> directive enforces the minimum Go version;
+builds attempted with older toolchains fail with a clear version
+mismatch error.</p>
+<p><strong>Code Block 2: <code>configs/verifier.yaml</code> Top-Level
+Schema</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># configs/verifier.yaml — LLMsVerifier configuration for HelixTranslate</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Schema version: 1.4.2</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Documentation: https://docs.helixagent.dev/llmsverifier/config-reference</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">verifier</span><span class="kw">:</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">  # Server configuration for the embedded verifier HTTP API</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">server</span><span class="kw">:</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">host</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;0.0.0.0&quot;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="dv">8081</span><span class="co">                    # Dedicated port; separate from HelixTranslate&#39;s main port</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">read_timeout</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">write_timeout</span><span class="kw">:</span><span class="at"> 60s</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">  # Discovery tier configuration</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">discovery</span><span class="kw">:</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">primary_poll_interval</span><span class="kw">:</span><span class="at"> 15m</span><span class="co">    # Provider API catalog queries</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">secondary_poll_interval</span><span class="kw">:</span><span class="at"> 60m</span><span class="co">  # Public registry scans (HuggingFace, Replicate)</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tertiary_poll_interval</span><span class="kw">:</span><span class="at"> 240m</span><span class="co">  # Community endpoint probes</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">max_concurrent_requests</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span><span class="co">   # Per-tier parallelism limit</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">request_timeout</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">backoff</span><span class="kw">:</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">initial</span><span class="kw">:</span><span class="at"> 1s</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">max</span><span class="kw">:</span><span class="at"> 5m</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">multiplier</span><span class="kw">:</span><span class="at"> </span><span class="fl">2.0</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co">  # Verification pipeline configuration</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">verification</span><span class="kw">:</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">timeout_per_step</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">warmup_requests</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span><span class="co">           # For latency measurement step</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">max_retries_per_step</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> api_reachability</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> authentication</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> model_existence</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> response_format</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> latency_measurement</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> capability_detection</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> rate_limit_compliance</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> error_handling</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="co">  # Scoring engine configuration</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">scoring</span><span class="kw">:</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">weights</span><span class="kw">:</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">latency</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">throughput</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">cost_efficiency</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">capability</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.25</span><span class="co">            # Slightly higher for translation workloads</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">reliability</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.15</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">gating_threshold</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.60</span><span class="co">        # Minimum composite score for model inclusion</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">recalculation_interval</span><span class="kw">:</span><span class="at"> 5m</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">history_window</span><span class="kw">:</span><span class="at"> 168h</span><span class="co">          # 7 days of health history for reliability score</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="co">  # Provider API credentials</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="co">  # Keys are loaded from environment variables or secrets manager;</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="co">  # values here are references, not literal keys.</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">openai</span><span class="kw">:</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${OPENAI_API_KEY}&quot;</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">base_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://api.openai.com/v1&quot;</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">default_models</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;gpt-4o&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;gpt-4o-mini&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;gpt-3.5-turbo&quot;</span><span class="kw">]</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">anthropic</span><span class="kw">:</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${ANTHROPIC_API_KEY}&quot;</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">base_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://api.anthropic.com&quot;</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">default_models</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;claude-3-5-sonnet-20241022&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;claude-3-haiku-20240307&quot;</span><span class="kw">]</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">google_vertex</span><span class="kw">:</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${GOOGLE_VERTEX_API_KEY}&quot;</span></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">project_id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${GOOGLE_PROJECT_ID}&quot;</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">location</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;us-central1&quot;</span></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">default_models</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;gemini-1.5-pro&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;gemini-1.5-flash&quot;</span><span class="kw">]</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">azure_openai</span><span class="kw">:</span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${AZURE_OPENAI_API_KEY}&quot;</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">endpoint</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${AZURE_OPENAI_ENDPOINT}&quot;</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;2024-10-21&quot;</span></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="co">    # ... additional providers follow same pattern ...</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a><span class="co">  # Health monitoring and circuit breaker integration</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">health</span><span class="kw">:</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">check_interval</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">failure_threshold</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span><span class="co">          # Consecutive failures before marking unhealthy</span></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">recovery_threshold</span><span class="kw">:</span><span class="at"> </span><span class="dv">2</span><span class="co">         # Consecutive successes before marking healthy</span></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">circuit_breaker</span><span class="kw">:</span></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 60s</span></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">half_open_max_calls</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a><span class="co">  # Persistence configuration</span></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">persistence</span><span class="kw">:</span></span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">store_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;./data/verifier/scores.db&quot;</span></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">max_size_mb</span><span class="kw">:</span><span class="at"> </span><span class="dv">512</span></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">backup_interval</span><span class="kw">:</span><span class="at"> 24h</span></span></code></pre></div>
+<p>The configuration schema is versioned (<code>1.4.2</code>) and
+validated against an embedded JSON Schema at startup. The
+<code>providers</code> section uses environment variable references
+(<code>${VAR_NAME}</code>) rather than literal keys, ensuring that
+credentials never appear in committed configuration files. The
+<code>scoring.weights.capability</code> parameter is set to
+<code>0.25</code> — slightly elevated from the default <code>0.20</code>
+— to reflect the importance of multilingual capability breadth in
+translation workloads. The <code>gating_threshold</code> of
+<code>0.60</code> means that any model scoring below 60% composite is
+excluded from the provider pool, providing a quality floor that
+eliminates underperforming models before they reach users.</p>
+<p>The sixteen-week timeline concludes with a production deployment that
+preserves full backward compatibility through the feature flag
+mechanism. Existing HelixTranslate installations continue to function
+with their current nine manual providers even after the LLMsVerifier
+code is deployed. Activation is a runtime toggle
+(<code>--use-llms-verifier</code>), not a code change or a migration
+script. This risk-minimizing approach ensures that the integration can
+be rolled out gradually — first to a staging environment for two weeks,
+then to a canary production segment for one week, and finally to full
+production traffic only after all operational metrics are validated
+against baseline.</p>
+</body>
+</html>

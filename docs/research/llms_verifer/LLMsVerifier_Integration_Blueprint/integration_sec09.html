@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>integration_sec09</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">integration_sec09</h1>
+</header>
+<h1 id="9-phase-8-documentation-deployment-and-operational-runbook">9.
+Phase 8: Documentation, Deployment, and Operational Runbook</h1>
+<p>Phase 8 closes the integration lifecycle by producing every artifact
+required for sustainable operations. This phase encompasses constitution
+governance for all three repositories, submodule documentation
+propagation, user-facing guides, an operational runbook with
+metric-driven alerting, Docker and Kubernetes deployment manifests, a
+migration and rollback plan with phased rollout gates, and a 50-item
+master checklist. Every configuration option introduced across Phases
+1–7 must appear in at least one documented reference table. Nothing
+ships without a signature.</p>
+<hr />
+<h2 id="91-constitution-and-governance-documentation">9.1 Constitution
+and Governance Documentation</h2>
+<p>The constitution defines the behavioral contract for all code that
+interacts with the LLMsVerifier subsystem. It is not aspirational text;
+it is enforced through CI gates, challenge tests, and mandatory
+code-review checklists.</p>
+<h3 id="911-write-internalverifierconstitutionmd">9.1.1 Write
+<code>internal/verifier/CONSTITUTION.md</code></h3>
+<p>The file <code>internal/verifier/CONSTITUTION.md</code> contains 33
+mandatory rules grouped into six categories, adapted from the HelixAgent
+reference constitution but contextualized for HelixTranslate's
+translation-domain requirements. Each rule carries a unique identifier,
+category, imperative text, rationale, enforcement mechanism, and
+violation consequence. The eight scoring rules (S01–S08) govern weight
+validation, threshold enforcement, score freshness with TTL-based
+recency penalties, normalization boundaries, component isolation to
+prevent cross-contamination of speed and cost signals, recalculation
+triggers on discovery events, and audit-trail persistence for every
+computed score. The eight verification rules (V01–V08) mandate pipeline
+integrity across all eight steps, enforce step isolation so a failure in
+latency benchmarking cannot mask an authentication failure, specify
+timeout values per step (5s for existence, 120s for latency), limit
+retries to three attempts per critical step, prohibit mock-only
+verification (anti-bluff), require a minimum of 193 passing challenges,
+enforce challenge coverage across all five scoring components, and
+mandate persistence of every verification result to SQLite. The five
+discovery rules (D01–D05) regulate refresh intervals per provider,
+establish fallback ordering from static registry to provider API to
+models.dev, require deduplication by model ID, define stale handling
+when a model has not been rediscovered within 2× the provider's refresh
+interval, and mandate provider health tracking with automatic
+degradation of unhealthy sources. The five selection rules (L01–L05)
+enforce fairness in the selection algorithm, require a diversity minimum
+of three distinct providers in any ranked list, implement load balancing
+across top-scored models, express tier preference for premium-tier
+models on quality-critical translations, and preserve user override
+capability. The four testing rules (T01–T04) codify the anti-bluff
+mandate, require 100% test coverage for the
+<code>internal/verifier/</code> package, mandate real infrastructure for
+all integration tests, and prohibit mock-only verification pipelines.
+The three operations rules (O01–O03) require health endpoint monitoring,
+define alerting thresholds for score drops exceeding 10% within one
+hour, and mandate rollback capability through the
+<code>LLMSVERIFIER_ENABLED</code> feature flag.</p>
+<h3 id="912-constitution-rule-template">9.1.2 Constitution Rule
+Template</h3>
+<p>Every rule in <code>internal/verifier/CONSTITUTION.md</code> follows
+the template shown in Table 9.1. This structure ensures that each rule
+is actionable, auditable, and enforceable without ambiguity.</p>
+<p><strong>Table 9.1: Constitution Rule Template with Representative
+Entries</strong></p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Category</th>
+<th>Rule Text</th>
+<th>Rationale</th>
+<th>Enforcement Mechanism</th>
+<th>Violation Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S01</td>
+<td>Scoring</td>
+<td>All five component weights must sum to exactly 1.0</td>
+<td>Normalization integrity prevents skewed composite scores</td>
+<td><code>validateWeights()</code> in
+<code>internal/verifier/scoring/components.go</code> returns error on
+mismatch</td>
+<td>CI build fails; PR blocked</td>
+</tr>
+<tr>
+<td>S04</td>
+<td>Scoring</td>
+<td>Recency penalty applies exponential decay with half-life 90
+days</td>
+<td>Older models depreciate naturally without manual intervention</td>
+<td><code>CalculateRecencyScore()</code> enforces time-decay formula;
+scores older than 24h are recalculated</td>
+<td>Stale scores trigger warning alert; model may fall below
+threshold</td>
+</tr>
+<tr>
+<td>V01</td>
+<td>Verification</td>
+<td>All eight pipeline steps must execute for every model before
+registry admission</td>
+<td>Incomplete verification creates blind spots in capability
+detection</td>
+<td><code>RunPipeline()</code> in
+<code>internal/verifier/pipeline.go</code> requires all steps
+complete</td>
+<td>Model cannot enter <code>verified_models</code> table; gatekeeper
+denies access</td>
+</tr>
+<tr>
+<td>V06</td>
+<td>Verification</td>
+<td>A minimum of 193 challenges must pass before a model receives a
+capability score</td>
+<td>Challenge count below 193 produces statistically unreliable
+capability metrics</td>
+<td><code>internal/verifier/challenges/runner.go</code> counts passes;
+returns error if count &lt; 193</td>
+<td>Score component set to 0.0; model flagged as unverified</td>
+</tr>
+<tr>
+<td>T01</td>
+<td>Testing</td>
+<td>No test may rely exclusively on mocked LLM responses for
+verification pipeline coverage</td>
+<td>Mock-only tests produce false confidence; anti-bluff mandate
+requires real behavior</td>
+<td><code>go test -cover</code> + manual review; integration tests
+require live verifier instance</td>
+<td>PR rejected; coverage report flagged</td>
+</tr>
+<tr>
+<td>O03</td>
+<td>Operations</td>
+<td>Rollback to legacy provider factory must complete within 30 seconds
+via feature flag</td>
+<td>Sustained degradation of verified model quality demands instant
+fallback</td>
+<td><code>LLMSVERIFIER_ENABLED=false</code> takes effect in next
+provider factory call; no restart required</td>
+<td>Operational incident if rollback exceeds 30s SLA</td>
+</tr>
+</tbody>
+</table>
+<h3 id="913-update-claudemd">9.1.3 Update <code>CLAUDE.md</code></h3>
+<p>The root <code>CLAUDE.md</code> file (11KB) receives a new appendix
+section titled "LLMsVerifier Integration Context." This section
+documents the architecture context: the verifier subsystem lives under
+<code>internal/verifier/</code> and provides a verified, scored,
+discovered model layer between <code>pkg/translator/llm/</code> and
+external LLM APIs. Key files are listed with one-line descriptions for
+all 15+ integration files: <code>internal/verifier/client.go</code>
+(verifier client), <code>internal/verifier/pipeline.go</code> (8-step
+pipeline), <code>internal/verifier/scoring/engine.go</code> (scoring
+engine), <code>internal/verifier/scoring/components.go</code> (5
+component calculators),
+<code>internal/verifier/scoring/composite.go</code> (weighted
+aggregator), <code>internal/verifier/discovery/service.go</code> (3-tier
+discovery), <code>internal/verifier/discovery/registry.go</code> (model
+registry), <code>internal/verifier/discovery/gatekeeper.go</code>
+(access control), <code>internal/verifier/selection/engine.go</code>
+(model selector), <code>internal/verifier/selection/fallback.go</code>
+(fallback chain),
+<code>internal/services/llmsverifier_score_adapter.go</code> (score
+adapter), <code>internal/verifier/config.go</code> (verifier config),
+<code>internal/verifier/health.go</code> (health checks),
+<code>internal/verifier/events.go</code> (event handlers), and
+<code>internal/verifier/CONSTITUTION.md</code> (governance rules). The
+pipeline description covers the eight ordered steps (existence →
+connectivity → authentication → completion → capability detection →
+translation quality → latency benchmark → error handling) with per-step
+timeouts and criticality flags. The scoring weight reference table
+documents the default distribution: response speed 0.25, cost
+effectiveness 0.25, model efficiency 0.20, capability 0.20, recency
+0.10. Common troubleshooting steps cover five scenarios: verifier client
+connection refused (check <code>LLMSVERIFIER_API_URL</code>), model not
+appearing in registry (run discovery or check gatekeeper threshold),
+score lower than expected (review component breakdown in logs), pipeline
+timeout on latency step (increase <code>LLMSVERIFIER_TIMEOUT</code>),
+and SQLite lock contention (reduce <code>MaxConcurrentTests</code>).</p>
+<h3 id="914-update-agentsmd">9.1.4 Update <code>AGENTS.md</code></h3>
+<p>The root <code>AGENTS.md</code> file (20KB) receives a new appendix
+section titled "Verifier Agent Roles and Decision Trees." This section
+defines three agent roles. The Discovery Agent is responsible for
+monitoring the 3-tier discovery system, reviewing discovery logs in
+<code>internal/verifier/discovery/</code>, and triggering manual
+discovery via the API when automated refresh fails. Its decision tree:
+on <code>ModelDiscoveryFailed</code> event, check provider API key
+validity → if valid, check provider health endpoint → if healthy, retry
+discovery → if still failing, log incident and proceed with cached
+models. The Verification Agent executes the 8-step pipeline, reviews
+step results, and investigates failures. Its decision tree: on
+<code>VerificationStepFailed</code> event, identify failed step → if
+critical step, block model and alert → if non-critical, log warning and
+continue → always publish results. The Scoring Agent monitors score
+trends, investigates drops, and recommends weight adjustments. Its
+decision tree: on <code>ScoreBelowThreshold</code> event, check recency
+(is score stale?) → if stale, trigger recalculation → if fresh, check
+component breakdown → identify declining component → recommend action
+(retire model, adjust weights, or escalate). Context window constraints
+are specified: each agent receives at most 4,000 tokens of log context
+and must reference specific line numbers in source files when making
+recommendations.</p>
+<hr />
+<h2 id="92-submodule-documentation-propagation">9.2 Submodule
+Documentation Propagation</h2>
+<p>The HelixTranslate project maintains two Git submodules:
+<code>Challenges/</code> (at commit <code>3937f06</code>) and
+<code>Containers/</code> (at commit <code>f572d26</code>). Both
+submodules require their own <code>CONSTITUTION.md</code>,
+<code>CLAUDE.md</code>, and <code>AGENTS.md</code> updates. The
+LLMsVerifier repository itself (checked out at
+<code>./LLMsVerifier/</code>) is treated as a third submodule for
+documentation purposes.</p>
+<h3 id="921-submodule-documentation-checklist">9.2.1 Submodule
+Documentation Checklist</h3>
+<p>Table 9.2 enumerates the documentation requirements for each
+submodule. Every cell must carry a commit hash and timestamp at
+completion.</p>
+<p><strong>Table 9.2: Submodule Documentation Completeness
+Matrix</strong></p>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Challenges Submodule</th>
+<th>Containers Submodule</th>
+<th>LLMsVerifier Submodule</th>
+<th>Completion Gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CONSTITUTION.md</code></td>
+<td>Must add test integrity rules (T01–T04), anti-bluff mandates, and
+challenge authoring guidelines specific to translation evaluation</td>
+<td>Must add container build rules, base image pinning rules, and
+security scanning rules</td>
+<td>Must update existing constitution with HelixTranslate integration
+rules (S01–S08, V01–V08)</td>
+<td>Signed commit on main branch</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td>Must append challenge system context: how to add challenges, how to
+run the challenge runner, expected pass criteria format</td>
+<td>Must append container build context: multi-stage build rules,
+dependency cache optimization, base image selection</td>
+<td>Must append integration context: how HelixTranslate consumes
+LLMsVerifier APIs, key exported functions, module boundary rules</td>
+<td>PR merged; code review passed</td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>Must define Challenge Author Agent role with decision tree for
+authoring new translation-quality challenges</td>
+<td>Must define Build Agent role for container build and release
+decisions</td>
+<td>Must define Provider Integration Agent role for adding new provider
+backends</td>
+<td>AI agent smoke test passed</td>
+</tr>
+<tr>
+<td>Submodule references in main project</td>
+<td><code>.gitmodules</code> entry verified</td>
+<td><code>.gitmodules</code> entry verified</td>
+<td><code>go.mod</code> replace directive verified</td>
+<td><code>git submodule status</code> returns clean</td>
+</tr>
+</tbody>
+</table>
+<h3 id="922-write-challenges-submodule-constitutionmd">9.2.2 Write
+Challenges Submodule <code>CONSTITUTION.md</code></h3>
+<p>The Challenges submodule <code>CONSTITUTION.md</code> focuses on test
+integrity. Rule TC01 mandates that every challenge must define an
+unambiguous pass criterion expressed as a deterministic check against
+expected output, never as a subjective quality assessment. Rule TC02
+prohibits challenges that rely on external network state; each challenge
+must declare its infrastructure dependencies in a
+<code>REQUIREMENTS</code> block. Rule TC03 requires that adding,
+removing, or modifying any challenge triggers a full re-verification of
+all 193+ challenges against a reference model to detect regression in
+challenge validity. Rule TC04 mandates anti-bluff design: no challenge
+may pass against a hardcoded response or a model that is known to be
+non-functional.</p>
+<h3 id="923-write-llmsverifier-submodule-documentation-updates">9.2.3
+Write LLMsVerifier Submodule Documentation Updates</h3>
+<p>The LLMsVerifier repository receives two documentation updates. In
+<code>CLAUDE.md</code>, a new section titled "HelixTranslate Integration
+Context" documents the module boundary:
+<code>digital.vasic.llmsverifier</code> exports a public API surface
+consumed by <code>digital.vasic.translator</code> through the adapter in
+<code>internal/providers/llmsverifier/adapter.go</code>. Key exported
+types are listed: <code>llmverifier.Client</code>,
+<code>llmverifier.CompletionRequest</code>,
+<code>llmverifier.CompletionResponse</code>,
+<code>scoring.ScoringEngine</code>,
+<code>scoring.ComprehensiveScore</code>, <code>discovery.Service</code>,
+and <code>verification.Verifier</code>. In <code>AGENTS.md</code>, a
+Provider Integration Agent role is defined with the decision tree: on
+request to add provider N+1, check if provider implements
+OpenAI-compatible API → if yes, create adapter using existing OpenAI
+client pattern → if no, implement native provider in
+<code>providers/</code> directory → run 8-step verification → add to
+static registry → update documentation.</p>
+<h3 id="924-documentation-update-checklist-script">9.2.4 Documentation
+Update Checklist Script</h3>
+<p>A validation script ensures all submodule documentation files remain
+in sync with the main project. The script checks file existence, minimum
+line counts, reference cross-links, and timestamp freshness. Code block
+9.1 shows the complete validation script.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># scripts/validate-documentation.sh</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Validates that all CONSTITUTION.md, CLAUDE.md, and AGENTS.md files</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># are present and cross-referenced across main project and submodules.</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="va">REQUIRED_FILES</span><span class="op">=</span><span class="va">(</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;internal/verifier/CONSTITUTION.md&quot;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;CLAUDE.md&quot;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;AGENTS.md&quot;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Challenges/CONSTITUTION.md&quot;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Challenges/CLAUDE.md&quot;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Challenges/AGENTS.md&quot;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Containers/CLAUDE.md&quot;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Containers/AGENTS.md&quot;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;LLMsVerifier/CLAUDE.md&quot;</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;LLMsVerifier/AGENTS.md&quot;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="va">)</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="va">MIN_LINES</span><span class="op">=</span><span class="va">(</span>150 200 300 100 150 200 80 120 200 200<span class="va">)</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="va">ERRORS</span><span class="op">=</span>0</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="st">&quot;</span><span class="va">${</span><span class="op">!</span><span class="va">REQUIRED_FILES</span><span class="op">[@]</span><span class="va">}</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="va">FILE</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${REQUIRED_FILES</span><span class="op">[</span><span class="va">$i</span><span class="op">]</span><span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="va">MIN</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${MIN_LINES</span><span class="op">[</span><span class="va">$i</span><span class="op">]</span><span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">[[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">$FILE</span><span class="st">&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;ERROR: Missing required file: </span><span class="va">$FILE</span><span class="st">&quot;</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="va">ERRORS</span><span class="op">=</span><span class="va">$((ERRORS</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="cf">elif</span> <span class="kw">[[</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">wc</span> <span class="at">-l</span> <span class="op">&lt;</span> <span class="st">&quot;</span><span class="va">$FILE</span><span class="st">&quot;</span><span class="va">)</span><span class="st">&quot;</span> <span class="ot">-lt</span> <span class="st">&quot;</span><span class="va">$MIN</span><span class="st">&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;ERROR: </span><span class="va">$FILE</span><span class="st"> has fewer than </span><span class="va">$MIN</span><span class="st"> lines&quot;</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="va">ERRORS</span><span class="op">=</span><span class="va">$((ERRORS</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;OK: </span><span class="va">$FILE</span><span class="st"> (</span><span class="va">$(</span><span class="fu">wc</span> <span class="at">-l</span> <span class="op">&lt;</span> <span class="st">&quot;</span><span class="va">$FILE</span><span class="st">&quot;</span><span class="va">)</span><span class="st"> lines)&quot;</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify cross-references</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="ot">! </span><span class="fu">grep</span> <span class="at">-q</span> <span class="st">&quot;LLMsVerifier&quot;</span> CLAUDE.md<span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;ERROR: CLAUDE.md missing LLMsVerifier section&quot;</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="va">ERRORS</span><span class="op">=</span><span class="va">$((ERRORS</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="ot">! </span><span class="fu">grep</span> <span class="at">-q</span> <span class="st">&quot;internal/verifier/CONSTITUTION.md&quot;</span> AGENTS.md<span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;ERROR: AGENTS.md missing verifier constitution reference&quot;</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="va">ERRORS</span><span class="op">=</span><span class="va">$((ERRORS</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="va">$ERRORS</span> <span class="ot">-gt</span> 0 <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;Documentation validation FAILED with </span><span class="va">$ERRORS</span><span class="st"> error(s)&quot;</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>  <span class="bu">exit</span> 1</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Documentation validation PASSED&quot;</span></span></code></pre></div>
+<hr />
+<h2 id="93-user-facing-documentation">9.3 User-Facing Documentation</h2>
+<p>User-facing documentation explains how the LLMsVerifier integration
+affects translation workflows, what verified models mean, how to
+interpret scores, and how to diagnose common issues.</p>
+<h3 id="931-write-docsllmsverifier-integrationmd">9.3.1 Write
+<code>docs/llmsverifier-integration.md</code></h3>
+<p>The file <code>docs/llmsverifier-integration.md</code> provides a
+high-level overview for end users. It explains that verified models are
+those that have passed all eight steps of the verification pipeline:
+existence confirmation, API connectivity, authentication validation,
+basic completion, capability detection, translation quality assessment,
+latency benchmarking, and error handling verification. It describes how
+each model receives a composite score from 0.0 to 10.0, computed from
+five weighted components (response speed 25%, cost effectiveness 25%,
+model efficiency 20%, capability 20%, recency 10%). It documents the
+model selection UX: when a user initiates a translation, only verified
+models with scores above their tier threshold appear in the provider
+selection list. Unverified models are hidden by default and require
+explicit <code>show_unverified=true</code> query parameter to appear, at
+which point they display a warning badge. Score badges use a color
+scheme: excellent (9.0–10.0, green), very good (7.5–8.9, blue), good
+(6.0–7.4, yellow), fair (4.0–5.9, orange), poor (below 4.0, red). The
+filtering system allows users to filter by provider, minimum score,
+capability tag (e.g., <code>long-context</code>, <code>json-mode</code>,
+<code>streaming</code>), and cost tier.</p>
+<h3 id="932-environment-variables-reference">9.3.2 Environment Variables
+Reference</h3>
+<p>Every environment variable introduced or consumed by the LLMsVerifier
+integration appears in Table 9.3. This table is the single source of
+truth for operational configuration.</p>
+<p><strong>Table 9.3: Complete Environment Variables Reference (33+
+Variables)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+<th>Description</th>
+<th>Example Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LLMSVERIFIER_ENABLED</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>No</td>
+<td>Master enable switch for the LLMsVerifier subsystem</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_API_URL</code></td>
+<td>string</td>
+<td><code>http://localhost:8080</code></td>
+<td>Yes</td>
+<td>Base URL of the LLMsVerifier service</td>
+<td><code>https://verifier.internal:8443</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes</td>
+<td>API key for authenticating with LLMsVerifier</td>
+<td><code>lv_live_abc123…</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_DB_PATH</code></td>
+<td>string</td>
+<td><code>./data/verifier.db</code></td>
+<td>No</td>
+<td>SQLite database path for local score caching</td>
+<td><code>/var/lib/helix/verifier.db</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_CACHE_TTL</code></td>
+<td>duration</td>
+<td><code>1h</code></td>
+<td>No</td>
+<td>Time-to-live for cached scores before recalculation</td>
+<td><code>30m</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_VERIFICATION_ENABLED</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>No</td>
+<td>Enable the 8-step verification pipeline</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_SCORING_ENABLED</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>No</td>
+<td>Enable 5-component score calculation</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_DISCOVERY_ENABLED</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>No</td>
+<td>Enable 3-tier model discovery</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_MAX_CONCURRENT</code></td>
+<td>int</td>
+<td><code>5</code></td>
+<td>No</td>
+<td>Maximum concurrent verification tests</td>
+<td><code>3</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_TIMEOUT</code></td>
+<td>duration</td>
+<td><code>30s</code></td>
+<td>No</td>
+<td>Per-step verification timeout</td>
+<td><code>60s</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_WEIGHT_SPEED</code></td>
+<td>float</td>
+<td><code>0.25</code></td>
+<td>No</td>
+<td>Scoring weight: response speed</td>
+<td><code>0.20</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_WEIGHT_COST</code></td>
+<td>float</td>
+<td><code>0.25</code></td>
+<td>No</td>
+<td>Scoring weight: cost effectiveness</td>
+<td><code>0.30</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_WEIGHT_EFFICIENCY</code></td>
+<td>float</td>
+<td><code>0.20</code></td>
+<td>No</td>
+<td>Scoring weight: model efficiency</td>
+<td><code>0.20</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_WEIGHT_CAPABILITY</code></td>
+<td>float</td>
+<td><code>0.20</code></td>
+<td>No</td>
+<td>Scoring weight: capability</td>
+<td><code>0.20</code></td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_WEIGHT_RECENCY</code></td>
+<td>float</td>
+<td><code>0.10</code></td>
+<td>No</td>
+<td>Scoring weight: recency</td>
+<td><code>0.10</code></td>
+</tr>
+<tr>
+<td><code>OPENAI_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using OpenAI)</td>
+<td>OpenAI API authentication key</td>
+<td><code>sk-proj-…</code></td>
+</tr>
+<tr>
+<td><code>ANTHROPIC_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Anthropic)</td>
+<td>Anthropic API authentication key</td>
+<td><code>sk-ant-…</code></td>
+</tr>
+<tr>
+<td><code>DEEPSEEK_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using DeepSeek)</td>
+<td>DeepSeek API authentication key</td>
+<td><code>sk-ds-…</code></td>
+</tr>
+<tr>
+<td><code>GROQ_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Groq)</td>
+<td>Groq API authentication key</td>
+<td><code>gsk_…</code></td>
+</tr>
+<tr>
+<td><code>MISTRAL_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Mistral)</td>
+<td>Mistral API authentication key</td>
+<td><code>…</code></td>
+</tr>
+<tr>
+<td><code>COHERE_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Cohere)</td>
+<td>Cohere API authentication key</td>
+<td><code>…</code></td>
+</tr>
+<tr>
+<td><code>XAI_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using xAI)</td>
+<td>xAI API authentication key</td>
+<td><code>…</code></td>
+</tr>
+<tr>
+<td><code>TOGETHER_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Together)</td>
+<td>Together AI API key</td>
+<td><code>…</code></td>
+</tr>
+<tr>
+<td><code>OPENROUTER_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using OpenRouter)</td>
+<td>OpenRouter API key</td>
+<td><code>sk-or-…</code></td>
+</tr>
+<tr>
+<td><code>CLOUDFLARE_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Cloudflare)</td>
+<td>Cloudflare AI API key</td>
+<td><code>…</code></td>
+</tr>
+<tr>
+<td><code>SAMBANOVA_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using SambaNova)</td>
+<td>SambaNova API key</td>
+<td><code>…</code></td>
+</tr>
+<tr>
+<td><code>NOVITA_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Novita)</td>
+<td>Novita API key</td>
+<td><code>…</code></td>
+</tr>
+<tr>
+<td><code>MOONSHOT_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Moonshot)</td>
+<td>Moonshot API key</td>
+<td><code>…</code></td>
+</tr>
+<tr>
+<td><code>QWEN_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Qwen)</td>
+<td>Qwen API authentication key</td>
+<td><code>sk-…</code></td>
+</tr>
+<tr>
+<td><code>REPLICATE_API_TOKEN</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Replicate)</td>
+<td>Replicate API token</td>
+<td><code>r8_…</code></td>
+</tr>
+<tr>
+<td><code>HYPERBOLIC_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Hyperbolic)</td>
+<td>Hyperbolic API key</td>
+<td><code>…</code></td>
+</tr>
+<tr>
+<td><code>CEREBRAS_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Cerebras)</td>
+<td>Cerebras API key</td>
+<td><code>…</code></td>
+</tr>
+<tr>
+<td><code>SILICONFLOW_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using SiliconFlow)</td>
+<td>SiliconFlow API key</td>
+<td><code>…</code></td>
+</tr>
+<tr>
+<td><code>FIREWORKS_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Fireworks)</td>
+<td>Fireworks AI API key</td>
+<td><code>…</code></td>
+</tr>
+<tr>
+<td><code>PERPLEXITY_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Perplexity)</td>
+<td>Perplexity API key</td>
+<td><code>pplx-…</code></td>
+</tr>
+<tr>
+<td><code>AI21_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using AI21)</td>
+<td>AI21 Studio API key</td>
+<td><code>…</code></td>
+</tr>
+<tr>
+<td><code>ZHIPU_API_KEY</code></td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Yes (if using Zhipu)</td>
+<td>Zhipu API authentication key</td>
+<td><code>…</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="933-document-model-selection-ux">9.3.3 Document Model Selection
+UX</h3>
+<p>The model selection user experience follows a gatekeeping pattern.
+When a user opens the provider selection interface, the system queries
+<code>internal/verifier/discovery/registry.go</code> for all models
+where <code>verification_status = 'verified'</code> and
+<code>composite_score &gt;= tier_threshold</code>. Models failing either
+condition are excluded from the default list. Each displayed model shows
+its name, provider, composite score badge (color-coded per range from
+Section 9.3.1), capability tags (chips for <code>streaming</code>,
+<code>json-mode</code>, <code>long-context</code>,
+<code>function-calling</code>), and cost tier indicator (premium,
+standard, budget). Users may apply filters: provider multi-select,
+minimum score slider (0–10), capability tag toggle, and cost tier
+multi-select. The sort default is composite score descending;
+alternatives are latency ascending, cost per token ascending, and
+recency descending. Users may override the gatekeeper by enabling "Show
+All Models" in advanced settings, which reveals unverified models with a
+red warning badge and requires explicit confirmation before use.</p>
+<h3 id="934-write-docstroubleshootingmd">9.3.4 Write
+<code>docs/troubleshooting.md</code></h3>
+<p>The troubleshooting guide covers ten common issues. Issue 1: "Model
+does not appear in selection list" — diagnosis: check verification
+status via <code>GET /api/v1/models/{id}</code>, check composite score
+against tier threshold, check discovery logs; resolution: trigger manual
+discovery or lower the minimum score filter. Issue 2: "Model score
+dropped unexpectedly" — diagnosis: check
+<code>internal/verifier/scoring/history.go</code> for trend data, review
+recency penalty application, check if provider pricing changed;
+resolution: force score recalculation via
+<code>POST /api/v1/score/calculate</code> or temporarily reduce weight
+on the declining component. Issue 3: "Discovery service returns no
+models for a provider" — diagnosis: check provider API key validity,
+check provider health endpoint response, review
+<code>discovery_service.go</code> logs for timeout or HTTP error;
+resolution: renew API key, increase provider timeout, or fall back to
+static registry. Issue 4: "API key reported as invalid" — diagnosis:
+verify key format matches provider expectations, check key has not
+expired, confirm key has required scopes; resolution: regenerate key in
+provider console, update environment variable, restart HelixTranslate.
+Issue 5: "Verification pipeline times out consistently" — diagnosis:
+check <code>LLMSVERIFIER_TIMEOUT</code> value against provider latency,
+check network path to provider, review per-step timing in pipeline logs;
+resolution: increase timeout, enable provider retry, or skip
+non-critical steps. Issue 6: "Score badge shows 0.0 for a known-good
+model" — diagnosis: check if capability component is 0.0 due to
+insufficient challenge passes (&lt; 193), check scoring engine error
+logs; resolution: re-run challenges or reduce minimum challenge
+threshold in development. Issue 7: "SQLite database locked errors" —
+diagnosis: check concurrent access from multiple HelixTranslate
+instances, review <code>MaxConcurrentTests</code> setting; resolution:
+use PostgreSQL backend for shared state, reduce concurrency, or
+implement connection pooling. Issue 8: "Translation uses unverified
+model despite gatekeeper enabled" — diagnosis: check if user override
+was activated, verify gatekeeper is not bypassed in API path;
+resolution: disable user override in config, add middleware check. Issue
+9: "Event bus missing verifier events" — diagnosis: check
+<code>EventIntegrationConfig.Enabled</code>, verify event type
+subscriptions in <code>internal/verifier/event_subscriber.go</code>;
+resolution: enable event integration, restart subscriber. Issue 10:
+"High memory usage from score caching" — diagnosis: check cache size in
+<code>ScoreCache.entries</code>, review TTL settings; resolution: reduce
+<code>LLMSVERIFIER_CACHE_TTL</code>, enable cache size limits, or switch
+to Redis-backed cache.</p>
+<hr />
+<h2 id="94-operational-runbook">9.4 Operational Runbook</h2>
+<p>The operational runbook defines standard operating procedures for the
+four most common incident types. Each procedure follows
+detect-diagnose-remediate-verify pattern.</p>
+<h3 id="941-monitoring-metrics-dashboard">9.4.1 Monitoring Metrics
+Dashboard</h3>
+<p>Table 9.4 defines the metrics that operators monitor, their
+PromQL-style query expressions, alert thresholds, severity levels, and
+runbook cross-references. In environments without Prometheus, equivalent
+queries against the SQLite metrics table in
+<code>internal/verifier/scoring/history.go</code> apply.</p>
+<p><strong>Table 9.4: Monitoring Metrics Dashboard</strong></p>
+<table>
+<thead>
+<tr>
+<th>Metric Name</th>
+<th>Query / Check</th>
+<th>Threshold</th>
+<th>Severity</th>
+<th>Runbook Link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>verifier_pipeline_failures_total</code></td>
+<td><code>SELECT COUNT(*) FROM verification_results WHERE passed = false AND created_at &gt; now() - interval '1 hour'</code></td>
+<td>&gt; 5 per hour</td>
+<td>P2 (High)</td>
+<td>Section 9.4.3</td>
+</tr>
+<tr>
+<td><code>model_score_drop_percent</code></td>
+<td><code>SELECT (prev_score - curr_score) / prev_score * 100 FROM score_history WHERE model_id = $1 ORDER BY timestamp DESC LIMIT 2</code></td>
+<td>&gt; 10% within 1 hour</td>
+<td>P1 (Critical)</td>
+<td>Section 9.4.3</td>
+</tr>
+<tr>
+<td><code>discovery_service_unavailable</code></td>
+<td><code>SELECT COUNT(*) FROM discovery_runs WHERE status = 'failed' AND provider = $1 AND created_at &gt; now() - interval '30 minutes'</code></td>
+<td>&gt; 3 consecutive failures</td>
+<td>P2 (High)</td>
+<td>Section 9.4.4</td>
+</tr>
+<tr>
+<td><code>gatekeeper_denial_rate</code></td>
+<td><code>SELECT COUNT(*) FROM gatekeeper_decisions WHERE allowed = false AND created_at &gt; now() - interval '1 hour'</code>
+/ total requests</td>
+<td>&gt; 20% of requests</td>
+<td>P3 (Medium)</td>
+<td>Section 9.3.4 Issue 8</td>
+</tr>
+<tr>
+<td><code>verifier_api_latency_p95</code></td>
+<td><code>SELECT percentile_cont(0.95) WITHIN GROUP (ORDER BY duration_ms) FROM api_calls WHERE endpoint LIKE '/api/v1/verify%' AND created_at &gt; now() - interval '5 minutes'</code></td>
+<td>&gt; 5000ms</td>
+<td>P2 (High)</td>
+<td>Increase <code>MaxConcurrentTests</code> or scale verifier
+service</td>
+</tr>
+<tr>
+<td><code>sqlite_db_size_bytes</code></td>
+<td><code>stat -c%s /data/verifier.db</code></td>
+<td>&gt; 1GB</td>
+<td>P3 (Medium)</td>
+<td>Run compaction, archive old scores</td>
+</tr>
+<tr>
+<td><code>challenge_pass_rate</code></td>
+<td><code>SELECT passed_count / total_count * 100 FROM challenge_runs WHERE model_id = $1 AND created_at &gt; now() - interval '24 hours'</code></td>
+<td>&lt; 80% for any verified model</td>
+<td>P2 (High)</td>
+<td>Re-run verification pipeline</td>
+</tr>
+<tr>
+<td><code>provider_api_error_rate</code></td>
+<td><code>SELECT COUNT(*) FROM provider_calls WHERE status &gt;= 500 AND created_at &gt; now() - interval '5 minutes'</code>
+/ total calls</td>
+<td>&gt; 5%</td>
+<td>P3 (Medium)</td>
+<td>Check provider status page, switch provider</td>
+</tr>
+<tr>
+<td><code>score_cache_hit_rate</code></td>
+<td><code>cache_hits / (cache_hits + cache_misses)</code></td>
+<td>&lt; 50%</td>
+<td>P4 (Low)</td>
+<td>Review TTL, increase cache size</td>
+</tr>
+<tr>
+<td><code>rollback_activation_time_ms</code></td>
+<td>Time from <code>LLMSVERIFIER_ENABLED=false</code> to last verified
+model request</td>
+<td>&gt; 30000ms</td>
+<td>P1 (Critical)</td>
+<td>Section 9.6.3</td>
+</tr>
+</tbody>
+</table>
+<h3 id="942-key-log-patterns">9.4.2 Key Log Patterns</h3>
+<p>Operators grep for five log patterns during incident diagnosis.
+Pattern 1 — successful verification:
+<code>msg="verification pipeline passed" model_id="&lt;id&gt;" steps_passed=8/8 duration_ms=&lt;n&gt;</code>
+appears at <code>INFO</code> level in
+<code>internal/verifier/pipeline.go</code> when all eight steps
+complete. Pattern 2 — score change:
+<code>msg="model score updated" model_id="&lt;id&gt;" previous=&lt;old&gt; current=&lt;new&gt; delta=&lt;delta&gt;</code>
+appears at <code>INFO</code> level in
+<code>internal/verifier/scoring/composite.go</code> whenever a score
+recalculation produces a different composite value. Pattern 3 — model
+retirement:
+<code>msg="model retired from registry" model_id="&lt;id&gt;" reason="score_below_threshold" score=&lt;score&gt; threshold=&lt;threshold&gt;</code>
+appears at <code>WARN</code> level in
+<code>internal/verifier/discovery/gatekeeper.go</code> when a model's
+score drops below its tier threshold for more than the grace period.
+Pattern 4 — discovery failure:
+<code>msg="discovery failed for provider" provider="&lt;name&gt;" error="&lt;message&gt;" consecutive_failures=&lt;n&gt;</code>
+appears at <code>ERROR</code> level in
+<code>internal/verifier/discovery/service.go</code>; three consecutive
+occurrences trigger the fallback to static registry. Pattern 5 —
+gatekeeping denial:
+<code>msg="gatekeeper denied model access" model_id="&lt;id&gt;" reason="&lt;verification_failed|score_below_threshold|provider_unhealthy&gt;"</code>
+appears at <code>WARN</code> level in
+<code>internal/verifier/discovery/gatekeeper.go</code>.</p>
+<h3 id="943-runbook-model-score-dropped-below-threshold">9.4.3 Runbook:
+Model Score Dropped Below Threshold</h3>
+<p><strong>Detection</strong>: The <code>model_score_drop_percent</code>
+alert fires when any verified model's composite score drops by more than
+10% within one hour, or the
+<code>verifier_pipeline_failures_total</code> alert fires when more than
+five pipelines fail in one hour. Both alerts route to the on-call
+engineer via PagerDuty with severity P1.</p>
+<p><strong>Diagnosis</strong>: The on-call engineer runs three queries
+in sequence. First, fetch the component-level breakdown:
+<code>SELECT component, score FROM score_components WHERE model_id = $1 ORDER BY calculated_at DESC LIMIT 5</code>
+to identify which component (speed, cost, efficiency, capability,
+recency) drove the drop. Second, check the model's recent challenge
+results:
+<code>SELECT challenge_id, passed FROM challenge_results WHERE model_id = $1 AND created_at &gt; now() - interval '24 hours'</code>
+to determine if a provider-side degradation affected capability scores.
+Third, review provider health:
+<code>SELECT status, latency_ms FROM provider_health WHERE provider = $1 ORDER BY checked_at DESC LIMIT 10</code>
+to confirm the provider API is responsive.</p>
+<p><strong>Remediation</strong>: If the score drop is due to stale data
+(score older than cache TTL), trigger a forced recalculation via
+<code>POST /api/v1/score/calculate</code> with the model ID. If the drop
+reflects genuine provider degradation and the model is non-critical,
+allow the gatekeeper to retire it automatically by waiting for the grace
+period (default 15 minutes). If the model is critical for production
+workloads, temporarily lower the minimum score threshold via
+<code>LLMSVERIFIER_MIN_SCORE</code> environment variable (requires
+service restart) while the provider resolves the issue. Document all
+actions in the incident log.</p>
+<h3 id="944-runbook-discovery-service-failure">9.4.4 Runbook: Discovery
+Service Failure</h3>
+<p><strong>Detection</strong>: The
+<code>discovery_service_unavailable</code> alert fires when a provider's
+discovery endpoint fails three or more consecutive times within 30
+minutes. The alert includes the provider name and last error
+message.</p>
+<p><strong>Diagnosis</strong>: Check provider API key validity by
+running a direct curl to the provider's model list endpoint with the
+stored key. If the key is valid, check the provider's public status
+page. Review <code>internal/verifier/discovery/service.go</code> logs
+for the specific HTTP status code and response body from the failed
+discovery call.</p>
+<p><strong>Remediation — Automatic Fallback</strong>: The discovery
+service automatically falls back to the static registry for the affected
+provider. Models from the last successful discovery remain available but
+are marked with <code>source_tier = 'static'</code>. No operator action
+is required for fallback activation.</p>
+<p><strong>Remediation — Manual Model Registration</strong>: If the
+provider failure is prolonged and critical models are needed, register
+models manually via <code>POST /api/v1/models/register</code> with a
+JSON payload containing <code>model_id</code>, <code>provider</code>,
+<code>name</code>, <code>context_window</code>, and
+<code>capabilities</code>. Manually registered models receive a
+provisional score of 5.0 and are tagged with
+<code>registration_type = 'manual'</code>.</p>
+<h3 id="945-runbook-new-provider-onboarding">9.4.5 Runbook: New Provider
+Onboarding</h3>
+<p>Adding provider 26+ to the verified pipeline follows a 10-step
+procedure. Step 1: Obtain API credentials and add the
+<code>{PROVIDER}_API_KEY</code> environment variable to the deployment
+configuration. Step 2: Add provider metadata to the static registry in
+<code>internal/verifier/discovery/registry.go</code> including known
+model IDs, context windows, and endpoint URLs. Step 3: Implement the
+provider adapter in <code>internal/providers/llmsverifier/</code>
+following the OpenAI-compatible pattern if applicable, or create a
+native implementation. Step 4: Add the provider to the discovery service
+configuration in <code>configs/verifier.yaml</code> under
+<code>providers_to_discover</code>. Step 5: Deploy to the staging
+environment and trigger manual discovery via
+<code>POST /api/v1/models/discover</code>. Step 6: Run the 8-step
+verification pipeline against each discovered model. Step 7: Verify that
+all models score above the minimum threshold for their tier; if not,
+investigate failing components. Step 8: Add provider-specific challenges
+to the Challenges submodule if the provider introduces novel
+capabilities. Step 9: Update user-facing documentation in
+<code>docs/llmsverifier-integration.md</code> with the new provider's
+name, supported models, and pricing tier. Step 10: Enable the provider
+in production via feature flag and monitor for 24 hours before declaring
+onboarding complete.</p>
+<hr />
+<h2 id="95-deployment-configuration">9.5 Deployment Configuration</h2>
+<p>The LLMsVerifier service deploys as a sidecar to the main
+HelixTranslate application, communicating over HTTP on port 8080 with an
+SQLite database persisted to a Docker volume.</p>
+<h3 id="951-docker-compose-service-definition">9.5.1 Docker Compose
+Service Definition</h3>
+<p>The <code>docker-compose.yml</code> file at the project root receives
+a new <code>llms-verifier</code> service. This service uses the
+<code>helix-translate/llms-verifier:latest</code> image built from the
+<code>./LLMsVerifier/</code> directory, exposes port 8080, mounts a
+named volume <code>verifier-data</code> to <code>/data</code> for SQLite
+persistence, connects to the existing <code>helix-network</code> bridge
+network, and defines a health check endpoint. Resource limits of 2 CPU
+cores and 2GB memory apply for production; these are overridden per
+environment in Section 9.5.4.</p>
+<h3 id="952-docker-compose-verifier-service">9.5.2 Docker Compose
+Verifier Service</h3>
+<p>Code block 9.2 shows the complete verifier service definition for
+<code>docker-compose.yml</code>.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">llms-verifier</span><span class="kw">:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> helix-translate/llms-verifier:latest</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">build</span><span class="kw">:</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">context</span><span class="kw">:</span><span class="at"> ./LLMsVerifier</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dockerfile</span><span class="kw">:</span><span class="at"> Dockerfile</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">container_name</span><span class="kw">:</span><span class="at"> helix-llms-verifier</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;8080:8080&quot;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> verifier-data:/data</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">networks</span><span class="kw">:</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> helix-network</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> DB_PATH=/data/verifier.db</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> API_PORT=8080</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> LOG_LEVEL=info</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> LLMSVERIFIER_API_KEY=${LLMSVERIFIER_API_KEY}</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> OPENAI_API_KEY=${OPENAI_API_KEY}</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> GROQ_API_KEY=${GROQ_API_KEY}</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> MISTRAL_API_KEY=${MISTRAL_API_KEY}</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> COHERE_API_KEY=${COHERE_API_KEY}</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> XAI_API_KEY=${XAI_API_KEY}</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> TOGETHER_API_KEY=${TOGETHER_API_KEY}</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> SAMBANOVA_API_KEY=${SAMBANOVA_API_KEY}</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> NOVITA_API_KEY=${NOVITA_API_KEY}</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> QWEN_API_KEY=${QWEN_API_KEY}</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN}</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> HYPERBOLIC_API_KEY=${HYPERBOLIC_API_KEY}</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> CEREBRAS_API_KEY=${CEREBRAS_API_KEY}</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> SILICONFLOW_API_KEY=${SILICONFLOW_API_KEY}</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> FIREWORKS_API_KEY=${FIREWORKS_API_KEY}</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> PERPLEXITY_API_KEY=${PERPLEXITY_API_KEY}</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> AI21_API_KEY=${AI21_API_KEY}</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ZHIPU_API_KEY=${ZHIPU_API_KEY}</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">healthcheck</span><span class="kw">:</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">test</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;CMD&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;wget&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;-q&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;--spider&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;http://localhost:8080/health&quot;</span><span class="kw">]</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 10s</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">start_period</span><span class="kw">:</span><span class="at"> 15s</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">deploy</span><span class="kw">:</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">resources</span><span class="kw">:</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">limits</span><span class="kw">:</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">cpus</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;2&#39;</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">memory</span><span class="kw">:</span><span class="at"> 2G</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">reservations</span><span class="kw">:</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">cpus</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;1&#39;</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">memory</span><span class="kw">:</span><span class="at"> 512M</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">restart</span><span class="kw">:</span><span class="at"> unless-stopped</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">depends_on</span><span class="kw">:</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> api-server</span></span></code></pre></div>
+<p>The named volume <code>verifier-data</code> must be added to the
+volumes section at the bottom of <code>docker-compose.yml</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">verifier-data</span><span class="kw">:</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">driver</span><span class="kw">:</span><span class="at"> local</span></span></code></pre></div>
+<h3 id="953-kubernetes-manifests">9.5.3 Kubernetes Manifests</h3>
+<p>Three Kubernetes manifests deploy the verifier service in production.
+The <code>verifier-deployment.yaml</code> defines a Deployment with two
+replicas for high availability, liveness and readiness probes against
+<code>/health</code>, pod anti-affinity to spread replicas across nodes,
+and resource requests/limits. The <code>verifier-service.yaml</code>
+exposes the deployment as a ClusterIP service on port 8080. The
+<code>verifier-configmap.yaml</code> holds non-sensitive configuration:
+<code>API_PORT</code>, <code>LOG_LEVEL</code>, <code>DB_PATH</code>,
+scoring weights, discovery intervals, and verification timeouts. API
+keys are injected via a Kubernetes Secret named
+<code>llmsverifier-api-keys</code> mounted as environment variables from
+the deployment's <code>envFrom</code> directive.</p>
+<p>Code block 9.3 shows the complete
+<code>verifier-deployment.yaml</code> manifest.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apiVersion</span><span class="kw">:</span><span class="at"> apps/v1</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">kind</span><span class="kw">:</span><span class="at"> Deployment</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">metadata</span><span class="kw">:</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">name</span><span class="kw">:</span><span class="at"> llms-verifier</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">namespace</span><span class="kw">:</span><span class="at"> helix-translate</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">labels</span><span class="kw">:</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">app</span><span class="kw">:</span><span class="at"> llms-verifier</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">component</span><span class="kw">:</span><span class="at"> verification</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">spec</span><span class="kw">:</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">replicas</span><span class="kw">:</span><span class="at"> </span><span class="dv">2</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">selector</span><span class="kw">:</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">matchLabels</span><span class="kw">:</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">app</span><span class="kw">:</span><span class="at"> llms-verifier</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">template</span><span class="kw">:</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">metadata</span><span class="kw">:</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">labels</span><span class="kw">:</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">app</span><span class="kw">:</span><span class="at"> llms-verifier</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">component</span><span class="kw">:</span><span class="at"> verification</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">spec</span><span class="kw">:</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">affinity</span><span class="kw">:</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">podAntiAffinity</span><span class="kw">:</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">preferredDuringSchedulingIgnoredDuringExecution</span><span class="kw">:</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="kw">-</span><span class="at"> </span><span class="fu">weight</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">podAffinityTerm</span><span class="kw">:</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="at">                </span><span class="fu">labelSelector</span><span class="kw">:</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="at">                  </span><span class="fu">matchExpressions</span><span class="kw">:</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="at">                    </span><span class="kw">-</span><span class="at"> </span><span class="fu">key</span><span class="kw">:</span><span class="at"> app</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="at">                      </span><span class="fu">operator</span><span class="kw">:</span><span class="at"> In</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="at">                      </span><span class="fu">values</span><span class="kw">:</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="at">                        </span><span class="kw">-</span><span class="at"> llms-verifier</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="at">                </span><span class="fu">topologyKey</span><span class="kw">:</span><span class="at"> kubernetes.io/hostname</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">containers</span><span class="kw">:</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> verifier</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">image</span><span class="kw">:</span><span class="at"> helix-translate/llms-verifier:latest</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="kw">-</span><span class="at"> </span><span class="fu">containerPort</span><span class="kw">:</span><span class="at"> </span><span class="dv">8080</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">name</span><span class="kw">:</span><span class="at"> http</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">envFrom</span><span class="kw">:</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="kw">-</span><span class="at"> </span><span class="fu">configMapRef</span><span class="kw">:</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="at">                </span><span class="fu">name</span><span class="kw">:</span><span class="at"> verifier-config</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="kw">-</span><span class="at"> </span><span class="fu">secretRef</span><span class="kw">:</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="at">                </span><span class="fu">name</span><span class="kw">:</span><span class="at"> llmsverifier-api-keys</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">volumeMounts</span><span class="kw">:</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> verifier-data</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">mountPath</span><span class="kw">:</span><span class="at"> /data</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">livenessProbe</span><span class="kw">:</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">httpGet</span><span class="kw">:</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /health</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="dv">8080</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">initialDelaySeconds</span><span class="kw">:</span><span class="at"> </span><span class="dv">15</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">periodSeconds</span><span class="kw">:</span><span class="at"> </span><span class="dv">30</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">timeoutSeconds</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">failureThreshold</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">readinessProbe</span><span class="kw">:</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">httpGet</span><span class="kw">:</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /health</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="dv">8080</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">initialDelaySeconds</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">periodSeconds</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">timeoutSeconds</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">failureThreshold</span><span class="kw">:</span><span class="at"> </span><span class="dv">2</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">resources</span><span class="kw">:</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">requests</span><span class="kw">:</span></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">cpu</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;1&quot;</span></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">memory</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;1Gi&quot;</span></span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">limits</span><span class="kw">:</span></span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">cpu</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;2&quot;</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">memory</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;2Gi&quot;</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> verifier-data</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">persistentVolumeClaim</span><span class="kw">:</span></span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">claimName</span><span class="kw">:</span><span class="at"> verifier-data-pvc</span></span></code></pre></div>
+<h3 id="954-resource-requirements-per-environment">9.5.4 Resource
+Requirements Per Environment</h3>
+<p>Table 9.5 specifies CPU, memory, storage, replica count, and
+high-availability configuration for each deployment environment.</p>
+<p><strong>Table 9.5: Resource Requirements Per Environment</strong></p>
+<table>
+<thead>
+<tr>
+<th>Environment</th>
+<th>CPU Request</th>
+<th>CPU Limit</th>
+<th>Memory Request</th>
+<th>Memory Limit</th>
+<th>Storage</th>
+<th>Replicas</th>
+<th>HA Config</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Development</td>
+<td>0.5</td>
+<td>1.0</td>
+<td>512MB</td>
+<td>1GB</td>
+<td>SQLite local file, 100MB</td>
+<td>1</td>
+<td>None</td>
+<td>Shares Docker network with api-server; hot-reload enabled</td>
+</tr>
+<tr>
+<td>Staging</td>
+<td>1.0</td>
+<td>2.0</td>
+<td>1GB</td>
+<td>2GB</td>
+<td>SQLite on PVC, 500MB</td>
+<td>1</td>
+<td>Single pod, daily backup</td>
+<td>Mirrors production config on reduced scale; full verification
+pipeline enabled</td>
+</tr>
+<tr>
+<td>Production</td>
+<td>2.0</td>
+<td>4.0</td>
+<td>2GB</td>
+<td>4GB</td>
+<td>SQLite on PVC (or PostgreSQL), 2GB</td>
+<td>2</td>
+<td>Pod anti-affinity across zones</td>
+<td>Persistent volume with snapshot backup; read replica for score
+queries</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="96-migration-and-rollback-plan">9.6 Migration and Rollback
+Plan</h2>
+<p>The migration from the legacy provider factory to the
+LLMsVerifier-backed pipeline uses a feature flag for gradual, reversible
+rollout.</p>
+<h3 id="961-migration-script">9.6.1 Migration Script</h3>
+<p>The <code>scripts/migrate-to-verifier.sh</code> script automates the
+rollout. It checks prerequisites (database connectivity, feature flag
+availability, verifier service health), runs the database migration to
+create <code>verified_models</code> and <code>score_history</code>
+tables, copies existing model configurations from
+<code>internal/config/</code> into the verifier registry with initial
+scores computed from default weights, and toggles the feature flag. Code
+block 9.4 shows the script.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># scripts/migrate-to-verifier.sh</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Gradual migration from legacy provider factory to LLMsVerifier-backed pipeline.</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="va">PHASE</span><span class="op">=</span><span class="va">${1</span><span class="op">:-</span><span class="st">&quot;canary&quot;</span><span class="va">}</span>  <span class="co"># canary | early-access | majority | full</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="va">DB_PATH</span><span class="op">=</span><span class="va">${DB_PATH</span><span class="op">:-</span><span class="st">&quot;./data/verifier.db&quot;</span><span class="va">}</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="va">API_URL</span><span class="op">=</span><span class="va">${LLMSVERIFIER_API_URL</span><span class="op">:-</span><span class="st">&quot;http://localhost:8080&quot;</span><span class="va">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="va">FEATURE_FLAG_KEY</span><span class="op">=</span><span class="st">&quot;use_verified_pipeline&quot;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== LLMsVerifier Migration: </span><span class="va">$PHASE</span><span class="st"> ===&quot;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Verify prerequisites</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[1/6] Checking prerequisites...&quot;</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="ot">! </span><span class="ex">curl</span> <span class="at">-sf</span> <span class="st">&quot;</span><span class="va">${API_URL}</span><span class="st">/health&quot;</span> <span class="op">&gt;</span> /dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;ERROR: LLMsVerifier health check failed at </span><span class="va">$API_URL</span><span class="st">&quot;</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="bu">exit</span> 1</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Run database migration</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[2/6] Running database migration...&quot;</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="ex">sqlite3</span> <span class="st">&quot;</span><span class="va">$DB_PATH</span><span class="st">&quot;</span> <span class="op">&lt;&lt; &#39;EOF&#39;</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="st">CREATE TABLE IF NOT EXISTS verified_models (</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="st">    model_id TEXT PRIMARY KEY,</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="st">    provider TEXT NOT NULL,</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="st">    name TEXT NOT NULL,</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="st">    verified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="st">    verification_status TEXT DEFAULT &#39;pending&#39;,</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="st">    composite_score REAL DEFAULT 0.0,</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="st">    component_speed REAL DEFAULT 0.0,</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="st">    component_cost REAL DEFAULT 0.0,</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="st">    component_efficiency REAL DEFAULT 0.0,</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="st">    component_capability REAL DEFAULT 0.0,</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="st">    component_recency REAL DEFAULT 0.0,</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a><span class="st">    tier TEXT DEFAULT &#39;standard&#39;,</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="st">    capabilities TEXT,</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a><span class="st">    source_tier TEXT DEFAULT &#39;static&#39;</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a><span class="st">);</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a><span class="st">CREATE TABLE IF NOT EXISTS score_history (</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a><span class="st">    id INTEGER PRIMARY KEY AUTOINCREMENT,</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="st">    model_id TEXT NOT NULL,</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="st">    composite_score REAL NOT NULL,</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a><span class="st">    calculated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="st">    FOREIGN KEY (model_id) REFERENCES verified_models(model_id)</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a><span class="st">);</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a><span class="st">CREATE INDEX IF NOT EXISTS idx_score_history_model_time</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a><span class="st">    ON score_history(model_id, calculated_at DESC);</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a><span class="st">CREATE TABLE IF NOT EXISTS discovery_runs (</span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a><span class="st">    id INTEGER PRIMARY KEY AUTOINCREMENT,</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a><span class="st">    provider TEXT NOT NULL,</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a><span class="st">    status TEXT NOT NULL,</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a><span class="st">    models_found INTEGER DEFAULT 0,</span></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a><span class="st">    error TEXT,</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a><span class="st">    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a><span class="st">);</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Import existing model configs</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[3/6] Importing existing model configurations...&quot;</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run scripts/import_model_configs.go <span class="at">--db</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$DB_PATH</span><span class="st">&quot;</span> <span class="at">--config</span><span class="op">=</span><span class="st">&quot;config.json&quot;</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 4: Compute initial scores</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[4/6] Computing initial scores...&quot;</span></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sf</span> <span class="at">-X</span> POST <span class="st">&quot;</span><span class="va">${API_URL}</span><span class="st">/api/v1/score/calculate-all&quot;</span> <span class="dt">\</span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Authorization: Bearer </span><span class="va">${LLMSVERIFIER_API_KEY}</span><span class="st">&quot;</span> <span class="kw">||</span> <span class="kw">{</span></span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;WARNING: Bulk score calculation failed; scores will be computed on demand&quot;</span></span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 5: Set feature flag percentage</span></span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[5/6] Setting feature flag for phase: </span><span class="va">$PHASE</span><span class="st">...&quot;</span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="st">&quot;</span><span class="va">$PHASE</span><span class="st">&quot;</span> <span class="kw">in</span></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>  <span class="ss">canary</span><span class="kw">)</span></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>    <span class="va">PERCENTAGE</span><span class="op">=</span>5</span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>    <span class="cf">;;</span></span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>  <span class="ss">early-access</span><span class="kw">)</span></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>    <span class="va">PERCENTAGE</span><span class="op">=</span>25</span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>    <span class="cf">;;</span></span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>  <span class="ss">majority</span><span class="kw">)</span></span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>    <span class="va">PERCENTAGE</span><span class="op">=</span>50</span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>    <span class="cf">;;</span></span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>  <span class="ss">full</span><span class="kw">)</span></span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>    <span class="va">PERCENTAGE</span><span class="op">=</span>100</span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">;;</span></span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a>  <span class="pp">*</span><span class="kw">)</span></span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;ERROR: Unknown phase: </span><span class="va">$PHASE</span><span class="st">&quot;</span></span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>    <span class="cf">;;</span></span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a><span class="cf">esac</span></span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 6: Verify rollout</span></span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[6/6] Verifying rollout at </span><span class="va">${PERCENTAGE}</span><span class="st">%...&quot;</span></span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a><span class="fu">sleep</span> 5</span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sf</span> <span class="st">&quot;</span><span class="va">${API_URL}</span><span class="st">/api/v1/status?feature_flag=</span><span class="va">${FEATURE_FLAG_KEY}</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a>  <span class="ex">jq</span> <span class="at">-e</span> <span class="st">&quot;.rollout_percentage == </span><span class="va">${PERCENTAGE}</span><span class="st">&quot;</span> <span class="kw">||</span> <span class="kw">{</span></span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;ERROR: Feature flag verification failed&quot;</span></span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a>  <span class="bu">exit</span> 1</span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== Migration to </span><span class="va">$PHASE</span><span class="st"> (</span><span class="va">${PERCENTAGE}</span><span class="st">%) completed successfully ===&quot;</span></span></code></pre></div>
+<h3 id="962-rollout-phases">9.6.2 Rollout Phases</h3>
+<p>The rollout proceeds through four phases with explicit entry and exit
+criteria. Phase 1 — Canary (5% traffic, 1 day): deploy to 5% of
+production traffic. Exit criteria: error rate remains below 0.1% and no
+P1/P2 alerts fire for 24 hours. Phase 2 — Early Access (25% traffic, 3
+days): expand to 25% of traffic. Exit criteria: user satisfaction score
+exceeds 4.0 out of 5.0 from feedback surveys, and average translation
+latency does not regress by more than 5% compared to the legacy
+pipeline. Phase 3 — Majority (50% traffic, 1 week): expand to 50% of
+traffic. Exit criteria: all performance SLAs met (p95 latency &lt; 5s,
+cache hit rate &gt; 80%), and the verification pipeline completes
+successfully for at least 95% of models. Phase 4 — Full (100% traffic, 2
+weeks): complete cutover. Exit criteria: all quality gates pass (100%
+test coverage confirmed, all 193+ challenges passing, all 14
+documentation files complete), and no critical incidents for 14
+consecutive days.</p>
+<h3 id="963-rollback-procedure">9.6.3 Rollback Procedure</h3>
+<p>Rollback is instantaneous and requires zero downtime. The feature
+flag <code>LLMSVERIFIER_ENABLED</code> controls whether
+<code>pkg/translator/llm/llm.go</code> uses the verified pipeline or the
+legacy provider factory. Setting <code>LLMSVERIFIER_ENABLED=false</code>
+causes the next provider factory invocation to bypass
+<code>internal/verifier/discovery/gatekeeper.go</code> and construct the
+provider directly from <code>internal/config/config.go</code> as in the
+pre-integration codebase. Code block 9.5 shows the rollback toggle.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># scripts/rollback-to-legacy.sh</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Instant rollback from LLMsVerifier to legacy provider factory.</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== Initiating emergency rollback ===&quot;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Method 1: Environment variable (takes effect on next request, no restart)</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">LLMSVERIFIER_ENABLED</span><span class="op">=</span>false</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> POST <span class="st">&quot;http://localhost:8080/admin/feature-flags&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Authorization: Bearer </span><span class="va">${ADMIN_API_KEY}</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;LLMSVERIFIER_ENABLED&quot;: false}&#39;</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Method 2: Config file update (persists across restarts)</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="ex">jq</span> <span class="st">&#39;.llmsverifier.enabled = false&#39;</span> config.json <span class="op">&gt;</span> config.json.tmp</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> config.json.tmp config.json</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify rollback</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Verifying rollback...&quot;</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="fu">sleep</span> 2</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="va">LEGACY_CALLS</span><span class="op">=</span><span class="va">$(</span><span class="ex">curl</span> <span class="at">-sf</span> <span class="st">&quot;http://localhost:8080/metrics&quot;</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grep</span> <span class="st">&#39;provider_factory_legacy_calls_total&#39;</span> <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-1</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;{print $2}&#39;</span><span class="va">)</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="st">&quot;</span><span class="va">$LEGACY_CALLS</span><span class="st">&quot;</span> <span class="ot">-gt</span> 0 <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;Rollback verified: legacy provider factory is active&quot;</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;WARNING: Rollback verification inconclusive; check metrics manually&quot;</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== Rollback complete ===&quot;</span></span></code></pre></div>
+<h3 id="964-data-migration">9.6.4 Data Migration</h3>
+<p>Existing model configurations in
+<code>internal/config/config.go</code> migrate to the
+<code>verified_models</code> SQLite table. The migration preserves
+provider name, model ID, API key reference (not the key itself), base
+URL, and assigned tier. Each migrated model receives an initial
+composite score of 5.0 (the "fair" baseline) and a
+<code>source_tier</code> value of <code>migrated</code>. Scores are
+recomputed through the full 5-component pipeline within 24 hours of
+migration. The migration is idempotent: running
+<code>scripts/migrate-to-verifier.sh</code> multiple times does not
+duplicate entries because the <code>model_id</code> column is the
+primary key.</p>
+<hr />
+<h2 id="97-final-checklist-and-definition-of-done">9.7 Final Checklist
+and Definition of Done</h2>
+<h3 id="971-master-checklist">9.7.1 Master Checklist</h3>
+<p>The master checklist contains 50 items across all eight phases. Each
+item carries a status column (pending / in-progress / complete), owner
+assignment (engineer name or team), and a sign-off signature with date.
+Phase 1 (Foundation) contains 8 items: module integration in
+<code>go.mod</code>, directory structure creation,
+<code>LLMsVerifierConfig</code> struct definition, environment variable
+loading, interface alignment in
+<code>internal/verifier/bridge.go</code>, constitution file creation,
+<code>CLAUDE.md</code> update, and <code>AGENTS.md</code> update. Phase
+2 (Verification) contains 8 items: <code>NewVerifierClient()</code>
+implementation, health check endpoint, 8-step pipeline definition,
+existence verification, responsive/feature detection, code visibility
+and coding challenges, performance benchmarking, and cost analysis
+integration. Phase 3 (Scoring) contains 6 items: scoring engine
+initialization, five-component score calculation, composite score
+aggregation, score adapter service, score persistence and history, and
+threshold management. Phase 4 (Discovery) contains 6 items: 3-tier
+discovery service, provider API enumeration, model registry CRUD,
+gatekeeper implementation, background sync runner, and model catalog API
+endpoints. Phase 5 (Runtime) contains 6 items: verified provider
+factory, runtime model selection engine, fallback chain, event bus
+integration, API key validation, and provider expansion to 30+. Phase 6
+(UX) contains 4 items: model selection interface, score badge rendering,
+filtering system, and unverified model warning flow. Phase 7 (Testing)
+contains 7 items: unit tests for verifier client, pipeline tests,
+scoring engine tests, score adapter tests, discovery and registry tests,
+integration tests with live verifier, and anti-bluff challenge suite (4
+challenges, 193+ total). Phase 8 (Documentation) contains 5 items: all
+constitution files signed, all CLAUDE.md and AGENTS.md updates merged,
+user-facing documentation published, operational runbook reviewed by
+on-call team, and deployment manifests validated in staging.</p>
+<h3 id="972-quality-gates">9.7.2 Quality Gates</h3>
+<p>Three quality gates block final sign-off. Gate 1 — Test Coverage:
+<code>go test -cover ./internal/verifier/...</code> must report 100%
+statement coverage. The coverage report is generated with
+<code>go test -coverprofile=coverage.out ./internal/verifier/... &amp;&amp; go tool cover -html=coverage.out -o coverage.html</code>
+and reviewed by the test lead. Gate 2 — Challenge Pass: all 193+
+challenges must pass when executed against a live LLMsVerifier instance
+with real provider API keys. The challenge run is initiated with
+<code>go test -tags=challenge ./internal/verifier/challenges/...</code>
+and the output is archived. Gate 3 — Documentation Completeness: all 14
+documentation files (3 <code>CONSTITUTION.md</code>, 3
+<code>CLAUDE.md</code>, 3 <code>AGENTS.md</code>, 2
+<code>README.md</code>, <code>docs/llmsverifier-integration.md</code>,
+<code>docs/troubleshooting.md</code>,
+<code>internal/verifier/README.md</code>) must pass the validation
+script from Section 9.2.4.</p>
+<h3 id="973-anti-bluff-verification">9.7.3 Anti-Bluff Verification</h3>
+<p>The anti-bluff verification is a manual procedure performed once
+after all automated gates pass. A senior engineer runs the full
+integration test suite against a live LLMsVerifier instance configured
+with real (not mocked) provider API keys for at least three distinct
+providers. The test sequence follows the complete user journey: trigger
+discovery, verify a model, compute its score, select it for translation,
+execute a translation, and confirm the model appears in the score
+history. The engineer pastes terminal output into the sign-off document.
+If any step produces a result that contradicts the automated test suite,
+the discrepancy is investigated as a potential test-bluff issue.</p>
+<h3 id="974-performance-verification">9.7.4 Performance
+Verification</h3>
+<p>Performance verification confirms all SLA targets under
+production-like load. The load test generates 1,000 concurrent
+translation requests using the verified model selection pipeline.
+Targets: p50 latency below 500ms, p95 latency below 2,000ms, p99 latency
+below 5,000ms, score cache hit rate above 80%, zero goroutine leaks
+after 30 minutes of sustained load, and memory growth below 10% over the
+same 30-minute window. The load test is executed with
+<code>go test -tags=perf -run TestVerifierLoad ./test/performance/...</code>
+against the staging environment. Results are captured with
+<code>go test -memprofile=mem.prof -cpuprofile=cpu.prof</code> and
+reviewed for hot paths before sign-off.</p>
+</body>
+</html>
