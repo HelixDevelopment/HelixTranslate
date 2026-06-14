@@ -50,15 +50,19 @@ func TestVerifierHandler_listVerifiedModels(t *testing.T) {
 	assert.Equal(t, http.StatusServiceUnavailable, w.Code)
 }
 
-func TestVerifierHandler_getVerifiedModel_NotFound(t *testing.T) {
+func TestVerifierHandler_getVerifiedModel_UpstreamUnreachable(t *testing.T) {
 	router, _ := setupVerifierRouter(t)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/api/v1/verified-models/nonexistent-model", nil)
 	router.ServeHTTP(w, req)
 
-	// Model not found returns 404
-	assert.Equal(t, http.StatusNotFound, w.Code)
+	// setupVerifierRouter has APIURL="" so the LLMsVerifier upstream is
+	// UNREACHABLE — GetModel returns a transport error, not a not-found. The
+	// correct status is 503 (upstream down), NOT 404 (which would falsely tell
+	// the client the specific model is absent). See getModelErrorStatus and
+	// TestVerifier_getVerifiedModel_NotFound_Is404 for the genuine-404 path.
+	assert.Equal(t, http.StatusServiceUnavailable, w.Code)
 }
 
 func TestVerifierHandler_getVerificationStatus(t *testing.T) {
@@ -100,7 +104,7 @@ func TestVerifierHandler_translateWithVerification_Validation(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-func TestVerifierHandler_translateWithVerification_MissingModel(t *testing.T) {
+func TestVerifierHandler_translateWithVerification_UpstreamUnreachable(t *testing.T) {
 	router, _ := setupVerifierRouter(t)
 
 	w := httptest.NewRecorder()
@@ -109,8 +113,10 @@ func TestVerifierHandler_translateWithVerification_MissingModel(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	// Model not found in empty cache
-	assert.Equal(t, http.StatusBadRequest, w.Code)
+	// APIURL="" → upstream unreachable → GetModel transport error → 503
+	// (NOT 400; the request is well-formed). The genuine missing-model→404 path
+	// is covered by TestVerifier_translateWithVerification_MissingModel_Is404.
+	assert.Equal(t, http.StatusServiceUnavailable, w.Code)
 }
 
 func TestInitVerifierFromConfig(t *testing.T) {

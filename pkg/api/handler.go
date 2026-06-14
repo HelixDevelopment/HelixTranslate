@@ -185,6 +185,19 @@ func (h *Handler) translateText(c *gin.Context) {
 		return
 	}
 
+	// Validate the requested target script up-front. Only "latin" and
+	// "cyrillic" perform a conversion; an empty value means "no conversion".
+	// Any other value is a client error and MUST be rejected rather than
+	// silently ignored (which would return un-converted text to a client that
+	// asked for a specific script — a response-correctness defect).
+	switch req.Script {
+	case "", "latin", "cyrillic":
+		// valid
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("invalid script: %s (expected \"latin\" or \"cyrillic\")", req.Script)})
+		return
+	}
+
 	// Create translator
 	trans, err := h.createTranslator(req.Provider, req.Model)
 	if err != nil {
@@ -241,10 +254,13 @@ func (h *Handler) translateText(c *gin.Context) {
 		translated = localResult
 	}
 
-	// Convert script if requested
-	if req.Script == "latin" {
-		converter := script.NewConverter()
-		translated = converter.ToLatin(translated)
+	// Convert script if requested. The value was validated above, so only the
+	// two conversion cases can reach here (empty == no conversion).
+	switch req.Script {
+	case "latin":
+		translated = script.NewConverter().ToLatin(translated)
+	case "cyrillic":
+		translated = script.NewConverter().ToCyrillic(translated)
 	}
 
 	c.JSON(http.StatusOK, gin.H{

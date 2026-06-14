@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -13,6 +14,20 @@ import (
 	"digital.vasic.translator/internal/verifier/scoring"
 	"digital.vasic.translator/internal/verifier/selection"
 )
+
+// getModelErrorStatus maps a verifier.Client.GetModel error to the correct HTTP
+// status. A genuinely-absent/unverified model (ErrModelNotVerified) is a 404
+// resource-not-found; any other error means the upstream LLMsVerifier could not
+// be consulted (down / timeout / decode failure) and is a 503 — NOT a 404
+// (which would falsely tell the client "this model does not exist") nor a 400
+// (the request was well-formed). Returns true when the error is a not-found.
+func getModelErrorStatus(err error) (status int, isNotFound bool) {
+	var notVerified verifier.ErrModelNotVerified
+	if errors.As(err, &notVerified) {
+		return http.StatusNotFound, true
+	}
+	return http.StatusServiceUnavailable, false
+}
 
 // VerifierHandler provides API endpoints for LLMsVerifier integration.
 type VerifierHandler struct {
@@ -138,7 +153,8 @@ func (h *VerifierHandler) getVerifiedModel(c *gin.Context) {
 
 	model, err := h.client.GetModel(ctx, modelID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		status, _ := getModelErrorStatus(err)
+		c.JSON(status, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -263,7 +279,8 @@ func (h *VerifierHandler) translateWithVerification(c *gin.Context) {
 	if req.ModelID != "" {
 		selectedModel, err = h.client.GetModel(ctx, req.ModelID)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			status, _ := getModelErrorStatus(err)
+			c.JSON(status, gin.H{"error": err.Error()})
 			return
 		}
 	} else {
