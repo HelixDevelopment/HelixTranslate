@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0">
+  <description>
+    <title-info>
+      <genre>nonfiction</genre>
+      <book-title>input</book-title>
+      <lang></lang>
+      <annotation>
+        <p></p>
+      </annotation>
+    </title-info>
+    <document-info>
+      <author>
+        <nickname>HelixTranslate</nickname>
+      </author>
+      <program-used>HelixTranslate</program-used>
+      <date value="2026-06-14">2026-06-14</date>
+    </document-info>
+  </description>
+  <body>
+    <section>
+      <title>
+        <p>input</p>
+      </title>
+      <p>Садржај документа</p>
+      <p>Храбри витез јахао је преко тихог свитања у зору. Носио је старо писмо запечаћено црвеним воском. Планине су стајале тихо под бледим јутарњим небом.</p>
+    </section>
+  </body>
+</FictionBook>

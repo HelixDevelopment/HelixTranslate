@@ -9,8 +9,12 @@ import (
 	"digital.vasic.translator/pkg/script"
 	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/test/mocks"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -679,36 +683,46 @@ func TestTranslateEbookFunction(t *testing.T) {
 
 	t.Run("with_app_config", func(t *testing.T) {
 		// This subtest drives translateEbook through the REAL provider path
-		// (no mock translator is injected), so its outcome depends on whether a
-		// valid provider API key is reachable: with a key it performs a real
-		// translation and returns nil; without one it correctly errors (e.g.
-		// "Qwen API error (status 401)"). To keep the suite deterministic and
-		// offline (§11.4.98 / §11.4.3), honestly SKIP when no provider key is
-		// present rather than asserting an outcome that depends on ambient env.
-		providerKeyEnvs := []string{
-			"OPENAI_API_KEY", "ANTHROPIC_API_KEY", "DEEPSEEK_API_KEY",
-			"ZHIPU_API_KEY", "QWEN_API_KEY", "GEMINI_API_KEY",
-		}
-		haveKey := false
-		for _, k := range providerKeyEnvs {
-			if os.Getenv(k) != "" {
-				haveKey = true
-				break
+		// (no mock translator is injected) using the config-provided provider
+		// settings. Previously it (a) hard-coded a fake "config-key" for openai
+		// and then asserted NoError, and (b) guarded with a skip that only fired
+		// when NO provider key was in the env. That combination was a §11.4.98
+		// bluff: when ANY provider key WAS present (e.g. DEEPSEEK), the subtest
+		// did not skip, forced provider=openai with the fake "config-key", dialled
+		// the REAL OpenAI endpoint, got a 401 invalid_api_key, and FAILED the
+		// NoError assertion — a non-deterministic, ambient-env-dependent outcome.
+		//
+		// Fixed to be fully self-driving + deterministic (§11.4.98): stand up an
+		// httptest mock that speaks the OpenAI chat-completions wire format and
+		// point the config's openai BaseURL at it. The config-key path is now
+		// exercised end-to-end with NO real network and NO env dependency, and we
+		// positively assert (1) the run succeeded, (2) the mock was actually hit
+		// (the real provider client path truly executed — not short-circuited),
+		// and (3) a non-empty output file was produced.
+		const mockTranslation = "Здраво свете"
+		var hits int32
+		mock := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if !strings.HasSuffix(r.URL.Path, "/chat/completions") {
+				w.WriteHeader(http.StatusNotFound)
+				return
 			}
-		}
-		if !haveKey {
-			t.Skip("SKIP (§11.4.3/§11.4.98): no provider API key in env — translateEbook " +
-				"would dial a real provider; skipping to keep the test deterministic offline")
-		}
+			atomic.AddInt32(&hits, 1)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"` + mockTranslation + `"}}]}`))
+		}))
+		defer mock.Close()
 
-		// Create app config
+		outFile := filepath.Join(t.TempDir(), "test_output.epub")
+
+		// Create app config pointing the openai provider at the mock server.
 		appConfig := &config.Config{
 			Translation: config.TranslationConfig{
 				DefaultProvider: "openai",
 				DefaultModel:    "gpt-3.5-turbo",
 				Providers: map[string]config.ProviderConfig{
 					"openai": {
-						APIKey: "config-key",
+						APIKey:  "config-key",
+						BaseURL: mock.URL,
 					},
 				},
 			},
@@ -716,12 +730,12 @@ func TestTranslateEbookFunction(t *testing.T) {
 
 		err := translateEbook(
 			book,
-			"test_output.epub",
+			outFile,
 			"epub",
-			"", // Will use default from config
-			"", // Will use default from config
-			"", // Will use from config
-			"",
+			"", // provider — use default from config (openai)
+			"", // model — use default from config
+			"", // apiKey — use from config
+			"", // baseURL — use from config (the mock URL)
 			"latn",
 			appConfig,
 			language.English,
@@ -732,9 +746,15 @@ func TestTranslateEbookFunction(t *testing.T) {
 			false, // provider not explicitly set — config default applies
 		)
 
-		// We expect no error in test environment with mocked/empty translation
-		// The test shows it's actually completing translation even without valid API keys
-		// This might be due to test mode or mock translators being used
+		// (1) the config-key + base-url provider path completed successfully.
 		assert.NoError(t, err)
+		// (2) the real provider client path actually executed against the mock —
+		// proves the translation was performed, not silently skipped.
+		assert.Greater(t, atomic.LoadInt32(&hits), int32(0),
+			"expected the openai client to POST to the mock /chat/completions endpoint")
+		// (3) a non-empty output file was produced.
+		if info, statErr := os.Stat(outFile); assert.NoError(t, statErr) {
+			assert.Greater(t, info.Size(), int64(0), "expected a non-empty output EPUB")
+		}
 	})
 }

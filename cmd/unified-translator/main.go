@@ -234,20 +234,31 @@ func executeTranslation(session *TranslationSession) error {
 	step.Details = fmt.Sprintf("Translated with %s, saved to %s", config.Provider, translatedMDPath)
 	stepComplete(step)
 
-	// Step 4: Convert to EPUB
-	step = addStep(session, "EPUB Generation")
-	epubPath := config.OutputFile
-	if err := generateEPUB(translatedMarkdown, epubPath, config.InputFile); err != nil {
-		return stepError(step, fmt.Sprintf("EPUB generation failed: %v", err))
+	// Step 4: Convert to the requested output format (honors the -o extension)
+	step = addStep(session, "Output Generation")
+	outPath := config.OutputFile
+	if err := generateOutput(translatedMarkdown, outPath, config.InputFile); err != nil {
+		return stepError(step, fmt.Sprintf("output generation failed: %v", err))
 	}
 
-	// Verify EPUB
-	epubVerified := verifyEPUB(epubPath)
-	epubSize := getFileSize(epubPath)
-	addFile(session, epubPath, "epub", epubSize, epubVerified,
-		map[bool]string{true: "Valid EPUB format", false: "Invalid EPUB format"}[epubVerified])
+	// Verify the produced file. EPUB has a structural check; for the other
+	// formats a non-empty file is the verification (the content is the translated
+	// text written directly / via the FB2 writer).
+	outFmt := strings.ToLower(strings.TrimPrefix(filepath.Ext(outPath), "."))
+	if outFmt == "" {
+		outFmt = "epub"
+	}
+	var outVerified bool
+	if outFmt == "epub" {
+		outVerified = verifyEPUB(outPath)
+	} else {
+		outVerified = getFileSize(outPath) > 0
+	}
+	outSize := getFileSize(outPath)
+	addFile(session, outPath, outFmt, outSize, outVerified,
+		map[bool]string{true: "Valid " + outFmt + " output", false: "Invalid " + outFmt + " output"}[outVerified])
 
-	step.Details = fmt.Sprintf("Generated EPUB: %s", epubPath)
+	step.Details = fmt.Sprintf("Generated %s: %s", outFmt, outPath)
 	stepComplete(step)
 
 	return nil
@@ -838,6 +849,46 @@ func verifyTranslation(text, targetLang, script string) bool {
 		return false
 	}
 	return len(strings.TrimSpace(text)) > 0
+}
+
+// generateOutput writes the translated content to outputPath in the format
+// indicated by the output file extension.
+//
+// Previously the CLI ALWAYS produced an EPUB regardless of the -o extension, so
+// `-o book.txt` / `-o book.fb2` wrote EPUB bytes into a misnamed file — a silent
+// wrong-output defect (§11.4: the user asked for one format and silently got
+// another). The output format is now honored. An unsupported extension is an
+// explicit, honest error (§11.4.6) rather than a misnamed EPUB.
+//
+// Supported: .epub (default / no extension), .fb2, .txt, .md.
+func generateOutput(content, outputPath, inputFile string) error {
+	ext := strings.ToLower(strings.TrimPrefix(filepath.Ext(outputPath), "."))
+	switch ext {
+	case "", "epub":
+		return generateEPUB(content, outputPath, inputFile)
+	case "txt", "md":
+		// The translated content is plain (markdown) text — write it directly.
+		if err := os.WriteFile(outputPath, []byte(content), 0644); err != nil {
+			return fmt.Errorf("failed to write %s output: %w", ext, err)
+		}
+		return nil
+	case "fb2":
+		base := filepath.Base(inputFile)
+		title := strings.TrimSuffix(base, filepath.Ext(base))
+		if title == "" {
+			title = "Translated Document"
+		}
+		book := &ebook.Book{
+			Metadata: ebook.Metadata{Title: title},
+			Chapters: []ebook.Chapter{{
+				Title:    title,
+				Sections: []ebook.Section{{Content: content}},
+			}},
+		}
+		return ebook.NewFB2Writer().Write(book, outputPath)
+	default:
+		return fmt.Errorf("unsupported output format %q (supported: .epub, .fb2, .txt, .md)", ext)
+	}
 }
 
 func generateEPUB(content, outputPath, inputFile string) error {

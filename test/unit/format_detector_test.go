@@ -36,6 +36,8 @@ func TestFormatDetector(t *testing.T) {
 			format.FormatEPUB,
 			format.FormatTXT,
 			format.FormatHTML,
+			format.FormatDOCX, // backed by the stdlib OOXML parser (real-translation proven)
+			format.FormatPDF,  // backed by the MIT ledongthuc/pdf extractor (real-translation proven)
 		}
 
 		for _, fmt := range supportedFormats {
@@ -44,8 +46,10 @@ func TestFormatDetector(t *testing.T) {
 			}
 		}
 
+		// MOBI has no parser implementation, so it is genuinely unsupported.
+		// (PDF + DOCX moved to supportedFormats above once their real extractors
+		// landed — §11.4.120 gate reconciliation, not a fake-pass.)
 		unsupportedFormats := []format.Format{
-			format.FormatPDF,
 			format.FormatMOBI,
 		}
 
