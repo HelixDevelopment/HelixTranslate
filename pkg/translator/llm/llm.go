@@ -317,6 +317,18 @@ func (lt *LLMTranslator) GetName() string {
 	return fmt.Sprintf("llm-%s", lt.provider)
 }
 
+// makeLLMCacheKey builds an INJECTIVE in-memory cache key from (text,
+// contextStr). A plain "text:contextStr" join is NOT injective — ":" can appear
+// inside the text, so ("a:b","c") and ("a","b:c") would both produce "a:b:c"
+// and the cache would serve the wrong translation (same collision class as the
+// storage Redis cache-key bug fixed earlier). Length-prefixing the text makes
+// the key unambiguous: the leading "<len>:" tells a parser exactly where text
+// ends, so no (text, contextStr) pair can alias another. This keeps the same
+// memory profile as the previous full-text key (no hashing cost).
+func makeLLMCacheKey(text, contextStr string) string {
+	return fmt.Sprintf("%d:%s:%s", len(text), text, contextStr)
+}
+
 // Translate translates text using LLM with automatic retry and text splitting
 func (lt *LLMTranslator) Translate(ctx context.Context, text string, contextStr string) (string, error) {
 	if text == "" || strings.TrimSpace(text) == "" {
@@ -324,7 +336,7 @@ func (lt *LLMTranslator) Translate(ctx context.Context, text string, contextStr 
 	}
 
 	// Check cache
-	cacheKey := fmt.Sprintf("%s:%s", text, contextStr)
+	cacheKey := makeLLMCacheKey(text, contextStr)
 	if cached, found := lt.CheckCache(cacheKey); found {
 		return cached, nil
 	}
