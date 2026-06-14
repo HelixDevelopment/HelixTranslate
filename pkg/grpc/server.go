@@ -221,7 +221,11 @@ func (s *Server) GetTranslationStatus(ctx context.Context, req *proto.Translatio
 	session, exists := s.sessions[req.SessionId]
 	if !exists {
 		s.sessionsMutex.RUnlock()
-		return nil, fmt.Errorf("translation session not found: %s", req.SessionId)
+		// Return a typed gRPC status so the client can switch on codes.NotFound.
+		// A bare fmt.Errorf is mapped to codes.Unknown by grpc-go, which is
+		// indistinguishable from a genuine server fault — breaking the error-code
+		// contract the write paths (StartTranslation) already honour.
+		return nil, status.Errorf(codes.NotFound, "translation session not found: %s", req.SessionId)
 	}
 	resp := &proto.TranslationStatusResponse{
 		SessionId:          session.ID,
@@ -581,6 +585,15 @@ func (s *Server) cleanupOldSessions() {
 		if (session.Status == "completed" || session.Status == "failed" || session.Status == "cancelled") &&
 			now.Sub(session.UpdatedAt) > s.config.SessionTimeout {
 
+			// Cancel the per-session timeout context BEFORE dropping the map
+			// reference. The context was created via context.WithTimeout in
+			// StartTranslation and is never cancelled on the terminal path, so
+			// deleting the session without cancelling leaks its timer goroutine
+			// until SessionTimeout fires (24h on a real server). cancel() is
+			// idempotent — safe even for an already-cancelled session.
+			if session.CancelFunc != nil {
+				session.CancelFunc()
+			}
 			delete(s.sessions, sessionID)
 			s.logger.Info("Cleaned up old session", map[string]interface{}{
 				"session_id": sessionID,

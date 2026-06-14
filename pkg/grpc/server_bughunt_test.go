@@ -7,6 +7,8 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"digital.vasic.translator/pkg/grpc/proto"
 )
 
 // --- Bug A: nil ProviderConfig crashes the server ---------------------------
@@ -110,5 +112,89 @@ func TestStartTranslation_DuplicateSessionId_RejectedNoLeak(t *testing.T) {
 		t.Fatal("original session context was cancelled by the duplicate request")
 	default:
 		// good: original still live
+	}
+}
+
+// --- Bug C: GetTranslationStatus unknown-session returns a non-gRPC error ----
+//
+// The handler returned a bare fmt.Errorf("translation session not found: ...")
+// for an unknown session id. grpc-go maps a non-status error returned from a
+// handler to codes.Unknown — so a client cannot distinguish "this session does
+// not exist" (a NotFound the caller can handle by, e.g., re-creating it) from a
+// genuine server-side fault. StartTranslation already maps its failure modes to
+// precise codes (InvalidArgument / AlreadyExists / ResourceExhausted); this read
+// path silently broke that contract. Every other "not found" surface in a gRPC
+// service is expected to be codes.NotFound.
+//
+// RED (pre-fix): status code is Unknown. GREEN (post-fix): codes.NotFound.
+func TestGetTranslationStatus_UnknownSession_NotFoundCode(t *testing.T) {
+	h := newTestHarness(t, nil, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := h.client.GetTranslationStatus(ctx, &proto.TranslationStatusRequest{SessionId: "ghost-session"})
+	if err == nil {
+		t.Fatal("expected error for unknown session, got nil")
+	}
+	st, _ := status.FromError(err)
+	if st.Code() != codes.NotFound {
+		t.Fatalf("code = %s, want NotFound (client must distinguish missing session from server fault); err=%v", st.Code(), err)
+	}
+}
+
+// --- Bug D: cleanupOldSessions leaks the per-session timeout context ----------
+//
+// StartTranslation creates each session's context via context.WithTimeout
+// (SessionTimeout). Nothing cancels that context when the translation reaches a
+// terminal state — runTranslation just flips Status to "completed"/"failed".
+// cleanupOldSessions then deletes the terminal session from the map WITHOUT
+// calling session.CancelFunc(), so the WithTimeout timer goroutine and the
+// context object stay alive until the (here) timeout fires — on a real server
+// SessionTimeout is 24h. Over a long-lived server churning sessions this is an
+// unbounded timer/goroutine leak. (This is the classic go-vet "the cancel
+// function is not used on all paths" defect.)
+//
+// RED (pre-fix): after cleanup the session's Ctx is NOT Done (cancel never
+// called). GREEN (post-fix): cleanup cancels the context before deleting it, so
+// Ctx.Done() is closed and the timer is released.
+func TestCleanupOldSessions_CancelsContextNoLeak(t *testing.T) {
+	// Short SessionTimeout so the terminal-age gate in cleanupOldSessions fires.
+	h := newTestHarness(t, &fakeCoreTranslator{}, &ServerConfig{
+		MaxConcurrentTranslations: 10,
+		SessionTimeout:            time.Millisecond,
+		StreamBufferSize:          10,
+	})
+
+	// Register a session directly and drive it to a terminal state, mirroring
+	// what runTranslation does, then age it past SessionTimeout.
+	sessCtx, cancelFn := context.WithTimeout(context.Background(), 24*time.Hour)
+	sess := &TranslationSession{
+		ID:         "leak-sess",
+		Status:     "completed",
+		CreatedAt:  time.Now().Add(-time.Hour),
+		UpdatedAt:  time.Now().Add(-time.Hour), // old enough to be cleaned
+		CancelFunc: cancelFn,
+		Ctx:        sessCtx,
+	}
+	h.server.sessionsMutex.Lock()
+	h.server.sessions["leak-sess"] = sess
+	h.server.sessionsMutex.Unlock()
+
+	h.server.cleanupOldSessions()
+
+	// The session must be gone from the map (cleanup ran)...
+	h.server.sessionsMutex.RLock()
+	_, stillThere := h.server.sessions["leak-sess"]
+	h.server.sessionsMutex.RUnlock()
+	if stillThere {
+		t.Fatal("cleanupOldSessions did not remove the aged terminal session")
+	}
+
+	// ...and its context MUST have been cancelled (timer released), not leaked.
+	select {
+	case <-sessCtx.Done():
+		// good: context cancelled, timer freed
+	default:
+		t.Fatal("cleanupOldSessions deleted the session without cancelling its context (timer/goroutine leak)")
 	}
 }
