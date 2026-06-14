@@ -231,6 +231,16 @@ func SaveConfig(filename string, config *Config) error {
 
 // loadAPIKeysFromEnv loads API keys from environment variables
 func (c *Config) loadAPIKeysFromEnv() {
+	// LoadConfig unmarshals into a zero-value Config, so when config.json omits
+	// the "translation.providers" section this map is nil. Writing a new provider
+	// entry below would panic ("assignment to entry in nil map"); ensure it exists.
+	// LoadConfig unmarshals into a zero-value Config, so when config.json omits
+	// the "translation.providers" section this map is nil. Writing a new provider
+	// entry below would panic ("assignment to entry in nil map"); ensure it exists.
+	if c.Translation.Providers == nil {
+		c.Translation.Providers = make(map[string]ProviderConfig)
+	}
+
 	envMappings := map[string]string{
 		"openai":       "OPENAI_API_KEY",
 		"anthropic":    "ANTHROPIC_API_KEY",
