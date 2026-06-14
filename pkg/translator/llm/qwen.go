@@ -310,7 +310,17 @@ func (c *QwenClient) Translate(ctx context.Context, text string, prompt string) 
 		return "", fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/services/aigc/text-generation/generation", bytes.NewBuffer(jsonData))
+	// DashScope OpenAI-compatible mode: base URL ends with /compatible-mode/v1 and
+	// the chat-completions path is /chat/completions. The request (messages[]) and
+	// response (choices[].message.content) shapes modeled by QwenRequest/QwenResponse
+	// match this endpoint. The production config sets baseURL to the compatible-mode
+	// endpoint, so we must NOT append the DashScope-native generation path
+	// (/services/aigc/text-generation/generation), which returns {"output":{"text"}}
+	// and would mismatch both the URL and the response struct.
+	// Refs (verified 2026-06-14):
+	//   https://www.alibabacloud.com/help/en/model-studio/compatibility-of-openai-with-dashscope
+	//   https://www.alibabacloud.com/help/en/model-studio/use-qwen-by-calling-api
+	req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/chat/completions", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}

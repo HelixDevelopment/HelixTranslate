@@ -84,6 +84,59 @@ func TestQwenProvider(t *testing.T) {
 		assert.Equal(t, "Привет", result)
 	})
 
+	// Anti-bluff path assertion (§11.4.69, §11.4.115): the production config sets the
+	// Qwen base URL to the DashScope OpenAI-compatible endpoint
+	// (.../compatible-mode/v1). Translate() MUST POST to that endpoint's
+	// /chat/completions path — NOT the DashScope-native
+	// /services/aigc/text-generation/generation path (which returns {"output":{"text"}}
+	// and is incompatible with the OpenAI-shaped QwenResponse struct).
+	//
+	// RED on the pre-fix code: Translate() appended /services/aigc/text-generation/generation,
+	// so r.URL.Path would be ".../services/aigc/text-generation/generation" and this
+	// assertion FAILs. GREEN after the fix: the path is "/chat/completions".
+	// Mutation proof: revert qwen.go's path back to the native generation path and this
+	// test FAILs on the captured-path assertion.
+	t.Run("posts_to_compatible_chat_completions_path", func(t *testing.T) {
+		var capturedPath string
+		var capturedBody []byte
+		mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			capturedPath = r.URL.Path
+			capturedBody, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			// OpenAI-compatible-shaped response (choices[].message.content).
+			w.Write([]byte(`{"choices": [{"message": {"content": "Здравствуйте"}}]}`))
+		}))
+		defer mockServer.Close()
+
+		// baseURL mimics the production config: a base ending in /compatible-mode/v1.
+		client := &QwenClient{
+			config: TranslationConfig{
+				Provider: "qwen",
+				APIKey:   "test-key",
+				Model:    "qwen-plus",
+			},
+			httpClient: &http.Client{},
+			baseURL:    mockServer.URL + "/compatible-mode/v1",
+		}
+
+		ctx := context.Background()
+		result, err := client.Translate(ctx, "Hello", "Translate to Russian")
+		require.NoError(t, err)
+
+		// Anti-bluff: assert the actual hit path is the OpenAI-compatible
+		// chat-completions path, not the DashScope-native generation path.
+		assert.Equal(t, "/compatible-mode/v1/chat/completions", capturedPath,
+			"Translate must POST to the OpenAI-compatible /chat/completions path, not the native generation path")
+		assert.NotContains(t, capturedPath, "services/aigc/text-generation/generation",
+			"Translate must NOT use the DashScope-native generation path against a compatible-mode base URL")
+
+		// Request body must be the OpenAI-compatible shape (messages[]).
+		assert.Contains(t, string(capturedBody), `"messages"`)
+
+		// Response (OpenAI-compatible choices[].message.content) must parse.
+		assert.Equal(t, "Здравствуйте", result)
+	})
+
 	t.Run("mock_translate_empty_choices", func(t *testing.T) {
 		mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
