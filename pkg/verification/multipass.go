@@ -7,6 +7,7 @@ import (
 	"digital.vasic.translator/pkg/translator"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"sync"
 	"time"
@@ -387,12 +388,30 @@ func (mpp *MultiPassPolisher) polishWithNotes(
 	}
 
 	// Polish chapters with notes
+	// Bound the loop by the SHORTER of original/current/polished chapter counts.
+	// The loop indexes currentBook.Chapters[i] and polishedBook.Chapters[i] using
+	// an index ranged over originalBook.Chapters; if the translated/polished book
+	// has FEWER chapters than the original (a legitimate outcome — e.g. a chapter
+	// translated to empty/merged), indexing the shorter slice panics (index out of
+	// range). Capping at the minimum length processes every chapter that exists in
+	// all three and safely skips the missing tail (logged) instead of crashing.
 	totalChapters := len(originalBook.Chapters)
+	maxChapters := totalChapters
+	if l := len(currentBook.Chapters); l < maxChapters {
+		maxChapters = l
+	}
+	if l := len(polishedBook.Chapters); l < maxChapters {
+		maxChapters = l
+	}
+	if maxChapters < totalChapters {
+		log.Printf("multipass: translated book has %d chapters vs %d in the original; "+
+			"polishing the first %d and skipping the missing tail", maxChapters, totalChapters, maxChapters)
+	}
 	// High-water mark into report.SectionResults (the polisher appends to it as
 	// each chapter is polished); we persist only the newly-appended results each
 	// iteration via saveNewResults.
 	savedResults := 0
-	for i := range originalBook.Chapters {
+	for i := 0; i < maxChapters; i++ {
 		select {
 		case <-ctx.Done():
 			return nil, nil, nil, ctx.Err()
