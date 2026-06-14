@@ -172,5 +172,19 @@ func (c *AnthropicClient) Translate(ctx context.Context, text string, prompt str
 		return "", fmt.Errorf("no content in response")
 	}
 
-	return response.Content[0].Text, nil
+	// Concatenate every text block. The Anthropic Messages API returns `content`
+	// as an array that MAY contain multiple blocks: long output can be split
+	// across several "text" blocks, and extended-thinking models emit a
+	// "thinking"/"redacted_thinking" block (with no usable .text) BEFORE the
+	// "text" block. Returning only Content[0].Text dropped the rest — truncating
+	// multi-block output and returning empty when the first block was a
+	// thinking block. We collect only "text" blocks (skipping thinking/tool
+	// blocks); an empty Type is treated as text for forward compatibility.
+	var translated strings.Builder
+	for _, block := range response.Content {
+		if block.Type == "" || block.Type == "text" {
+			translated.WriteString(block.Text)
+		}
+	}
+	return translated.String(), nil
 }
