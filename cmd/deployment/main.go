@@ -95,6 +95,18 @@ func handleDeploy(orchestrator *deployment.DeploymentOrchestrator, planFile stri
 	log.Println("Deployment completed successfully!")
 }
 
+// shortContainerID returns at most the first 12 characters of a container ID
+// for display. A plain id[:12] slice panics with a slice-out-of-range when the
+// ID is shorter than 12 bytes (empty or short container IDs are possible — the
+// ID can come from a deployer return value or a short configured container
+// name), which would crash the entire `status` report. This bounds the slice.
+func shortContainerID(id string) string {
+	if len(id) <= 12 {
+		return id
+	}
+	return id[:12]
+}
+
 func handleStatus(orchestrator *deployment.DeploymentOrchestrator) {
 	instances := orchestrator.GetDeployedInstances()
 
@@ -104,7 +116,7 @@ func handleStatus(orchestrator *deployment.DeploymentOrchestrator) {
 	for id, instance := range instances {
 		fmt.Printf("Instance: %s\n", id)
 		fmt.Printf("  Host: %s:%d\n", instance.Host, instance.Port)
-		fmt.Printf("  Container ID: %s\n", instance.ContainerID[:12])
+		fmt.Printf("  Container ID: %s\n", shortContainerID(instance.ContainerID))
 		fmt.Printf("  Status: %s\n", instance.Status)
 		fmt.Printf("  Last Seen: %s\n", instance.LastSeen.Format(time.RFC3339))
 		fmt.Println()
