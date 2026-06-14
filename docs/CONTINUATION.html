@@ -172,14 +172,121 @@
   </style>
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">CONTINUATION</h1>
-</header>
 <h1
 id="continuation--helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 44 <strong>Last modified:</strong>
-2026-06-14T19:18:00Z</p>
+<p><strong>Revision:</strong> 45 <strong>Last modified:</strong>
+2026-06-14T22:30:00Z</p>
+<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 18 real bugs across 7 owned submodules -->
+
+<h3
+id="session-2026-06-14v--cross-submodule-bug-hunt-campaign-11428-equal-codebase">Session
+2026-06-14v — cross-submodule bug-hunt campaign (§11.4.28
+equal-codebase)</h3>
+<p>Parallel subagent-driven (§11.4.70/§11.4.103) hunt across owned
+submodules — each bug reproduce-first RED (§11.4.115) → fix → GREEN →
+mutation-proven (revert→FAIL/race→restore→PASS), verified by the
+conductor against repo state before commit (§11.4.142), committed in
+each submodule's own repo (raw git, FF-only, no force §11.4.113,
+multi-mirror §2.1). <strong>18 genuine mutation-proven bugs fixed +
+pushed; vision_engine's was independently fixed upstream by a parallel
+session (64b7d08) so it was integrated, NOT double-fixed.</strong> Host
+API rate-limit (prior session's 6-subagent killer) had recovered —
+proven by a probe wave that all survived.</p>
+<table>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>bug(s) fixed</th>
+<th>commit (after FF)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>llm_provider</td>
+<td>health monitor recovered on cumulative not consecutive
+successes</td>
+<td>f58559f</td>
+</tr>
+<tr>
+<td>llm_provider</td>
+<td>claude stream fake-success-on-error; openrouter 4096B SSE
+truncation; zen dropped system-prompt; zen sessionID data race</td>
+<td>325a469</td>
+</tr>
+<tr>
+<td>doc_processor</td>
+<td><code>truncate</code> byte-slice corrupts multibyte (Cyrillic)
+Feature.Description</td>
+<td>eec2d3e</td>
+</tr>
+<tr>
+<td>doc_processor</td>
+<td>i18n <code>interpolate</code> re-substitutes placeholders,
+order-dependent Cyrillic corruption</td>
+<td>fc4fed8</td>
+</tr>
+<tr>
+<td>llm_orchestrator</td>
+<td><code>SimpleAgentPool.Release</code> returns untracked agents
+(double-handout + cross-pool leak)</td>
+<td>1fac8b1</td>
+</tr>
+<tr>
+<td>llm_orchestrator</td>
+<td><code>RoundRobinSelector</code> never selects a lazy pool with spare
+build capacity (dead lazy-build path)</td>
+<td>4e08b93</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>HTTP/3-disabled nil-panic + ignored maxScore ceiling</td>
+<td>6e5ab147</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>nil circuit-breaker deref panic ×3 sites + concurrent map write
+under RLock (data race)</td>
+<td>6f19503b</td>
+</tr>
+<tr>
+<td>docs_chain</td>
+<td>corrupt SQLite node silently read as empty DB (SSoT-destroying)</td>
+<td>47275bc</td>
+</tr>
+<tr>
+<td>docs_chain</td>
+<td><code>verify</code> masked multi-level staleness — CI gate passed a
+stale artifact</td>
+<td>ad8b9ff</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>go/cargo test-JSON parsers silently drop failures after &gt;64KB
+line (PASS-bluff in the anti-bluff harness)</td>
+<td>e4ae4ef</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>boot summary counter corruption (Started=-1) + health check ignored
+ctx cancellation</td>
+<td>f3bfbc2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Anti-bluff non-findings (honest, §11.4.6 — did NOT
+manufacture fixes):</strong> llm_provider <code>generic.go</code>
+empty-choices→empty-content is by-design tested contract; numerous
+adapters/packages audited clean with enumerated coverage; vision_engine
+gocv-build bug already fixed upstream.</p>
+<p><strong>§11.4.147 NOTE (operator awareness):</strong> a SEPARATE
+sibling clone exists at
+<code>/Volumes/T7/Projects/llm_orchestrator</code> (outside the parent
+tree). A subagent accidentally wrote the first RoundRobinSelector fix
+THERE; I left it untouched (unknown provenance) and re-applied the fix
+correctly inside the submodule (committed 4e08b93). That sibling now
+holds a stale, superseded, uncommitted change — safe to discard, but
+flagged so it isn't mistaken for live work.</p>
 <!-- session 2026-06-14u: wave 14 governance/coverage build-out + e2e fix (HEAD 84f7a46) -->
 
 <h3

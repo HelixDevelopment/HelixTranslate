@@ -1,7 +1,44 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 44
-**Last modified:** 2026-06-14T19:18:00Z
+**Revision:** 45
+**Last modified:** 2026-06-14T22:30:00Z
+
+<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 18 real bugs across 7 owned submodules -->
+
+### Session 2026-06-14v — cross-submodule bug-hunt campaign (§11.4.28 equal-codebase)
+
+Parallel subagent-driven (§11.4.70/§11.4.103) hunt across owned submodules — each bug
+reproduce-first RED (§11.4.115) → fix → GREEN → mutation-proven (revert→FAIL/race→restore→PASS),
+verified by the conductor against repo state before commit (§11.4.142), committed in each
+submodule's own repo (raw git, FF-only, no force §11.4.113, multi-mirror §2.1). **18 genuine
+mutation-proven bugs fixed + pushed; vision_engine's was independently fixed upstream by a
+parallel session (64b7d08) so it was integrated, NOT double-fixed.** Host API rate-limit
+(prior session's 6-subagent killer) had recovered — proven by a probe wave that all survived.
+
+| Submodule | bug(s) fixed | commit (after FF) |
+|---|---|---|
+| llm_provider | health monitor recovered on cumulative not consecutive successes | f58559f |
+| llm_provider | claude stream fake-success-on-error; openrouter 4096B SSE truncation; zen dropped system-prompt; zen sessionID data race | 325a469 |
+| doc_processor | `truncate` byte-slice corrupts multibyte (Cyrillic) Feature.Description | eec2d3e |
+| doc_processor | i18n `interpolate` re-substitutes placeholders, order-dependent Cyrillic corruption | fc4fed8 |
+| llm_orchestrator | `SimpleAgentPool.Release` returns untracked agents (double-handout + cross-pool leak) | 1fac8b1 |
+| llm_orchestrator | `RoundRobinSelector` never selects a lazy pool with spare build capacity (dead lazy-build path) | 4e08b93 |
+| llms_verifier | HTTP/3-disabled nil-panic + ignored maxScore ceiling | 6e5ab147 |
+| llms_verifier | nil circuit-breaker deref panic ×3 sites + concurrent map write under RLock (data race) | 6f19503b |
+| docs_chain | corrupt SQLite node silently read as empty DB (SSoT-destroying) | 47275bc |
+| docs_chain | `verify` masked multi-level staleness — CI gate passed a stale artifact | ad8b9ff |
+| challenges | go/cargo test-JSON parsers silently drop failures after >64KB line (PASS-bluff in the anti-bluff harness) | e4ae4ef |
+| containers | boot summary counter corruption (Started=-1) + health check ignored ctx cancellation | f3bfbc2 |
+
+**Anti-bluff non-findings (honest, §11.4.6 — did NOT manufacture fixes):** llm_provider
+`generic.go` empty-choices→empty-content is by-design tested contract; numerous adapters/packages
+audited clean with enumerated coverage; vision_engine gocv-build bug already fixed upstream.
+
+**§11.4.147 NOTE (operator awareness):** a SEPARATE sibling clone exists at
+`/Volumes/T7/Projects/llm_orchestrator` (outside the parent tree). A subagent accidentally wrote
+the first RoundRobinSelector fix THERE; I left it untouched (unknown provenance) and re-applied the
+fix correctly inside the submodule (committed 4e08b93). That sibling now holds a stale, superseded,
+uncommitted change — safe to discard, but flagged so it isn't mistaken for live work.
 
 <!-- session 2026-06-14u: wave 14 governance/coverage build-out + e2e fix (HEAD 84f7a46) -->
 
