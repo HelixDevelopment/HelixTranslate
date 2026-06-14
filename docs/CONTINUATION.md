@@ -1,7 +1,21 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 30
-**Last modified:** 2026-06-14T14:45:00Z
+**Revision:** 31
+**Last modified:** 2026-06-14T13:15:00Z
+
+<!-- session 2026-06-14h: all 4 operator-selected directives executed (HEAD c6c2930) -->
+
+### Session 2026-06-14h — operator-selected directions ALL executed (HEAD c6c2930); real E2E translation PROVEN
+
+Operator selected all four next-directions; executed with conductor verification + push FF:
+- **Qwen endpoint** (556002d + 2f0e359): client posted native DashScope path under a compatible-mode base AND the CODE DEFAULT base was native /api/v1 while the struct+config are compatible-mode → wrong URL + unparseable shape (Qwen was broken for default+production). Fixed: default base → /compatible-mode/v1 + path /chat/completions + choices[] (all consistent, §11.4.150 docs-verified). Live test made §11.4.98-honest (SKIP on auth/endpoint failure).
+- **Storage dedup** (367adce): cache served STALE translation on tuple collision (no UNIQUE index; dedup only on id PK) → lookup_hash UNIQUE index + idempotent UPSERT + safe dedup migration, both backends. Mutation-proven.
+- **DOCX** (d433210): input was NON-FUNCTIONAL (license-gated unioffice returned 'license required' for every real .docx). Rewrote as a stdlib parser (archive/zip + encoding/xml over word/document.xml + docProps/core.xml); dropped unioffice (+ transitive msoleps) via go mod tidy. Proven on a real in-test .docx (text+metadata+UTF-8). DOCX input now actually works.
+- **Stress/chaos + metrics race** (bf81517): added §11.4.85 stress/chaos suites (events/coordination/distributed) which UNCOVERED a real VersionManager.metrics data race + 40-60% lost counter updates → fixed with metricsMu + snapshot-on-read; KNOWN_BUG guard flipped to active GREEN (§11.4.115).
+- **CLI env-key gate** (c6c2930): unified-translator's API-key gate ignored provider *_API_KEY env vars → fixed (falls back to resolveProviderAPIKey).
+- **REAL E2E TRANSLATION PROOF** (c6c2930, docs/qa/e2e_deepseek_20260614T130829/): unified-translator translated test/assets/crow_and_pitcher_en.txt EN→Serbian via REAL DeepSeek (deepseek-chat, 2.89s) into a VALID EPUB — 205 Cyrillic chars ('Гавран и крчаг…'), differs from source, no placeholders, no key leak (§11.4.83/§11.4.107/§11.4.10). Full detect→parse→translate→EPUB-write pipeline confirmed working after the session's fixes.
+
+**SESSION GRAND TOTAL: ~74 real bugs** + 2 reconciliations + §11.4.98 conversion + real E2E proof. OPERATOR ACTION to widen provider coverage: add OPENAI_API_KEY / ANTHROPIC_API_KEY to ~/api_keys.sh (not present; all other ~34 providers available). Post-wave full sweep GREEN at HEAD c6c2930: 54 ok / 0 FAIL (fullsweep_20260614T131*.log). Build+vet exit 0.
 
 <!-- session 2026-06-14g: 7th (final-coverage) SECOND-PASS wave (HEAD 5dfe003) — 4 more real bugs; comprehensive second pass COMPLETE -->
 
