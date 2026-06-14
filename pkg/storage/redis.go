@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -292,9 +293,23 @@ func (r *RedisStorage) Close() error {
 	return r.client.Close()
 }
 
-// makeCacheKey creates a cache key from translation parameters
+// makeCacheKey creates a cache key from translation parameters.
+//
+// The final hash is computed over ALL five components joined with a NUL ('\x00')
+// separator. NUL cannot appear in any of these strings, so the join is
+// unambiguous and no field's content can shift another field's boundary. A
+// previous implementation joined the metadata fields with a RAW ':' delimiter
+// and only hashed sourceText, so two DISTINCT (srcLang,tgtLang,provider,model)
+// tuples whose fields contained ':' concatenated to the SAME key — e.g.
+// provider="ollama" model="llama3:8b" collided with provider="ollama:llama3"
+// model="8b" (Ollama model ids natively contain ':'), serving the WRONG cached
+// translation. The readable "cache:<src>:<tgt>:<provider>:<model>:" prefix is
+// retained for debuggability, but correctness now rests on the injection-proof
+// NUL-joined hash suffix, not on the prefix.
 func (r *RedisStorage) makeCacheKey(sourceText, sourceLanguage, targetLanguage, provider, model string) string {
-	return fmt.Sprintf("cache:%s:%s:%s:%s:%s", sourceLanguage, targetLanguage, provider, model, hashString(sourceText))
+	tupleHash := hashString(strings.Join(
+		[]string{sourceLanguage, targetLanguage, provider, model, sourceText}, "\x00"))
+	return fmt.Sprintf("cache:%s:%s:%s:%s:%s", sourceLanguage, targetLanguage, provider, model, tupleHash)
 }
 
 // accumulateAvgDuration folds one more duration sample into a running mean.
