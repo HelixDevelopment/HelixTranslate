@@ -1,0 +1,108 @@
+# HelixTranslate — Issues (Open Workable Items)
+
+**Revision:** 1
+**Last modified:** 2026-06-14T15:37:53Z
+**Authority:** §11.4.15 (status) · §11.4.16 (type) · §11.4.19 (column-alignment) · §11.4.21 (Operator-blocked details) · §11.4.54 (ATM-NNN ticket IDs) · §11.4.91 (clear descriptions)
+**Scope:** the open-work tracker. Every entry carries a stable `[ATM-NNN]` id, a `**Status:**`, a `**Type:**`, and — for Operator-blocked items — an `**Operator-Block-Details:**` line (§11.4.21). Source of truth for the open items is `docs/WORKING_PLAN.md`; this file is the constitution-mandated tracker view of it.
+
+Status vocabulary (open): `Queued` · `Operator-blocked` · `Design` (architecture decision pending) · `Blocked` (another session / external dependency).
+
+ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated ATM-064).
+
+---
+
+### §1. [ATM-065] Decide the single authoritative version number (2.3.x vs 3.0.0)
+**Status:** Operator-blocked
+**Type:** Task
+- WHAT: `VERSION`=2.3.0 but Makefile/binaries historically referenced 3.0.0. The single-source wiring landed (ATM-064); the actual number to ship is an operator decision.
+- **Operator-Block-Details:** WHAT — pick 2.3.x or 3.0.0 as the next release version. WHY — CLAUDE.md says treat `VERSION` (2.3.0) as authoritative while the Makefile references 3.0.0; the agent cannot decide product versioning. Self-resolution exhausted: single-source wiring already done (a36030e), value choice is purely a product call. UNBLOCK CONDITION — operator states the canonical number; agent sets `VERSION` and re-runs the version test. WHO — operator (Milos Vasic).
+
+### §2. [ATM-066] Provider credentials absent/invalid (OpenAI/Anthropic/Gemini/Zhipu) block allowlist refresh
+**Status:** Operator-blocked
+**Type:** Bug
+- WHAT: OPENAI_API_KEY and ANTHROPIC_API_KEY absent → those providers unverified and their model allowlists stale; GEMINI_API_KEY invalid (live `/models` returns "API Key not found"); Zhipu account out of balance (error 1113 余额不足) so its current models (glm-4.5/4.6/5/5.1…) cannot be translation-verified.
+- **Operator-Block-Details:** WHAT — add/refresh OPENAI/ANTHROPIC/GEMINI keys and recharge the Zhipu account. WHY — the proven deepseek pattern (live `/models` → verify-translate → additive allowlist + RED gate) requires a working key to verify the response shape; refreshing an allowlist without verification would be a §11.4 bluff. Self-resolution exhausted: live `/models` probes captured, deepseek fix `0fd1a34` is the ready template. UNBLOCK CONDITION — funded/valid keys present in the environment. WHO — operator (Milos Vasic).
+
+### §3. [ATM-067] ~30 other provider allowlists not audited against live current models
+**Status:** Operator-blocked
+**Type:** Task
+- WHAT: qwen, groq, cohere, mistral, xai, replicate, cerebras, cloudflare, siliconflow, hyperbolic, togetherai, sambanova, kimi, novita, nlpcloud, upstage, sarvam, modal, publicai, nia, vulavula — allowlists unverified against current live catalogs.
+- **Operator-Block-Details:** WHAT — provide funded keys per provider. WHY — each allowlist refresh needs a live verify-translate + string-content shape check before adding (deepseek pattern); without keys the verification cannot run. Self-resolution exhausted: pattern proven, only credentials missing. UNBLOCK CONDITION — per-provider funded keys. WHO — operator (Milos Vasic).
+
+### §4. [ATM-068] Inert CLI flags in unified-translator (-chunk-size/-workers/-concurrency/-verify, -monitoring stub)
+**Status:** Design
+**Type:** Task
+- WHAT: `cmd/unified-translator` parses `-chunk-size`, `-workers`, `-concurrency`, `-verify` but never consumes them (chunking is automatic+correct via `translateWithRetry`/`splitText`); `startMonitoringServer` is a print-only stub. Decision needed: wire each flag to real semantics OR remove it (removing a user-facing flag needs operator confirmation per §11.4.122). Not a blind autonomous fix.
+
+### §5. [ATM-069] Inert config fields (DOCXConfig.MinTextLength/IgnoreStyles, PDFConfig.MinTextLength)
+**Status:** Design
+**Type:** Task
+- WHAT: `DOCXConfig.MinTextLength`, `DOCXConfig.IgnoreStyles`, and `PDFConfig.MinTextLength` are declared/documented but never consumed. Decision: wire (filter short paragraphs / honor ignore-styles) or drop. Wiring `MinTextLength` changes output, so it needs care + tests.
+
+### §6. [ATM-070] Verifier MinScoreThreshold scale inconsistency (0-100 raw vs 0-10 normalized)
+**Status:** Design
+**Type:** Bug
+- WHAT: the handler (`pkg/api/verifier_handlers.go`) compares `MinScoreThreshold` against raw 0-100 `OverallScore`; the adapter (`internal/services/llmsverifier_score_adapter.go`) compares it against the normalized 0-10 score. The two contracts contradict and `GetPreferences`/`GetProviderScore` have no production caller. Canonical scale must be declared before either path is wired (fixing one side blindly breaks the other's test, §11.4.120).
+
+### §7. [ATM-071] Reasoning-model structured-content support (content as LIST, not STRING)
+**Status:** Design
+**Type:** Feature
+- WHAT: OpenAI-compatible clients assume `content` is a string; some reasoning models return `content` as a structured list (verified Mistral `magistral-medium-latest`; likely glm-5 / deepseek-reasoner class), which the clients silently drop. Adding structured-content handling would unlock those models. Non-trivial; design + tests required.
+
+### §8. [ATM-072] Markdown not a first-class CLI input format
+**Status:** Design
+**Type:** Feature
+- WHAT: `.md` input is detected as TXT and translated as plain text (works, but markdown structure is not preserved). First-class markdown input that preserves structure is an enhancement.
+
+### §9. [ATM-073] cmd/translator intermediate-markdown download-dir inconsistency (needs live SSH)
+**Status:** Blocked
+**Type:** Bug
+- WHAT: intermediate `.md` downloads to `Dir(InputFile)` in one path vs `Dir(OutputFile)` in another; manifests only under live SSH with `-o` in a different dir. Not unit-testable without real SSH infra; reproduce via the §11.4.76 Containers submodule (boot an SSH worker container) → RED → fix → GREEN. Gated on containerized SSH test infrastructure.
+
+### §10. [ATM-074] pkg/hash is a dead package (zero importers) — investigate per §11.4.124
+**Status:** Operator-blocked
+**Type:** Task
+- WHAT: `pkg/hash` (393 LOC) is a `package main` duplicate of `pkg/version.CodebaseHasher` with zero importers (confirmed; documented in commit `981ced9`). Per §11.4.124 it must not be removed without git-history investigation; per §11.4.122 removing a shipped package needs operator confirmation.
+- **Operator-Block-Details:** WHAT — confirm keep-or-remove of the dead `pkg/hash` package. WHY — §11.4.122 forbids silently removing an existing component, and §11.4.124 requires operator confirmation before deleting a shipped package even with git-history proof. Self-resolution exhausted: investigation done (981ced9 captures it as a dead duplicate). UNBLOCK CONDITION — operator says remove (then a separate descriptive commit cites the evidence) or keep/wire-in. WHO — operator (Milos Vasic).
+
+### §11. [ATM-075] Pre-build CM-* gate suite not implemented
+**Status:** Queued
+**Type:** Task
+- WHAT: the constitution references dozens of `CM-*` pre-build gates + paired §1.1 mutations; this project has only `scripts/testing/meta_test_constitution_inheritance.sh` and partial seeds. Implement the highest-value gates first (anti-bluff smoke, doc-sync, regression-guard-registered, no-fakes-beyond-unit, gitignore-precommit-audit), each with a paired mutation, wired into `scripts/pre_build_verification.sh`. (P4.2 — a sibling session owns `pre_build_verification.sh`.)
+
+### §12. [ATM-076] §11.4.65 universal markdown export audit across all tracked docs
+**Status:** Queued
+**Type:** Task
+- WHAT: every tracked non-source `.md` must have synced `.html`+`.pdf` siblings. The commit wrapper auto-syncs, but a full audit (including WORKING_PLAN.md and all docs/) is needed to confirm every `docs/*.md` has fresh exports.
+
+### §13. [ATM-077] Owned-submodule bug-hunt + brittle-test fixes (§11.4.28 equal-codebase)
+**Status:** Blocked
+**Type:** Task
+- WHAT: owned submodules (challenges, containers, helix_qa, doc_processor, llm_orchestrator, llm_provider, vision_engine, llms_verifier, docs_chain) are §11.4.28 equal-codebase and carry the brittle "connection refused" env-coupled test class fixed in the main module this session.
+- WHY-BLOCKED: evidence shows another session is actively working `helix_qa` (`go test -race` observed); per §11.4.119 single-owner do not collide. After operator confirms ownership/coordination, run per-submodule bug-hunt waves (separate go.mod, separate upstreams).
+
+### §14. [ATM-078] Per-feature test-type matrix + HelixQA + Challenges coverage (§11.4.25/§11.4.27)
+**Status:** Queued
+**Type:** Task
+- WHAT: §11.4.27 mandates 100% coverage with every test type. This session added unit/integration + some stress/chaos + real E2E proofs; the full matrix per feature (perf/benchmark for the pipeline, chaos for distributed/storage, Challenges entries per shipped feature, full HelixQA autonomous sessions) is unfilled. Build the §11.4.25 coverage ledger and fill highest-value gaps.
+
+### §15. [ATM-079] docs/qa/<run-id> evidence per shipped feature (§11.4.83)
+**Status:** Queued
+**Type:** Task
+- WHAT: §11.4.83 requires a recorded e2e transcript per shipped feature. E2E proofs exist for PDF input, the output-format matrix, and deepseek-v4; the remaining user-visible features from this session's fixes need per-feature evidence dirs under `docs/qa/`.
+
+### §16. [ATM-080] Full §11.4.40 7-step release retest not yet run
+**Status:** Operator-blocked
+**Type:** Task
+- WHAT: release requires the complete §11.4.40 7-step retest (pre-build sweep, post-build sweep, on-device cycle, meta-test mutation sweep, Challenge bank sweep, Issues/Fixed audit, CONTINUATION sync) on a clean baseline. Repeated full `go test ./... -p 1` sweeps are green but the full 7-step ritual is not done.
+- **Operator-Block-Details:** WHAT — authorize and run the full release retest. WHY — sequenced after the gate suite (ATM-075), Challenges/HelixQA (ATM-078), and §11.4.151 release-prefix tagging; requires operator confirmation of the release scope. Self-resolution exhausted: dependencies tracked as their own items. UNBLOCK CONDITION — ATM-075/ATM-078 closed + operator green-lights the release. WHO — operator (Milos Vasic).
+
+### §17. [ATM-081] No §11.4.151 prefixed release tag yet
+**Status:** Operator-blocked
+**Type:** Task
+- WHAT: no release tag exists. Per §11.4.151 the tag must be `helix_translate-<version>` (prefix from `HELIX_RELEASE_PREFIX` env or lowercased root dir name) on the main repo + every owned submodule, fanned to all upstreams with no force-push (§11.4.113).
+- **Operator-Block-Details:** WHAT — green-light creating the prefixed release tag. WHY — gated on ATM-080 (the full retest must pass first) and the operator-chosen version (ATM-065); a tag cannot precede a clean retest per §11.4.40. Self-resolution exhausted: tag mechanics ready, only the go-ahead + passing retest missing. UNBLOCK CONDITION — ATM-080 GREEN + ATM-065 decided. WHO — operator (Milos Vasic).
+
+---
+
+*This tracker is regenerated into `Issues_Summary.md` by `scripts/testing/generate_issues_summary.sh`. Do not hand-edit the summary. When an item closes it migrates atomically to `Fixed.md` (§11.4.19).*
