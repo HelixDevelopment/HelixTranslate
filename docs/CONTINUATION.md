@@ -1,9 +1,9 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 46
-**Last modified:** 2026-06-14T23:30:00Z
+**Revision:** 47
+**Last modified:** 2026-06-15T00:30:00Z
 
-<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 22 real bugs (18 submodule + 4 main) -->
+<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 29 real bugs (19 submodule + 10 main) -->
 
 ### Session 2026-06-14v — cross-submodule bug-hunt campaign (§11.4.28 equal-codebase)
 
@@ -29,7 +29,10 @@ parallel session (64b7d08) so it was integrated, NOT double-fixed.** Host API ra
 | docs_chain | `verify` masked multi-level staleness — CI gate passed a stale artifact | ad8b9ff |
 | challenges | go/cargo test-JSON parsers silently drop failures after >64KB line (PASS-bluff in the anti-bluff harness) | e4ae4ef |
 | containers | boot summary counter corruption (Started=-1) + health check ignored ctx cancellation | f3bfbc2 |
-| **MAIN** pkg/distributed | slice-header data race (remoteInstances) + BatchProcessor processFn-under-lock deadlock + version_manager backups fatal concurrent-map-write + alerts slice race — all `-race`-proven | (this commit) |
+| **MAIN** pkg/distributed | slice-header data race (remoteInstances) + BatchProcessor processFn-under-lock deadlock + version_manager backups fatal concurrent-map-write + alerts slice race — all `-race`-proven | 3a5b435 |
+| **MAIN** internal/verifier | GetPreferences dropped ALL models without a prior RefreshScores (used uncached score vs threshold); empty verified-models result never cached (TTL defeated) | (wave 7) |
+| **MAIN** pkg/ebook + pkg/fb2 | TXT >64KiB single-line total content loss; EPUB multiline `<head>` leaks `<title>` text into chapter; FB2 stanza title/subtitle dropped; FB2 cite/epigraph nested `<poem>` dropped — round-trip data-loss class | (wave 7) |
+| containers pkg/crossbuild | copyFile false-FAIL on directory artifacts (jpackage app-images) — successful build reported as failure (§11.4.1), all 3 non-Apple backends | ebf2641 |
 
 **Main-repo + submodule-pointer sync (operator directive 2026-06-14):** main repo committed the 4 `pkg/distributed` concurrency fixes (above) + advanced the 8 submodule gitlink pointers (challenges/containers/doc_processor/docs_chain/llm_orchestrator/llm_provider/llms_verifier/vision_engine) to their pushed HEADs so parent ↔ submodules are in sync. NOT staged: `helix_qa` (`m`, another session's in-flight work, §11.4.119); tracked rebuilt binaries `preparation-translator`/`translate-ssh`/`unified-translator` + untracked `hash`/`workable-items` (build artifacts, §11.4.30 — never committed).
 

@@ -96,7 +96,13 @@ func (a *LLMsVerifierScoreAdapter) GetPreferences(ctx context.Context) ([]Provid
 		if m.VerificationStatus != "verified" || !m.CanSeeCode || !m.AffirmativeResponse {
 			continue
 		}
-		score := a.GetProviderScore(m.ID)
+		// Score each model from the model data we just fetched (normalized to the
+		// 0-10 scale), exactly as RefreshScores does. GetPreferences is a
+		// self-contained method that performs its own fetch, so it MUST NOT depend
+		// on the a.scores cache being pre-populated by a separate RefreshScores
+		// call — otherwise every model scores 0 here and any positive
+		// MinScoreThreshold silently drops all qualified models.
+		score := normalizeScore(m.OverallScore)
 		if score < a.config.MinScoreThreshold {
 			continue
 		}

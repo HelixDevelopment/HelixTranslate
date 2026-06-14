@@ -378,8 +378,12 @@ func (p *EPUBParser) parseContentFile(f *zip.File) (*Chapter, error) {
 	// Simple HTML text extraction - remove head/title sections first
 	content := string(data)
 
-	// Remove entire head section including title
-	headRe := regexp.MustCompile(`(?i)<head[^>]*>.*?</head>`)
+	// Remove entire head section including title. The `(?s)` flag is REQUIRED so
+	// `.` matches newlines: real EPUB XHTML almost always spans the <head> over
+	// several lines (<title>, charset <meta>, stylesheet <link> on separate
+	// lines). Without `(?s)` a multi-line head is never matched, so the <title>
+	// TEXT survives tag-stripping and leaks into the extracted chapter content.
+	headRe := regexp.MustCompile(`(?is)<head[^>]*>.*?</head>`)
 	content = headRe.ReplaceAllString(content, " ")
 
 	// Remove tags from remaining content

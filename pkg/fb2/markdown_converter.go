@@ -169,6 +169,16 @@ func (c *MarkdownConverter) processEpigraph(markdown *strings.Builder, epigraph 
 		}
 	}
 
+	// Process nested poems and citations. The FB2 schema allows an <epigraph> to
+	// contain <poem> and <cite> children; without descending into them a poetic
+	// or quoted epigraph's text is silently dropped \u2014 data loss.
+	for _, poem := range epigraph.Poem {
+		c.processPoem(markdown, poem)
+	}
+	for _, cite := range epigraph.Cite {
+		c.processCite(markdown, cite)
+	}
+
 	// Process text author if available
 	for _, textAuthor := range epigraph.TextAuthor {
 		if textAuthor != "" {
@@ -195,8 +205,23 @@ func (c *MarkdownConverter) processPoem(markdown *strings.Builder, poem Poem) {
 
 	markdown.WriteString("\n")
 
-	// Process stanzas
+	// Process stanzas. Each <stanza> may carry its own <title> and <subtitle>
+	// (both mixed content per the FB2 schema). Emit them so translated stanza
+	// heading text is not silently dropped from the markdown output.
 	for _, stanza := range poem.Stanza {
+		if len(stanza.Title.Paragraphs) > 0 {
+			title := extractTextFromParagraph(stanza.Title.Paragraphs[0])
+			if title != "" {
+				markdown.WriteString("#### ")
+				markdown.WriteString(title)
+				markdown.WriteString("\n\n")
+			}
+		}
+		if stanza.Subtitle != "" {
+			markdown.WriteString("#### ")
+			markdown.WriteString(string(stanza.Subtitle))
+			markdown.WriteString("\n\n")
+		}
 		for _, verse := range stanza.V {
 			if verse.Text != "" {
 				markdown.WriteString("    ")
@@ -231,6 +256,13 @@ func (c *MarkdownConverter) processCite(markdown *strings.Builder, cite Cite) {
 			markdown.WriteString(string(subtitle))
 			markdown.WriteString("\n")
 		}
+	}
+
+	// Process nested poems. The FB2 schema allows a <cite> to contain <poem>
+	// children; without descending into them a quoted poem's verses are silently
+	// dropped \u2014 data loss.
+	for _, poem := range cite.Poem {
+		c.processPoem(markdown, poem)
 	}
 
 	markdown.WriteString("\n")

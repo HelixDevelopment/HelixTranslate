@@ -68,8 +68,14 @@ func (c *Client) Ping(ctx context.Context) error {
 
 // GetVerifiedModels returns all verified models from LLMsVerifier.
 func (c *Client) GetVerifiedModels(ctx context.Context) ([]Model, error) {
+	// Cache validity is keyed on a SUCCESSFUL prior fetch (lastFetch != zero),
+	// NOT on len(c.models) > 0. A legitimate zero-verified-models response is a
+	// cacheable fact; gating on slice length meant the empty result was never
+	// cached and every call re-hit the upstream within the TTL window, silently
+	// defeating CacheTTL. InvalidateCache resets lastFetch to the zero value to
+	// force a refetch.
 	c.mu.RLock()
-	if len(c.models) > 0 && time.Since(c.lastFetch) < c.cacheTTL {
+	if !c.lastFetch.IsZero() && time.Since(c.lastFetch) < c.cacheTTL {
 		models := make([]Model, len(c.models))
 		copy(models, c.models)
 		c.mu.RUnlock()
@@ -81,7 +87,7 @@ func (c *Client) GetVerifiedModels(ctx context.Context) ([]Model, error) {
 	defer c.mu.Unlock()
 
 	// Double-check after acquiring write lock
-	if len(c.models) > 0 && time.Since(c.lastFetch) < c.cacheTTL {
+	if !c.lastFetch.IsZero() && time.Since(c.lastFetch) < c.cacheTTL {
 		models := make([]Model, len(c.models))
 		copy(models, c.models)
 		return models, nil
