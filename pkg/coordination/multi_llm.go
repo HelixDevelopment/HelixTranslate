@@ -299,7 +299,15 @@ func (c *MultiLLMCoordinator) TranslateWithRetry(
 	}
 
 	var lastErr error
-	triedInstances := make(map[string]bool)
+	// triedCount records how many times each instance has been attempted in THIS
+	// call. The loop budget is maxRetries*len(instances), and an instance may be
+	// retried up to maxRetries times: a transient (non-rate-limit) error on one
+	// attempt must not permanently disqualify the instance, or a single-instance
+	// configuration would never actually retry (the maxRetries multiplier would be
+	// dead). Blocking only after maxRetries attempts preserves round-robin rotation
+	// (other instances are still preferred first via getNextInstance) while honoring
+	// the configured retry budget per instance.
+	triedCount := make(map[string]int)
 
 	for attempt := 0; attempt < c.maxRetries*len(c.instances); attempt++ {
 		// Honor context cancellation: once the caller has given up, stop
@@ -320,12 +328,14 @@ func (c *MultiLLMCoordinator) TranslateWithRetry(
 			break
 		}
 
-		// Skip if already tried this instance
-		if triedInstances[instance.ID] {
+		// Skip only instances that have already exhausted their per-instance retry
+		// budget; allow up to maxRetries attempts each so transient failures are
+		// genuinely retried.
+		if triedCount[instance.ID] >= c.maxRetries {
 			continue
 		}
 
-		triedInstances[instance.ID] = true
+		triedCount[instance.ID]++
 
 		c.emitEvent(events.Event{
 			Type:      "translation_attempt",

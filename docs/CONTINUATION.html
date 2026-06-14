@@ -175,9 +175,9 @@
 <h1
 id="continuation--helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 49 <strong>Last modified:</strong>
-2026-06-15T02:00:00Z</p>
-<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 33 real bugs (19 submodule + 14 main) -->
+<p><strong>Revision:</strong> 50 <strong>Last modified:</strong>
+2026-06-15T02:45:00Z</p>
+<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 35 real bugs (20 submodule + 15 main) -->
 
 <h3
 id="session-2026-06-14v--cross-submodule-bug-hunt-campaign-11428-equal-codebase">Session
@@ -321,10 +321,30 @@ translation served) across SQLite/Postgres/Redis; length-prefix fix +
 <td><strong>MAIN</strong> pkg/verification</td>
 <td>nondeterministic consensus tie-break (map-order-dependent verdict,
 §11.4.50) + untranslated-char double-count corrupting quality score</td>
-<td>(wave 9)</td>
+<td>54b50c3</td>
+</tr>
+<tr>
+<td><strong>MAIN</strong> pkg/markdown</td>
+<td>inline code-span corrupted by emphasis/link regexes
+(<code>file_name_v2</code>→<code>file*name*v2</code>) in EPUB↔︎MD
+round-trip; PUA-placeholder protection</td>
+<td>(wave 10)</td>
+</tr>
+<tr>
+<td><strong>MAIN</strong> pkg/coordination</td>
+<td>TranslateWithRetry never retried (gave up after 1 attempt/instance
+despite maxRetries) — silent loss of recoverable translation</td>
+<td>(wave 10)</td>
 </tr>
 </tbody>
 </table>
+<p><strong>Clean non-findings (§11.4.6, mutation-verified the existing
+guards are real):</strong> pkg/translator root (data-loss guard
+genuine), pkg/events+pkg/websocket (concurrency already hardened),
+pkg/script (rule-based scope correct). Hunted main packages now broad:
+distributed, verifier, ebook/fb2, storage, security, verification,
+markdown, coordination, translator, events, websocket, script + 8
+submodules.</p>
 <p><strong>Inline non-finding (§11.4.6):</strong> pkg/script (Serbian
 Cyrillic↔︎Latin) audited — conversion correct for its rule-based scope
 (all 30 letters both directions, uppercase-digraph all-caps logic sound,

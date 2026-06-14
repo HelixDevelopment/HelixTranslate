@@ -829,10 +829,30 @@ func restoreEscapes(s string) string {
 	return b.String()
 }
 
+// inlineCodeRegex matches a single-backtick inline code span. The content is
+// captured non-greedily so adjacent spans on one line are matched separately.
+var inlineCodeRegex = regexp.MustCompile("`([^`]+)`")
+
 // convertInlineMarkdown converts inline markdown formatting to HTML
 func (c *MarkdownToEPUBConverter) convertInlineMarkdown(text string) string {
 	// First escape XML special characters in the raw text
 	text = c.escapeXML(text)
+
+	// Extract inline code spans FIRST and replace each with an opaque
+	// placeholder, so the emphasis/link/image regexes below NEVER see the
+	// metacharacters inside a `code` span. Inline code is literal by definition:
+	// `file_name_v2` must ship as <code>file_name_v2</code>, not have its
+	// underscores rewritten to <em> (which then round-trips to `file*name*v2` —
+	// permanent corruption of the code content). The captured content is already
+	// XML-escaped (escapeXML ran above) and is re-inserted verbatim after the
+	// other rules, wrapped in <code>…</code>.
+	var codeSpans []string
+	text = inlineCodeRegex.ReplaceAllStringFunc(text, func(m string) string {
+		sub := inlineCodeRegex.FindStringSubmatch(m)
+		idx := len(codeSpans)
+		codeSpans = append(codeSpans, sub[1])
+		return inlineCodePlaceholder(idx)
+	})
 
 	// Hide backslash-escaped markdown metacharacters from the substitution
 	// regexes below so "\*literal\*" is NOT treated as emphasis. The escape is
@@ -848,9 +868,6 @@ func (c *MarkdownToEPUBConverter) convertInlineMarkdown(text string) string {
 	// Process after bold to avoid matching ** or __
 	text = regexp.MustCompile(`\*([^*]+?)\*`).ReplaceAllString(text, "<em>$1</em>")
 	text = regexp.MustCompile(`_([^_]+?)_`).ReplaceAllString(text, "<em>$1</em>")
-
-	// Code: `text`
-	text = regexp.MustCompile("`([^`]+)`").ReplaceAllString(text, "<code>$1</code>")
 
 	// Image: ![alt](src) — MUST run before the link rule, since the link rule's
 	// "[text](url)" pattern also matches the "[alt](src)" tail of an image. The
@@ -869,7 +886,30 @@ func (c *MarkdownToEPUBConverter) convertInlineMarkdown(text string) string {
 	// Decode the protected backslash-escapes back to their literal characters.
 	text = restoreEscapes(text)
 
+	// Re-insert the inline code spans, wrapping each verbatim content in
+	// <code>…</code>. Done LAST so the code content was never exposed to the
+	// emphasis/link/image rules above.
+	for i, span := range codeSpans {
+		text = strings.Replace(text, inlineCodePlaceholder(i), "<code>"+span+"</code>", 1)
+	}
+
 	return text
+}
+
+// inlineCodePlaceholderBase is a Private-Use-Area rune base distinct from
+// inlineEscapePlaceholderBase, used to stand in for an extracted inline code
+// span while the emphasis/link/image regexes run. The index is bracketed by the
+// base rune and a sentinel rune so it cannot collide with surrounding text and
+// cannot itself be matched by the markdown regexes.
+const (
+	inlineCodePlaceholderBase = rune(0xE200)
+	inlineCodePlaceholderEnd  = rune(0xE201)
+)
+
+// inlineCodePlaceholder returns a unique, regex-inert placeholder string for the
+// idx-th extracted inline code span.
+func inlineCodePlaceholder(idx int) string {
+	return string(inlineCodePlaceholderBase) + fmt.Sprintf("%d", idx) + string(inlineCodePlaceholderEnd)
 }
 
 // escapeXML escapes special XML characters

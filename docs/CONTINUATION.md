@@ -1,9 +1,9 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 49
-**Last modified:** 2026-06-15T02:00:00Z
+**Revision:** 50
+**Last modified:** 2026-06-15T02:45:00Z
 
-<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 33 real bugs (19 submodule + 14 main) -->
+<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 35 real bugs (20 submodule + 15 main) -->
 
 ### Session 2026-06-14v — cross-submodule bug-hunt campaign (§11.4.28 equal-codebase)
 
@@ -35,7 +35,11 @@ parallel session (64b7d08) so it was integrated, NOT double-fixed.** Host API ra
 | containers pkg/crossbuild | copyFile false-FAIL on directory artifacts (jpackage app-images) — successful build reported as failure (§11.4.1), all 3 non-Apple backends | ebf2641 |
 | **MAIN** pkg/storage | cache-key NUL-delimiter collision (distinct (lang,provider,model,text) tuples → same sha256 → WRONG cached translation served) across SQLite/Postgres/Redis; length-prefix fix + §11.4.120 reconcile | c8e36d8 |
 | **MAIN** pkg/security | JWT with NO `exp` claim accepted → never-expiring session (jwt/v5 treats exp optional); `jwt.WithExpirationRequired()` | (wave 9) |
-| **MAIN** pkg/verification | nondeterministic consensus tie-break (map-order-dependent verdict, §11.4.50) + untranslated-char double-count corrupting quality score | (wave 9) |
+| **MAIN** pkg/verification | nondeterministic consensus tie-break (map-order-dependent verdict, §11.4.50) + untranslated-char double-count corrupting quality score | 54b50c3 |
+| **MAIN** pkg/markdown | inline code-span corrupted by emphasis/link regexes (`file_name_v2`→`file*name*v2`) in EPUB↔MD round-trip; PUA-placeholder protection | (wave 10) |
+| **MAIN** pkg/coordination | TranslateWithRetry never retried (gave up after 1 attempt/instance despite maxRetries) — silent loss of recoverable translation | (wave 10) |
+
+**Clean non-findings (§11.4.6, mutation-verified the existing guards are real):** pkg/translator root (data-loss guard genuine), pkg/events+pkg/websocket (concurrency already hardened), pkg/script (rule-based scope correct). Hunted main packages now broad: distributed, verifier, ebook/fb2, storage, security, verification, markdown, coordination, translator, events, websocket, script + 8 submodules.
 
 **Inline non-finding (§11.4.6):** pkg/script (Serbian Cyrillic↔Latin) audited — conversion correct for its rule-based scope (all 30 letters both directions, uppercase-digraph all-caps logic sound, rune-iterated); the loanword `nj`/`dž` disambiguation (e.g. `injekcija`→`инјекција`) is an inherent rule-based-transliteration limitation needing an exception dictionary, NOT a narrow bug — no fix manufactured.
 
