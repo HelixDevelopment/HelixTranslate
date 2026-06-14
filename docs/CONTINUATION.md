@@ -1,7 +1,30 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 36
-**Last modified:** 2026-06-14T15:24:00Z
+**Revision:** 38
+**Last modified:** 2026-06-14T15:51:00Z
+
+<!-- session 2026-06-14o: latent brittle-test fixes surfaced by the sweeps (HEAD 817b9dd) -->
+
+### Session 2026-06-14o — latent brittle test-harness defects fixed (HEAD 817b9dd); full sweep GREEN 54/0
+
+Two latent test defects (NOT caused by this session's source changes — different packages) surfaced one-per-sweep by the §11.4.118 discovery-pressure of repeated full sweeps, root-caused (§11.4.102) + fixed + proven:
+
+- **ab7db0e** tests: DETERMINISTIC goroutine panic in tests/websocket_monitoring_test.go — concurrent map WRITE at the handleClientMessages defer delete. `go test -race` confirmed 22 races (suite.server.Clients + suite.testSessions + *TestSession fields accessed from the main goroutine, /status handler, and per-client goroutines without consistent locking; concurrent map read+write is a Go FATAL). Fixed: all shared-map access under suite.server.mu; thread-safe read helpers (clientCount/sessionCount/sessionSnapshot/totalSessionEvents, lock+copy, no I/O under lock) for /status + every assertion; TestMultipleClients writers joined via sync.WaitGroup (sleep = no happens-before edge → leaked writer raced another test's write to the same gorilla conn). PROVEN: `-race -count=3` → 0 races; plain `-count=5` → ok.
+- **817b9dd** tests: DETERMINISTIC fail in cmd/translate-ssh TestSSHErrorHandling/connection_timeout — the 'connection timeout' case asserted the error contains 'connection refused', but this host's slow localhost resolver returns 'lookup localhost: i/o timeout' (§11.4.1 FAIL-bluff: failed on environment, not product defect). Broadened the connection-class assertion to accept any connection-failure indicator (refused/timeout/no route/unreachable/no such host/lookup); auth case keeps its specific check; still requires a real error. PROVEN: `-count=5` → ok.
+
+**Scope note (§11.4.28):** the same brittle 'connection refused' assertion class exists in the challenges/containers/helix_qa SUBMODULES (separate go.mod → NOT in the main `go test ./...` sweep; their own repos/sweeps — separate work, noted for follow-up).
+
+**FULL SWEEP GREEN** at HEAD 817b9dd: `go test ./... -p 1` = **54 ok / 0 FAIL** (qa-results/full_sweep_20260614_155722.log). build+vet exit 0. All 7 main-stream commits this session (PDF, output-format, .html, doc-sync, deepseek-v4, websocket-race, ssh-test) pushed FF to both upstreams (no force §11.4.113).
+
+<!-- session 2026-06-14n: provider allowlist §11.4.150 audit — deepseek v4 fix + findings (HEAD 0fd1a34) -->
+
+### Session 2026-06-14n — provider model-allowlist §11.4.150 audit (live /models, not memory)
+
+- **0fd1a34** deepseek: ValidModels[ProviderDeepSeek] was stale — only legacy {deepseek-chat,deepseek-coder}; deepseek.go HARD-REJECTS unlisted models, so the CURRENT flagship was rejected. Live DeepSeek /models (verified 2026-06-14) returns **deepseek-v4-flash + deepseek-v4-pro**; v4-flash proven to translate via full CLI (docs/qa/e2e_deepseek_v4_*, 136 Cyrillic chars). Added both (NOT deepseek-reasoner — not in /models, §11.4.6); kept legacy aliases (§11.4.122). RED-proven guard deepseek_v4_models_test.go. **2d98509** doc-sync: generateOutput comment now lists .html/.htm.
+- **AUDIT FINDINGS (captured, for operator/future work):**
+  - **Mistral**: allowlist {large,medium,small}-latest all present in live /models → FUNCTIONAL (aliases track current). NOT widened: the `magistral-*` reasoning family returns `content` as a STRUCTURED LIST (thinking blocks), which our OpenAI-compatible string-content clients CANNOT parse — adding magistral-medium would break for users. **Latent gap (operator/design):** supporting reasoning-model structured `content` is a non-trivial client change, not a blind allowlist add. (deepseek-v4-flash is safe because it returns `content` as a plain STRING with reasoning in a separate field — verified.)
+  - **Gemini**: live /models re-confirms `API Key not found` → §11.4.6 the gemini failures are an OPERATOR CREDENTIAL issue, NOT a code bug. Operator action: refresh GEMINI_API_KEY.
+  - Other ~30 providers' allowlists: not audited (no keys / would need per-provider live verification). Adding current models is safe-but-must-be-verified-per-model (string-content shape + real translation), never from memory (§11.4.99/§11.4.150).
 
 <!-- session 2026-06-14m: .html output added — format matrix complete (HEAD fb07a59) -->
 
