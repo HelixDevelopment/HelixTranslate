@@ -15,7 +15,6 @@ import (
 	"digital.vasic.translator/internal/verifier/selection"
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
-	"digital.vasic.translator/pkg/fb2"
 	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/pkg/markdown"
 	"digital.vasic.translator/pkg/script"
@@ -780,54 +779,16 @@ func parseInputFile(filePath string) (string, string, error) {
 }
 
 func convertToMarkdown(content, format string) (string, error) {
-	// Use existing markdown converter
-	switch format {
-	case "fb2":
-		// Create temporary input file
-		tmpFile := filepath.Join(os.TempDir(), "input.fb2")
-		if err := os.WriteFile(tmpFile, []byte(content), 0644); err != nil {
-			return "", fmt.Errorf("failed to write temp file: %w", err)
-		}
-		defer os.Remove(tmpFile)
-
-		// Create temporary output file
-		outputFile := filepath.Join(os.TempDir(), "output.md")
-		defer os.Remove(outputFile)
-
-		// Convert using FB2 to markdown workflow
-		converter := fb2.NewMarkdownConverter(logger.NewNoOpLogger())
-		if err := converter.ConvertToMarkdown(tmpFile, outputFile); err != nil {
-			return "", fmt.Errorf("failed to convert FB2 to markdown: %w", err)
-		}
-
-		// Read result
-		result, err := os.ReadFile(outputFile)
-		return string(result), err
-	case "epub":
-		// Create temporary input file
-		tmpFile := filepath.Join(os.TempDir(), "input.epub")
-		if err := os.WriteFile(tmpFile, []byte(content), 0644); err != nil {
-			return "", fmt.Errorf("failed to write temp file: %w", err)
-		}
-		defer os.Remove(tmpFile)
-
-		// Create temporary output file
-		outputFile := filepath.Join(os.TempDir(), "output.md")
-		defer os.Remove(outputFile)
-
-		// Convert using EPUB to markdown workflow
-		converter := markdown.NewEPUBToMarkdownConverter(false, "")
-		if err := converter.ConvertEPUBToMarkdown(tmpFile, outputFile); err != nil {
-			return "", fmt.Errorf("failed to convert EPUB to markdown: %w", err)
-		}
-
-		// Read result
-		result, err := os.ReadFile(outputFile)
-		return string(result), err
-	default:
-		// Simple text conversion for other formats
-		return content, nil
-	}
+	// parseInputFile has ALREADY parsed the source format (FB2/EPUB/HTML/DOCX/TXT/
+	// ...) into extracted text via bookToString — `content` IS that extracted text,
+	// not the original file bytes. The previous fb2/epub special-cases re-wrote this
+	// extracted text into a temp .fb2/.epub and re-parsed it AS that format, which
+	// always failed ("failed to parse FB2: EOF" / "zip: not a valid zip file") and
+	// broke FB2 and EPUB INPUT end-to-end (only TXT/HTML/DOCX, which hit the default
+	// passthrough, worked). All formats now use the already-extracted content
+	// uniformly. (format is retained in the signature for call-site clarity.)
+	_ = format
+	return content, nil
 }
 
 func bookToString(book *ebook.Book) string {
