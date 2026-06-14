@@ -861,7 +861,7 @@ func verifyTranslation(text, targetLang, script string) bool {
 // another). The output format is now honored. An unsupported extension is an
 // explicit, honest error (§11.4.6) rather than a misnamed EPUB.
 //
-// Supported: .epub (default / no extension), .fb2, .txt, .md.
+// Supported: .epub (default / no extension), .fb2, .html, .htm, .txt, .md.
 func generateOutput(content, outputPath, inputFile string) error {
 	ext := strings.ToLower(strings.TrimPrefix(filepath.Ext(outputPath), "."))
 	switch ext {
