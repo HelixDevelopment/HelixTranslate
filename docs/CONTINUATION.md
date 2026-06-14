@@ -1,10 +1,21 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 24
-**Last modified:** 2026-06-14T01:20:00Z
+**Revision:** 25
+**Last modified:** 2026-06-14T06:30:00Z
 **Purpose:** Single canonical out-of-the-box entry point for any fresh session (§11.4.131 / §12.10 / §11.4.127). To resume: point a new session at THIS file, run `git fetch --all`, and say **continue**.
 
 ---
+
+<!-- session 2026-06-14a: host-safe single-stream inline (HEAD bd8a1ef) — 2 more real bugs while FD-pressured -->
+
+### Session 2026-06-14a — host-safe single-stream inline (HEAD bd8a1ef) — 2 more real data/correctness bugs in pkg/translator/llm (the chunking path subagents skipped)
+
+Context: operator returned, asked for 3-4 parallel subagents; chose "free FDs first" but host `kern.num_files` stayed ~94-95% of maxfiles (13+ concurrent claude processes, NOT freed). Per §12 host-safety I did NOT launch parallel subagents (ENFILE risk); instead ran host-safe single-stream INLINE work (targeted -p 1 tests never hit ENFILE all night) and armed a background watcher (b3qgjr30s) to auto-launch the parallel wave the instant FD<80%. 2 commits, pushed FF.
+
+- **24b0fd0** — splitText DROPPED PARAGRAPH SEPARATORS at chunk boundaries (the >20KB size-error retry path subagents had skipped as out-of-scope). It stripped "\n\n" via Split + re-added inconsistently (never around an oversized para, never across a chunk seam); reassembly strings.Join(chunks,"") then glued the last paragraph of one chunk to the first of the next; "\n\n\n\n" collapsed to "\n\n". Structural data loss in translated large chapters. Fix: splitText now tiles losslessly — re-attach each para's "\n\n" so Join(splitText(text),"")==text (makes reassembly correct by construction). RED (5 cases dropped \n\n) -> GREEN -> mutation polarity proven.
+- **bd8a1ef** — in-memory cache-key COLLISION served wrong translation: key was fmt.Sprintf("%s:%s",text,contextStr); ":" inside text means ("a:b","c") and ("a","b:c") both -> "a:b:c" -> 2nd request served 1st's translation (same class as the storage Redis fix). Fix: makeLLMCacheKey injective via length prefix "%d:%s:%s". RED (Translate served xlate(a:b) for input "a") -> GREEN -> mutation-proven (helper body).
+
+**SESSION GRAND TOTAL now: 38 real bugs** (waves 1-5 = 32 + wave-5 4... see below) + 2 reconciliations + §11.4.98 conversion. Build STABLE GREEN, `go build ./...` exit 0; pkg/translator/llm passes offline. Watcher b3qgjr30s armed (40min cap) → auto-launch 3-4 parallel subagents for a §11.4.118 second-pass discovery wave the moment FD<80%. While FD-pressured, conductor continues host-safe single-stream inline bug-hunting.
 
 <!-- session 2026-06-13g: bug-hunt wave 5 + STABLE GREEN BUILD + §12 host-safety pace (HEAD ceab1db) -->
 
