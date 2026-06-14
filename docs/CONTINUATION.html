@@ -175,9 +175,9 @@
 <h1
 id="continuation--helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 51 <strong>Last modified:</strong>
-2026-06-15T03:30:00Z</p>
-<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 36 real bugs (20 submodule + 16 main) -->
+<p><strong>Revision:</strong> 52 <strong>Last modified:</strong>
+2026-06-15T04:15:00Z</p>
+<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 38 real bugs (20 submodule + 18 main) -->
 
 <h3
 id="session-2026-06-14v--cross-submodule-bug-hunt-campaign-11428-equal-codebase">Session
@@ -341,10 +341,32 @@ despite maxRetries) — silent loss of recoverable translation</td>
 <td>truncateContent byte-sliced mid-rune → invalid UTF-8 Cyrillic fed to
 the analysis LLM, degrading character/terminology JSON; rune-boundary
 backup</td>
-<td>(wave 11)</td>
+<td>ae33585</td>
+</tr>
+<tr>
+<td><strong>MAIN</strong> pkg/grpc</td>
+<td>CoreTranslatorImpl GetStatus read job state lock-free while the
+pipeline mutated it — data race on every in-flight status poll (RPC);
+RLock + mutator locks</td>
+<td>(wave 12)</td>
+</tr>
+<tr>
+<td><strong>MAIN</strong> pkg/progress</td>
+<td>items-only mode (totalChapters=0) never computed PercentComplete —
+dashboard bar stuck at 0% to completion; items-driven percent
+branch</td>
+<td>(wave 12)</td>
 </tr>
 </tbody>
 </table>
+<p><strong>More clean non-findings (§11.4.6):</strong> pkg/format +
+pkg/hardware (detection correct; 2 Windows-only leads
+UNCONFIRMED-flagged, not fabricated), pkg/report (snapshot+clamp+locks
+correct). Hunt has reached the well-hardened core — consecutive clean
+non-findings across
+format/hardware/report/translator/events/websocket/script signal
+§11.4.118 completeness for the rule-based + already-hardened
+packages.</p>
 <p><strong>Clean non-findings (§11.4.6, mutation-verified the existing
 guards are real):</strong> pkg/translator root (data-loss guard
 genuine), pkg/events+pkg/websocket (concurrency already hardened),

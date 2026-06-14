@@ -512,6 +512,13 @@ func (ct *CoreTranslatorImpl) createStep(name, description string) *proto.Transl
 }
 
 func (ct *CoreTranslatorImpl) updateJobStep(job *TranslationJob, step *proto.TranslationStep) {
+	// These job fields (Step / Steps / Progress / UpdateTime) are read concurrently
+	// by GetStatus / Cancel under ct.mutex while a translation is in flight (a
+	// status poll of a running job). The pipeline ran these mutations unlocked,
+	// racing the locked reader (proven by -race). Guard them under the same lock.
+	ct.mutex.Lock()
+	defer ct.mutex.Unlock()
+
 	job.Step = step.Name
 	job.Steps = append(job.Steps, step)
 
@@ -522,11 +529,19 @@ func (ct *CoreTranslatorImpl) updateJobStep(job *TranslationJob, step *proto.Tra
 }
 
 func (ct *CoreTranslatorImpl) completeStep(step *proto.TranslationStep) {
+	// step is already inside job.Steps, which GetStatus exposes by reference, so its
+	// fields are read concurrently by the status RPC. Mutate under ct.mutex.
+	ct.mutex.Lock()
+	defer ct.mutex.Unlock()
+
 	step.Status = "completed"
 	step.EndedAt = timeToProto(time.Now())
 }
 
 func (ct *CoreTranslatorImpl) failStep(step *proto.TranslationStep, err error) {
+	ct.mutex.Lock()
+	defer ct.mutex.Unlock()
+
 	step.Status = "failed"
 	step.EndedAt = timeToProto(time.Now())
 	step.ErrorMessage = err.Error()
@@ -542,7 +557,11 @@ func (ct *CoreTranslatorImpl) addGeneratedFile(job *TranslationJob, path, fileTy
 		VerificationMessage: verification,
 		CreatedAt:           timeToProto(time.Now()),
 	}
+	// job.Files is read concurrently by GetStatus under ct.mutex; appending here
+	// without the lock raced the reader (proven by -race). Guard the append.
+	ct.mutex.Lock()
 	job.Files = append(job.Files, file)
+	ct.mutex.Unlock()
 }
 
 func (ct *CoreTranslatorImpl) getContentType(fileType string) string {
@@ -612,10 +631,17 @@ func (ct *CoreTranslatorImpl) Cancel(sessionID string) error {
 }
 
 func (ct *CoreTranslatorImpl) GetStatus(sessionID string) (*proto.TranslationStatusResponse, error) {
+	// Hold the read lock across the FIELD reads, not merely the map lookup. The
+	// previous code released the lock right after the lookup, then read the job's
+	// mutable fields (Status / Progress / Step / Files / Steps) lock-free — those
+	// fields are written concurrently by the running pipeline (updateJobStep /
+	// addGeneratedFile / completeStep / failStep) and by Cancel, so a status poll
+	// of an in-flight job raced the writers (proven by -race). The reads are pure
+	// in-memory field copies (no I/O), so holding RLock across them is safe.
 	ct.mutex.RLock()
-	job, exists := ct.sessions[sessionID]
-	ct.mutex.RUnlock()
+	defer ct.mutex.RUnlock()
 
+	job, exists := ct.sessions[sessionID]
 	if !exists {
 		return nil, fmt.Errorf("translation session not found: %s", sessionID)
 	}

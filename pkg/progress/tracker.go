@@ -202,6 +202,19 @@ func (t *Tracker) updateProgress() {
 		if t.progress.PercentComplete < 0.0 {
 			t.progress.PercentComplete = 0.0
 		}
+	} else if t.progress.ItemsTotal > 0 {
+		// Items-only mode (no chapters): drive the percentage from the item
+		// counters so an items-based run shows real progress instead of a
+		// 0% bar through to completion. Mirrors the items-based ETA fallback
+		// in GetProgress, which is only meaningful when chapters are absent.
+		completed := t.progress.ItemsCompleted
+		if completed > t.progress.ItemsTotal {
+			completed = t.progress.ItemsTotal // never exceed 100% on overshoot
+		}
+		if completed < 0 {
+			completed = 0
+		}
+		t.progress.PercentComplete = float64(completed) / float64(t.progress.ItemsTotal) * 100.0
 	}
 
 	// Update elapsed time

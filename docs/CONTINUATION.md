@@ -1,9 +1,9 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 51
-**Last modified:** 2026-06-15T03:30:00Z
+**Revision:** 52
+**Last modified:** 2026-06-15T04:15:00Z
 
-<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 36 real bugs (20 submodule + 16 main) -->
+<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 38 real bugs (20 submodule + 18 main) -->
 
 ### Session 2026-06-14v — cross-submodule bug-hunt campaign (§11.4.28 equal-codebase)
 
@@ -38,7 +38,11 @@ parallel session (64b7d08) so it was integrated, NOT double-fixed.** Host API ra
 | **MAIN** pkg/verification | nondeterministic consensus tie-break (map-order-dependent verdict, §11.4.50) + untranslated-char double-count corrupting quality score | 54b50c3 |
 | **MAIN** pkg/markdown | inline code-span corrupted by emphasis/link regexes (`file_name_v2`→`file*name*v2`) in EPUB↔MD round-trip; PUA-placeholder protection | (wave 10) |
 | **MAIN** pkg/coordination | TranslateWithRetry never retried (gave up after 1 attempt/instance despite maxRetries) — silent loss of recoverable translation | 84d462e |
-| **MAIN** pkg/preparation | truncateContent byte-sliced mid-rune → invalid UTF-8 Cyrillic fed to the analysis LLM, degrading character/terminology JSON; rune-boundary backup | (wave 11) |
+| **MAIN** pkg/preparation | truncateContent byte-sliced mid-rune → invalid UTF-8 Cyrillic fed to the analysis LLM, degrading character/terminology JSON; rune-boundary backup | ae33585 |
+| **MAIN** pkg/grpc | CoreTranslatorImpl GetStatus read job state lock-free while the pipeline mutated it — data race on every in-flight status poll (RPC); RLock + mutator locks | (wave 12) |
+| **MAIN** pkg/progress | items-only mode (totalChapters=0) never computed PercentComplete — dashboard bar stuck at 0% to completion; items-driven percent branch | (wave 12) |
+
+**More clean non-findings (§11.4.6):** pkg/format + pkg/hardware (detection correct; 2 Windows-only leads UNCONFIRMED-flagged, not fabricated), pkg/report (snapshot+clamp+locks correct). Hunt has reached the well-hardened core — consecutive clean non-findings across format/hardware/report/translator/events/websocket/script signal §11.4.118 completeness for the rule-based + already-hardened packages.
 
 **Clean non-findings (§11.4.6, mutation-verified the existing guards are real):** pkg/translator root (data-loss guard genuine), pkg/events+pkg/websocket (concurrency already hardened), pkg/script (rule-based scope correct). Hunted main packages now broad: distributed, verifier, ebook/fb2, storage, security, verification, markdown, coordination, translator, events, websocket, script + 8 submodules.
 
