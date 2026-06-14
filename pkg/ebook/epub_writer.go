@@ -117,10 +117,15 @@ func (w *EPUBWriter) writeContentOPF(zw *zip.Writer, book *Book, identifier stri
 	var manifest strings.Builder
 	var spine strings.Builder
 
-	// Add cover to manifest if present
+	// Add cover to manifest if present. The cover format is sniffed from its
+	// magic bytes so the manifest media-type + href match the ACTUAL image
+	// (e.g. a PNG cover from a parsed EPUB is no longer mislabeled image/jpeg).
 	hasCover := len(book.Metadata.Cover) > 0
 	if hasCover {
-		manifest.WriteString(`    <item id="cover-image" href="cover.jpg" media-type="image/jpeg" properties="cover-image"/>` + "\n")
+		_, coverMediaType, coverHref := coverImageType(book.Metadata.Cover)
+		manifest.WriteString(fmt.Sprintf(
+			`    <item id="cover-image" href="%s" media-type="%s" properties="cover-image"/>%s`,
+			coverHref, coverMediaType, "\n"))
 	}
 
 	for i := range book.Chapters {
@@ -309,15 +314,50 @@ func (w *EPUBWriter) formatSection(section *Section) string {
 	return sb.String()
 }
 
-// writeCover writes the cover image file
+// writeCover writes the cover image file using a filename whose extension
+// matches the sniffed image format, so the stored bytes never contradict the
+// file extension or the OPF manifest media-type.
 func (w *EPUBWriter) writeCover(zw *zip.Writer, coverData []byte) error {
-	writer, err := zw.Create("OEBPS/cover.jpg")
+	_, _, coverHref := coverImageType(coverData)
+	writer, err := zw.Create("OEBPS/" + coverHref)
 	if err != nil {
 		return err
 	}
 
 	_, err = writer.Write(coverData)
 	return err
+}
+
+// coverImageType sniffs the image format from the leading magic bytes of the
+// cover and returns (extension, OPF media-type, href filename). It recognises
+// PNG, GIF, WEBP and SVG; everything else (including JPEG) defaults to JPEG,
+// preserving the historical behaviour for unrecognised/JPEG covers.
+func coverImageType(data []byte) (ext, mediaType, href string) {
+	switch {
+	case len(data) >= 8 && data[0] == 0x89 && data[1] == 'P' && data[2] == 'N' && data[3] == 'G' &&
+		data[4] == 0x0D && data[5] == 0x0A && data[6] == 0x1A && data[7] == 0x0A:
+		return "png", "image/png", "cover.png"
+	case len(data) >= 6 && data[0] == 'G' && data[1] == 'I' && data[2] == 'F' &&
+		data[3] == '8' && (data[4] == '7' || data[4] == '9') && data[5] == 'a':
+		return "gif", "image/gif", "cover.gif"
+	case len(data) >= 12 && data[0] == 'R' && data[1] == 'I' && data[2] == 'F' && data[3] == 'F' &&
+		data[8] == 'W' && data[9] == 'E' && data[10] == 'B' && data[11] == 'P':
+		return "webp", "image/webp", "cover.webp"
+	case isSVGCover(data):
+		return "svg", "image/svg+xml", "cover.svg"
+	default:
+		return "jpg", "image/jpeg", "cover.jpg"
+	}
+}
+
+// isSVGCover reports whether the cover bytes look like an SVG document
+// (XML declaration / leading whitespace followed by an <svg root element).
+func isSVGCover(data []byte) bool {
+	s := strings.TrimSpace(string(data))
+	if len(s) > 512 {
+		s = s[:512]
+	}
+	return strings.Contains(s, "<svg")
 }
 
 // escapeXML escapes XML special characters
