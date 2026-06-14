@@ -649,7 +649,12 @@ func (bp *BookPolisher) buildConsensus(
 	}
 
 	result.Consensus = maxAgreement
-	result.Confidence = float64(maxAgreement) / count
+	// Guard against count==0 (empty providers / all verifications errored):
+	// float64(0)/0 is NaN, which would poison result.Confidence and propagate
+	// into report.AverageConfidence and every downstream score aggregate.
+	if count > 0 {
+		result.Confidence = float64(maxAgreement) / count
+	}
 
 	// Apply polished version if consensus reached
 	if maxAgreement >= bp.config.MinConsensus {

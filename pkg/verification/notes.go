@@ -302,9 +302,25 @@ func (nt *NoteTaker) parseNote(
 			}
 			currentField = "content"
 		} else if strings.HasPrefix(line, "EXAMPLES:") {
+			// Flush any accumulated content before switching fields. EXAMPLES is
+			// an optional section that may follow CONTENT directly (with no later
+			// IMPLICATIONS marker). Without this flush, a NOTE+TITLE+CONTENT+EXAMPLES
+			// block that omits IMPLICATIONS ends in the "examples" field, leaves
+			// note.Content empty, and is silently dropped by the required-fields
+			// check — mirroring the content→implications flush already done above.
+			if currentField == "content" {
+				note.Content = contentBuilder.String()
+				contentBuilder.Reset()
+			}
 			currentField = "examples"
 		} else if strings.HasPrefix(line, "IMPLICATIONS:") {
-			note.Content = contentBuilder.String()
+			// Flush content only if it has not already been flushed (e.g. by an
+			// intervening EXAMPLES marker). Otherwise an EXAMPLES section between
+			// CONTENT and IMPLICATIONS would cause this to clobber note.Content
+			// with the now-empty builder.
+			if currentField == "content" {
+				note.Content = contentBuilder.String()
+			}
 			contentBuilder.Reset()
 			implications := strings.TrimSpace(strings.TrimPrefix(line, "IMPLICATIONS:"))
 			if implications != "" {

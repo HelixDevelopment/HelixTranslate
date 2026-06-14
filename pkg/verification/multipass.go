@@ -560,15 +560,20 @@ func (mpp *MultiPassPolisher) generateFinalReport(result *MultiPassResult) *Poli
 	// Use last pass report as base
 	finalReport := result.PassResults[len(result.PassResults)-1].Report
 
-	// Add summary of all passes
-	finalReport.TotalSections = 0
-	finalReport.TotalChanges = result.TotalChanges
-
+	// Sum every pass's section count into a LOCAL first. finalReport aliases the
+	// last pass's Report pointer, so zeroing finalReport.TotalSections and then
+	// summing in-place would (a) zero the last pass's own contribution and (b)
+	// re-read finalReport's running total for the last pass — under-counting the
+	// combined total. Accumulate separately, assign once.
+	totalSections := 0
 	for _, passResult := range result.PassResults {
 		if passResult.Report != nil {
-			finalReport.TotalSections += passResult.Report.TotalSections
+			totalSections += passResult.Report.TotalSections
 		}
 	}
+
+	finalReport.TotalSections = totalSections
+	finalReport.TotalChanges = result.TotalChanges
 
 	return finalReport
 }
