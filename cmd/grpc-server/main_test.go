@@ -1,6 +1,49 @@
 package main
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
+
+// TestBuildServerConfig_HonorsMaxConnections proves the documented
+// -max-connections flag (config.MaxConnections) actually reaches the gRPC
+// server's MaxConcurrentTranslations limit — the value that gates session
+// admission in pkg/grpc/server.go. Before the fix, MaxConcurrentTranslations
+// was hardcoded to 50 in main(), so setting -max-connections=500 silently had
+// no effect. This test FAILS on that broken behavior and PASSES once the flag
+// is wired through buildServerConfig.
+func TestBuildServerConfig_HonorsMaxConnections(t *testing.T) {
+	cfg := &ServerConfig{MaxConnections: 500, EnableMetrics: true}
+
+	got := buildServerConfig(cfg)
+
+	if got.MaxConcurrentTranslations != 500 {
+		t.Errorf("MaxConnections not honored: got MaxConcurrentTranslations=%d, want 500",
+			got.MaxConcurrentTranslations)
+	}
+	if got.EnableMetrics != true {
+		t.Errorf("EnableMetrics not propagated: got %v, want true", got.EnableMetrics)
+	}
+	if got.SessionTimeout != 24*time.Hour {
+		t.Errorf("SessionTimeout: got %v, want 24h", got.SessionTimeout)
+	}
+	if got.StreamBufferSize != 1000 {
+		t.Errorf("StreamBufferSize: got %d, want 1000", got.StreamBufferSize)
+	}
+}
+
+// TestBuildServerConfig_NonPositiveMaxConnectionsFallsBack proves a zero or
+// negative -max-connections value falls back to a sane default rather than
+// admitting zero sessions (which would make the server reject every request).
+func TestBuildServerConfig_NonPositiveMaxConnectionsFallsBack(t *testing.T) {
+	for _, mc := range []int{0, -5} {
+		got := buildServerConfig(&ServerConfig{MaxConnections: mc})
+		if got.MaxConcurrentTranslations != defaultMaxConcurrentTranslations {
+			t.Errorf("MaxConnections=%d must fall back: got MaxConcurrentTranslations=%d, want %d",
+				mc, got.MaxConcurrentTranslations, defaultMaxConcurrentTranslations)
+		}
+	}
+}
 
 // TestApplyEnvOverrides_HonorsDocumentedEnvVars proves the environment-variable
 // overrides advertised in printHelp() (GRPC_ADDRESS, GRPC_PORT, LOG_LEVEL,

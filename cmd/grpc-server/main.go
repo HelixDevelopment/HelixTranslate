@@ -55,12 +55,7 @@ func main() {
 	coreTranslator := translatorgrpc.NewCoreTranslator(log)
 
 	// Initialize server configuration
-	serverConfig := &translatorgrpc.ServerConfig{
-		MaxConcurrentTranslations: 50,
-		SessionTimeout:            24 * time.Hour,
-		StreamBufferSize:          1000,
-		EnableMetrics:             config.EnableMetrics,
-	}
+	serverConfig := buildServerConfig(config)
 
 	// Create gRPC server
 	grpcServer := translatorgrpc.NewServer(eventBus, log, coreTranslator, serverConfig)
@@ -108,6 +103,30 @@ func main() {
 		log.Info("Shutting down gRPC server...", nil)
 		grpcServer.Shutdown()
 		log.Info("gRPC server shutdown complete", nil)
+	}
+}
+
+// defaultMaxConcurrentTranslations is the fallback concurrency limit used when
+// the -max-connections flag (config.MaxConnections) is non-positive.
+const defaultMaxConcurrentTranslations = 1000
+
+// buildServerConfig maps the CLI/env ServerConfig onto the gRPC server's
+// runtime configuration. Critically it wires config.MaxConnections (the
+// documented -max-connections flag, also overridable via env) into
+// MaxConcurrentTranslations — the value that actually gates session admission
+// in pkg/grpc/server.go. Previously MaxConcurrentTranslations was hardcoded to
+// 50, so the documented -max-connections knob did nothing. A non-positive
+// MaxConnections falls back to defaultMaxConcurrentTranslations.
+func buildServerConfig(config *ServerConfig) *translatorgrpc.ServerConfig {
+	maxConcurrent := config.MaxConnections
+	if maxConcurrent <= 0 {
+		maxConcurrent = defaultMaxConcurrentTranslations
+	}
+	return &translatorgrpc.ServerConfig{
+		MaxConcurrentTranslations: maxConcurrent,
+		SessionTimeout:            24 * time.Hour,
+		StreamBufferSize:          1000,
+		EnableMetrics:             config.EnableMetrics,
 	}
 }
 

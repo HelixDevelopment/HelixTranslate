@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/websocket"
@@ -10,6 +11,22 @@ import (
 	"github.com/gin-gonic/gin"
 	gorillaws "github.com/gorilla/websocket"
 )
+
+// serverRunner abstracts the blocking server-start call so it can be injected
+// in tests. *gin.Engine.Run satisfies this signature.
+type serverRunner interface {
+	Run(addr ...string) error
+}
+
+// runServer starts the monitoring server on addr and PROPAGATES any startup
+// error (e.g. "address already in use") to the caller. Previously main()
+// called router.Run(...) and discarded its error return, so a failed bind was
+// silently swallowed — the process produced no diagnostic. Extracted as a pure
+// helper so the error-propagation contract is unit-testable without binding a
+// privileged port.
+func runServer(r serverRunner, addr string) error {
+	return r.Run(addr)
+}
 
 func main() {
 	// Initialize event bus
@@ -84,5 +101,8 @@ func main() {
 	fmt.Printf("🔗 WebSocket Endpoint: ws://localhost:%d/ws\n", port)
 	fmt.Printf("🏥 Health Check: http://localhost:%d/health\n", port)
 
-	router.Run(fmt.Sprintf(":%d", port))
+	if err := runServer(router, fmt.Sprintf(":%d", port)); err != nil {
+		fmt.Fprintf(os.Stderr, "❌ Monitoring server failed to start on :%d: %v\n", port, err)
+		os.Exit(1)
+	}
 }
