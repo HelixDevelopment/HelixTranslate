@@ -321,6 +321,7 @@ func (d *Detector) IsSupported(format Format) bool {
 		FormatEPUB,
 		FormatTXT,
 		FormatHTML,
+		FormatDOCX, // now backed by the stdlib OOXML parser (no license-gated dep)
 	}
 
 	for _, f := range supported {
@@ -338,6 +339,7 @@ func (d *Detector) GetSupportedFormats() []Format {
 		FormatEPUB,
 		FormatTXT,
 		FormatHTML,
+		FormatDOCX,
 	}
 }
 

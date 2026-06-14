@@ -334,6 +334,7 @@ func TestIsSupported(t *testing.T) {
 		FormatEPUB,
 		FormatTXT,
 		FormatHTML,
+		FormatDOCX, // §11.4.120: now supported via the stdlib OOXML parser
 	}
 
 	unsupportedFormats := []Format{
@@ -341,7 +342,6 @@ func TestIsSupported(t *testing.T) {
 		FormatMOBI,
 		FormatAZW,
 		FormatAZW3,
-		FormatDOCX,
 		FormatRTF,
 		FormatUnknown,
 	}
@@ -363,7 +363,7 @@ func TestGetSupportedFormats(t *testing.T) {
 	detector := NewDetector()
 
 	supported := detector.GetSupportedFormats()
-	expected := []Format{FormatFB2, FormatEPUB, FormatTXT, FormatHTML}
+	expected := []Format{FormatFB2, FormatEPUB, FormatTXT, FormatHTML, FormatDOCX}
 
 	if len(supported) != len(expected) {
 		t.Errorf("GetSupportedFormats() returned %d formats, expected %d", len(supported), len(expected))
