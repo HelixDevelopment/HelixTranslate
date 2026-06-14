@@ -49,6 +49,18 @@
 #       with no gaps (the contiguous sequence ATM-001..ATM-NNN). A heading
 #       without an id, a duplicate id, or a gap in the sequence is a §11.4.54
 #       violation.
+#   CM-DOC-SIBLING-SYNC          (§11.4.65) — every in-scope tracked *.md
+#       (project-root *.md, docs/**, scripts/** companions; EXCLUDING owned
+#       submodule trees + build/vendor/qa dirs) has BOTH a tracked .html AND a
+#       tracked .pdf sibling, and each sibling's mtime is >= the .md mtime. A
+#       missing or stale (older) sibling is a §11.4.65 universal-Markdown-export
+#       violation (operators/agents reading the HTML/PDF get a divergent view).
+#   CM-NO-FORCE-PUSH-ABSOLUTE    (§11.4.113) — no tracked script under scripts/
+#       contains an ACTUAL force-push invocation: a `git push` carrying
+#       --force / --force-with-lease / -f, OR a `git push` with a leading-'+'
+#       forced refspec. Force-push is STRICTLY FORBIDDEN with no exception.
+#       Comment lines, case-pattern arms, and die/echo refusal strings (the
+#       commit_all.sh §11.4.113 GUARD) are NOT invocations and do NOT trip it.
 #
 # Usage:
 #   scripts/pre_build_verification.sh            # run all gates
@@ -79,6 +91,8 @@
 #   scripts/testing/meta_test_version_single_source.sh         — paired mutation (§1.1)
 #   scripts/testing/meta_test_tracker_docs_present.sh          — paired mutation (§1.1)
 #   scripts/testing/meta_test_atm_ticket_ids.sh               — paired mutation (§1.1)
+#   scripts/testing/meta_test_doc_sibling_sync.sh             — paired mutation (§1.1)
+#   scripts/testing/meta_test_no_force_push_absolute.sh       — paired mutation (§1.1)
 #   §11.4.67 target-shell-parseable — passes `bash -n` AND `sh -n`.
 #
 # Parseability note (§11.4.67): written in POSIX-portable shell. No arrays,
@@ -441,6 +455,152 @@ $(printf '%s\n' "$_hits" | sed 's/^/    /')"
 }
 
 # ---------------------------------------------------------------------------
+# Gate: CM-DOC-SIBLING-SYNC (§11.4.65)
+#
+# Asserts every in-scope tracked *.md has BOTH a tracked .html AND a tracked
+# .pdf sibling whose mtime is >= the .md's mtime (siblings never older than
+# their source). In-scope per §11.4.65: project-root *.md, docs/**, scripts/**
+# companions — EXCLUDING owned-submodule trees (challenges, containers,
+# helix_qa, doc_processor, llm_orchestrator, llm_provider, vision_engine,
+# llms_verifier, constitution, docs_chain — they own their own exports) and
+# build/vendor/qa dirs (build, out, dist, external, prebuilts, node_modules,
+# vendor, qa-results). The exclusion set mirrors
+# scripts/testing/sync_all_markdown_exports.sh (the generator that keeps
+# siblings fresh) so the gate and the generator agree on scope.
+#
+# Three failure modes, each a real §11.4.65 violation:
+#   (1) an in-scope .md with NO tracked .html sibling (unexported)
+#   (2) an in-scope .md with NO tracked .pdf sibling (unexported)
+#   (3) a sibling whose mtime is OLDER than its .md (stale — divergent view)
+#
+# Operates over TRACKED files only (git ls-files): an untracked stray .md is
+# not a versioned doc and an untracked sibling does not satisfy the export
+# mandate (the export must be committed). Honest boundary (§11.4.6): mtime is
+# a working-tree property; a fresh clone checks out arbitrary mtimes, so the
+# mtime arm asserts "in THIS working tree the sibling is not older" — the
+# presence arm is the durable cross-checkout invariant, the mtime arm is the
+# local freshness guard the §11.4.65 generator enforces on every sync.
+# ---------------------------------------------------------------------------
+gate_doc_sibling_sync() {
+  # Basename/path exclusion regex — mirrors sync_all_markdown_exports.sh.
+  _excl='(^|/)(challenges|containers|helix_qa|doc_processor|llm_orchestrator|llm_provider|vision_engine|llms_verifier|constitution|docs_chain|node_modules|vendor|external|prebuilts|build|out|dist|qa-results)/'
+
+  # In-scope tracked .md: root-level *.md OR under docs/ OR under scripts/,
+  # minus the excluded trees.
+  _mds=$(git ls-files -- '*.md' 2>/dev/null \
+           | grep -Ev "$_excl" \
+           | grep -E '^[^/]+\.md$|^docs/|^scripts/' || true)
+
+  _bad=""
+  for _md in $_mds; do
+    [ -f "$_md" ] || continue
+    _base=${_md%.md}
+    for _ext in html pdf; do
+      _sib="$_base.$_ext"
+      # Sibling must be TRACKED (committed export).
+      if ! git ls-files --error-unmatch -- "$_sib" >/dev/null 2>&1; then
+        _bad="$_bad
+$_sib (MISSING tracked sibling for $_md)"
+        continue
+      fi
+      # And present on disk and not older than the .md.
+      if [ ! -f "$_sib" ]; then
+        _bad="$_bad
+$_sib (tracked but absent from working tree)"
+      elif [ "$_md" -nt "$_sib" ]; then
+        _bad="$_bad
+$_sib (STALE — older than $_md)"
+      fi
+    done
+  done
+  _bad=$(printf '%s\n' "$_bad" | sed '/^[[:space:]]*$/d')
+
+  if [ -n "$_bad" ]; then
+    echo "FAIL CM-DOC-SIBLING-SYNC — in-scope .md missing or stale .html/.pdf sibling (§11.4.65):"
+    printf '%s\n' "$_bad" | sed 's/^/         - /'
+    return 1
+  fi
+  echo "PASS CM-DOC-SIBLING-SYNC — every in-scope tracked .md has fresh .html + .pdf siblings"
+  return 0
+}
+
+# ---------------------------------------------------------------------------
+# Gate: CM-NO-FORCE-PUSH-ABSOLUTE (§11.4.113)
+#
+# Asserts NO tracked script under scripts/ contains an ACTUAL force-push
+# invocation. §11.4.113 forbids force-push with NO exception. The forbidden
+# invocation forms:
+#   - `git push ... --force`            (incl. --force=...)
+#   - `git push ... --force-with-lease` (incl. --force-with-lease=...)
+#   - `git push ... -f`                 (the short force flag, as a token)
+#   - `git push ... +<ref>`             (a leading-'+' forced refspec)
+#
+# CRITICAL false-positive avoidance (§11.4.1 — a FAIL-bluff is forbidden): the
+# project's OWN commit_all.sh GUARD against force-push legitimately names these
+# tokens in (a) comment lines, (b) `case` pattern arms ('--force|...)' ), and
+# (c) die/echo refusal strings. None of those is an invocation. The gate
+# therefore scans ONLY lines that look like a `git push` COMMAND and carry a
+# force token on the SAME logical command, while excluding:
+#   - comment lines (first non-blank char is '#')
+#   - case-pattern arms (a bare token-list ending in ')')
+#   - lines whose force token appears only inside a quoted die/echo message
+#     (i.e. lines that contain 'die ' or 'echo ' before the token, OR a
+#      §11.4.113 reference) — these are the GUARD, not a push.
+#
+# A genuine `git push --force` (or +refspec) in any tracked scripts/*.sh is a
+# §11.4.113 violation; a §11.4.109-class PreToolUse guard blocks the class at
+# the tool-call boundary, this gate is the committed-tree complement.
+# ---------------------------------------------------------------------------
+gate_no_force_push_absolute() {
+  _bad=""
+  for _f in $(git ls-files 'scripts/*.sh' 'scripts/*/*.sh' 'scripts/*/*/*.sh' 2>/dev/null); do
+    [ -f "$_f" ] || continue
+    # Candidate lines: contain 'git push' AND a force token — either a force
+    # FLAG (--force / --force-with-lease / -f as a word) anywhere on the line,
+    # OR a '+'-prefixed forced refspec token (e.g. '+main:main') which may sit
+    # after the remote ('git push origin +main:main'), so it is matched as a
+    # whitespace-led '+<word>' token, NOT only immediately after 'push'.
+    _hits=$(grep -nE 'git[[:space:]]+push' "$_f" 2>/dev/null \
+              | grep -E '(--force|--force-with-lease|[[:space:]]-f([[:space:]]|$)|[[:space:]]\+[A-Za-z][A-Za-z0-9_./-]*(:|[[:space:]]|$))' \
+              || true)
+    [ -n "$_hits" ] || continue
+    # Filter out non-invocation lines (comments / case arms / die-echo guards).
+    while IFS= read -r _line; do
+      [ -n "$_line" ] || continue
+      # Strip the leading 'N:' line-number prefix grep -n adds.
+      _body=${_line#*:}
+      # Trim leading whitespace.
+      _trim=$(printf '%s' "$_body" | sed 's/^[[:space:]]*//')
+      # (a) comment line.
+      case "$_trim" in '#'*) continue ;; esac
+      # (b) the GUARD: a die/echo refusal string or a §11.4.113 reference.
+      case "$_body" in
+        *die\ *|*echo\ *|*11.4.113*) continue ;;
+      esac
+      # (c) case-pattern arm: a token-list ending in ')' with no command verb.
+      #     e.g. '--force|--force-with-lease|-f)'  — these are option matchers.
+      case "$_trim" in
+        *')') case "$_trim" in *git\ push*) : ;; *) continue ;; esac ;;
+      esac
+      # Survivor: a real-looking `git push` carrying a force token.
+      _bad="$_bad
+$_f: $_body"
+    done <<EOF2
+$_hits
+EOF2
+  done
+  _bad=$(printf '%s\n' "$_bad" | sed '/^[[:space:]]*$/d')
+
+  if [ -n "$_bad" ]; then
+    echo "FAIL CM-NO-FORCE-PUSH-ABSOLUTE — force-push invocation in tracked script (§11.4.113):"
+    printf '%s\n' "$_bad" | sed 's/^/         - /'
+    return 1
+  fi
+  echo "PASS CM-NO-FORCE-PUSH-ABSOLUTE — no tracked scripts/*.sh invokes a force-push"
+  return 0
+}
+
+# ---------------------------------------------------------------------------
 # Dispatch.
 # ---------------------------------------------------------------------------
 run_one() {
@@ -451,11 +611,13 @@ run_one() {
     CM-VERSION-SINGLE-SOURCE)         gate_version_single_source ;;
     CM-TRACKER-DOCS-PRESENT)          gate_tracker_docs_present ;;
     CM-ATM-TICKET-IDS)                gate_atm_ticket_ids ;;
+    CM-DOC-SIBLING-SYNC)              gate_doc_sibling_sync ;;
+    CM-NO-FORCE-PUSH-ABSOLUTE)        gate_no_force_push_absolute ;;
     *) echo "pre_build_verification: ERROR — unknown gate '$1'" >&2; return 2 ;;
   esac
 }
 
-GATES="CM-GITIGNORE-PRECOMMIT-AUDIT CM-NO-FAKES-BEYOND-UNIT CM-SCRIPT-TARGET-SHELL-PARSEABLE CM-VERSION-SINGLE-SOURCE CM-TRACKER-DOCS-PRESENT CM-ATM-TICKET-IDS"
+GATES="CM-GITIGNORE-PRECOMMIT-AUDIT CM-NO-FAKES-BEYOND-UNIT CM-SCRIPT-TARGET-SHELL-PARSEABLE CM-VERSION-SINGLE-SOURCE CM-TRACKER-DOCS-PRESENT CM-ATM-TICKET-IDS CM-DOC-SIBLING-SYNC CM-NO-FORCE-PUSH-ABSOLUTE"
 
 if [ "${1:-}" = "--list" ]; then
   for g in $GATES; do echo "$g"; done

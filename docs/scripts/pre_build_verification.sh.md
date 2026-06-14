@@ -1,7 +1,7 @@
 # pre_build_verification.sh — companion guide
 
-**Revision:** 3
-**Last modified:** 2026-06-14T16:30:00Z
+**Revision:** 4
+**Last modified:** 2026-06-14T18:45:00Z
 
 ## Overview
 
@@ -28,6 +28,8 @@ bluff.
 | `CM-VERSION-SINGLE-SOURCE` | P0.1 / `a36030e` | No `cmd/*/main.go` declares a hardcoded semver version literal (e.g. `appVersion = "3.0.0"`); every binary's version derives from `pkg/version.AppVersion` (== authoritative `VERSION` file). A fast grep complement of the Go test `TestNoBinaryDeclaresDivergentVersionLiteral`. |
 | `CM-TRACKER-DOCS-PRESENT` | §11.4.15 / .16 / .53 / .44 | The four canonical workable-item tracker docs (`docs/Issues.md`, `docs/Fixed.md`, `docs/Issues_Summary.md`, `docs/Fixed_Summary.md`) all exist AND each carries a §11.4.44 revision header — both a `**Revision:**` line and a `**Last modified:**` line in its header block. A missing doc or a missing header line is a documentation-layer violation (the tracker constellation is incomplete / unversioned). |
 | `CM-ATM-TICKET-IDS` | §11.4.54 | Every `###`/`##` `§X.` workable-item heading in `docs/Issues.md` + `docs/Fixed.md` carries an `[ATM-NNN]` token; the union of all ids is **unique** and **monotonic with no gaps** — the contiguous sequence `ATM-001..ATM-NNN`. A heading without a token, a duplicate id, or a gap in the sequence is a §11.4.54 violation. |
+| `CM-DOC-SIBLING-SYNC` | §11.4.65 | Every in-scope tracked `*.md` (project-root `*.md`, `docs/**`, `scripts/**` companions; EXCLUDING owned-submodule trees + `build`/`out`/`dist`/`external`/`prebuilts`/`node_modules`/`vendor`/`qa-results`) has BOTH a tracked `.html` AND a tracked `.pdf` sibling, and each sibling's mtime is `>=` the `.md` mtime. A missing or stale (older) sibling is a §11.4.65 universal-Markdown-export violation. The exclusion set mirrors `scripts/testing/sync_all_markdown_exports.sh` (the generator) so gate and generator agree on scope. |
+| `CM-NO-FORCE-PUSH-ABSOLUTE` | §11.4.113 | No tracked script under `scripts/` contains an **actual force-push invocation**: a `git push` carrying `--force` / `--force-with-lease` / `-f`, OR a `git push` with a leading-`+` forced refspec (e.g. `git push origin +main:main`). Force-push is STRICTLY FORBIDDEN with no exception. Comment lines, `case`-pattern arms, and `die`/`echo` refusal strings (the `commit_all.sh` §11.4.113 GUARD) are NOT invocations and do NOT trip the gate (anti-FAIL-bluff, §11.4.1). |
 
 ## Prerequisites
 
@@ -100,6 +102,27 @@ Exit codes: `0` all selected gates passed · `1` at least one real violation ·
   the tree's actual heading convention (Issues `§1..N`, Fixed `§1..N`); the
   unique + contiguous-`001..N` invariant is computed from the union of both
   files.
+- **CM-DOC-SIBLING-SYNC** operates over TRACKED files only (`git ls-files`): an
+  untracked stray `.md` is not a versioned doc, and an untracked sibling does
+  not satisfy the export mandate (the export must be committed). The presence
+  arm (`.html` + `.pdf` both tracked) is the durable cross-checkout invariant;
+  the mtime arm (`sibling -nt`-not-older) is a working-tree freshness guard —
+  honest boundary (§11.4.6): a fresh clone checks out arbitrary mtimes, so the
+  mtime arm asserts "in THIS working tree the sibling is not older than its
+  `.md`," exactly what the §11.4.65 generator enforces on every sync. Owned
+  submodule trees (they own their own exports) and build/vendor/qa dirs are
+  excluded, mirroring `sync_all_markdown_exports.sh`, so an excluded `.md`
+  without siblings is never false-FAILed.
+- **CM-NO-FORCE-PUSH-ABSOLUTE** scans only lines that look like a `git push`
+  COMMAND carrying a force token, and explicitly excludes the three GUARD forms
+  the project's own `commit_all.sh` §11.4.113 refusal logic uses: comment lines
+  (`#`-led), `case`-pattern arms (a token-list ending in `)` with no `git push`
+  verb), and `die`/`echo` refusal strings (or any line referencing `11.4.113`).
+  This anti-false-positive design is load-bearing — naming a forbidden flag in a
+  GUARD is NOT an invocation, and false-FAILing it would itself be a §11.4.1
+  FAIL-bluff. The `+`-refspec form is matched as a whitespace-led `+<word>`
+  token so `git push origin +main:main` (where `+` follows the remote, not
+  `push`) is caught.
 
 ## Internal behaviour
 
@@ -126,13 +149,23 @@ mutated.
   proof for `CM-TRACKER-DOCS-PRESENT`.
 - `scripts/testing/meta_test_atm_ticket_ids.sh` — paired §1.1 mutation proof
   for `CM-ATM-TICKET-IDS`.
+- `scripts/testing/meta_test_doc_sibling_sync.sh` — paired §1.1 mutation proof
+  for `CM-DOC-SIBLING-SYNC`.
+- `scripts/testing/meta_test_no_force_push_absolute.sh` — paired §1.1 mutation
+  proof for `CM-NO-FORCE-PUSH-ABSOLUTE`.
+- `scripts/testing/sync_all_markdown_exports.sh` — the §11.4.65 export generator
+  whose exclusion set `CM-DOC-SIBLING-SYNC` mirrors.
 - `scripts/testing/meta_test_constitution_inheritance.sh` — the pre-existing
   inheritance meta-test (sibling discipline).
 - `scripts/commit_all.sh` — the authorised commit + push wrapper.
 
-**Last verified:** 2026-06-14 (all 6 gates PASS on current tree; all six paired
+**Last verified:** 2026-06-14 (all 8 gates PASS on current tree; all eight paired
 mutation tests PASS — every gate FAILs on a real violation and PASSes when
-restored. CM-TRACKER-DOCS-PRESENT catches a missing doc + a missing
+restored. CM-DOC-SIBLING-SYNC catches a missing `.html`, a missing `.pdf`, and a
+stale (backdated) sibling without false-FAILing excluded owned-submodule docs;
+CM-NO-FORCE-PUSH-ABSOLUTE catches `--force`, `--force-with-lease`, and a
+`+`-refspec push without false-FAILing the `commit_all.sh`-class force-push
+GUARD; CM-TRACKER-DOCS-PRESENT catches a missing doc + a missing
 Revision/Last-modified header; CM-ATM-TICKET-IDS catches missing tokens,
 duplicate ids, and sequence gaps without false-FAILing a non-item heading; and
 the prior negatives confirm honest-bash scripts and the compliant
