@@ -465,6 +465,14 @@ func (bp *BatchProcessor) computeOutputPath(inputPath string) (string, error) {
 
 	isOutputDir := err == nil && outputInfo.IsDir()
 
+	// A non-existent OutputPath with no file extension is an as-yet-uncreated
+	// destination DIRECTORY (e.g. "-output /some/new/dir"), not a single output
+	// file. Treating it as a file path would map every input in a directory batch
+	// onto the same output, silently overwriting all but the last (data loss).
+	if !isOutputDir && os.IsNotExist(err) && filepath.Ext(bp.options.OutputPath) == "" {
+		isOutputDir = true
+	}
+
 	if !isOutputDir {
 		// Output is a file path
 		return bp.options.OutputPath, nil
