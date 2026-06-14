@@ -437,33 +437,51 @@ func (lt *LLMTranslator) splitText(text string) []string {
 	var chunks []string
 	var currentChunk strings.Builder
 
-	// Split by paragraphs first
+	// Split by paragraphs, but re-attach the "\n\n" delimiter to every paragraph
+	// except the last so the units losslessly tile the input: concatenating all
+	// units reproduces the original text exactly. This is the key invariant —
+	// strings.Join(splitText(text), "") == text — which makes the per-chunk
+	// translation reassembly (also a Join with "") preserve paragraph boundaries
+	// instead of gluing the last paragraph of one chunk to the first of the next.
+	// The previous implementation stripped "\n\n" via Split and re-added it
+	// inconsistently (never around an oversized paragraph, and never across a
+	// chunk boundary), dropping a separator at every chunk seam — structural
+	// data loss in translated large chapters.
 	paragraphs := strings.Split(text, "\n\n")
 
-	for _, para := range paragraphs {
-		// If single paragraph is too large, split by sentences
-		if len(para) > maxChunkSize {
-			sentences := lt.splitBySentences(para)
+	for i, para := range paragraphs {
+		unit := para
+		if i < len(paragraphs)-1 {
+			unit += "\n\n"
+		}
+		if unit == "" {
+			// Only the final unit can be empty (text ended with a delimiter);
+			// it carries no content, so skipping it keeps the tiling lossless.
+			continue
+		}
+
+		// If a single unit is too large on its own, split it into sentences
+		// (splitBySentences is lossless — its output concatenates back to the
+		// unit, including the trailing "\n\n").
+		if len(unit) > maxChunkSize {
+			sentences := lt.splitBySentences(unit)
 			for _, sentence := range sentences {
 				if currentChunk.Len()+len(sentence) > maxChunkSize && currentChunk.Len() > 0 {
-					// Current chunk is full, start new chunk
 					chunks = append(chunks, currentChunk.String())
 					currentChunk.Reset()
 				}
 				currentChunk.WriteString(sentence)
 			}
-		} else {
-			// Add paragraph to current chunk
-			if currentChunk.Len()+len(para)+2 > maxChunkSize && currentChunk.Len() > 0 {
-				// Current chunk is full, start new chunk
-				chunks = append(chunks, currentChunk.String())
-				currentChunk.Reset()
-			}
-			if currentChunk.Len() > 0 {
-				currentChunk.WriteString("\n\n")
-			}
-			currentChunk.WriteString(para)
+			continue
 		}
+
+		// The unit already includes its "\n\n" delimiter, so no extra separator
+		// is added here (that would double the breaks and break the round-trip).
+		if currentChunk.Len()+len(unit) > maxChunkSize && currentChunk.Len() > 0 {
+			chunks = append(chunks, currentChunk.String())
+			currentChunk.Reset()
+		}
+		currentChunk.WriteString(unit)
 	}
 
 	// Add final chunk
