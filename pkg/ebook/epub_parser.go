@@ -5,6 +5,7 @@ import (
 	"digital.vasic.translator/pkg/format"
 	"encoding/xml"
 	"fmt"
+	"html"
 	"io"
 	"net/url"
 	"regexp"
@@ -383,6 +384,14 @@ func (p *EPUBParser) parseContentFile(f *zip.File) (*Chapter, error) {
 
 	// Remove tags from remaining content
 	content = removeHTMLTags(content)
+
+	// Decode HTML/XML character references. removeHTMLTags only strips TAGS; it
+	// leaves entities (&amp; &lt; &gt; &quot; &apos; and numeric &#NNN; / &#xHH;)
+	// verbatim. Without this pass those entities survive as literal markup in the
+	// chapter text — the translator then ships "Tom &amp; Jerry" / "caf&#233;" to
+	// the reader instead of "Tom & Jerry" / "café". html.UnescapeString decodes
+	// every named + numeric reference and is a no-op on entity-free text.
+	content = html.UnescapeString(content)
 
 	// Clean up multiple spaces
 	spaceRe := regexp.MustCompile(` {2,}`)
