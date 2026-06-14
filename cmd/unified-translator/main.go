@@ -582,8 +582,16 @@ func parseFlags() *UnifiedConfig {
 	case "mock", "ollama":
 		// No API key required for mock or local Ollama
 	default:
+		// Fall back to the provider's well-known env var (e.g. DEEPSEEK_API_KEY)
+		// when -api-key was not passed. The gate previously checked ONLY the flag,
+		// so env-var keys — which resolveProviderAPIKey already supports and the
+		// docs advertise — never satisfied it. Populate config.APIKey so the whole
+		// pipeline (provider client construction) uses the resolved key too.
 		if config.APIKey == "" {
-			fmt.Fprintf(os.Stderr, "Error: API key required for provider=%s\n", config.Provider)
+			config.APIKey = resolveProviderAPIKey(config, config.Provider)
+		}
+		if config.APIKey == "" {
+			fmt.Fprintf(os.Stderr, "Error: API key required for provider=%s (pass -api-key or set the provider's *_API_KEY env var)\n", config.Provider)
 			os.Exit(1)
 		}
 	}
