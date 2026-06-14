@@ -301,6 +301,17 @@ func (c *MultiLLMCoordinator) TranslateWithRetry(
 	triedInstances := make(map[string]bool)
 
 	for attempt := 0; attempt < c.maxRetries*len(c.instances); attempt++ {
+		// Honor context cancellation: once the caller has given up, stop
+		// rotating through instances and stop waiting between retries. Returning
+		// the wrapped ctx error (rather than the last provider error) lets
+		// callers distinguish "you cancelled" from "all providers failed".
+		if ctxErr := ctx.Err(); ctxErr != nil {
+			if lastErr != nil {
+				return "", fmt.Errorf("translation aborted (%w) after %d attempts: %v", ctxErr, attempt, lastErr)
+			}
+			return "", fmt.Errorf("translation aborted: %w", ctxErr)
+		}
+
 		// Get next available instance
 		instance := c.getNextInstance()
 		if instance == nil {
@@ -355,9 +366,16 @@ func (c *MultiLLMCoordinator) TranslateWithRetry(
 			go c.reenableInstanceAfterDelay(instance, 30*time.Second)
 		}
 
-		// Wait before retry
-		if attempt < c.maxRetries*len(c.instances)-1 {
-			time.Sleep(c.retryDelay)
+		// Wait before retry, but abort the wait immediately if the caller
+		// cancels the context (a bare time.Sleep would ignore cancellation).
+		if attempt < c.maxRetries*len(c.instances)-1 && c.retryDelay > 0 {
+			timer := time.NewTimer(c.retryDelay)
+			select {
+			case <-ctx.Done():
+				timer.Stop()
+				return "", fmt.Errorf("translation aborted (%w) after %d attempts: %v", ctx.Err(), attempt+1, lastErr)
+			case <-timer.C:
+			}
 		}
 	}
 
@@ -390,7 +408,13 @@ func (c *MultiLLMCoordinator) TranslateWithConsensus(
 	resultsChan := make(chan result, requiredAgreement)
 	instancesUsed := 0
 
-	for i := 0; i < requiredAgreement && i < len(c.instances); i++ {
+	// Fan out over AVAILABLE instances until we have requiredAgreement of them.
+	// Scanning the whole slice (not just the first requiredAgreement entries)
+	// ensures that when leading instances are unavailable, healthy instances
+	// further down still participate in the consensus instead of silently
+	// shrinking the vote (or falling back to retry while healthy instances sit
+	// idle).
+	for i := 0; i < len(c.instances) && instancesUsed < requiredAgreement; i++ {
 		instance := c.instances[i]
 		if !instance.IsAvailable() {
 			continue
