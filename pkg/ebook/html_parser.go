@@ -143,9 +143,6 @@ func (p *HTMLParser) extractTextWithContext(n *html.Node, inPre bool) string {
 
 		// Clean up any remaining whitespace issues
 		result = strings.TrimSpace(result)
-
-		// Add missing spaces in text where needed (simple heuristic for test case)
-		result = strings.ReplaceAll(result, "Nestedtexthere", "Nested text here")
 	}
 
 	return result

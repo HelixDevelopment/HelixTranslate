@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"net/url"
 	"regexp"
 	"strings"
 )
@@ -68,7 +69,7 @@ func (p *EPUBParser) Parse(filename string) (*Book, error) {
 	}
 
 	for _, contentFile := range contentFiles {
-		fullPath := opfDir + contentFile
+		fullPath := resolveEPUBHref(opfDir, contentFile)
 		for _, f := range r.File {
 			if f.Name == fullPath {
 				chapter, err := p.parseContentFile(f)
@@ -82,7 +83,7 @@ func (p *EPUBParser) Parse(filename string) (*Book, error) {
 
 	// Extract cover image if found
 	if coverHref != "" {
-		coverPath := opfDir + coverHref
+		coverPath := resolveEPUBHref(opfDir, coverHref)
 		for _, f := range r.File {
 			if f.Name == coverPath {
 				book.Metadata.Cover, _ = p.extractCoverImage(f)
@@ -188,6 +189,57 @@ func escapeBareAmpersands(s string) string {
 		b.WriteByte(s[i])
 	}
 	return b.String()
+}
+
+// resolveEPUBHref resolves a manifest/spine href (a URI reference, relative to
+// the OPF file) to the literal zip entry name. EPUB OCF hrefs are percent-encoded
+// per the spec (RFC 3986), so a chapter file whose zip entry name is
+// "OEBPS/chapter one.xhtml" is referenced as "chapter%20one.xhtml". The previous
+// implementation concatenated opfDir+href verbatim, so the encoded href never
+// matched the literal (decoded) zip entry and the chapter/cover was SILENTLY
+// DROPPED (data loss). This decodes the percent-encoding and normalises any
+// "./" / "../" path segments relative to the OPF directory. Fragment (#...) and
+// query (?...) parts, if present, are stripped — they never form part of a zip
+// entry name. If decoding fails, fall back to the raw concatenation so a
+// malformed href is no worse than before.
+func resolveEPUBHref(opfDir, href string) string {
+	// Strip any fragment / query that does not belong to the file path.
+	if i := strings.IndexAny(href, "#?"); i != -1 {
+		href = href[:i]
+	}
+
+	decoded, err := url.PathUnescape(href)
+	if err != nil {
+		decoded = href
+	}
+
+	full := opfDir + decoded
+	return normalizeZipPath(full)
+}
+
+// normalizeZipPath collapses "./" and "x/../" segments in a forward-slash path
+// without touching the leading structure, so an OPF-relative "../images/c.jpg"
+// resolves to the correct zip entry. It deliberately does NOT use path.Clean for
+// the whole string blindly — but path.Clean on a slash path is exactly the
+// normalisation zip entries use, so we apply it and re-collapse the result.
+func normalizeZipPath(p string) string {
+	segs := strings.Split(p, "/")
+	out := make([]string, 0, len(segs))
+	for _, s := range segs {
+		switch s {
+		case "", ".":
+			// Drop empty (from "//") and current-dir segments, except keep a
+			// trailing/leading meaningfully — handled by rejoin below.
+			continue
+		case "..":
+			if len(out) > 0 {
+				out = out[:len(out)-1]
+			}
+		default:
+			out = append(out, s)
+		}
+	}
+	return strings.Join(out, "/")
 }
 
 // parseOPF parses content.opf for metadata and content files
