@@ -1,7 +1,17 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 28
-**Last modified:** 2026-06-14T13:15:00Z
+**Revision:** 29
+**Last modified:** 2026-06-14T14:00:00Z
+
+<!-- session 2026-06-14f: 6th SECOND-PASS wave (HEAD 837f528) — 4 more real bugs (batch/coordination/translator-core) -->
+
+### Session 2026-06-14f — 6th §11.4.118 second-pass wave (HEAD 837f528) — 4 more real bugs
+
+- **53b5056** batch: directory batch to a non-existent output dir collided ALL files onto one path (only last survived) — data loss; fix: extensionless non-existent OutputPath treated as a directory.
+- **df8a8cb** coordination: TranslateWithRetry ignored ctx cancellation (full sweep+sleep on cancelled ctx); TranslateWithConsensus only scanned the first requiredAgreement instances → skipped available-and-agreeing instances behind unavailable ones. Both fixed.
+- **837f528** translator: successful-but-empty translation ('', nil) silently OVERWROTE source content across metadata/chapter/section/subsection (7 fields) — 'tests pass but book destroyed' data loss; fix: keepIfTranslationEmpty preserves source when translation empty + source non-empty. Latent flag: detected source-lang not propagated to llm translator.
+
+**SESSION GRAND TOTAL: 64 real bugs** (5 parallel waves + 3 inline + 6 second-pass waves) + 2 reconciliations + §11.4.98 conversion. Post-wave full sweep GREEN at HEAD 837f528: 54 ok / 0 FAIL (fullsweep_20260614T114733.log).
 
 <!-- session 2026-06-14e: 5th SECOND-PASS wave (HEAD 367d88b) — 5 more real bugs incl CWE-208 timing oracle -->
 
