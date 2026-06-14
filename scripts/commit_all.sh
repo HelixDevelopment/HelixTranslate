@@ -64,7 +64,14 @@ LOCK_NAME=".commit_all.lock"
 # §11.4.30 — submodule that MUST NEVER be staged by this wrapper.
 FORBIDDEN_PATHSPEC="helix_qa"
 # §11.4.84 — mutation residue markers. A staged/working-tree hit aborts the commit.
-MUTATION_MARKERS='MUTATED for paired|// always pass|# always pass|_mutated_|<<<<<<< |^=======$|>>>>>>> '
+# Each alternative wraps ONE character in a regex char-class (e.g. a trailing
+# [D]) so this DEFINITION line never self-matches the scan when commit_all.sh is
+# itself the staged pathspec — the wrapper that defines the markers must not flag
+# its own definition (§11.4.120 false-positive). A char-class does NOT change
+# what the regex matches (the class contains exactly the one literal character),
+# while the bracketed text here is not itself a match. No comment in this file
+# may contain a literal marker verbatim, or it would re-introduce a self-match.
+MUTATION_MARKERS='MUTATE[D] for paired|// alway[s] pass|# alway[s] pass|_mutate[d]_|<<<<<<[<] |^======[=]$|>>>>>>[>] '
 
 # ----------------------------------------------------------------------------
 # Helpers
@@ -190,6 +197,18 @@ quiescence_check() {
         _hits="$_hits $_ps"
       fi
     elif [ -d "$_ps" ]; then
+      # §11.4.120: a submodule path is a gitlink — staging it records ONLY the
+      # submodule's HEAD SHA, never its working-tree files. Recursively scanning
+      # the submodule tree here is a false-positive (the submodule's own
+      # quiescence is enforced by ITS own scoped commit). A submodule pathspec
+      # is exactly one ls-files entry with mode 160000; skip it. Ordinary
+      # directories (>1 entry, or non-gitlink mode) are still scanned in full.
+      _ls="$(git ls-files -s -- "$_ps" 2>/dev/null)"
+      _nlines="$(printf '%s\n' "$_ls" | sed '/^$/d' | wc -l | tr -d ' ')"
+      _mode1="$(printf '%s\n' "$_ls" | awk 'NR==1{print $1}')"
+      if [ "$_nlines" = "1" ] && [ "$_mode1" = "160000" ]; then
+        continue
+      fi
       if LC_ALL=C grep -rInE "$MUTATION_MARKERS" "$_ps" >/dev/null 2>&1; then
         _found="$(LC_ALL=C grep -rIlE "$MUTATION_MARKERS" "$_ps" 2>/dev/null | tr '\n' ' ')"
         _hits="$_hits $_found"
