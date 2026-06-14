@@ -106,31 +106,19 @@ func TestDOCXParser_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	// Even with invalid data, context cancellation should be detected
-	_, err := parser.ParseWithContext(ctx, []byte("not a docx"))
+	// Use a VALID .docx so parsing reaches the streaming loop where context
+	// cancellation is checked (the stdlib parser checks ctx during
+	// word/document.xml token streaming). §11.4.120: the old assertion accepted a
+	// "license" error from the now-removed unioffice dependency; the correct
+	// post-rewrite behavior is a clean context.Canceled.
+	data := buildTestDOCX(t, sampleDocumentXML, sampleCoreXML)
+	_, err := parser.ParseWithContext(ctx, data)
 	if err == nil {
 		t.Error("Expected parsing to fail with cancelled context")
 	}
-
-	// Check if it's either context cancelled or license error (both acceptable)
-	if err != context.Canceled && !contains(err.Error(), "license") {
-		t.Errorf("Expected context.Canceled or license error, got %v", err)
+	if err != context.Canceled {
+		t.Errorf("Expected context.Canceled, got %v", err)
 	}
-}
-
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) &&
-		(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr ||
-			findSubstring(s, substr)))
-}
-
-func findSubstring(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }
 
 func TestDOCXConfig_Defaults(t *testing.T) {

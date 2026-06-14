@@ -1,17 +1,28 @@
 package ebook
 
 import (
+	"archive/zip"
 	"bytes"
 	"context"
+	"encoding/xml"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
 
 	"digital.vasic.translator/pkg/format"
-	"github.com/unidoc/unioffice/document"
 )
 
+// DOCXParser parses .docx (OOXML WordprocessingML) documents.
+//
+// It reads the OOXML package directly with the standard library (archive/zip +
+// encoding/xml) — extracting paragraph text from word/document.xml and core
+// metadata from docProps/core.xml. The previous implementation used
+// github.com/unidoc/unioffice, which is LICENSE-GATED: document.Read returned
+// "unioffice license required" for every real .docx, so DOCX input was entirely
+// non-functional in this build. This stdlib parser makes DOCX input actually
+// work and removes the gated dependency.
 type DOCXParser struct {
 	config *DOCXConfig
 }
@@ -50,19 +61,17 @@ func NewDOCXParser(config *DOCXConfig) *DOCXParser {
 }
 
 func (p *DOCXParser) Parse(filename string) (*Book, error) {
-	// Read file
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
-
 	return p.ParseWithContext(context.Background(), data)
 }
 
 func (p *DOCXParser) ParseWithContext(ctx context.Context, data []byte) (*Book, error) {
-	doc, err := document.Read(bytes.NewReader(data), int64(len(data)))
+	zr, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
-		return nil, fmt.Errorf("failed to read DOCX document: %w", err)
+		return nil, fmt.Errorf("failed to read DOCX (not a valid OOXML zip): %w", err)
 	}
 
 	book := &Book{
@@ -71,50 +80,26 @@ func (p *DOCXParser) ParseWithContext(ctx context.Context, data []byte) (*Book, 
 		},
 	}
 
-	// Extract metadata
 	if p.config.ExtractMetadata {
-		if err := p.extractMetadata(doc, book); err != nil {
-			return nil, fmt.Errorf("failed to extract metadata: %w", err)
-		}
+		// Metadata is best-effort: a document without docProps/core.xml is still
+		// a valid document, so a metadata miss must not fail the whole parse.
+		_ = p.extractMetadataFromZip(zr, book)
 	}
 
-	// Extract content as plain text
-	var allText strings.Builder
-
-	// Simple paragraph extraction
-	paragraphs := doc.Paragraphs()
-	for i := 0; i < len(paragraphs); i++ {
-		para := paragraphs[i]
-
-		// Simple text extraction from paragraph
-		runs := para.Runs()
-		for j := 0; j < len(runs); j++ {
-			run := runs[j]
-			allText.WriteString(run.Text())
-		}
-
-		// Add paragraph separator
-		if i < len(paragraphs)-1 {
-			allText.WriteString("\n\n")
-		}
-
-		// Check for context cancellation
-		if i%10 == 0 {
-			select {
-			case <-ctx.Done():
-				return nil, ctx.Err()
-			default:
-			}
-		}
+	paragraphs, err := extractDOCXParagraphs(ctx, zr)
+	if err != nil {
+		return nil, err
 	}
 
-	// Create main content as first chapter
+	// Preserve paragraph structure: join with the blank-line separator the rest
+	// of the pipeline (formatSection / FB2 splitIntoParagraphs) treats as a
+	// paragraph boundary.
 	mainChapter := Chapter{
 		Title: "Document Content",
 		Sections: []Section{
 			{
 				Title:   "Main Content",
-				Content: allText.String(),
+				Content: strings.Join(paragraphs, "\n\n"),
 			},
 		},
 	}
@@ -125,12 +110,141 @@ func (p *DOCXParser) ParseWithContext(ctx context.Context, data []byte) (*Book, 
 	return book, nil
 }
 
+// extractDOCXParagraphs streams word/document.xml and returns one string per
+// <w:p> paragraph (runs concatenated; <w:tab> -> "\t"; <w:br>/<w:cr> -> "\n").
+// Matching is by element Local name so it is robust to namespace-prefix
+// variations across producers.
+func extractDOCXParagraphs(ctx context.Context, zr *zip.Reader) ([]string, error) {
+	rc, err := openZipEntry(zr, "word/document.xml")
+	if err != nil {
+		return nil, fmt.Errorf("DOCX missing word/document.xml: %w", err)
+	}
+	defer rc.Close()
+
+	dec := xml.NewDecoder(rc)
+	var paragraphs []string
+	var cur strings.Builder
+	inText, inPara := false, false
+	count := 0
+
+	for {
+		if count%64 == 0 {
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			default:
+			}
+		}
+		count++
+
+		tok, err := dec.Token()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse word/document.xml: %w", err)
+		}
+
+		switch t := tok.(type) {
+		case xml.StartElement:
+			switch t.Name.Local {
+			case "p":
+				inPara = true
+				cur.Reset()
+			case "t":
+				inText = true
+			case "tab":
+				if inPara {
+					cur.WriteByte('\t')
+				}
+			case "br", "cr":
+				if inPara {
+					cur.WriteByte('\n')
+				}
+			}
+		case xml.CharData:
+			if inText {
+				cur.Write(t)
+			}
+		case xml.EndElement:
+			switch t.Name.Local {
+			case "t":
+				inText = false
+			case "p":
+				if inPara {
+					paragraphs = append(paragraphs, cur.String())
+					inPara = false
+				}
+			}
+		}
+	}
+
+	return paragraphs, nil
+}
+
+// extractMetadataFromZip reads docProps/core.xml (Dublin Core + cp properties).
+func (p *DOCXParser) extractMetadataFromZip(zr *zip.Reader, book *Book) error {
+	rc, err := openZipEntry(zr, "docProps/core.xml")
+	if err != nil {
+		return err
+	}
+	defer rc.Close()
+
+	dec := xml.NewDecoder(rc)
+	var cur strings.Builder
+	for {
+		tok, err := dec.Token()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		switch t := tok.(type) {
+		case xml.StartElement:
+			cur.Reset()
+		case xml.CharData:
+			cur.Write(t)
+		case xml.EndElement:
+			val := strings.TrimSpace(cur.String())
+			if val == "" {
+				continue
+			}
+			switch t.Name.Local {
+			case "title":
+				book.Metadata.Title = val
+			case "description", "subject":
+				if book.Metadata.Description == "" {
+					book.Metadata.Description = val
+				}
+			case "language":
+				book.Metadata.Language = val
+			case "creator":
+				if len(book.Metadata.Authors) == 0 {
+					book.Metadata.Authors = []string{val}
+				}
+			case "created":
+				if tm, perr := time.Parse(time.RFC3339, val); perr == nil {
+					book.Metadata.Date = tm.Format(time.RFC3339)
+				} else {
+					book.Metadata.Date = val
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (p *DOCXParser) Validate(data []byte) error {
-	_, err := document.Read(bytes.NewReader(data), int64(len(data)))
+	zr, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
 		return fmt.Errorf("invalid DOCX structure: %w", err)
 	}
-
+	rc, err := openZipEntry(zr, "word/document.xml")
+	if err != nil {
+		return fmt.Errorf("invalid DOCX: missing word/document.xml: %w", err)
+	}
+	_ = rc.Close()
 	return nil
 }
 
@@ -139,19 +253,13 @@ func (p *DOCXParser) SupportedFormats() []string {
 }
 
 func (p *DOCXParser) GetMetadata(data []byte) (*Metadata, error) {
-	doc, err := document.Read(bytes.NewReader(data), int64(len(data)))
+	zr, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read DOCX document: %w", err)
 	}
-
-	metadata := &Metadata{}
-	err = p.extractMetadata(doc, &Book{Metadata: *metadata})
-	if err != nil {
-		return nil, err
-	}
-
-	// Return a copy to avoid mutation
-	result := *metadata
+	book := &Book{}
+	_ = p.extractMetadataFromZip(zr, book)
+	result := book.Metadata
 	return &result, nil
 }
 
@@ -159,28 +267,13 @@ func (p *DOCXParser) GetFormat() format.Format {
 	return format.FormatDOCX
 }
 
-func (p *DOCXParser) extractMetadata(doc *document.Document, book *Book) error {
-	// Extract core properties - simplified implementation
-	props := doc.CoreProperties
-
-	// Try to get title
-	if props.Title() != "" {
-		book.Metadata.Title = props.Title()
+// openZipEntry opens a named entry from a zip reader, or returns an error if it
+// is absent.
+func openZipEntry(zr *zip.Reader, name string) (io.ReadCloser, error) {
+	for _, f := range zr.File {
+		if f.Name == name {
+			return f.Open()
+		}
 	}
-
-	// Note: The API is different than expected, skip author extraction for now
-
-	// Try to get description
-	if props.Description() != "" {
-		book.Metadata.Description = props.Description()
-	}
-
-	// Note: Skip language extraction due to API differences
-
-	// Try to get creation date
-	if !props.Created().IsZero() {
-		book.Metadata.Date = props.Created().Format(time.RFC3339)
-	}
-
-	return nil
+	return nil, fmt.Errorf("entry %q not found in archive", name)
 }
