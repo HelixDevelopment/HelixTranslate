@@ -37,7 +37,7 @@ func TestMainFunctionComprehensive(t *testing.T) {
 		{
 			name:           "version flag",
 			args:           []string{"-version"},
-			expectedOutput: "v1.0.0",
+			expectedOutput: "v" + versionpkg.AppVersion,
 			expectedExit:   0,
 			setup:          func() func() { return func() {} },
 		},
@@ -704,9 +704,14 @@ func TestMainFunction(t *testing.T) {
 
 		os.Args = []string{"server", "-version"}
 
-		// This will call os.Exit, so we need to test differently
-		// We can test the version output more directly
-		assert.Contains(t, "v1.0.0", "1.0.0", "version constant should be defined")
+		// This will call os.Exit, so we test the wiring directly instead of the
+		// os.Exit-ing output path: the server's version const MUST be sourced from
+		// the single authoritative versionpkg.AppVersion (== VERSION file), not a
+		// hardcoded literal. (The prior assert.Contains("v1.0.0","1.0.0") was a
+		// tautology that tested nothing — §11.4.1 bluff — and went stale after the
+		// P0.1 single-source reconcile.)
+		assert.NotEmpty(t, versionpkg.AppVersion, "authoritative AppVersion must be defined")
+		assert.Equal(t, versionpkg.AppVersion, version, "server version must be sourced from authoritative AppVersion")
 	})
 
 	t.Run("generate-certs flag", func(t *testing.T) {

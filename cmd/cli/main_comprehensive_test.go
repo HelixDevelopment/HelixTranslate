@@ -8,6 +8,7 @@ import (
 	"digital.vasic.translator/pkg/language"
 	"digital.vasic.translator/pkg/script"
 	"digital.vasic.translator/pkg/translator"
+	versionpkg "digital.vasic.translator/pkg/version"
 	"digital.vasic.translator/test/mocks"
 	"net/http"
 	"net/http/httptest"
@@ -34,21 +35,21 @@ func TestMainFunctionComprehensive(t *testing.T) {
 		{
 			name:           "version flag",
 			args:           []string{"-version"},
-			expectedOutput: "Universal Ebook Translator v2.0.0",
+			expectedOutput: "Universal Ebook Translator v" + versionpkg.AppVersion,
 			expectedExit:   0,
 			setup:          func() func() { return func() {} },
 		},
 		{
 			name:           "help flag",
 			args:           []string{"-help"},
-			expectedOutput: "Universal Ebook Translator v2.0.0",
+			expectedOutput: "Universal Ebook Translator v" + versionpkg.AppVersion,
 			expectedExit:   0,
 			setup:          func() func() { return func() {} },
 		},
 		{
 			name:           "no arguments shows help",
 			args:           []string{},
-			expectedOutput: "Universal Ebook Translator v2.0.0",
+			expectedOutput: "Universal Ebook Translator v" + versionpkg.AppVersion,
 			expectedExit:   0,
 			setup:          func() func() { return func() {} },
 		},
@@ -451,7 +452,7 @@ func TestPrintHelpComprehensive(t *testing.T) {
 	output := buf.String()
 
 	// Verify help content
-	assert.Contains(t, output, "Universal Ebook Translator v2.0.0")
+	assert.Contains(t, output, "Universal Ebook Translator v" + versionpkg.AppVersion)
 	assert.Contains(t, output, "Usage:")
 	assert.Contains(t, output, "Options:")
 	assert.Contains(t, output, "Environment Variables:")
