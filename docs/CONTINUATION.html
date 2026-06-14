@@ -175,9 +175,9 @@
 <h1
 id="continuation--helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 48 <strong>Last modified:</strong>
-2026-06-15T01:15:00Z</p>
-<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 30 real bugs (19 submodule + 11 main) -->
+<p><strong>Revision:</strong> 49 <strong>Last modified:</strong>
+2026-06-15T02:00:00Z</p>
+<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 33 real bugs (19 submodule + 14 main) -->
 
 <h3
 id="session-2026-06-14v--cross-submodule-bug-hunt-campaign-11428-equal-codebase">Session
@@ -308,7 +308,20 @@ backends</td>
 (lang,provider,model,text) tuples → same sha256 → WRONG cached
 translation served) across SQLite/Postgres/Redis; length-prefix fix +
 §11.4.120 reconcile</td>
-<td>(wave 8)</td>
+<td>c8e36d8</td>
+</tr>
+<tr>
+<td><strong>MAIN</strong> pkg/security</td>
+<td>JWT with NO <code>exp</code> claim accepted → never-expiring session
+(jwt/v5 treats exp optional);
+<code>jwt.WithExpirationRequired()</code></td>
+<td>(wave 9)</td>
+</tr>
+<tr>
+<td><strong>MAIN</strong> pkg/verification</td>
+<td>nondeterministic consensus tie-break (map-order-dependent verdict,
+§11.4.50) + untranslated-char double-count corrupting quality score</td>
+<td>(wave 9)</td>
 </tr>
 </tbody>
 </table>

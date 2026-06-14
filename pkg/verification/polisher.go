@@ -657,12 +657,19 @@ func (bp *BookPolisher) buildConsensus(
 		}
 	}
 
-	// Find most agreed-upon polished version
+	// Find most agreed-upon polished version. Break ties deterministically:
+	// map iteration order is randomized per run, so on a tie (two distinct
+	// polished versions agreed by an equal number of providers) "agreement >
+	// maxAgreement" alone makes the winner — and thus the accepted PolishedText
+	// and recorded Change — depend on iteration order, producing different
+	// verdicts across runs (a §11.4.50 determinism violation). On equal
+	// agreement, prefer the lexicographically smaller text so the choice is
+	// stable for identical input.
 	maxAgreement := 0
 	bestPolished := translatedText
 
 	for polished, agreement := range polishedVersions {
-		if agreement > maxAgreement {
+		if agreement > maxAgreement || (agreement == maxAgreement && polished < bestPolished) {
 			maxAgreement = agreement
 			bestPolished = polished
 		}

@@ -1,9 +1,9 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 48
-**Last modified:** 2026-06-15T01:15:00Z
+**Revision:** 49
+**Last modified:** 2026-06-15T02:00:00Z
 
-<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 30 real bugs (19 submodule + 11 main) -->
+<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 33 real bugs (19 submodule + 14 main) -->
 
 ### Session 2026-06-14v — cross-submodule bug-hunt campaign (§11.4.28 equal-codebase)
 
@@ -33,7 +33,9 @@ parallel session (64b7d08) so it was integrated, NOT double-fixed.** Host API ra
 | **MAIN** internal/verifier | GetPreferences dropped ALL models without a prior RefreshScores (used uncached score vs threshold); empty verified-models result never cached (TTL defeated) | (wave 7) |
 | **MAIN** pkg/ebook + pkg/fb2 | TXT >64KiB single-line total content loss; EPUB multiline `<head>` leaks `<title>` text into chapter; FB2 stanza title/subtitle dropped; FB2 cite/epigraph nested `<poem>` dropped — round-trip data-loss class | (wave 7) |
 | containers pkg/crossbuild | copyFile false-FAIL on directory artifacts (jpackage app-images) — successful build reported as failure (§11.4.1), all 3 non-Apple backends | ebf2641 |
-| **MAIN** pkg/storage | cache-key NUL-delimiter collision (distinct (lang,provider,model,text) tuples → same sha256 → WRONG cached translation served) across SQLite/Postgres/Redis; length-prefix fix + §11.4.120 reconcile | (wave 8) |
+| **MAIN** pkg/storage | cache-key NUL-delimiter collision (distinct (lang,provider,model,text) tuples → same sha256 → WRONG cached translation served) across SQLite/Postgres/Redis; length-prefix fix + §11.4.120 reconcile | c8e36d8 |
+| **MAIN** pkg/security | JWT with NO `exp` claim accepted → never-expiring session (jwt/v5 treats exp optional); `jwt.WithExpirationRequired()` | (wave 9) |
+| **MAIN** pkg/verification | nondeterministic consensus tie-break (map-order-dependent verdict, §11.4.50) + untranslated-char double-count corrupting quality score | (wave 9) |
 
 **Inline non-finding (§11.4.6):** pkg/script (Serbian Cyrillic↔Latin) audited — conversion correct for its rule-based scope (all 30 letters both directions, uppercase-digraph all-caps logic sound, rune-iterated); the loanword `nj`/`dž` disambiguation (e.g. `injekcija`→`инјекција`) is an inherent rule-based-transliteration limitation needing an exception dictionary, NOT a narrow bug — no fix manufactured.
 

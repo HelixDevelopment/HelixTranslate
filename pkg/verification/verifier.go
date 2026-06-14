@@ -265,7 +265,8 @@ func (v *Verifier) verifySection(section *ebook.Section, location string, result
 	// Verify section content
 	if section.Content != "" {
 		// Check if content is translated
-		if v.isSourceLanguage(section.Content) {
+		contentUntranslated := v.isSourceLanguage(section.Content)
+		if contentUntranslated {
 			result.UntranslatedBlocks = append(result.UntranslatedBlocks, UntranslatedBlock{
 				Location:     location + " - Content",
 				OriginalText: truncate(section.Content, 500),
@@ -283,17 +284,26 @@ func (v *Verifier) verifySection(section *ebook.Section, location string, result
 			result.Warnings = append(result.Warnings, fmt.Sprintf("HTML artifact in %s: %s", location, artifact.Content))
 		}
 
-		// Verify paragraphs
-		paragraphs := v.splitIntoParagraphs(section.Content)
-		for pi, para := range paragraphs {
-			if v.isSourceLanguage(para) {
-				paraLoc := fmt.Sprintf("%s, Paragraph %d", location, pi+1)
-				result.UntranslatedBlocks = append(result.UntranslatedBlocks, UntranslatedBlock{
-					Location:     paraLoc,
-					OriginalText: truncate(para, 200),
-					Language:     v.sourceLanguage.Code,
-					Length:       len(para),
-				})
+		// Verify paragraphs ONLY when the whole content was not already flagged.
+		// The whole-content block above already accounts for every character of
+		// section.Content; also emitting a per-paragraph block for the same content
+		// double-counts those characters in calculateQualityScore (which sums
+		// block.Length over ALL blocks against a totalChars that counts the content
+		// once), driving the character score artificially negative. The
+		// paragraph-level scan still catches PARTIAL untranslation when the
+		// whole-content heuristic did not fire.
+		if !contentUntranslated {
+			paragraphs := v.splitIntoParagraphs(section.Content)
+			for pi, para := range paragraphs {
+				if v.isSourceLanguage(para) {
+					paraLoc := fmt.Sprintf("%s, Paragraph %d", location, pi+1)
+					result.UntranslatedBlocks = append(result.UntranslatedBlocks, UntranslatedBlock{
+						Location:     paraLoc,
+						OriginalText: truncate(para, 200),
+						Language:     v.sourceLanguage.Code,
+						Length:       len(para),
+					})
+				}
 			}
 		}
 	}

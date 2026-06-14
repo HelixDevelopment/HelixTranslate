@@ -78,7 +78,14 @@ func (as *AuthService) ValidateToken(tokenString string) (*Claims, error) {
 			return nil, errors.New("invalid signing method")
 		}
 		return as.jwtSecret, nil
-	})
+	},
+		// Require an exp claim. jwt/v5 treats exp as OPTIONAL by default, so a
+		// validly-signed token that omits exp is otherwise reported as valid and
+		// never expires — a never-expiring-session bypass of the token TTL (OWASP
+		// JWT: exp MUST be present and enforced). See
+		// TestAdv_JWT_MissingExpRejected.
+		jwt.WithExpirationRequired(),
+	)
 
 	// Add small artificial delay for invalid tokens to prevent brute force
 	if err != nil {

@@ -244,6 +244,49 @@ func TestAdv_JWT_RefreshAcceptsLiveClaims(t *testing.T) {
 	}
 }
 
+// TestAdv_JWT_MissingExpRejected — a token with a VALID signature but NO exp
+// claim must be rejected. jwt/v5 treats exp as OPTIONAL by default: a correctly
+// signed token that simply omits exp is reported token.Valid == true and never
+// expires. ValidateToken is a public verifier that any caller relies on to
+// enforce session bounds; if it accepts an exp-less token, a never-expiring
+// session can be minted (e.g. by a misconfigured/compromised issuer, or any
+// caller crafting claims directly) and the verifier will honour it forever —
+// a "missing-expiry accepted as valid-forever" auth-bound bypass (OWASP JWT:
+// exp MUST be present and enforced). The fix requires exp at parse time.
+func TestAdv_JWT_MissingExpRejected(t *testing.T) {
+	as := advNewAuth(t)
+
+	// Sign with the REAL secret so the only defect under test is the missing exp
+	// (signature is genuinely valid — this is not a forgery test).
+	claims := jwt.MapClaims{
+		"user_id":  "attacker",
+		"username": "attacker",
+		"roles":    []string{"admin"},
+		// deliberately NO exp / nbf / iat
+	}
+	tok, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(advSecret))
+	if err != nil {
+		t.Fatalf("sign: %v", err)
+	}
+
+	if _, err := as.ValidateToken(tok); err == nil {
+		t.Fatal("SECURITY: token with NO exp claim was ACCEPTED — never-expiring session")
+	}
+}
+
+// TestAdv_JWT_PresentExpStillAccepted — over-correction guard: requiring exp
+// must NOT break ordinary tokens that DO carry an exp (GenerateToken's output).
+func TestAdv_JWT_PresentExpStillAccepted(t *testing.T) {
+	as := advNewAuth(t)
+	tok, err := as.GenerateToken("u1", "alice", []string{"user"})
+	if err != nil {
+		t.Fatalf("GenerateToken: %v", err)
+	}
+	if _, err := as.ValidateToken(tok); err != nil {
+		t.Fatalf("REGRESSION: a normally-issued token with exp was rejected: %v", err)
+	}
+}
+
 // TestAdv_JWT_FutureNbfRejected — a token whose not-before is in the future
 // must be rejected (token-not-yet-valid).
 func TestAdv_JWT_FutureNbfRejected(t *testing.T) {
