@@ -1,7 +1,9 @@
 package events
 
 import (
+	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -184,7 +186,17 @@ func NewEvent(eventType EventType, message string, data map[string]interface{}) 
 	}
 }
 
-// generateEventID creates a unique event ID
+// eventIDCounter is a process-wide monotonic counter appended to every event ID
+// so two events created within the same wall-clock microsecond are still
+// distinct. A bare time.Now().Format(...) is NOT unique under a burst (the normal
+// case for progress events): many calls land in the same microsecond and collide.
+var eventIDCounter uint64
+
+// generateEventID creates a unique event ID. The timestamp prefix preserves
+// human-readable chronological ordering; the atomic suffix guarantees uniqueness
+// even for events generated in the same microsecond (or, in principle, at the
+// same instant from multiple goroutines).
 func generateEventID() string {
-	return time.Now().Format("20060102150405.000000")
+	seq := atomic.AddUint64(&eventIDCounter, 1)
+	return time.Now().Format("20060102150405.000000") + "-" + strconv.FormatUint(seq, 10)
 }

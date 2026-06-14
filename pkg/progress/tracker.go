@@ -233,13 +233,30 @@ func formatDuration(d time.Duration) string {
 	minutes := int(d.Minutes()) % 60
 	seconds := int(d.Seconds()) % 60
 
+	// Join only the non-empty unit parts. formatTime returns "" for a zero
+	// value, so an exact 5h (minutes==0) or exact 2m (seconds==0) must NOT
+	// render with a trailing space ("5 hours ") — these strings are surfaced
+	// verbatim to the dashboard as EstimatedETA / ElapsedTime.
 	if hours > 0 {
-		return formatTime(hours, "hour") + " " + formatTime(minutes, "minute")
+		return joinNonEmpty(formatTime(hours, "hour"), formatTime(minutes, "minute"))
 	} else if minutes > 0 {
-		return formatTime(minutes, "minute") + " " + formatTime(seconds, "second")
+		return joinNonEmpty(formatTime(minutes, "minute"), formatTime(seconds, "second"))
 	} else {
 		return formatTime(seconds, "second")
 	}
+}
+
+// joinNonEmpty joins the larger- and smaller-unit fragments with a single
+// space, dropping any empty fragment so no leading/trailing/double space is
+// produced.
+func joinNonEmpty(major, minor string) string {
+	if major == "" {
+		return minor
+	}
+	if minor == "" {
+		return major
+	}
+	return major + " " + minor
 }
 
 // formatTime formats a time value with proper singular/plural
