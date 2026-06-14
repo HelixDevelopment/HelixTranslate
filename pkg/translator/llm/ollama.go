@@ -19,9 +19,19 @@ type OllamaClient struct {
 
 // OllamaRequest represents Ollama API request
 type OllamaRequest struct {
-	Model  string `json:"model"`
-	Prompt string `json:"prompt"`
-	Stream bool   `json:"stream"`
+	Model   string         `json:"model"`
+	Prompt  string         `json:"prompt"`
+	Stream  bool           `json:"stream"`
+	Options *OllamaOptions `json:"options,omitempty"`
+}
+
+// OllamaOptions carries generation parameters. Per the Ollama /api/generate
+// reference (https://github.com/ollama/ollama/blob/main/docs/api.md, verified
+// 2026-06-14) sampling/length controls such as temperature and num_predict are
+// passed inside an "options" object — NOT as top-level request fields.
+type OllamaOptions struct {
+	Temperature float64 `json:"temperature"`
+	NumPredict  int     `json:"num_predict,omitempty"`
 }
 
 // OllamaResponse represents Ollama API response
@@ -60,10 +70,36 @@ func (c *OllamaClient) Translate(ctx context.Context, text string, prompt string
 		model = "llama3:8b"
 	}
 
+	// Precedence: Options[...] override > typed config field (CLI flag) > default.
+	// Mirrors the openai/anthropic/qwen/zhipu clients so the Ollama path honours
+	// the same configured temperature/max_tokens instead of silently dropping
+	// them (Ollama would otherwise fall back to its model-default sampling).
+	temperature := 0.3
+	if c.config.Temperature > 0 {
+		temperature = c.config.Temperature
+	}
+	if t, ok := toFloat64(c.config.Options["temperature"]); ok {
+		temperature = t
+	}
+
+	// num_predict 0 == "use model default" for Ollama, so leave it unset unless
+	// the user configured a budget (typed field or Options override).
+	numPredict := 0
+	if c.config.MaxTokens > 0 {
+		numPredict = c.config.MaxTokens
+	}
+	if mt, ok := toInt(c.config.Options["max_tokens"]); ok {
+		numPredict = mt
+	}
+
 	request := OllamaRequest{
 		Model:  model,
 		Prompt: prompt,
 		Stream: false,
+		Options: &OllamaOptions{
+			Temperature: temperature,
+			NumPredict:  numPredict,
+		},
 	}
 
 	jsonData, err := json.Marshal(request)
