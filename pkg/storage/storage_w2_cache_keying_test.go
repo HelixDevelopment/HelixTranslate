@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"fmt"
-	"strings"
 	"testing"
 	"time"
 )
@@ -70,10 +69,11 @@ func TestRedisMakeCacheKey_DistinctPerComponent(t *testing.T) {
 	base := r.makeCacheKey("text", "en", "sr", "openai", "gpt-4")
 
 	// Documented format: cache:<srcLang>:<tgtLang>:<provider>:<model>:<hash(tuple)>
-	// where the hash covers ALL components NUL-joined (injection-proof, W20). The
-	// readable prefix is retained; correctness rests on the tuple hash, not the
-	// raw-':' join of the prior (vulnerable) format.
-	wantHash := hashString(strings.Join([]string{"en", "sr", "openai", "gpt-4", "text"}, "\x00"))
+	// where the hash covers ALL components length-prefix encoded (injection-proof,
+	// W21 — supersedes the W20 NUL-join, which collided on a delimiter byte inside
+	// a field). The readable prefix is retained; correctness rests on the tuple
+	// hash, not the raw-':' join of the prior (vulnerable) format.
+	wantHash := hashString(encodeCacheTuple("en", "sr", "openai", "gpt-4", "text"))
 	wantPrefix := fmt.Sprintf("cache:en:sr:openai:gpt-4:%s", wantHash)
 	if base != wantPrefix {
 		t.Fatalf("cache key format mismatch:\n got  %q\n want %q", base, wantPrefix)
