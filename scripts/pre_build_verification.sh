@@ -36,6 +36,19 @@
 #       binary's version derives from pkg/version.AppVersion (== authoritative
 #       VERSION file). Fast grep complement of the Go test
 #       TestNoBinaryDeclaresDivergentVersionLiteral.
+#   CM-TRACKER-DOCS-PRESENT      (§11.4.15/.16/.53) — the four canonical
+#       workable-item tracker docs (docs/Issues.md, docs/Fixed.md,
+#       docs/Issues_Summary.md, docs/Fixed_Summary.md) all exist AND each
+#       carries a §11.4.44 revision header (a '**Revision:**' line AND a
+#       '**Last modified:**' line). A missing doc or a missing header is a
+#       documentation-layer §11.4 violation (the tracker constellation is
+#       incomplete / unversioned).
+#   CM-ATM-TICKET-IDS            (§11.4.54) — every '###/## §' workable-item
+#       heading in docs/Issues.md + docs/Fixed.md carries an '[ATM-NNN]'
+#       ticket token; the ATM ids are UNIQUE across both files AND MONOTONIC
+#       with no gaps (the contiguous sequence ATM-001..ATM-NNN). A heading
+#       without an id, a duplicate id, or a gap in the sequence is a §11.4.54
+#       violation.
 #
 # Usage:
 #   scripts/pre_build_verification.sh            # run all gates
@@ -64,6 +77,8 @@
 #   scripts/testing/meta_test_no_fakes_beyond_unit.sh      — paired mutation (§1.1)
 #   scripts/testing/meta_test_script_target_shell_parseable.sh — paired mutation (§1.1)
 #   scripts/testing/meta_test_version_single_source.sh         — paired mutation (§1.1)
+#   scripts/testing/meta_test_tracker_docs_present.sh          — paired mutation (§1.1)
+#   scripts/testing/meta_test_atm_ticket_ids.sh               — paired mutation (§1.1)
 #   §11.4.67 target-shell-parseable — passes `bash -n` AND `sh -n`.
 #
 # Parseability note (§11.4.67): written in POSIX-portable shell. No arrays,
@@ -305,6 +320,127 @@ $(printf '%s\n' "$_hits" | sed 's/^/    /')"
 }
 
 # ---------------------------------------------------------------------------
+# Gate: CM-TRACKER-DOCS-PRESENT (§11.4.15/.16/.53)
+#
+# Asserts the four canonical workable-item tracker docs exist AND each carries
+# a §11.4.44 revision header. The required docs:
+#   docs/Issues.md          (open tracker — §11.4.15/.16)
+#   docs/Fixed.md           (closed archive — §11.4.19/.33)
+#   docs/Issues_Summary.md  (open summary — §11.4.12)
+#   docs/Fixed_Summary.md   (closed summary — §11.4.53)
+# A §11.4.44 revision header here means BOTH a line beginning '**Revision:**'
+# AND a line beginning '**Last modified:**' appear in the doc's header block
+# (checked over the first 12 non-blank lines, where the header lives).
+#
+# A missing doc OR a missing header line is a real, user-visible violation:
+# the tracker constellation is incomplete (an operator/agent cannot resume
+# from a half-present tracker) or unversioned (§11.4.44 freshness breaks).
+# ---------------------------------------------------------------------------
+gate_tracker_docs_present() {
+  _bad=""
+  for _doc in docs/Issues.md docs/Fixed.md docs/Issues_Summary.md docs/Fixed_Summary.md; do
+    if [ ! -f "$_doc" ]; then
+      _bad="$_bad
+$_doc (MISSING)"
+      continue
+    fi
+    # Read the header block (first 12 lines) and check for both header lines.
+    _hdr=$(head -n 12 "$_doc" 2>/dev/null)
+    if ! printf '%s\n' "$_hdr" | grep -q '^\*\*Revision:\*\*'; then
+      _bad="$_bad
+$_doc (no §11.4.44 '**Revision:**' header line)"
+    fi
+    if ! printf '%s\n' "$_hdr" | grep -q '^\*\*Last modified:\*\*'; then
+      _bad="$_bad
+$_doc (no §11.4.44 '**Last modified:**' header line)"
+    fi
+  done
+  _bad=$(printf '%s\n' "$_bad" | sed '/^[[:space:]]*$/d')
+
+  if [ -n "$_bad" ]; then
+    echo "FAIL CM-TRACKER-DOCS-PRESENT — tracker doc missing or unversioned (§11.4.15/.16/.53/.44):"
+    printf '%s\n' "$_bad" | sed 's/^/         - /'
+    return 1
+  fi
+  echo "PASS CM-TRACKER-DOCS-PRESENT — all 4 tracker docs present with §11.4.44 revision headers"
+  return 0
+}
+
+# ---------------------------------------------------------------------------
+# Gate: CM-ATM-TICKET-IDS (§11.4.54)
+#
+# Asserts every '###/## §' workable-item heading in docs/Issues.md +
+# docs/Fixed.md carries an '[ATM-NNN]' token, AND the union of all ids is
+# UNIQUE and MONOTONIC with no gaps — the contiguous sequence ATM-001..ATM-N
+# where N is the count of ids (so min=1, max=count, every integer present once).
+#
+# Three failure modes, each a real §11.4.54 violation:
+#   (1) a workable-item heading missing its [ATM-NNN] token (unidentifiable item)
+#   (2) a duplicate id across the two files (the id is not a stable unique key)
+#   (3) a gap in the sequence (renumber/skip — §11.4.54 forbids gaps)
+#
+# Honest boundary (§11.4.6): "workable-item heading" is matched as a line of
+# the form '^#{2,3} §' (the project's §X. heading convention). Headings not
+# matching that shape (e.g. the doc H1, '---' rules) are not items and are not
+# required to carry an id. This is a fast grep probe, faithful to the tree's
+# actual heading convention (verified: Issues §1..17, Fixed §1..64).
+# ---------------------------------------------------------------------------
+gate_atm_ticket_ids() {
+  # 1. Every workable-item heading must carry an [ATM-NNN] token.
+  _missing=""
+  for _doc in docs/Issues.md docs/Fixed.md; do
+    [ -f "$_doc" ] || { _missing="$_missing
+$_doc (MISSING file)"; continue; }
+    # Headings of the §X. workable-item form that lack an [ATM-NNN] token.
+    _hits=$(grep -nE '^#{2,3} §' "$_doc" 2>/dev/null | grep -vE '\[ATM-[0-9]+\]' || true)
+    if [ -n "$_hits" ]; then
+      _missing="$_missing
+$_doc:
+$(printf '%s\n' "$_hits" | sed 's/^/    /')"
+    fi
+  done
+  _missing=$(printf '%s\n' "$_missing" | sed '/^[[:space:]]*$/d')
+  if [ -n "$_missing" ]; then
+    echo "FAIL CM-ATM-TICKET-IDS — workable-item heading without an [ATM-NNN] token (§11.4.54):"
+    printf '%s\n' "$_missing" | sed 's/^/         /'
+    return 1
+  fi
+
+  # 2/3. Collect all ids (as integers) from both files; check unique + monotonic.
+  _ids=$(grep -ohE '\[ATM-[0-9]+\]' docs/Issues.md docs/Fixed.md 2>/dev/null \
+           | grep -oE '[0-9]+' | sed 's/^0*//; s/^$/0/')
+  if [ -z "$_ids" ]; then
+    echo "FAIL CM-ATM-TICKET-IDS — no [ATM-NNN] ids found in trackers (§11.4.54)"
+    return 1
+  fi
+
+  _sorted=$(printf '%s\n' "$_ids" | sort -n)
+  _count=$(printf '%s\n' "$_sorted" | wc -l | tr -d ' ')
+
+  # Duplicate detection: distinct count must equal total count.
+  _distinct=$(printf '%s\n' "$_sorted" | uniq | wc -l | tr -d ' ')
+  if [ "$_distinct" != "$_count" ]; then
+    _dups=$(printf '%s\n' "$_sorted" | uniq -d | sed 's/^/ATM-/')
+    echo "FAIL CM-ATM-TICKET-IDS — duplicate ATM id(s) across trackers (§11.4.54):"
+    printf '%s\n' "$_dups" | sed 's/^/         - /'
+    return 1
+  fi
+
+  # Monotonic no-gap: min must be 1 and max must equal count (contiguous 1..N).
+  _min=$(printf '%s\n' "$_sorted" | head -n 1)
+  _max=$(printf '%s\n' "$_sorted" | tail -n 1)
+  if [ "$_min" != "1" ] || [ "$_max" != "$_count" ]; then
+    echo "FAIL CM-ATM-TICKET-IDS — ATM sequence not contiguous 001..NNN (§11.4.54):"
+    echo "         - have $_count distinct id(s), min=ATM-$(printf '%03d' "$_min"), max=ATM-$(printf '%03d' "$_max")"
+    echo "         - expected min=ATM-001 and max=ATM-$(printf '%03d' "$_count") (a gap or out-of-range id exists)"
+    return 1
+  fi
+
+  echo "PASS CM-ATM-TICKET-IDS — every item carries a unique, contiguous [ATM-001..ATM-$(printf '%03d' "$_count")] id"
+  return 0
+}
+
+# ---------------------------------------------------------------------------
 # Dispatch.
 # ---------------------------------------------------------------------------
 run_one() {
@@ -313,11 +449,13 @@ run_one() {
     CM-NO-FAKES-BEYOND-UNIT)          gate_no_fakes_beyond_unit ;;
     CM-SCRIPT-TARGET-SHELL-PARSEABLE) gate_script_target_shell_parseable ;;
     CM-VERSION-SINGLE-SOURCE)         gate_version_single_source ;;
+    CM-TRACKER-DOCS-PRESENT)          gate_tracker_docs_present ;;
+    CM-ATM-TICKET-IDS)                gate_atm_ticket_ids ;;
     *) echo "pre_build_verification: ERROR — unknown gate '$1'" >&2; return 2 ;;
   esac
 }
 
-GATES="CM-GITIGNORE-PRECOMMIT-AUDIT CM-NO-FAKES-BEYOND-UNIT CM-SCRIPT-TARGET-SHELL-PARSEABLE CM-VERSION-SINGLE-SOURCE"
+GATES="CM-GITIGNORE-PRECOMMIT-AUDIT CM-NO-FAKES-BEYOND-UNIT CM-SCRIPT-TARGET-SHELL-PARSEABLE CM-VERSION-SINGLE-SOURCE CM-TRACKER-DOCS-PRESENT CM-ATM-TICKET-IDS"
 
 if [ "${1:-}" = "--list" ]; then
   for g in $GATES; do echo "$g"; done

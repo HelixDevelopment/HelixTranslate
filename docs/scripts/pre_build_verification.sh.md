@@ -1,7 +1,7 @@
 # pre_build_verification.sh — companion guide
 
-**Revision:** 2
-**Last modified:** 2026-06-14T00:00:00Z
+**Revision:** 3
+**Last modified:** 2026-06-14T16:30:00Z
 
 ## Overview
 
@@ -26,6 +26,8 @@ bluff.
 | `CM-NO-FAKES-BEYOND-UNIT` | §11.4.27 | Non-unit Go test files (build-tagged `integration`/`e2e`/`stress`/`performance`/`security`) do not import a mock/stub/fake package path. Mocks are permitted in unit tests only. |
 | `CM-SCRIPT-TARGET-SHELL-PARSEABLE` | §11.4.67 | Every tracked `*.sh` under `scripts/` + `scripts/testing/` parses cleanly under `bash -n`; any script declaring an **sh-family shebang** (`#!/bin/sh`, `#!/usr/bin/env sh`) or **no recognised shell shebang** must ALSO parse under `sh -n`. A script with an honest **bash** shebang is only required to be bash-parseable (invoked via its shebang it never runs under `sh`), so its bash-only constructs (`mapfile`, `< <(...)`, `[[ ]]`, arrays) are legitimate and must NOT be false-FAILed. |
 | `CM-VERSION-SINGLE-SOURCE` | P0.1 / `a36030e` | No `cmd/*/main.go` declares a hardcoded semver version literal (e.g. `appVersion = "3.0.0"`); every binary's version derives from `pkg/version.AppVersion` (== authoritative `VERSION` file). A fast grep complement of the Go test `TestNoBinaryDeclaresDivergentVersionLiteral`. |
+| `CM-TRACKER-DOCS-PRESENT` | §11.4.15 / .16 / .53 / .44 | The four canonical workable-item tracker docs (`docs/Issues.md`, `docs/Fixed.md`, `docs/Issues_Summary.md`, `docs/Fixed_Summary.md`) all exist AND each carries a §11.4.44 revision header — both a `**Revision:**` line and a `**Last modified:**` line in its header block. A missing doc or a missing header line is a documentation-layer violation (the tracker constellation is incomplete / unversioned). |
+| `CM-ATM-TICKET-IDS` | §11.4.54 | Every `###`/`##` `§X.` workable-item heading in `docs/Issues.md` + `docs/Fixed.md` carries an `[ATM-NNN]` token; the union of all ids is **unique** and **monotonic with no gaps** — the contiguous sequence `ATM-001..ATM-NNN`. A heading without a token, a duplicate id, or a gap in the sequence is a §11.4.54 violation. |
 
 ## Prerequisites
 
@@ -85,6 +87,19 @@ Exit codes: `0` all selected gates passed · `1` at least one real violation ·
   2-part XML/EPUB attr (`version="1.0"`) are correctly NOT flagged. It and the
   Go test `TestNoBinaryDeclaresDivergentVersionLiteral` together are the
   high-value probe, not an AST-grade proof.
+- **CM-TRACKER-DOCS-PRESENT** checks the §11.4.44 header over the first 12 lines
+  of each doc (where the header block lives). It asserts presence of the two
+  header lines and the four files; it does NOT validate the revision *value* or
+  the timestamp *freshness* (that is §11.4.44 / §11.4.60 sync-gate territory,
+  owned by the markdown-export sync path). A well-formed constellation is never
+  false-FAILed.
+- **CM-ATM-TICKET-IDS** matches workable-item headings as lines of the form
+  `^#{2,3} §` (the project's `§X.` heading convention). Non-item headings (the
+  doc H1, `---` rules) are not items and are not required to carry an id, so
+  they are never false-FAILed (§11.4.1). It is a fast grep probe faithful to
+  the tree's actual heading convention (Issues `§1..N`, Fixed `§1..N`); the
+  unique + contiguous-`001..N` invariant is computed from the union of both
+  files.
 
 ## Internal behaviour
 
@@ -107,11 +122,18 @@ mutated.
   mutation proof for `CM-SCRIPT-TARGET-SHELL-PARSEABLE`.
 - `scripts/testing/meta_test_version_single_source.sh` — paired §1.1 mutation
   proof for `CM-VERSION-SINGLE-SOURCE`.
+- `scripts/testing/meta_test_tracker_docs_present.sh` — paired §1.1 mutation
+  proof for `CM-TRACKER-DOCS-PRESENT`.
+- `scripts/testing/meta_test_atm_ticket_ids.sh` — paired §1.1 mutation proof
+  for `CM-ATM-TICKET-IDS`.
 - `scripts/testing/meta_test_constitution_inheritance.sh` — the pre-existing
   inheritance meta-test (sibling discipline).
 - `scripts/commit_all.sh` — the authorised commit + push wrapper.
 
-**Last verified:** 2026-06-14 (all 4 gates PASS on current tree; all four paired
+**Last verified:** 2026-06-14 (all 6 gates PASS on current tree; all six paired
 mutation tests PASS — every gate FAILs on a real violation and PASSes when
-restored, and the two false-FAIL negatives confirm honest-bash scripts and the
-compliant `version.AppVersion` form are never wrongly flagged).
+restored. CM-TRACKER-DOCS-PRESENT catches a missing doc + a missing
+Revision/Last-modified header; CM-ATM-TICKET-IDS catches missing tokens,
+duplicate ids, and sequence gaps without false-FAILing a non-item heading; and
+the prior negatives confirm honest-bash scripts and the compliant
+`version.AppVersion` form are never wrongly flagged).
