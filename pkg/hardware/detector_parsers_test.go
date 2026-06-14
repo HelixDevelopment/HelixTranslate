@@ -339,6 +339,61 @@ func TestParseLscpuCores(t *testing.T) {
 	}
 }
 
+// TestParseLscpuCores_MultiSocket is the regression guard for the multi-socket
+// physical-core undercount bug. CPUCores is documented as "physical cores"
+// (detector.go), but on a dual-socket server the physical core count is
+// (Core(s) per socket) * (Socket(s)). A real dual-socket Xeon reporting
+// 8 cores/socket across 2 sockets has 16 physical cores; the parser must NOT
+// report 8 (cores-per-socket only).
+//
+// Mutation proof (§1.1): reverting parseLscpuCores to return cores-per-socket
+// without multiplying by Socket(s) makes every multi-socket case below FAIL.
+func TestParseLscpuCores_MultiSocket(t *testing.T) {
+	cases := []struct {
+		name string
+		in   string
+		want int
+	}{
+		{
+			name: "dual socket 8 cores each = 16",
+			in: "Architecture:            x86_64\n" +
+				"CPU(s):                  64\n" +
+				"Thread(s) per core:      2\n" +
+				"Core(s) per socket:      8\n" +
+				"Socket(s):               2\n",
+			want: 16,
+		},
+		{
+			name: "quad socket 18 cores each = 72",
+			in: "Core(s) per socket:      18\n" +
+				"Socket(s):               4\n",
+			want: 72,
+		},
+		{
+			name: "single socket still correct = 8",
+			in: "Core(s) per socket:      8\n" +
+				"Socket(s):               1\n",
+			want: 8,
+		},
+		{
+			name: "missing Socket(s) line defaults to 1 socket = 6",
+			in:   "Core(s) per socket:      6\n",
+			want: 6,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := parseLscpuCores(tc.in)
+			if err != nil {
+				t.Fatalf("parseLscpuCores(%q) unexpected error: %v", tc.name, err)
+			}
+			if got != tc.want {
+				t.Errorf("parseLscpuCores(%s) = %d physical cores, want %d", tc.name, got, tc.want)
+			}
+		})
+	}
+}
+
 // --- parseSysctlLabeledInt: BSD `sysctl hw.ncpu` -> "hw.ncpu: 8".
 func TestParseSysctlLabeledInt(t *testing.T) {
 	cases := []struct {

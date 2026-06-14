@@ -427,23 +427,42 @@ func parseSysctlInt(output string) (int, error) {
 	return cores, nil
 }
 
-// parseLscpuCores scans Linux `lscpu` output for the "Core(s) per socket:"
-// line and returns the integer in field [3], e.g. "Core(s) per socket:    8"
-// -> 8. Behavior-preserving: returns an error only when no parseable line is
-// found, matching the original inline loop exactly.
+// parseLscpuCores scans Linux `lscpu` output for the physical core count.
+// CPUCores is documented as TOTAL physical cores, so on a multi-socket host
+// that is (Core(s) per socket) * (Socket(s)) — e.g. a dual-socket server
+// reporting "Core(s) per socket: 8" and "Socket(s): 2" has 16 physical cores,
+// not 8. The "Core(s) per socket:" line is required (its absence is an error,
+// matching the original inline loop); "Socket(s):" is optional and defaults to
+// 1 when absent (a single-socket machine).
 func parseLscpuCores(output string) (int, error) {
+	coresPerSocket := 0
+	foundCores := false
+	sockets := 1 // default: single socket when lscpu omits the Socket(s) line
+
 	for _, line := range strings.Split(output, "\n") {
-		if strings.Contains(line, "Core(s) per socket:") {
+		switch {
+		case strings.Contains(line, "Core(s) per socket:"):
 			parts := strings.Fields(line)
 			if len(parts) >= 4 {
-				cores, err := strconv.Atoi(parts[3])
-				if err == nil {
-					return cores, nil
+				if v, err := strconv.Atoi(parts[3]); err == nil {
+					coresPerSocket = v
+					foundCores = true
+				}
+			}
+		case strings.Contains(line, "Socket(s):"):
+			parts := strings.Fields(line)
+			if len(parts) >= 2 {
+				if v, err := strconv.Atoi(parts[len(parts)-1]); err == nil && v > 0 {
+					sockets = v
 				}
 			}
 		}
 	}
-	return 0, fmt.Errorf("could not parse core count")
+
+	if !foundCores {
+		return 0, fmt.Errorf("could not parse core count")
+	}
+	return coresPerSocket * sockets, nil
 }
 
 // parseSysctlLabeledInt parses a labeled BSD sysctl line of the form
