@@ -309,8 +309,11 @@ func (rc *ResultCache) Set(key, value string) {
 	rc.mu.Lock()
 	defer rc.mu.Unlock()
 
-	// Check cache size limit
-	if len(rc.cache) >= rc.maxSize {
+	// Only enforce the size limit when inserting a NEW key. Updating an
+	// existing key overwrites a slot in place and does not grow the map, so
+	// evicting another entry here would needlessly drop a valid cached result
+	// and shrink the effective cache below maxSize.
+	if _, present := rc.cache[key]; !present && len(rc.cache) >= rc.maxSize {
 		// Remove expired entries first
 		rc.removeExpired()
 

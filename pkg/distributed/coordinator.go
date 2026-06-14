@@ -77,8 +77,10 @@ func (dc *DistributedCoordinator) DiscoverRemoteInstances(ctx context.Context) e
 	dc.mu.Lock()
 	defer dc.mu.Unlock()
 
-	// Clear existing remote instances
+	// Clear existing remote instances and reset the round-robin cursor so it
+	// cannot point past the freshly-rebuilt (possibly shorter) slice.
 	dc.remoteInstances = make([]*RemoteLLMInstance, 0)
+	dc.currentIndex = 0
 
 	instanceID := 1
 	for workerID, service := range pairedServices {
@@ -483,6 +485,14 @@ func (dc *DistributedCoordinator) getNextRemoteInstance() *RemoteLLMInstance {
 
 	if len(dc.remoteInstances) == 0 {
 		return nil
+	}
+
+	// Clamp the round-robin cursor: the instance slice is rebuilt on every
+	// DiscoverRemoteInstances call and may shrink below the previously-advanced
+	// currentIndex. Without this guard, indexing a stale currentIndex into a
+	// shorter slice panics (index out of range) in the translation hot path.
+	if dc.currentIndex >= len(dc.remoteInstances) {
+		dc.currentIndex = 0
 	}
 
 	// Use round-robin selection
