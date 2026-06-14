@@ -142,6 +142,60 @@ func TestGetTranslationStatus_UnknownSession_NotFoundCode(t *testing.T) {
 	}
 }
 
+// --- Bug E: emitProgressEvent publishes bus events with an empty SessionId ----
+//
+// emitProgressEvent(sessionID, ...) fans a TranslationProgressEvent to the
+// per-session streams AND re-publishes it onto the main event bus via
+//
+//	s.eventBus.Publish(events.NewEvent(events.EventType(eventType), message, metadata))
+//
+// events.NewEvent does NOT set Event.SessionID — it is left "". SubscribeEvents
+// then maps every bus event to a proto.SystemEvent{ SessionId: event.SessionID },
+// so EVERY translation lifecycle event (started / completed / failed / cancelled)
+// delivered to a SubscribeEvents client arrives with an EMPTY session_id. A
+// monitoring client therefore cannot tell which translation an event belongs to.
+// CoreTranslatorImpl.emitProgress gets this right (it sets event.SessionID before
+// publishing); the server's own emitProgressEvent dropped the sessionID it was
+// handed.
+//
+// RED (pre-fix): the SystemEvent received over the real SubscribeEvents stream
+// has SessionId == "". GREEN (post-fix): SessionId == the emitting session id.
+func TestEmitProgressEvent_BusEventCarriesSessionId(t *testing.T) {
+	h := newTestHarness(t, nil, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stream, err := h.client.SubscribeEvents(ctx, &proto.EventSubscriptionRequest{
+		ClientId:   "sess-id-client",
+		EventTypes: []string{"completed"}, // match the emitProgressEvent eventType below
+	})
+	if err != nil {
+		t.Fatalf("SubscribeEvents open: %v", err)
+	}
+
+	// Wait for the server's SubscribeAll registration to land before emitting.
+	deadline := time.Now().Add(2 * time.Second)
+	for h.server.eventBus.HandlerCount() == 0 && time.Now().Before(deadline) {
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	// Drive the exact server method under test with a concrete session id.
+	const wantSession = "evt-session-42"
+	h.server.emitProgressEvent(wantSession, "completed", "", 100, "done", nil)
+
+	ev, err := stream.Recv()
+	if err != nil {
+		t.Fatalf("recv: %v", err)
+	}
+	if ev.GetEventType() != "completed" {
+		t.Fatalf("event type = %q, want \"completed\"", ev.GetEventType())
+	}
+	if ev.GetSessionId() != wantSession {
+		t.Fatalf("session_id = %q, want %q (lifecycle event delivered to subscribers must carry its session id)",
+			ev.GetSessionId(), wantSession)
+	}
+}
+
 // --- Bug D: cleanupOldSessions leaks the per-session timeout context ----------
 //
 // StartTranslation creates each session's context via context.WithTimeout

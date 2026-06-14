@@ -562,8 +562,13 @@ func (s *Server) emitProgressEvent(sessionID, eventType, stepName string, progre
 	}
 	s.streamsMutex.RUnlock()
 
-	// Also emit to main event bus
-	s.eventBus.Publish(events.NewEvent(events.EventType(eventType), message, metadata))
+	// Also emit to main event bus. events.NewEvent leaves Event.SessionID empty,
+	// so we MUST stamp the sessionID we were handed before publishing — otherwise
+	// SubscribeEvents maps every lifecycle event to a SystemEvent with an empty
+	// session_id and subscribers cannot associate the event with its translation.
+	busEvent := events.NewEvent(events.EventType(eventType), message, metadata)
+	busEvent.SessionID = sessionID
+	s.eventBus.Publish(busEvent)
 }
 
 func (s *Server) cleanupRoutine() {
