@@ -1,7 +1,19 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 29
-**Last modified:** 2026-06-14T14:00:00Z
+**Revision:** 30
+**Last modified:** 2026-06-14T14:45:00Z
+
+<!-- session 2026-06-14g: 7th (final-coverage) SECOND-PASS wave (HEAD 5dfe003) — 4 more real bugs; comprehensive second pass COMPLETE -->
+
+### Session 2026-06-14g — 7th/final §11.4.118 second-pass wave (HEAD 5dfe003) — 4 more real bugs; whole-codebase second pass essentially COMPLETE
+
+- **b1b747f** progress: formatDuration trailing space in dashboard ETA ('5 hours '); events: generateEventID non-unique within a microsecond (8172 dups/10000 in a burst → broke ID-keyed consumers). Both fixed.
+- **5dfe003** cmd: preparation-translator -providers flag silently ignored (hardcoded list); cli explicit -provider silently overridden by config default (precedence inversion). Both fixed.
+- CLEAN second-pass (honest §11.4.6, no fabricated bugs): logger, version, hardware, report, format, websocket, script.
+
+**SESSION GRAND TOTAL: 68 real bugs** (5 parallel waves + 3 inline + 7 second-pass waves) + 2 reconciliations + §11.4.98 conversion. ALL reproduce-first + mutation-proven + conductor-reverified (-race/-p 1) + pushed FF (no force §11.4.113). 3 distinct security issues (CWE-204 enumeration, CWE-22 path traversal, CWE-208 timing oracle); extensive data-loss/correctness across ebook pipeline (EPUB/FB2/HTML/markdown round-trips), providers (Anthropic/OpenRouter/Qwen), distributed, storage/cache, verification, preparation, translator-core, batch, coordination, grpc, api. The codebase has had a comprehensive 2-pass hunt; remaining items are operator/review-gated (see flags below). Post-wave full sweep GREEN at HEAD 5dfe003: 54 ok / 0 FAIL (fullsweep_20260614T120039.log). Build+vet exit 0.
+
+OPERATOR/REVIEW-GATED carry-overs (NOT autonomously fixable — need a decision): Qwen native-vs-compatible endpoint mode; storage cache dup-tuple UNIQUE index (schema/dedup-semantics); DOCX unioffice license (go.mod dependency); detected source-lang not propagated to llm translator (cross-package wiring); FB2 writer section-title flatten; verifier 3-tier merge precedence + run.go registry flags; coordination consensus tie-break determinism; G1 verify→server-DB bridge; G2 batched ~30-provider sweep; G3 add OPENAI/ANTHROPIC keys.
 
 <!-- session 2026-06-14f: 6th SECOND-PASS wave (HEAD 837f528) — 4 more real bugs (batch/coordination/translator-core) -->
 
