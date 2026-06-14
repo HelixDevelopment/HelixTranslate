@@ -485,6 +485,7 @@ type VersionManager struct {
 	backupDir    string
 	backups      map[string]*UpdateBackup // workerID -> backup
 	metrics      *VersionMetrics
+	metricsMu    sync.Mutex // guards every read/modify/write of *metrics (Record*/CheckVersionDrift/GetMetrics/GetHealthStatus run concurrently; the counter ++ are non-atomic RMW and lost ~40-60% of updates under load)
 	alerts       []*DriftAlert
 	alertManager *AlertManager
 	versionCache map[string]*VersionCacheEntry // workerID -> cached version info
@@ -1184,7 +1185,12 @@ func (vm *VersionManager) InstallWorker(ctx context.Context, workerID, host stri
 
 // GetMetrics returns current version management metrics
 func (vm *VersionManager) GetMetrics() *VersionMetrics {
-	return vm.metrics
+	// Return a snapshot COPY under the lock — handing back the shared pointer let
+	// callers read fields while Record*/CheckVersionDrift mutated them (data race).
+	vm.metricsMu.Lock()
+	defer vm.metricsMu.Unlock()
+	snapshot := *vm.metrics
+	return &snapshot
 }
 
 // GetAlerts returns current version drift alerts
@@ -1355,8 +1361,11 @@ func (vm *VersionManager) CheckVersionDrift(ctx context.Context, services []*Rem
 	alerts := make([]*DriftAlert, 0)
 	now := time.Now()
 
+	workersChecked := int64(len(services))
+	vm.metricsMu.Lock()
 	vm.metrics.LastDriftCheck = now
-	vm.metrics.WorkersChecked = int64(len(services))
+	vm.metrics.WorkersChecked = workersChecked
+	vm.metricsMu.Unlock()
 
 	upToDateCount := int64(0)
 	outdatedCount := int64(0)
@@ -1387,9 +1396,11 @@ func (vm *VersionManager) CheckVersionDrift(ctx context.Context, services []*Rem
 
 			// Calculate drift duration
 			driftDuration := now.Sub(service.Version.LastUpdated)
+			vm.metricsMu.Lock()
 			if driftDuration > vm.metrics.MaxDriftDuration {
 				vm.metrics.MaxDriftDuration = driftDuration
 			}
+			vm.metricsMu.Unlock()
 
 			// Determine severity based on drift duration
 			severity := vm.calculateDriftSeverity(driftDuration)
@@ -1416,23 +1427,25 @@ func (vm *VersionManager) CheckVersionDrift(ctx context.Context, services []*Rem
 	}
 
 	// Update metrics
+	vm.metricsMu.Lock()
 	vm.metrics.WorkersUpToDate = upToDateCount
 	vm.metrics.WorkersOutdated = outdatedCount
 	vm.metrics.WorkersUnhealthy = unhealthyCount
+	vm.metricsMu.Unlock()
 
 	// Store alerts
 	vm.alerts = alerts
 
-	// Emit drift check event
+	// Emit drift check event (use the locals, not vm.metrics, to avoid a racy read)
 	event := events.Event{
 		Type:      "version_drift_check_completed",
 		SessionID: "system",
 		Timestamp: now,
 		Data: map[string]interface{}{
-			"workers_checked":    vm.metrics.WorkersChecked,
-			"workers_up_to_date": vm.metrics.WorkersUpToDate,
-			"workers_outdated":   vm.metrics.WorkersOutdated,
-			"workers_unhealthy":  vm.metrics.WorkersUnhealthy,
+			"workers_checked":    workersChecked,
+			"workers_up_to_date": upToDateCount,
+			"workers_outdated":   outdatedCount,
+			"workers_unhealthy":  unhealthyCount,
 			"alerts_generated":   len(alerts),
 		},
 	}
@@ -1457,6 +1470,8 @@ func (vm *VersionManager) calculateDriftSeverity(driftDuration time.Duration) st
 
 // RecordUpdateMetrics records metrics for a completed update operation
 func (vm *VersionManager) RecordUpdateMetrics(success bool, duration time.Duration) {
+	vm.metricsMu.Lock()
+	defer vm.metricsMu.Unlock()
 	vm.metrics.TotalUpdates++
 	vm.metrics.LastUpdateTime = time.Now()
 
@@ -1477,6 +1492,8 @@ func (vm *VersionManager) RecordUpdateMetrics(success bool, duration time.Durati
 
 // RecordRollbackMetrics records metrics for a completed rollback operation
 func (vm *VersionManager) RecordRollbackMetrics(success bool, duration time.Duration) {
+	vm.metricsMu.Lock()
+	defer vm.metricsMu.Unlock()
 	vm.metrics.TotalRollbacks++
 	vm.metrics.LastRollbackTime = time.Now()
 
@@ -1496,6 +1513,8 @@ func (vm *VersionManager) RecordRollbackMetrics(success bool, duration time.Dura
 
 // RecordSignatureMetrics records metrics for signature operations
 func (vm *VersionManager) RecordSignatureMetrics(success bool) {
+	vm.metricsMu.Lock()
+	defer vm.metricsMu.Unlock()
 	vm.metrics.SignatureVerifications++
 
 	if success {
@@ -1507,35 +1526,41 @@ func (vm *VersionManager) RecordSignatureMetrics(success bool) {
 
 // RecordBackupMetrics records metrics for backup operations
 func (vm *VersionManager) RecordBackupMetrics() {
-	vm.metrics.BackupsCreated++
-
-	// Count active backups
+	// Count active backups before taking metricsMu (don't hold it across the
+	// backups iteration).
 	activeCount := int64(0)
 	for _, backup := range vm.backups {
 		if backup.Status == "active" {
 			activeCount++
 		}
 	}
+	vm.metricsMu.Lock()
+	vm.metrics.BackupsCreated++
 	vm.metrics.BackupsActive = activeCount
+	vm.metricsMu.Unlock()
 }
 
 // GetHealthStatus returns overall health status of version management
 func (vm *VersionManager) GetHealthStatus() map[string]interface{} {
 	now := time.Now()
-	driftCheckAge := now.Sub(vm.metrics.LastDriftCheck)
+	// Snapshot metrics once under the lock; use the copy for every read below.
+	vm.metricsMu.Lock()
+	m := *vm.metrics
+	vm.metricsMu.Unlock()
+	driftCheckAge := now.Sub(m.LastDriftCheck)
 
 	// Calculate health score (0-100)
 	healthScore := 100.0
 
 	// Penalize for outdated workers
-	if vm.metrics.WorkersChecked > 0 {
-		outdatedRatio := float64(vm.metrics.WorkersOutdated) / float64(vm.metrics.WorkersChecked)
+	if m.WorkersChecked > 0 {
+		outdatedRatio := float64(m.WorkersOutdated) / float64(m.WorkersChecked)
 		healthScore -= outdatedRatio * 50
 	}
 
 	// Penalize for unhealthy workers
-	if vm.metrics.WorkersChecked > 0 {
-		unhealthyRatio := float64(vm.metrics.WorkersUnhealthy) / float64(vm.metrics.WorkersChecked)
+	if m.WorkersChecked > 0 {
+		unhealthyRatio := float64(m.WorkersUnhealthy) / float64(m.WorkersChecked)
 		healthScore -= unhealthyRatio * 30
 	}
 
@@ -1549,8 +1574,8 @@ func (vm *VersionManager) GetHealthStatus() map[string]interface{} {
 	}
 
 	// Penalize for update failures
-	if vm.metrics.TotalUpdates > 0 {
-		failureRatio := float64(vm.metrics.FailedUpdates) / float64(vm.metrics.TotalUpdates)
+	if m.TotalUpdates > 0 {
+		failureRatio := float64(m.FailedUpdates) / float64(m.TotalUpdates)
 		healthScore -= failureRatio * 10
 	}
 
@@ -1569,15 +1594,15 @@ func (vm *VersionManager) GetHealthStatus() map[string]interface{} {
 	return map[string]interface{}{
 		"status":                status,
 		"health_score":          healthScore,
-		"last_drift_check":      vm.metrics.LastDriftCheck,
+		"last_drift_check":      m.LastDriftCheck,
 		"drift_check_age":       driftCheckAge,
-		"workers_checked":       vm.metrics.WorkersChecked,
-		"workers_up_to_date":    vm.metrics.WorkersUpToDate,
-		"workers_outdated":      vm.metrics.WorkersOutdated,
-		"workers_unhealthy":     vm.metrics.WorkersUnhealthy,
+		"workers_checked":       m.WorkersChecked,
+		"workers_up_to_date":    m.WorkersUpToDate,
+		"workers_outdated":      m.WorkersOutdated,
+		"workers_unhealthy":     m.WorkersUnhealthy,
 		"active_alerts":         len(vm.alerts),
-		"update_success_rate":   vm.calculateSuccessRate(vm.metrics.SuccessfulUpdates, vm.metrics.TotalUpdates),
-		"rollback_success_rate": vm.calculateSuccessRate(vm.metrics.SuccessfulRollbacks, vm.metrics.TotalRollbacks),
+		"update_success_rate":   vm.calculateSuccessRate(m.SuccessfulUpdates, m.TotalUpdates),
+		"rollback_success_rate": vm.calculateSuccessRate(m.SuccessfulRollbacks, m.TotalRollbacks),
 	}
 }
 
