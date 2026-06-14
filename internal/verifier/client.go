@@ -139,12 +139,23 @@ type serverModel struct {
 // ({"models":[...],"count":N}) with its server-side field names AND a bare
 // []api.Model array (forward-compatible), mapping either onto []Model.
 func decodeModelsResponse(body []byte) ([]Model, error) {
-	// Preferred: the server envelope with server-side field names.
+	// Preferred: the server envelope with server-side field names. The envelope is
+	// a JSON OBJECT, so a successful unmarshal into the struct (err == nil) is the
+	// discriminator that the body IS the envelope — a bare array errors here
+	// ("cannot unmarshal array into ... struct") and correctly falls through to
+	// the array fallback below. A present-but-null models key
+	// ({"models":null,"count":0} — what the server emits for a zero-length
+	// verified set, since Go marshals a nil slice as JSON null) yields a nil
+	// Models slice but a successful struct unmarshal, so it MUST be handled as a
+	// valid empty result here rather than wrongly forced down the bare-array
+	// fallback (which then fails: "cannot unmarshal object into []"). Gating on
+	// `env.Models != nil` conflated "empty envelope" with "bare array" and broke
+	// /api/v1/verified-models whenever zero models were verified.
 	var env struct {
 		Models []serverModel `json:"models"`
 		Count  int           `json:"count"`
 	}
-	if err := json.Unmarshal(body, &env); err == nil && env.Models != nil {
+	if err := json.Unmarshal(body, &env); err == nil {
 		out := make([]Model, 0, len(env.Models))
 		for _, sm := range env.Models {
 			caps := make(map[string]bool, len(sm.Capabilities))
