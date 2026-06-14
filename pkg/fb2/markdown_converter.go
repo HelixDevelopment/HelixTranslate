@@ -126,7 +126,7 @@ func (c *MarkdownConverter) processSections(markdown *strings.Builder, sections 
 		for _, subtitle := range section.Subtitle {
 			if subtitle != "" {
 				markdown.WriteString("### ")
-				markdown.WriteString(subtitle)
+				markdown.WriteString(string(subtitle))
 				markdown.WriteString("\n\n")
 			}
 		}
@@ -173,7 +173,7 @@ func (c *MarkdownConverter) processEpigraph(markdown *strings.Builder, epigraph 
 	for _, textAuthor := range epigraph.TextAuthor {
 		if textAuthor != "" {
 			markdown.WriteString("> \u2014 ")
-			markdown.WriteString(textAuthor)
+			markdown.WriteString(string(textAuthor))
 			markdown.WriteString("\n")
 		}
 	}
@@ -228,7 +228,7 @@ func (c *MarkdownConverter) processCite(markdown *strings.Builder, cite Cite) {
 	for _, subtitle := range cite.Subtitle {
 		if subtitle != "" {
 			markdown.WriteString("> \u2014 ")
-			markdown.WriteString(subtitle)
+			markdown.WriteString(string(subtitle))
 			markdown.WriteString("\n")
 		}
 	}

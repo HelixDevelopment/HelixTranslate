@@ -124,9 +124,9 @@ type Section struct {
 	Epigraph  []Epigraph  `xml:"epigraph,omitempty"`
 	Section   []Section   `xml:"section,omitempty"`
 	Paragraph []Paragraph `xml:"p,omitempty"`
-	Poem      []Poem      `xml:"poem,omitempty"`
-	Subtitle  []string    `xml:"subtitle,omitempty"`
-	Cite      []Cite      `xml:"cite,omitempty"`
+	Poem      []Poem       `xml:"poem,omitempty"`
+	Subtitle  []InlineText `xml:"subtitle,omitempty"`
+	Cite      []Cite       `xml:"cite,omitempty"`
 	EmptyLine []struct{}  `xml:"empty-line,omitempty"`
 }
 
@@ -252,6 +252,50 @@ func (p Paragraph) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return e.EncodeToken(xml.EndElement{Name: start.Name})
 }
 
+// InlineText is a named string for FB2 elements that carry mixed content —
+// bare character data interleaved with inline formatting elements (<emphasis>,
+// <strong>, <a>, <style>, <sub>, <sup>, <code>, <strikethrough>, ...). The FB2
+// schema models <v> (verse), <subtitle>, and <text-author> as such mixed
+// content, but Go's encoding/xml `,chardata` / plain `string` captures ONLY the
+// bare chardata and silently drops every inline element's text, leaving broken
+// fragments with gaps where the emphasized/strong/linked words used to be (e.g.
+// "Verse <strong>STRONG</strong> end" parsed as "Verse  end"). InlineText's
+// custom UnmarshalXML walks the token stream so inline-element text (recursively)
+// and tail text are all preserved in document order, exactly as the end user
+// would read them — the same fix the Paragraph type applies.
+type InlineText string
+
+// UnmarshalXML reconstructs the full mixed-content text of an FB2 inline-bearing
+// element (<v>, <subtitle>, <text-author>) in document order, preserving bare
+// chardata, inline-element text (recursively), and tail text.
+func (s *InlineText) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	var b strings.Builder
+	depth := 0
+	for {
+		tok, err := d.Token()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+		switch t := tok.(type) {
+		case xml.CharData:
+			b.Write(t)
+		case xml.StartElement:
+			depth++
+		case xml.EndElement:
+			if depth == 0 {
+				*s = InlineText(b.String())
+				return nil
+			}
+			depth--
+		}
+	}
+	*s = InlineText(b.String())
+	return nil
+}
+
 // Emphasis represents emphasized text
 type Emphasis struct {
 	Style string `xml:"style,attr,omitempty"`
@@ -265,10 +309,10 @@ type Strong struct {
 
 // Epigraph represents an epigraph
 type Epigraph struct {
-	Paragraph  []Paragraph `xml:"p"`
-	Poem       []Poem      `xml:"poem,omitempty"`
-	Cite       []Cite      `xml:"cite,omitempty"`
-	TextAuthor []string    `xml:"text-author,omitempty"`
+	Paragraph  []Paragraph  `xml:"p"`
+	Poem       []Poem       `xml:"poem,omitempty"`
+	Cite       []Cite       `xml:"cite,omitempty"`
+	TextAuthor []InlineText `xml:"text-author,omitempty"`
 }
 
 // Poem represents a poem
@@ -280,23 +324,55 @@ type Poem struct {
 
 // Stanza represents a poem stanza
 type Stanza struct {
-	Title    Title  `xml:"title,omitempty"`
-	Subtitle string `xml:"subtitle,omitempty"`
-	V        []V    `xml:"v"`
+	Title    Title      `xml:"title,omitempty"`
+	Subtitle InlineText `xml:"subtitle,omitempty"`
+	V        []V        `xml:"v"`
 }
 
-// V represents a verse line
+// V represents a verse line. The verse body is mixed content (inline formatting
+// allowed). A `,chardata` field would drop all inline-element text, so V carries
+// a custom UnmarshalXML/MarshalXML that reconstructs the full mixed-content text
+// in document order (a `,chardata` field does NOT invoke a named field type's
+// UnmarshalXML, so the element-level walk must live on V itself).
 type V struct {
-	Text string `xml:",chardata"`
+	Text string
+}
+
+// UnmarshalXML reconstructs the full mixed-content text of a <v> verse line,
+// preserving bare chardata, inline-element text (recursively), and tail text.
+func (v *V) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	var s InlineText
+	if err := (&s).UnmarshalXML(d, start); err != nil {
+		return err
+	}
+	v.Text = string(s)
+	return nil
+}
+
+// MarshalXML emits the verse's full text as the <v> element body, escaped by the
+// encoder. Without it the default marshaling of the plain Text field would still
+// work, but defining it keeps write symmetric with the custom read.
+func (v V) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	start.Name = xml.Name{Local: "v"}
+	start.Attr = start.Attr[:0]
+	if err := e.EncodeToken(start); err != nil {
+		return err
+	}
+	if v.Text != "" {
+		if err := e.EncodeToken(xml.CharData(v.Text)); err != nil {
+			return err
+		}
+	}
+	return e.EncodeToken(xml.EndElement{Name: start.Name})
 }
 
 // Cite represents a citation
 type Cite struct {
-	Paragraph  []Paragraph `xml:"p"`
-	Subtitle   []string    `xml:"subtitle,omitempty"`
-	Poem       []Poem      `xml:"poem,omitempty"`
-	EmptyLine  []struct{}  `xml:"empty-line,omitempty"`
-	TextAuthor []string    `xml:"text-author,omitempty"`
+	Paragraph  []Paragraph  `xml:"p"`
+	Subtitle   []InlineText `xml:"subtitle,omitempty"`
+	Poem       []Poem       `xml:"poem,omitempty"`
+	EmptyLine  []struct{}   `xml:"empty-line,omitempty"`
+	TextAuthor []InlineText `xml:"text-author,omitempty"`
 }
 
 // Binary represents embedded binary data (images)
