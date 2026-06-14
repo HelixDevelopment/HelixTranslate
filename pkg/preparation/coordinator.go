@@ -346,10 +346,9 @@ func (pc *PreparationCoordinator) extractBookContent(book *ebook.Book) string {
 		}
 		content.WriteString("\n\n")
 
-		// Add sections
-		for _, section := range chapter.Sections {
-			content.WriteString(section.Content)
-			content.WriteString("\n\n")
+		// Add sections (recursively, including nested subsections).
+		for i := range chapter.Sections {
+			writeSectionContent(&content, &chapter.Sections[i])
 		}
 	}
 
@@ -359,11 +358,25 @@ func (pc *PreparationCoordinator) extractBookContent(book *ebook.Book) string {
 // extractChapterContent extracts text from a single chapter
 func (pc *PreparationCoordinator) extractChapterContent(chapter *ebook.Chapter) string {
 	var content strings.Builder
-	for _, section := range chapter.Sections {
+	for i := range chapter.Sections {
+		writeSectionContent(&content, &chapter.Sections[i])
+	}
+	return content.String()
+}
+
+// writeSectionContent appends a section's content and then recurses into its
+// subsections. FB2 (and other nested formats) populate Section.Subsections, and
+// the translator recurses into them — so the analysis input MUST include nested
+// text too, otherwise the LLM analyses an incomplete chapter and the resulting
+// terminology / caveats / context silently miss everything in the subsections.
+func writeSectionContent(content *strings.Builder, section *ebook.Section) {
+	if section.Content != "" {
 		content.WriteString(section.Content)
 		content.WriteString("\n\n")
 	}
-	return content.String()
+	for i := range section.Subsections {
+		writeSectionContent(content, &section.Subsections[i])
+	}
 }
 
 // extractJSON attempts to extract a valid JSON value (object or array) from an

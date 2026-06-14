@@ -158,9 +158,20 @@ func GetTranslationContext(analysis *ContentAnalysis, chapterNum int) string {
 		context += "\n"
 	}
 
-	// Chapter-specific context
-	if chapterNum > 0 && chapterNum <= len(analysis.ChapterAnalyses) {
-		chapterAnalysis := analysis.ChapterAnalyses[chapterNum-1]
+	// Chapter-specific context.
+	//
+	// Look up by the analysis's own ChapterNum field rather than by slice
+	// position. analyzeChapters compacts the slice, DROPPING chapters whose
+	// per-chapter LLM analysis failed, so position no longer equals chapter
+	// number once any chapter fails: positional indexing would hand chapter N+1
+	// the dropped neighbour's successor analysis and push the final chapter out
+	// of range. Match on ChapterNum so each chapter gets ITS OWN analysis (and a
+	// failed/missing chapter simply gets no chapter section). Fall back to
+	// positional indexing only for legacy data where ChapterNum is unset (0),
+	// which preserves behaviour for analyses produced before this field was
+	// populated.
+	chapterAnalysis, found := lookupChapterAnalysis(analysis.ChapterAnalyses, chapterNum)
+	if found {
 		context += fmt.Sprintf("**Chapter %d Context**:\n", chapterNum)
 		context += fmt.Sprintf("Summary: %s\n", chapterAnalysis.Summary)
 		if len(chapterAnalysis.Caveats) > 0 {
@@ -173,4 +184,40 @@ func GetTranslationContext(analysis *ContentAnalysis, chapterNum int) string {
 	}
 
 	return context
+}
+
+// lookupChapterAnalysis returns the analysis whose ChapterNum equals chapterNum.
+//
+// When NONE of the analyses carry a populated ChapterNum (all zero — legacy data
+// predating the field), it falls back to positional indexing
+// (analyses[chapterNum-1]) so old preparation JSON keeps working. As soon as any
+// analysis carries a real ChapterNum, only the by-number match is used, which is
+// robust to the slice being compacted after a failed-chapter drop.
+func lookupChapterAnalysis(analyses []ChapterAnalysis, chapterNum int) (ChapterAnalysis, bool) {
+	if chapterNum <= 0 || len(analyses) == 0 {
+		return ChapterAnalysis{}, false
+	}
+
+	anyNumbered := false
+	for i := range analyses {
+		if analyses[i].ChapterNum > 0 {
+			anyNumbered = true
+			if analyses[i].ChapterNum == chapterNum {
+				return analyses[i], true
+			}
+		}
+	}
+
+	if anyNumbered {
+		// Numbered data exists but no entry matched: this chapter has no analysis
+		// (e.g. its per-chapter pass failed and was dropped). Do NOT fall back to
+		// position — that is exactly the mis-attribution this guards against.
+		return ChapterAnalysis{}, false
+	}
+
+	// Legacy data: no ChapterNum populated anywhere → positional indexing.
+	if chapterNum <= len(analyses) {
+		return analyses[chapterNum-1], true
+	}
+	return ChapterAnalysis{}, false
 }
