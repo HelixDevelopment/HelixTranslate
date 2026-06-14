@@ -1,7 +1,15 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 35
-**Last modified:** 2026-06-14T15:17:00Z
+**Revision:** 36
+**Last modified:** 2026-06-14T15:24:00Z
+
+<!-- session 2026-06-14m: .html output added — format matrix complete (HEAD fb07a59) -->
+
+### Session 2026-06-14m — .html output added; input×output format matrix complete (HEAD fb07a59)
+
+- **fb07a59** cli: added `.html`/`.htm` output to `generateOutput` (was: errored, while INPUT fully supports HTML — asymmetric gap). Minimal valid HTML5, HTML-escaped content (no markup injection). REAL E2E PROVEN (docs/qa/e2e_html_output_20260614_152301/): English PDF → real DeepSeek → out.html (valid HTML document, DOCTYPE + 2 `<p>`, 140 Cyrillic chars, not a zip). Guard extended (output_format_test.go): well-formed-HTML + escaping (no `<script>` injection) subtests.
+
+**FORMAT MATRIX NOW COMPLETE:** input FB2/EPUB/TXT/HTML/DOCX/PDF (6) × output EPUB/FB2/TXT/MD/HTML (5) — all real-translation proven this session set (PDF/DOCX revived from license-gated-dead; output formats honored; HTML output added). **SESSION GRAND TOTAL: ~84 real bugs/features** + 5 reconciliations. build+vet exit 0; full `go test ./... -p 1` sweep GREEN at HEAD fb07a59: **54 ok / 0 FAIL** (qa-results/full_sweep_20260614_152400.log).
 
 <!-- session 2026-06-14l: CLI output-format honored + 2 gate reconciliations (HEAD ca5608f) -->
 
