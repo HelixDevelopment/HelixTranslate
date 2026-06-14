@@ -391,12 +391,21 @@ func (fm *FallbackManager) getFailureRate(componentID string) float64 {
 	tracker.mu.Lock()
 	defer tracker.mu.Unlock()
 
-	// Reset window if it's too old
-	if time.Since(tracker.WindowStart) > fm.config.FailureTrackingWindow {
-		tracker.Failures = 1
-		tracker.TotalRequests = 1
+	// Reset the window only when windowing is enabled (positive width) AND the window
+	// has genuinely elapsed. Two bugs lived here:
+	//   1. A non-positive FailureTrackingWindow made "time.Since(WindowStart) > window"
+	//      always true, so EVERY call took the reset branch and the real accumulated
+	//      counts were never used (a zero window means "no windowing", never reset).
+	//   2. On a genuine expiry the counters were reset to Failures=1, TotalRequests=1
+	//      and 1.0 was returned, fabricating a 100% failure rate for a component whose
+	//      window simply expired with no new failure — falsely trapping the coordinator
+	//      in degraded mode and firing spurious high-failure alerts. A fresh window must
+	//      start EMPTY (0/0) and report a 0% rate.
+	if fm.config.FailureTrackingWindow > 0 && time.Since(tracker.WindowStart) > fm.config.FailureTrackingWindow {
+		tracker.Failures = 0
+		tracker.TotalRequests = 0
 		tracker.WindowStart = time.Now()
-		return 1.0
+		return 0.0
 	}
 
 	return float64(tracker.Failures) / float64(tracker.TotalRequests)
