@@ -1,7 +1,23 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 26
-**Last modified:** 2026-06-14T11:30:00Z
+**Revision:** 27
+**Last modified:** 2026-06-14T12:30:00Z
+
+<!-- session 2026-06-14c+d: two more parallel SECOND-PASS waves (HEAD 4a95b06) — 11 more real bugs, FD-safe -->
+
+### Session 2026-06-14c/d — two more §11.4.118 second-pass waves (HEAD 4a95b06) — 11 more real bugs; 3-stream low-FD method proven repeatable at ~95% FD, NO ENFILE
+
+Wave c (verification/storage/markdown) = 7 bugs; wave d (api/verifier/script) = 4 bugs + script came back genuinely CLEAN (honest §11.4.6, no fabricated bug). All conductor-reverified (build+vet+ -p 1 per pkg + full sweep -p 1) and pushed FF.
+
+- **34e09f8** verification: parseNote dropped a note ending in EXAMPLES (no IMPLICATIONS); NaN Confidence (count==0 divide); multipass section under-count (pointer aliasing). 
+- **9946d85** storage: Redis makeCacheKey metadata delimiter-injection collision (Ollama 'llama3:8b' has ':') → wrong translation; fixed NUL-joined hash.
+- **d055b8c** markdown: EPUB↔MD code blocks destroyed, GFM tables lost both ways, backslash-escapes corrupted — all fixed bidirectional.
+- **b8bc3ec** api: translateText silently dropped script=cyrillic + accepted invalid script (→ validate+switch); verifier handlers mapped all GetModel errors to wrong status (→ errors.As 404-vs-503).
+- **4a95b06** verifier: buildFallbackChain rand.Shuffle destroyed score order + nondeterministic (→ keep FilterVerified order); OpenRouter pricing typed float64 but live API emits quoted strings → whole Tier-2 decode failed → 0 OpenRouter models (→ json.Number). 
+
+Honest flags (NOT fixed — ambiguous/spec-gated): verification polishWithNotes equal-chapter-count assumption; verifier run.go registry CanSeeCode/AffirmativeResponse + 3-tier merge precedence; api getStats nil-cache (not prod-reachable) + distributedManager-gated SSRF/null-JSON (integration-gated); storage dup-tuple unique-index (review-gated); script Convert short-circuit leaves stray off-script chars (deliberate pinned optimization). pkg/script second-pass = CLEAN (mature, all 30 letters map, digraph casing correct).
+
+**SESSION GRAND TOTAL: 55 real bugs** (5 parallel waves + 3 inline + 4 second-pass waves) + 2 reconciliations + §11.4.98 conversion. Post-wave full sweep GREEN at HEAD 4a95b06: go test ./... -p 1 = 54 ok / 0 FAIL (fullsweep_20260614T112302.log). build+vet exit 0.
 
 <!-- session 2026-06-14b: parallel SECOND-PASS discovery wave (HEAD 47ea69d) — 5 more real bugs, FD-safe -->
 
