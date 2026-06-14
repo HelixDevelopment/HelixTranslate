@@ -1048,7 +1048,12 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 		result.WriteString("<pre><code>" + c.escapeXML(codeBlock.String()) + "</code></pre>\n")
 	}
 
-	// Wrap in XHTML document structure
+	// Wrap in XHTML document structure. The book title MUST be XML-escaped: it is
+	// arbitrary user text and a title containing &, <, > (e.g. "Pride & Prejudice")
+	// would otherwise emit a bare "&" / "<" in the chapter <title>, producing
+	// MALFORMED XHTML that strict EPUB validators (epubcheck) reject and strict XML
+	// parsers fail to parse. Every other title site (OPF dc:title, toc.ncx,
+	// headers) already escapes; this one was the outlier.
 	return fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -1057,5 +1062,5 @@ func (c *MarkdownToEPUBConverter) convertMarkdownToXHTML(markdown string) string
 </head>
 <body>
 %s</body>
-</html>`, c.metadata.Title, result.String())
+</html>`, c.escapeXML(c.metadata.Title), result.String())
 }
