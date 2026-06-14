@@ -8,12 +8,19 @@
 // Usage:
 //
 //	workable-items sync md-to-db [-issues PATH] [-fixed PATH] [-db PATH]
+//	workable-items sync db-to-md [-db PATH] [-issues-summary PATH] [-fixed-summary PATH]
 //	workable-items validate       [-issues PATH] [-fixed PATH] [-db PATH]
+//	workable-items diff           [-issues PATH] [-fixed PATH] [-db PATH]
 //	workable-items list           [-db PATH]
+//	workable-items record-event   -atm ATM-NNN -event EVENT -on TIMESTAMP [-note NOTE] [-db PATH]
 //
 // Anti-bluff (§11.4): md-to-db parses the real markdown headings and populates a
-// real, queryable SQLite database; validate re-parses the markdown and compares
-// the live DB row counts + ids against it, exiting non-zero on any drift.
+// real, queryable SQLite database; db-to-md regenerates the §11.4.12/§11.4.53
+// Issues_Summary/Fixed_Summary tables FROM the DB (the §11.4.93 bidirectional
+// requirement); validate re-parses the markdown and compares the live DB row
+// counts + ids against it, exiting non-zero on any drift; diff prints the same
+// drift human-readably; record-event appends to the §11.4.93 append-only
+// item_history audit trail (deterministic, no LLM).
 package main
 
 import (
@@ -28,9 +35,11 @@ import (
 )
 
 const (
-	defaultIssues = "docs/Issues.md"
-	defaultFixed  = "docs/Fixed.md"
-	defaultDB     = "docs/workable_items.db"
+	defaultIssues        = "docs/Issues.md"
+	defaultFixed         = "docs/Fixed.md"
+	defaultDB            = "docs/workable_items.db"
+	defaultIssuesSummary = "docs/Issues_Summary.md"
+	defaultFixedSummary  = "docs/Fixed_Summary.md"
 
 	locationOpen  = "open"
 	locationFixed = "fixed"
@@ -47,8 +56,12 @@ func main() {
 		os.Exit(cmdSync(os.Args[2:]))
 	case "validate":
 		os.Exit(cmdValidate(os.Args[2:]))
+	case "diff":
+		os.Exit(cmdDiff(os.Args[2:]))
 	case "list":
 		os.Exit(cmdList(os.Args[2:]))
+	case "record-event":
+		os.Exit(cmdRecordEvent(os.Args[2:]))
 	case "-h", "--help", "help":
 		usage()
 		os.Exit(0)
@@ -64,27 +77,50 @@ func usage() {
 
 Commands:
   sync md-to-db   Parse the ATM-NNN headings from the markdown trackers into the DB.
+  sync db-to-md   Regenerate the Issues_Summary/Fixed_Summary tables FROM the DB.
   validate        Verify the DB matches the markdown (counts + ids); exit non-zero on drift.
+  diff            Print the md-vs-db drift human-readably (exit non-zero if any).
   list            Print the items currently in the DB.
+  record-event    Append an event to the append-only item_history audit trail.
 
 Common flags:
-  -issues PATH    open-items markdown   (default docs/Issues.md)
-  -fixed  PATH    fixed-items markdown  (default docs/Fixed.md)
-  -db     PATH    SQLite database       (default docs/workable_items.db)
+  -issues PATH         open-items markdown   (default docs/Issues.md)
+  -fixed  PATH         fixed-items markdown  (default docs/Fixed.md)
+  -db     PATH         SQLite database       (default docs/workable_items.db)
+
+db-to-md flags:
+  -issues-summary PATH (default docs/Issues_Summary.md)
+  -fixed-summary  PATH (default docs/Fixed_Summary.md)
+
+record-event flags:
+  -atm ATM-NNN  -event EVENT  -on YYYY-MM-DDTHH:MM:SSZ  [-note NOTE]
 `)
 }
 
-// cmdSync handles `sync md-to-db`.
+// cmdSync dispatches `sync md-to-db` and `sync db-to-md`.
 func cmdSync(args []string) int {
-	if len(args) == 0 || args[0] != "md-to-db" {
-		fmt.Fprintln(os.Stderr, "workable-items sync: only the 'md-to-db' direction is supported")
+	if len(args) == 0 {
+		fmt.Fprintln(os.Stderr, "workable-items sync: need a direction ('md-to-db' or 'db-to-md')")
 		return 2
 	}
+	switch args[0] {
+	case "md-to-db":
+		return cmdSyncMdToDB(args[1:])
+	case "db-to-md":
+		return cmdSyncDBToMd(args[1:])
+	default:
+		fmt.Fprintf(os.Stderr, "workable-items sync: unknown direction %q (want 'md-to-db' or 'db-to-md')\n", args[0])
+		return 2
+	}
+}
+
+// cmdSyncMdToDB handles `sync md-to-db`.
+func cmdSyncMdToDB(args []string) int {
 	fs := flag.NewFlagSet("sync md-to-db", flag.ExitOnError)
 	issues := fs.String("issues", defaultIssues, "open-items markdown path")
 	fixed := fs.String("fixed", defaultFixed, "fixed-items markdown path")
 	dbPath := fs.String("db", defaultDB, "SQLite database path")
-	_ = fs.Parse(args[1:])
+	_ = fs.Parse(args)
 
 	items, err := parseAll(*issues, *fixed)
 	if err != nil {
@@ -100,6 +136,95 @@ func cmdSync(args []string) int {
 
 	open, fixedN := countByLocation(items)
 	fmt.Printf("synced %d items into %s (%d open, %d fixed)\n", n, *dbPath, open, fixedN)
+	return 0
+}
+
+// cmdSyncDBToMd handles `sync db-to-md` — the §11.4.93 reverse direction. It
+// regenerates the Issues_Summary/Fixed_Summary table blocks FROM the DB and
+// writes complete summary files (header + table + total line) byte-compatible
+// with the shell generators except for the non-deterministic `Last modified`
+// timestamp (which is and must be `now`).
+func cmdSyncDBToMd(args []string) int {
+	fs := flag.NewFlagSet("sync db-to-md", flag.ExitOnError)
+	dbPath := fs.String("db", defaultDB, "SQLite database path")
+	issuesSummary := fs.String("issues-summary", defaultIssuesSummary, "Issues_Summary.md output path")
+	fixedSummary := fs.String("fixed-summary", defaultFixedSummary, "Fixed_Summary.md output path")
+	_ = fs.Parse(args)
+
+	items, err := readDB(*dbPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "workable-items sync: %v\n", err)
+		return 1
+	}
+
+	openN, fixedN := countByLocation(items)
+	if err := os.WriteFile(*issuesSummary, []byte(renderIssuesSummaryDoc(items, openN)), 0o600); err != nil {
+		fmt.Fprintf(os.Stderr, "workable-items sync: write %s: %v\n", *issuesSummary, err)
+		return 1
+	}
+	if err := os.WriteFile(*fixedSummary, []byte(renderFixedSummaryDoc(items, fixedN)), 0o600); err != nil {
+		fmt.Fprintf(os.Stderr, "workable-items sync: write %s: %v\n", *fixedSummary, err)
+		return 1
+	}
+	fmt.Printf("regenerated %s (%d open) and %s (%d fixed) from %s\n",
+		*issuesSummary, openN, *fixedSummary, fixedN, *dbPath)
+	return 0
+}
+
+// cmdDiff handles `diff` — the same drift as validate but always printed,
+// human-readably, even when in sync.
+func cmdDiff(args []string) int {
+	fs := flag.NewFlagSet("diff", flag.ExitOnError)
+	issues := fs.String("issues", defaultIssues, "open-items markdown path")
+	fixed := fs.String("fixed", defaultFixed, "fixed-items markdown path")
+	dbPath := fs.String("db", defaultDB, "SQLite database path")
+	_ = fs.Parse(args)
+
+	mdItems, err := parseAll(*issues, *fixed)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "workable-items diff: %v\n", err)
+		return 1
+	}
+	dbItems, err := readDB(*dbPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "workable-items diff: %v\n", err)
+		return 1
+	}
+
+	drift := diff(mdItems, dbItems)
+	if len(drift) == 0 {
+		fmt.Printf("no drift: DB %s matches markdown (%d items)\n", *dbPath, len(mdItems))
+		return 0
+	}
+	fmt.Printf("%d difference(s) between markdown and DB %s:\n", len(drift), *dbPath)
+	for _, d := range drift {
+		fmt.Printf("  %s\n", d)
+	}
+	return 1
+}
+
+// cmdRecordEvent handles `record-event` — appends one row to the append-only
+// §11.4.93 item_history audit trail. Deterministic, no LLM: the timestamp is an
+// explicit -on argument (never the wall clock) so runs are reproducible.
+func cmdRecordEvent(args []string) int {
+	fs := flag.NewFlagSet("record-event", flag.ExitOnError)
+	dbPath := fs.String("db", defaultDB, "SQLite database path")
+	atm := fs.String("atm", "", "ATM-NNN item id (required)")
+	event := fs.String("event", "", "event name, e.g. Opened/Reopened/Fixed (required)")
+	on := fs.String("on", "", "ISO-8601 timestamp for the event (required)")
+	note := fs.String("note", "", "optional free-text note")
+	_ = fs.Parse(args)
+
+	if *atm == "" || *event == "" || *on == "" {
+		fmt.Fprintln(os.Stderr, "workable-items record-event: -atm, -event and -on are all required")
+		return 2
+	}
+
+	if err := recordEvent(*dbPath, *atm, *event, *on, *note); err != nil {
+		fmt.Fprintf(os.Stderr, "workable-items record-event: %v\n", err)
+		return 1
+	}
+	fmt.Printf("recorded %s event %q @ %s\n", *atm, *event, *on)
 	return 0
 }
 
@@ -268,4 +393,69 @@ CREATE TABLE IF NOT EXISTS items (
     status   TEXT NOT NULL,
     location TEXT NOT NULL CHECK (location IN ('open','fixed')),
     title    TEXT NOT NULL
-);`
+);
+CREATE TABLE IF NOT EXISTS item_history (
+    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    atm_id    TEXT NOT NULL,
+    event     TEXT NOT NULL,
+    ts        TEXT NOT NULL,
+    note      TEXT NOT NULL DEFAULT '',
+    recorded  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_item_history_atm ON item_history(atm_id);`
+
+// recordEvent appends one row to the append-only item_history audit trail. It
+// never updates or deletes — append-only per §11.4.93. The DB (and its schema)
+// is created on demand so record-event works before the first md-to-db sync.
+func recordEvent(dbPath, atmID, event, ts, note string) error {
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	if _, err := db.Exec(schemaDDL); err != nil {
+		return fmt.Errorf("create schema: %w", err)
+	}
+	if _, err := db.Exec(
+		"INSERT INTO item_history(atm_id, event, ts, note) VALUES (?, ?, ?, ?)",
+		atmID, event, ts, note,
+	); err != nil {
+		return fmt.Errorf("insert event: %w", err)
+	}
+	return nil
+}
+
+// HistoryEvent is one row of the append-only item_history audit trail.
+type HistoryEvent struct {
+	ATMID string
+	Event string
+	TS    string
+	Note  string
+}
+
+// readHistory returns the item_history rows for an item in insertion order.
+func readHistory(dbPath, atmID string) ([]HistoryEvent, error) {
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query(
+		"SELECT atm_id, event, ts, note FROM item_history WHERE atm_id = ? ORDER BY id", atmID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var hist []HistoryEvent
+	for rows.Next() {
+		var h HistoryEvent
+		if err := rows.Scan(&h.ATMID, &h.Event, &h.TS, &h.Note); err != nil {
+			return nil, err
+		}
+		hist = append(hist, h)
+	}
+	return hist, rows.Err()
+}

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -172,5 +173,153 @@ func mustWrite(t *testing.T, path, content string) {
 	t.Helper()
 	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 		t.Fatalf("write %s: %v", path, err)
+	}
+}
+
+// TestRoundTrip_MdToDbToMd is the §11.4.93 bidirectional proof: parse the
+// markdown into the DB, regenerate the summary docs FROM the DB, and assert the
+// regenerated summary TABLE is byte-identical to a freshly rendered table built
+// directly from the same parsed items. The timestamped header is excluded
+// (extractSummaryTable) because it is genuinely non-deterministic (§11.4.6) — we
+// do not claim a byte-stable header, only a byte-stable table, and we prove it.
+// Mutation-proof: change renderSummaryTable's column order or the Level logic
+// and the exact-string assertions below fail.
+func TestRoundTrip_MdToDbToMd(t *testing.T) {
+	dir := t.TempDir()
+	issues := filepath.Join(dir, "Issues.md")
+	fixed := filepath.Join(dir, "Fixed.md")
+	dbPath := filepath.Join(dir, "wi.db")
+	issuesSum := filepath.Join(dir, "Issues_Summary.md")
+	fixedSum := filepath.Join(dir, "Fixed_Summary.md")
+	mustWrite(t, issues, fixtureIssues)
+	mustWrite(t, fixed, fixtureFixed)
+
+	// Deterministic header timestamp so the WHOLE file is reproducible too.
+	saved := nowUTC
+	nowUTC = func() string { return "2026-01-01T00:00:00Z" }
+	defer func() { nowUTC = saved }()
+
+	if rc := cmdSyncMdToDB([]string{"-issues", issues, "-fixed", fixed, "-db", dbPath}); rc != 0 {
+		t.Fatalf("md-to-db rc=%d", rc)
+	}
+	if rc := cmdSyncDBToMd([]string{"-db", dbPath, "-issues-summary", issuesSum, "-fixed-summary", fixedSum}); rc != 0 {
+		t.Fatalf("db-to-md rc=%d", rc)
+	}
+
+	// The DB-regenerated table must equal a table rendered straight from the
+	// same source items (the round-trip preserves every column).
+	srcItems, err := parseAll(issues, fixed)
+	if err != nil {
+		t.Fatalf("parseAll: %v", err)
+	}
+	wantOpen := renderSummaryTable(srcItems, locationOpen)
+	gotOpenDoc, err := os.ReadFile(issuesSum)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gotOpen := extractSummaryTable(string(gotOpenDoc))
+	if gotOpen != wantOpen {
+		t.Fatalf("Issues summary table round-trip mismatch:\n got:\n%s\nwant:\n%s", gotOpen, wantOpen)
+	}
+
+	wantFixed := renderSummaryTable(srcItems, locationFixed)
+	gotFixedDoc, err := os.ReadFile(fixedSum)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gotFixed := extractSummaryTable(string(gotFixedDoc))
+	if gotFixed != wantFixed {
+		t.Fatalf("Fixed summary table round-trip mismatch:\n got:\n%s\nwant:\n%s", gotFixed, wantFixed)
+	}
+
+	// Concrete content assertion (mutation-proof): the open fixture's ATM-101 is
+	// Operator-blocked → Level High; render exactly that row.
+	wantRow := "| ATM-101 | High | Operator-blocked | Task | Second open item with a longer descriptive title |"
+	if !strings.Contains(gotOpen, wantRow) {
+		t.Errorf("Issues table missing expected row:\n%s\nin:\n%s", wantRow, gotOpen)
+	}
+	// Fixed fixture ATM-002 is a Task → Level Task, keeps closure status verbatim.
+	wantFixedRow := "| ATM-002 | Task | Completed (→ Fixed.md) | Task | A closed task that was completed |"
+	if !strings.Contains(gotFixed, wantFixedRow) {
+		t.Errorf("Fixed table missing expected row:\n%s\nin:\n%s", wantFixedRow, gotFixed)
+	}
+}
+
+// TestRecordEvent_AppendOnlyHistory proves record-event genuinely INSERTs into a
+// real item_history table and readHistory reads the rows back in insertion order
+// — the §11.4.93 append-only audit trail. Mutation-proof: drop the INSERT in
+// recordEvent and the length/content assertions fail.
+func TestRecordEvent_AppendOnlyHistory(t *testing.T) {
+	dir := t.TempDir()
+	dbPath := filepath.Join(dir, "wi.db")
+
+	if rc := cmdRecordEvent([]string{"-db", dbPath, "-atm", "ATM-100", "-event", "Opened", "-on", "2026-01-01T00:00:00Z", "-note", "first"}); rc != 0 {
+		t.Fatalf("record-event #1 rc=%d", rc)
+	}
+	if rc := cmdRecordEvent([]string{"-db", dbPath, "-atm", "ATM-100", "-event", "Reopened", "-on", "2026-02-01T00:00:00Z", "-note", "regressed"}); rc != 0 {
+		t.Fatalf("record-event #2 rc=%d", rc)
+	}
+	// A different item must not bleed into ATM-100's history.
+	if rc := cmdRecordEvent([]string{"-db", dbPath, "-atm", "ATM-999", "-event", "Opened", "-on", "2026-03-01T00:00:00Z"}); rc != 0 {
+		t.Fatalf("record-event #3 rc=%d", rc)
+	}
+
+	hist, err := readHistory(dbPath, "ATM-100")
+	if err != nil {
+		t.Fatalf("readHistory: %v", err)
+	}
+	if len(hist) != 2 {
+		t.Fatalf("ATM-100 history len = %d, want 2", len(hist))
+	}
+	if hist[0].Event != "Opened" || hist[0].TS != "2026-01-01T00:00:00Z" || hist[0].Note != "first" {
+		t.Errorf("event[0] = %+v", hist[0])
+	}
+	if hist[1].Event != "Reopened" || hist[1].Note != "regressed" {
+		t.Errorf("event[1] = %+v", hist[1])
+	}
+
+	// Direct DB count confirms append-only (3 total rows across both items).
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	var total int
+	if err := db.QueryRow("SELECT count(*) FROM item_history").Scan(&total); err != nil {
+		t.Fatalf("count item_history: %v", err)
+	}
+	if total != 3 {
+		t.Fatalf("item_history total = %d, want 3", total)
+	}
+}
+
+// TestRecordEvent_RequiresArgs guards the required-flag validation.
+func TestRecordEvent_RequiresArgs(t *testing.T) {
+	dir := t.TempDir()
+	dbPath := filepath.Join(dir, "wi.db")
+	if rc := cmdRecordEvent([]string{"-db", dbPath, "-atm", "ATM-1"}); rc == 0 {
+		t.Fatal("record-event accepted missing -event/-on, want non-zero")
+	}
+}
+
+// TestDiff_ReportsAndExits proves diff exits 0 when in sync and non-zero on drift.
+func TestDiff_ReportsAndExits(t *testing.T) {
+	dir := t.TempDir()
+	issues := filepath.Join(dir, "Issues.md")
+	fixed := filepath.Join(dir, "Fixed.md")
+	dbPath := filepath.Join(dir, "wi.db")
+	mustWrite(t, issues, fixtureIssues)
+	mustWrite(t, fixed, fixtureFixed)
+
+	if rc := cmdSyncMdToDB([]string{"-issues", issues, "-fixed", fixed, "-db", dbPath}); rc != 0 {
+		t.Fatalf("sync rc=%d", rc)
+	}
+	if rc := cmdDiff([]string{"-issues", issues, "-fixed", fixed, "-db", dbPath}); rc != 0 {
+		t.Fatalf("diff (in-sync) rc=%d, want 0", rc)
+	}
+	mustWrite(t, issues, fixtureIssues+
+		"\n### §3. [ATM-102] A brand new open item not yet synced\n**Status:** Queued\n**Type:** Task\n")
+	if rc := cmdDiff([]string{"-issues", issues, "-fixed", fixed, "-db", dbPath}); rc == 0 {
+		t.Fatal("diff (drift) rc=0, want non-zero")
 	}
 }
