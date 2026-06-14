@@ -15,7 +15,6 @@ import (
 
 	"digital.vasic.translator/internal/services"
 	"digital.vasic.translator/internal/verifier"
-	"digital.vasic.translator/internal/verifier/discovery"
 	"digital.vasic.translator/internal/verifier/scoring"
 	"digital.vasic.translator/internal/verifier/selection"
 )
