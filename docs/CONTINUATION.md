@@ -1,7 +1,17 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 33
-**Last modified:** 2026-06-14T15:10:00Z
+**Revision:** 34
+**Last modified:** 2026-06-14T15:07:00Z
+
+<!-- session 2026-06-14k: PDF input revived (HEAD 18d6f73) -->
+
+### Session 2026-06-14k — PDF input revived: license-gated unipdf → MIT ledongthuc/pdf (HEAD 18d6f73)
+
+- **18d6f73** ebook: PDF INPUT was non-functional — `github.com/unidoc/unipdf`'s `ExtractText` is LICENSE-GATED ("unipdf license code required" for every real PDF), so PDF input shipped dead (same §11.4 "ships but cannot be used" class DOCX was, now both fixed). Swapped to MIT `github.com/ledongthuc/pdf`; dropped `unidoc/unipdf` via `go mod tidy`. Wired `FormatPDF` into `pkg/format/detector.go` IsSupported + GetSupportedFormats (§11.4.108 source→artifact gate; §11.4.120 reconcile of detector_test + pdf_parser_test's unipdf-coupled error-string assertion). REAL E2E PROVEN (docs/qa/e2e_pdf_input_20260614_150421/): minimal English PDF → real DeepSeek deepseek-chat (1.9s) → valid Serbian Cyrillic EPUB ("Храбри витез јахао је преко тихог сванућа у зору"), 138 Cyrillic chars, differs from source, no placeholders, no API-key leak (§11.4.10). Permanent regression guard (§11.4.135): `pkg/ebook/pdf_extraction_regression_test.go` + `testdata/sample_text.pdf` assert real extraction + reject any license-error string; mutation reverting to unipdf → FAIL.
+
+**SESSION GRAND TOTAL: ~82 real bugs** + 3 reconciliations + §11.4.98 conversion + real E2E proofs (PDF + 5-format matrix via DeepSeek + Mistral). PDF + DOCX (the two dead input formats) now both work end-to-end with rock-solid real-translation evidence. ALL 6 input formats (FB2/EPUB/TXT/HTML/DOCX/PDF) proven. Post-fix targeted tests green (pkg/ebook + pkg/format); full -p 1 sweep running in background (FD ~95%, host-safe). build exit 0.
+
+REMAINING KNOWN ISSUES (operator/research/design-gated): OpenAI/Anthropic keys absent; GEMINI_API_KEY invalid; zhipu account/model access; markdown not a first-class CLI input; other ~30 providers' model-allowlists not audited; verifier 3-tier merge precedence + run.go registry flags (design); RefreshToken no expiry re-validate (no caller); CLI always emits EPUB (no TXT writer); SQLite encryption DSN needs SQLCipher; G1/G2 carry-overs; W16 Models→submodule. NO release tag yet (needs §11.4.40 full retest + operator confirm).
 
 <!-- session 2026-06-14j: known-issue cleanup wave (HEAD b83038c) -->
 
