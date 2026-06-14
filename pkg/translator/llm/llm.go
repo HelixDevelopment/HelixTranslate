@@ -59,7 +59,10 @@ var ValidModels = map[Provider][]string{
 	ProviderOpenAI:      {"gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o"},
 	ProviderAnthropic:   {"claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"},
 	ProviderZhipu:       {"glm-4", "glm-3-turbo", "glm-4-plus", "glm-4-flash", "glm-4-air", "glm-4-airx", "glm-4-long", "glm-4-flashx"},
-	ProviderDeepSeek:    {"deepseek-chat", "deepseek-coder"},
+	// deepseek-v4-flash / deepseek-v4-pro: current models per the live DeepSeek
+	// /models endpoint (verified 2026-06-14); v4-flash proven to translate. The
+	// legacy deepseek-chat/coder remain accepted (still work — §11.4.122).
+	ProviderDeepSeek:    {"deepseek-chat", "deepseek-coder", "deepseek-v4-flash", "deepseek-v4-pro"},
 	ProviderQwen:        {"qwen-max", "qwen-plus", "qwen-turbo"},
 	ProviderGemini:      {"gemini-pro", "gemini-pro-vision", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-pro"},
 	ProviderOllama:      {"llama2", "codellama", "mistral", "vicuna"},
