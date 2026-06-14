@@ -379,7 +379,8 @@ func boundaryEmptyAndDuplicateSessionID(ctx context.Context, t *testing.T, st *P
 		"original row unchanged after a rejected duplicate insert")
 }
 
-// CacheTranslation overwrite — ON CONFLICT (id) DO UPDATE replaces target_text.
+// CacheTranslation overwrite — ON CONFLICT(lookup_hash) DO UPDATE replaces
+// target_text. Re-caching the SAME tuple (same id+src here) updates in place.
 // Write a wrong value, overwrite with the corrected one, read back the corrected.
 func boundaryCacheOverwrite(ctx context.Context, t *testing.T, st *PostgreSQLStorage) {
 	now := time.Now().UTC().Truncate(time.Second)
@@ -393,7 +394,7 @@ func boundaryCacheOverwrite(ctx context.Context, t *testing.T, st *PostgreSQLSto
 	require.NotNil(t, first)
 	assert.Equal(t, "WRONG translation", first.TargetText, "first write stored the wrong value")
 
-	// Overwrite the SAME id with the corrected target (INSERT-OR-REPLACE semantics).
+	// Overwrite the SAME tuple with the corrected target (tuple-keyed upsert).
 	require.NoError(t, st.CacheTranslation(ctx, scMkCache(cid, src, "ИСПРАВНО tačan prevod", now)),
 		"overwrite cache write (same id)")
 	corrected, err := st.GetCachedTranslation(ctx, src, "en", "sr", "deepseek", "deepseek-chat")

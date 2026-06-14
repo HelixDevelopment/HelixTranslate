@@ -93,6 +93,7 @@ func (s *PostgreSQLStorage) initSchema() error {
 		target_language TEXT NOT NULL,
 		provider TEXT NOT NULL,
 		model TEXT NOT NULL,
+		lookup_hash TEXT NOT NULL DEFAULT '',
 		created_at TIMESTAMP NOT NULL,
 		access_count INTEGER DEFAULT 0,
 		last_accessed_at TIMESTAMP NOT NULL
@@ -102,8 +103,102 @@ func (s *PostgreSQLStorage) initSchema() error {
 	CREATE INDEX IF NOT EXISTS idx_cache_last_accessed ON translation_cache(last_accessed_at);
 	`
 
-	_, err := s.db.Exec(schema)
-	return err
+	if _, err := s.db.Exec(schema); err != nil {
+		return err
+	}
+
+	// Migrate legacy DBs to the lookup_hash + UNIQUE-tuple model. Idempotent and
+	// safe to run on every open.
+	return s.migrateCacheUniqueTuple()
+}
+
+// migrateCacheUniqueTuple ensures the translation_cache table carries a
+// lookup_hash column and a UNIQUE index on it, deduplicating any pre-existing
+// duplicate-tuple rows (keeping the freshest) BEFORE the index is added so the
+// index creation never fails on a populated legacy DB. Idempotent. §11.4.124/§9:
+// only redundant duplicate rows are removed; the kept row is the freshest per
+// tuple — exactly the row the corrected lookup would serve.
+func (s *PostgreSQLStorage) migrateCacheUniqueTuple() error {
+	// 1) Add the lookup_hash column if a legacy schema lacks it (IF NOT EXISTS is
+	//    supported by PostgreSQL 9.6+ and is idempotent).
+	if _, err := s.db.Exec(
+		`ALTER TABLE translation_cache ADD COLUMN IF NOT EXISTS lookup_hash TEXT NOT NULL DEFAULT ''`,
+	); err != nil {
+		return fmt.Errorf("add lookup_hash column: %w", err)
+	}
+
+	// 2) Backfill lookup_hash for rows missing it, computed in Go so it matches
+	//    cacheLookupHash exactly (sha256 over the NUL-joined tuple).
+	if err := s.backfillCacheLookupHashes(); err != nil {
+		return fmt.Errorf("backfill lookup_hash: %w", err)
+	}
+
+	// 3) Deduplicate by lookup_hash, keeping the freshest row per tuple. ctid is
+	//    PostgreSQL's stable per-row physical identifier.
+	if _, err := s.db.Exec(`
+		DELETE FROM translation_cache
+		WHERE ctid NOT IN (
+			SELECT keep_ctid FROM (
+				SELECT ctid AS keep_ctid,
+				       ROW_NUMBER() OVER (
+				           PARTITION BY lookup_hash
+				           ORDER BY created_at DESC, last_accessed_at DESC
+				       ) AS rn
+				FROM translation_cache
+			) ranked
+			WHERE rn = 1
+		)
+	`); err != nil {
+		return fmt.Errorf("dedup duplicate-tuple cache rows: %w", err)
+	}
+
+	// 4) Add the UNIQUE index (now safe — no duplicate lookup_hash values remain).
+	if _, err := s.db.Exec(
+		`CREATE UNIQUE INDEX IF NOT EXISTS idx_cache_unique_tuple ON translation_cache(lookup_hash)`,
+	); err != nil {
+		return fmt.Errorf("create unique tuple index: %w", err)
+	}
+
+	return nil
+}
+
+// backfillCacheLookupHashes computes lookup_hash for any row whose value is empty
+// (legacy rows added before the column existed).
+func (s *PostgreSQLStorage) backfillCacheLookupHashes() error {
+	rows, err := s.db.Query(
+		`SELECT id, source_text, source_language, target_language, provider, model
+		 FROM translation_cache WHERE lookup_hash = ''`,
+	)
+	if err != nil {
+		return err
+	}
+	type rowKey struct {
+		id, sourceText, srcLang, tgtLang, provider, model string
+	}
+	var pending []rowKey
+	for rows.Next() {
+		var rk rowKey
+		if err := rows.Scan(&rk.id, &rk.sourceText, &rk.srcLang, &rk.tgtLang, &rk.provider, &rk.model); err != nil {
+			rows.Close()
+			return err
+		}
+		pending = append(pending, rk)
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		return err
+	}
+	rows.Close()
+
+	for _, rk := range pending {
+		h := cacheLookupHash(rk.sourceText, rk.srcLang, rk.tgtLang, rk.provider, rk.model)
+		if _, err := s.db.Exec(
+			`UPDATE translation_cache SET lookup_hash = $1 WHERE id = $2`, h, rk.id,
+		); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // CreateSession creates a new translation session
@@ -271,21 +366,33 @@ func (s *PostgreSQLStorage) GetCachedTranslation(ctx context.Context, sourceText
 	return cache, nil
 }
 
-// CacheTranslation caches a translation
+// CacheTranslation caches a translation, idempotent on the lookup tuple
+// (source_text, source_language, target_language, provider, model).
+//
+// Upsert semantics: ON CONFLICT(lookup_hash) — the UNIQUE-tuple key — DO UPDATE,
+// NOT ON CONFLICT(id). Keying on lookup_hash means two different ids carrying the
+// same tuple collapse into one row (the freshest translation wins) instead of
+// leaving a stale shadow row the lookup could serve. access_count is preserved
+// (only the payload + freshness columns are overwritten).
 func (s *PostgreSQLStorage) CacheTranslation(ctx context.Context, cache *TranslationCache) error {
+	lookupHash := cacheLookupHash(
+		cache.SourceText, cache.SourceLanguage, cache.TargetLanguage, cache.Provider, cache.Model,
+	)
+
 	query := `
 		INSERT INTO translation_cache (
 			id, source_text, target_text, source_language, target_language, provider, model,
-			created_at, access_count, last_accessed_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-		ON CONFLICT (id) DO UPDATE SET
+			lookup_hash, created_at, access_count, last_accessed_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		ON CONFLICT (lookup_hash) DO UPDATE SET
 			target_text = EXCLUDED.target_text,
+			created_at = EXCLUDED.created_at,
 			last_accessed_at = EXCLUDED.last_accessed_at
 	`
 
 	_, err := s.db.ExecContext(ctx, query,
 		cache.ID, cache.SourceText, cache.TargetText, cache.SourceLanguage, cache.TargetLanguage,
-		cache.Provider, cache.Model, cache.CreatedAt, cache.AccessCount, cache.LastAccessedAt,
+		cache.Provider, cache.Model, lookupHash, cache.CreatedAt, cache.AccessCount, cache.LastAccessedAt,
 	)
 
 	return err

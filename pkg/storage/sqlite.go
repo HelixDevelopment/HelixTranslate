@@ -87,6 +87,7 @@ func (s *SQLiteStorage) initSchema() error {
 		target_language TEXT NOT NULL,
 		provider TEXT NOT NULL,
 		model TEXT NOT NULL,
+		lookup_hash TEXT NOT NULL DEFAULT '',
 		created_at DATETIME NOT NULL,
 		access_count INTEGER DEFAULT 0,
 		last_accessed_at DATETIME NOT NULL
@@ -96,8 +97,135 @@ func (s *SQLiteStorage) initSchema() error {
 	CREATE INDEX IF NOT EXISTS idx_cache_last_accessed ON translation_cache(last_accessed_at);
 	`
 
-	_, err := s.db.Exec(schema)
-	return err
+	if _, err := s.db.Exec(schema); err != nil {
+		return err
+	}
+
+	// Migrate legacy DBs to the lookup_hash + UNIQUE-tuple model. Idempotent and
+	// safe to run on every open (CREATE TABLE above only fires on a brand-new DB).
+	return s.migrateCacheUniqueTuple()
+}
+
+// migrateCacheUniqueTuple ensures the translation_cache table carries a
+// lookup_hash column and a UNIQUE index on it, deduplicating any pre-existing
+// duplicate-tuple rows (keeping the freshest) BEFORE the index is added so the
+// index creation never fails on a populated legacy DB. Idempotent: every step is
+// a no-op once already applied.
+//
+// §11.4.124/§9 migration safety: dedup keeps the row with the greatest
+// (created_at, last_accessed_at) per tuple and deletes the older shadow rows
+// (the stale rows the old lookup could serve). No backup is needed beyond the
+// caller's normal DB file — only redundant duplicate rows are removed, and the
+// kept row is the one the corrected lookup would return anyway.
+func (s *SQLiteStorage) migrateCacheUniqueTuple() error {
+	// 1) Add the lookup_hash column if a legacy schema lacks it.
+	hasCol, err := s.cacheHasColumn("lookup_hash")
+	if err != nil {
+		return fmt.Errorf("inspect translation_cache columns: %w", err)
+	}
+	if !hasCol {
+		if _, err := s.db.Exec(
+			`ALTER TABLE translation_cache ADD COLUMN lookup_hash TEXT NOT NULL DEFAULT ''`,
+		); err != nil {
+			return fmt.Errorf("add lookup_hash column: %w", err)
+		}
+	}
+
+	// 2) Backfill lookup_hash for any rows missing it (empty default). Done in Go
+	//    so the hash matches cacheLookupHash exactly (sha256 over NUL-joined tuple).
+	if err := s.backfillCacheLookupHashes(); err != nil {
+		return fmt.Errorf("backfill lookup_hash: %w", err)
+	}
+
+	// 3) Deduplicate by lookup_hash, keeping the freshest row per tuple. rowid is
+	//    the stable per-row key; we keep the rowid whose (created_at,
+	//    last_accessed_at) is greatest and delete the rest.
+	if _, err := s.db.Exec(`
+		DELETE FROM translation_cache
+		WHERE rowid NOT IN (
+			SELECT keep_rowid FROM (
+				SELECT rowid AS keep_rowid,
+				       ROW_NUMBER() OVER (
+				           PARTITION BY lookup_hash
+				           ORDER BY created_at DESC, last_accessed_at DESC, rowid DESC
+				       ) AS rn
+				FROM translation_cache
+			)
+			WHERE rn = 1
+		)
+	`); err != nil {
+		return fmt.Errorf("dedup duplicate-tuple cache rows: %w", err)
+	}
+
+	// 4) Add the UNIQUE index (now safe — no duplicate lookup_hash values remain).
+	if _, err := s.db.Exec(
+		`CREATE UNIQUE INDEX IF NOT EXISTS idx_cache_unique_tuple ON translation_cache(lookup_hash)`,
+	); err != nil {
+		return fmt.Errorf("create unique tuple index: %w", err)
+	}
+
+	return nil
+}
+
+// cacheHasColumn reports whether translation_cache has the named column.
+func (s *SQLiteStorage) cacheHasColumn(name string) (bool, error) {
+	rows, err := s.db.Query(`PRAGMA table_info(translation_cache)`)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var cid int
+		var colName, colType string
+		var notNull, pk int
+		var dflt sql.NullString
+		if err := rows.Scan(&cid, &colName, &colType, &notNull, &dflt, &pk); err != nil {
+			return false, err
+		}
+		if colName == name {
+			return true, rows.Err()
+		}
+	}
+	return false, rows.Err()
+}
+
+// backfillCacheLookupHashes computes lookup_hash for any row whose value is empty
+// (legacy rows, or rows added before the column existed).
+func (s *SQLiteStorage) backfillCacheLookupHashes() error {
+	rows, err := s.db.Query(
+		`SELECT id, source_text, source_language, target_language, provider, model
+		 FROM translation_cache WHERE lookup_hash = ''`,
+	)
+	if err != nil {
+		return err
+	}
+	type rowKey struct {
+		id, sourceText, srcLang, tgtLang, provider, model string
+	}
+	var pending []rowKey
+	for rows.Next() {
+		var rk rowKey
+		if err := rows.Scan(&rk.id, &rk.sourceText, &rk.srcLang, &rk.tgtLang, &rk.provider, &rk.model); err != nil {
+			rows.Close()
+			return err
+		}
+		pending = append(pending, rk)
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		return err
+	}
+	rows.Close()
+
+	for _, rk := range pending {
+		h := cacheLookupHash(rk.sourceText, rk.srcLang, rk.tgtLang, rk.provider, rk.model)
+		if _, err := s.db.Exec(
+			`UPDATE translation_cache SET lookup_hash = ? WHERE id = ?`, h, rk.id,
+		); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // CreateSession creates a new translation session
@@ -265,18 +393,37 @@ func (s *SQLiteStorage) GetCachedTranslation(ctx context.Context, sourceText, so
 	return cache, nil
 }
 
-// CacheTranslation caches a translation
+// CacheTranslation caches a translation, idempotent on the lookup tuple
+// (source_text, source_language, target_language, provider, model).
+//
+// Upsert semantics: ON CONFLICT(lookup_hash) DO UPDATE — NOT INSERT OR REPLACE.
+// INSERT OR REPLACE deletes the conflicting row and re-inserts, which would lose
+// the existing access_count and change the row's identity. ON CONFLICT...DO
+// UPDATE keeps the original row (and its accumulated access_count) and overwrites
+// only the translation payload + freshness columns, so re-caching the same tuple
+// with a corrected/fresher translation updates in place and GetCachedTranslation
+// returns the FRESHEST target_text. The conflict is detected on lookup_hash (the
+// UNIQUE-tuple key), so two different ids carrying the same tuple collapse to one
+// row instead of leaving a stale shadow.
 func (s *SQLiteStorage) CacheTranslation(ctx context.Context, cache *TranslationCache) error {
+	lookupHash := cacheLookupHash(
+		cache.SourceText, cache.SourceLanguage, cache.TargetLanguage, cache.Provider, cache.Model,
+	)
+
 	query := `
-		INSERT OR REPLACE INTO translation_cache (
+		INSERT INTO translation_cache (
 			id, source_text, target_text, source_language, target_language, provider, model,
-			created_at, access_count, last_accessed_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			lookup_hash, created_at, access_count, last_accessed_at
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(lookup_hash) DO UPDATE SET
+			target_text = excluded.target_text,
+			created_at = excluded.created_at,
+			last_accessed_at = excluded.last_accessed_at
 	`
 
 	_, err := s.db.ExecContext(ctx, query,
 		cache.ID, cache.SourceText, cache.TargetText, cache.SourceLanguage, cache.TargetLanguage,
-		cache.Provider, cache.Model, cache.CreatedAt, cache.AccessCount, cache.LastAccessedAt,
+		cache.Provider, cache.Model, lookupHash, cache.CreatedAt, cache.AccessCount, cache.LastAccessedAt,
 	)
 
 	return err
