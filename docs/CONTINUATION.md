@@ -1,7 +1,23 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 41
-**Last modified:** 2026-06-14T17:55:00Z
+**Revision:** 42
+**Last modified:** 2026-06-14T18:35:00Z
+
+<!-- session 2026-06-14s: WORKING_PLAN + plan-execution waves 10-12 (HEAD 06a8a16) -->
+
+### Session 2026-06-14s — WORKING_PLAN created + plan-execution begins (HEAD 06a8a16)
+
+Operator mandate: comprehensive subagent-driven plan of all unfinished items + known issues, then execute. Bug-hunt declared SATURATED by the §11.4.118 completeness-critic (wave 10).
+
+- **docs/WORKING_PLAN.md** (78ce2d0) — the canonical no-bluff inventory: P0 release blockers, P1 operator/credential-gated, P2 design decisions, P3 dead code, P4 governance gaps, P5 owned submodules, P6 full test-type coverage. Each item: WHAT/WHY-OPEN/EVIDENCE/SUBAGENT-TASK/ACCEPTANCE.
+- **Wave 10 (2 fixes + saturation verdict):** e520c4c `enhanceTranslation` byte→rune capitalization (silently no-op for Cyrillic/accented first letters) + isRussianToSerbian empty-source (told LLM wrong source lang); 5b0dd17 the orphaned guard. docx_parser: no bug (exhaustive). Completeness-critic: main-module product bug-hunt SATURATED.
+- **Wave 11 (3 plan items):** a36030e P0.1 version single-source (`pkg/version/app.go AppVersion=2.3.0`; 5 divergent binaries reconciled, runtime-verified, mutation-proven); 981ced9 P3.1 §11.4.124 pkg/hash investigation (dead `package main` duplicate of pkg/version.CodebaseHasher — finding doc written, NOT removed per §11.4.122, **operator decision queued: remove-as-duplicate vs relocate**); 279ac7c P4.2 first real pre-build gate suite (CM-GITIGNORE-PRECOMMIT-AUDIT + CM-NO-FAKES-BEYOND-UNIT + paired mutation meta-tests). 59819fa→06a8a16 §11.4.120 reconcile of stale version assertions in cmd/cli (`v2.0.0`→dynamic) + cmd/server (fixed a tautological `Contains("v1.0.0","1.0.0")` §11.4.1 bluff). [Note: 59819fa committed a test before `go test` verified it — `go build ./...` skips `_test.go`; repaired fix-forward in 06a8a16. Lesson: use `go vet`/`go test` as the pre-commit compile check for test changes.]
+- **§11.4.65 finding (P4.3):** only 3 of 87 tracked `docs/*.md` have `.html`/`.pdf` siblings — large export gap (needs pandoc/weasyprint or honest §11.4.106 ToolAbsent skip).
+- **Wave 12 in flight:** P4.1 tracker constellation scaffold (Issues/Fixed/summaries + ATM-NNN) · P6 perf/benchmark + stress/chaos coverage · P4.2 gate-suite expansion (CM-SCRIPT-TARGET-SHELL-PARSEABLE + CM-VERSION-SINGLE-SOURCE).
+
+**Integration sweep GREEN** at HEAD 06a8a16 (quiescent): `go test ./... -p 1` = **57 ok / 0 FAIL**. build+vet clean. CAMPAIGN TOTAL: ~30 genuine mutation-proven fixes; main-module bug-hunt saturated; plan execution underway.
+
+**OPERATOR DECISIONS QUEUED:** (1) P1.0 authoritative version number (2.3.0 vs 3.0.0); (2) P3.1 pkg/hash remove-vs-relocate; (3) P1.1 provider keys/balance (OPENAI/ANTHROPIC absent, GEMINI invalid, ZHIPU no balance) to unblock allowlist audits; (4) P2.x design decisions (inert flags, MinScoreThreshold scale, reasoning-content support). See docs/WORKING_PLAN.md.
 
 <!-- session 2026-06-14r: bug-hunt waves 8-9 — 7 more genuine fixes (HEAD daa2f70) -->
 
