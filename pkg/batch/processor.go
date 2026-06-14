@@ -443,6 +443,32 @@ func (bp *BatchProcessor) processFile(ctx context.Context, inputPath, outputPath
 	}, nil
 }
 
+// autoOutputName builds a deterministic, collision-free output file name for the
+// auto-naming (directory / write-next-to-input) branches.
+//
+// The source extension is embedded into the name so two distinct inputs that
+// share a stem but differ in extension (e.g. "book.fb2" and "book.epub", both
+// supported formats discovered by findSupportedFiles) never map onto the same
+// output file. Stripping the source extension — as the previous "%s_%s.%s" with
+// base=TrimSuffix(path,ext) did — silently collapsed such inputs onto one path,
+// so the second translation overwrote the first (sequential) or both goroutines
+// wrote the same file (parallel): in both cases translated output was lost.
+//
+// stem is the input path/relpath with its extension already removed; srcExt is
+// the input's extension WITH the leading dot ("" for an extensionless input).
+func autoOutputName(stem, srcExt, lang, outputFormat string) string {
+	if outputFormat == "" {
+		outputFormat = "epub"
+	}
+	// Use the dotless source extension as a discriminator. When the source has
+	// no extension there is nothing to disambiguate, so fall back to the
+	// stem-only form.
+	if srcExt == "" {
+		return fmt.Sprintf("%s_%s.%s", stem, lang, outputFormat)
+	}
+	return fmt.Sprintf("%s_%s_%s.%s", stem, strings.TrimPrefix(srcExt, "."), lang, outputFormat)
+}
+
 // computeOutputPath computes the output path preserving directory structure
 func (bp *BatchProcessor) computeOutputPath(inputPath string) (string, error) {
 	if bp.options.OutputPath == "" {
@@ -450,11 +476,7 @@ func (bp *BatchProcessor) computeOutputPath(inputPath string) (string, error) {
 		ext := filepath.Ext(inputPath)
 		base := strings.TrimSuffix(inputPath, ext)
 		lang := bp.options.TargetLanguage.Code
-		outputFormat := bp.options.OutputFormat
-		if outputFormat == "" {
-			outputFormat = "epub"
-		}
-		return fmt.Sprintf("%s_%s.%s", base, lang, outputFormat), nil
+		return autoOutputName(base, ext, lang, bp.options.OutputFormat), nil
 	}
 
 	// Check if output is a directory
@@ -485,16 +507,13 @@ func (bp *BatchProcessor) computeOutputPath(inputPath string) (string, error) {
 		relPath = filepath.Base(inputPath)
 	}
 
-	// Change extension and add language suffix
+	// Change extension and add language suffix. Embed the source extension so
+	// same-stem/different-extension inputs do not collide onto one output file.
 	ext := filepath.Ext(relPath)
 	base := strings.TrimSuffix(relPath, ext)
 	lang := bp.options.TargetLanguage.Code
-	outputFormat := bp.options.OutputFormat
-	if outputFormat == "" {
-		outputFormat = "epub"
-	}
 
-	outputFile := fmt.Sprintf("%s_%s.%s", base, lang, outputFormat)
+	outputFile := autoOutputName(base, ext, lang, bp.options.OutputFormat)
 	outputPath := filepath.Join(bp.options.OutputPath, outputFile)
 
 	// Create output directory if needed

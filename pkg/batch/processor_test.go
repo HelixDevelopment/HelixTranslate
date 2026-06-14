@@ -385,7 +385,9 @@ func TestBatchProcessor_ComputeOutputPath(t *testing.T) {
 			t.Errorf("Unexpected error: %v", err)
 		}
 
-		expected := filepath.Join(outputDir, "test_sr.epub")
+		// Source extension is embedded in the auto-name so same-stem inputs
+		// (e.g. test.fb2 + test.txt) do not collide onto one output file.
+		expected := filepath.Join(outputDir, "test_fb2_sr.epub")
 		if outputPath != expected {
 			t.Logf("InputDir: %s, OutputDir: %s", inputDir, outputDir)
 			t.Logf("InputFile: %s", inputFile)
@@ -407,7 +409,7 @@ func TestBatchProcessor_ComputeOutputPath(t *testing.T) {
 			t.Errorf("Unexpected error: %v", err)
 		}
 
-		expected := filepath.Join(outputDir, "subdir", "test_sr.epub")
+		expected := filepath.Join(outputDir, "subdir", "test_fb2_sr.epub")
 		if outputPath != expected {
 			t.Errorf("Expected output path %s, got %s", expected, outputPath)
 		}
@@ -429,7 +431,7 @@ func TestBatchProcessor_ComputeOutputPath(t *testing.T) {
 			t.Errorf("Unexpected error: %v", err)
 		}
 
-		expected := filepath.Join(inputDir, "test_sr.epub")
+		expected := filepath.Join(inputDir, "test_fb2_sr.epub")
 		if outputPath != expected {
 			t.Errorf("Expected output path %s, got %s", expected, outputPath)
 		}
