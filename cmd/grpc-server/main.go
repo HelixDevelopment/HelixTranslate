@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -126,6 +127,9 @@ func parseFlags() *ServerConfig {
 
 	flag.Parse()
 
+	// Apply environment-variable overrides as documented in printHelp().
+	applyEnvOverrides(config, os.Getenv)
+
 	if *versionFlag {
 		fmt.Printf("gRPC Translation Server v%s\n", appVersion)
 		os.Exit(0)
@@ -137,6 +141,35 @@ func parseFlags() *ServerConfig {
 	}
 
 	return config
+}
+
+// applyEnvOverrides applies the environment-variable overrides documented in
+// printHelp() (GRPC_ADDRESS, GRPC_PORT, LOG_LEVEL, ENABLE_METRICS,
+// ENABLE_REFLECTION). When a variable is set and well-formed it takes
+// precedence over the corresponding command-line flag, as the help text
+// promises. getenv is injected to keep this unit-testable.
+func applyEnvOverrides(config *ServerConfig, getenv func(string) string) {
+	if v := getenv("GRPC_ADDRESS"); v != "" {
+		config.Address = v
+	}
+	if v := getenv("GRPC_PORT"); v != "" {
+		if p, err := strconv.Atoi(v); err == nil {
+			config.Port = p
+		}
+	}
+	if v := getenv("LOG_LEVEL"); v != "" {
+		config.LogLevel = v
+	}
+	if v := getenv("ENABLE_METRICS"); v != "" {
+		if b, err := strconv.ParseBool(v); err == nil {
+			config.EnableMetrics = b
+		}
+	}
+	if v := getenv("ENABLE_REFLECTION"); v != "" {
+		if b, err := strconv.ParseBool(v); err == nil {
+			config.EnableReflection = b
+		}
+	}
 }
 
 // printHelp displays usage information
