@@ -175,9 +175,9 @@
 <h1
 id="continuation--helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 50 <strong>Last modified:</strong>
-2026-06-15T02:45:00Z</p>
-<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 35 real bugs (20 submodule + 15 main) -->
+<p><strong>Revision:</strong> 51 <strong>Last modified:</strong>
+2026-06-15T03:30:00Z</p>
+<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 36 real bugs (20 submodule + 16 main) -->
 
 <h3
 id="session-2026-06-14v--cross-submodule-bug-hunt-campaign-11428-equal-codebase">Session
@@ -334,7 +334,14 @@ round-trip; PUA-placeholder protection</td>
 <td><strong>MAIN</strong> pkg/coordination</td>
 <td>TranslateWithRetry never retried (gave up after 1 attempt/instance
 despite maxRetries) — silent loss of recoverable translation</td>
-<td>(wave 10)</td>
+<td>84d462e</td>
+</tr>
+<tr>
+<td><strong>MAIN</strong> pkg/preparation</td>
+<td>truncateContent byte-sliced mid-rune → invalid UTF-8 Cyrillic fed to
+the analysis LLM, degrading character/terminology JSON; rune-boundary
+backup</td>
+<td>(wave 11)</td>
 </tr>
 </tbody>
 </table>

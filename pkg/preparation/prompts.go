@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"unicode/utf8"
 )
 
 // PreparationPromptBuilder builds prompts for content analysis
@@ -303,6 +304,16 @@ func truncateContent(content string, maxChars int) string {
 		cutPoint = lastPeriod + 1
 	} else if lastNewline > maxChars-200 && lastNewline > 0 {
 		cutPoint = lastNewline
+	}
+
+	// content is UTF-8; cutPoint is a byte offset that may land in the middle of
+	// a multi-byte rune (common for Cyrillic, where every letter is 2 bytes and
+	// there is no late '.'/"\n\n" to snap to). Slicing there yields an invalid
+	// trailing half-rune that is then fed to the analysis LLM. content[:cutPoint]
+	// is valid UTF-8 iff the first excluded byte (content[cutPoint]) starts a new
+	// rune; back the cut up to the nearest rune boundary otherwise.
+	for cutPoint > 0 && cutPoint < len(content) && !utf8.RuneStart(content[cutPoint]) {
+		cutPoint--
 	}
 
 	truncatedContent := content[:cutPoint]
