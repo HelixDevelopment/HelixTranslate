@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -445,13 +446,33 @@ func (c *MultiLLMCoordinator) TranslateWithConsensus(
 		}
 	}
 
-	// Find consensus
+	// Find consensus deterministically.
+	//
+	// The winner is chosen by a STABLE, documented rule so that identical
+	// per-instance outputs always yield the identical consensus result
+	// (§11.4.50 determinism): (1) the translation with the highest vote count
+	// wins; (2) on an EXACT TIE in count, the lexicographically-smallest
+	// translation wins.
+	//
+	// Iterating the `translations` map directly would let Go's randomized
+	// map-iteration order decide a tie, so the same inputs could produce
+	// different consensus outputs across runs. Sorting the candidate keys
+	// first removes that non-determinism entirely.
 	maxCount := 0
 	bestTranslation := firstSuccess
 
-	for translation, count := range translations {
-		if count > maxCount {
-			maxCount = count
+	candidates := make([]string, 0, len(translations))
+	for translation := range translations {
+		candidates = append(candidates, translation)
+	}
+	sort.Strings(candidates)
+
+	for _, translation := range candidates {
+		// Strict `>` combined with the lexicographic pre-sort means the first
+		// candidate reaching a given max count keeps it: ties are broken in
+		// favour of the lexicographically-smallest translation.
+		if translations[translation] > maxCount {
+			maxCount = translations[translation]
 			bestTranslation = translation
 		}
 	}
