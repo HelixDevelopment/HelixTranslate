@@ -1,7 +1,22 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 38
-**Last modified:** 2026-06-14T15:51:00Z
+**Revision:** 39
+**Last modified:** 2026-06-14T16:05:00Z
+
+<!-- session 2026-06-14p: zhipu allowlist finding (operator-blocked) + queue-drained status (HEAD a33f20b) -->
+
+### Session 2026-06-14p — Zhipu allowlist §11.4.150 finding (operator-blocked); autonomously-provable queue drained
+
+- **Zhipu allowlist is stale (Operator-blocked, §11.4.21):** live Zhipu /models (account-authoritative, verified 2026-06-14) returns **glm-4.5, glm-4.5-air, glm-4.6, glm-4.7, glm-5, glm-5-turbo, glm-5.1** — NONE of our allowlisted glm-4 family (glm-4/glm-3-turbo/glm-4-plus/glm-4-flash/glm-4-air/glm-4-airx/glm-4-long/glm-4-flashx) are listed. The generic factory (llm.go:218) HARD-REJECTS unlisted models, so a funded account requesting a current model is rejected (this is what the earlier "zhipu rejects documented models" flag actually was). **Why not fixed autonomously:** the account is OUT OF BALANCE (chat API error 1113 "余额不足/insufficient balance") → I cannot obtain §11.4.123 translation proof NOR verify response-shape compatibility (the magistral lesson: glm-5 reasoning models may return structured-list `content` our string-content client cannot parse — unverifiable while balance-blocked). Blindly adding glm-5 could enable a client-incompatible model. **Operator-Block-Details:** WHAT — recharge the Zhipu account OR provide a funded ZHIPU_API_KEY; WHY — every self-resolution exhausted (key present + API reachable, but balance blocks all verification; cannot manufacture credit); UNBLOCK CONDITION — a funded zhipu key so the deepseek-pattern fix (verify-translate + string-content shape, then additive allowlist update + RED-proven gate guard) can be applied; WHO — operator.
+- Contrast: **deepseek** had a funded key → fully provable → FIXED this session (0fd1a34). The verify-then-fix pattern is established; it just needs a funded provider account.
+
+**AUTONOMOUSLY-PROVABLE QUEUE DRAINED.** All clearly-actionable, evidence-provable main-module work this session is done + green. Remaining known issues are ALL operator/research/design-gated (cannot be closed with rock-solid proof autonomously):
+- **Operator (credentials/balance):** add OPENAI_API_KEY + ANTHROPIC_API_KEY (absent); refresh GEMINI_API_KEY (live /models = "API Key not found"); recharge/replace ZHIPU_API_KEY (balance 1113). Each unblocks a verify-then-fix allowlist/E2E pass.
+- **Research (needs funded keys):** ~30 other provider allowlists not audited (audit pattern proven: live /models → verify-translate + string-content shape → additive update).
+- **Design:** `-chunk-size` CLI flag is inert (real chunking is automatic+correct via translateWithRetry/splitText; wiring the flag has ambiguous semantics OR removing it needs §11.4.122 operator confirm); markdown not a first-class CLI input (works as TXT today); reasoning-model structured-list `content` support in the OpenAI-compatible clients (would enable magistral/glm-5-class models).
+- **Release:** NO tag yet — needs §11.4.40 full retest + operator confirm + §11.4.151 `<prefix>-<version>` naming.
+
+Loop status (§11.4.94(A)/§11.4.101/§11.4.126): idle-on-blocked — every remaining item is externally/operator-gated; no item is autonomously closable with rock-solid proof. Build is the most stable this session: full sweep 54 ok/0 FAIL, websocket race-clean, format matrix complete (6 in × 5 out), deepseek current.
 
 <!-- session 2026-06-14o: latent brittle-test fixes surfaced by the sweeps (HEAD 817b9dd) -->
 
