@@ -274,8 +274,20 @@ func (bp *BookPolisher) polishChapter(
 		report.AddSectionResult(result)
 	}
 
-	// Polish sections
-	for i := range original.Sections {
+	// Polish sections.
+	// Bound by the SHORTER of original/translated section counts. The loop
+	// indexes translated.Sections[i] with an index ranged over original.Sections;
+	// if the translated chapter legitimately has FEWER sections than the original
+	// (a section translated to empty/merged, or a parser producing fewer
+	// sections), indexing the shorter slice panics (index out of range). Capping
+	// at the minimum processes every section present in both and safely skips the
+	// missing tail instead of crashing — the section-level analogue of the
+	// chapter-level cap in multipass.go.
+	maxSections := len(original.Sections)
+	if l := len(translated.Sections); l < maxSections {
+		maxSections = l
+	}
+	for i := 0; i < maxSections; i++ {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
@@ -338,8 +350,16 @@ func (bp *BookPolisher) polishSectionRecursive(
 		report.AddSectionResult(result)
 	}
 
-	// Polish subsections
-	for i := range original.Subsections {
+	// Polish subsections.
+	// Same bounds discipline as sections above: cap at the shorter of
+	// original/translated subsection counts so a translated section with fewer
+	// subsections than the original skips the missing tail instead of panicking
+	// on translated.Subsections[i].
+	maxSubsections := len(original.Subsections)
+	if l := len(translated.Subsections); l < maxSubsections {
+		maxSubsections = l
+	}
+	for i := 0; i < maxSubsections; i++ {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
