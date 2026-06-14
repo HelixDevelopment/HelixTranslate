@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -521,11 +522,34 @@ func (s *APIServer) getProviders(c *gin.Context) {
 }
 
 func (s *APIServer) healthCheck(c *gin.Context) {
-	s.sendSuccessResponse(c, map[string]interface{}{
+	// The gRPC backend is this server's sole upstream — every translation
+	// endpoint proxies to it. Reporting "healthy" with HTTP 200 while the
+	// connection is not Ready makes orchestrators (k8s readiness/liveness, ALB
+	// target health) route real traffic to an instance that fails every request
+	// with 500. Derive health from the actual connection state instead.
+	state := s.conn.GetState()
+	healthy := state == connectivity.Ready
+
+	payload := map[string]interface{}{
 		"status":         "healthy",
 		"timestamp":      time.Now().Unix(),
 		"version":        "3.0.0",
-		"grpc_connected": s.conn.GetState().String(),
+		"grpc_connected": state.String(),
+	}
+
+	if healthy {
+		s.sendSuccessResponse(c, payload)
+		return
+	}
+
+	// Backend not Ready → report unhealthy with 503 so upstream health checks
+	// route away from this instance.
+	payload["status"] = "unhealthy"
+	c.JSON(http.StatusServiceUnavailable, APIResponse{
+		Success:   false,
+		Message:   "gRPC backend not ready",
+		Data:      payload,
+		Timestamp: time.Now().Unix(),
 	})
 }
 

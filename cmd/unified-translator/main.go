@@ -313,8 +313,7 @@ func executeSSHTranslation(ctx context.Context, config *UnifiedConfig, session *
 
 	// Execute translation using remote llama.cpp
 	remoteOutputPath := filepath.Join(config.RemoteDir, "output.md")
-	cmd := fmt.Sprintf("cd %s && /home/milosvasic/llama.cpp -m /home/milosvasic/models/tiny-llama-working.gguf -p 'Translate from Russian to Serbian Cyrillic: ' -f %s > %s",
-		config.RemoteDir, remoteTextPath, remoteOutputPath)
+	cmd := buildSSHTranslateCommand(config, remoteTextPath, remoteOutputPath)
 
 	result, err := worker.ExecuteCommand(ctx, cmd)
 	if err != nil {
@@ -342,6 +341,73 @@ func executeSSHTranslation(ctx context.Context, config *UnifiedConfig, session *
 	os.Remove(tempFile)
 
 	return string(translatedData), nil
+}
+
+// buildSSHTranslateCommand builds the remote shell command that runs llama.cpp
+// on the SSH worker. It honors the user's -llama-binary, -llama-model,
+// -source-lang, -target-lang and -script flags rather than hardcoding a single
+// Russian→Serbian-Cyrillic translation. The prompt is single-quote-escaped so a
+// language/script value can never break out of the shell quoting.
+func buildSSHTranslateCommand(config *UnifiedConfig, remoteTextPath, remoteOutputPath string) string {
+	binary := config.LlamaBinary
+	if strings.TrimSpace(binary) == "" {
+		binary = "/usr/local/bin/llama.cpp"
+	}
+	model := config.LlamaModel
+	if strings.TrimSpace(model) == "" {
+		model = "/home/milosvasic/models/tiny-llama-working.gguf"
+	}
+
+	prompt := sshTranslatePrompt(config.SourceLang, config.TargetLang, config.Script)
+
+	return fmt.Sprintf("cd %s && %s -m %s -p %s -f %s > %s",
+		config.RemoteDir, binary, model, shellSingleQuote(prompt), remoteTextPath, remoteOutputPath)
+}
+
+// sshTranslatePrompt builds a translation instruction from the user's
+// source/target language and target script.
+func sshTranslatePrompt(sourceLang, targetLang, targetScript string) string {
+	src := languageDisplayName(sourceLang)
+	tgt := languageDisplayName(targetLang)
+	if targetLang == "sr" {
+		switch targetScript {
+		case "latin":
+			tgt = "Serbian Latin"
+		case "cyrillic":
+			tgt = "Serbian Cyrillic"
+		}
+	}
+	return fmt.Sprintf("Translate from %s to %s: ", src, tgt)
+}
+
+// languageDisplayName maps a language code to a human-readable name, falling
+// back to the code itself for unknown codes (no guessing — §11.4.6).
+func languageDisplayName(code string) string {
+	names := map[string]string{
+		"ru": "Russian",
+		"sr": "Serbian",
+		"en": "English",
+		"fr": "French",
+		"de": "German",
+		"es": "Spanish",
+		"it": "Italian",
+		"zh": "Chinese",
+		"ja": "Japanese",
+		"pt": "Portuguese",
+	}
+	if n, ok := names[code]; ok {
+		return n
+	}
+	if strings.TrimSpace(code) == "" {
+		return "the source language"
+	}
+	return code
+}
+
+// shellSingleQuote safely wraps s in single quotes for POSIX shells, escaping
+// any embedded single quotes via the '"'"' idiom so no value can break out.
+func shellSingleQuote(s string) string {
+	return "'" + strings.ReplaceAll(s, "'", `'"'"'`) + "'"
 }
 
 // executeLlamaCppTranslation uses local llama.cpp for translation
