@@ -38,6 +38,10 @@ func TestStress_SustainedLoad_SingleText(t *testing.T) {
 	lt, mock := newMockTranslator(t)
 	const iterations = 500
 	const text = "Привет мир"
+	// Case-insensitive: enhanceTranslation correctly capitalizes the first letter
+	// when the source ("Привет…") starts uppercase, so the mock's lowercase
+	// "translated: …" becomes "Translated: …". This sanity guard only proves the
+	// translation is not stubbed/echoed, so case is irrelevant here.
 	const wantPrefix = "translated: "
 
 	for i := 0; i < iterations; i++ {
@@ -65,7 +69,7 @@ func TestStress_SustainedLoad_SingleText(t *testing.T) {
 	}
 	// Sanity: the produced text must actually contain the expected mock output,
 	// so a stubbed Translate (returning "" or echoing input) fails this test.
-	if got, _ := lt.Translate(context.Background(), text, "greeting"); !strings.HasPrefix(got, wantPrefix) {
+	if got, _ := lt.Translate(context.Background(), text, "greeting"); !strings.HasPrefix(strings.ToLower(got), wantPrefix) {
 		t.Fatalf("translation does not match mock contract: %q", got)
 	}
 }

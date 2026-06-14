@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"unicode"
+	"unicode/utf8"
 )
 
 // TranslationConfig holds translation configuration (use from parent package to avoid import cycle)
@@ -626,9 +628,14 @@ func isRussianToSerbian(sourceLang, targetLang string) bool {
 		// No pair configured at all → preserve the legacy Russian→Serbian default.
 		return true
 	}
-	srcRU := src == "Russian" || src == ""
-	tgtSR := tgt == "Serbian" || tgt == ""
-	return srcRU && tgtSR
+	// A PARTIALLY-configured pair must NOT inherit the missing side as Russian /
+	// Serbian: when exactly one of source/target is set the empty side is unknown,
+	// not "the default". Treating an empty source as Russian made an explicit
+	// non-Russian-source → Serbian pair (e.g. SourceLang unset + TargetLang "sr",
+	// common when the source language is auto-detected) emit the primary
+	// "translate the following Russian text" Ekavica prompt — telling the LLM the
+	// wrong source language. The RU→SR path requires BOTH sides explicit.
+	return src == "Russian" && tgt == "Serbian"
 }
 
 // scriptInstruction returns a script-specific guideline line for the target
@@ -751,11 +758,22 @@ func (lt *LLMTranslator) enhanceTranslation(original, translated string) string 
 		enhanced += "\n"
 	}
 
-	// Fix sentence capitalization
+	// Fix sentence capitalization.
+	//
+	// The first character must be decoded as a *rune*, not indexed as a byte:
+	// the translator's primary target scripts (Serbian/Russian Cyrillic, accented
+	// Latin) have multibyte first characters, so the previous `enhanced[0]` /
+	// `original[0]` byte-indexing fed a UTF-8 lead byte (e.g. 0xD0) to ASCII-only
+	// helpers, making this correction silently dead for exactly the languages
+	// this tool produces. unicode.IsLower / IsUpper / ToUpper operate on the
+	// decoded rune and capitalize Cyrillic/accented letters correctly.
 	if len(enhanced) > 0 && len(original) > 0 {
-		if isLower(rune(enhanced[0])) && isUpper(rune(original[0])) {
+		eFirst, _ := utf8.DecodeRuneInString(enhanced)
+		oFirst, _ := utf8.DecodeRuneInString(original)
+		if eFirst != utf8.RuneError && oFirst != utf8.RuneError &&
+			unicode.IsLower(eFirst) && unicode.IsUpper(oFirst) {
 			runes := []rune(enhanced)
-			runes[0] = toUpper(runes[0])
+			runes[0] = unicode.ToUpper(runes[0])
 			enhanced = string(runes)
 		}
 	}
@@ -763,7 +781,11 @@ func (lt *LLMTranslator) enhanceTranslation(original, translated string) string 
 	return enhanced
 }
 
-// Helper functions
+// Helper functions.
+//
+// NOTE: these ASCII-only helpers are retained for their existing unit tests;
+// enhanceTranslation itself uses the unicode package so capitalization works for
+// the multibyte (Cyrillic / accented Latin) scripts this translator targets.
 func isLower(r rune) bool {
 	return r >= 'a' && r <= 'z'
 }
