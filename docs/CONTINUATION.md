@@ -1,7 +1,21 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 32
-**Last modified:** 2026-06-14T14:25:00Z
+**Revision:** 33
+**Last modified:** 2026-06-14T15:10:00Z
+
+<!-- session 2026-06-14j: known-issue cleanup wave (HEAD b83038c) -->
+
+### Session 2026-06-14j — design/known-issue cleanup (HEAD b83038c) — 3 more real fixes + gemini/zhipu clients cleared
+
+Subagent-driven wave (1 completed via subagent, 3 rate-limited → finished inline per §11.4.101/§11.4.147):
+- **77a0c15** coordination: TranslateWithConsensus tie-break was non-deterministic (map-iteration order on vote ties) → sort candidates, strict '>', lexicographic tie-break. Mutation-proven (1000 runs identical).
+- **9640a00** verification: multipass chapter loop panicked (index out of range) when the translation has FEWER chapters than the original → bound the loop by min(original,current,polished) + log/skip the tail. FACT code-analysis root cause; build+vet+tests green.
+- **b83038c** ebook: FB2 writer dropped section/subsection TITLES (content was already lossless) → prepend each non-empty title as a paragraph. RED→GREEN→mutation-proven (real write→read).
+- gemini/zhipu CLIENT investigation (issue #5) RESOLVED as **no client bug** (§11.4.6): gemini.go correctly uses https://generativelanguage.googleapis.com/v1beta + ?key= + :generateContent; zhipu.go correctly uses https://open.bigmodel.cn/api/paas/v4 + /chat/completions + Bearer. Their live failures are OPERATOR credential/account issues (invalid GEMINI_API_KEY; zhipu account lacks the model), NOT code.
+
+**SESSION GRAND TOTAL: ~81 real bugs** + 3 reconciliations + §11.4.98 conversion + real E2E proofs (5-format matrix via DeepSeek + Mistral). Post-wave sweep at HEAD b83038c: 53 ok; the single pkg/distributed FAIL was ENFILE host-exhaustion ("too many open files", FD ~95%), NOT a regression — TestSSHConnection_ExecuteCommand passes deterministically in isolation (-count=3 green); nothing in pkg/distributed changed this round. build+vet exit 0.
+
+REMAINING KNOWN ISSUES (operator/research/design-gated — see the operator-facing status report): OpenAI/Anthropic keys absent; GEMINI_API_KEY invalid; zhipu account/model access; PDF input non-functional (license-gated unipdf, same class DOCX was — needs a free PDF lib / go.mod decision); markdown not a first-class CLI input; other ~30 providers' model-allowlists not audited; verifier 3-tier merge precedence + run.go registry flags (design); RefreshToken no expiry re-validate (no caller); CLI always emits EPUB (no TXT writer); SQLite encryption DSN needs SQLCipher; G1/G2 carry-overs; W16 Models→submodule. NO release tag yet (needs §11.4.40 full retest + operator confirm).
 
 <!-- session 2026-06-14i: real-translation E2E matrix caught + fixed more bugs (HEAD b23bcac) -->
 
