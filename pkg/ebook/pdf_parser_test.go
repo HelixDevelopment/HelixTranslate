@@ -114,15 +114,21 @@ func TestPDFParser_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	// Even with invalid data, context cancellation should be detected
+	// Even with invalid data, parsing must fail (either the context is observed
+	// as cancelled, or the bytes are rejected as a non-PDF at the reader stage —
+	// both are legitimate hard failures; the previous assertion coupled to the
+	// unipdf-specific "version not found" string, which no longer applies after
+	// the switch to the MIT ledongthuc/pdf extractor — §11.4.120 reconciliation).
 	_, err := parser.ParseWithContext(ctx, []byte("not a pdf"))
 	if err == nil {
 		t.Error("Expected parsing to fail with cancelled context")
 	}
 
-	// Check if it's either context cancelled or parsing error (both acceptable)
-	if err != context.Canceled && !containsString(err.Error(), "version not found") {
-		t.Errorf("Expected context.Canceled or version error, got %v", err)
+	// Accept context cancellation OR a genuine PDF-structure rejection.
+	if err != context.Canceled &&
+		!containsString(err.Error(), "PDF") &&
+		!containsString(err.Error(), "not a PDF file") {
+		t.Errorf("Expected context.Canceled or a PDF-structure error, got %v", err)
 	}
 }
 

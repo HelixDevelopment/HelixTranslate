@@ -322,6 +322,7 @@ func (d *Detector) IsSupported(format Format) bool {
 		FormatTXT,
 		FormatHTML,
 		FormatDOCX, // now backed by the stdlib OOXML parser (no license-gated dep)
+		FormatPDF,  // now backed by the MIT ledongthuc/pdf text extractor (no license-gated dep)
 	}
 
 	for _, f := range supported {
@@ -340,6 +341,7 @@ func (d *Detector) GetSupportedFormats() []Format {
 		FormatTXT,
 		FormatHTML,
 		FormatDOCX,
+		FormatPDF,
 	}
 }
 

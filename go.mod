@@ -13,7 +13,6 @@ require (
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
-	github.com/unidoc/unipdf/v3 v3.69.0
 	golang.org/x/crypto v0.49.0
 	golang.org/x/net v0.52.0
 	golang.org/x/text v0.35.0
@@ -47,21 +46,14 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/quic-go/qpack v0.5.1 // indirect
-	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.0 // indirect
-	github.com/unidoc/freetype v0.2.3 // indirect
-	github.com/unidoc/pkcs7 v0.2.0 // indirect
-	github.com/unidoc/timestamp v0.0.0-20200412005513-91597fd3793a // indirect
-	github.com/unidoc/unitype v0.5.1 // indirect
 	go.opentelemetry.io/otel v1.43.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.43.0 // indirect
 	golang.org/x/arch v0.20.0 // indirect
-	golang.org/x/image v0.24.0 // indirect
 	golang.org/x/sys v0.43.0 // indirect
-	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260401024825-9d38bb4040a9 // indirect
 )
 
@@ -70,6 +62,7 @@ require (
 	digital.vasic.containers v0.0.0-00010101000000-000000000000
 	digital.vasic.llmsverifier v0.0.0
 	digital.vasic.models v0.0.0-00010101000000-000000000000
+	github.com/ledongthuc/pdf v0.0.0-20250511090121-5959a4027728
 )
 
 replace digital.vasic.challenges => ./challenges

@@ -4,16 +4,20 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	_ "image/jpeg" // Register JPEG decoder
-	_ "image/png"  // Register PNG decoder
 	"os"
 	"strings"
 
 	"digital.vasic.translator/pkg/format"
-	"github.com/unidoc/unipdf/v3/extractor"
-	"github.com/unidoc/unipdf/v3/model"
+	"github.com/ledongthuc/pdf"
 )
 
+// PDFParser extracts text from PDF documents.
+//
+// Text extraction uses github.com/ledongthuc/pdf (MIT). The previous
+// implementation used github.com/unidoc/unipdf, whose text extractor is
+// LICENSE-GATED: ExtractText returned "unipdf license code required" for every
+// real PDF, so PDF input was non-functional (a §11.4 'ships but cannot be used'
+// defect — old tests only fed invalid data and asserted failure, masking it).
 type PDFParser struct {
 	config *PDFConfig
 }
@@ -46,102 +50,84 @@ func NewPDFParser(config *PDFConfig) *PDFParser {
 }
 
 func (p *PDFParser) Parse(filename string) (*Book, error) {
-	// Read file
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
-
 	return p.ParseWithContext(context.Background(), data)
 }
 
 func (p *PDFParser) ParseWithContext(ctx context.Context, data []byte) (*Book, error) {
-	pdfReader, err := model.NewPdfReader(bytes.NewReader(data))
+	reader, err := pdf.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
-		return nil, fmt.Errorf("failed to create PDF reader: %w", err)
+		return nil, fmt.Errorf("failed to read PDF: %w", err)
 	}
 
-	book := &Book{
-		Metadata: Metadata{},
-	}
-
-	// Extract metadata
+	book := &Book{Metadata: Metadata{}}
+	numPages := reader.NumPage()
 	if p.config.ExtractMetadata {
-		if err := p.extractMetadata(pdfReader, book); err != nil {
-			return nil, fmt.Errorf("failed to extract metadata: %w", err)
-		}
+		book.Metadata.Description = fmt.Sprintf("PDF document with %d pages", numPages)
 	}
 
-	// Get page count
-	numPages, err := pdfReader.GetNumPages()
+	allText, err := extractPDFText(ctx, reader, numPages)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get page count: %w", err)
+		return nil, err
 	}
 
-	var allText strings.Builder
+	book.Chapters = append(book.Chapters, Chapter{
+		Title: "Document Content",
+		Sections: []Section{
+			{Title: "Full Text", Content: allText},
+		},
+	})
+	book.Language = book.Metadata.Language
+	return book, nil
+}
 
-	// Extract text from all pages
+// extractPDFText pulls plain text from every page, separating pages with a blank
+// line. ledongthuc/pdf can panic on a few malformed PDFs, so the per-page
+// extraction is wrapped in a recover that converts a panic into an error (a
+// malformed page must not crash the whole process — §11.4.1).
+func extractPDFText(ctx context.Context, reader *pdf.Reader, numPages int) (text string, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("PDF text extraction failed (malformed PDF): %v", r)
+		}
+	}()
+
+	var sb strings.Builder
 	for i := 1; i <= numPages; i++ {
-		page, err := pdfReader.GetPage(i)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get page %d: %w", i, err)
+		page := reader.Page(i)
+		if page.V.IsNull() {
+			continue
 		}
-
-		// Extract text from page
-		ex, err := extractor.New(page)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create extractor for page %d: %w", i, err)
+		pageText, perr := page.GetPlainText(nil)
+		if perr != nil {
+			return "", fmt.Errorf("failed to extract text from page %d: %w", i, perr)
 		}
-
-		text, err := ex.ExtractText()
-		if err != nil {
-			return nil, fmt.Errorf("failed to extract text from page %d: %w", i, err)
+		if sb.Len() > 0 && strings.TrimSpace(pageText) != "" {
+			sb.WriteString("\n\n")
 		}
+		sb.WriteString(pageText)
 
-		if allText.Len() > 0 {
-			allText.WriteString("\n\n--- Page Break ---\n\n")
-		}
-		allText.WriteString(text)
-
-		// Check for context cancellation
 		if i%5 == 0 {
 			select {
 			case <-ctx.Done():
-				return nil, ctx.Err()
+				return "", ctx.Err()
 			default:
 			}
 		}
 	}
-
-	// Create main content as first chapter
-	mainChapter := Chapter{
-		Title: "Document Content",
-		Sections: []Section{
-			{
-				Title:   "Full Text",
-				Content: allText.String(),
-			},
-		},
-	}
-
-	book.Chapters = append(book.Chapters, mainChapter)
-	book.Language = book.Metadata.Language
-
-	return book, nil
+	return sb.String(), nil
 }
 
 func (p *PDFParser) Validate(data []byte) error {
-	// Check PDF signature
 	if len(data) < 5 || !bytes.HasPrefix(data, []byte("%PDF-")) {
 		return fmt.Errorf("invalid PDF signature")
 	}
-
-	// Try to parse PDF structure
-	_, err := model.NewPdfReader(bytes.NewReader(data))
-	if err != nil {
+	if _, err := pdf.NewReader(bytes.NewReader(data), int64(len(data))); err != nil {
 		return fmt.Errorf("invalid PDF structure: %w", err)
 	}
-
 	return nil
 }
 
@@ -150,38 +136,14 @@ func (p *PDFParser) SupportedFormats() []string {
 }
 
 func (p *PDFParser) GetMetadata(data []byte) (*Metadata, error) {
-	pdfReader, err := model.NewPdfReader(bytes.NewReader(data))
+	reader, err := pdf.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
-		return nil, fmt.Errorf("failed to create PDF reader: %w", err)
+		return nil, fmt.Errorf("failed to read PDF: %w", err)
 	}
-
-	metadata := &Metadata{}
-	err = p.extractMetadata(pdfReader, &Book{Metadata: *metadata})
-	if err != nil {
-		return nil, err
-	}
-
-	// Return a copy to avoid mutation
-	result := *metadata
-	return &result, nil
+	md := &Metadata{Description: fmt.Sprintf("PDF document with %d pages", reader.NumPage())}
+	return md, nil
 }
 
 func (p *PDFParser) GetFormat() format.Format {
 	return format.FormatPDF
-}
-
-func (p *PDFParser) extractMetadata(pdfReader *model.PdfReader, book *Book) error {
-	// Note: The API is different than expected, using simplified metadata extraction
-	// Basic PDF structure is valid, that's what matters for now
-
-	// Extract page count
-	if numPages, err := pdfReader.GetNumPages(); err == nil {
-		if book.Metadata.Description != "" {
-			book.Metadata.Description += fmt.Sprintf(" (Pages: %d)", numPages)
-		} else {
-			book.Metadata.Description = fmt.Sprintf("PDF document with %d pages", numPages)
-		}
-	}
-
-	return nil
 }
