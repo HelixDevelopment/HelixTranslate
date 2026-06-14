@@ -123,6 +123,60 @@ func TestFormatJSON_UnmarshalableField_Fallback(t *testing.T) {
 	}
 }
 
+// RED (§11.4.115): a user field whose key collides with a reserved JSON log
+// key ("level", "message", "timestamp") must NOT clobber the authoritative log
+// metadata. On the pre-fix code, fields were merged AFTER the reserved keys, so
+// fields["level"]="db-layer" overwrote the real severity ("error") -> the true
+// severity was silently DROPPED, corrupting downstream level filtering/alerting.
+//
+// Correct behaviour: the reserved keys keep the logger-supplied values; the
+// colliding user value is preserved (never lost) under a "fields." namespace.
+func TestFormatJSON_ReservedKeyCollision_DoesNotClobberSeverity(t *testing.T) {
+	l := &StandardLogger{level: "debug", format: "json"}
+	out := l.formatJSON("error", "db failure",
+		map[string]interface{}{"level": "db-layer", "message": "user-msg", "timestamp": "user-ts"}, "real-ts")
+	var parsed map[string]interface{}
+	if err := json.Unmarshal([]byte(out), &parsed); err != nil {
+		t.Fatalf("not valid JSON: %v (%s)", err, out)
+	}
+	// Reserved metadata must be the logger-supplied values.
+	if parsed["level"] != "error" {
+		t.Errorf("real severity clobbered by user field: level=%v want %q (%s)", parsed["level"], "error", out)
+	}
+	if parsed["message"] != "db failure" {
+		t.Errorf("real message clobbered by user field: message=%v want %q (%s)", parsed["message"], "db failure", out)
+	}
+	if parsed["timestamp"] != "real-ts" {
+		t.Errorf("real timestamp clobbered by user field: timestamp=%v want %q (%s)", parsed["timestamp"], "real-ts", out)
+	}
+	// The colliding user values must be preserved (not silently lost).
+	if parsed["fields.level"] != "db-layer" {
+		t.Errorf("colliding user field dropped: fields.level=%v want %q (%s)", parsed["fields.level"], "db-layer", out)
+	}
+	if parsed["fields.message"] != "user-msg" {
+		t.Errorf("colliding user field dropped: fields.message=%v want %q (%s)", parsed["fields.message"], "user-msg", out)
+	}
+	if parsed["fields.timestamp"] != "user-ts" {
+		t.Errorf("colliding user field dropped: fields.timestamp=%v want %q (%s)", parsed["fields.timestamp"], "user-ts", out)
+	}
+}
+
+// Non-colliding fields must still be merged at top level unchanged.
+func TestFormatJSON_NonCollidingFields_UnchangedTopLevel(t *testing.T) {
+	l := &StandardLogger{level: "debug", format: "json"}
+	out := l.formatJSON("warn", "m", map[string]interface{}{"user_id": 42.0, "op": "save"}, "ts")
+	var parsed map[string]interface{}
+	if err := json.Unmarshal([]byte(out), &parsed); err != nil {
+		t.Fatalf("not valid JSON: %v (%s)", err, out)
+	}
+	if parsed["user_id"] != 42.0 || parsed["op"] != "save" {
+		t.Errorf("non-colliding fields must remain top-level: %s", out)
+	}
+	if parsed["level"] != "warn" || parsed["message"] != "m" {
+		t.Errorf("reserved keys altered: %s", out)
+	}
+}
+
 // Behavioral: formatMessage routes JSON vs text by configured format.
 func TestFormatMessage_RoutesByFormat(t *testing.T) {
 	j := &StandardLogger{format: "json"}

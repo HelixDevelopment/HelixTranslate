@@ -155,16 +155,26 @@ func (l *StandardLogger) formatText(level, message string, fields map[string]int
 
 // formatJSON formats the message as JSON
 func (l *StandardLogger) formatJSON(level, message string, fields map[string]interface{}, timestamp string) string {
-	logData := map[string]interface{}{
-		"timestamp": timestamp,
-		"level":     level,
-		"message":   message,
+	logData := make(map[string]interface{}, len(fields)+3)
+
+	// Add user fields first. Any field whose key collides with a reserved log
+	// key (timestamp/level/message) is re-homed under a "fields." prefix so the
+	// authoritative log metadata set below is never clobbered AND the user value
+	// is never silently dropped (a dropped severity would corrupt downstream
+	// level filtering/alerting).
+	for key, value := range fields {
+		switch key {
+		case "timestamp", "level", "message":
+			logData["fields."+key] = value
+		default:
+			logData[key] = value
+		}
 	}
 
-	// Add fields
-	for key, value := range fields {
-		logData[key] = value
-	}
+	// Reserved metadata is authoritative — set last so it always wins.
+	logData["timestamp"] = timestamp
+	logData["level"] = level
+	logData["message"] = message
 
 	// Use json.Marshal for proper JSON formatting
 	jsonBytes, err := json.Marshal(logData)
