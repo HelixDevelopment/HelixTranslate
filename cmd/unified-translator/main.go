@@ -698,10 +698,11 @@ Examples:
   unified-translator -i book.fb2 -provider openai -api-key YOUR_KEY -monitoring
 
 Translation Flow:
-  1. Parse input ebook (FB2, EPUB, PDF, etc.)
+  1. Parse input ebook (FB2, EPUB, TXT, HTML, DOCX, PDF)
   2. Convert to markdown format
   3. Translate using selected provider
-  4. Convert translated markdown to EPUB
+  4. Write output in the format set by the -o extension
+     (.epub default; .fb2, .html/.htm, .txt, .md honored)
   5. Verify and document results
 
 Generated Files:
