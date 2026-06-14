@@ -1,7 +1,26 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 40
-**Last modified:** 2026-06-14T17:40:00Z
+**Revision:** 41
+**Last modified:** 2026-06-14T17:55:00Z
+
+<!-- session 2026-06-14r: bug-hunt waves 8-9 — 7 more genuine fixes (HEAD daa2f70) -->
+
+### Session 2026-06-14r — bug-hunt waves 8-9: 7 more genuine mutation-proven fixes (HEAD daa2f70)
+
+Continued the §11.4.70/§11.4.103 parallel campaign (background subagents on disjoint cmd/ + pkg/ scopes; reproduce-first + mutation-proven + single-package `-p 1`/`-race`; FF-pushed, no force).
+
+- **86d10d4** cmd/translate-ssh: `-output` ignored — translated EPUB delivered to the INPUT dir instead of the requested path, then `printFinalReport` claimed success pointing at a nonexistent file (wrong-delivery + false-success).
+- **309ca91** cmd/cli: `gemini` missing from `getAPIKeyFromEnv` env map → `GEMINI_API_KEY` silently ignored (translation failed with a key present).
+- **21c2460** cmd/grpc-server: documented env-var overrides (`GRPC_ADDRESS/PORT`, `LOG_LEVEL`, `ENABLE_METRICS/REFLECTION`) never implemented → silently ignored.
+- **cde2e1a** cmd/deployment: `handleStatus` sliced `ContainerID[:12]` unconditionally → panic crashing the whole status command on any <12-char/empty ID.
+- **93e89d7** cmd/grpc-server + cmd/monitor-server: wired the dead `-max-connections` flag (was hardcoded 50) + stopped swallowing monitor-server's `router.Run()` bind error (silent failed start).
+- **daa2f70** logger: JSON reserved-key collision — a user field named `level`/`message`/`timestamp` overwrote the authoritative metadata → real severity/message/timestamp silently dropped.
+
+**Integration sweep GREEN** at HEAD daa2f70 (quiescent): `go test ./... -p 1` = **57 ok / 0 FAIL** (up from 55 — the wave fixes added committed tests to 5 cmd/ packages that previously had none). build+vet exit 0.
+
+**CAMPAIGN TOTAL (waves 1-9): 25 genuine mutation-proven fixes (27 subagents).** SESSION GRAND TOTAL ~32 real fixes. Wave 10 (completeness-critic audit + docx_parser + llm prompt/cache helpers) in flight to confirm saturation.
+
+REMAINING (operator/design-gated, unchanged): OPENAI/ANTHROPIC keys absent; GEMINI_API_KEY invalid; ZHIPU out of balance (allowlist stale, can't verify); ~30 other provider allowlists need funded keys; verifier `MinScoreThreshold` 0-100-vs-0-10 scale (no caller, operator decision); `-chunk-size` inert flag (design); markdown first-class input (design); reasoning-model structured-`content` client support (design); cmd/translator intermediate-md download-dir inconsistency (needs live SSH); submodules (challenges/containers/helix_qa) being worked by another session — do not collide (§11.4.119). NO release tag yet (needs §11.4.40 full retest + operator confirm + §11.4.151 prefix).
 
 <!-- session 2026-06-14q: parallel subagent bug-hunt campaign — 18 genuine fixes across 7 waves (HEAD 4bbac9a) -->
 
