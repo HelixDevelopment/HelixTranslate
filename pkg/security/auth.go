@@ -97,10 +97,24 @@ func (as *AuthService) ValidateToken(tokenString string) (*Claims, error) {
 	return nil, errors.New("invalid token")
 }
 
-// RefreshToken generates a new token with extended expiration
+// RefreshToken generates a new token with extended expiration.
+//
+// A refresh MUST NOT resurrect a dead session: it re-checks that the supplied
+// claims are still live before minting a new token. Without this, a caller (or
+// attacker) holding the claims of an EXPIRED session could obtain a perpetually
+// fresh token, extending a terminated session indefinitely — a "refresh accepts
+// expired token without re-validation" auth bypass (see
+// TestAdv_JWT_RefreshRejectsExpiredClaims). Claims with no expiry at all are
+// likewise not a bounded, live session and are rejected.
 func (as *AuthService) RefreshToken(claims *Claims) (string, error) {
 	if claims == nil {
 		return "", errors.New("claims cannot be nil")
+	}
+	if claims.ExpiresAt == nil {
+		return "", errors.New("cannot refresh claims without an expiry")
+	}
+	if !claims.ExpiresAt.After(time.Now()) {
+		return "", errors.New("cannot refresh an expired token")
 	}
 
 	newClaims := Claims{

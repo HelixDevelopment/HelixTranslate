@@ -167,6 +167,83 @@ func TestAdv_JWT_ExpiredRejected(t *testing.T) {
 	}
 }
 
+// TestAdv_JWT_RefreshRejectsExpiredClaims — a refresh operation MUST NOT
+// resurrect a dead session. RefreshToken takes already-parsed *Claims and mints
+// a brand-new, fully-valid token. If it does not re-check that those claims are
+// still live, an attacker (or a stale caller) holding the claims of an EXPIRED
+// session can call RefreshToken and obtain a perpetually-fresh token, extending
+// a terminated session indefinitely — a classic "refresh accepts expired token
+// without re-validation" auth-bypass. The new token MUST be rejected at the
+// source: claims whose ExpiresAt is in the past (or absent) are not refreshable.
+func TestAdv_JWT_RefreshRejectsExpiredClaims(t *testing.T) {
+	as := advNewAuth(t)
+
+	expiredClaims := &Claims{
+		UserID:   "u1",
+		Username: "alice",
+		Roles:    []string{"admin"},
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(-1 * time.Hour)), // dead session
+			IssuedAt:  jwt.NewNumericDate(time.Now().Add(-2 * time.Hour)),
+			NotBefore: jwt.NewNumericDate(time.Now().Add(-2 * time.Hour)),
+		},
+	}
+
+	newTok, err := as.RefreshToken(expiredClaims)
+	if err == nil {
+		// Prove the resurrection is real: the minted token validates cleanly,
+		// granting a fresh admin session from a corpse.
+		if _, vErr := as.ValidateToken(newTok); vErr == nil {
+			t.Fatal("SECURITY: RefreshToken resurrected an EXPIRED session into a fresh valid token")
+		}
+		t.Fatal("SECURITY: RefreshToken accepted expired claims (no error returned)")
+	}
+}
+
+// TestAdv_JWT_RefreshRejectsNoExpiry — claims with no expiry at all are not a
+// live session and must not be refreshable either (avoids minting tokens from a
+// claims struct that was never bounded in time).
+func TestAdv_JWT_RefreshRejectsNoExpiry(t *testing.T) {
+	as := advNewAuth(t)
+
+	noExpClaims := &Claims{
+		UserID:   "u1",
+		Username: "alice",
+		Roles:    []string{"admin"},
+		// RegisteredClaims left zero: ExpiresAt == nil.
+	}
+
+	if _, err := as.RefreshToken(noExpClaims); err == nil {
+		t.Fatal("SECURITY: RefreshToken accepted claims with no expiry")
+	}
+}
+
+// TestAdv_JWT_RefreshAcceptsLiveClaims — guard against over-correction: a still
+// valid (non-expired) session MUST remain refreshable, otherwise the fix would
+// break the legitimate refresh flow.
+func TestAdv_JWT_RefreshAcceptsLiveClaims(t *testing.T) {
+	as := advNewAuth(t)
+
+	liveClaims := &Claims{
+		UserID:   "u1",
+		Username: "alice",
+		Roles:    []string{"user"},
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)), // still alive
+			IssuedAt:  jwt.NewNumericDate(time.Now().Add(-30 * time.Minute)),
+			NotBefore: jwt.NewNumericDate(time.Now().Add(-30 * time.Minute)),
+		},
+	}
+
+	newTok, err := as.RefreshToken(liveClaims)
+	if err != nil {
+		t.Fatalf("REGRESSION: RefreshToken rejected a still-live session: %v", err)
+	}
+	if _, err := as.ValidateToken(newTok); err != nil {
+		t.Fatalf("REGRESSION: refreshed token from a live session did not validate: %v", err)
+	}
+}
+
 // TestAdv_JWT_FutureNbfRejected — a token whose not-before is in the future
 // must be rejected (token-not-yet-valid).
 func TestAdv_JWT_FutureNbfRejected(t *testing.T) {
