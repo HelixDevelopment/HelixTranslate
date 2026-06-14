@@ -1,7 +1,17 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 27
-**Last modified:** 2026-06-14T12:30:00Z
+**Revision:** 28
+**Last modified:** 2026-06-14T13:15:00Z
+
+<!-- session 2026-06-14e: 5th SECOND-PASS wave (HEAD 367d88b) — 5 more real bugs incl CWE-208 timing oracle -->
+
+### Session 2026-06-14e — 5th §11.4.118 second-pass wave (HEAD 367d88b) — 5 more real bugs (grpc/security/preparation)
+
+- **45f6152** grpc: GetTranslationStatus returned codes.Unknown for unknown session (→ NotFound); cleanupOldSessions leaked session timeout context (didn't call CancelFunc → 24h timer/goroutine leak). 
+- **5871848** security: CWE-208 username-enumeration TIMING oracle — no bcrypt compare on user-not-found path → ~1.7M× faster than wrong-password → reveals valid usernames. Fix: dummy-bcrypt compare at init (OWASP constant-time). 
+- **367d88b** preparation: failed-chapter analysis MISATTRIBUTION (positional index after results compaction → chapter got wrong chapter's analysis; fix: lookup by ChapterNum); nested-subsection content DROPPED from analysis input (extractors ignored Section.Subsections; FB2 populates them; fix: recursive writeSectionContent).
+
+**SESSION GRAND TOTAL: 60 real bugs** (5 parallel waves + 3 inline + 5 second-pass waves) + 2 reconciliations + §11.4.98 conversion. Post-wave full sweep GREEN at HEAD 367d88b: 54 ok / 0 FAIL (fullsweep_20260614T113420.log).
 
 <!-- session 2026-06-14c+d: two more parallel SECOND-PASS waves (HEAD 4a95b06) — 11 more real bugs, FD-safe -->
 
