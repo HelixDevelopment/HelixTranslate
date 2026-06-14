@@ -1,7 +1,23 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 43
-**Last modified:** 2026-06-14T19:02:00Z
+**Revision:** 44
+**Last modified:** 2026-06-14T19:18:00Z
+
+<!-- session 2026-06-14u: wave 14 governance/coverage build-out + e2e fix (HEAD 84f7a46) -->
+
+### Session 2026-06-14u — wave 14: governance depth + coverage + e2e build-fix (HEAD 84f7a46)
+
+- **22a32e3** §11.4.93 SQLite SSoT extended: `sync db-to-md` (byte-stable summary round-trip), `item_history` table + `record-event`, `diff`. (Full per-item-prose body round-trip honestly noted as not-yet-in-schema.)
+- **c049907** pre-build gates +2 → **8-gate suite, all green** (CM-DOC-SIBLING-SYNC §11.4.65 + CM-NO-FORCE-PUSH-ABSOLUTE §11.4.113), all 8 paired mutations pass; caught a real gate-regex bug pre-commit.
+- **fef82cc** real e2e pipeline coverage: `test/integration/pipeline_roundtrip_test.go` (FB2/TXT × EPUB/FB2 + httptest-provider HTTP path), asserts actual output-artifact content, empty-stub mutation-proven.
+- **84f7a46** fixed a pre-existing §11.4.1 build break: `test/e2e` package didn't compile (unused `discovery` import) — removed; `go vet -tags e2e ./test/e2e/` now clean.
+
+**FINAL sweep GREEN** at HEAD 84f7a46 (quiescent): `go test ./... -p 1` = **58 ok / 0 FAIL**; 8-gate pre-build suite PASS; build+vet clean; all FF-pushed both upstreams (no force §11.4.113).
+
+**NEW tracked gap (for follow-on):** `scripts/commit_all.sh` does NOT auto-invoke `sync_all_markdown_exports.sh`, so doc commits leave stale `.html`/`.pdf` siblings (CM-DOC-SIBLING-SYNC catches them post-hoc; the gate agent had to regen CONTINUATION siblings manually). Follow-on: wire the export-sync into commit_all.sh (§11.4.75 layer-2). Until then, regen siblings when committing a doc.
+
+#### SESSION FINAL STATE (unchanged from Rev 43 + wave 14) — autonomous queue DRAINED
+Loop correctly rests on operator decisions. Remaining items (all operator-gated or larger multi-session follow-ons) tracked in docs/WORKING_PLAN.md + docs/Issues.md ATM-065..081: version number · pkg/hash remove-vs-relocate · provider keys/balance → allowlist audits · design calls · fuller §11.4.93 body round-trip · commit_all export-sync wiring · owned-submodule waves (another session active on helix_qa) · full §11.4.27 test-type matrix · full §11.4.40 retest → §11.4.151 release tag. Resume: point a fresh session at this file + docs/WORKING_PLAN.md.
 
 <!-- session 2026-06-14t: plan-execution wave 13 — autonomous queue DRAINED (HEAD 6444e38) -->
 
