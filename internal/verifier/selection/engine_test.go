@@ -161,6 +161,29 @@ func TestBuildFallbackChain(t *testing.T) {
 	assert.NotContains(t, chain, "unverified")
 }
 
+// TestBuildFallbackChainScoreOrdered is a §11.4.115 reproduce-first guard for
+// the fallback-ordering bug: buildFallbackChain must return remaining verified
+// models in score-DESCENDING order so a primary failure falls back to the
+// genuine next-best model (the SelectFallback doc contract: "the next best
+// model when the primary fails"). The pre-fix code shuffled the chain randomly,
+// so a low-score model could be tried before a high-score one, and the order
+// was non-deterministic across runs (§11.4.50). Registry scores:
+// gpt-4=9.5 > claude-3=9.2 > llama-3=8.0. Excluding gpt-4, the next-best order
+// is exactly [claude-3, llama-3]; any other order is the bug.
+func TestBuildFallbackChainScoreOrdered(t *testing.T) {
+	engine, _ := newTestSelectionEngine(t)
+
+	// Run repeatedly: a random shuffle would (with overwhelming probability over
+	// many iterations) produce the reversed order at least once. The correct
+	// score-ordered implementation yields the identical deterministic order every
+	// time.
+	for i := 0; i < 50; i++ {
+		chain := engine.buildFallbackChain("gpt-4")
+		require.Equal(t, []string{"claude-3", "llama-3"}, chain,
+			"fallback chain must be score-descending (next-best-first), deterministic across runs")
+	}
+}
+
 func TestCalculateTaskScore(t *testing.T) {
 	engine, _ := newTestSelectionEngine(t)
 

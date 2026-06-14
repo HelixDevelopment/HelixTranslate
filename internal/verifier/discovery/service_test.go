@@ -94,6 +94,44 @@ func TestDiscoverTier2OpenRouter(t *testing.T) {
 	assert.Equal(t, "Claude 3", claude.Name)
 }
 
+// TestDiscoverTier2OpenRouterRealStringPricing is a §11.4.115/§11.4.99
+// reproduce-first guard against the OpenRouter Tier-2 decode bug. The LIVE
+// OpenRouter /api/v1/models contract emits pricing.prompt/pricing.completion as
+// QUOTED JSON STRINGS (e.g. "0.000005"), verified against the live registry on
+// 2026-06-14: {"pricing":{"prompt":"-1","completion":"-1"}}. The decode struct
+// typed those fields as float64, so decoding the REAL response failed with
+// "cannot unmarshal string into Go ... float64", the error was swallowed in
+// Discover(), and ZERO OpenRouter models were registered against the live API —
+// while the float-literal stub in TestDiscoverTier2OpenRouter stayed green
+// (a §11.4 test-passes-feature-dead bluff). This test serves the real
+// string-typed shape and asserts the model is discovered with pricing parsed.
+func TestDiscoverTier2OpenRouterRealStringPricing(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Real OpenRouter shape: pricing values are quoted strings.
+		const realBody = `{"data":[{"id":"openai/gpt-4","name":"GPT-4",` +
+			`"pricing":{"prompt":"0.00003","completion":"0.00006"},"context_length":8192}]}`
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(realBody))
+	}))
+	defer server.Close()
+
+	cfg := verifier.DefaultConfig()
+	registry := verifier.NewRegistry()
+	svc := NewService(cfg, registry)
+	svc.httpClient = &http.Client{Timeout: 5 * time.Second}
+	sentinelTier2(t, svc)
+	svc.openRouterURL = server.URL + "/api/v1/models"
+
+	err := svc.Discover(context.Background())
+	require.NoError(t, err)
+
+	gpt4, ok := registry.GetModel("openai/gpt-4")
+	require.True(t, ok, "OpenRouter model with real string-typed pricing must be discovered")
+	assert.Equal(t, "GPT-4", gpt4.Name)
+	assert.InDelta(t, 0.00003, gpt4.Pricing.InputTokenCost, 1e-12, "prompt price parsed from string")
+	assert.InDelta(t, 0.00006, gpt4.Pricing.OutputTokenCost, 1e-12, "completion price parsed from string")
+}
+
 func TestDiscoverTier3Community(t *testing.T) {
 	communityModels := []verifier.Model{
 		{ID: "community-model-1", ProviderID: "community", Name: "Community Model 1", VerificationStatus: "discovered"},

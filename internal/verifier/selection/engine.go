@@ -3,10 +3,8 @@ package selection
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"sort"
 	"sync"
-	"time"
 
 	"digital.vasic.translator/internal/verifier"
 	"digital.vasic.translator/internal/verifier/scoring"
@@ -101,7 +99,15 @@ func (e *Engine) SelectFallback(primaryModelID string, task TaskRequirements) (*
 	return nil, fmt.Errorf("no fallback model available for %s", primaryModelID)
 }
 
-// buildFallbackChain creates an ordered list of fallback models.
+// buildFallbackChain creates an ordered list of fallback models, preserving the
+// score-DESCENDING order from FilterVerified so a primary failure falls back to
+// the genuine next-best model (SelectFallback's documented contract). The chain
+// MUST stay deterministic across runs (§11.4.50): an earlier implementation
+// shuffled it randomly, which both discarded the score ranking (a low-score
+// model could be tried before a high-score one) and made the order
+// non-reproducible. FilterVerified already returns models sorted highest-score
+// first with model-ID as the tie-breaker, so simply excluding the primary keeps
+// that deterministic, best-first ordering.
 func (e *Engine) buildFallbackChain(excludeModelID string) []string {
 	candidates := e.registry.FilterVerified(e.config.MinScoreThreshold)
 	var chain []string
@@ -110,10 +116,6 @@ func (e *Engine) buildFallbackChain(excludeModelID string) []string {
 			chain = append(chain, m.ID)
 		}
 	}
-	// Shuffle slightly to ensure provider diversity
-	rand.New(rand.NewSource(time.Now().UnixNano())).Shuffle(len(chain), func(i, j int) {
-		chain[i], chain[j] = chain[j], chain[i]
-	})
 	return chain
 }
 

@@ -38,12 +38,19 @@ type Service struct {
 }
 
 // openRouterModel represents a model from OpenRouter API.
+//
+// OpenRouter's live /api/v1/models contract emits the pricing values as QUOTED
+// JSON STRINGS (e.g. "0.00003"), NOT bare numbers (verified against the live
+// registry 2026-06-14: {"pricing":{"prompt":"-1","completion":"-1"}}). Typing
+// them as json.Number lets encoding/json accept BOTH the real string form AND a
+// bare-number form (forward/test compatibility); a typed float64 rejected the
+// real response and failed the whole decode, dropping every OpenRouter model.
 type openRouterModel struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Pricing  struct {
-		Prompt float64 `json:"prompt"`
-		Completion float64 `json:"completion"`
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Pricing struct {
+		Prompt     json.Number `json:"prompt"`
+		Completion json.Number `json:"completion"`
 	} `json:"pricing"`
 	ContextLength int `json:"context_length"`
 }
@@ -165,6 +172,10 @@ func (s *Service) discoverFromOpenRouter(ctx context.Context) error {
 	}
 
 	for _, m := range result.Data {
+		// .Float64() tolerates both the live string form and a bare-number form;
+		// an empty/absent value (json.Number("")) yields an error → cost 0.
+		promptCost, _ := m.Pricing.Prompt.Float64()
+		completionCost, _ := m.Pricing.Completion.Float64()
 		s.registry.AddModel(verifier.Model{
 			ID:                 m.ID,
 			ProviderID:         "openrouter",
@@ -172,8 +183,8 @@ func (s *Service) discoverFromOpenRouter(ctx context.Context) error {
 			VerificationStatus: "discovered",
 			Capabilities:       map[string]bool{"streaming": true},
 			Pricing: verifier.PricingInfo{
-				InputTokenCost:  m.Pricing.Prompt,
-				OutputTokenCost: m.Pricing.Completion,
+				InputTokenCost:  promptCost,
+				OutputTokenCost: completionCost,
 				Currency:        "USD",
 			},
 		})
