@@ -59,10 +59,7 @@ func (w *FB2Writer) Write(book *Book, filename string) error {
 			Title: sectionTitle{P: chapter.Title},
 		}
 		for _, sec := range chapter.Sections {
-			section.P = append(section.P, splitIntoParagraphs(sec.Content)...)
-			for _, sub := range sec.Subsections {
-				section.P = append(section.P, splitIntoParagraphs(sub.Content)...)
-			}
+			section.P = append(section.P, collectSectionParagraphs(sec)...)
 		}
 		fb.Body.Sections = append(fb.Body.Sections, section)
 	}
@@ -81,6 +78,21 @@ func (w *FB2Writer) Write(book *Book, filename string) error {
 	}
 
 	return nil
+}
+
+// collectSectionParagraphs gathers the FB2 <p> paragraphs for a section AND all
+// of its subsections at ANY depth, in document order. The previous writer only
+// descended two levels (a section's content + its direct subsections' content),
+// so any content nested deeper (a subsection's subsection and below) was silently
+// dropped from the written FB2 file — real translated-text data loss. Recursing
+// over the full Subsections tree (as the EPUB writer's formatSection already
+// does) makes the write lossless for arbitrarily-nested content.
+func collectSectionParagraphs(sec Section) []string {
+	paragraphs := splitIntoParagraphs(sec.Content)
+	for _, sub := range sec.Subsections {
+		paragraphs = append(paragraphs, collectSectionParagraphs(sub)...)
+	}
+	return paragraphs
 }
 
 // splitIntoParagraphs splits section content into separate FB2 <p> paragraphs.
