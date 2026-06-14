@@ -62,6 +62,41 @@ func TestGenerateOutput_HonorsExtension(t *testing.T) {
 		}
 	})
 
+	t.Run("html is well-formed escaped HTML", func(t *testing.T) {
+		out := filepath.Join(dir, "book.html")
+		if err := generateOutput(content, out, "in.pdf"); err != nil {
+			t.Fatalf("generateOutput(.html) failed: %v", err)
+		}
+		b, err := os.ReadFile(out)
+		if err != nil {
+			t.Fatal(err)
+		}
+		s := string(b)
+		if bytes.HasPrefix(b, []byte("PK")) {
+			t.Errorf(".html output is a ZIP/EPUB (regression: always-EPUB)")
+		}
+		if !strings.Contains(s, "<!DOCTYPE html>") || !strings.Contains(s, "<p>") {
+			t.Errorf(".html is not a well-formed HTML document; got prefix %q", s[:min(80, len(s))])
+		}
+		if !strings.Contains(s, "Здраво свете") {
+			t.Errorf(".html missing translated content")
+		}
+	})
+
+	t.Run("html escapes content (no markup injection)", func(t *testing.T) {
+		out := filepath.Join(dir, "inject.html")
+		if err := generateOutput("Пас <script>alert(1)</script>", out, "in.pdf"); err != nil {
+			t.Fatal(err)
+		}
+		b, _ := os.ReadFile(out)
+		if strings.Contains(string(b), "<script>") {
+			t.Errorf(".html did not escape content — markup injection (got raw <script>)")
+		}
+		if !strings.Contains(string(b), "&lt;script&gt;") {
+			t.Errorf(".html should contain the escaped form &lt;script&gt;")
+		}
+	})
+
 	t.Run("unsupported extension is an explicit error, not a misnamed EPUB", func(t *testing.T) {
 		out := filepath.Join(dir, "book.rtf")
 		err := generateOutput(content, out, "in.pdf")

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"html"
 	"os"
 	"path/filepath"
 	"strings"
@@ -873,22 +874,55 @@ func generateOutput(content, outputPath, inputFile string) error {
 		}
 		return nil
 	case "fb2":
-		base := filepath.Base(inputFile)
-		title := strings.TrimSuffix(base, filepath.Ext(base))
-		if title == "" {
-			title = "Translated Document"
-		}
 		book := &ebook.Book{
-			Metadata: ebook.Metadata{Title: title},
+			Metadata: ebook.Metadata{Title: titleFromInput(inputFile)},
 			Chapters: []ebook.Chapter{{
-				Title:    title,
+				Title:    titleFromInput(inputFile),
 				Sections: []ebook.Section{{Content: content}},
 			}},
 		}
 		return ebook.NewFB2Writer().Write(book, outputPath)
+	case "html", "htm":
+		return generateHTML(content, outputPath, titleFromInput(inputFile))
 	default:
-		return fmt.Errorf("unsupported output format %q (supported: .epub, .fb2, .txt, .md)", ext)
+		return fmt.Errorf("unsupported output format %q (supported: .epub, .fb2, .html, .txt, .md)", ext)
 	}
+}
+
+// titleFromInput derives a document title from the input filename (basename
+// without extension), falling back to a generic title.
+func titleFromInput(inputFile string) string {
+	base := filepath.Base(inputFile)
+	title := strings.TrimSuffix(base, filepath.Ext(base))
+	if strings.TrimSpace(title) == "" {
+		return "Translated Document"
+	}
+	return title
+}
+
+// generateHTML writes the translated content as a minimal, valid, well-formed
+// HTML5 document. Blank-line-separated blocks become <p> paragraphs; all text
+// (title + body) is HTML-escaped so translated content can never inject markup.
+func generateHTML(content, outputPath, title string) error {
+	var b strings.Builder
+	b.WriteString("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n<title>")
+	b.WriteString(html.EscapeString(title))
+	b.WriteString("</title>\n</head>\n<body>\n")
+	for _, block := range strings.Split(content, "\n\n") {
+		// Collapse single newlines within a paragraph to spaces.
+		p := strings.TrimSpace(strings.ReplaceAll(block, "\n", " "))
+		if p == "" {
+			continue
+		}
+		b.WriteString("<p>")
+		b.WriteString(html.EscapeString(p))
+		b.WriteString("</p>\n")
+	}
+	b.WriteString("</body>\n</html>\n")
+	if err := os.WriteFile(outputPath, []byte(b.String()), 0644); err != nil {
+		return fmt.Errorf("failed to write html output: %w", err)
+	}
+	return nil
 }
 
 func generateEPUB(content, outputPath, inputFile string) error {
