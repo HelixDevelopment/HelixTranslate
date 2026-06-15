@@ -192,6 +192,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Sanitize the metadata title BEFORE any translation. Some parsers (notably
+	// the TXT parser) fall back to using the raw input file PATH as the book
+	// title. That path would then be sent through the translator as if it were
+	// real title text and leak into the output's <dc:title> metadata field — a
+	// user-visible defect (file path shown as the book title). Replace a
+	// path-derived title with a clean, human-readable title derived from the
+	// file's base name so only genuine title text is ever translated.
+	book.Metadata.Title = sanitizeBookTitle(book.Metadata.Title, inputFile)
+
 	fmt.Printf("Detected format: %s\n", book.Format)
 	fmt.Printf("Title: %s\n", book.Metadata.Title)
 	fmt.Printf("Chapters: %d\n", book.GetChapterCount())
@@ -481,6 +490,79 @@ func getAPIKeyFromEnv(provider string) string {
 	}
 
 	return ""
+}
+
+// sanitizeBookTitle returns a clean, human-readable book title, replacing a
+// parser-supplied title that is actually the input file PATH with a title
+// derived from the file's base name. Genuine titles (anything that is not the
+// raw input path) are returned unchanged.
+//
+// The TXT parser uses the input filename as the metadata title; for an input
+// like "/Volumes/T7/books/my_book.txt" that path would otherwise be translated
+// and leak into the output <dc:title>. We detect that case (title equals the
+// input path, or is empty) and substitute a derived title: base name, extension
+// stripped, '_'/'-' turned into spaces, trimmed.
+func sanitizeBookTitle(title, inputFile string) string {
+	cleaned := titleFromPath(inputFile)
+
+	if title == "" {
+		return cleaned
+	}
+
+	// Title leaked the file path if it matches the input path exactly, the
+	// cleaned absolute form of it, or just its base name (path-as-title).
+	base := filepath.Base(inputFile)
+	if title == inputFile || title == base || pathsEqual(title, inputFile) {
+		return cleaned
+	}
+
+	// A title that still looks like a filesystem path (contains a separator and
+	// a known ebook extension) is treated as a leaked path as well.
+	if looksLikePath(title) {
+		return cleaned
+	}
+
+	return title
+}
+
+// titleFromPath derives a human-readable title from a file path: base name,
+// extension removed, separators normalised to spaces, collapsed and trimmed.
+func titleFromPath(inputFile string) string {
+	base := filepath.Base(inputFile)
+	base = strings.TrimSuffix(base, filepath.Ext(base))
+	base = strings.ReplaceAll(base, "_", " ")
+	base = strings.ReplaceAll(base, "-", " ")
+	base = strings.Join(strings.Fields(base), " ")
+	return strings.TrimSpace(base)
+}
+
+// pathsEqual reports whether two path strings refer to the same file, comparing
+// cleaned absolute forms when resolvable (falls back to a cleaned compare).
+func pathsEqual(a, b string) bool {
+	ca, cb := filepath.Clean(a), filepath.Clean(b)
+	if ca == cb {
+		return true
+	}
+	if aa, err := filepath.Abs(a); err == nil {
+		if ab, err := filepath.Abs(b); err == nil {
+			return aa == ab
+		}
+	}
+	return false
+}
+
+// looksLikePath reports whether a string is a filesystem path rather than a
+// genuine book title: it contains a path separator AND ends with a known ebook
+// file extension.
+func looksLikePath(s string) bool {
+	if !strings.ContainsRune(s, filepath.Separator) && !strings.ContainsRune(s, '/') {
+		return false
+	}
+	switch strings.ToLower(filepath.Ext(s)) {
+	case ".txt", ".epub", ".fb2", ".html", ".htm", ".pdf", ".docx":
+		return true
+	}
+	return false
 }
 
 func generateOutputFilename(inputFile, targetLang, outputFormat string) string {

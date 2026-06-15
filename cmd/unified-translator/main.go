@@ -22,6 +22,7 @@ import (
 	"digital.vasic.translator/pkg/sshworker"
 	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/translator/llm"
+	"digital.vasic.translator/pkg/verification"
 	"digital.vasic.translator/pkg/version"
 )
 
@@ -70,6 +71,11 @@ type UnifiedConfig struct {
 	Concurrency  int
 	VerifyOutput bool
 	Verbose      bool
+
+	// Multi-pass verification/polishing (pkg/verification engine)
+	MultiPass      bool // run the multi-pass LLM verification/polishing engine
+	MultiPassCount int  // number of polishing passes (default 1 — TEaR optimum)
+	MultiPassDB    string
 
 	// Monitoring
 	EnableMonitoring bool
@@ -225,6 +231,28 @@ func executeTranslation(session *TranslationSession) error {
 	// already in the correct script, so the conversion MUST be skipped (§11.4.6:
 	// the -script flag is a Serbian-context control, not a universal transliterator).
 	translatedMarkdown = applyTargetScript(translatedMarkdown, config.TargetLang, config.Script)
+
+	// Step 3b (opt-in): multi-pass LLM verification/polishing. Wires the
+	// previously-dormant pkg/verification engine (§11.4.124 — investigate then
+	// wire-in-properly). Runs ONLY when -multipass is set so the default path is
+	// unchanged (§11.4.1 no solve-A-create-B). The engine gates each pass on a
+	// real per-provider LLM critique and preserves the original when no genuine
+	// improvement is found (TEaR-style; see research artefact), so it never
+	// silently degrades the translation.
+	if config.MultiPass {
+		mpStep := addStep(session, "Multi-pass Polishing")
+		polished, polishErr := runMultiPass(ctx, config, session, originalMarkdown, translatedMarkdown)
+		if polishErr != nil {
+			// A multipass failure must not destroy the already-good base
+			// translation: log it, keep the pre-polish text, mark the step.
+			mpStep.Details = fmt.Sprintf("Multi-pass polishing failed, keeping base translation: %v", polishErr)
+			stepComplete(mpStep)
+		} else {
+			translatedMarkdown = polished
+			mpStep.Details = fmt.Sprintf("Polished over %d pass(es) with %s", config.MultiPassCount, config.Provider)
+			stepComplete(mpStep)
+		}
+	}
 
 	// Save translated markdown
 	translatedMDPath := generateTranslatedMDPath(config.InputFile)
@@ -614,6 +642,15 @@ func parseFlags() *UnifiedConfig {
 	flag.BoolVar(&config.VerifyOutput, "verify", true, "Verify translated output")
 	flag.BoolVar(&config.Verbose, "verbose", false, "Enable verbose logging")
 
+	// Multi-pass LLM verification/polishing (opt-in; costs real LLM calls).
+	// Separate from -verify (which stays the lightweight heuristic check) so
+	// existing behaviour is preserved. Default passes = 1 (TEaR best-practice
+	// optimum; later passes regress — see docs/research/.../verification_multipass_wiring.md).
+	flag.BoolVar(&config.MultiPass, "multipass", false,
+		"Run the multi-pass LLM verification/polishing engine after translation (opt-in, uses extra LLM calls)")
+	flag.IntVar(&config.MultiPassCount, "multipass-passes", 1, "Number of multi-pass polishing passes (default 1)")
+	flag.StringVar(&config.MultiPassDB, "multipass-db", "", "Optional SQLite path to persist multi-pass polishing reports")
+
 	// Monitoring options
 	flag.BoolVar(&config.EnableMonitoring, "monitoring", false, "Enable web monitoring")
 	flag.IntVar(&config.MonitoringPort, "monitoring-port", 8080, "Monitoring server port")
@@ -740,6 +777,9 @@ Execution Options:
   -chunk-size <size>         Text chunk size (default: 2000)
   -concurrency <num>         Concurrent operations (default: 4)
   -verify                   Verify output (default: true)
+  -multipass                Run multi-pass LLM verification/polishing after translation (opt-in)
+  -multipass-passes N       Number of multi-pass polishing passes (default: 1)
+  -multipass-db PATH        Optional SQLite path to persist multi-pass polishing reports
   -verbose                  Enable verbose logging
 
 Monitoring:
@@ -944,6 +984,113 @@ func applyTargetScript(text, targetLang, targetScript string) string {
 		return text
 	}
 	return normalizeScript(text, targetScript)
+}
+
+// runMultiPass runs the pkg/verification multi-pass LLM polishing engine over an
+// already-translated markdown document and returns the polished markdown.
+//
+// The engine operates on *ebook.Book; the unified-translator pipeline works in
+// markdown, so we wrap the original and translated markdown each as a single-
+// chapter / single-section Book, run MultiPassPolisher.PolishBook (real per-pass
+// LLM critique + consensus), and read the polished section content back out.
+//
+// Safety / guardrails (see docs/research/.../verification_multipass_wiring.md):
+//   - Pass count defaults to 1 and is clamped to >=1 (TEaR optimum; later passes
+//     regress).
+//   - The engine preserves the existing translation when no genuine improvement
+//     is found (POLISHED_TEXT "UNCHANGED" / default-to-current), so it cannot
+//     silently degrade the base translation.
+//   - If the polished result is empty (e.g. provider returned nothing useful),
+//     the original translation is returned unchanged rather than wiped.
+func runMultiPass(
+	ctx context.Context,
+	config *UnifiedConfig,
+	session *TranslationSession,
+	originalMarkdown, translatedMarkdown string,
+) (string, error) {
+	passes := config.MultiPassCount
+	if passes < 1 {
+		passes = 1
+	}
+
+	// Per-provider TranslationConfig the polisher uses to build its LLM clients.
+	tc := translator.TranslationConfig{
+		SourceLang:  config.SourceLang,
+		TargetLang:  config.TargetLang,
+		Provider:    config.Provider,
+		Model:       config.Model,
+		Temperature: config.Temperature,
+		MaxTokens:   config.MaxTokens,
+		Timeout:     config.Timeout,
+		APIKey:      config.APIKey,
+		BaseURL:     config.BaseURL,
+		Script:      config.Script,
+	}
+
+	mpConfig := verification.MultiPassConfig{
+		PassCount:    passes,
+		MinConsensus: 1,
+		// Verify across all four quality dimensions the engine supports.
+		VerifySpirit:     true,
+		VerifyLanguage:   true,
+		VerifyContext:    true,
+		VerifyVocabulary: true,
+		// Note-taking is an extra LLM round per section; keep it off for the CLI
+		// path to bound cost — the polishing critique itself is the value here.
+		EnableNoteTaking: false,
+		DatabasePath:     config.MultiPassDB,
+		TranslationConfigs: map[string]translator.TranslationConfig{
+			config.Provider: tc,
+		},
+	}
+
+	polisher, err := verification.NewMultiPassPolisher(mpConfig, session.EventBus, session.ID)
+	if err != nil {
+		return translatedMarkdown, fmt.Errorf("create multi-pass polisher: %w", err)
+	}
+	defer polisher.Close()
+
+	origBook := markdownToSingleSectionBook(originalMarkdown)
+	transBook := markdownToSingleSectionBook(translatedMarkdown)
+
+	result, err := polisher.PolishBook(ctx, origBook, transBook)
+	if err != nil {
+		return translatedMarkdown, fmt.Errorf("polish book: %w", err)
+	}
+
+	polished := extractSingleSectionContent(result.FinalBook)
+	if strings.TrimSpace(polished) == "" {
+		// Never return empty over a real translation — keep the base text.
+		return translatedMarkdown, nil
+	}
+	return polished, nil
+}
+
+// markdownToSingleSectionBook wraps a markdown document as a minimal one-chapter,
+// one-section ebook.Book so the verification engine (which polishes per-section)
+// can process it. The whole document is the single section's content.
+func markdownToSingleSectionBook(md string) *ebook.Book {
+	return &ebook.Book{
+		Metadata: ebook.Metadata{Title: "document"},
+		Chapters: []ebook.Chapter{
+			{
+				Title: "Content",
+				Sections: []ebook.Section{
+					{Title: "Content", Content: md},
+				},
+			},
+		},
+	}
+}
+
+// extractSingleSectionContent reads the polished content back out of the single
+// section produced by markdownToSingleSectionBook. Returns "" if the shape is
+// unexpected (caller falls back to the base translation).
+func extractSingleSectionContent(book *ebook.Book) string {
+	if book == nil || len(book.Chapters) == 0 || len(book.Chapters[0].Sections) == 0 {
+		return ""
+	}
+	return book.Chapters[0].Sections[0].Content
 }
 
 func verifyTranslation(text, targetLang, script string) bool {
