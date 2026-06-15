@@ -283,7 +283,7 @@ func TestGetFileSize(t *testing.T) {
 func TestConvertToMarkdown_DefaultPassthrough(t *testing.T) {
 	ct := newCT()
 	in := "# Already markdown\n\nbody"
-	out, err := ct.convertToMarkdown(in, "txt")
+	out, err := ct.convertToMarkdown("", in, "txt")
 	if err != nil {
 		t.Fatalf("convertToMarkdown(txt) error: %v", err)
 	}

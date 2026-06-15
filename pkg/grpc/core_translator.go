@@ -127,7 +127,7 @@ func (ct *CoreTranslatorImpl) executeTranslationPipeline(job *TranslationJob, ev
 	step = ct.createStep("markdown_conversion", "Converting to markdown")
 	ct.updateJobStep(job, step)
 
-	originalMarkdown, err := ct.convertToMarkdown(content, format)
+	originalMarkdown, err := ct.convertToMarkdown(req.InputFile, content, format)
 	if err != nil {
 		ct.failStep(step, err)
 		return ct.createErrorResponse(job, step), err
@@ -392,25 +392,33 @@ func (ct *CoreTranslatorImpl) parseInputFile(filePath string) (string, string, e
 	return book.ExtractText(), f.String(), nil
 }
 
-func (ct *CoreTranslatorImpl) convertToMarkdown(content, format string) (string, error) {
+// convertToMarkdown turns the parsed input into markdown for the translation
+// step. For EPUB inputs it converts the REAL input file (inputFile) directly via
+// the EPUB→markdown converter — NOT a temp .epub fabricated from the already-
+// extracted plain text. The previous implementation wrote content (plain text
+// from Book.ExtractText) into a .epub temp file and re-parsed it as a zip, which
+// always failed ("zip: not a valid zip file") and made every EPUB-input job
+// error out. For non-EPUB formats the extracted text already IS the markdown
+// body, so it is returned unchanged.
+func (ct *CoreTranslatorImpl) convertToMarkdown(inputFile, content, format string) (string, error) {
 	switch format {
 	case "epub":
-		// Write content to temp file and convert
-		tempEpub := filepath.Join(os.TempDir(), "input.epub")
-		if err := os.WriteFile(tempEpub, []byte(content), 0644); err != nil {
-			return "", fmt.Errorf("failed to write temp epub: %w", err)
+		tempMD, err := os.CreateTemp("", "core_translator_*.md")
+		if err != nil {
+			return "", fmt.Errorf("failed to create temp markdown: %w", err)
 		}
-		defer os.Remove(tempEpub)
-		tempMD := filepath.Join(os.TempDir(), "output.md")
+		tempMDPath := tempMD.Name()
+		_ = tempMD.Close()
+		defer os.Remove(tempMDPath)
+
 		converter := markdown.NewEPUBToMarkdownConverter(true, "")
-		if err := converter.ConvertEPUBToMarkdown(tempEpub, tempMD); err != nil {
+		if err := converter.ConvertEPUBToMarkdown(inputFile, tempMDPath); err != nil {
 			return "", fmt.Errorf("failed to convert epub to markdown: %w", err)
 		}
-		mdBytes, err := os.ReadFile(tempMD)
+		mdBytes, err := os.ReadFile(tempMDPath)
 		if err != nil {
 			return "", fmt.Errorf("failed to read markdown: %w", err)
 		}
-		_ = os.Remove(tempMD)
 		return string(mdBytes), nil
 	default:
 		return content, nil
