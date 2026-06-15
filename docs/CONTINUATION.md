@@ -1,7 +1,15 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 72
-**Last modified:** 2026-06-15T15:22:00Z
+**Revision:** 73
+**Last modified:** 2026-06-15T15:36:00Z
+
+## 🏁 COMPREHENSIVE BUG-HUNT COMPLETE — 101 fixes + 1 guard; main module + ALL 8 owned submodules swept
+Wave 14 (challenges + llms_verifier) closed the submodule sweep. Parent HEAD `c47989a`, git OK, llms_verifier pointer intact.
+- **challenges** `349b0f1` (gitlink `a449d13`, #100): bank ValidateFile JSON-only rejected YAML banks + skipped test_cases validation — a bluff in the anti-bluff framework. RED+mutation-proven; §11.4.113 rebased over a parallel session; FF-pushed all Challenges remotes.
+- **llms_verifier** `1e0de43c` (gitlink `c47989a`, #101): the verification GATE (CONST-036) certified code-BLIND models as Status=verified → IsModelVerified passed them. Fix keys off CodeVisibility. RED + §11.4.120 reconciliation of the bluff-enshrining test + mutation-proven; verification pkg -race green; FF-pushed all LLMsVerifier remotes.
+Submodule yield 8/8 (doc_processor, llm_orchestrator, docs_chain, containers, security, vision_engine, challenges, llms_verifier) — every owned submodule had a genuine fix.
+**KNOWN follow-up (honest disclosure §11.4.118, NOT yet fixed):** llms_verifier has PRE-EXISTING flaky/time-dependent tests in scoring (recency-date drift), security (timestamp uniqueness), client (brotli env) — independent of #101, don't import verification — a §11.4.50 determinism cleanup for a follow-up.
+
 
 ## 🔬 SUBMODULE WAVE 13 (security, vision_engine) — campaign 97→99, submodule yield 6/6
 - **security** `3782c27` (gitlink `fb7cc11`, HIGH): securestorage read-path RLock while helpers mutate the in-memory AES key + cache → concurrent readers corrupt the secret key. Fix = RLock→Lock + lock the unlocked IsSecure. RED+mutation-proven; 18 pkgs -race green; FF-pushed all Security remotes. (SSRF/e2ee/AES-GCM audited hardened.)
@@ -135,7 +143,7 @@ Clean non-findings (audited, no RED reproducible): SQLite concurrent-writer cont
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **99 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + owned submodules (full table below; latest 13 waves = 36 fixes + 1 regression guard, newest submodules `3782c27` security + `e40e6f9` vision_engine; submodule yield 6/6, see POST-VALIDATION BUG-HUNT WAVES + SUBMODULE WAVE blocks at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak + deployment Docker-health + server TLS-key leak + api-server backend-error PASS-bluffs + deployment hardcoded-JWT-secret). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
+- **101 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + ALL 8 owned submodules (full table below; latest 14 waves = 38 fixes + 1 regression guard, newest submodules `349b0f1` challenges + `1e0de43c` llms_verifier; submodule yield 8/8 COMPLETE, see COMPREHENSIVE BUG-HUNT COMPLETE block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak + deployment Docker-health + server TLS-key leak + api-server backend-error PASS-bluffs + deployment hardcoded-JWT-secret). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
