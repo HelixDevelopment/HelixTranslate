@@ -15,6 +15,31 @@ import (
 	"time"
 )
 
+// resolveLanguageCodes maps the human-readable -source / -target flag values
+// (e.g. "English", "Spanish", or an ISO code like "en") to the language.Language
+// structs (with the correct ISO Code) that drive BOTH the translator's
+// translation-direction prompt AND the output book's metadata language tag.
+//
+// The codes were previously hardcoded to "ru" (source) and "sr" (target),
+// so the -source/-target flags only affected the human-readable Name passed to
+// the preparation analyzer while the translator ALWAYS built a Russian→Serbian
+// prompt and the output EPUB was ALWAYS tagged language "sr" — a wrong-output
+// defect (§11.4): a user requesting English→Spanish silently got a
+// Russian→Serbian prompt and an "sr"-tagged book. Unknown values fall back to a
+// Language whose Code == the trimmed input (no guessing — §11.4.6) so an
+// unrecognised language still threads a deterministic, honest code through the
+// pipeline rather than a hardcoded wrong one.
+func resolveLanguageCodes(source, target string) (language.Language, language.Language) {
+	resolve := func(raw, fallbackName string) language.Language {
+		if lang, err := language.ParseLanguage(raw); err == nil {
+			return lang
+		}
+		trimmed := strings.TrimSpace(raw)
+		return language.Language{Code: trimmed, Name: fallbackName}
+	}
+	return resolve(source, source), resolve(target, target)
+}
+
 // parseProviders splits a comma-separated providers flag into a clean slice.
 // It trims surrounding whitespace from each entry and drops empty entries
 // (so "deepseek, ,zhipu" -> ["deepseek","zhipu"]). When the result is empty
@@ -72,9 +97,10 @@ func main() {
 	log.Printf("✅ Parsed ebook: %d chapters, %d words",
 		book.GetChapterCount(), book.GetWordCount())
 
-	// Setup languages
-	sourceLanguage := language.Language{Code: "ru", Name: *sourceLang}
-	targetLanguage := language.Language{Code: "sr", Name: *targetLang}
+	// Setup languages — resolve the -source/-target flag values to their real
+	// ISO codes so the translator and the output metadata follow the requested
+	// language pair instead of a hardcoded Russian→Serbian one.
+	sourceLanguage, targetLanguage := resolveLanguageCodes(*sourceLang, *targetLang)
 
 	// Setup preparation configuration
 	log.Printf("\n2. Configuring preparation phase...")
