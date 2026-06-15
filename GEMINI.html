@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>GEMINI</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">GEMINI</h1>
+</header>
+<h1 id="gemini.md">GEMINI.md</h1>
+<h2 id="inherited-from-constitutionclaude.md">INHERITED FROM
+constitution/CLAUDE.md</h2>
+<p>All rules in <code>constitution/CLAUDE.md</code> (and the
+<code>constitution/Constitution.md</code> it references) apply
+unconditionally. Project-specific rules below extend them — they do NOT
+weaken any universal clause. When this file disagrees with the
+constitution submodule, the constitution wins.</p>
+<p>This is the <strong>Gemini CLI</strong> per-agent governance context
+carrier for <code>helix_translate</code>, maintained in lockstep
+(§11.4.157) with <code>CLAUDE.md</code>, <code>AGENTS.md</code>,
+<code>QWEN.md</code>, and <code>CONSTITUTION.md</code>. For the full
+project guidance, conventions, architecture, commands, and the complete
+§11.4.x anchor set, read <code>CLAUDE.md</code> and
+<code>AGENTS.md</code> — they are authoritative and this file mirrors
+the same universal anchors. Any governance edit MUST land here alongside
+the other four carriers in the same change-window.</p>
+<h2 id="mirrored-constitution-anchors-11.4.15411.4.157">Mirrored
+constitution anchors (§11.4.154–§11.4.157)</h2>
+<p>Condensed consumer-side mirrors of the four universal anchors most
+recently added to the constitution submodule (HEAD
+<code>9f3147e</code>). Canonical text lives in
+<code>constitution/Constitution.md</code>; these mirrors carry the
+literal <code>11.4.N</code> tokens the propagation gates require
+(§11.4.35).</p>
+<p><strong>§11.4.154 — Window-scoped capture + fresh-corpus rotation for
+feature/QA recordings (User mandate, 2026-06-15).</strong> Refines
+§11.4.2/.5/.107/.153 recording discipline with two capture-hygiene
+invariants. <strong>(A) Window-scoped, NOT whole-screen</strong> — every
+feature/QA video MUST capture ONLY the window/surface of the app/service
+under test (GUI window / CLI-TUI terminal pane / web tab-viewport /
+device-emulator frame), NEVER the whole desktop/monitor or unrelated
+windows; target by stable identity (window id/title, device serial,
+browser context, tmux target) per §11.4.111, never a fixed full-screen
+index; platform genuinely cannot capture below whole-screen ⇒ honest
+§11.4.3 SKIP + tracked migration item. <strong>(B) Fresh-corpus
+rotation</strong> — a new recording run for a scope removes the agent’s
+OWN prior in-scope stale recordings FIRST (§11.4.107 not-stale +
+§11.4.86 roster-freshness); the agent’s own SAME-scope recordings ONLY,
+NEVER another project’s/operator-authored files (uncertain ⇒ surface,
+don’t delete §11.4.122/§9.2); committed
+<code>docs/qa/&lt;run-id&gt;/</code> evidence (§11.4.83) is the durable
+record, NOT rotated. Classification: universal (§11.4.17). Composes
+§11.4.2/.5/.10/.83/.86/.107/.111/.122/.128/.137/.153/§9.2/.6. Canonical
+authority: constitution submodule <code>Constitution.md</code>
+§11.4.154. Non-compliance is a release blocker.</p>
+<p><strong>§11.4.155 — Project-name-prefixed feature/QA recording
+filenames (User mandate, 2026-06-15).</strong> Every recorded video the
+project produces (§11.4.153 real-use, §11.4.154 window-scoped, §11.4.128
+always-on device, any raw/curated artefact at the recording path + the
+committed <code>docs/qa/&lt;run-id&gt;/</code> trail §11.4.83) MUST have
+a filename that STARTS WITH the PROJECT-NAME prefix, ALWAYS; an
+unprefixed recording is a §11.4.155 violation (un-greppable +
+un-attributable multi-project corpus — the §11.4.151 identify-and-grep
+failure on the recording axis). <strong>Prefix resolution (closed-set,
+deterministic — §11.4.6, IDENTICAL to §11.4.151):</strong> (1)
+<code>HELIX_RELEASE_PREFIX</code> from <code>.env</code> (git-ignored
+§11.4.30, documented in <code>.env.example</code> §11.4.77) else (2)
+lowercased snake_case project-root dir name §11.4.29; canonical form
+<code>&lt;PREFIX&gt;---&lt;feature-or-scope&gt;---&lt;run-id&gt;.&lt;ext&gt;</code>;
+MUST equal the §11.4.151-resolved release-tag prefix. Honest boundary
+(§11.4.6): the prefix guarantees attribution + greppability, NOT content
+validity (still §11.4.107/.137/.153). Classification: universal
+(§11.4.17). Composes
+§11.4.151/.128/.153/.154/.111/.83/.6/.29/.30/.35/.77/.86. Canonical
+authority: constitution submodule <code>Constitution.md</code>
+§11.4.155. Non-compliance is a release blocker.</p>
+<p><strong>§11.4.156 — All CI/CD automation (GitHub Actions / GitLab
+pipelines / equivalents) MUST be disabled (User mandate,
+2026-06-15).</strong> Every repository this Constitution governs MUST
+ship with ALL server-side CI/CD automation DISABLED: no push to any
+owned upstream may trigger a GitHub Actions run, GitLab pipeline, or
+equivalent (Jenkins/CircleCI/Travis/Drone/Woodpecker/Bitbucket/Azure,
+any
+<code>on: push</code>/<code>schedule</code>/<code>workflow_dispatch</code>).
+GENERALISES + makes ABSOLUTE the §11.4.75 Layer-5 posture across ALL
+governed repos; enforcement migrates to the LOCAL §11.4.75 git-hook
+ritual + §11.4.40 pre-tag sweep, never a remote runner. ALL hold:
+<strong>(A)</strong> zero active root-level
+<code>.github/workflows/*.yml|yaml</code> / <code>.gitlab-ci.yml</code>
+/ equivalent; <strong>(B)</strong> “disabled” = a push triggers ZERO
+runs — delete OR rename to a non-trigger name (the §11.4.75
+<code>.disabled-local-only</code> pattern); a
+live-<code>on:</code>+<code>if:false</code> workflow is NOT compliant;
+<strong>(C)</strong> scope = repos we author+push — vendored/third-party
+nested configs are INERT, OUT of scope (§11.4.29 vendor-exempt);
+<strong>(D)</strong> no new CI may be added; <strong>(E)</strong>
+pre-push verify the tracked workflow set is empty for authored repos.
+Honest boundary (§11.4.6): file-level disabling stops FILE-triggered
+runs, NOT provider-side server settings — the operator turns those off.
+Composes §11.4.75/.29/.6/.40/.42/.109/.113/§2.1. Classification:
+universal (§11.4.17). The parent repo currently has NO active CI
+workflow files — already §11.4.156-compliant. Canonical authority:
+constitution submodule <code>Constitution.md</code> §11.4.156.
+Non-compliance is a release blocker.</p>
+<p><strong>§11.4.157 — GEMINI.md maintained in lockstep with CLAUDE.md /
+AGENTS.md / QWEN.md (User mandate, 2026-06-15).</strong>
+<code>GEMINI.md</code> is a FIRST-CLASS governance context carrier EQUAL
+to <code>CLAUDE.md</code>/<code>AGENTS.md</code>/<code>QWEN.md</code>,
+never optional/best-effort. ALL hold: <strong>(A)</strong> five-carrier
+lockstep — no governance change is complete until <code>GEMINI.md</code>
+carries it alongside the other three mirrors (added to the §11.4.26
+propagation + cross-reference set); <strong>(B)</strong> no silent drift
+— <code>GEMINI.md</code> lagging the other mirrors’ highest rule is a
+§11.4.157 violation (§11.4.65-class); <strong>(C)</strong> equal status
+— <code>GEMINI.md</code> restates the SAME literal <code>11.4.N</code>
+anchors the propagation gates require (§11.4.35), fleet count INCLUDES
+<code>GEMINI.md</code>; <strong>(D)</strong> consumer projects’ own
+CLAUDE/AGENTS/QWEN/GEMINI bind too (§11.4.35). Honest boundary
+(§11.4.6): claiming <code>GEMINI.md</code> “in sync” while a back-fill
+is incomplete is itself a §11.4.157 violation. Composes
+§11.4.26/.35/.17/.44/.65/.140/.156. Classification: universal
+(§11.4.17). This parent repo now maintains <code>CLAUDE.md</code> +
+<code>AGENTS.md</code> + <code>QWEN.md</code> + <code>GEMINI.md</code>
+in lockstep (QWEN.md + GEMINI.md created in this change-window).
+Canonical authority: constitution submodule <code>Constitution.md</code>
+§11.4.157. Non-compliance is a release blocker.</p>
+</body>
+</html>
