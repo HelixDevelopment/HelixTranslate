@@ -1,13 +1,19 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 61
-**Last modified:** 2026-06-15T12:59:00Z
+**Revision:** 62
+**Last modified:** 2026-06-15T13:10:00Z
 
-## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 6 parallel subagents over 2 waves, all verified+pushed)
-After the green validation run, dispatched 2 successive 3-wide worktree-isolated
-subagent waves on the highest-remaining-yield autonomous surfaces. **7 genuine,
-conductor-verified, independently mutation-proven fixes (campaign 63→70); honest
-clean non-findings on the rest (§11.4.118). HEAD `39ae131` green+pushed both upstreams.**
+## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 9 parallel subagents over 3 waves, all verified+pushed)
+After the green validation run, dispatched 3 successive 3-wide worktree-isolated
+subagent waves on the highest-remaining-yield autonomous surfaces. **8 genuine,
+conductor-verified, independently mutation-proven fixes (campaign 63→71) + 1
+teeth-proven regression guard; honest clean non-findings on the rest (§11.4.118).
+HEAD `5baf804` green+pushed both upstreams.**
+
+WAVE 3 (`pkg/security`, `pkg/events`+`pkg/websocket`, `pkg/batch`+`pkg/coordination`):
+- **batch processFile PASS-bluff** (`5baf804`, HIGHEST severity): processFile parsed→wrote WITHOUT invoking the translator yet returned Success:true — every file/directory batch incl. the `/translate/directory` API shipped an UNTRANSLATED copy as 'translation completed' (§11.4/CONST-035). Fix = translate book in place (recursive title+Section Title+Content+Subsections, ctx-honoring) when Translator!=nil. RED; mutation neutralize→"translator never invoked: untranslated copy reported as success"→restore→GREEN.
+- **`pkg/security` clean non-finding**: JWT alg-confusion/none/expired/nbf all rejected, refresh re-validates liveness, rate-limiter per-key race-clean, API-key store RWMutex-guarded, login timing defends CWE-208+CWE-204. HS512-when-HS256 candidate correctly rejected (forging still needs the secret — not a vuln).
+- **`pkg/events`+`pkg/websocket` clean non-finding + teeth-proven guard** (`46db0c6`): both hardened (lock-released-before-fan-out, delete-before-close, session-filter, batched-drain). Added combined-concurrency regression guard `hub_combined_stress_test.go`; teeth proven (weaken unregister lock→DATA RACE caught→restore→GREEN).
 
 WAVE 2 (`pkg/script`, `pkg/verification`, `pkg/preparation`):
 - **verification content-wipe** (`39ae131`, HIGH severity): a failed provider's zero-value `llmVerification{}` (empty PolishedText) fed `buildConsensus` → could win consensus and WIPE the section's translated content to `""`, plus diluted scores (0.9→0.300 with 2/3 failing). Fix = drop empty-Provider phantom entries before aggregation. RED; mutation disable-filter→"CONTENT CORRUPTION got ''"+"SCORE DILUTION 0.300"→restore→GREEN.
@@ -37,7 +43,7 @@ Clean non-findings (audited, no RED reproducible): SQLite concurrent-writer cont
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **70 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 2 waves = 7 fixes `a22d0de`/`9ff5049`/`0366941`/`a8cf0cd`/`39ae131`, see POST-VALIDATION BUG-HUNT WAVES block at top). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
+- **71 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 3 waves = 8 fixes + 1 regression guard `a22d0de`/`9ff5049`/`0366941`/`a8cf0cd`/`39ae131`/`46db0c6`/`5baf804`, see POST-VALIDATION BUG-HUNT WAVES block at top; latest = batch processFile PASS-bluff, HIGHEST severity). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
