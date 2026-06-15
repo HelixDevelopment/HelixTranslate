@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 2 <strong>Last modified:</strong>
-2026-06-15T17:30:00Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 3 <strong>Last modified:</strong>
+2026-06-15T18:45:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -195,22 +195,27 @@ genuinely demonstrates the feature working (each cited <code>.mp4</code>
 was ffprobe-verified for non-zero duration+frames and content-verified
 against its claimed behaviour — e.g. real DeepSeek output in the target
 language, real gRPC translated text, live WebSocket count change).
-<strong>20 feature rows are video-confirmed</strong> this session across
+<strong>21 feature rows are video-confirmed</strong> this session across
 unified-translator (DeepSeek translate, EPUB→TXT / HTML→EPUB / FB2→EPUB
 / FB2→FB2 conversions, Serbian-Cyrillic, <code>-script</code>
-Cyrillic↔︎Latin, format-detection, help/version, <code>-verify</code>),
+Cyrillic↔︎Latin, format-detection, help/version, <code>-verify</code>,
+<strong><code>-multipass</code> multi-pass polishing engine</strong>),
 the REST API server (POST /api/v1/translate real DeepSeek + target_lang
 FIXED, TLS startup FIXED, /health · /api/v1/version ·
 /api/v1/providers), the gRPC server (real EN→ES), markdown-translator
 (EPUB↔︎MD round-trip), preparation-translator (FIXED real analysis),
 cmd/cli (real DeepSeek), monitor-server (live WS hub), and the DeepSeek
-library client. <strong>Honest gaps recorded, NOT confirmed:</strong>
-DOCX output + PDF output are unimplemented (no writer in
-<code>pkg/ebook</code>; unified-translator rejects them);
-<code>-verify</code> is the CLI’s own per-step check, NOT the
-<code>pkg/verification</code> multipass engine (that engine has no CLI
-entry point wired in); <code>cmd/translator</code> local path is a STUB
-(“local translation not yet implemented”); <code>translate-ssh</code> +
+library client. <strong>Real-artifact-confirmed (not video):</strong>
+<strong>DOCX output</strong> is now Implemented — a real DeepSeek run
+produced <code>garden_es.docx</code> = <code>Microsoft Word 2007+</code>
+(well-formed WordprocessingML, real translation; pure-Go OOXML writer
+<code>pkg/ebook/docx_writer.go</code>, commit 87cd2be) — confirmed by
+the produced artifact’s file type, no <code>.mp4</code> exists yet
+(video PENDING). <strong>Honest gaps recorded, NOT confirmed:</strong>
+PDF output is still unimplemented (no PDF writer in
+<code>pkg/ebook</code>; unified-translator rejects <code>.pdf</code>);
+<code>cmd/translator</code> local path is a STUB (“local translation not
+yet implemented”); <code>translate-ssh</code> +
 <code>ebook-translator</code> are OPERATOR-BLOCKED (need a remote
 SSH/llama.cpp worker host); <code>GET /api/v1/verified-models</code>
 returns 404 because LLMsVerifier is disabled in config. Everything else
@@ -258,12 +263,13 @@ tally)</td>
 </tr>
 <tr>
 <td>Enumerated feature rows in this doc</td>
-<td><strong>472</strong> (470 source-inventory rows + 2 honest gap rows
-added Rev 2: DOCX-write, PDF-write — both unimplemented)</td>
+<td><strong>472</strong> (470 source-inventory rows + 2 gap rows added
+Rev 2: DOCX-write [now Implemented Rev 3], PDF-write [still
+unimplemented])</td>
 </tr>
 <tr>
 <td>Implemented</td>
-<td>463</td>
+<td>464 (DOCX-write flipped gap→Implemented Rev 3, commit 87cd2be)</td>
 </tr>
 <tr>
 <td>Stub</td>
@@ -274,8 +280,8 @@ added Rev 2: DOCX-write, PDF-write — both unimplemented)</td>
 </tr>
 <tr>
 <td>Not implemented (gap rows)</td>
-<td>2 (<code>pkg/ebook</code> DOCX-write, PDF-write — no writer exists;
-output limited to EPUB/FB2/TXT/HTML/MD)</td>
+<td>1 (<code>pkg/ebook</code> PDF-write — no writer exists; output now
+EPUB/FB2/TXT/HTML/MD/DOCX)</td>
 </tr>
 <tr>
 <td>Partial</td>
@@ -292,9 +298,11 @@ remote SSH/llama.cpp worker host)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td><strong>20</strong> (real, content-verified recordings this session
-— see Anti-bluff note) — ≈ 4.3% of 470 enumerated rows (≈ 4.8% of the
-417 headline)</td>
+<td><strong>21</strong> (real, content-verified recordings this session
+— see Anti-bluff note) — ≈ 4.5% of 470 enumerated rows (≈ 5.0% of the
+417 headline). Plus <strong>1 real-artifact-confirmed</strong> (DOCX
+output — produced <code>.docx</code> = Microsoft Word 2007+; video
+PENDING)</td>
 </tr>
 <tr>
 <td>Video-confirmation PENDING</td>
@@ -649,12 +657,15 @@ writes results dir</td>
 <td>CLI</td>
 <td>Implemented</td>
 <td>Wired</td>
-<td>Parse ebook → translate → write EPUB/FB2/TXT; multi-llm/distributed
-support</td>
+<td>Parse ebook → translate → atomic-write EPUB/FB2/TXT;
+multi-llm/distributed support</td>
 <td>Not-inventoried</td>
 <td><strong>PASS — real DeepSeek run captured</strong> (real Serbian TXT
-output). Minor cosmetic note: source file path leaks into title metadata
-(non-blocking)</td>
+output). Title path-leak FIXED (d53e085, sanitizeBookTitle).
+Write-safety FIXED (87cd2be): format validated before any FS write,
+written to temp sibling + atomic os.Rename only on full success — never
+a partial/clobbered output. Guard: cmd/cli/no_partial_output_test.go (5
+tests, mutation-proven)</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek-translate_20260615-172211.mp4</td>
 </tr>
 <tr>
@@ -3379,14 +3390,22 @@ translation, progress events</td>
 <td>ebook</td>
 <td>DOCX write (output)</td>
 <td>Library</td>
-<td><strong>Not implemented</strong></td>
-<td>Unwired</td>
-<td>GAP (§11.4.6): no DOCX writer exists in <code>pkg/ebook</code>; DOCX
-is parse-only. unified-translator rejects <code>-output</code> .docx.
-Output formats are limited to EPUB/FB2/TXT/HTML/MD</td>
-<td>None</td>
-<td><strong>GAP — unimplemented (no writer)</strong></td>
-<td>N/A (no feature to record)</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Pure-Go OOXML writer <code>pkg/ebook/docx_writer.go</code> (stdlib
+archive/zip + encoding/xml, zero new deps); emits the 4 required OOXML
+parts; XML specials auto-escaped via xml.Marshal chardata. Wired into
+unified-translator generateOutput (<code>case docx</code>). Real
+DeepSeek EN→ES → <code>garden_es.docx</code> =
+<code>Microsoft Word 2007+</code>, well-formed WordprocessingML with the
+real translation. Guards: pkg/ebook/docx_writer_test.go + .docx subtest
+in cmd/unified-translator/output_format_test.go (mutation-proven)</td>
+<td>Covered</td>
+<td><strong>PASS — real artifact verified</strong> (produced .docx =
+<code>Microsoft Word 2007+</code>, 4 OOXML parts, real translated
+content + correct XML escaping; commit 87cd2be)</td>
+<td>real-artifact verified (file=Microsoft Word 2007+); video
+PENDING</td>
 </tr>
 <tr>
 <td>ebook</td>
@@ -3810,17 +3829,22 @@ workflow</h2>
 <td>Multi-pass polisher</td>
 <td>Library</td>
 <td>Implemented</td>
-<td><strong>Unwired into unified-translator</strong></td>
-<td>Iterative multi-LLM polishing w/ note-taking &amp; consensus. GAP
-(§11.4.6): this engine is NOT what the unified-translator
-<code>-verify</code> flag invokes — <code>-verify</code> runs the CLI’s
-own per-step output check (row above), not this
-<code>pkg/verification</code> multipass engine. The multipass engine has
-no CLI entry point wired in</td>
+<td><strong>Wired into unified-translator (<code>-multipass</code>,
+d53e085)</strong></td>
+<td>Iterative multi-LLM polishing w/ note-taking &amp; consensus. Now
+reachable via the unified-translator opt-in <code>-multipass</code> flag
+(+ <code>-multipass-passes</code>, <code>-multipass-db</code>; default
+OFF, zero overhead/behavior change when absent). NOTE: distinct from
+<code>-verify</code> (the CLI’s own per-step output check) —
+<code>-multipass</code> invokes this <code>pkg/verification</code>
+engine. Guard: cmd/unified-translator/multipass_wiring_test.go (httptest
++ real DeepSeek). §11.4.150 research:
+docs/research/20260615_video_surfaced_fixes/verification_multipass_wiring.md</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed (library present); <strong>GAP — not wired into
-CLI</strong></td>
-<td>PENDING</td>
+<td><strong>PASS — video-confirmed</strong> (ffprobe 888x630, 93 frames,
+9.3s; shows “Step 4: Multi-pass Polishing ✅ Success — Polished over 1
+pass with deepseek” + real Spanish output)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-multipass-verify-20260615.mp4</td>
 </tr>
 <tr>
 <td>verification</td>
@@ -7469,21 +7493,25 @@ distributed llama.cpp RPC</td>
 <h2 id="honest-gaps-caveats-11.4.6">Honest gaps &amp; caveats
 (§11.4.6)</h2>
 <ol type="1">
-<li><strong>Video coverage is 20 feature rows.</strong> 20 features are
-confirmed by real, ffprobe- and content-verified recordings this session
-(see the Anti-bluff note for the full list). Every other
-runtime/user-visible feature is <code>PENDING</code> a recording. This
-is stated, not hidden. 1a. <strong>DOCX output + PDF output are
-unimplemented</strong> — <code>pkg/ebook</code> has FB2-write and
-EPUB-write only; DOCX and PDF are parse/extract-only. unified-translator
-rejects <code>.docx</code>/<code>.pdf</code> as output. Output formats
-are EPUB/FB2/TXT/HTML/MD. 1b. <strong><code>-verify</code> ≠ multipass
-engine.</strong> The unified-translator <code>-verify</code> flag runs
-the CLI’s own per-step output check, NOT the
-<code>pkg/verification</code> multi-pass polisher (which has no CLI
-entry point wired in). 1c. <strong><code>cmd/translator</code> local
-path is a STUB</strong> (“local translation not yet implemented”); its
-remote path is OPERATOR-BLOCKED (no SSH/llama.cpp worker host). 1d.
+<li><strong>Video coverage is 21 feature rows</strong> (+ 1
+real-artifact-confirmed). 21 features are confirmed by real, ffprobe-
+and content-verified recordings this session (see the Anti-bluff note
+for the full list); DOCX output is real-artifact-confirmed (produced
+<code>.docx</code> = Microsoft Word 2007+) with its video still PENDING.
+Every other runtime/user-visible feature is <code>PENDING</code> a
+recording. This is stated, not hidden. 1a. <strong>DOCX output is now
+Implemented (Rev 3, commit 87cd2be)</strong> — pure-Go OOXML writer; a
+real DeepSeek run produced <code>garden_es.docx</code> =
+<code>Microsoft Word 2007+</code>. PDF output is still unimplemented (no
+PDF writer in <code>pkg/ebook</code>; unified-translator rejects
+<code>.pdf</code>). Output formats are now EPUB/FB2/TXT/HTML/MD/DOCX.
+1b. <strong><code>-multipass</code> ≠ <code>-verify</code>.</strong> The
+unified-translator <code>-verify</code> flag runs the CLI’s own per-step
+output check; the separate <code>-multipass</code> flag (d53e085)
+invokes the <code>pkg/verification</code> multi-pass polisher engine —
+now wired and video-confirmed. 1c. <strong><code>cmd/translator</code>
+local path is a STUB</strong> (“local translation not yet implemented”);
+its remote path is OPERATOR-BLOCKED (no SSH/llama.cpp worker host). 1d.
 <strong><code>translate-ssh</code> + <code>ebook-translator</code> are
 OPERATOR-BLOCKED</strong> — both require a remote SSH worker host
 running llama.cpp; none available. Binaries build and run as far as
@@ -7491,9 +7519,9 @@ possible (blocked-binaries demo recorded). 1e.
 <strong><code>GET /api/v1/verified-models</code> returns 404</strong> —
 LLMsVerifier is disabled in the current config so the route is not
 mounted (feature-disabled-by-config, not a defect). 1f.
-<strong><code>cmd/cli</code> cosmetic note:</strong> the source file
-path leaks into the output title metadata (non-blocking, real
-translation otherwise correct).</li>
+<strong><code>cmd/cli</code> title path-leak FIXED</strong> (d53e085) +
+<strong>write-safety FIXED</strong> (87cd2be, atomic write/no-clobber,
+guard cmd/cli/no_partial_output_test.go).</li>
 <li><strong>Tests = <code>Not-inventoried</code></strong> for all rows:
 the raw inventory did not perform per-feature test attribution. The repo
 carries extensive <code>_test.go</code> + <code>test/</code> suites, but

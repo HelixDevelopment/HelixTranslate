@@ -1,7 +1,7 @@
 # HelixTranslate — Feature Status Summary
 
-**Revision:** 2
-**Last modified:** 2026-06-15T17:30:00Z
+**Revision:** 3
+**Last modified:** 2026-06-15T18:45:00Z
 **Authority:** Two-audience companion to `docs/features/Status.md` (§11.4.56). Derived from the same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync), §11.4.6 (no-guessing).
 
 ---
@@ -12,14 +12,15 @@
 
 ## What works
 
-- We have a complete catalogue of **every feature** in the product and its 8 owned add-on modules — **472 individual capabilities** catalogued (470 from the source inventory + 2 honest "unimplemented output" gap rows added this round; the headline "417" is the same list with closely-related sub-options counted once).
-- The majority are fully built and reachable: the command-line translators, the web dashboards, the REST and gRPC servers, ~32 built-in AI providers, ebook format readers (FB2, EPUB, DOCX, HTML, TXT, PDF) and writers (EPUB, FB2, TXT, HTML, Markdown), caching, security, and all 8 add-on modules.
-- **20 features are now proven on real recordings** this round — and each recording was checked frame-by-frame to confirm it genuinely shows the feature working (real translated text in the right language, a live connection count changing, etc.), not just "a screen". These include: the primary command-line translator doing real DeepSeek translations and converting between ebook formats (EPUB→TXT, HTML→EPUB, FB2→EPUB, FB2→FB2), Serbian Cyrillic/Latin handling, the REST API server translating for real, the gRPC server translating English→Spanish, the markdown round-trip tool, the preparation/analysis runner (now fixed), the simple CLI translator, and the live monitoring dashboard.
+- We have a complete catalogue of **every feature** in the product and its 8 owned add-on modules — **472 individual capabilities** catalogued (470 from the source inventory + 2 output gap rows; one of those — DOCX output — is now built this round; the headline "417" is the same list with closely-related sub-options counted once).
+- The majority are fully built and reachable: the command-line translators, the web dashboards, the REST and gRPC servers, ~32 built-in AI providers, ebook format readers (FB2, EPUB, DOCX, HTML, TXT, PDF) and writers (EPUB, FB2, TXT, HTML, Markdown, **and now DOCX**), caching, security, and all 8 add-on modules.
+- **21 features are now proven on real recordings** this round — and each recording was checked frame-by-frame to confirm it genuinely shows the feature working (real translated text in the right language, a live connection count changing, etc.), not just "a screen". These include: the primary command-line translator doing real DeepSeek translations and converting between ebook formats (EPUB→TXT, HTML→EPUB, FB2→EPUB, FB2→FB2), Serbian Cyrillic/Latin handling, the **multi-pass polishing engine (`-multipass`, newly wired)**, the REST API server translating for real, the gRPC server translating English→Spanish, the markdown round-trip tool, the preparation/analysis runner (now fixed), the simple CLI translator, and the live monitoring dashboard.
+- **DOCX output is newly built and proven by the produced file itself:** a real DeepSeek translation produced a `.docx` that opens as a genuine "Microsoft Word 2007+" document with the real translated text inside. (A screen recording of it is still owed, so it counts as artifact-proven rather than video-proven for now.)
 
 ## What is pending or limited
 
-- **Video proof is still the main gap, but moving:** **20 of 472** features now have a recorded, watch-it-yourself demonstration (≈ 4.3%, up from 1). Everything else is built and present in the code, but a recording is still owed. Nothing is claimed proven just because the code exists.
-- **DOCX and PDF *output* are not built yet.** The product can *read* DOCX and PDF, but it cannot *write* them — there is no DOCX or PDF writer. Output is limited to EPUB, FB2, TXT, HTML and Markdown.
+- **Video proof is still the main gap, but moving:** **21 of 472** features now have a recorded, watch-it-yourself demonstration (≈ 4.5%, up from 20). Everything else is built and present in the code, but a recording is still owed. Nothing is claimed proven just because the code exists.
+- **PDF *output* is not built yet.** The product can *read* DOCX and PDF, and can now *write* DOCX; it still cannot *write* PDF — there is no PDF writer. Output is now EPUB, FB2, TXT, HTML, Markdown and DOCX.
 - **Two remote-worker tools are blocked on infrastructure:** the SSH-based translators (`translate-ssh`, `ebook-translator`) need a remote helper machine running a local AI engine, which we don't have available. They build and start, then stop at the missing machine.
 - **The documented `translator` tool's "translate on this computer" mode is a placeholder** ("local translation not yet implemented"); its remote mode is blocked on the same missing machine.
 - **The "verified models" API returns 404** because the model-verification service is switched off in the current configuration (a config choice, not a broken feature).
@@ -28,7 +29,7 @@
 
 ## Video-confirmation coverage
 
-**20 / 472 ≈ 4.3%** (up from 1). This is the headline number to keep improving: each new genuine recording raises it.
+**21 / 472 ≈ 4.5%** (up from 20), plus **1 real-artifact-confirmed** (DOCX output, video PENDING). This is the headline number to keep improving: each new genuine recording raises it.
 
 ## Team actions
 
@@ -48,13 +49,13 @@ Derived 1:1 from `docs/features/.feature_inventory_raw.md` (Rev 1). Every detail
 | Dimension | Value |
 |---|---|
 | Headline total (dedup per-category tally) | 417 |
-| Enumerated detailed rows (this doc + Status.md) | 472 (470 inventory + 2 Rev 2 gap rows: DOCX-write, PDF-write) |
-| Implemented | 463 |
+| Enumerated detailed rows (this doc + Status.md) | 472 (470 inventory + 2 gap rows: DOCX-write [Implemented Rev 3], PDF-write) |
+| Implemented | 464 (DOCX-write flipped gap→Implemented Rev 3, commit 87cd2be) |
 | Stub | 4 |
-| Not implemented (gap rows) | 2 (`pkg/ebook` DOCX-write, PDF-write) |
+| Not implemented (gap rows) | 1 (`pkg/ebook` PDF-write) |
 | Partial | 3 (`POST /api/batch`; `vision_engine` OpenCV; `cmd/translator` local STUB + remote OPERATOR-BLOCKED) |
 | Operator-blocked | 2 (`translate-ssh`, `ebook-translator`) |
-| Video-confirmed | 20 |
+| Video-confirmed | 21 (+ 1 real-artifact-confirmed: DOCX output) |
 | Video PENDING | runtime/user-visible, no recording yet |
 | Video N/A | flags / internal types / infra middleware |
 
@@ -84,12 +85,11 @@ Derived 1:1 from `docs/features/.feature_inventory_raw.md` (Rev 1). Every detail
 2. `vision_engine` OpenCV — stub by default; real CV only behind a build tag.
 3. `cmd/translator` — LOCAL path is a STUB ("local translation not yet implemented"); REMOTE path OPERATOR-BLOCKED (no SSH/llama.cpp worker host).
 
-## Not-implemented gap rows (Rev 2, §11.4.6)
+## Not-implemented gap rows (§11.4.6)
 
-1. `pkg/ebook` DOCX-write — no DOCX writer; DOCX is parse-only; unified-translator rejects `.docx` output.
-2. `pkg/ebook` PDF-write — no PDF writer; PDF is extract-only; unified-translator rejects `.pdf` output.
+1. `pkg/ebook` PDF-write — no PDF writer; PDF is extract-only; unified-translator rejects `.pdf` output.
 
-> Output formats are EPUB / FB2 / TXT / HTML / MD.
+> Resolved Rev 3: `pkg/ebook` DOCX-write — now Implemented (pure-Go OOXML writer `pkg/ebook/docx_writer.go`, commit 87cd2be; real DeepSeek run → `garden_es.docx` = `Microsoft Word 2007+`). Output formats are now EPUB / FB2 / TXT / HTML / MD / DOCX.
 
 ## Operator-blocked list (§11.4.45)
 
@@ -109,18 +109,18 @@ Derived 1:1 from `docs/features/.feature_inventory_raw.md` (Rev 1). Every detail
 
 ## Top gaps (engineering)
 
-1. **Video-confirmation 20/472.** 20 rows carry real, ffprobe- and content-verified recordings (Status.md cites each `.mp4`; the 3 video-surfaced bug fixes — prep-translator dead, server TLS startup, REST hardcoded target-lang — are in commit `a5e8866`). All other runtime features carry `PENDING`. Per §11.4.2/§11.4.107 nothing else may be marked video-confirmed without a real, content-verified file.
-2. **DOCX/PDF output unimplemented** — `pkg/ebook` has FB2-write + EPUB-write only. Two Rev-2 gap rows record this honestly; output is EPUB/FB2/TXT/HTML/MD.
-3. **`-verify` ≠ multipass engine** — unified-translator `-verify` runs the CLI's own per-step check; the `pkg/verification` multi-pass polisher has no CLI entry point wired in.
+1. **Video-confirmation 21/472** (+ 1 real-artifact-confirmed: DOCX output). 21 rows carry real, ffprobe- and content-verified recordings (Status.md cites each `.mp4`; the new `-multipass` video is `helixtranslate-cli-multipass-verify-20260615.mp4`, ffprobe 888x630/93fr/9.3s; the 3 video-surfaced bug fixes — prep-translator dead, server TLS startup, REST hardcoded target-lang — are in commit `a5e8866`). All other runtime features carry `PENDING`. Per §11.4.2/§11.4.107 nothing else may be marked video-confirmed without a real, content-verified file.
+2. **PDF output unimplemented** — `pkg/ebook` now has FB2/EPUB/DOCX writers; PDF-write remains the one open gap row. Output is EPUB/FB2/TXT/HTML/MD/DOCX.
+3. **`-multipass` wired (d53e085); `-verify` ≠ `-multipass`** — unified-translator `-verify` runs the CLI's own per-step check; the new `-multipass` flag invokes the `pkg/verification` multi-pass polisher engine (now wired + video-confirmed). cmd/cli write-safety FIXED (87cd2be, atomic write/no-clobber, guard cmd/cli/no_partial_output_test.go) + title path-leak FIXED (d53e085).
 4. **2 binaries OPERATOR-BLOCKED + 1 local STUB** — `translate-ssh`/`ebook-translator` need a remote SSH/llama.cpp host; `cmd/translator` local path is a STUB.
 5. **`GET /api/v1/verified-models` → 404** — LLMsVerifier disabled in config (route not mounted); feature-disabled-by-config, not a defect.
 6. **Per-feature test attribution missing** (`Not-inventoried` everywhere). Repo has extensive `_test.go` + `test/` suites; mapping suites → features is future work.
-7. **4 stubs + 2 unimplemented + 3 partials** must either be implemented or reclassified per §11.4.90 before they can be claimed as working capabilities.
+7. **4 stubs + 1 unimplemented + 3 partials** must either be implemented or reclassified per §11.4.90 before they can be claimed as working capabilities.
 8. **UNCONFIRMED LLM determinations** carried from the inventory: thin OpenAI-compatible providers' base-URL/model specifics; several `llms_verifier` packages (scoring/helixqa/cliagents/crush/opencode/scheduler/partners/bigdata/multimodal/performance); `challenges/userflow` evaluators; `doc_processor/archdoc`.
 
 ## Video-coverage ratio
 
-`20 / 472` enumerated rows = **4.3%** (≈ 4.8% against the 417 headline), up from `1 / 470`. This is the primary metric to drive upward; each anti-bluff §11.4.107 recording increments the numerator.
+`21 / 472` enumerated rows = **4.5%** (≈ 5.0% against the 417 headline), up from `20 / 472`. Plus 1 real-artifact-confirmed (DOCX output, video PENDING). This is the primary metric to drive upward; each anti-bluff §11.4.107 recording increments the numerator.
 
 ## Cross-references
 

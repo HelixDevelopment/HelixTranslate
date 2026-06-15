@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status-summary">HelixTranslate — Feature
 Status Summary</h1>
-<p><strong>Revision:</strong> 2 <strong>Last modified:</strong>
-2026-06-15T17:30:00Z <strong>Authority:</strong> Two-audience companion
+<p><strong>Revision:</strong> 3 <strong>Last modified:</strong>
+2026-06-15T18:45:00Z <strong>Authority:</strong> Two-audience companion
 to <code>docs/features/Status.md</code> (§11.4.56). Derived from the
 same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync),
 §11.4.6 (no-guessing).</p>
@@ -193,36 +193,44 @@ catalogued and how much we have proven works on camera.</p>
 <li>We have a complete catalogue of <strong>every feature</strong> in
 the product and its 8 owned add-on modules — <strong>472 individual
 capabilities</strong> catalogued (470 from the source inventory + 2
-honest “unimplemented output” gap rows added this round; the headline
-“417” is the same list with closely-related sub-options counted
-once).</li>
+output gap rows; one of those — DOCX output — is now built this round;
+the headline “417” is the same list with closely-related sub-options
+counted once).</li>
 <li>The majority are fully built and reachable: the command-line
 translators, the web dashboards, the REST and gRPC servers, ~32 built-in
 AI providers, ebook format readers (FB2, EPUB, DOCX, HTML, TXT, PDF) and
-writers (EPUB, FB2, TXT, HTML, Markdown), caching, security, and all 8
-add-on modules.</li>
-<li><strong>20 features are now proven on real recordings</strong> this
+writers (EPUB, FB2, TXT, HTML, Markdown, <strong>and now DOCX</strong>),
+caching, security, and all 8 add-on modules.</li>
+<li><strong>21 features are now proven on real recordings</strong> this
 round — and each recording was checked frame-by-frame to confirm it
 genuinely shows the feature working (real translated text in the right
 language, a live connection count changing, etc.), not just “a screen”.
 These include: the primary command-line translator doing real DeepSeek
 translations and converting between ebook formats (EPUB→TXT, HTML→EPUB,
-FB2→EPUB, FB2→FB2), Serbian Cyrillic/Latin handling, the REST API server
-translating for real, the gRPC server translating English→Spanish, the
-markdown round-trip tool, the preparation/analysis runner (now fixed),
-the simple CLI translator, and the live monitoring dashboard.</li>
+FB2→EPUB, FB2→FB2), Serbian Cyrillic/Latin handling, the
+<strong>multi-pass polishing engine (<code>-multipass</code>, newly
+wired)</strong>, the REST API server translating for real, the gRPC
+server translating English→Spanish, the markdown round-trip tool, the
+preparation/analysis runner (now fixed), the simple CLI translator, and
+the live monitoring dashboard.</li>
+<li><strong>DOCX output is newly built and proven by the produced file
+itself:</strong> a real DeepSeek translation produced a
+<code>.docx</code> that opens as a genuine “Microsoft Word 2007+”
+document with the real translated text inside. (A screen recording of it
+is still owed, so it counts as artifact-proven rather than video-proven
+for now.)</li>
 </ul>
 <h2 id="what-is-pending-or-limited">What is pending or limited</h2>
 <ul>
 <li><strong>Video proof is still the main gap, but moving:</strong>
-<strong>20 of 472</strong> features now have a recorded,
-watch-it-yourself demonstration (≈ 4.3%, up from 1). Everything else is
+<strong>21 of 472</strong> features now have a recorded,
+watch-it-yourself demonstration (≈ 4.5%, up from 20). Everything else is
 built and present in the code, but a recording is still owed. Nothing is
 claimed proven just because the code exists.</li>
-<li><strong>DOCX and PDF <em>output</em> are not built yet.</strong> The
-product can <em>read</em> DOCX and PDF, but it cannot <em>write</em>
-them — there is no DOCX or PDF writer. Output is limited to EPUB, FB2,
-TXT, HTML and Markdown.</li>
+<li><strong>PDF <em>output</em> is not built yet.</strong> The product
+can <em>read</em> DOCX and PDF, and can now <em>write</em> DOCX; it
+still cannot <em>write</em> PDF — there is no PDF writer. Output is now
+EPUB, FB2, TXT, HTML, Markdown and DOCX.</li>
 <li><strong>Two remote-worker tools are blocked on
 infrastructure:</strong> the SSH-based translators
 (<code>translate-ssh</code>, <code>ebook-translator</code>) need a
@@ -244,8 +252,10 @@ stats endpoint that always shows zeros). These are flagged in the
 detailed document.</li>
 </ul>
 <h2 id="video-confirmation-coverage">Video-confirmation coverage</h2>
-<p><strong>20 / 472 ≈ 4.3%</strong> (up from 1). This is the headline
-number to keep improving: each new genuine recording raises it.</p>
+<p><strong>21 / 472 ≈ 4.5%</strong> (up from 20), plus <strong>1
+real-artifact-confirmed</strong> (DOCX output, video PENDING). This is
+the headline number to keep improving: each new genuine recording raises
+it.</p>
 <h2 id="team-actions">Team actions</h2>
 <ul>
 <li><strong>Operator decision owed for 2 blocked tools:</strong> to
@@ -284,11 +294,12 @@ honest unknown, never guessed).</p>
 </tr>
 <tr>
 <td>Enumerated detailed rows (this doc + Status.md)</td>
-<td>472 (470 inventory + 2 Rev 2 gap rows: DOCX-write, PDF-write)</td>
+<td>472 (470 inventory + 2 gap rows: DOCX-write [Implemented Rev 3],
+PDF-write)</td>
 </tr>
 <tr>
 <td>Implemented</td>
-<td>463</td>
+<td>464 (DOCX-write flipped gap→Implemented Rev 3, commit 87cd2be)</td>
 </tr>
 <tr>
 <td>Stub</td>
@@ -296,7 +307,7 @@ honest unknown, never guessed).</p>
 </tr>
 <tr>
 <td>Not implemented (gap rows)</td>
-<td>2 (<code>pkg/ebook</code> DOCX-write, PDF-write)</td>
+<td>1 (<code>pkg/ebook</code> PDF-write)</td>
 </tr>
 <tr>
 <td>Partial</td>
@@ -309,7 +320,7 @@ honest unknown, never guessed).</p>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td>20</td>
+<td>21 (+ 1 real-artifact-confirmed: DOCX output)</td>
 </tr>
 <tr>
 <td>Video PENDING</td>
@@ -391,16 +402,18 @@ behind a build tag.</li>
 translation not yet implemented”); REMOTE path OPERATOR-BLOCKED (no
 SSH/llama.cpp worker host).</li>
 </ol>
-<h2 id="not-implemented-gap-rows-rev-2-11.4.6">Not-implemented gap rows
-(Rev 2, §11.4.6)</h2>
+<h2 id="not-implemented-gap-rows-11.4.6">Not-implemented gap rows
+(§11.4.6)</h2>
 <ol type="1">
-<li><code>pkg/ebook</code> DOCX-write — no DOCX writer; DOCX is
-parse-only; unified-translator rejects <code>.docx</code> output.</li>
 <li><code>pkg/ebook</code> PDF-write — no PDF writer; PDF is
 extract-only; unified-translator rejects <code>.pdf</code> output.</li>
 </ol>
 <blockquote>
-<p>Output formats are EPUB / FB2 / TXT / HTML / MD.</p>
+<p>Resolved Rev 3: <code>pkg/ebook</code> DOCX-write — now Implemented
+(pure-Go OOXML writer <code>pkg/ebook/docx_writer.go</code>, commit
+87cd2be; real DeepSeek run → <code>garden_es.docx</code> =
+<code>Microsoft Word 2007+</code>). Output formats are now EPUB / FB2 /
+TXT / HTML / MD / DOCX.</p>
 </blockquote>
 <h2 id="operator-blocked-list-11.4.45">Operator-blocked list
 (§11.4.45)</h2>
@@ -435,20 +448,27 @@ hardcoded zeros.</li>
 </ul>
 <h2 id="top-gaps-engineering">Top gaps (engineering)</h2>
 <ol type="1">
-<li><strong>Video-confirmation 20/472.</strong> 20 rows carry real,
-ffprobe- and content-verified recordings (Status.md cites each
-<code>.mp4</code>; the 3 video-surfaced bug fixes — prep-translator
+<li><strong>Video-confirmation 21/472</strong> (+ 1
+real-artifact-confirmed: DOCX output). 21 rows carry real, ffprobe- and
+content-verified recordings (Status.md cites each <code>.mp4</code>; the
+new <code>-multipass</code> video is
+<code>helixtranslate-cli-multipass-verify-20260615.mp4</code>, ffprobe
+888x630/93fr/9.3s; the 3 video-surfaced bug fixes — prep-translator
 dead, server TLS startup, REST hardcoded target-lang — are in commit
 <code>a5e8866</code>). All other runtime features carry
 <code>PENDING</code>. Per §11.4.2/§11.4.107 nothing else may be marked
 video-confirmed without a real, content-verified file.</li>
-<li><strong>DOCX/PDF output unimplemented</strong> —
-<code>pkg/ebook</code> has FB2-write + EPUB-write only. Two Rev-2 gap
-rows record this honestly; output is EPUB/FB2/TXT/HTML/MD.</li>
-<li><strong><code>-verify</code> ≠ multipass engine</strong> —
+<li><strong>PDF output unimplemented</strong> — <code>pkg/ebook</code>
+now has FB2/EPUB/DOCX writers; PDF-write remains the one open gap row.
+Output is EPUB/FB2/TXT/HTML/MD/DOCX.</li>
+<li><strong><code>-multipass</code> wired (d53e085);
+<code>-verify</code> ≠ <code>-multipass</code></strong> —
 unified-translator <code>-verify</code> runs the CLI’s own per-step
-check; the <code>pkg/verification</code> multi-pass polisher has no CLI
-entry point wired in.</li>
+check; the new <code>-multipass</code> flag invokes the
+<code>pkg/verification</code> multi-pass polisher engine (now wired +
+video-confirmed). cmd/cli write-safety FIXED (87cd2be, atomic
+write/no-clobber, guard cmd/cli/no_partial_output_test.go) + title
+path-leak FIXED (d53e085).</li>
 <li><strong>2 binaries OPERATOR-BLOCKED + 1 local STUB</strong> —
 <code>translate-ssh</code>/<code>ebook-translator</code> need a remote
 SSH/llama.cpp host; <code>cmd/translator</code> local path is a
@@ -460,7 +480,7 @@ feature-disabled-by-config, not a defect.</li>
 (<code>Not-inventoried</code> everywhere). Repo has extensive
 <code>_test.go</code> + <code>test/</code> suites; mapping suites →
 features is future work.</li>
-<li><strong>4 stubs + 2 unimplemented + 3 partials</strong> must either
+<li><strong>4 stubs + 1 unimplemented + 3 partials</strong> must either
 be implemented or reclassified per §11.4.90 before they can be claimed
 as working capabilities.</li>
 <li><strong>UNCONFIRMED LLM determinations</strong> carried from the
@@ -471,8 +491,9 @@ several <code>llms_verifier</code> packages
 <code>doc_processor/archdoc</code>.</li>
 </ol>
 <h2 id="video-coverage-ratio">Video-coverage ratio</h2>
-<p><code>20 / 472</code> enumerated rows = <strong>4.3%</strong> (≈ 4.8%
-against the 417 headline), up from <code>1 / 470</code>. This is the
+<p><code>21 / 472</code> enumerated rows = <strong>4.5%</strong> (≈ 5.0%
+against the 417 headline), up from <code>20 / 472</code>. Plus 1
+real-artifact-confirmed (DOCX output, video PENDING). This is the
 primary metric to drive upward; each anti-bluff §11.4.107 recording
 increments the numerator.</p>
 <h2 id="cross-references">Cross-references</h2>

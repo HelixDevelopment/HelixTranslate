@@ -1,7 +1,17 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 76
-**Last modified:** 2026-06-15T18:05:00Z
+**Revision:** 77
+**Last modified:** 2026-06-15T18:50:00Z
+
+## ✅ §11.4.153 LEDGER RE-SYNC (2026-06-15, +DOCX output + `-multipass` video + cli atomic-write)
+Three capabilities became real+evidenced this session and landed+pushed; the feature ledger
+(`docs/features/Status.md` + `Status_Summary.md`) is re-synced honestly (docs UNCOMMITTED — conductor commits, no `git add -A`):
+- **DOCX output** — gap → **Implemented** (pure-Go OOXML writer `pkg/ebook/docx_writer.go`, commit `87cd2be`). Verified this session by re-producing a `.docx` via the shipped writer → `file` = `Microsoft Word 2007+`, all 4 OOXML parts, real translated content, correct XML escaping. **Real-artifact-confirmed (NOT video — no `.mp4` yet, video PENDING).**
+- **`-multipass` multi-pass verification** — now **video-confirmed**: `helixtranslate-cli-multipass-verify-20260615.mp4` (ffprobe 888x630, 93 frames, 9.3s) shows "Step 4: Multi-pass Polishing ✅ Success — Polished over 1 pass with deepseek" + real Spanish output. Engine wired into unified-translator via `-multipass` in `d53e085`.
+- **cmd/cli atomic-write / no-clobber** (`87cd2be`) — write-safety fix, guard `cmd/cli/no_partial_output_test.go` (unit-proven, no video required); title path-leak fixed in `d53e085`.
+- **Honest counts:** video-confirmed **20 → 21** (the `-multipass` flip) + **1 real-artifact-confirmed** (DOCX); Status/Status_Summary Rev 2→3; not-implemented gap rows 2→1.
+- **Exports re-synced:** `docs_chain sync features` (6 derived nodes) → `docs_chain verify features` = **in-sync (RC=0)**; HTML+PDF+DOCX siblings regenerated for both docs (all `file`-verified).
+- **Remaining gaps now:** PDF **output** (no writer); `cmd/translator` local path STUB; llm_provider gofmt hygiene (23 flagged files); cosmetic docx title-twice; web-dashboard translation video **OPERATOR-BLOCKED** (HelixQA-gated). `translate-ssh`/`ebook-translator` stay OPERATOR-BLOCKED.
 
 ## ✅ GAP-CLOSURE BATCH (2026-06-15, video/coverage-surfaced gaps — all reviewed GO + pushed)
 Three gap-closures (each RED-first §11.4.115, mutation-verified, independent batch review VERDICT GO §11.4.142) landed + pushed:

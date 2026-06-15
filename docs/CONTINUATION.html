@@ -175,8 +175,47 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 76 <strong>Last modified:</strong>
-2026-06-15T18:05:00Z</p>
+<p><strong>Revision:</strong> 77 <strong>Last modified:</strong>
+2026-06-15T18:50:00Z</p>
+<h2
+id="ledger-re-sync-2026-06-15-docx-output--multipass-video-cli-atomic-write">✅
+§11.4.153 LEDGER RE-SYNC (2026-06-15, +DOCX output +
+<code>-multipass</code> video + cli atomic-write)</h2>
+<p>Three capabilities became real+evidenced this session and
+landed+pushed; the feature ledger (<code>docs/features/Status.md</code>
++ <code>Status_Summary.md</code>) is re-synced honestly (docs
+UNCOMMITTED — conductor commits, no <code>git add -A</code>): -
+<strong>DOCX output</strong> — gap → <strong>Implemented</strong>
+(pure-Go OOXML writer <code>pkg/ebook/docx_writer.go</code>, commit
+<code>87cd2be</code>). Verified this session by re-producing a
+<code>.docx</code> via the shipped writer → <code>file</code> =
+<code>Microsoft Word 2007+</code>, all 4 OOXML parts, real translated
+content, correct XML escaping. <strong>Real-artifact-confirmed (NOT
+video — no <code>.mp4</code> yet, video PENDING).</strong> -
+<strong><code>-multipass</code> multi-pass verification</strong> — now
+<strong>video-confirmed</strong>:
+<code>helixtranslate-cli-multipass-verify-20260615.mp4</code> (ffprobe
+888x630, 93 frames, 9.3s) shows “Step 4: Multi-pass Polishing ✅ Success
+— Polished over 1 pass with deepseek” + real Spanish output. Engine
+wired into unified-translator via <code>-multipass</code> in
+<code>d53e085</code>. - <strong>cmd/cli atomic-write /
+no-clobber</strong> (<code>87cd2be</code>) — write-safety fix, guard
+<code>cmd/cli/no_partial_output_test.go</code> (unit-proven, no video
+required); title path-leak fixed in <code>d53e085</code>. -
+<strong>Honest counts:</strong> video-confirmed <strong>20 → 21</strong>
+(the <code>-multipass</code> flip) + <strong>1
+real-artifact-confirmed</strong> (DOCX); Status/Status_Summary Rev 2→3;
+not-implemented gap rows 2→1. - <strong>Exports re-synced:</strong>
+<code>docs_chain sync features</code> (6 derived nodes) →
+<code>docs_chain verify features</code> = <strong>in-sync
+(RC=0)</strong>; HTML+PDF+DOCX siblings regenerated for both docs (all
+<code>file</code>-verified). - <strong>Remaining gaps now:</strong> PDF
+<strong>output</strong> (no writer); <code>cmd/translator</code> local
+path STUB; llm_provider gofmt hygiene (23 flagged files); cosmetic docx
+title-twice; web-dashboard translation video
+<strong>OPERATOR-BLOCKED</strong> (HelixQA-gated).
+<code>translate-ssh</code>/<code>ebook-translator</code> stay
+OPERATOR-BLOCKED.</p>
 <h2
 id="gap-closure-batch-2026-06-15-videocoverage-surfaced-gaps-all-reviewed-go-pushed">✅
 GAP-CLOSURE BATCH (2026-06-15, video/coverage-surfaced gaps — all
