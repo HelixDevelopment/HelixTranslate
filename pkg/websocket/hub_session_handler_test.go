@@ -20,7 +20,7 @@ import (
 // handleEvent skips the per-session filter when client.SessionID == "", so a
 // dashboard that connected for session "alpha" received EVERY session's events
 // (including "beta"). The canonical cmd/monitor-server set SessionID correctly;
-// the hub's own server method did not, and cmd/ssh-translation uses it.
+// the hub's own server method did not.
 //
 // RED on the broken handler: the client receives the "beta" event -> FAIL.
 // GREEN after the fix (wsHandler reads session_id): only "alpha" arrives.
