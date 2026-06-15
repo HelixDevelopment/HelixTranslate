@@ -144,7 +144,11 @@ echo "PASS: API handler tests execute and pass"
 # -----------------------------------------------------------------------------
 echo ">>> Step 7: Challenge script integrity..."
 CHALLENGE_COUNT=0
-for script in "${PROJECT_ROOT}"/challenges/scripts/*_challenge.sh; do
+# §11.4.1 fix: this project's executable challenge scripts live in this very
+# directory (pkg/challenge_runner/scripts/, == SCRIPT_DIR), not in a
+# challenges/scripts/ subdir (the old path matched 0 here and FAIL-bluffed even
+# though 11+ real challenges exist). Count the project's actual challenge home.
+for script in "${SCRIPT_DIR}"/*_challenge.sh; do
     if [ -x "$script" ]; then
         CHALLENGE_COUNT=$((CHALLENGE_COUNT + 1))
     fi
