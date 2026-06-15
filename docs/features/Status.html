@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 3 <strong>Last modified:</strong>
-2026-06-15T18:45:00Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 4 <strong>Last modified:</strong>
+2026-06-15T20:10:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -211,11 +211,15 @@ produced <code>garden_es.docx</code> = <code>Microsoft Word 2007+</code>
 (well-formed WordprocessingML, real translation; pure-Go OOXML writer
 <code>pkg/ebook/docx_writer.go</code>, commit 87cd2be) — confirmed by
 the produced artifact’s file type, no <code>.mp4</code> exists yet
-(video PENDING). <strong>Honest gaps recorded, NOT confirmed:</strong>
-PDF output is still unimplemented (no PDF writer in
-<code>pkg/ebook</code>; unified-translator rejects <code>.pdf</code>);
-<code>cmd/translator</code> local path is a STUB (“local translation not
-yet implemented”); <code>translate-ssh</code> +
+(video PENDING). <strong>Real-artifact / unit-confirmed (not
+video):</strong> <strong>PDF output</strong> is now Implemented (commit
+fb265e7) — <code>pkg/ebook/pdf_writer.go</code> renders the
+Book→HTML5→<code>weasyprint</code>→valid Cyrillic-faithful PDF, wired
+into unified-translator (<code>.pdf</code> output; main.go:1160);
+<code>pkg/ebook</code> PDF tests green this session (no
+<code>.mp4</code> yet, video PENDING). <strong>Honest gaps recorded, NOT
+confirmed:</strong> <code>cmd/translator</code> local path is a STUB
+(“local translation not yet implemented”); <code>translate-ssh</code> +
 <code>ebook-translator</code> are OPERATOR-BLOCKED (need a remote
 SSH/llama.cpp worker host); <code>GET /api/v1/verified-models</code>
 returns 404 because LLMsVerifier is disabled in config. Everything else
@@ -263,13 +267,15 @@ tally)</td>
 </tr>
 <tr>
 <td>Enumerated feature rows in this doc</td>
-<td><strong>472</strong> (470 source-inventory rows + 2 gap rows added
-Rev 2: DOCX-write [now Implemented Rev 3], PDF-write [still
-unimplemented])</td>
+<td><strong>478</strong> (470 source-inventory rows + 2 gap rows added
+Rev 2 [DOCX-write→Implemented Rev 3, PDF-write→Implemented Rev 4] + 6
+new rows added Rev 4: cmd/model-bridge CLI ×2, pkg/bridge ×2,
+internal/verifier affirmative-gate ×1, pkg/api/dashboard.go ×1)</td>
 </tr>
 <tr>
 <td>Implemented</td>
-<td>464 (DOCX-write flipped gap→Implemented Rev 3, commit 87cd2be)</td>
+<td>471 (DOCX-write Rev 3 + PDF-write flipped gap→Implemented Rev 4
+[commit fb265e7] + 6 new Rev 4 rows all Implemented)</td>
 </tr>
 <tr>
 <td>Stub</td>
@@ -280,8 +286,8 @@ unimplemented])</td>
 </tr>
 <tr>
 <td>Not implemented (gap rows)</td>
-<td>1 (<code>pkg/ebook</code> PDF-write — no writer exists; output now
-EPUB/FB2/TXT/HTML/MD/DOCX)</td>
+<td>0 (PDF-write flipped gap→Implemented Rev 4, commit fb265e7; output
+now EPUB/FB2/TXT/HTML/MD/DOCX/PDF)</td>
 </tr>
 <tr>
 <td>Partial</td>
@@ -299,10 +305,16 @@ remote SSH/llama.cpp worker host)</td>
 <tr>
 <td>Video-confirmed</td>
 <td><strong>21</strong> (real, content-verified recordings this session
-— see Anti-bluff note) — ≈ 4.5% of 470 enumerated rows (≈ 5.0% of the
-417 headline). Plus <strong>1 real-artifact-confirmed</strong> (DOCX
-output — produced <code>.docx</code> = Microsoft Word 2007+; video
-PENDING)</td>
+— see Anti-bluff note) — ≈ 4.4% of 478 enumerated rows (≈ 5.0% of the
+417 headline). Plus <strong>2 real-artifact/unit-confirmed</strong>
+(DOCX output — produced <code>.docx</code> = Microsoft Word 2007+; PDF
+output — <code>pkg/ebook</code> tests green + weasyprint present; both
+video PENDING). Rev-4 additions (bridge CLI+MCP, pkg/bridge,
+internal/verifier gate, pkg/api/dashboard.go) are PASS at
+unit/integration/live-run level with video PENDING (terminal-surface
+recordings owed) or SKIP (web dashboard — needs HelixQA web/video
+backend) or N/A (internal logic) — none claim a video that doesn’t
+exist</td>
 </tr>
 <tr>
 <td>Video-confirmation PENDING</td>
@@ -2674,6 +2686,72 @@ verified models to SQLite</td>
 </tr>
 </tbody>
 </table>
+<h2 id="cmdmodel-bridge">cmd/model-bridge</h2>
+<p>LLMsVerifier→component+agent bridge (no local models): selects the
+best LLMsVerifier-scored model, exposes it to agents/components via a
+CLI and an MCP stdio server wired in <code>.mcp.json</code>. Source:
+<code>cmd/model-bridge/{main.go,mcp.go}</code>,
+<code>pkg/bridge/</code>, commit ab1bed3 (+ routing seam a5860b2).</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>model-bridge</td>
+<td>LLMsVerifier→agent bridge CLI</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Selects best LLMsVerifier-scored model (top-1 + fallback chain) and
+translates/invokes through it; no local models</td>
+<td>Covered (pkg/bridge unit+integration, <code>go test -race</code>
+green this session)</td>
+<td><strong>PASS — real run captured</strong> (best-model selection
+<code>groq/allam-2-7b</code> score 0.906; <code>Invoke</code>→“Buenos
+días, amigo.”)</td>
+<td>PENDING (CLI/MCP terminal surface — asciinema→agg→ffmpeg→ffprobe
+<code>helixtranslate-bridge-*</code> recording owed; not yet
+recorded)</td>
+</tr>
+<tr>
+<td>model-bridge</td>
+<td>MCP stdio server (<code>.mcp.json</code>)</td>
+<td>CLI/Infra</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Exposes the selected model to MCP clients over stdio; wired as
+<code>model-bridge</code> in <code>.mcp.json</code>
+(<code>./build/model-bridge</code>)</td>
+<td>Covered (<code>cmd/model-bridge/mcp_test.go</code>)</td>
+<td><strong>PASS — MCP live nonce-echo captured</strong>
+(<code>HELIX-PROOF-9b21x</code> round-tripped through the MCP
+server)</td>
+<td>PENDING (terminal surface; recording owed)</td>
+</tr>
+</tbody>
+</table>
 <h2 id="cmdworkable-items">cmd/workable-items</h2>
 <table style="width:100%;">
 <colgroup>
@@ -3411,14 +3489,28 @@ PENDING</td>
 <td>ebook</td>
 <td>PDF write (output)</td>
 <td>Library</td>
-<td><strong>Not implemented</strong></td>
-<td>Unwired</td>
-<td>GAP (§11.4.6): no PDF writer exists in <code>pkg/ebook</code>; PDF
-is extract-only. unified-translator rejects <code>-output</code> .pdf.
-Output formats are limited to EPUB/FB2/TXT/HTML/MD</td>
-<td>None</td>
-<td><strong>GAP — unimplemented (no writer)</strong></td>
-<td>N/A (no feature to record)</td>
+<td><strong>Implemented</strong></td>
+<td>Wired</td>
+<td>PDF writer <code>pkg/ebook/pdf_writer.go</code> (commit fb265e7):
+renders the in-memory Book to UTF-8 HTML5 then hands it to
+<code>weasyprint</code> to emit a VALID, Cyrillic-faithful PDF
+(Standard-14 fonts can’t render Cyrillic — weasyprint embeds glyphs,
+avoiding a silent-glyph-drop bluff). Wired into unified-translator
+generateOutput (<code>case .pdf</code> →
+<code>ebook.NewPDFWriter().Write</code>, main.go:1160);
+<code>.pdf</code> is a supported <code>-output</code> extension. Honest
+typed <code>ErrWeasyPrintUnavailable</code> when weasyprint absent
+(§11.4.3/§11.4.6). Guards: pkg/ebook/pdf_writer_test.go
+(<code>TestPDFWriter_ProducesValidPDFCarryingTranslatedText</code>,
+<code>_UnavailableWeasyPrint</code>)</td>
+<td>Covered</td>
+<td><strong>PASS</strong> — <code>go test ./pkg/ebook</code> green this
+session
+(<code>TestPDFWriter_ProducesValidPDFCarryingTranslatedText</code>
+asserts a valid PDF carrying the translated text; weasyprint present at
+/opt/homebrew/bin/weasyprint)</td>
+<td>PENDING (translate→weasyprint→.pdf run is recordable; no
+<code>.mp4</code> yet — recording owed)</td>
 </tr>
 </tbody>
 </table>
@@ -3889,6 +3981,58 @@ pass with deepseek” + real Spanish output)</td>
 <td>Not-inventoried</td>
 <td>Source-confirmed</td>
 <td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2
+id="internalverifier-llmsverifier-consumer-integration">internal/verifier
+— LLMsVerifier consumer integration</h2>
+<p>Consumer-side LLMsVerifier verification gate (client + scoring +
+discovery + selection). Source:
+<code>internal/verifier/pipeline.go</code>.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>internal/verifier</td>
+<td>Affirmative-response hard-gate</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired (verification pipeline)</td>
+<td>Correctness fix (commit 97a8afd): a model with
+<code>affirmative_response=0</code> is now a HARD disqualifier —
+rejected by the verification gate regardless of other scores</td>
+<td>Covered + <strong>§11.4.115 polarity guard</strong>
+<code>pipeline_affirmative_gate_test.go</code> (default RED reproduces
+pre-fix defect; <code>RED_MODE=0</code> GREEN guard asserts ABSENT)</td>
+<td><strong>PASS</strong> — observed this session: default RED correctly
+FAILs on pre-fix defect; <code>RED_MODE=0 go test -race</code> GREEN
+(<code>ok internal/verifier</code>)</td>
+<td>N/A (§11.4.6 — internal verification gate, no user-visible
+surface)</td>
 </tr>
 </tbody>
 </table>
@@ -4691,6 +4835,69 @@ websocket, batch, progress, report, logger, hardware, hash</h2>
 </tr>
 </tbody>
 </table>
+<h2 id="pkgbridge-llmsverifiercomponentagent-bridge">pkg/bridge —
+LLMsVerifier→component+agent bridge</h2>
+<p>In-process bridge (no local models) that selects the best
+LLMsVerifier-scored model and routes component/agent calls to it; backs
+<code>cmd/model-bridge</code> CLI + MCP. Source:
+<code>pkg/bridge/bridge.go</code>, commit ab1bed3 (+ routing mutation
+seam a5860b2).</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bridge</td>
+<td>Best-model selection</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired (via cmd/model-bridge CLI+MCP)</td>
+<td>Picks top-1 LLMsVerifier-scored model with a fallback chain; no
+local models</td>
+<td>Covered (<code>pkg/bridge/bridge_test.go</code> unit+integration,
+-race green)</td>
+<td><strong>PASS — real selection captured</strong>
+(<code>groq/allam-2-7b</code> score 0.906)</td>
+<td>N/A (internal selection logic — surfaced via cmd/model-bridge)</td>
+</tr>
+<tr>
+<td>bridge</td>
+<td><code>Invoke</code> routes to BestModel</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Routes the invocation to the selected best model</td>
+<td>Covered + <strong>§1.1 paired mutation seam</strong>
+<code>TestBridge_Invoke_RoutesToBestModel</code> (RED FAILs on
+mis-route, -race green)</td>
+<td><strong>PASS</strong> (<code>Invoke</code>→“Buenos días, amigo.”
+through selected model; routing guard catches mis-route)</td>
+<td>N/A (internal routing — surfaced via cmd/model-bridge)</td>
+</tr>
+</tbody>
+</table>
 <h2 id="pkgversion">pkg/version</h2>
 <table style="width:100%;">
 <colgroup>
@@ -5119,6 +5326,65 @@ translation</td>
 <td>Not-inventoried</td>
 <td>Source-confirmed</td>
 <td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="web-dashboard-backend-handler-pkgapidashboard.go">Web Dashboard
+backend handler — pkg/api/dashboard.go</h2>
+<p>Backend that serves the dashboard page (<code>/</code>,
+<code>/dashboard</code>, <code>/monitor</code>) and the translations
+endpoints. Was previously UNROUTED (returned 404); now wired so the
+dashboard genuinely translates for end users. Source:
+<code>pkg/api/dashboard.go</code>, commit f6ba5cc.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api/dashboard.go</td>
+<td>Dashboard page + translations endpoints</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired (was Unwired/404 pre-fix)</td>
+<td>Serves the dashboard HTML at <code>/</code>,
+<code>/dashboard</code>, <code>/monitor</code> and the
+<code>GET/POST /api/v1/translations</code> path; Start-Translation now
+runs a real translation through the wired UI path (no longer a 404)</td>
+<td>Covered + <strong>§11.4.115 RED→GREEN guard</strong>
+<code>dashboard_test.go</code> (default GREEN asserts pages 200 + real
+translation start; <code>RED_MODE=1</code> reproduces the pre-fix 404) —
+<code>go test -race ./pkg/api</code> GREEN this session</td>
+<td><strong>PASS (unit/integration)</strong> —
+<code>dashboard_test.go</code> observed green this session; live run
+produced real translation “Dobro jutro, prijatelju.” through the
+dashboard handler</td>
+<td><strong>SKIP (§11.4.3/§11.4.52)</strong> — autonomous browser+video
+capture needs the HelixQA web/video backend, off-limits to this session;
+tracked migration item owed (a
+<code>helixtranslate-web-dashboard-*</code> recording requires that
+backend). NOT a faked confirmation</td>
 </tr>
 </tbody>
 </table>
@@ -7499,19 +7765,22 @@ and content-verified recordings this session (see the Anti-bluff note
 for the full list); DOCX output is real-artifact-confirmed (produced
 <code>.docx</code> = Microsoft Word 2007+) with its video still PENDING.
 Every other runtime/user-visible feature is <code>PENDING</code> a
-recording. This is stated, not hidden. 1a. <strong>DOCX output is now
+recording. This is stated, not hidden. 1a. <strong>DOCX output is
 Implemented (Rev 3, commit 87cd2be)</strong> — pure-Go OOXML writer; a
 real DeepSeek run produced <code>garden_es.docx</code> =
-<code>Microsoft Word 2007+</code>. PDF output is still unimplemented (no
-PDF writer in <code>pkg/ebook</code>; unified-translator rejects
-<code>.pdf</code>). Output formats are now EPUB/FB2/TXT/HTML/MD/DOCX.
-1b. <strong><code>-multipass</code> ≠ <code>-verify</code>.</strong> The
-unified-translator <code>-verify</code> flag runs the CLI’s own per-step
-output check; the separate <code>-multipass</code> flag (d53e085)
-invokes the <code>pkg/verification</code> multi-pass polisher engine —
-now wired and video-confirmed. 1c. <strong><code>cmd/translator</code>
-local path is a STUB</strong> (“local translation not yet implemented”);
-its remote path is OPERATOR-BLOCKED (no SSH/llama.cpp worker host). 1d.
+<code>Microsoft Word 2007+</code>. <strong>PDF output is now Implemented
+(Rev 4, commit fb265e7)</strong> — <code>pkg/ebook/pdf_writer.go</code>
+(Book→HTML5→weasyprint→Cyrillic-faithful PDF), wired into
+unified-translator (<code>.pdf</code> output, main.go:1160);
+<code>pkg/ebook</code> PDF tests green. Output formats are now
+EPUB/FB2/TXT/HTML/MD/DOCX/PDF. 1b. <strong><code>-multipass</code> ≠
+<code>-verify</code>.</strong> The unified-translator
+<code>-verify</code> flag runs the CLI’s own per-step output check; the
+separate <code>-multipass</code> flag (d53e085) invokes the
+<code>pkg/verification</code> multi-pass polisher engine — now wired and
+video-confirmed. 1c. <strong><code>cmd/translator</code> local path is a
+STUB</strong> (“local translation not yet implemented”); its remote path
+is OPERATOR-BLOCKED (no SSH/llama.cpp worker host). 1d.
 <strong><code>translate-ssh</code> + <code>ebook-translator</code> are
 OPERATOR-BLOCKED</strong> — both require a remote SSH worker host
 running llama.cpp; none available. Binaries build and run as far as

@@ -1,11 +1,11 @@
 # HelixTranslate — Feature Status
 
-**Revision:** 3
-**Last modified:** 2026-06-15T18:45:00Z
+**Revision:** 4
+**Last modified:** 2026-06-15T20:10:00Z
 **Authority:** Derived from `docs/features/.feature_inventory_raw.md` (Revision 1). Per §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header), §11.4.56 (two-audience summary → `Status_Summary.md`), §11.4.60 (always-sync), §11.4.6 (no-guessing — every status reflects what the inventory actually found in source).
 **Scope:** Every one of the 417 inventoried features across CLI, API, Web, gRPC, Library, Submodule and Infra. `helix_qa` deliberately not included.
 
-> **Anti-bluff note (§11.4.6 / §11.4.2 / §11.4.107):** `Video-confirmation` is set to a real file **only** where a recording exists AND that recording genuinely demonstrates the feature working (each cited `.mp4` was ffprobe-verified for non-zero duration+frames and content-verified against its claimed behaviour — e.g. real DeepSeek output in the target language, real gRPC translated text, live WebSocket count change). **21 feature rows are video-confirmed** this session across unified-translator (DeepSeek translate, EPUB→TXT / HTML→EPUB / FB2→EPUB / FB2→FB2 conversions, Serbian-Cyrillic, `-script` Cyrillic↔Latin, format-detection, help/version, `-verify`, **`-multipass` multi-pass polishing engine**), the REST API server (POST /api/v1/translate real DeepSeek + target_lang FIXED, TLS startup FIXED, /health · /api/v1/version · /api/v1/providers), the gRPC server (real EN→ES), markdown-translator (EPUB↔MD round-trip), preparation-translator (FIXED real analysis), cmd/cli (real DeepSeek), monitor-server (live WS hub), and the DeepSeek library client. **Real-artifact-confirmed (not video):** **DOCX output** is now Implemented — a real DeepSeek run produced `garden_es.docx` = `Microsoft Word 2007+` (well-formed WordprocessingML, real translation; pure-Go OOXML writer `pkg/ebook/docx_writer.go`, commit 87cd2be) — confirmed by the produced artifact's file type, no `.mp4` exists yet (video PENDING). **Honest gaps recorded, NOT confirmed:** PDF output is still unimplemented (no PDF writer in `pkg/ebook`; unified-translator rejects `.pdf`); `cmd/translator` local path is a STUB ("local translation not yet implemented"); `translate-ssh` + `ebook-translator` are OPERATOR-BLOCKED (need a remote SSH/llama.cpp worker host); `GET /api/v1/verified-models` returns 404 because LLMsVerifier is disabled in config. Everything else is `PENDING` (a recording is owed) or `N/A` (no user-visible video applies — e.g. CLI flags, internal library types). Absence of a runtime recording is stated honestly, never papered over.
+> **Anti-bluff note (§11.4.6 / §11.4.2 / §11.4.107):** `Video-confirmation` is set to a real file **only** where a recording exists AND that recording genuinely demonstrates the feature working (each cited `.mp4` was ffprobe-verified for non-zero duration+frames and content-verified against its claimed behaviour — e.g. real DeepSeek output in the target language, real gRPC translated text, live WebSocket count change). **21 feature rows are video-confirmed** this session across unified-translator (DeepSeek translate, EPUB→TXT / HTML→EPUB / FB2→EPUB / FB2→FB2 conversions, Serbian-Cyrillic, `-script` Cyrillic↔Latin, format-detection, help/version, `-verify`, **`-multipass` multi-pass polishing engine**), the REST API server (POST /api/v1/translate real DeepSeek + target_lang FIXED, TLS startup FIXED, /health · /api/v1/version · /api/v1/providers), the gRPC server (real EN→ES), markdown-translator (EPUB↔MD round-trip), preparation-translator (FIXED real analysis), cmd/cli (real DeepSeek), monitor-server (live WS hub), and the DeepSeek library client. **Real-artifact-confirmed (not video):** **DOCX output** is now Implemented — a real DeepSeek run produced `garden_es.docx` = `Microsoft Word 2007+` (well-formed WordprocessingML, real translation; pure-Go OOXML writer `pkg/ebook/docx_writer.go`, commit 87cd2be) — confirmed by the produced artifact's file type, no `.mp4` exists yet (video PENDING). **Real-artifact / unit-confirmed (not video):** **PDF output** is now Implemented (commit fb265e7) — `pkg/ebook/pdf_writer.go` renders the Book→HTML5→`weasyprint`→valid Cyrillic-faithful PDF, wired into unified-translator (`.pdf` output; main.go:1160); `pkg/ebook` PDF tests green this session (no `.mp4` yet, video PENDING). **Honest gaps recorded, NOT confirmed:** `cmd/translator` local path is a STUB ("local translation not yet implemented"); `translate-ssh` + `ebook-translator` are OPERATOR-BLOCKED (need a remote SSH/llama.cpp worker host); `GET /api/v1/verified-models` returns 404 because LLMsVerifier is disabled in config. Everything else is `PENDING` (a recording is owed) or `N/A` (no user-visible video applies — e.g. CLI flags, internal library types). Absence of a runtime recording is stated honestly, never papered over.
 
 ## Operator-blocked items (read first, §11.4.45)
 
@@ -20,13 +20,13 @@ Two binaries are OPERATOR-BLOCKED — both require a remote SSH worker host runn
 | Metric | Value |
 |---|---|
 | Headline feature total (inventory's deduplicated per-category tally) | **417** |
-| Enumerated feature rows in this doc | **472** (470 source-inventory rows + 2 gap rows added Rev 2: DOCX-write [now Implemented Rev 3], PDF-write [still unimplemented]) |
-| Implemented | 464 (DOCX-write flipped gap→Implemented Rev 3, commit 87cd2be) |
+| Enumerated feature rows in this doc | **478** (470 source-inventory rows + 2 gap rows added Rev 2 [DOCX-write→Implemented Rev 3, PDF-write→Implemented Rev 4] + 6 new rows added Rev 4: cmd/model-bridge CLI ×2, pkg/bridge ×2, internal/verifier affirmative-gate ×1, pkg/api/dashboard.go ×1) |
+| Implemented | 471 (DOCX-write Rev 3 + PDF-write flipped gap→Implemented Rev 4 [commit fb265e7] + 6 new Rev 4 rows all Implemented) |
 | Stub | 4 (`POST /api/v1/translate/ebook`, `POST /api/v1/preparation/analyze`, `GET /api/v1/preparation/result/:id`, `POST /api/v1/translate-with-verification`) |
-| Not implemented (gap rows) | 1 (`pkg/ebook` PDF-write — no writer exists; output now EPUB/FB2/TXT/HTML/MD/DOCX) |
+| Not implemented (gap rows) | 0 (PDF-write flipped gap→Implemented Rev 4, commit fb265e7; output now EPUB/FB2/TXT/HTML/MD/DOCX/PDF) |
 | Partial | 3 (`POST /api/batch` on standalone `pkg/api/server.go` — returns `queued` batch_id only, no translation; `vision_engine` OpenCV — stub default, real impl behind build tag; `cmd/translator` — local path STUB + remote OPERATOR-BLOCKED) |
 | Operator-blocked | 2 (`translate-ssh`, `ebook-translator` — need remote SSH/llama.cpp worker host) |
-| Video-confirmed | **21** (real, content-verified recordings this session — see Anti-bluff note) — ≈ 4.5% of 470 enumerated rows (≈ 5.0% of the 417 headline). Plus **1 real-artifact-confirmed** (DOCX output — produced `.docx` = Microsoft Word 2007+; video PENDING) |
+| Video-confirmed | **21** (real, content-verified recordings this session — see Anti-bluff note) — ≈ 4.4% of 478 enumerated rows (≈ 5.0% of the 417 headline). Plus **2 real-artifact/unit-confirmed** (DOCX output — produced `.docx` = Microsoft Word 2007+; PDF output — `pkg/ebook` tests green + weasyprint present; both video PENDING). Rev-4 additions (bridge CLI+MCP, pkg/bridge, internal/verifier gate, pkg/api/dashboard.go) are PASS at unit/integration/live-run level with video PENDING (terminal-surface recordings owed) or SKIP (web dashboard — needs HelixQA web/video backend) or N/A (internal logic) — none claim a video that doesn't exist |
 | Video-confirmation PENDING | runtime/user-visible features without a recording yet |
 | Video-confirmation N/A | flags, internal library types, infra middleware (no standalone user-visible video) |
 
@@ -301,6 +301,15 @@ Two binaries are OPERATOR-BLOCKED — both require a remote SSH worker host runn
 | verify-models | `-min-score` | CLI | Implemented | Wired | Min overall score to persist | Not-inventoried | Source-confirmed | N/A |
 | verify-models | `-timeout` | CLI | Implemented | Wired | Overall verification timeout | Not-inventoried | Source-confirmed | N/A |
 
+## cmd/model-bridge
+
+LLMsVerifier→component+agent bridge (no local models): selects the best LLMsVerifier-scored model, exposes it to agents/components via a CLI and an MCP stdio server wired in `.mcp.json`. Source: `cmd/model-bridge/{main.go,mcp.go}`, `pkg/bridge/`, commit ab1bed3 (+ routing seam a5860b2).
+
+| Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
+|---|---|---|---|---|---|---|---|---|
+| model-bridge | LLMsVerifier→agent bridge CLI | CLI | Implemented | Wired | Selects best LLMsVerifier-scored model (top-1 + fallback chain) and translates/invokes through it; no local models | Covered (pkg/bridge unit+integration, `go test -race` green this session) | **PASS — real run captured** (best-model selection `groq/allam-2-7b` score 0.906; `Invoke`→"Buenos días, amigo.") | PENDING (CLI/MCP terminal surface — asciinema→agg→ffmpeg→ffprobe `helixtranslate-bridge-*` recording owed; not yet recorded) |
+| model-bridge | MCP stdio server (`.mcp.json`) | CLI/Infra | Implemented | Wired | Exposes the selected model to MCP clients over stdio; wired as `model-bridge` in `.mcp.json` (`./build/model-bridge`) | Covered (`cmd/model-bridge/mcp_test.go`) | **PASS — MCP live nonce-echo captured** (`HELIX-PROOF-9b21x` round-tripped through the MCP server) | PENDING (terminal surface; recording owed) |
+
 ## cmd/workable-items
 
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
@@ -378,7 +387,7 @@ Two binaries are OPERATOR-BLOCKED — both require a remote SSH worker host runn
 | ebook | TXT parse | Library | Implemented | Wired | Parse plain text (configurable 64 MiB line cap) | Not-inventoried | Source-confirmed | N/A |
 | ebook | PDF text extraction | Library | Implemented | Wired | Extract text via ledongthuc/pdf | Not-inventoried | Source-confirmed | N/A |
 | ebook | DOCX write (output) | Library | Implemented | Wired | Pure-Go OOXML writer `pkg/ebook/docx_writer.go` (stdlib archive/zip + encoding/xml, zero new deps); emits the 4 required OOXML parts; XML specials auto-escaped via xml.Marshal chardata. Wired into unified-translator generateOutput (`case docx`). Real DeepSeek EN→ES → `garden_es.docx` = `Microsoft Word 2007+`, well-formed WordprocessingML with the real translation. Guards: pkg/ebook/docx_writer_test.go + .docx subtest in cmd/unified-translator/output_format_test.go (mutation-proven) | Covered | **PASS — real artifact verified** (produced .docx = `Microsoft Word 2007+`, 4 OOXML parts, real translated content + correct XML escaping; commit 87cd2be) | real-artifact verified (file=Microsoft Word 2007+); video PENDING |
-| ebook | PDF write (output) | Library | **Not implemented** | Unwired | GAP (§11.4.6): no PDF writer exists in `pkg/ebook`; PDF is extract-only. unified-translator rejects `-output` .pdf. Output formats are limited to EPUB/FB2/TXT/HTML/MD | None | **GAP — unimplemented (no writer)** | N/A (no feature to record) |
+| ebook | PDF write (output) | Library | **Implemented** | Wired | PDF writer `pkg/ebook/pdf_writer.go` (commit fb265e7): renders the in-memory Book to UTF-8 HTML5 then hands it to `weasyprint` to emit a VALID, Cyrillic-faithful PDF (Standard-14 fonts can't render Cyrillic — weasyprint embeds glyphs, avoiding a silent-glyph-drop bluff). Wired into unified-translator generateOutput (`case .pdf` → `ebook.NewPDFWriter().Write`, main.go:1160); `.pdf` is a supported `-output` extension. Honest typed `ErrWeasyPrintUnavailable` when weasyprint absent (§11.4.3/§11.4.6). Guards: pkg/ebook/pdf_writer_test.go (`TestPDFWriter_ProducesValidPDFCarryingTranslatedText`, `_UnavailableWeasyPrint`) | Covered | **PASS** — `go test ./pkg/ebook` green this session (`TestPDFWriter_ProducesValidPDFCarryingTranslatedText` asserts a valid PDF carrying the translated text; weasyprint present at /opt/homebrew/bin/weasyprint) | PENDING (translate→weasyprint→.pdf run is recordable; no `.mp4` yet — recording owed) |
 
 ## pkg/fb2 — FB2-specific XML
 
@@ -437,6 +446,14 @@ Two binaries are OPERATOR-BLOCKED — both require a remote SSH worker host runn
 | verification | Polishing reporter | Library | Implemented | Wired | Stats aggregation (consensus rates, issue/provider breakdown) | Not-inventoried | Source-confirmed | N/A |
 | verification | Polishing database | Library | Implemented | Wired | SQLite persistence for multi-pass sessions/pass records | Not-inventoried | Source-confirmed | N/A |
 | verification | Literary notes | Library | Implemented | Wired | Character/tone/theme/terminology/cultural note collection | Not-inventoried | Source-confirmed | N/A |
+
+## internal/verifier — LLMsVerifier consumer integration
+
+Consumer-side LLMsVerifier verification gate (client + scoring + discovery + selection). Source: `internal/verifier/pipeline.go`.
+
+| Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
+|---|---|---|---|---|---|---|---|---|
+| internal/verifier | Affirmative-response hard-gate | Library | Implemented | Wired (verification pipeline) | Correctness fix (commit 97a8afd): a model with `affirmative_response=0` is now a HARD disqualifier — rejected by the verification gate regardless of other scores | Covered + **§11.4.115 polarity guard** `pipeline_affirmative_gate_test.go` (default RED reproduces pre-fix defect; `RED_MODE=0` GREEN guard asserts ABSENT) | **PASS** — observed this session: default RED correctly FAILs on pre-fix defect; `RED_MODE=0 go test -race` GREEN (`ok internal/verifier`) | N/A (§11.4.6 — internal verification gate, no user-visible surface) |
 
 ## pkg/preparation — pre-translation analysis
 
@@ -533,6 +550,15 @@ Two binaries are OPERATOR-BLOCKED — both require a remote SSH worker host runn
 | models | Verifier registry | Library | Implemented | Wired | LLMsVerifier-backed registry w/ thresholds & filtering | Not-inventoried | Source-confirmed | PENDING |
 | modelsbridge | Models bridge | Library | Implemented | Wired | Adapter mapping models.LLMRequest/Response → llm.LLMClient | Not-inventoried | Source-confirmed | N/A |
 
+## pkg/bridge — LLMsVerifier→component+agent bridge
+
+In-process bridge (no local models) that selects the best LLMsVerifier-scored model and routes component/agent calls to it; backs `cmd/model-bridge` CLI + MCP. Source: `pkg/bridge/bridge.go`, commit ab1bed3 (+ routing mutation seam a5860b2).
+
+| Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
+|---|---|---|---|---|---|---|---|---|
+| bridge | Best-model selection | Library | Implemented | Wired (via cmd/model-bridge CLI+MCP) | Picks top-1 LLMsVerifier-scored model with a fallback chain; no local models | Covered (`pkg/bridge/bridge_test.go` unit+integration, -race green) | **PASS — real selection captured** (`groq/allam-2-7b` score 0.906) | N/A (internal selection logic — surfaced via cmd/model-bridge) |
+| bridge | `Invoke` routes to BestModel | Library | Implemented | Wired | Routes the invocation to the selected best model | Covered + **§1.1 paired mutation seam** `TestBridge_Invoke_RoutesToBestModel` (RED FAILs on mis-route, -race green) | **PASS** (`Invoke`→"Buenos días, amigo." through selected model; routing guard catches mis-route) | N/A (internal routing — surfaced via cmd/model-bridge) |
+
 ## pkg/version
 
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
@@ -581,6 +607,14 @@ Two binaries are OPERATOR-BLOCKED — both require a remote SSH worker host runn
 | dashboard.html | New Translation modal | Web | Implemented | Wired | File input, provider selector, source/target lang, API-key/SSH/llama fields (UI only) | Not-inventoried | Source-confirmed | PENDING |
 | dashboard.html | Start Translation (submit) | Web | Implemented | Wired | POST /api/v1/translations with provider config — triggers backend translation | Not-inventoried | Source-confirmed | PENDING |
 | dashboard.html | Cancel session | Web | Implemented | Wired | DELETE /api/v1/translations/:id | Not-inventoried | Source-confirmed | PENDING |
+
+## Web Dashboard backend handler — pkg/api/dashboard.go
+
+Backend that serves the dashboard page (`/`, `/dashboard`, `/monitor`) and the translations endpoints. Was previously UNROUTED (returned 404); now wired so the dashboard genuinely translates for end users. Source: `pkg/api/dashboard.go`, commit f6ba5cc.
+
+| Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
+|---|---|---|---|---|---|---|---|---|
+| api/dashboard.go | Dashboard page + translations endpoints | Web | Implemented | Wired (was Unwired/404 pre-fix) | Serves the dashboard HTML at `/`, `/dashboard`, `/monitor` and the `GET/POST /api/v1/translations` path; Start-Translation now runs a real translation through the wired UI path (no longer a 404) | Covered + **§11.4.115 RED→GREEN guard** `dashboard_test.go` (default GREEN asserts pages 200 + real translation start; `RED_MODE=1` reproduces the pre-fix 404) — `go test -race ./pkg/api` GREEN this session | **PASS (unit/integration)** — `dashboard_test.go` observed green this session; live run produced real translation "Dobro jutro, prijatelju." through the dashboard handler | **SKIP (§11.4.3/§11.4.52)** — autonomous browser+video capture needs the HelixQA web/video backend, off-limits to this session; tracked migration item owed (a `helixtranslate-web-dashboard-*` recording requires that backend). NOT a faked confirmation |
 
 ## REST API — pkg/api/server.go (standalone `Server`, gin)
 
@@ -841,7 +875,7 @@ Two binaries are OPERATOR-BLOCKED — both require a remote SSH worker host runn
 ## Honest gaps & caveats (§11.4.6)
 
 1. **Video coverage is 21 feature rows** (+ 1 real-artifact-confirmed). 21 features are confirmed by real, ffprobe- and content-verified recordings this session (see the Anti-bluff note for the full list); DOCX output is real-artifact-confirmed (produced `.docx` = Microsoft Word 2007+) with its video still PENDING. Every other runtime/user-visible feature is `PENDING` a recording. This is stated, not hidden.
-1a. **DOCX output is now Implemented (Rev 3, commit 87cd2be)** — pure-Go OOXML writer; a real DeepSeek run produced `garden_es.docx` = `Microsoft Word 2007+`. PDF output is still unimplemented (no PDF writer in `pkg/ebook`; unified-translator rejects `.pdf`). Output formats are now EPUB/FB2/TXT/HTML/MD/DOCX.
+1a. **DOCX output is Implemented (Rev 3, commit 87cd2be)** — pure-Go OOXML writer; a real DeepSeek run produced `garden_es.docx` = `Microsoft Word 2007+`. **PDF output is now Implemented (Rev 4, commit fb265e7)** — `pkg/ebook/pdf_writer.go` (Book→HTML5→weasyprint→Cyrillic-faithful PDF), wired into unified-translator (`.pdf` output, main.go:1160); `pkg/ebook` PDF tests green. Output formats are now EPUB/FB2/TXT/HTML/MD/DOCX/PDF.
 1b. **`-multipass` ≠ `-verify`.** The unified-translator `-verify` flag runs the CLI's own per-step output check; the separate `-multipass` flag (d53e085) invokes the `pkg/verification` multi-pass polisher engine — now wired and video-confirmed.
 1c. **`cmd/translator` local path is a STUB** ("local translation not yet implemented"); its remote path is OPERATOR-BLOCKED (no SSH/llama.cpp worker host).
 1d. **`translate-ssh` + `ebook-translator` are OPERATOR-BLOCKED** — both require a remote SSH worker host running llama.cpp; none available. Binaries build and run as far as possible (blocked-binaries demo recorded).
