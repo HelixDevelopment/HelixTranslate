@@ -2,6 +2,7 @@ package bridge
 
 import (
 	"context"
+	"os"
 	"strings"
 	"testing"
 
@@ -153,6 +154,85 @@ func TestBridge_ListVerified_EmptyIsHonestError(t *testing.T) {
 	_, err := b.ListVerified(context.Background())
 	if err == nil {
 		t.Fatal("ListVerified with no models should error, got nil")
+	}
+}
+
+// TestBridge_Invoke_RoutesToBestModel is the §1.1 paired-mutation routing guard
+// for Review Finding C (commit ab1bed3). It proves that Invoke routes the raw
+// completion to EXACTLY the (provider, model) that BestModel selected — not merely
+// that it returns "some non-empty result" while silently routing elsewhere.
+//
+// The dispatch is intercepted via the package-level invokeDispatch seam (no live
+// network call), capturing the (providerMarker, modelID) the dispatch is asked to
+// route to. The guard then asserts they equal what BestModel independently
+// returned for the same bridge.
+//
+// Polarity switch (§11.4.115): RED_MODE=1 forces a deliberate MIS-ROUTE inside the
+// seam (the dispatch routes to a DIFFERENT verified model than BestModel selected),
+// proving the guard FAILs on a broken route. RED_MODE=0 (default) is the standing
+// GREEN regression guard asserting the route is correct.
+func TestBridge_Invoke_RoutesToBestModel(t *testing.T) {
+	redMode := os.Getenv("RED_MODE") == "1"
+
+	// Two distinct verified models with distinct providers + distinct scores so
+	// "the model selected" is unambiguous: gpt-4o (openai, 0.93) is strongest;
+	// deepseek-chat (deepseek, 0.71) is the wrong route the mutation forces.
+	const (
+		bestModelID    = "gpt-4o"
+		bestProviderID = "openai"
+		wrongModelID   = "deepseek-chat"
+		wrongProvider  = "deepseek"
+	)
+	b := newTestBridge(keyForAll(),
+		verifiedModel(bestModelID, bestProviderID, "GPT-4o", 0.93),
+		verifiedModel(wrongModelID, wrongProvider, "DeepSeek Chat", 0.71),
+	)
+
+	// Independently establish what BestModel selects (the oracle for the route).
+	best, err := b.BestModel(context.Background(), selection.TaskRequirements{})
+	if err != nil {
+		t.Fatalf("BestModel error: %v", err)
+	}
+	if best.ModelID != bestModelID {
+		t.Fatalf("test setup: BestModel = %q, want %q", best.ModelID, bestModelID)
+	}
+
+	// Intercept the dispatch: record the (providerMarker, modelID) Invoke routes
+	// to. NO network call is made — this is the unit-test capability seam.
+	var gotProviderMarker, gotModelID string
+	const sentinel = "ROUTED-OK"
+
+	orig := invokeDispatch
+	t.Cleanup(func() { invokeDispatch = orig })
+	invokeDispatch = func(ctx context.Context, providerMarker, modelID string, rp *verifier.ResolvedProvider, full string) (string, error) {
+		if redMode {
+			// §1.1 MUTATION: simulate a broken route — Invoke's selection is ignored
+			// and the dispatch goes to the WRONG model. The guard below MUST catch it.
+			modelID = wrongModelID
+			providerMarker = wrongProvider
+		}
+		gotProviderMarker = providerMarker
+		gotModelID = modelID
+		return sentinel, nil
+	}
+
+	out, err := b.Invoke(context.Background(), "you are a router test", "ping")
+	if err != nil {
+		t.Fatalf("Invoke error: %v", err)
+	}
+	if out != sentinel {
+		t.Fatalf("Invoke output = %q, want sentinel %q (dispatch result must propagate)", out, sentinel)
+	}
+
+	// THE ROUTING GUARD: Invoke must dispatch to EXACTLY the BestModel-selected
+	// model. In RED_MODE the mutation rerouted to the wrong model, so this fails.
+	if gotModelID != best.ModelID {
+		t.Errorf("Invoke routed to model %q, want BestModel-selected %q", gotModelID, best.ModelID)
+	}
+	// The provider marker must materialize from the SAME selected model's provider
+	// (openai → genuine "openai" marker per the delegation rule).
+	if gotProviderMarker != bestProviderID {
+		t.Errorf("Invoke routed via provider marker %q, want %q", gotProviderMarker, bestProviderID)
 	}
 }
 

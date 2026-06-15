@@ -289,6 +289,41 @@ func (b *Bridge) ListVerified(ctx context.Context) ([]ModelInfo, error) {
 	return models, nil
 }
 
+// invokeDispatch is the seam that turns the strongest-model selection into a real
+// completion. Production assigns it realInvokeDispatch (below) — building the raw
+// OpenAI-compatible client and calling Translate. It is a package var (not a
+// method) ONLY so an in-package test can intercept the (providerMarker, modelID)
+// the dispatch is actually asked to route to WITHOUT a live network call, proving
+// the routing guard catches a mis-route (§1.1 paired mutation). Production
+// behaviour is unchanged: realInvokeDispatch is the exact prior inline code.
+var invokeDispatch = realInvokeDispatch
+
+// realInvokeDispatch builds the raw OpenAI-compatible chat client and calls it.
+// providerMarker is the delegation marker (concrete provider id, or "openai" for
+// the genuine OpenAI provider); modelID is the strongest verified model's id. The
+// resolved provider rp carries the concrete key/base_url. No API key is logged.
+func realInvokeDispatch(ctx context.Context, providerMarker, modelID string, rp *verifier.ResolvedProvider, full string) (string, error) {
+	client, err := llm.NewOpenAIClient(translator.TranslationConfig{
+		Provider: providerMarker,
+		Model:    modelID,
+		APIKey:   rp.APIKey,
+		BaseURL:  rp.BaseURL,
+		// Cap max_tokens conservatively: the OpenAI client defaults to 8192 (sized
+		// for book chapters), but many verified models cap lower (e.g. Groq's
+		// allam-2-7b at 4096) and return HTTP 400 above their limit. Invoke is a
+		// raw agent-capability call, not a long-form translation, so a modest cap
+		// is both safe across providers and sufficient. Callers needing more use
+		// BestTranslator + the component path.
+		MaxTokens: invokeMaxTokens,
+	})
+	if err != nil {
+		return "", fmt.Errorf("bridge: build raw client for %s: %w", modelID, err)
+	}
+	// OpenAIClient.Translate sends `prompt` (2nd arg) as the single user message
+	// and ignores `text` (1st arg); pass the composed prompt there.
+	return client.Translate(ctx, "", full)
+}
+
 // Invoke calls the strongest verified model with a raw prompt — the direct
 // agent-access path. system is prepended to prompt (the underlying OpenAI-
 // compatible client sends a single user message, so we compose them). Returns
@@ -319,30 +354,13 @@ func (b *Bridge) Invoke(ctx context.Context, system, prompt string) (string, err
 		// whitelist applies; for every other provider the concrete id delegates.
 		providerMarker = rp.FactoryProvider
 	}
-	client, err := llm.NewOpenAIClient(translator.TranslationConfig{
-		Provider: providerMarker,
-		Model:    best.ModelID,
-		APIKey:   rp.APIKey,
-		BaseURL:  rp.BaseURL,
-		// Cap max_tokens conservatively: the OpenAI client defaults to 8192 (sized
-		// for book chapters), but many verified models cap lower (e.g. Groq's
-		// allam-2-7b at 4096) and return HTTP 400 above their limit. Invoke is a
-		// raw agent-capability call, not a long-form translation, so a modest cap
-		// is both safe across providers and sufficient. Callers needing more use
-		// BestTranslator + the component path.
-		MaxTokens: invokeMaxTokens,
-	})
-	if err != nil {
-		return "", fmt.Errorf("bridge: build raw client for %s: %w", best.ModelID, err)
-	}
 
 	full := strings.TrimSpace(prompt)
 	if s := strings.TrimSpace(system); s != "" {
 		full = s + "\n\n" + full
 	}
-	// OpenAIClient.Translate sends `prompt` (2nd arg) as the single user message
-	// and ignores `text` (1st arg); pass the composed prompt there.
-	out, err := client.Translate(ctx, "", full)
+
+	out, err := invokeDispatch(ctx, providerMarker, best.ModelID, &rp, full)
 	if err != nil {
 		return "", fmt.Errorf("bridge: invoke %s/%s: %w", rp.ProviderID, best.ModelID, err)
 	}
