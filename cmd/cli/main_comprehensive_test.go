@@ -10,12 +10,8 @@ import (
 	"digital.vasic.translator/pkg/translator"
 	versionpkg "digital.vasic.translator/pkg/version"
 	"digital.vasic.translator/test/mocks"
-	"net/http"
-	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"strings"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -452,7 +448,7 @@ func TestPrintHelpComprehensive(t *testing.T) {
 	output := buf.String()
 
 	// Verify help content
-	assert.Contains(t, output, "Universal Ebook Translator v" + versionpkg.AppVersion)
+	assert.Contains(t, output, "Universal Ebook Translator v"+versionpkg.AppVersion)
 	assert.Contains(t, output, "Usage:")
 	assert.Contains(t, output, "Options:")
 	assert.Contains(t, output, "Environment Variables:")
@@ -658,11 +654,17 @@ func TestTranslateEbookFunction(t *testing.T) {
 		},
 	}
 
-	// Test with minimal parameters
+	// Test with minimal parameters. Under R2 the translator comes from the
+	// LLMsVerifier bridge; with no provider API keys in the environment the bridge
+	// fails to open and translateEbook returns an honest hard error (never a local
+	// fallback, §11.4.69). The positive path needs the live pipeline → SKIP (§11.4.3).
 	t.Run("minimal_parameters", func(t *testing.T) {
+		if hasAnyProviderKey() {
+			t.Skip("SKIP-OK (§11.4.3/§11.4.98): provider key(s) present — the bridge would perform a LIVE verification pass (real credentials, network); the no-key honest-error contract is only assertable with no keys present")
+		}
 		err := translateEbook(
 			book,
-			"test_output.epub",
+			filepath.Join(t.TempDir(), "test_output.epub"),
 			"epub",
 			"openai",
 			"gpt-3.5-turbo",
@@ -678,54 +680,32 @@ func TestTranslateEbookFunction(t *testing.T) {
 			true, // provider explicitly set
 			true, // api-key explicitly set
 		)
-
-		// We expect an error due to missing API key in test environment
-		assert.Error(t, err)
+		assert.Error(t, err, "with no provider keys the bridge-backed translateEbook MUST fail loudly")
 	})
 
-	t.Run("with_app_config", func(t *testing.T) {
-		// This subtest drives translateEbook through the REAL provider path
-		// (no mock translator is injected) using the config-provided provider
-		// settings. Previously it (a) hard-coded a fake "config-key" for openai
-		// and then asserted NoError, and (b) guarded with a skip that only fired
-		// when NO provider key was in the env. That combination was a §11.4.98
-		// bluff: when ANY provider key WAS present (e.g. DEEPSEEK), the subtest
-		// did not skip, forced provider=openai with the fake "config-key", dialled
-		// the REAL OpenAI endpoint, got a 401 invalid_api_key, and FAILED the
-		// NoError assertion — a non-deterministic, ambient-env-dependent outcome.
-		//
-		// Fixed to be fully self-driving + deterministic (§11.4.98): stand up an
-		// httptest mock that speaks the OpenAI chat-completions wire format and
-		// point the config's openai BaseURL at it. The config-key path is now
-		// exercised end-to-end with NO real network and NO env dependency, and we
-		// positively assert (1) the run succeeded, (2) the mock was actually hit
-		// (the real provider client path truly executed — not short-circuited),
-		// and (3) a non-empty output file was produced.
-		const mockTranslation = "Здраво свете"
-		var hits int32
-		mock := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if !strings.HasSuffix(r.URL.Path, "/chat/completions") {
-				w.WriteHeader(http.StatusNotFound)
-				return
-			}
-			atomic.AddInt32(&hits, 1)
-			w.Header().Set("Content-Type", "application/json")
-			_, _ = w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"` + mockTranslation + `"}}]}`))
-		}))
-		defer mock.Close()
-
+	t.Run("with_app_config_bridge_contract", func(t *testing.T) {
+		// R2 (R-1a): translateEbook now sources its translator from the LLMsVerifier
+		// bridge — it NO LONGER constructs an llm.NewLLMTranslator from a config
+		// provider's APIKey/BaseURL, so the previous "point an httptest mock at the
+		// openai BaseURL and assert it's hit" path is gone by design (provider /
+		// api-key / base-url are advisory under R2; the bridge selects the verified
+		// model). The CLI-seam contract this subtest now asserts is §11.4.69: with
+		// NO provider API keys present, the config-default provider path still fails
+		// loudly via the bridge and produces NO output — never a silent local/config
+		// fallback. The positive bridge path needs the live verification pipeline and
+		// is gated with SKIP-with-reason (§11.4.3) BEFORE any bridge call so the
+		// offline suite never performs a live verification pass.
+		if hasAnyProviderKey() {
+			t.Skip("SKIP-OK (§11.4.3/§11.4.98): provider key(s) present — the bridge would perform a LIVE verification pass (real credentials, network); the no-key honest-error contract is only assertable with no keys present")
+		}
 		outFile := filepath.Join(t.TempDir(), "test_output.epub")
 
-		// Create app config pointing the openai provider at the mock server.
 		appConfig := &config.Config{
 			Translation: config.TranslationConfig{
 				DefaultProvider: "openai",
 				DefaultModel:    "gpt-3.5-turbo",
 				Providers: map[string]config.ProviderConfig{
-					"openai": {
-						APIKey:  "config-key",
-						BaseURL: mock.URL,
-					},
+					"openai": {APIKey: "config-key"},
 				},
 			},
 		}
@@ -737,7 +717,7 @@ func TestTranslateEbookFunction(t *testing.T) {
 			"", // provider — use default from config (openai)
 			"", // model — use default from config
 			"", // apiKey — use from config
-			"", // baseURL — use from config (the mock URL)
+			"", // baseURL — use from config
 			"latn",
 			appConfig,
 			language.English,
@@ -749,15 +729,7 @@ func TestTranslateEbookFunction(t *testing.T) {
 			false, // api-key not explicitly set — config/env applies
 		)
 
-		// (1) the config-key + base-url provider path completed successfully.
-		assert.NoError(t, err)
-		// (2) the real provider client path actually executed against the mock —
-		// proves the translation was performed, not silently skipped.
-		assert.Greater(t, atomic.LoadInt32(&hits), int32(0),
-			"expected the openai client to POST to the mock /chat/completions endpoint")
-		// (3) a non-empty output file was produced.
-		if info, statErr := os.Stat(outFile); assert.NoError(t, statErr) {
-			assert.Greater(t, info.Size(), int64(0), "expected a non-empty output EPUB")
-		}
+		require.Error(t, err, "with no provider keys the bridge-backed translateEbook MUST fail loudly")
+		require.NoFileExists(t, outFile, "a failed (no-key) run must not leave an output file")
 	})
 }

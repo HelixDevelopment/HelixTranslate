@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"digital.vasic.translator/internal/config"
+	"digital.vasic.translator/internal/verifier/selection"
+	"digital.vasic.translator/pkg/bridge"
 	"digital.vasic.translator/pkg/coordination"
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
@@ -10,14 +12,18 @@ import (
 	"digital.vasic.translator/pkg/language"
 	"digital.vasic.translator/pkg/script"
 	"digital.vasic.translator/pkg/translator"
-	"digital.vasic.translator/pkg/translator/llm"
 	versionpkg "digital.vasic.translator/pkg/version"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
+
+// bridgeOpenTimeout bounds the one-time LLMsVerifier bridge bootstrap (default
+// 5m verify pass + 30s headroom, mirroring cmd/model-bridge's openBridge).
+const bridgeOpenTimeout = 5*time.Minute + 30*time.Second
 
 // version is sourced from the single authoritative version.AppVersion (== VERSION file).
 const version = versionpkg.AppVersion
@@ -326,6 +332,22 @@ func translateEbook(
 	var err error
 	sessionID := "cli-session"
 
+	// Open the LLMsVerifier bridge ONCE (R-1a/R2): every translator built below —
+	// the multi-LLM ensemble AND the single fallback — now obtains its model(s)
+	// from the strongest verified model(s) the bridge selects, NOT a local/
+	// hardcoded provider. With no provider API keys present bridge.Open returns an
+	// honest hard error and we fail loudly; we NEVER silently fall back to a local
+	// runtime (§11.4.69). The -provider/-model/-api-key flags remain compiling and
+	// advisory under R2 (the bridge selects the verified model); -disable-local-llms
+	// / -prefer-distributed still thread through the coordinator (removal is R-2/R-4).
+	bridgeCtx, bridgeCancel := context.WithTimeout(context.Background(), bridgeOpenTimeout)
+	b, bridgeErr := bridge.Open(bridgeCtx, bridge.Options{})
+	bridgeCancel()
+	if bridgeErr != nil {
+		return fmt.Errorf("LLMsVerifier bridge unavailable (no local-runtime fallback): %w", bridgeErr)
+	}
+	task := selection.TaskRequirements{SourceLang: sourceLang.Code, TargetLang: targetLang.Code}
+
 	// Try multi-LLM first if provider is "multi-llm", "distributed" or not specified
 	if providerName == "multi-llm" || providerName == "distributed" || providerName == "" {
 		// For distributed provider, prefer distributed workers if enabled
@@ -334,10 +356,13 @@ func translateEbook(
 			fmt.Printf("Distributed translation enabled, preferring remote workers\n")
 		}
 
-		multiTrans, multiErr := coordination.NewMultiLLMTranslatorWrapperWithConfig(config, eventBus, sessionID, disableLocalLLMs, preferDistributed)
+		// Source the coordinator's ensemble from the bridge's provider-diverse
+		// verified translators instead of the built-in per-provider discovery.
+		multiTrans, multiErr := coordination.NewMultiLLMTranslatorWrapperWithFactory(
+			config, eventBus, sessionID, disableLocalLLMs, preferDistributed, b.EnsembleFactory(task))
 		if multiErr == nil {
 			trans = multiTrans
-			fmt.Printf("Using translator: multi-llm-coordinator (%d instances)\n\n", multiTrans.Coordinator.GetInstanceCount())
+			fmt.Printf("Using translator: multi-llm-coordinator (%d instances, bridge=%s)\n\n", multiTrans.Coordinator.GetInstanceCount(), b.Source())
 		} else if providerName == "multi-llm" || providerName == "distributed" {
 			// User explicitly requested multi-llm or distributed but it failed
 			return fmt.Errorf("failed to create multi-LLM translator: %w", multiErr)
@@ -345,13 +370,14 @@ func translateEbook(
 		// Otherwise fall through to single translator
 	}
 
-	// Fall back to single translator
+	// Fall back to single translator — the STRONGEST verified model the bridge
+	// selects (R-1a/R2), not llm.NewLLMTranslator on a local/hardcoded provider.
 	if trans == nil {
-		trans, err = llm.NewLLMTranslator(config)
+		trans, err = b.BestTranslatorFunc(task)(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to create translator: %w", err)
+			return fmt.Errorf("failed to obtain verified translator from bridge: %w", err)
 		}
-		fmt.Printf("Using translator: %s\n\n", trans.GetName())
+		fmt.Printf("Using translator: %s (bridge=%s)\n\n", trans.GetName(), b.Source())
 	}
 
 	// Create language detector with LLM support if API key available

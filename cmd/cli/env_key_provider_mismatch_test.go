@@ -1,82 +1,50 @@
 package main
 
 import (
-	"net/http"
-	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"strings"
-	"sync/atomic"
 	"testing"
 
 	"digital.vasic.translator/internal/config"
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/language"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// TestEnvAPIKeyMatchesResolvedProvider reproduces a real CLI orchestration
-// defect: main() loads the env API key for the *pre-config* CLI provider
-// (default "openai") BEFORE config resolution picks the actual provider, and
-// translateEbook then treats that already-populated (wrong-provider) key as
-// "user supplied" — so the per-provider config key is never applied.
-//
-// Scenario mirrors main.go exactly:
-//   - User did NOT pass -provider, so the CLI provider value is the "openai"
-//     default; main.go line 156-157 does apiKey = getAPIKeyFromEnv("openai").
-//   - The config selects DefaultProvider "deepseek" with its OWN correct API
-//     key (and a mock base URL).
-//   - OPENAI_API_KEY is present in the environment (very common).
-//
-// Correct behaviour: the deepseek provider client must authenticate with the
-// deepseek key from config. Buggy behaviour: the leaked OPENAI_API_KEY is sent
-// as the Bearer token to the deepseek endpoint — wrong credential for the
-// resolved provider.
-func TestEnvAPIKeyMatchesResolvedProvider(t *testing.T) {
-	const (
-		leakedOpenAIKey   = "LEAKED-OPENAI-KEY"
-		correctDeepSeekKey = "CORRECT-DEEPSEEK-KEY"
-		mockTranslation    = "prevod"
-	)
-
-	// Simulate the common environment: OPENAI_API_KEY is set.
-	t.Setenv("OPENAI_API_KEY", leakedOpenAIKey)
-	// Make sure no real deepseek env key interferes with the assertion.
-	t.Setenv("DEEPSEEK_API_KEY", "")
-
-	var hits int32
-	var gotAuth atomic.Value
-	gotAuth.Store("")
-	mock := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !strings.HasSuffix(r.URL.Path, "/chat/completions") {
-			w.WriteHeader(http.StatusNotFound)
-			return
+// hasAnyProviderKey reports whether any provider API key is present in the
+// environment. Under R2 (LLMsVerifier bridge) translateEbook obtains its
+// translator from the bridge, which needs at least one provider key to provision
+// a verified model; with none present bridge.Open returns an honest hard error.
+func hasAnyProviderKey() bool {
+	for _, k := range []string{
+		"OPENAI_API_KEY", "ANTHROPIC_API_KEY", "DEEPSEEK_API_KEY",
+		"ZHIPU_API_KEY", "QWEN_API_KEY", "GEMINI_API_KEY",
+		"GROQ_API_KEY", "MISTRAL_API_KEY", "XAI_API_KEY",
+		"COHERE_API_KEY", "TOGETHER_API_KEY",
+	} {
+		if strings.TrimSpace(os.Getenv(k)) != "" {
+			return true
 		}
-		atomic.AddInt32(&hits, 1)
-		gotAuth.Store(r.Header.Get("Authorization"))
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"` + mockTranslation + `"}}]}`))
-	}))
-	defer mock.Close()
+	}
+	return false
+}
 
-	// Mimic main.go's flag-default + env-key load sequence: the user left
-	// -provider at its "openai" default, so the env key loaded is OPENAI's.
-	cliProvider := "openai"
-	apiKey := getAPIKeyFromEnv(cliProvider)
-	require.Equal(t, leakedOpenAIKey, apiKey, "precondition: openai env key loaded")
-
-	appConfig := &config.Config{
-		Translation: config.TranslationConfig{
-			DefaultProvider: "deepseek",
-			DefaultModel:    "deepseek-chat",
-			Providers: map[string]config.ProviderConfig{
-				"deepseek": {
-					APIKey:  correctDeepSeekKey,
-					BaseURL: mock.URL,
-				},
-			},
-		},
+// TestTranslateEbookNoKeysHonestError is the R2 contract guard (replaces the
+// pre-R2 TestEnvAPIKeyMatchesResolvedProvider, which asserted the now-removed
+// per-provider config-key → provider-Bearer routing inside translateEbook).
+//
+// Under R2 translateEbook opens the LLMsVerifier bridge and sources its
+// translator from the strongest verified model — it NO LONGER threads a
+// config/CLI api-key into an llm.NewLLMTranslator construction. The credential-
+// routing that the old test guarded now lives in the bridge's ProviderResolver
+// (covered by pkg/bridge tests). What translateEbook MUST guarantee at the CLI
+// seam is the §11.4.69 invariant: with NO provider API keys present it returns an
+// honest hard error and NEVER silently falls back to a local runtime.
+func TestTranslateEbookNoKeysHonestError(t *testing.T) {
+	if hasAnyProviderKey() {
+		t.Skip("SKIP-OK (§11.4.3): a provider API key is present; the no-key honest-error contract is only assertable with no keys in the environment")
 	}
 
 	book := &ebook.Book{
@@ -86,33 +54,30 @@ func TestEnvAPIKeyMatchesResolvedProvider(t *testing.T) {
 			Sections: []ebook.Section{{Content: "hello world"}},
 		}},
 	}
-
 	outFile := filepath.Join(t.TempDir(), "out.epub")
 
 	err := translateEbook(
 		book,
 		outFile,
 		"epub",
-		cliProvider, // provider value as main() passes it (default "openai")
-		"",          // model — resolved from config
-		apiKey,      // env key already loaded for the *CLI* provider
-		"",          // baseURL — from config
+		"openai",
+		"",
+		"",
+		"",
 		"default",
-		appConfig,
+		nil,
 		language.English,
 		language.Spanish,
 		nil,
 		false,
 		false,
-		false, // provider NOT explicitly set -> config DefaultProvider applies
-		false, // api-key NOT explicitly set (came from env) -> must re-resolve
+		false,
+		false,
 	)
-	require.NoError(t, err)
-	require.Greater(t, atomic.LoadInt32(&hits), int32(0), "deepseek mock must be hit")
-
-	auth := gotAuth.Load().(string)
-	assert.Equal(t, "Bearer "+correctDeepSeekKey, auth,
-		"resolved deepseek provider must authenticate with its config key, not the leaked OPENAI_API_KEY")
-	assert.NotEqual(t, "Bearer "+leakedOpenAIKey, auth,
-		"the pre-config OPENAI_API_KEY must not leak as the deepseek bearer token")
+	require.Error(t, err, "with no provider API keys translateEbook MUST fail loudly via the bridge, never fall back to a local runtime")
+	require.NoFileExists(t, outFile, "a failed (no-key) run must not leave an output file")
 }
+
+// keep config import referenced (config-driven paths remain exercised by other
+// tests); avoids churn if this file later regrows config-based cases.
+var _ = config.Config{}

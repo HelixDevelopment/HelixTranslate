@@ -9,7 +9,9 @@ import (
 	"crypto/x509/pkix"
 	"digital.vasic.translator/internal/cache"
 	"digital.vasic.translator/internal/config"
+	"digital.vasic.translator/internal/verifier/selection"
 	"digital.vasic.translator/pkg/api"
+	"digital.vasic.translator/pkg/bridge"
 	"digital.vasic.translator/pkg/coordination"
 	"digital.vasic.translator/pkg/deployment"
 	"digital.vasic.translator/pkg/distributed"
@@ -76,10 +78,22 @@ func main() {
 	rateLimiter := security.NewRateLimiter(cfg.Security.RateLimitRPS, cfg.Security.RateLimitBurst)
 	wsHub := websocket.NewHub(eventBus)
 
-	// Initialize local coordinator
-	localCoordinator := coordination.NewMultiLLMCoordinator(coordination.CoordinatorConfig{
+	// Initialize the local multi-LLM coordinator from the LLMsVerifier bridge
+	// (R-1a/R2): its ensemble translators are the provider-diverse STRONGEST
+	// verified models the bridge selects, NOT the built-in per-provider discovery.
+	// With no provider API keys present bridge.Open returns an honest hard error and
+	// the server refuses to start — it NEVER silently falls back to a local runtime
+	// (§11.4.69). The server has no per-request source/target at startup, so the
+	// empty TaskRequirements selects the strongest verified models overall.
+	bridgeCtx, bridgeCancel := context.WithTimeout(context.Background(), 5*time.Minute+30*time.Second)
+	b, err := bridge.Open(bridgeCtx, bridge.Options{})
+	bridgeCancel()
+	if err != nil {
+		log.Fatalf("LLMsVerifier bridge unavailable (no local-runtime fallback): %v", err)
+	}
+	localCoordinator := coordination.NewMultiLLMCoordinatorWithFactory(coordination.CoordinatorConfig{
 		EventBus: eventBus,
-	})
+	}, b.EnsembleFactory(selection.TaskRequirements{}))
 
 	// Initialize API communication logger for distributed operations
 	var apiLogger *deployment.APICommunicationLogger
