@@ -1,7 +1,7 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 56
-**Last modified:** 2026-06-15T07:30:00Z
+**Revision:** 57
+**Last modified:** 2026-06-15T10:30:00Z
 
 <!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 48 real bugs (21 submodule + 27 main) -->
 
@@ -9,7 +9,7 @@
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **48 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced.
+- **63 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
@@ -63,7 +63,8 @@ parallel session (64b7d08) so it was integrated, NOT double-fixed.** Host API ra
 | **MAIN** pkg/challenge_runner | 6 mutation challenge scripts had NO trap → an interrupted `go test` left REAL project source mutated with a `.bak` (§11.4.84 residue corruption in the anti-bluff harness itself); restore-trap armed before each sed | 9539233 |
 | **security submodule** | SSRF guard octal/hex IP-encoding bypass (`0177.0.0.1`→127.0.0.1, `012.0.0.1`→10.0.0.1 reach INTERNAL via cgo/libc inet_aton) — a real SSRF vuln; ParseInetAtonIP added (verified vs compiled C inet_aton) | 1ef9f4e |
 | **MAIN** cmd/unified-translator | auto output filename hardcoded `_sr.epub` ignoring -target-lang → a French/German/… translation silently labelled Serbian (output + session-report filenames); honors targetLang + §11.4.120 reconcile | (wave 15) |
-| **MAIN** pkg/version | codebase hasher used strings.Contains for excludes → over-excluded `vendored/`/`prod.env.json` + dead globs (`*.log` never matched) → corrupted the distributed worker version-sync hash (false match/spurious resync); proper component + glob match | (wave 15) |
+| **MAIN** pkg/version | codebase hasher used strings.Contains for excludes → over-excluded `vendored/`/`prod.env.json` + dead globs (`*.log` never matched) → corrupted the distributed worker version-sync hash (false match/spurious resync); proper component + glob match | fc86064 |
+| **llm_provider** (15 bugs) | systemic EOF-last-chunk streamed-content data loss across 14 adapters (openai/groq/together/fireworks/generic/deepseek/xai/perplexity/cohere/mistral/qwen/nvidia/sambanova/cerebras — final SSE delta + stop frame dropped when last chunk has no trailing newline) + ollama success-on-HTTP-error-body + W1A empty-choices guards; merged with a parallel session's HealthCheck fixes | 0f21fb0 |
 
 **Flagged not-hermetically-testable (honest §11.4.6, NOT fabricated):** pkg/sshworker UploadFile/DownloadFile/UploadData build unquoted shell commands (`mkdir -p %s`, `cat %s`, `> %s`) — a remote path with spaces/metacharacters breaks/injects; no executor seam to test hermetically (dials real *ssh.Client). Worth a command-runner-interface refactor → P-list. Also ExecuteCommand hardcodes ExitCode:1 (loses *ssh.ExitError fidelity) — same live-SSH-only constraint.
 
