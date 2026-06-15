@@ -65,7 +65,6 @@ func (o *Orchestrator) RegisterAllChallenges() error {
 		NewGRPCServerChallenge(),
 		NewTranslationPipelineChallenge(),
 		NewVerificationChallenge(),
-		NewDistributedSSHChallenge(),
 		NewSecurityAuthChallenge(),
 		NewRateLimitingChallenge(),
 		NewE2ETranslationChallenge(),

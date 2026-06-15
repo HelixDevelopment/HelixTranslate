@@ -183,47 +183,6 @@ func (c *GRPCServerChallenge) Execute(ctx context.Context) (*challenge.Result, e
 	return c.CreateResult(status, start, assertions, nil, nil, ""), nil
 }
 
-// NewDistributedSSHChallenge verifies distributed SSH worker functionality.
-type DistributedSSHChallenge struct {
-	challenge.BaseChallenge
-}
-
-// NewDistributedSSHChallenge creates the distributed SSH challenge.
-func NewDistributedSSHChallenge() *DistributedSSHChallenge {
-	bc := challenge.NewBaseChallenge(
-		"distributed-ssh",
-		"Distributed SSH Workers",
-		"Verifies SSH worker management, connection pooling, and remote execution",
-		"integration",
-		nil,
-	)
-	return &DistributedSSHChallenge{BaseChallenge: bc}
-}
-
-// Execute runs the distributed SSH challenge.
-func (c *DistributedSSHChallenge) Execute(ctx context.Context) (*challenge.Result, error) {
-	start := time.Now()
-	cmd := exec.CommandContext(ctx, "go", "test", "-run", "TestSSH", "./pkg/sshworker/...")
-	out, err := cmd.CombinedOutput()
-
-	pass := err == nil
-	assertions := []challenge.AssertionResult{
-		{
-			Type:    "test_pass",
-			Target:  "ssh_worker",
-			Passed:  pass,
-			Message: string(out),
-		},
-	}
-
-	status := challenge.StatusPassed
-	if !pass {
-		status = challenge.StatusFailed
-	}
-
-	return c.CreateResult(status, start, assertions, nil, nil, ""), nil
-}
-
 // NewSecurityAuthChallenge verifies JWT authentication.
 type SecurityAuthChallenge struct {
 	challenge.BaseChallenge

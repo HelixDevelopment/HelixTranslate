@@ -9,9 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"digital.vasic.translator/pkg/logger"
-	"digital.vasic.translator/pkg/sshworker"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/ssh"
@@ -399,55 +396,6 @@ func TestSSHPoolResourceLeak(t *testing.T) {
 	assert.NoError(t, err)
 	statsAfterClose := pool.GetStats()
 	assert.Equal(t, 0, statsAfterClose["total_connections"])
-}
-
-// TestSSHPoolIntegrationWithWorker tests SSH pool integration with worker system
-func TestSSHPoolIntegrationWithWorker(t *testing.T) {
-	pool := newMockSSHPoolImplementation(10, 5)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	config := &ssh.ClientConfig{
-		User: "test",
-		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
-			return nil
-		},
-	}
-
-	// Create worker info
-	workerInfo := WorkerInfo{
-		ID:       "worker-1",
-		Address:  "worker1.example.com:22",
-		Username: "test",
-	}
-
-	// Get SSH connection for worker
-	sshClient, err := pool.GetConnection(ctx, workerInfo.Address, config)
-	assert.NoError(t, err)
-	// In mock context, client will be nil but that's expected
-
-	// Create SSH worker
-	workerConfig := sshworker.SSHWorkerConfig{
-		Host:     "worker1.example.com",
-		Port:     22,
-		Username: "test",
-	}
-	log := logger.NewLogger(logger.LoggerConfig{})
-	sshWorker, err := sshworker.NewSSHWorker(workerConfig, log)
-	assert.NoError(t, err)
-	assert.NotNil(t, sshWorker)
-
-	// Test worker functionality with ExecuteCommand
-	result, err := sshWorker.ExecuteCommand(ctx, "echo 'Hello world'")
-	// Note: In mock environment, this might fail, but we're testing the integration
-	if err == nil {
-		assert.NotNil(t, result)
-	}
-
-	// Return connection to pool
-	err = pool.PutConnection(workerInfo.Address, sshClient)
-	assert.NoError(t, err)
 }
 
 // BenchmarkSSHPoolGet benchmarks connection pool get operations

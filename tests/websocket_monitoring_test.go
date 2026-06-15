@@ -5,14 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"sync"
 	"testing"
 	"time"
 
 	"digital.vasic.translator/pkg/events"
-	"digital.vasic.translator/pkg/sshworker"
 	"digital.vasic.translator/pkg/websocket"
 	"digital.vasic.translator/test/utils"
 	gorillaws "github.com/gorilla/websocket"
@@ -23,7 +21,7 @@ import (
 // TestWebSocketMonitoringSystem comprehensive test suite for WebSocket monitoring
 func TestWebSocketMonitoringSystem(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
+		t.Skip("Skipping integration test in short mode") // SKIP-OK: #short-mode
 	}
 	// Create a test suite
 	suite := &WebSocketMonitoringTestSuite{}
@@ -477,63 +475,6 @@ func (suite *WebSocketMonitoringTestSuite) TestErrorHandling(t *testing.T) {
 	assert.Contains(t, session.Error.Error(), "Simulated error", "Error message should match")
 }
 
-// TestSSHWorkerIntegration tests SSH worker functionality
-func TestSSHWorkerIntegration(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping SSH worker integration test in short mode")  // SKIP-OK: #short-mode
-	}
-
-	// Create test SSH worker configuration
-	config := sshworker.SSHWorkerConfig{
-		Host:              "localhost",
-		Username:          "testuser",
-		Password:          "testpass",
-		Port:              22,
-		RemoteDir:         "/tmp/translate-ssh-test",
-		ConnectionTimeout: 5 * time.Second,
-		CommandTimeout:    10 * time.Second,
-	}
-
-	t.Run("SSHWorkerCreation", func(t *testing.T) {
-		// Test SSH worker creation
-		logger := &MockLogger{}
-		worker, err := sshworker.NewSSHWorker(config, logger)
-
-		// Should succeed (connection will fail later)
-		assert.NoError(t, err)
-		assert.NotNil(t, worker)
-	})
-
-	t.Run("SSHWorkerConnection", func(t *testing.T) {
-		// Skip if no SSH server available
-		if !isSSHServerAvailable(config.Host, config.Port) {
-			t.Skip("SSH server not available for integration test")  // SKIP-OK: #integration-mode-only
-		}
-
-		logger := &MockLogger{}
-		worker, err := sshworker.NewSSHWorker(config, logger)
-		require.NoError(t, err)
-
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		// Test connection
-		err = worker.Connect(ctx)
-		if err != nil {
-			t.Skip("SSH connection failed - worker not configured")  // SKIP-OK: #legacy-untriaged
-			return
-		}
-
-		defer worker.Disconnect()
-
-		// Test command execution
-		result, err := worker.ExecuteCommand(ctx, "echo 'Hello from SSH worker'")
-		assert.NoError(t, err)
-		assert.Equal(t, 0, result.ExitCode)
-		assert.Contains(t, result.Stdout, "Hello from SSH worker")
-	})
-}
-
 // TestEventBusIntegration tests event system integration
 func TestEventBusIntegration(t *testing.T) {
 	t.Run("EventCreation", func(t *testing.T) {
@@ -577,7 +518,7 @@ func TestEventBusIntegration(t *testing.T) {
 // TestWebSocketPerformance tests performance characteristics
 func TestWebSocketPerformance(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping performance test in short mode")  // SKIP-OK: #short-mode
+		t.Skip("Skipping performance test in short mode") // SKIP-OK: #short-mode
 	}
 
 	t.Run("HighFrequencyEvents", func(t *testing.T) {
@@ -645,15 +586,6 @@ func TestWebSocketPerformance(t *testing.T) {
 
 // Helper functions and utilities
 
-func isSSHServerAvailable(host string, port int) bool {
-	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", host, port), 2*time.Second)
-	if err != nil {
-		return false
-	}
-	conn.Close()
-	return true
-}
-
 // MockLogger implements logger interface for testing
 type MockLogger struct {
 	Messages []string
@@ -715,7 +647,7 @@ func BenchmarkWebSocketEventTransmission(b *testing.B) {
 // Integration test for complete monitoring workflow
 func TestCompleteMonitoringWorkflow(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
+		t.Skip("Skipping integration test in short mode") // SKIP-OK: #short-mode
 	}
 
 	// Create a fresh suite for this integration test
