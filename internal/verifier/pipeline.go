@@ -77,8 +77,16 @@ func (p *Pipeline) Verify(ctx context.Context, provider ProviderConfig, modelID 
 	// Step 8: Error Handling (informational)
 	mv.Steps = append(mv.Steps, p.validateErrorHandling(ctx, provider))
 
-	// Compute overall pass/fail and score
-	// Reachability and authentication are hard gates - they MUST pass
+	// Compute overall pass/fail and score.
+	// Reachability, authentication, AND affirmative response (the response_format
+	// step) are HARD gates - they MUST pass. The affirmative-response probe is the
+	// step the persisted Model.AffirmativeResponse field is derived from (see
+	// run.go responseFormatPassed). A model that did not affirmatively respond
+	// cannot be "verified" regardless of how high its other components score:
+	// folding it into the averaged Overall let high-scoring sibling steps carry a
+	// non-affirmative model above the 0.5 threshold, marking it verified — a
+	// §11.4 correctness bluff. A failed affirmative response is now a hard
+	// disqualifier (§11.4.115).
 	var totalScore float64
 	reachabilityPassed := mv.Steps[0].Passed
 	authPassed := mv.Steps[1].Passed
@@ -86,7 +94,8 @@ func (p *Pipeline) Verify(ctx context.Context, provider ProviderConfig, modelID 
 		totalScore += step.Score
 	}
 	mv.Overall = totalScore / float64(len(mv.Steps))
-	mv.Passed = reachabilityPassed && authPassed && mv.Overall >= 0.5
+	affirmativePassed := responseFormatPassed(mv)
+	mv.Passed = reachabilityPassed && authPassed && affirmativePassed && mv.Overall >= 0.5
 
 	return mv
 }
