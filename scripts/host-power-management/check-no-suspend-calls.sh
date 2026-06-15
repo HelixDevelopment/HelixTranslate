@@ -33,6 +33,7 @@ EXCLUDE_DIRS=(
   "releases"
   "Example_Projects"
   "submodules"
+  "qa-results"
 )
 
 # File-path substrings allowlisted (the canonical artifacts and
@@ -43,11 +44,24 @@ EXCLUDE_PATHS=(
   "no_suspend_calls_challenge.sh"
   "HOST_POWER_MANAGEMENT.md"
   "CONSTITUTION.md"
+  "Constitution.md"
   "CONSTITUTION.json"
+  # CHALLENGE.md files are challenge-DEFINITION docs that list the forbidden
+  # commands as block-list TEST INPUTS (e.g. the sandboxed-shell challenge proves
+  # they are BLOCKED), never invocations — governance/test-fixture documentation.
+  "CHALLENGE.md"
   "AGENTS.md"
   "CLAUDE.md"
   "QWEN.md"
   "GEMINI.md"
+  # §11.4.65 doc exports: .html/.pdf are generated, non-executable RENDERS of the
+  # already-excluded .md governance docs (AGENTS/CLAUDE/CONSTITUTION/QWEN/GEMINI/
+  # HOST_POWER_MANAGEMENT). They list the forbidden commands as DOCUMENTATION, never
+  # invoke them — a rendered doc cannot be command-invoking source. Excluding these
+  # formats fixes a §11.4.1 FAIL-bluff WITHOUT masking any real suspend invocation
+  # (which only lives in executable .sh/.go/.py/.rs source, still fully scanned).
+  ".html"
+  ".pdf"
   "/docs/issues/fixed/BUGFIXES.md"
   "/CHANGELOG.md"
   "/docs/superpowers/plans/"
