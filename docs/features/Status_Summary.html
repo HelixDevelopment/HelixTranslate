@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status-summary">HelixTranslate — Feature
 Status Summary</h1>
-<p><strong>Revision:</strong> 4 <strong>Last modified:</strong>
-2026-06-15T20:10:00Z <strong>Authority:</strong> Two-audience companion
+<p><strong>Revision:</strong> 5 <strong>Last modified:</strong>
+2026-06-15T22:30:00Z <strong>Authority:</strong> Two-audience companion
 to <code>docs/features/Status.md</code> (§11.4.56). Derived from the
 same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync),
 §11.4.6 (no-guessing).</p>
@@ -202,7 +202,7 @@ translators, the web dashboards, the REST and gRPC servers, ~32 built-in
 AI providers, ebook format readers (FB2, EPUB, DOCX, HTML, TXT, PDF) and
 writers (EPUB, FB2, TXT, HTML, Markdown, <strong>DOCX and now
 PDF</strong>), caching, security, and all 8 add-on modules.</li>
-<li><strong>21 features are proven on real recordings</strong> — each
+<li><strong>22 features are proven on real recordings</strong> — each
 checked frame-by-frame to confirm it genuinely shows the feature working
 (real translated text in the right language, a live connection count
 changing, etc.), not just “a screen”. These include: the primary
@@ -212,7 +212,11 @@ Cyrillic/Latin handling, the <strong>multi-pass polishing engine
 (<code>-multipass</code>)</strong>, the REST API server translating for
 real, the gRPC server translating English→Spanish, the markdown
 round-trip tool, the preparation/analysis runner (fixed), the simple CLI
-translator, and the live monitoring dashboard.</li>
+translator, the live monitoring dashboard, and <strong>the agent bridge
+command-line tool</strong> (picks the best verifier-scored model and
+translates through it — recording shows it choosing
+<code>novita/Sao10K/L3-8B-Stheno-v3.2</code> and translating “Good
+morning, friend.” → “Buenos días, amigo.”).</li>
 <li><strong>DOCX output</strong> is built and proven by the produced
 file itself (a real <code>.docx</code> = “Microsoft Word 2007+” with
 real translated text). <strong>PDF output is newly built this
@@ -220,21 +224,23 @@ round</strong> and proven by passing tests (it renders the translated
 book to a real, valid PDF that keeps Serbian Cyrillic readable). Screen
 recordings of both are still owed, so they count as file/test-proven
 rather than video-proven for now.</li>
-<li><strong>New this round (built, tested, working at the code level —
-recordings owed):</strong> an <strong>agent bridge</strong> that picks
-the best AI model from our model-verifier and lets other tools/agents
-use it (via a command-line tool and an MCP server) — a real run picked
-<code>groq/allam-2-7b</code> and translated correctly; a
-<strong>correctness fix in the model-verification gate</strong> (a model
-that fails the basic “do you respond?” check is now properly rejected);
-and the <strong>web dashboard’s translation page</strong> which used to
-return “page not found” and now genuinely translates.</li>
+<li><strong>New this round:</strong> the <strong>agent bridge
+command-line tool</strong> is now <strong>video-proven</strong>
+(<code>helixtranslate-bridge-bestmodel-translate-20260615.mp4</code> —
+real run picked <code>novita/Sao10K/L3-8B-Stheno-v3.2</code> and
+translated correctly); its <strong>MCP server</strong> counterpart is
+built, tested and live-proven at the code level but its screen recording
+is still owed; a <strong>correctness fix in the model-verification
+gate</strong> (a model that fails the basic “do you respond?” check is
+now properly rejected); and the <strong>web dashboard’s translation
+page</strong> which used to return “page not found” and now genuinely
+translates.</li>
 </ul>
 <h2 id="what-is-pending-or-limited">What is pending or limited</h2>
 <ul>
-<li><strong>Video proof is still the main gap:</strong> <strong>21 of
+<li><strong>Video proof is still the main gap:</strong> <strong>22 of
 478</strong> features have a recorded, watch-it-yourself demonstration
-(≈ 4.4%). Everything else is built and present in the code, but a
+(≈ 4.6%). Everything else is built and present in the code, but a
 recording is still owed. Nothing is claimed proven just because the code
 exists.</li>
 <li><strong>PDF <em>output</em> is now built</strong> (this round). The
@@ -268,7 +274,7 @@ stats endpoint that always shows zeros). These are flagged in the
 detailed document.</li>
 </ul>
 <h2 id="video-confirmation-coverage">Video-confirmation coverage</h2>
-<p><strong>21 / 478 ≈ 4.4%</strong>, plus <strong>2
+<p><strong>22 / 478 ≈ 4.6%</strong>, plus <strong>2
 real-artifact/test-confirmed</strong> (DOCX + PDF output, video
 PENDING). This is the headline number to keep improving: each new
 genuine recording raises it.</p>
@@ -338,7 +344,7 @@ pkg/bridge ×2, internal/verifier gate ×1, pkg/api/dashboard.go ×1)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td>21 (+ 2 real-artifact/test-confirmed: DOCX + PDF output)</td>
+<td>22 (+ 2 real-artifact/test-confirmed: DOCX + PDF output)</td>
 </tr>
 <tr>
 <td>Video PENDING</td>
@@ -443,12 +449,15 @@ Rev 4 features (built + tested this round, recordings owed/skipped)</h2>
 LLMsVerifier→component+agent bridge (no local models): selects the best
 verifier-scored model (top-1 + fallback) and exposes it via a CLI and an
 MCP stdio server (<code>.mcp.json</code>). Commits ab1bed3 + a5860b2.
-PASS (real run: <code>groq/allam-2-7b</code> score 0.906,
-<code>Invoke</code>→“Buenos días, amigo.”; MCP nonce-echo
+PASS (real run: best-model <code>novita/Sao10K/L3-8B-Stheno-v3.2</code>
+score 0.919, <code>Invoke</code>→“Buenos días, amigo.”; MCP nonce-echo
 <code>HELIX-PROOF-9b21x</code>; <code>go test -race ./pkg/bridge</code>
 green; §1.1 routing-guard
-<code>TestBridge_Invoke_RoutesToBestModel</code>). Video PENDING
-(terminal-surface asciinema→mp4 recording owed).</li>
+<code>TestBridge_Invoke_RoutesToBestModel</code>). <strong>CLI video
+CONFIRMED</strong>
+(<code>helixtranslate-bridge-bestmodel-translate-20260615.mp4</code>,
+ffprobe 8.0s/80fr, §11.4.107 content-verified); MCP-stdio surface video
+still PENDING.</li>
 <li><strong>internal/verifier affirmative-response hard-gate</strong> —
 commit 97a8afd: a model with <code>affirmative_response=0</code> is now
 a hard disqualifier. PASS (§11.4.115 polarity guard
@@ -498,18 +507,20 @@ hardcoded zeros.</li>
 </ul>
 <h2 id="top-gaps-engineering">Top gaps (engineering)</h2>
 <ol type="1">
-<li><strong>Video-confirmation 21/478</strong> (+ 2
-real-artifact/test-confirmed: DOCX + PDF output). 21 rows carry real,
+<li><strong>Video-confirmation 22/478</strong> (+ 2
+real-artifact/test-confirmed: DOCX + PDF output). 22 rows carry real,
 ffprobe- and content-verified recordings (Status.md cites each
 <code>.mp4</code>; the <code>-multipass</code> video is
 <code>helixtranslate-cli-multipass-verify-20260615.mp4</code>, ffprobe
-888x630/93fr/9.3s; the 3 video-surfaced bug fixes — prep-translator
-dead, server TLS startup, REST hardcoded target-lang — are in commit
-<code>a5e8866</code>). The Rev-4 additions carry <code>PENDING</code>
-(bridge CLI+MCP, PDF), <code>SKIP</code> (web dashboard — needs HelixQA
-web/video backend) or <code>N/A</code> (internal verifier gate). Per
-§11.4.2/§11.4.107 nothing may be marked video-confirmed without a real,
-content-verified file.</li>
+888x630/93fr/9.3s; the bridge CLI video is
+<code>helixtranslate-bridge-bestmodel-translate-20260615.mp4</code>,
+ffprobe 790×560/80fr/8.0s; the 3 video-surfaced bug fixes —
+prep-translator dead, server TLS startup, REST hardcoded target-lang —
+are in commit <code>a5e8866</code>). The remaining Rev-4 additions carry
+<code>PENDING</code> (bridge MCP-stdio surface, PDF), <code>SKIP</code>
+(web dashboard — needs HelixQA web/video backend) or <code>N/A</code>
+(internal verifier gate). Per §11.4.2/§11.4.107 nothing may be marked
+video-confirmed without a real, content-verified file.</li>
 <li><strong>PDF output now Implemented</strong> (Rev 4, commit fb265e7)
 — <code>pkg/ebook</code> now has FB2/EPUB/DOCX/PDF writers; zero open
 gap rows remain. Output is EPUB/FB2/TXT/HTML/MD/DOCX/PDF.</li>
@@ -543,7 +554,7 @@ several <code>llms_verifier</code> packages
 <code>doc_processor/archdoc</code>.</li>
 </ol>
 <h2 id="video-coverage-ratio">Video-coverage ratio</h2>
-<p><code>21 / 478</code> enumerated rows = <strong>4.4%</strong> (≈ 5.0%
+<p><code>22 / 478</code> enumerated rows = <strong>4.6%</strong> (≈ 5.3%
 against the 417 headline). Plus 2 real-artifact/test-confirmed (DOCX +
 PDF output, video PENDING). This is the primary metric to drive upward;
 each anti-bluff §11.4.107 recording increments the numerator.</p>
