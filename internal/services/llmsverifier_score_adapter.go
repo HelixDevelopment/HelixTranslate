@@ -96,16 +96,22 @@ func (a *LLMsVerifierScoreAdapter) GetPreferences(ctx context.Context) ([]Provid
 		if m.VerificationStatus != "verified" || !m.CanSeeCode || !m.AffirmativeResponse {
 			continue
 		}
-		// Score each model from the model data we just fetched (normalized to the
-		// 0-10 scale), exactly as RefreshScores does. GetPreferences is a
-		// self-contained method that performs its own fetch, so it MUST NOT depend
-		// on the a.scores cache being pre-populated by a separate RefreshScores
-		// call — otherwise every model scores 0 here and any positive
-		// MinScoreThreshold silently drops all qualified models.
-		score := normalizeScore(m.OverallScore)
-		if score < a.config.MinScoreThreshold {
+		// MinScoreThreshold is interpreted on the RAW score scale — the single
+		// convention every other consumer of this config field uses: the public
+		// /api/v1/verified-models handler (listVerifiedModels compares
+		// `m.OverallScore <= MinScoreThreshold`) AND the live model-selection path
+		// (selection.Engine.SelectModel -> registry.FilterVerified compares
+		// `m.OverallScore > minScore`). Normalizing the score to 0-10 BEFORE the
+		// threshold comparison here made GetPreferences the odd one out: an
+		// operator setting the documented-convention threshold (e.g. 50/100) saw
+		// the verified-models list and the selector keep models, while
+		// GetPreferences silently dropped ALL of them (normalizeScore(95)=9.5 < 50).
+		// Compare the RAW score against the threshold (same scale as everyone
+		// else); still normalize ONLY for the Score/Weight output fields.
+		if m.OverallScore <= a.config.MinScoreThreshold {
 			continue
 		}
+		score := normalizeScore(m.OverallScore)
 		prefs = append(prefs, ProviderPreference{
 			ProviderID:   m.ProviderID,
 			ModelID:      m.ID,

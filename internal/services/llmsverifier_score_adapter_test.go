@@ -112,6 +112,9 @@ func TestGetPreferencesWithMinThreshold(t *testing.T) {
 
 	cfg := verifier.DefaultConfig()
 	cfg.APIURL = server.URL
+	// MinScoreThreshold is on the RAW score scale (same convention as the
+	// /verified-models handler and the registry/selection engine). Threshold 5
+	// keeps both raw scores 95 and 50.
 	cfg.MinScoreThreshold = 5.0
 	client := verifier.NewClient(cfg)
 	engine := scoring.NewEngine(scoring.ScoreWeights{})
@@ -124,8 +127,9 @@ func TestGetPreferencesWithMinThreshold(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, prefs, 2)
 
-	// Now with higher threshold
-	cfg.MinScoreThreshold = 9.0
+	// Now with a higher RAW threshold that excludes the 50-scored model but
+	// keeps the 95-scored one.
+	cfg.MinScoreThreshold = 90.0
 	adapter2 := NewLLMsVerifierScoreAdapter(client, engine, cfg)
 	_ = adapter2.RefreshScores(context.Background())
 
