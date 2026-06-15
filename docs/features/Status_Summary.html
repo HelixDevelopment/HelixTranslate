@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status-summary">HelixTranslate — Feature
 Status Summary</h1>
-<p><strong>Revision:</strong> 6 <strong>Last modified:</strong>
-2026-06-15T23:05:00Z <strong>Authority:</strong> Two-audience companion
+<p><strong>Revision:</strong> 7 <strong>Last modified:</strong>
+2026-06-16T00:00:00Z <strong>Authority:</strong> Two-audience companion
 to <code>docs/features/Status.md</code> (§11.4.56). Derived from the
 same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync),
 §11.4.6 (no-guessing).</p>
@@ -260,15 +260,16 @@ faked:</strong> recording the dashboard translating end-to-end needs the
 HelixQA web/video test backend, which was off-limits to this round. The
 page is proven working by its tests + a real run, but its on-camera
 proof is owed.</li>
-<li><strong>Two remote-worker tools are blocked on
-infrastructure:</strong> the SSH-based translators
-(<code>translate-ssh</code>, <code>ebook-translator</code>) need a
-remote helper machine running a local AI engine, which we don’t have
-available. They build and start, then stop at the missing machine.</li>
-<li><strong>The documented <code>translator</code> tool’s “translate on
-this computer” mode is a placeholder</strong> (“local translation not
-yet implemented”); its remote mode is blocked on the same missing
-machine.</li>
+<li><strong>The on-this-computer AI engines and the remote-worker
+translators were removed (this round):</strong> the product no longer
+runs a local AI model (llama.cpp / Ollama) and no longer ships the
+SSH-based remote-worker tools (<code>translate-ssh</code>,
+<code>ssh-translation</code>, <code>ebook-translator</code>, the
+documented <code>translator</code> tool). Every translation now uses an
+online verified AI provider chosen automatically via the LLMsVerifier
+bridge. These removed tools are marked <strong>Obsolete</strong>
+(operator-approved 2026-06-15). The team-facing distributed/API
+capability is kept.</li>
 <li><strong>The “verified models” API returns 404</strong> because the
 model-verification service is switched off in the current configuration
 (a config choice, not a broken feature).</li>
@@ -287,10 +288,10 @@ PENDING). This is the headline number to keep improving: each new
 genuine recording raises it.</p>
 <h2 id="team-actions">Team actions</h2>
 <ul>
-<li><strong>Operator decision owed for 2 blocked tools:</strong> to
-confirm <code>translate-ssh</code> and <code>ebook-translator</code>,
-provide a remote SSH host running the local AI engine (llama.cpp). Until
-then they stay marked OPERATOR-BLOCKED.</li>
+<li><strong>No operator decision owed for the former SSH/local
+tools:</strong> the remote-worker + local-engine tools were removed
+(operator-approved 2026-06-15), so they no longer wait on a remote host
+— they are Obsolete, not blocked.</li>
 <li>Priority ask: produce real recordings for the next-most-important
 runtime features (web dashboard translation, the other AI providers) to
 keep lifting video-confirmation coverage.</li>
@@ -329,8 +330,14 @@ pkg/bridge ×2, internal/verifier gate ×1, pkg/api/dashboard.go ×1)</td>
 </tr>
 <tr>
 <td>Implemented</td>
-<td>471 (DOCX-write Rev 3 + PDF-write Rev 4 [commit fb265e7] + 6 new Rev
-4 rows all Implemented)</td>
+<td>435 (was 471 Rev 6; −36 flipped to Obsolete Rev 7)</td>
+</tr>
+<tr>
+<td><strong>Obsolete (→ Fixed.md)</strong></td>
+<td><strong>39</strong> (Rev 7 — bridge phase-2 R-2..R-4 removals:
+<code>cmd/translate-ssh</code>/<code>ssh-translation</code>/<code>translator</code>/<code>ebook-translator</code>,
+<code>pkg/sshworker</code>, <code>pkg/modelsbridge</code>, Ollama +
+llama.cpp providers; Reason=<code>feature-removed</code>)</td>
 </tr>
 <tr>
 <td>Stub</td>
@@ -342,12 +349,14 @@ pkg/bridge ×2, internal/verifier gate ×1, pkg/api/dashboard.go ×1)</td>
 </tr>
 <tr>
 <td>Partial</td>
-<td>3 (<code>POST /api/batch</code>; <code>vision_engine</code> OpenCV;
-<code>cmd/translator</code> local STUB + remote OPERATOR-BLOCKED)</td>
+<td>2 (<code>POST /api/batch</code>; <code>vision_engine</code> OpenCV)
+— was 3 Rev 6; <code>cmd/translator</code> → Obsolete Rev 7</td>
 </tr>
 <tr>
 <td>Operator-blocked</td>
-<td>2 (<code>translate-ssh</code>, <code>ebook-translator</code>)</td>
+<td>0 (was 2 Rev 6; <code>translate-ssh</code> +
+<code>ebook-translator</code> → Obsolete Rev 7 — capability removed, not
+host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
@@ -429,10 +438,12 @@ returns metadata + preview; does NOT translate).</li>
 only, no translation executed.</li>
 <li><code>vision_engine</code> OpenCV — stub by default; real CV only
 behind a build tag.</li>
-<li><code>cmd/translator</code> — LOCAL path is a STUB (“local
-translation not yet implemented”); REMOTE path OPERATOR-BLOCKED (no
-SSH/llama.cpp worker host).</li>
 </ol>
+<blockquote>
+<p><code>cmd/translator</code> was Partial in Rev 6 (local STUB + remote
+OPERATOR-BLOCKED) — flipped to <strong>Obsolete</strong> Rev 7 (the
+whole binary was removed in bridge phase-2 R-4).</p>
+</blockquote>
 <h2 id="not-implemented-gap-rows-11.4.6">Not-implemented gap rows
 (§11.4.6)</h2>
 <p>None — both former gap rows are now Implemented.</p>
@@ -474,9 +485,10 @@ content-verified).</li>
 <li><strong>internal/verifier affirmative-response hard-gate</strong> —
 commit 97a8afd: a model with <code>affirmative_response=0</code> is now
 a hard disqualifier. PASS (§11.4.115 polarity guard
-<code>pipeline_affirmative_gate_test.go</code>: default RED reproduces
-pre-fix defect, <code>RED_MODE=0</code> GREEN guard green this session).
-Video N/A (internal gate, no user-visible surface).</li>
+<code>pipeline_affirmative_gate_test.go</code>: GREEN-default — the
+standing suite asserts the defect ABSENT; RED reproduction is OPT-IN
+only under <code>RED_MODE=1</code>, green this session). Video N/A
+(internal gate, no user-visible surface).</li>
 <li><strong>pkg/api/dashboard.go web-dashboard backend</strong> — commit
 f6ba5cc: dashboard page + translations endpoints, previously 404, now
 genuinely translates. PASS unit/integration
@@ -489,15 +501,30 @@ confirmation).</li>
 </ol>
 <h2 id="operator-blocked-list-11.4.45">Operator-blocked list
 (§11.4.45)</h2>
+<p>None — the Rev 6 operator-blocked binaries
+(<code>cmd/translate-ssh</code>, <code>cmd/ebook-translator</code>) were
+<strong>removed</strong> in bridge phase-2 R-4 and are now Obsolete (see
+the Obsolete list), not host-blocked.</p>
+<h2
+id="obsolete-list-11.4.90-rev-7-operator-approved-2026-06-15-d1d2-r-1-r-4">Obsolete
+list (§11.4.90 — Rev 7, operator-approved 2026-06-15 D1/D2 + R-1 +
+R-4)</h2>
 <ol type="1">
-<li><code>cmd/translate-ssh</code> — SSH worker FB2→EPUB; needs remote
-SSH host + llama.cpp.</li>
-<li><code>cmd/ebook-translator</code> — FB2 remote-translate workflow;
-same remote SSH/llama.cpp requirement.</li>
+<li><code>cmd/translate-ssh</code>, <code>cmd/ssh-translation</code>,
+<code>cmd/translator</code>, <code>cmd/ebook-translator</code> —
+SSH-local / remote-worker translators (removed; FACT:
+<code>git ls-files</code> empty for these cmd dirs).</li>
+<li><code>pkg/sshworker</code>, <code>pkg/modelsbridge</code> — SSH
+worker library + models-bridge adapter (removed).</li>
+<li>Ollama provider, llama.cpp provider + multi-worker coordinator
+(<code>pkg/translator/llm/{ollama.go,llamacpp.go,llamacpp_provider.go}</code>
+removed).</li>
 </ol>
 <blockquote>
-<p>Evidence (builds + runs to the blocked point):
-<code>helixtranslate-cmd-blocked-binaries_20260615-172456.mp4</code>.</p>
+<p>Reason=<code>feature-removed</code>;
+Superseding-item=<code>pkg/bridge</code> (LLMsVerifier→agent bridge);
+the KEPT distributed-API path is NOT Obsolete. Triple-check: source
+files gone + <code>CM-NO-LOCAL-RUNTIME</code> gate PASS.</p>
 </blockquote>
 <h2
 id="static-hardcoded-return-endpoints-implemented-but-not-live">Static /
@@ -514,7 +541,8 @@ hardcoded zeros.</li>
 (<code>cmd/monitor-server/main.go</code>) — static
 <code>monitoring_active</code>.</li>
 <li><code>GET /api/v1/providers</code> (gRPC <code>GetProviders</code>)
-— static ProviderRegistry (openai, anthropic, ssh).</li>
+— static ProviderRegistry (API providers only; the <code>ssh</code>
+local provider was removed in bridge phase-2 R-4).</li>
 <li>Static language/provider lists in several
 <code>GET /api/.../languages</code> routes.</li>
 </ul>
@@ -547,10 +575,12 @@ check; the new <code>-multipass</code> flag invokes the
 video-confirmed). cmd/cli write-safety FIXED (87cd2be, atomic
 write/no-clobber, guard cmd/cli/no_partial_output_test.go) + title
 path-leak FIXED (d53e085).</li>
-<li><strong>2 binaries OPERATOR-BLOCKED + 1 local STUB</strong> —
-<code>translate-ssh</code>/<code>ebook-translator</code> need a remote
-SSH/llama.cpp host; <code>cmd/translator</code> local path is a
-STUB.</li>
+<li><strong>SSH-local + local-runtime features removed (Rev 7, 39 rows
+Obsolete)</strong> —
+<code>translate-ssh</code>/<code>ssh-translation</code>/<code>translator</code>/<code>ebook-translator</code>
+binaries, <code>pkg/sshworker</code>, <code>pkg/modelsbridge</code>, and
+the Ollama + llama.cpp providers are gone (operator-approved); the
+default path now sources the LLMsVerifier bridge.</li>
 <li><strong><code>GET /api/v1/verified-models</code> → 404</strong> —
 LLMsVerifier disabled in config (route not mounted);
 feature-disabled-by-config, not a defect.</li>

@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 6 <strong>Last modified:</strong>
-2026-06-15T23:05:00Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 7 <strong>Last modified:</strong>
+2026-06-16T00:00:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -289,8 +289,19 @@ internal/verifier affirmative-gate ×1, pkg/api/dashboard.go ×1)</td>
 </tr>
 <tr>
 <td>Implemented</td>
-<td>471 (DOCX-write Rev 3 + PDF-write flipped gap→Implemented Rev 4
-[commit fb265e7] + 6 new Rev 4 rows all Implemented)</td>
+<td>435 (was 471 Rev 6; <strong>−36</strong> flipped to Obsolete Rev 7 —
+local-runtime + SSH-local features removed in bridge phase-2
+R-2..R-4)</td>
+</tr>
+<tr>
+<td><strong>Obsolete (→ Fixed.md)</strong></td>
+<td><strong>39</strong> (Rev 7 — bridge phase-2 R-2..R-4 removals:
+<code>cmd/translate-ssh</code> ×9, <code>cmd/ssh-translation</code> ×2,
+<code>cmd/translator</code> ×19, <code>cmd/ebook-translator</code> ×3,
+<code>pkg/sshworker</code> ×2, <code>pkg/modelsbridge</code> ×1, Ollama
+provider ×1, llama.cpp provider+coordinator ×2;
+Reason=<code>feature-removed</code>; the KEPT distributed-API path is
+NOT Obsolete)</td>
 </tr>
 <tr>
 <td>Stub</td>
@@ -306,16 +317,18 @@ now EPUB/FB2/TXT/HTML/MD/DOCX/PDF)</td>
 </tr>
 <tr>
 <td>Partial</td>
-<td>3 (<code>POST /api/batch</code> on standalone
+<td>2 (<code>POST /api/batch</code> on standalone
 <code>pkg/api/server.go</code> — returns <code>queued</code> batch_id
 only, no translation; <code>vision_engine</code> OpenCV — stub default,
-real impl behind build tag; <code>cmd/translator</code> — local path
-STUB + remote OPERATOR-BLOCKED)</td>
+real impl behind build tag) — was 3 Rev 6; <code>cmd/translator</code>
+flipped to Obsolete Rev 7</td>
 </tr>
 <tr>
 <td>Operator-blocked</td>
-<td>2 (<code>translate-ssh</code>, <code>ebook-translator</code> — need
-remote SSH/llama.cpp worker host)</td>
+<td>0 (was 2 Rev 6 — <code>translate-ssh</code> +
+<code>ebook-translator</code> flipped to Obsolete Rev 7: the remote
+SSH/llama.cpp worker capability was removed, not merely
+host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
@@ -1041,72 +1054,35 @@ tests, mutation-proven)</td>
 </tbody>
 </table>
 <h2 id="cmdebook-translator">cmd/ebook-translator</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
-<thead>
-<tr>
-<th>Component</th>
-<th>Feature</th>
-<th>Category</th>
-<th>Implementation</th>
-<th>Wiring</th>
-<th>Real-use</th>
-<th>Tests</th>
-<th>Validation</th>
-<th>Video-confirmation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ebook-translator</td>
-<td>FB2 remote-translate workflow</td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>SSH worker syncs binary, runs remote FB2→MD→translate→EPUB,
-downloads + verifies outputs</td>
-<td>Not-inventoried</td>
-<td><strong>OPERATOR-BLOCKED</strong> — needs a remote SSH worker host +
-remote llama.cpp; none available. Binary builds + prints usage in
-blocked-binaries demo</td>
-<td>OPERATOR-BLOCKED;
-evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-cmd-blocked-binaries_20260615-172456.mp4</td>
-</tr>
-<tr>
-<td>ebook-translator</td>
-<td>Positional args (no flags)</td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td><code>&lt;source_fb2&gt; &lt;target_lang&gt; &lt;remote_host&gt; &lt;remote_user&gt; &lt;remote_password&gt;</code></td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>ebook-translator</td>
-<td>Output verification</td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Verifies MD/EPUB exist, non-degenerate, target-language (Cyrillic)
-check</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-</tbody>
-</table>
+<blockquote>
+<p><strong>Obsolete-Details:</strong> Since=bridge phase-2 R-2/R-4
+(2026-06-16); Reason=<code>feature-removed</code> (local-runtime +
+SSH-local translation removed; default path now sources the LLMsVerifier
+bridge — no local llama.cpp/Ollama, no SSH-local worker);
+Superseding-item=<code>pkg/bridge</code> (LLMsVerifier→agent bridge);
+Operator-approval=2026-06-15 D1/D2 (forbid all local runtimes) + R-1
+redirect + the R-4 “keep distributed API, remove SSH-local” decision
+(2026-06-16); Triple-check evidence=source files removed (FACT:
+<code>git ls-files</code> empty for the removed cmd/* dirs +
+pkg/sshworker + pkg/modelsbridge + ollama.go/llamacpp*.go) +
+<code>CM-NO-LOCAL-RUNTIME</code> gate PASS. The KEPT distributed-API
+path is NOT Obsolete. | Component | Feature | Category | Implementation
+| Wiring | Real-use | Tests | Validation | Video-confirmation |
+|—|—|—|—|—|—|—|—|—| | ebook-translator | FB2 remote-translate workflow |
+CLI | <strong>Obsolete (→ Fixed.md)</strong> | Wired | SSH worker syncs
+binary, runs remote FB2→MD→translate→EPUB, downloads + verifies outputs
+| Not-inventoried | <strong>OPERATOR-BLOCKED</strong> — needs a remote
+SSH worker host + remote llama.cpp; none available. Binary builds +
+prints usage in blocked-binaries demo | OPERATOR-BLOCKED;
+evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-cmd-blocked-binaries_20260615-172456.mp4
+| | ebook-translator | Positional args (no flags) | CLI |
+<strong>Obsolete (→ Fixed.md)</strong> | Wired |
+<code>&lt;source_fb2&gt; &lt;target_lang&gt; &lt;remote_host&gt; &lt;remote_user&gt; &lt;remote_password&gt;</code>
+| Not-inventoried | Source-confirmed | N/A | | ebook-translator | Output
+verification | CLI | <strong>Obsolete (→ Fixed.md)</strong> | Wired |
+Verifies MD/EPUB exist, non-degenerate, target-language (Cyrillic) check
+| Not-inventoried | Source-confirmed | PENDING |</p>
+</blockquote>
 <h2 id="cmdgrpc-server">cmd/grpc-server</h2>
 <table style="width:100%;">
 <colgroup>
@@ -1706,433 +1682,139 @@ backfill bug a5e8866; “Server started successfully” + HTTP/2 TLS on
 </tbody>
 </table>
 <h2 id="cmdssh-translation">cmd/ssh-translation</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
-<thead>
-<tr>
-<th>Component</th>
-<th>Feature</th>
-<th>Category</th>
-<th>Implementation</th>
-<th>Wiring</th>
-<th>Real-use</th>
-<th>Tests</th>
-<th>Validation</th>
-<th>Video-confirmation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ssh-translation</td>
-<td>SSH translation system (fixed-config)</td>
-<td>CLI/Web</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Hardcoded Russian→Serbian-Cyrillic workflow over SSH worker w/
-llama.cpp; WebSocket monitoring</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>ssh-translation</td>
-<td>(no CLI flags)</td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>All config hardcoded in <code>SystemConfig</code> (host, creds,
-langs, llama providers)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-</tbody>
-</table>
+<blockquote>
+<p><strong>Obsolete-Details:</strong> Since=bridge phase-2 R-2/R-4
+(2026-06-16); Reason=<code>feature-removed</code> (local-runtime +
+SSH-local translation removed; default path now sources the LLMsVerifier
+bridge — no local llama.cpp/Ollama, no SSH-local worker);
+Superseding-item=<code>pkg/bridge</code> (LLMsVerifier→agent bridge);
+Operator-approval=2026-06-15 D1/D2 (forbid all local runtimes) + R-1
+redirect + the R-4 “keep distributed API, remove SSH-local” decision
+(2026-06-16); Triple-check evidence=source files removed (FACT:
+<code>git ls-files</code> empty for the removed cmd/* dirs +
+pkg/sshworker + pkg/modelsbridge + ollama.go/llamacpp*.go) +
+<code>CM-NO-LOCAL-RUNTIME</code> gate PASS. The KEPT distributed-API
+path is NOT Obsolete. | Component | Feature | Category | Implementation
+| Wiring | Real-use | Tests | Validation | Video-confirmation |
+|—|—|—|—|—|—|—|—|—| | ssh-translation | SSH translation system
+(fixed-config) | CLI/Web | <strong>Obsolete (→ Fixed.md)</strong> |
+Wired | Hardcoded Russian→Serbian-Cyrillic workflow over SSH worker w/
+llama.cpp; WebSocket monitoring | Not-inventoried | Source-confirmed |
+PENDING | | ssh-translation | (no CLI flags) | CLI | <strong>Obsolete (→
+Fixed.md)</strong> | Wired | All config hardcoded in
+<code>SystemConfig</code> (host, creds, langs, llama providers) |
+Not-inventoried | Source-confirmed | N/A |</p>
+</blockquote>
 <h2 id="cmdtranslate-ssh">cmd/translate-ssh</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
-<thead>
-<tr>
-<th>Component</th>
-<th>Feature</th>
-<th>Category</th>
-<th>Implementation</th>
-<th>Wiring</th>
-<th>Real-use</th>
-<th>Tests</th>
-<th>Validation</th>
-<th>Video-confirmation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>translate-ssh</td>
-<td>SSH worker 4-step FB2→EPUB translator</td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>FB2→MD → translate (remote llama.cpp) → MD→EPUB; standalone worker
-invoked by coordinator</td>
-<td>Not-inventoried</td>
-<td><strong>OPERATOR-BLOCKED</strong> — needs a remote SSH worker host
+<blockquote>
+<p><strong>Obsolete-Details:</strong> Since=bridge phase-2 R-2/R-4
+(2026-06-16); Reason=<code>feature-removed</code> (local-runtime +
+SSH-local translation removed; default path now sources the LLMsVerifier
+bridge — no local llama.cpp/Ollama, no SSH-local worker);
+Superseding-item=<code>pkg/bridge</code> (LLMsVerifier→agent bridge);
+Operator-approval=2026-06-15 D1/D2 (forbid all local runtimes) + R-1
+redirect + the R-4 “keep distributed API, remove SSH-local” decision
+(2026-06-16); Triple-check evidence=source files removed (FACT:
+<code>git ls-files</code> empty for the removed cmd/* dirs +
+pkg/sshworker + pkg/modelsbridge + ollama.go/llamacpp*.go) +
+<code>CM-NO-LOCAL-RUNTIME</code> gate PASS. The KEPT distributed-API
+path is NOT Obsolete. | Component | Feature | Category | Implementation
+| Wiring | Real-use | Tests | Validation | Video-confirmation |
+|—|—|—|—|—|—|—|—|—| | translate-ssh | SSH worker 4-step FB2→EPUB
+translator | CLI | <strong>Obsolete (→ Fixed.md)</strong> | Wired |
+FB2→MD → translate (remote llama.cpp) → MD→EPUB; standalone worker
+invoked by coordinator | Not-inventoried |
+<strong>OPERATOR-BLOCKED</strong> — needs a remote SSH worker host
 running llama.cpp; none available. Binary builds + runs as far as
-possible (blocked-binaries demo)</td>
-<td>OPERATOR-BLOCKED;
-evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-cmd-blocked-binaries_20260615-172456.mp4</td>
-</tr>
-<tr>
-<td>translate-ssh</td>
-<td><code>-input</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Input ebook (required)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translate-ssh</td>
-<td><code>-output</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Output EPUB (required)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translate-ssh</td>
-<td><code>-host</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>SSH host (required)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translate-ssh</td>
-<td><code>-user</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>SSH username (required)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translate-ssh</td>
-<td><code>-password</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>SSH password (required)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translate-ssh</td>
-<td><code>-port</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>SSH port</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translate-ssh</td>
-<td><code>-remote-dir</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Remote working directory</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translate-ssh</td>
-<td><code>-report-dir</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Report output directory</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-</tbody>
-</table>
+possible (blocked-binaries demo) | OPERATOR-BLOCKED;
+evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-cmd-blocked-binaries_20260615-172456.mp4
+| | translate-ssh | <code>-input</code> | CLI | <strong>Obsolete (→
+Fixed.md)</strong> | Wired | Input ebook (required) | Not-inventoried |
+Source-confirmed | N/A | | translate-ssh | <code>-output</code> | CLI |
+<strong>Obsolete (→ Fixed.md)</strong> | Wired | Output EPUB (required)
+| Not-inventoried | Source-confirmed | N/A | | translate-ssh |
+<code>-host</code> | CLI | <strong>Obsolete (→ Fixed.md)</strong> |
+Wired | SSH host (required) | Not-inventoried | Source-confirmed | N/A |
+| translate-ssh | <code>-user</code> | CLI | <strong>Obsolete (→
+Fixed.md)</strong> | Wired | SSH username (required) | Not-inventoried |
+Source-confirmed | N/A | | translate-ssh | <code>-password</code> | CLI
+| <strong>Obsolete (→ Fixed.md)</strong> | Wired | SSH password
+(required) | Not-inventoried | Source-confirmed | N/A | | translate-ssh
+| <code>-port</code> | CLI | <strong>Obsolete (→ Fixed.md)</strong> |
+Wired | SSH port | Not-inventoried | Source-confirmed | N/A | |
+translate-ssh | <code>-remote-dir</code> | CLI | <strong>Obsolete (→
+Fixed.md)</strong> | Wired | Remote working directory | Not-inventoried
+| Source-confirmed | N/A | | translate-ssh | <code>-report-dir</code> |
+CLI | <strong>Obsolete (→ Fixed.md)</strong> | Wired | Report output
+directory | Not-inventoried | Source-confirmed | N/A |</p>
+</blockquote>
 <h2 id="cmdtranslator">cmd/translator</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
-<thead>
-<tr>
-<th>Component</th>
-<th>Feature</th>
-<th>Category</th>
-<th>Implementation</th>
-<th>Wiring</th>
-<th>Real-use</th>
-<th>Tests</th>
-<th>Validation</th>
-<th>Video-confirmation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>translator</td>
-<td>Documented FB2 local/remote translator</td>
-<td>CLI</td>
-<td><strong>Partial</strong> (local path is STUB; remote needs SSH
-worker)</td>
-<td>Wired</td>
-<td>Remote SSH/llama.cpp path produces a documentation report; LOCAL
-path is a STUB — emits “local translation not yet implemented”
-(captured). Remote path is OPERATOR-BLOCKED (no SSH worker host)</td>
-<td>Not-inventoried</td>
-<td><strong>GAP — local STUB captured; remote
-OPERATOR-BLOCKED</strong></td>
-<td>PENDING/OPERATOR-BLOCKED;
-evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-cmd-blocked-binaries_20260615-172456.mp4</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-i/-input</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Input ebook</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-o/-output</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Output file</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-ssh-host</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>SSH host (remote mode)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-ssh-user</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>SSH username</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-ssh-password</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>SSH password</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-ssh-port</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>SSH port</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-remote-dir</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Remote working directory</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-workers</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Parallel workers</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-chunk-size</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Text chunk size</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-concurrency</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Max concurrent operations</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-verify</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Verify translated output</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-verbose</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Verbose logging</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-llama-binary</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Path to llama.cpp binary</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-temperature</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>LLM temperature</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-context</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>LLM context size</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-version</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Show version</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-help</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Show help</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>translator</td>
-<td><code>-hash-codebase</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Compute codebase hash</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-</tbody>
-</table>
+<blockquote>
+<p><strong>Obsolete-Details:</strong> Since=bridge phase-2 R-2/R-4
+(2026-06-16); Reason=<code>feature-removed</code> (local-runtime +
+SSH-local translation removed; default path now sources the LLMsVerifier
+bridge — no local llama.cpp/Ollama, no SSH-local worker);
+Superseding-item=<code>pkg/bridge</code> (LLMsVerifier→agent bridge);
+Operator-approval=2026-06-15 D1/D2 (forbid all local runtimes) + R-1
+redirect + the R-4 “keep distributed API, remove SSH-local” decision
+(2026-06-16); Triple-check evidence=source files removed (FACT:
+<code>git ls-files</code> empty for the removed cmd/* dirs +
+pkg/sshworker + pkg/modelsbridge + ollama.go/llamacpp*.go) +
+<code>CM-NO-LOCAL-RUNTIME</code> gate PASS. The KEPT distributed-API
+path is NOT Obsolete. | Component | Feature | Category | Implementation
+| Wiring | Real-use | Tests | Validation | Video-confirmation |
+|—|—|—|—|—|—|—|—|—| | translator | Documented FB2 local/remote
+translator | CLI | <strong>Obsolete (→ Fixed.md)</strong> | Wired |
+Remote SSH/llama.cpp path produces a documentation report; LOCAL path is
+a STUB — emits “local translation not yet implemented” (captured).
+Remote path is OPERATOR-BLOCKED (no SSH worker host) | Not-inventoried |
+<strong>GAP — local STUB captured; remote OPERATOR-BLOCKED</strong> |
+PENDING/OPERATOR-BLOCKED;
+evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-cmd-blocked-binaries_20260615-172456.mp4
+| | translator | <code>-i/-input</code> | CLI | <strong>Obsolete (→
+Fixed.md)</strong> | Wired | Input ebook | Not-inventoried |
+Source-confirmed | N/A | | translator | <code>-o/-output</code> | CLI |
+<strong>Obsolete (→ Fixed.md)</strong> | Wired | Output file |
+Not-inventoried | Source-confirmed | N/A | | translator |
+<code>-ssh-host</code> | CLI | <strong>Obsolete (→ Fixed.md)</strong> |
+Wired | SSH host (remote mode) | Not-inventoried | Source-confirmed |
+N/A | | translator | <code>-ssh-user</code> | CLI | <strong>Obsolete (→
+Fixed.md)</strong> | Wired | SSH username | Not-inventoried |
+Source-confirmed | N/A | | translator | <code>-ssh-password</code> | CLI
+| <strong>Obsolete (→ Fixed.md)</strong> | Wired | SSH password |
+Not-inventoried | Source-confirmed | N/A | | translator |
+<code>-ssh-port</code> | CLI | <strong>Obsolete (→ Fixed.md)</strong> |
+Wired | SSH port | Not-inventoried | Source-confirmed | N/A | |
+translator | <code>-remote-dir</code> | CLI | <strong>Obsolete (→
+Fixed.md)</strong> | Wired | Remote working directory | Not-inventoried
+| Source-confirmed | N/A | | translator | <code>-workers</code> | CLI |
+<strong>Obsolete (→ Fixed.md)</strong> | Wired | Parallel workers |
+Not-inventoried | Source-confirmed | N/A | | translator |
+<code>-chunk-size</code> | CLI | <strong>Obsolete (→ Fixed.md)</strong>
+| Wired | Text chunk size | Not-inventoried | Source-confirmed | N/A | |
+translator | <code>-concurrency</code> | CLI | <strong>Obsolete (→
+Fixed.md)</strong> | Wired | Max concurrent operations | Not-inventoried
+| Source-confirmed | N/A | | translator | <code>-verify</code> | CLI |
+<strong>Obsolete (→ Fixed.md)</strong> | Wired | Verify translated
+output | Not-inventoried | Source-confirmed | N/A | | translator |
+<code>-verbose</code> | CLI | <strong>Obsolete (→ Fixed.md)</strong> |
+Wired | Verbose logging | Not-inventoried | Source-confirmed | N/A | |
+translator | <code>-llama-binary</code> | CLI | <strong>Obsolete (→
+Fixed.md)</strong> | Wired | Path to llama.cpp binary | Not-inventoried
+| Source-confirmed | N/A | | translator | <code>-temperature</code> |
+CLI | <strong>Obsolete (→ Fixed.md)</strong> | Wired | LLM temperature |
+Not-inventoried | Source-confirmed | N/A | | translator |
+<code>-context</code> | CLI | <strong>Obsolete (→ Fixed.md)</strong> |
+Wired | LLM context size | Not-inventoried | Source-confirmed | N/A | |
+translator | <code>-version</code> | CLI | <strong>Obsolete (→
+Fixed.md)</strong> | Wired | Show version | Not-inventoried |
+Source-confirmed | N/A | | translator | <code>-help</code> | CLI |
+<strong>Obsolete (→ Fixed.md)</strong> | Wired | Show help |
+Not-inventoried | Source-confirmed | N/A | | translator |
+<code>-hash-codebase</code> | CLI | <strong>Obsolete (→
+Fixed.md)</strong> | Wired | Compute codebase hash | Not-inventoried |
+Source-confirmed | N/A |</p>
+</blockquote>
 <h2 id="cmdunified-translator-primary-cli">cmd/unified-translator
 (PRIMARY CLI)</h2>
 <table style="width:100%;">
@@ -3054,259 +2736,98 @@ unified-translator):/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek
 <td>Ollama</td>
 <td>Ollama local client</td>
 <td>Library</td>
-<td>Implemented</td>
+<td><strong>Obsolete (→ Fixed.md)</strong></td>
 <td>Wired</td>
-<td>Local /api/generate inference</td>
+<td>Local /api/generate inference — REMOVED (bridge phase-2 R-2). See
+Obsolete-Details below.</td>
 <td>Not-inventoried</td>
 <td>Source-confirmed</td>
-<td>PENDING</td>
+<td>N/A</td>
 </tr>
 <tr>
 <td>llama.cpp</td>
 <td>llama.cpp client</td>
 <td>Library</td>
-<td>Implemented</td>
+<td><strong>Obsolete (→ Fixed.md)</strong></td>
 <td>Wired</td>
-<td>llama-cli wrapper w/ hardware detection, model download, GPU
-accel</td>
+<td>llama-cli wrapper w/ hardware detection, model download, GPU accel —
+REMOVED (bridge phase-2 R-3). See Obsolete-Details below.</td>
 <td>Not-inventoried</td>
 <td>Source-confirmed</td>
-<td>PENDING</td>
+<td>N/A</td>
 </tr>
 <tr>
 <td>llama.cpp</td>
 <td>llama.cpp multi-worker coordinator</td>
 <td>Library</td>
-<td>Implemented</td>
+<td><strong>Obsolete (→ Fixed.md)</strong></td>
 <td>Wired</td>
-<td>Worker pool for parallel local llama.cpp inference</td>
+<td>Worker pool for parallel local llama.cpp inference — REMOVED (bridge
+phase-2 R-3). See Obsolete-Details below.</td>
 <td>Not-inventoried</td>
 <td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>Groq</td>
-<td>Groq client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>Cohere</td>
-<td>Cohere client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>command-r via OpenAI-compat endpoint</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>Mistral</td>
-<td>Mistral client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>xAI</td>
-<td>xAI (Grok) client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>Replicate</td>
-<td>Replicate client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Async prediction-polling API</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>Cerebras</td>
-<td>Cerebras client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper (base-URL/model specifics
-UNCONFIRMED)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>Cloudflare</td>
-<td>Cloudflare Workers AI client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>/client/v4 Workers AI</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>SiliconFlow</td>
-<td>SiliconFlow client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>Hyperbolic</td>
-<td>Hyperbolic client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>TogetherAI</td>
-<td>TogetherAI client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>SambaNova</td>
-<td>SambaNova client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>Kimi</td>
-<td>Kimi (Moonshot) client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>Novita</td>
-<td>Novita client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>/v3/openai-compatible wrapper</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>NLPCloud</td>
-<td>NLPCloud client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>Upstage</td>
-<td>Upstage (Solar) client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>Sarvam</td>
-<td>Sarvam client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>Modal</td>
-<td>Modal client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>PublicAI</td>
-<td>PublicAI client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>NIA</td>
-<td>NIA client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>Vulavula</td>
-<td>Vulavula client</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td>N/A</td>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p><strong>Obsolete-Details (Ollama + llama.cpp provider/coordinator
+rows above):</strong> Since=bridge phase-2 R-2/R-3 (2026-06-16);
+Reason=<code>feature-removed</code> (local-runtime inference removed;
+the default path now sources the LLMsVerifier bridge — no local
+llama.cpp/Ollama); Superseding-item=<code>pkg/bridge</code>;
+Operator-approval=2026-06-15 D1/D2 (forbid all local runtimes) + R-1
+redirect; Triple-check
+evidence=<code>pkg/translator/llm/{ollama.go,llamacpp.go,llamacpp_provider.go}</code>
+removed (FACT: <code>git ls-files</code> empty) +
+<code>CM-NO-LOCAL-RUNTIME</code> gate PASS. The KEPT API provider
+clients (OpenAI/Anthropic/DeepSeek/…) in this section are NOT Obsolete.
+| Groq | Groq client | Library | Implemented | Wired | OpenAI-compatible
+wrapper | Not-inventoried | Source-confirmed | PENDING | | Cohere |
+Cohere client | Library | Implemented | Wired | command-r via
+OpenAI-compat endpoint | Not-inventoried | Source-confirmed | PENDING |
+| Mistral | Mistral client | Library | Implemented | Wired |
+OpenAI-compatible wrapper | Not-inventoried | Source-confirmed | PENDING
+| | xAI | xAI (Grok) client | Library | Implemented | Wired |
+OpenAI-compatible wrapper | Not-inventoried | Source-confirmed | PENDING
+| | Replicate | Replicate client | Library | Implemented | Wired | Async
+prediction-polling API | Not-inventoried | Source-confirmed | PENDING |
+| Cerebras | Cerebras client | Library | Implemented | Wired |
+OpenAI-compatible wrapper (base-URL/model specifics UNCONFIRMED) |
+Not-inventoried | Source-confirmed | PENDING | | Cloudflare | Cloudflare
+Workers AI client | Library | Implemented | Wired | /client/v4 Workers
+AI | Not-inventoried | Source-confirmed | PENDING | | SiliconFlow |
+SiliconFlow client | Library | Implemented | Wired | OpenAI-compatible
+wrapper (specifics UNCONFIRMED) | Not-inventoried | Source-confirmed |
+PENDING | | Hyperbolic | Hyperbolic client | Library | Implemented |
+Wired | OpenAI-compatible wrapper (specifics UNCONFIRMED) |
+Not-inventoried | Source-confirmed | PENDING | | TogetherAI | TogetherAI
+client | Library | Implemented | Wired | OpenAI-compatible wrapper
+(specifics UNCONFIRMED) | Not-inventoried | Source-confirmed | PENDING |
+| SambaNova | SambaNova client | Library | Implemented | Wired |
+OpenAI-compatible wrapper (specifics UNCONFIRMED) | Not-inventoried |
+Source-confirmed | PENDING | | Kimi | Kimi (Moonshot) client | Library |
+Implemented | Wired | OpenAI-compatible wrapper (specifics UNCONFIRMED)
+| Not-inventoried | Source-confirmed | PENDING | | Novita | Novita
+client | Library | Implemented | Wired | /v3/openai-compatible wrapper |
+Not-inventoried | Source-confirmed | PENDING | | NLPCloud | NLPCloud
+client | Library | Implemented | Wired | OpenAI-compatible wrapper
+(specifics UNCONFIRMED) | Not-inventoried | Source-confirmed | PENDING |
+| Upstage | Upstage (Solar) client | Library | Implemented | Wired |
+OpenAI-compatible wrapper (specifics UNCONFIRMED) | Not-inventoried |
+Source-confirmed | PENDING | | Sarvam | Sarvam client | Library |
+Implemented | Wired | OpenAI-compatible wrapper (specifics UNCONFIRMED)
+| Not-inventoried | Source-confirmed | PENDING | | Modal | Modal client
+| Library | Implemented | Wired | OpenAI-compatible wrapper (specifics
+UNCONFIRMED) | Not-inventoried | Source-confirmed | PENDING | | PublicAI
+| PublicAI client | Library | Implemented | Wired | OpenAI-compatible
+wrapper (specifics UNCONFIRMED) | Not-inventoried | Source-confirmed |
+PENDING | | NIA | NIA client | Library | Implemented | Wired |
+OpenAI-compatible wrapper (specifics UNCONFIRMED) | Not-inventoried |
+Source-confirmed | PENDING | | Vulavula | Vulavula client | Library |
+Implemented | Wired | OpenAI-compatible wrapper (specifics UNCONFIRMED)
+| Not-inventoried | Source-confirmed | PENDING |</p>
+</blockquote>
 <h2 id="pkgtranslator-translation-core">pkg/translator — translation
 core</h2>
 <table style="width:100%;">
@@ -4062,11 +3583,12 @@ discovery + selection). Source:
 <code>affirmative_response=0</code> is now a HARD disqualifier —
 rejected by the verification gate regardless of other scores</td>
 <td>Covered + <strong>§11.4.115 polarity guard</strong>
-<code>pipeline_affirmative_gate_test.go</code> (default RED reproduces
-pre-fix defect; <code>RED_MODE=0</code> GREEN guard asserts ABSENT)</td>
-<td><strong>PASS</strong> — observed this session: default RED correctly
-FAILs on pre-fix defect; <code>RED_MODE=0 go test -race</code> GREEN
-(<code>ok internal/verifier</code>)</td>
+<code>pipeline_affirmative_gate_test.go</code> (GREEN-default: the
+standing suite asserts the defect ABSENT; RED reproduction is OPT-IN
+only under <code>RED_MODE=1</code>)</td>
+<td><strong>PASS</strong> — observed this session: default suite GREEN
+(<code>ok internal/verifier</code>); the defect reproduction FAILs only
+under explicit <code>RED_MODE=1</code> (by-design §11.4.115)</td>
 <td>N/A (§11.4.6 — internal verification gate, no user-visible
 surface)</td>
 </tr>
@@ -4334,56 +3856,28 @@ log</td>
 </tbody>
 </table>
 <h2 id="pkgsshworker">pkg/sshworker</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
-<thead>
-<tr>
-<th>Component</th>
-<th>Feature</th>
-<th>Category</th>
-<th>Implementation</th>
-<th>Wiring</th>
-<th>Real-use</th>
-<th>Tests</th>
-<th>Validation</th>
-<th>Video-confirmation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>sshworker</td>
-<td>SSH worker</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>SSH exec, file up/download, codebase sync, key generation</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>sshworker</td>
-<td>Monitored worker</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Event-monitored progress tracking for long commands</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-</tbody>
-</table>
+<blockquote>
+<p><strong>Obsolete-Details:</strong> Since=bridge phase-2 R-2/R-4
+(2026-06-16); Reason=<code>feature-removed</code> (local-runtime +
+SSH-local translation removed; default path now sources the LLMsVerifier
+bridge — no local llama.cpp/Ollama, no SSH-local worker);
+Superseding-item=<code>pkg/bridge</code> (LLMsVerifier→agent bridge);
+Operator-approval=2026-06-15 D1/D2 (forbid all local runtimes) + R-1
+redirect + the R-4 “keep distributed API, remove SSH-local” decision
+(2026-06-16); Triple-check evidence=source files removed (FACT:
+<code>git ls-files</code> empty for the removed cmd/* dirs +
+pkg/sshworker + pkg/modelsbridge + ollama.go/llamacpp*.go) +
+<code>CM-NO-LOCAL-RUNTIME</code> gate PASS. The KEPT distributed-API
+path is NOT Obsolete. | Component | Feature | Category | Implementation
+| Wiring | Real-use | Tests | Validation | Video-confirmation |
+|—|—|—|—|—|—|—|—|—| | sshworker | SSH worker | Library |
+<strong>Obsolete (→ Fixed.md)</strong> | Wired | SSH exec, file
+up/download, codebase sync, key generation | Not-inventoried |
+Source-confirmed | N/A | | sshworker | Monitored worker | Library |
+<strong>Obsolete (→ Fixed.md)</strong> | Wired | Event-monitored
+progress tracking for long commands | Not-inventoried | Source-confirmed
+| N/A |</p>
+</blockquote>
 <h2 id="pkgdeployment">pkg/deployment</h2>
 <table style="width:100%;">
 <colgroup>
@@ -4777,100 +4271,36 @@ websocket, batch, progress, report, logger, hardware, hash</h2>
 </tbody>
 </table>
 <h2 id="pkgmodels-modelsbridge">pkg/models &amp; modelsbridge</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
-<thead>
-<tr>
-<th>Component</th>
-<th>Feature</th>
-<th>Category</th>
-<th>Implementation</th>
-<th>Wiring</th>
-<th>Real-use</th>
-<th>Tests</th>
-<th>Validation</th>
-<th>Video-confirmation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>models</td>
-<td>Model registry</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Translation-model metadata registry (50+ models)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>models</td>
-<td>Model downloader</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>HTTP model download w/ caching + sha256 verification</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>models</td>
-<td>User domain</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>User struct, bcrypt hashing, in-memory repo</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>models</td>
-<td>Error definitions</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Domain error constants</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>models</td>
-<td>Verifier registry</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>LLMsVerifier-backed registry w/ thresholds &amp; filtering</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
-</tr>
-<tr>
-<td>modelsbridge</td>
-<td>Models bridge</td>
-<td>Library</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Adapter mapping models.LLMRequest/Response → llm.LLMClient</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-</tbody>
-</table>
+<blockquote>
+<p><strong>Obsolete-Details:</strong> Since=bridge phase-2 R-2/R-4
+(2026-06-16); Reason=<code>feature-removed</code> (local-runtime +
+SSH-local translation removed; default path now sources the LLMsVerifier
+bridge — no local llama.cpp/Ollama, no SSH-local worker);
+Superseding-item=<code>pkg/bridge</code> (LLMsVerifier→agent bridge);
+Operator-approval=2026-06-15 D1/D2 (forbid all local runtimes) + R-1
+redirect + the R-4 “keep distributed API, remove SSH-local” decision
+(2026-06-16); Triple-check evidence=source files removed (FACT:
+<code>git ls-files</code> empty for the removed cmd/* dirs +
+pkg/sshworker + pkg/modelsbridge + ollama.go/llamacpp*.go) +
+<code>CM-NO-LOCAL-RUNTIME</code> gate PASS. The KEPT distributed-API
+path is NOT Obsolete. | Component | Feature | Category | Implementation
+| Wiring | Real-use | Tests | Validation | Video-confirmation |
+|—|—|—|—|—|—|—|—|—| | models | Model registry | Library | Implemented |
+Wired | Translation-model metadata registry (50+ models) |
+Not-inventoried | Source-confirmed | N/A | | models | Model downloader |
+Library | Implemented | Wired | HTTP model download w/ caching + sha256
+verification | Not-inventoried | Source-confirmed | N/A | | models |
+User domain | Library | Implemented | Wired | User struct, bcrypt
+hashing, in-memory repo | Not-inventoried | Source-confirmed | N/A | |
+models | Error definitions | Library | Implemented | Wired | Domain
+error constants | Not-inventoried | Source-confirmed | N/A | | models |
+Verifier registry | Library | Implemented | Wired | LLMsVerifier-backed
+registry w/ thresholds &amp; filtering | Not-inventoried |
+Source-confirmed | PENDING | | modelsbridge | Models bridge | Library |
+<strong>Obsolete (→ Fixed.md)</strong> | Wired | Adapter mapping
+models.LLMRequest/Response → llm.LLMClient | Not-inventoried |
+Source-confirmed | N/A |</p>
+</blockquote>
 <h2 id="pkgbridge-llmsverifiercomponentagent-bridge">pkg/bridge —
 LLMsVerifier→component+agent bridge</h2>
 <p>In-process bridge (no local models) that selects the best
