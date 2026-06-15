@@ -378,6 +378,18 @@ func (p *EPUBParser) parseContentFile(f *zip.File) (*Chapter, error) {
 	// Simple HTML text extraction - remove head/title sections first
 	content := string(data)
 
+	// Extract the chapter's real title BEFORE the head is stripped. Prefer the
+	// document <title>, falling back to the first <h1> heading. The previous
+	// implementation used the zip entry name (e.g. "OEBPS/chapter1.xhtml") as the
+	// chapter title, so an EPUB -> translate -> EPUB round-trip emitted that
+	// internal filename as the chapter <h1> heading AND the NCX/TOC navLabel
+	// (writeChapters/writeTOC both use chapter.Title) — visible corruption — while
+	// the real title was lost as a title (it only survived folded into body text).
+	chapterTitle := extractChapterTitle(content)
+	if chapterTitle == "" {
+		chapterTitle = f.Name
+	}
+
 	// Remove entire head section including title. The `(?s)` flag is REQUIRED so
 	// `.` matches newlines: real EPUB XHTML almost always spans the <head> over
 	// several lines (<title>, charset <meta>, stylesheet <link> on separate
@@ -408,7 +420,7 @@ func (p *EPUBParser) parseContentFile(f *zip.File) (*Chapter, error) {
 	}
 
 	chapter := &Chapter{
-		Title: f.Name,
+		Title: chapterTitle,
 		Sections: []Section{
 			{
 				Content: content,
@@ -417,6 +429,36 @@ func (p *EPUBParser) parseContentFile(f *zip.File) (*Chapter, error) {
 	}
 
 	return chapter, nil
+}
+
+// titleTagRe / h1TagRe extract the chapter's human-readable title from the raw
+// XHTML. `(?is)` so `.` matches newlines (multi-line <head>/<h1>) and matching is
+// case-insensitive.
+var (
+	titleTagRe = regexp.MustCompile(`(?is)<title[^>]*>(.*?)</title>`)
+	h1TagRe    = regexp.MustCompile(`(?is)<h1[^>]*>(.*?)</h1>`)
+)
+
+// extractChapterTitle returns the chapter's real title text — the <title>
+// element if present and non-empty, otherwise the first <h1> heading. Any inner
+// markup (e.g. <span> inside the heading) is stripped and entities decoded, and
+// whitespace is collapsed, so the returned title is clean reader-facing text.
+// Returns "" when neither element yields text, letting the caller fall back to a
+// filename.
+func extractChapterTitle(raw string) string {
+	for _, re := range []*regexp.Regexp{titleTagRe, h1TagRe} {
+		m := re.FindStringSubmatch(raw)
+		if m == nil {
+			continue
+		}
+		t := removeHTMLTags(m[1])
+		t = html.UnescapeString(t)
+		t = strings.Join(strings.Fields(t), " ")
+		if t != "" {
+			return t
+		}
+	}
+	return ""
 }
 
 // htmlTagRe matches any HTML/XML tag form: opening (<p>), closing (</p>),
