@@ -17,7 +17,6 @@ import (
 	"digital.vasic.translator/pkg/grpc/proto"
 	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/pkg/markdown"
-	"digital.vasic.translator/pkg/sshworker"
 	"digital.vasic.translator/pkg/translator"
 )
 
@@ -254,84 +253,20 @@ func (ct *CoreTranslatorImpl) executeTranslation(job *TranslationJob, text strin
 
 	switch req.ProviderConfig.Type {
 	case "ssh":
-		return ct.executeSSHTranslation(job, text, eventBus)
+		// The SSH-local translation path (remote SSH worker running llama.cpp)
+		// was removed in bridge phase-2 R-4 (operator-confirmed: "keep
+		// distributed API, remove only SSH-local"). provider=ssh MUST
+		// hard-error honestly rather than silently routing to a DIFFERENT
+		// (API/bridge) provider — a silent wrong-provider fallback is forbidden
+		// (§11.4.69).
+		return "", fmt.Errorf("provider=ssh is no longer supported: the SSH-local translation path was removed (bridge phase-2 R-4); use an API provider")
 	default:
-		// No local-runtime path: any non-SSH provider (incl. the former
-		// "llamacpp" local arm, removed in bridge phase-2 R-3) routes to the
-		// API path, which sources the strongest verified model via the bridge
-		// and hard-errors honestly when no API key is set (§11.4.69). There is
-		// NEVER a silent local llama.cpp fallback.
+		// No local-runtime path: any provider routes to the API path, which
+		// sources the strongest verified model via the bridge and hard-errors
+		// honestly when no API key is set (§11.4.69). There is NEVER a silent
+		// local-runtime fallback.
 		return ct.executeAPITranslation(job, text, eventBus)
 	}
-}
-
-// executeSSHTranslation uses SSH worker
-func (ct *CoreTranslatorImpl) executeSSHTranslation(job *TranslationJob, text string, eventBus *events.EventBus) (string, error) {
-	req := job.Request
-	ctx := job.Context
-
-	ct.logger.Info("Executing SSH translation", map[string]interface{}{
-		"session_id": job.ID,
-		"host":       req.ProviderConfig.SshHost,
-	})
-
-	// Initialize SSH worker
-	workerConfig := sshworker.SSHWorkerConfig{
-		Host:              req.ProviderConfig.SshHost,
-		Port:              int(req.ProviderConfig.SshPort),
-		Username:          req.ProviderConfig.SshUser,
-		Password:          req.ProviderConfig.SshPassword,
-		RemoteDir:         req.ProviderConfig.RemoteDir,
-		ConnectionTimeout: 30 * time.Second,
-		CommandTimeout:    time.Duration(req.ProviderConfig.TimeoutSeconds) * time.Second,
-	}
-
-	worker, err := sshworker.NewSSHWorker(workerConfig, ct.logger)
-	if err != nil {
-		return "", fmt.Errorf("failed to create SSH worker: %w", err)
-	}
-	defer worker.Close()
-
-	if err := worker.Connect(ctx); err != nil {
-		return "", fmt.Errorf("failed to connect to SSH worker: %w", err)
-	}
-
-	// Upload text to remote
-	remoteTextPath := filepath.Join(req.ProviderConfig.RemoteDir, "input.md")
-	if err := worker.UploadData(ctx, []byte(text), remoteTextPath); err != nil {
-		return "", fmt.Errorf("failed to upload text to remote: %w", err)
-	}
-
-	// Emit progress
-	ct.emitProgress(eventBus, job.ID, "upload_complete", "translation", 10, "Text uploaded to remote worker")
-
-	// Execute translation using remote llama.cpp
-	remoteOutputPath := filepath.Join(req.ProviderConfig.RemoteDir, "output.md")
-	cmd := ct.buildSSHCommand(req.ProviderConfig, remoteTextPath, remoteOutputPath)
-
-	result, err := worker.ExecuteCommand(ctx, cmd)
-	if err != nil {
-		return "", fmt.Errorf("failed to execute remote translation: %w", err)
-	}
-
-	if result.ExitCode != 0 {
-		return "", fmt.Errorf("remote translation failed: %s", result.Stderr)
-	}
-
-	// Emit progress
-	ct.emitProgress(eventBus, job.ID, "translation_complete", "translation", 80, "Translation completed on remote worker")
-	// Download result to temp file
-	tempFile := ct.generatePath(req.InputFile, "_translated.md")
-	if err := worker.DownloadFile(ctx, remoteOutputPath, tempFile); err != nil {
-		return "", fmt.Errorf("failed to download translation result: %w", err)
-	}
-	translatedData, err := os.ReadFile(tempFile)
-	if err != nil {
-		return "", fmt.Errorf("failed to read downloaded translation: %w", err)
-	}
-	_ = os.Remove(tempFile)
-
-	return string(translatedData), nil
 }
 
 // executeAPITranslation uses API-based providers
@@ -474,13 +409,6 @@ func (ct *CoreTranslatorImpl) getFileSize(path string) int64 {
 		return 0
 	}
 	return info.Size()
-}
-
-func (ct *CoreTranslatorImpl) buildSSHCommand(config *proto.ProviderConfig, inputPath, outputPath string) string {
-	// Build SSH command based on available models and binaries
-	cmd := fmt.Sprintf("cd %s && /home/milosvasic/llama.cpp -m /home/milosvasic/models/tiny-llama-working.gguf -p 'Translate from Russian to Serbian Cyrillic: ' -f %s > %s",
-		config.RemoteDir, inputPath, outputPath)
-	return cmd
 }
 
 func (ct *CoreTranslatorImpl) generateSessionReport(job *TranslationJob) {

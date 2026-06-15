@@ -3,7 +3,6 @@ package grpc
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -208,23 +207,6 @@ func TestCreateErrorResponse(t *testing.T) {
 	}
 	if resp.GetErrorMessage() != os.ErrNotExist.Error() {
 		t.Errorf("error message = %q, want %q", resp.GetErrorMessage(), os.ErrNotExist.Error())
-	}
-}
-
-// --- buildSSHCommand --------------------------------------------------------
-
-func TestBuildSSHCommand(t *testing.T) {
-	ct := newCT()
-	cfg := &proto.ProviderConfig{RemoteDir: "/work"}
-	cmd := ct.buildSSHCommand(cfg, "/work/input.md", "/work/output.md")
-	if !strings.Contains(cmd, "cd /work") {
-		t.Errorf("command missing cd into remote dir: %q", cmd)
-	}
-	if !strings.Contains(cmd, "/work/input.md") || !strings.Contains(cmd, "/work/output.md") {
-		t.Errorf("command missing input/output paths: %q", cmd)
-	}
-	if !strings.Contains(cmd, "llama.cpp") {
-		t.Errorf("command missing llama.cpp invocation: %q", cmd)
 	}
 }
 

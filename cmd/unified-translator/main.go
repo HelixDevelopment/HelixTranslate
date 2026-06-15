@@ -20,7 +20,6 @@ import (
 	"digital.vasic.translator/pkg/logger"
 	"digital.vasic.translator/pkg/markdown"
 	"digital.vasic.translator/pkg/script"
-	"digital.vasic.translator/pkg/sshworker"
 	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/translator/llm"
 	"digital.vasic.translator/pkg/verification"
@@ -44,7 +43,7 @@ type UnifiedConfig struct {
 	Script     string // cyrillic, latin
 
 	// Provider Selection
-	Provider string // openai, anthropic, zhipu, deepseek, qwen, gemini, ssh
+	Provider string // openai, anthropic, zhipu, deepseek, qwen, gemini
 
 	// API/Local LLM Configuration
 	APIKey      string
@@ -53,18 +52,6 @@ type UnifiedConfig struct {
 	Temperature float64
 	MaxTokens   int
 	Timeout     time.Duration
-
-	// SSH Worker Configuration (for provider=ssh). The remote worker runs
-	// llama.cpp, so LlamaBinary / LlamaModel point at the binary + model ON THE
-	// REMOTE host (see buildSSHTranslateCommand). There is NO local llama.cpp
-	// runtime in-process (removed in bridge phase-2 R-3).
-	SSHHost     string
-	SSHUser     string
-	SSHPassword string
-	SSHPort     int
-	RemoteDir   string
-	LlamaBinary string // remote llama.cpp binary path (provider=ssh)
-	LlamaModel  string // remote llama.cpp model path (provider=ssh)
 
 	// Execution Options
 	Workers      int
@@ -303,148 +290,20 @@ func executeTranslation(session *TranslationSession) error {
 func executeProviderTranslation(ctx context.Context, config *UnifiedConfig, session *TranslationSession, text string) (string, error) {
 	switch config.Provider {
 	case "ssh":
-		return executeSSHTranslation(ctx, config, session, text)
+		// The SSH-local translation path (remote SSH worker running llama.cpp)
+		// was removed in bridge phase-2 R-4 (operator-confirmed: "keep
+		// distributed API, remove only SSH-local"). It is the project's only
+		// former local-runtime path. provider=ssh MUST hard-error honestly
+		// rather than silently routing to a DIFFERENT (API/bridge) provider —
+		// a silent wrong-provider fallback is forbidden (§11.4.69).
+		return "", fmt.Errorf("provider=ssh is no longer supported: the SSH-local translation path was removed (bridge phase-2 R-4); use an API provider (openai, anthropic, zhipu, deepseek, qwen, gemini)")
 	default:
-		// No local-runtime path: any non-SSH provider (incl. the former
-		// "llamacpp" local arm, removed in bridge phase-2 R-3) routes to the
-		// API path, which sources the strongest verified model via the bridge
-		// and hard-errors honestly when no API key is set (§11.4.69). There is
-		// NEVER a silent local llama.cpp fallback.
+		// No local-runtime path: any provider routes to the API path, which
+		// sources the strongest verified model via the bridge and hard-errors
+		// honestly when no API key is set (§11.4.69). There is NEVER a silent
+		// local-runtime fallback.
 		return executeAPITranslation(ctx, config, session, text)
 	}
-}
-
-// executeSSHTranslation uses SSH worker for translation
-func executeSSHTranslation(ctx context.Context, config *UnifiedConfig, session *TranslationSession, text string) (string, error) {
-	session.Logger.Info("Starting SSH translation", map[string]interface{}{
-		"host": config.SSHHost,
-		"user": config.SSHUser,
-	})
-
-	// Initialize SSH worker
-	workerConfig := sshworker.SSHWorkerConfig{
-		Host:              config.SSHHost,
-		Port:              config.SSHPort,
-		Username:          config.SSHUser,
-		Password:          config.SSHPassword,
-		RemoteDir:         config.RemoteDir,
-		ConnectionTimeout: 30 * time.Second,
-		CommandTimeout:    30 * time.Minute,
-	}
-
-	worker, err := sshworker.NewSSHWorker(workerConfig, session.Logger)
-	if err != nil {
-		return "", fmt.Errorf("failed to create SSH worker: %w", err)
-	}
-	defer worker.Close()
-
-	if err := worker.Connect(ctx); err != nil {
-		return "", fmt.Errorf("failed to connect to SSH worker: %w", err)
-	}
-
-	// Upload text to remote
-	remoteTextPath := filepath.Join(config.RemoteDir, "input.md")
-	if err := worker.UploadData(ctx, []byte(text), remoteTextPath); err != nil {
-		return "", fmt.Errorf("failed to upload text to remote: %w", err)
-	}
-
-	// Execute translation using remote llama.cpp
-	remoteOutputPath := filepath.Join(config.RemoteDir, "output.md")
-	cmd := buildSSHTranslateCommand(config, remoteTextPath, remoteOutputPath)
-
-	result, err := worker.ExecuteCommand(ctx, cmd)
-	if err != nil {
-		return "", fmt.Errorf("failed to execute remote translation: %w", err)
-	}
-
-	if result.ExitCode != 0 {
-		return "", fmt.Errorf("remote translation failed: %s", result.Stderr)
-	}
-
-	// Download result
-	tempFile := filepath.Join(os.TempDir(), "translation_result_"+session.ID+".txt")
-	err = worker.DownloadFile(ctx, remoteOutputPath, tempFile)
-	if err != nil {
-		return "", fmt.Errorf("failed to download translation result: %w", err)
-	}
-
-	// Read the downloaded file
-	translatedData, err := os.ReadFile(tempFile)
-	if err != nil {
-		return "", fmt.Errorf("failed to read downloaded translation result: %w", err)
-	}
-
-	// Clean up temp file
-	os.Remove(tempFile)
-
-	return string(translatedData), nil
-}
-
-// buildSSHTranslateCommand builds the remote shell command that runs llama.cpp
-// on the SSH worker. It honors the user's -llama-binary, -llama-model,
-// -source-lang, -target-lang and -script flags rather than hardcoding a single
-// Russian→Serbian-Cyrillic translation. The prompt is single-quote-escaped so a
-// language/script value can never break out of the shell quoting.
-func buildSSHTranslateCommand(config *UnifiedConfig, remoteTextPath, remoteOutputPath string) string {
-	binary := config.LlamaBinary
-	if strings.TrimSpace(binary) == "" {
-		binary = "/usr/local/bin/llama.cpp"
-	}
-	model := config.LlamaModel
-	if strings.TrimSpace(model) == "" {
-		model = "/home/milosvasic/models/tiny-llama-working.gguf"
-	}
-
-	prompt := sshTranslatePrompt(config.SourceLang, config.TargetLang, config.Script)
-
-	return fmt.Sprintf("cd %s && %s -m %s -p %s -f %s > %s",
-		config.RemoteDir, binary, model, shellSingleQuote(prompt), remoteTextPath, remoteOutputPath)
-}
-
-// sshTranslatePrompt builds a translation instruction from the user's
-// source/target language and target script.
-func sshTranslatePrompt(sourceLang, targetLang, targetScript string) string {
-	src := languageDisplayName(sourceLang)
-	tgt := languageDisplayName(targetLang)
-	if targetLang == "sr" {
-		switch targetScript {
-		case "latin":
-			tgt = "Serbian Latin"
-		case "cyrillic":
-			tgt = "Serbian Cyrillic"
-		}
-	}
-	return fmt.Sprintf("Translate from %s to %s: ", src, tgt)
-}
-
-// languageDisplayName maps a language code to a human-readable name, falling
-// back to the code itself for unknown codes (no guessing — §11.4.6).
-func languageDisplayName(code string) string {
-	names := map[string]string{
-		"ru": "Russian",
-		"sr": "Serbian",
-		"en": "English",
-		"fr": "French",
-		"de": "German",
-		"es": "Spanish",
-		"it": "Italian",
-		"zh": "Chinese",
-		"ja": "Japanese",
-		"pt": "Portuguese",
-	}
-	if n, ok := names[code]; ok {
-		return n
-	}
-	if strings.TrimSpace(code) == "" {
-		return "the source language"
-	}
-	return code
-}
-
-// shellSingleQuote safely wraps s in single quotes for POSIX shells, escaping
-// any embedded single quotes via the '"'"' idiom so no value can break out.
-func shellSingleQuote(s string) string {
-	return "'" + strings.ReplaceAll(s, "'", `'"'"'`) + "'"
 }
 
 // executeAPITranslation uses API-based LLM providers
@@ -597,8 +456,6 @@ func parseFlags() *UnifiedConfig {
 		Temperature:    0.3,
 		MaxTokens:      4096,
 		Timeout:        30 * time.Second,
-		SSHPort:        22,
-		RemoteDir:      "/tmp/translator",
 		Workers:        1,
 		ChunkSize:      2000,
 		Concurrency:    4,
@@ -615,23 +472,13 @@ func parseFlags() *UnifiedConfig {
 	flag.StringVar(&config.TargetLang, "target-lang", "sr", "Target language (default: sr)")
 	flag.StringVar(&config.Script, "script", "cyrillic", "Target script: cyrillic, latin (default: cyrillic)")
 
-	flag.StringVar(&config.Provider, "provider", "openai", "Translation provider: openai, anthropic, zhipu, deepseek, qwen, gemini, ssh")
+	flag.StringVar(&config.Provider, "provider", "openai", "Translation provider: openai, anthropic, zhipu, deepseek, qwen, gemini")
 	flag.StringVar(&config.Model, "model", "gpt-4", "Model name")
 	flag.StringVar(&config.APIKey, "api-key", "", "API key for provider")
 	flag.StringVar(&config.BaseURL, "base-url", "", "Base URL for provider (if needed)")
 	flag.Float64Var(&config.Temperature, "temperature", 0.3, "LLM temperature")
 	flag.IntVar(&config.MaxTokens, "max-tokens", 4096, "Maximum tokens")
 	flag.DurationVar(&config.Timeout, "timeout", 30*time.Second, "Request timeout")
-
-	// SSH options (the remote worker runs llama.cpp; -llama-binary / -llama-model
-	// point at the binary + model ON THE REMOTE host).
-	flag.StringVar(&config.SSHHost, "ssh-host", "", "SSH host (for provider=ssh)")
-	flag.StringVar(&config.SSHUser, "ssh-user", "", "SSH username (for provider=ssh)")
-	flag.StringVar(&config.SSHPassword, "ssh-password", "", "SSH password (for provider=ssh)")
-	flag.IntVar(&config.SSHPort, "ssh-port", 22, "SSH port (default: 22)")
-	flag.StringVar(&config.RemoteDir, "remote-dir", "/tmp/translator", "Remote directory (default: /tmp/translator)")
-	flag.StringVar(&config.LlamaBinary, "llama-binary", "/usr/local/bin/llama.cpp", "Remote llama.cpp binary path (for provider=ssh)")
-	flag.StringVar(&config.LlamaModel, "llama-model", "", "Remote llama.cpp model path (for provider=ssh)")
 
 	// Execution options
 	flag.IntVar(&config.Workers, "workers", 1, "Number of parallel workers")
@@ -688,10 +535,11 @@ func parseFlags() *UnifiedConfig {
 	// Provider-specific validation
 	switch config.Provider {
 	case "ssh":
-		if config.SSHHost == "" || config.SSHUser == "" || config.SSHPassword == "" {
-			fmt.Fprintf(os.Stderr, "Error: SSH host, user, and password required for provider=ssh\n")
-			os.Exit(1)
-		}
+		// SSH-local translation was removed (bridge phase-2 R-4). Reject early
+		// with an honest error rather than silently falling back to an API
+		// provider (§11.4.69 — never a silent wrong-provider fallback).
+		fmt.Fprintf(os.Stderr, "Error: provider=ssh is no longer supported (SSH-local path removed in bridge phase-2 R-4); use an API provider (openai, anthropic, zhipu, deepseek, qwen, gemini)\n")
+		os.Exit(1)
 	case "mock":
 		// No API key required for the mock offline test seam.
 	default:
@@ -733,7 +581,6 @@ Providers:
   deepseek    - DeepSeek models (requires API key)
   qwen        - Qwen models (requires API key)
   gemini      - Google Gemini models (requires API key)
-  ssh         - Remote SSH worker running llama.cpp
 
 Basic Options:
   -i, -input <file>        Input ebook file (FB2, EPUB, PDF, DOCX, TXT, HTML)
@@ -750,15 +597,6 @@ Provider Configuration:
   -temperature <value>      LLM temperature (default: 0.3)
   -max-tokens <num>         Maximum tokens (default: 4096)
   -timeout <duration>       Request timeout (default: 30s)
-
-SSH Configuration (provider=ssh):
-  -ssh-host <host>          SSH host
-  -ssh-user <user>          SSH username
-  -ssh-password <pass>      SSH password
-  -ssh-port <port>          SSH port (default: 22)
-  -remote-dir <dir>         Remote directory (default: /tmp/translator)
-  -llama-binary <path>      Remote llama.cpp binary path
-  -llama-model <path>       Remote llama.cpp model path
 
 Execution Options:
   -workers <num>            Parallel workers (default: 1)
@@ -786,9 +624,6 @@ Other:
 Examples:
   # Translate with OpenAI
   unified-translator -i book.fb2 -provider openai -api-key YOUR_KEY
-
-  # Translate via SSH worker
-  unified-translator -i book.fb2 -provider ssh -ssh-host worker.local -ssh-user user -ssh-password pass
 
   # Translate with monitoring
   unified-translator -i book.fb2 -provider openai -api-key YOUR_KEY -monitoring
