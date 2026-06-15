@@ -163,10 +163,19 @@ func (am *AlertManager) AddChannel(channel AlertChannel) {
 	am.channels = append(am.channels, channel)
 }
 
-// SendAlert sends an alert through all configured channels
+// SendAlert sends an alert through all configured channels.
+//
+// The shared-state mutation (alert-ID assignment, history append/trim) happens
+// under am.mu, but the channel sends run with the lock RELEASED: channel.SendAlert
+// performs blocking network I/O (EmailAlertChannel dials SMTP up to ~30s;
+// WebhookAlertChannel POSTs up to ~30s). Holding am.mu across that I/O — as the
+// prior `defer am.mu.Unlock()` did — stalls every other AlertManager method
+// (GetAlertHistory / AcknowledgeAlert / AddChannel / a concurrent SendAlert) for
+// the full duration of the slowest channel, violating the project's "no blocking
+// operation inside a held lock" rule. We snapshot the channel list under the lock
+// and iterate the snapshot unlocked.
 func (am *AlertManager) SendAlert(alert *DriftAlert) error {
 	am.mu.Lock()
-	defer am.mu.Unlock()
 
 	// Generate alert ID if not set
 	if alert.AlertID == "" {
@@ -181,9 +190,14 @@ func (am *AlertManager) SendAlert(alert *DriftAlert) error {
 		am.alertHistory = am.alertHistory[len(am.alertHistory)-am.maxHistory:]
 	}
 
-	// Send through all channels
+	// Snapshot channels so the blocking sends below run WITHOUT am.mu held.
+	channels := make([]AlertChannel, len(am.channels))
+	copy(channels, am.channels)
+	am.mu.Unlock()
+
+	// Send through all channels (unlocked — see doc comment).
 	var lastErr error
-	for _, channel := range am.channels {
+	for _, channel := range channels {
 		if err := channel.SendAlert(alert); err != nil {
 			lastErr = err
 			// Log error but continue with other channels
@@ -193,7 +207,12 @@ func (am *AlertManager) SendAlert(alert *DriftAlert) error {
 	return lastErr
 }
 
-// GetAlertHistory returns alert history
+// GetAlertHistory returns alert history.
+//
+// Each element is a deep COPY of the stored *DriftAlert. Returning the shared
+// pointers (as a plain copy of the slice did) let callers read the alert's
+// mutable fields (Acknowledged / AcknowledgedAt / AcknowledgedBy) without am.mu
+// while AcknowledgeAlert wrote them under am.mu — a data race on the struct.
 func (am *AlertManager) GetAlertHistory(limit int) []*DriftAlert {
 	am.mu.RLock()
 	defer am.mu.RUnlock()
@@ -202,10 +221,28 @@ func (am *AlertManager) GetAlertHistory(limit int) []*DriftAlert {
 		limit = len(am.alertHistory)
 	}
 
-	// Return most recent alerts first
+	// Return most recent alerts first, as independent copies.
+	src := am.alertHistory[len(am.alertHistory)-limit:]
 	result := make([]*DriftAlert, limit)
-	copy(result, am.alertHistory[len(am.alertHistory)-limit:])
+	for i, a := range src {
+		result[i] = copyDriftAlert(a)
+	}
 	return result
+}
+
+// copyDriftAlert returns an independent copy of a DriftAlert, including a fresh
+// copy of the AcknowledgedAt pointer target, so callers cannot observe (or
+// mutate) the manager's live struct without holding am.mu.
+func copyDriftAlert(a *DriftAlert) *DriftAlert {
+	if a == nil {
+		return nil
+	}
+	cp := *a
+	if a.AcknowledgedAt != nil {
+		t := *a.AcknowledgedAt
+		cp.AcknowledgedAt = &t
+	}
+	return &cp
 }
 
 // AcknowledgeAlert marks an alert as acknowledged
@@ -1202,11 +1239,21 @@ func (vm *VersionManager) GetMetrics() *VersionMetrics {
 	return &snapshot
 }
 
-// GetAlerts returns current version drift alerts
+// GetAlerts returns current version drift alerts.
+//
+// Returns deep COPIES: a drift alert is appended to BOTH vm.alerts and the
+// AlertManager history as the SAME *DriftAlert, so AcknowledgeAlert can mutate an
+// alert reachable through vm.alerts. Handing back the shared pointers let callers
+// read those mutable ack fields without a lock — the same struct-field race the
+// AlertManager history fix closes. Copy on the way out.
 func (vm *VersionManager) GetAlerts() []*DriftAlert {
 	vm.alertsMu.RLock()
 	defer vm.alertsMu.RUnlock()
-	return vm.alerts
+	out := make([]*DriftAlert, len(vm.alerts))
+	for i, a := range vm.alerts {
+		out[i] = copyDriftAlert(a)
+	}
+	return out
 }
 
 // AddAlertChannel adds an alert notification channel
