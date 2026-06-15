@@ -63,13 +63,67 @@ type PreparationCoordinator struct {
 	providers []translator.Translator
 }
 
-// NewPreparationCoordinator creates a new preparation coordinator
+// EnsembleTranslatorFactory supplies the preparation providers from an external
+// source (e.g. the provider-diverse LLMsVerifier bridge) instead of the
+// built-in per-provider NewLLMTranslator construction. nil = use the built-in
+// construction (default, behaviour-preserving). This is the injectable seam that
+// keeps PreparationCoordinator decoupled from any concrete provider-discovery
+// implementation: the factory is a plain function value, so this package never
+// imports the bridge or internal/verifier (§11.4.28 decoupling).
+type EnsembleTranslatorFactory func(ctx context.Context) ([]translator.Translator, error)
+
+// NewPreparationCoordinator creates a new preparation coordinator using the
+// built-in per-provider construction. It is a thin, behaviour-preserving wrapper
+// over NewPreparationCoordinatorWithFactory with a nil factory + a background
+// context, so the default construction path is provably identical to the
+// injectable-factory path's nil branch.
 func NewPreparationCoordinator(config PreparationConfig) (*PreparationCoordinator, error) {
+	return NewPreparationCoordinatorWithFactory(context.Background(), config, nil)
+}
+
+// NewPreparationCoordinatorWithFactory creates a preparation coordinator,
+// optionally sourcing its provider-diverse translators from an injected
+// EnsembleTranslatorFactory. When factory is nil the EXACT built-in
+// per-provider construction runs (default, behaviour-preserving). When factory
+// is non-nil the providers come from factory(ctx); an empty result keeps the
+// same honest "no valid LLM providers available" error as the built-in path.
+func NewPreparationCoordinatorWithFactory(
+	ctx context.Context,
+	config PreparationConfig,
+	factory EnsembleTranslatorFactory,
+) (*PreparationCoordinator, error) {
 	if config.PassCount < 1 {
 		config.PassCount = 2 // Default to 2 passes
 	}
 
-	// Initialize LLM providers
+	providers, err := buildProviders(ctx, config, factory)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(providers) == 0 {
+		return nil, fmt.Errorf("no valid LLM providers available")
+	}
+
+	return &PreparationCoordinator{
+		config:    config,
+		providers: providers,
+	}, nil
+}
+
+// buildProviders resolves the coordinator's translators. With a non-nil factory
+// the providers are supplied externally; with a nil factory the built-in
+// per-provider NewLLMTranslator construction runs unchanged.
+func buildProviders(
+	ctx context.Context,
+	config PreparationConfig,
+	factory EnsembleTranslatorFactory,
+) ([]translator.Translator, error) {
+	if factory != nil {
+		return factory(ctx)
+	}
+
+	// Initialize LLM providers (built-in default construction).
 	var providers []translator.Translator
 	for _, providerName := range config.Providers {
 		// Resolve the per-provider API key. A shared config.APIKey (when set)
@@ -104,14 +158,7 @@ func NewPreparationCoordinator(config PreparationConfig) (*PreparationCoordinato
 		providers = append(providers, llmTranslator)
 	}
 
-	if len(providers) == 0 {
-		return nil, fmt.Errorf("no valid LLM providers available")
-	}
-
-	return &PreparationCoordinator{
-		config:    config,
-		providers: providers,
-	}, nil
+	return providers, nil
 }
 
 // PrepareBook performs multi-pass analysis on an entire book

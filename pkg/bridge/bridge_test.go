@@ -348,6 +348,135 @@ func TestBridge_BestClient_EmptyRegistryHonestError(t *testing.T) {
 	}
 }
 
+// TestBridge_ProviderDiverseClients_OnePerProviderRankedByScore is the §1.1
+// paired-mutation guard for the P-1.5 provider-diverse API. It proves that
+// ProviderDiverseClients returns EXACTLY one llm.LLMClient per DISTINCT provider —
+// the STRONGEST verified model of each provider — ordered score-descending, each
+// reporting the correct provider name via GetProviderName(). It preserves the
+// multi-provider diversity the 3 ensemble cross-check sites depend on (NOT
+// collapsed to a single model).
+//
+// Registry (3 providers, 5 models): openai has gpt-4o(0.93) + gpt-4o-mini(0.60);
+// deepseek has deepseek-chat(0.80) + deepseek-coder(0.50); groq has groq-llama(0.70).
+// Provider-diverse expectation = the strongest-per-provider set:
+//
+//	openai/gpt-4o(0.93) · deepseek/deepseek-chat(0.80) · groq/groq-llama(0.70)
+//
+// — one per provider, score-descending, NOT the weaker same-provider models.
+//
+// Polarity switch (§11.4.115): RED_MODE=1 corrupts the expectation to assert NO
+// dedup (5 entries) so the test FAILs on the pre-fix artifact (no method) AND so
+// the §1.1 mutation "dedupe-by-provider removed → duplicates appear" is caught.
+func TestBridge_ProviderDiverseClients_OnePerProviderRankedByScore(t *testing.T) {
+	redMode := os.Getenv("RED_MODE") == "1"
+
+	b := newTestBridge(keyForAll(),
+		verifiedModel("gpt-4o", "openai", "GPT-4o", 0.93),
+		verifiedModel("gpt-4o-mini", "openai", "GPT-4o mini", 0.60),
+		verifiedModel("deepseek-chat", "deepseek", "DeepSeek Chat", 0.80),
+		verifiedModel("deepseek-coder", "deepseek", "DeepSeek Coder", 0.50),
+		verifiedModel("groq-llama", "groq", "Groq Llama", 0.70),
+	)
+
+	clients, err := b.ProviderDiverseClients(context.Background(), selection.TaskRequirements{})
+	if err != nil {
+		t.Fatalf("ProviderDiverseClients error: %v", err)
+	}
+
+	// One per DISTINCT provider — exactly 3 (NOT 5; the weaker same-provider
+	// models are dropped). A regression that removes the per-provider dedup
+	// returns 5 here → FAIL.
+	wantN := 3
+	if redMode {
+		wantN = 5 // §1.1 MUTATION: assert no-dedup; the correct impl returns 3 → FAIL.
+	}
+	if len(clients) != wantN {
+		t.Fatalf("got %d clients, want %d (one strongest model per distinct provider)", len(clients), wantN)
+	}
+	if redMode {
+		return // RED baseline established (or mutation caught); skip the GREEN asserts.
+	}
+
+	// Ordered score-descending by each provider's strongest model:
+	// openai(0.93) → deepseek(0.80) → groq(0.70).
+	wantProviders := []string{"openai", "deepseek", "groq"}
+	for i, want := range wantProviders {
+		if got := clients[i].GetProviderName(); got != want {
+			t.Errorf("clients[%d].GetProviderName() = %q, want %q (provider-diverse, score-desc)", i, got, want)
+		}
+	}
+
+	// No duplicate providers (the diversity invariant).
+	seen := map[string]bool{}
+	for _, c := range clients {
+		p := c.GetProviderName()
+		if seen[p] {
+			t.Errorf("duplicate provider %q in provider-diverse set — diversity violated", p)
+		}
+		seen[p] = true
+	}
+}
+
+// TestBridge_ProviderDiverseTranslators_OnePerProviderRankedByScore proves the
+// translator.Translator variant returns one strongest-per-provider translator,
+// score-descending, with each translator's GetName() naming its provider's model
+// (so the ensemble's N-way diversity is preserved across the translator surface).
+func TestBridge_ProviderDiverseTranslators_OnePerProviderRankedByScore(t *testing.T) {
+	b := newTestBridge(keyForAll(),
+		verifiedModel("gpt-4o", "openai", "GPT-4o", 0.93),
+		verifiedModel("gpt-4o-mini", "openai", "GPT-4o mini", 0.60),
+		verifiedModel("deepseek-chat", "deepseek", "DeepSeek Chat", 0.80),
+		verifiedModel("groq-llama", "groq", "Groq Llama", 0.70),
+	)
+
+	trs, err := b.ProviderDiverseTranslators(context.Background(), selection.TaskRequirements{})
+	if err != nil {
+		t.Fatalf("ProviderDiverseTranslators error: %v", err)
+	}
+	if len(trs) != 3 {
+		t.Fatalf("got %d translators, want 3 (one strongest per distinct provider)", len(trs))
+	}
+	for i, tr := range trs {
+		if tr == nil {
+			t.Fatalf("translators[%d] is nil", i)
+		}
+	}
+}
+
+// TestBridge_ProviderDiverse_EmptyRegistryHonestError proves both provider-diverse
+// methods return an honest error (never an empty silent success, never a local
+// fallback) when no verified model is available.
+func TestBridge_ProviderDiverse_EmptyRegistryHonestError(t *testing.T) {
+	b := newTestBridge(keyForAll()) // no models
+	if cs, err := b.ProviderDiverseClients(context.Background(), selection.TaskRequirements{}); err == nil {
+		t.Errorf("ProviderDiverseClients with no models should error, got %d clients", len(cs))
+	}
+	if trs, err := b.ProviderDiverseTranslators(context.Background(), selection.TaskRequirements{}); err == nil {
+		t.Errorf("ProviderDiverseTranslators with no models should error, got %d translators", len(trs))
+	}
+}
+
+// TestBridge_ProviderDiverseClients_SingleProviderStillReturnsOne proves the
+// degenerate single-provider case returns exactly that one strongest model — the
+// ensemble degrades gracefully to 1-way when only one provider is verified
+// (NOT an error, NOT zero).
+func TestBridge_ProviderDiverseClients_SingleProviderStillReturnsOne(t *testing.T) {
+	b := newTestBridge(keyForAll(),
+		verifiedModel("deepseek-chat", "deepseek", "DeepSeek Chat", 0.80),
+		verifiedModel("deepseek-coder", "deepseek", "DeepSeek Coder", 0.50),
+	)
+	clients, err := b.ProviderDiverseClients(context.Background(), selection.TaskRequirements{})
+	if err != nil {
+		t.Fatalf("ProviderDiverseClients error: %v", err)
+	}
+	if len(clients) != 1 {
+		t.Fatalf("single-provider registry → got %d, want 1 (strongest of the one provider)", len(clients))
+	}
+	if got := clients[0].GetProviderName(); got != "deepseek" {
+		t.Errorf("GetProviderName() = %q, want deepseek", got)
+	}
+}
+
 // TestOpen_NoKeys_HonestHardError proves the OOTB in-process path returns an
 // honest hard error (NOT a silent fallback) when no provider key is present —
 // the R2 require-keys mandate.

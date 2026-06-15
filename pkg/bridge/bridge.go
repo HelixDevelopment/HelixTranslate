@@ -27,12 +27,14 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"digital.vasic.translator/internal/services"
 	"digital.vasic.translator/internal/verifier"
 	"digital.vasic.translator/internal/verifier/persistence"
 	"digital.vasic.translator/internal/verifier/selection"
+	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/translator/llm"
 )
@@ -437,6 +439,147 @@ func (b *Bridge) Invoke(ctx context.Context, system, prompt string) (string, err
 	}
 	return out, nil
 }
+
+// ProviderDiverseModels returns the STRONGEST verified model of EACH distinct
+// provider, ranked score-descending — the metadata backbone of the provider-
+// diverse ensemble. It preserves multi-provider diversity (one model per
+// provider) so the N-way cross-check ensemble sites keep N distinct providers
+// rather than collapsing to a single model.
+//
+// Computation (FACT): rankedModels() is already score-descending (model-id
+// tie-break), so the FIRST ModelInfo seen for a given ProviderID is that
+// provider's strongest verified model. Keeping the first-per-provider entry,
+// in encounter order, yields exactly one strongest model per provider AND keeps
+// the result score-descending (the kept entries appear in the order their
+// strongest models rank). No API key is returned (§11.4.10).
+func (b *Bridge) ProviderDiverseModels(ctx context.Context, task selection.TaskRequirements) ([]ModelInfo, error) {
+	// Reuse ListVerified so the HTTP-mode registry refresh + empty-registry
+	// honest error are shared verbatim (no duplicated bootstrap path).
+	ranked, err := b.ListVerified(ctx)
+	if err != nil {
+		return nil, err
+	}
+	seen := make(map[string]bool, len(ranked))
+	diverse := make([]ModelInfo, 0, len(ranked))
+	for _, m := range ranked {
+		if seen[m.ProviderID] {
+			continue // a weaker same-provider model — diversity keeps only the strongest
+		}
+		seen[m.ProviderID] = true
+		diverse = append(diverse, m)
+	}
+	if len(diverse) == 0 {
+		return nil, fmt.Errorf("bridge: no provider-diverse verified models available")
+	}
+	// FallbackOrder is re-numbered 1..N over the diverse set so consumers see a
+	// dense ordering of the distinct-provider models.
+	for i := range diverse {
+		diverse[i].FallbackOrder = i + 1
+	}
+	return diverse, nil
+}
+
+// ProviderDiverseClients returns one llm.LLMClient per DISTINCT provider — the
+// strongest verified model of each — ranked score-descending. It is the
+// provider-diverse counterpart of BestClient for the multi-LLM cross-check
+// ensemble sites (coordination/preparation/verification): preserving N-way
+// provider diversity instead of collapsing to the single strongest model.
+//
+// Each client is built through the SAME whitelist-immune clientBuild seam
+// BestClient uses (so a genuinely-verified model outside a provider's static
+// model whitelist is not rejected) and is wrapped so its GetProviderName()
+// reports that model's provider id. No API key is returned or logged (§11.4.10).
+func (b *Bridge) ProviderDiverseClients(ctx context.Context, task selection.TaskRequirements) ([]llmClient, error) {
+	diverse, err := b.ProviderDiverseModels(ctx, task)
+	if err != nil {
+		return nil, err
+	}
+	clients := make([]llmClient, 0, len(diverse))
+	for _, m := range diverse {
+		rp, rerr := b.resolver.Resolve(m.ProviderID)
+		if rerr != nil {
+			return nil, fmt.Errorf("bridge: cannot materialize provider-diverse model %s/%s: %w", m.ProviderID, m.ModelID, rerr)
+		}
+		marker := rp.ProviderID
+		if marker == "" || marker == "openai" {
+			marker = rp.FactoryProvider
+		}
+		c, cerr := clientBuild(marker, m.ModelID, &rp)
+		if cerr != nil {
+			return nil, cerr
+		}
+		clients = append(clients, c)
+	}
+	return clients, nil
+}
+
+// ProviderDiverseTranslators returns one translator.Translator per DISTINCT
+// provider — the strongest verified model of each — ranked score-descending.
+// It is the provider-diverse counterpart of BestTranslator for the ensemble
+// sites whose contract is the translator.Translator surface (Translate +
+// TranslateWithProgress + GetStats + GetName).
+//
+// Each translator wraps the SAME whitelist-immune provider-diverse client
+// (ProviderDiverseClients), so diversity, score-ordering, and whitelist-immunity
+// are computed in exactly ONE place and shared between the two variants. The
+// wrapper is a thin clientTranslator (below) exposing the Translator contract
+// over the underlying llm.LLMClient. No API key is returned or logged.
+func (b *Bridge) ProviderDiverseTranslators(ctx context.Context, task selection.TaskRequirements) ([]translator.Translator, error) {
+	clients, err := b.ProviderDiverseClients(ctx, task)
+	if err != nil {
+		return nil, err
+	}
+	trs := make([]translator.Translator, 0, len(clients))
+	for _, c := range clients {
+		trs = append(trs, &clientTranslator{client: c})
+	}
+	return trs, nil
+}
+
+// clientTranslator adapts an llm.LLMClient to the translator.Translator contract
+// for the provider-diverse translator variant. It delegates Translate verbatim
+// (the underlying client's (ctx, text, context) signature matches), reports a
+// provider-derived name, and exposes a quiescent stats view. The ensemble sites
+// that consume provider-diverse translators call only Translate (FACT: the
+// verification polisher's sole use is translator.Translate(ctx, prompt, location)),
+// so this thin surface is sufficient AND keeps diversity computed in one place.
+type clientTranslator struct {
+	client llmClient
+	mu     sync.Mutex
+	stats  translator.TranslationStats
+}
+
+// Translate delegates to the underlying verified client and tracks a minimal
+// translated/error count under mu (the ensemble sites run with concurrency).
+func (c *clientTranslator) Translate(ctx context.Context, text, contextStr string) (string, error) {
+	out, err := c.client.Translate(ctx, text, contextStr)
+	c.mu.Lock()
+	if err != nil {
+		c.stats.Errors++
+	} else {
+		c.stats.Translated++
+	}
+	c.mu.Unlock()
+	return out, err
+}
+
+// TranslateWithProgress delegates to Translate; the bridge client carries no
+// event surface, so progress reporting is a no-op beyond the completion.
+func (c *clientTranslator) TranslateWithProgress(
+	ctx context.Context, text, contextStr string, _ *events.EventBus, _ string,
+) (string, error) {
+	return c.Translate(ctx, text, contextStr)
+}
+
+// GetStats returns the adapter's translated/error counters under mu.
+func (c *clientTranslator) GetStats() translator.TranslationStats {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.stats
+}
+
+// GetName reports the underlying verified model's provider id (e.g. "deepseek").
+func (c *clientTranslator) GetName() string { return c.client.GetProviderName() }
 
 // rankedModels builds a strongest-first ModelInfo list from the factory's
 // verified set, attaching FallbackOrder + resolved base_url. Reuses the

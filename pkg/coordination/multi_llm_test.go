@@ -222,6 +222,122 @@ func (m *mockTranslator) GetName() string {
 	return "mock"
 }
 
+// namedStubTranslator is a minimal translator.Translator whose GetName() identity
+// is configurable, so factory-injected ensemble tests can assert the coordinator
+// builds one instance per supplied translator with the right provider identity.
+type namedStubTranslator struct {
+	name string
+}
+
+func (s *namedStubTranslator) Translate(ctx context.Context, text, context string) (string, error) {
+	return "stub translation", nil
+}
+
+func (s *namedStubTranslator) TranslateWithProgress(
+	ctx context.Context, text, context string, eventBus *events.EventBus, sessionID string,
+) (string, error) {
+	return s.Translate(ctx, text, context)
+}
+
+func (s *namedStubTranslator) GetStats() translator.TranslationStats {
+	return translator.TranslationStats{}
+}
+
+func (s *namedStubTranslator) GetName() string { return s.name }
+
+// TestNewMultiLLMCoordinator_WithFactory is the §11.4.115 polarity guard for the
+// injectable ensemble factory seam. With an injected factory returning 3 distinct
+// stub translators the coordinator MUST initialize EXACTLY those 3 instances from
+// the factory — NOT the env-key discovery path.
+//
+// RED_MODE=1 (or a mutation that makes initializeLLMInstances ignore the injected
+// factory and fall through to discovery) FAILs this guard: with no API keys and
+// SKIP_QWEN_OAUTH set, discovery yields 0 instances and none of the stub
+// providers, so both the count==3 assertion and the provider-identity assertions
+// fail. RED_MODE=0 (default, seam wired) is the GREEN guard.
+func TestNewMultiLLMCoordinator_WithFactory(t *testing.T) {
+	// Ensure the discovery path would produce ZERO instances, so a PASS can only
+	// come from the injected factory (proves the seam, not the environment).
+	os.Unsetenv("OPENAI_API_KEY")
+	os.Unsetenv("ANTHROPIC_API_KEY")
+	os.Unsetenv("ZHIPU_API_KEY")
+	os.Unsetenv("DEEPSEEK_API_KEY")
+	os.Unsetenv("QWEN_API_KEY")
+	os.Unsetenv("OLLAMA_ENABLED")
+	os.Setenv("SKIP_QWEN_OAUTH", "1")
+	defer os.Unsetenv("SKIP_QWEN_OAUTH")
+
+	wantNames := []string{"alpha-llm", "beta-llm", "gamma-llm"}
+
+	factoryCalled := false
+	factory := func(ctx context.Context) ([]translator.Translator, error) {
+		factoryCalled = true
+		return []translator.Translator{
+			&namedStubTranslator{name: wantNames[0]},
+			&namedStubTranslator{name: wantNames[1]},
+			&namedStubTranslator{name: wantNames[2]},
+		}, nil
+	}
+
+	// RED_MODE=1 swaps the factory for nil, forcing the discovery path; the guard
+	// then catches a seam that fails to honour the injected factory.
+	if os.Getenv("RED_MODE") == "1" {
+		factory = nil
+	}
+
+	coordinator := NewMultiLLMCoordinatorWithFactory(
+		CoordinatorConfig{SessionID: "factory-test"},
+		factory,
+	)
+
+	if os.Getenv("RED_MODE") != "1" && !factoryCalled {
+		t.Fatal("expected the injected factory to be invoked, but it was not")
+	}
+
+	if got := coordinator.GetInstanceCount(); got != 3 {
+		t.Fatalf("expected exactly 3 instances from injected factory, got %d", got)
+	}
+
+	gotProviders := make(map[string]bool)
+	for _, inst := range coordinator.instances {
+		gotProviders[inst.Provider] = true
+	}
+	for _, want := range wantNames {
+		if !gotProviders[want] {
+			t.Errorf("expected an instance with provider identity %q from the factory, providers=%v",
+				want, coordinator.getProviderList())
+		}
+	}
+}
+
+// TestNewMultiLLMCoordinator_NilFactory_DiscoveryUnchanged asserts the default
+// (nil factory) path is byte-for-byte the legacy behaviour: with no API keys and
+// SKIP_QWEN_OAUTH set, the coordinator yields 0 instances exactly as
+// TestNewMultiLLMCoordinator_NoAPIKeys requires. A seam that wrongly engaged the
+// factory branch on a nil factory would diverge here.
+func TestNewMultiLLMCoordinator_NilFactory_DiscoveryUnchanged(t *testing.T) {
+	os.Unsetenv("OPENAI_API_KEY")
+	os.Unsetenv("ANTHROPIC_API_KEY")
+	os.Unsetenv("ZHIPU_API_KEY")
+	os.Unsetenv("DEEPSEEK_API_KEY")
+	os.Unsetenv("QWEN_API_KEY")
+	os.Unsetenv("OLLAMA_ENABLED")
+	os.Setenv("SKIP_QWEN_OAUTH", "1")
+	defer os.Unsetenv("SKIP_QWEN_OAUTH")
+
+	// Both the explicit nil-factory config field and the bare constructor MUST
+	// behave identically to the pre-seam default.
+	c1 := NewMultiLLMCoordinator(CoordinatorConfig{SessionID: "nil-factory-test"})
+	if c1.GetInstanceCount() != 0 {
+		t.Errorf("nil-factory config: expected 0 instances (discovery, no keys), got %d", c1.GetInstanceCount())
+	}
+
+	c2 := NewMultiLLMCoordinatorWithFactory(CoordinatorConfig{SessionID: "nil-factory-test"}, nil)
+	if c2.GetInstanceCount() != 0 {
+		t.Errorf("nil factory via WithFactory: expected 0 instances (discovery, no keys), got %d", c2.GetInstanceCount())
+	}
+}
+
 func TestMultiLLMCoordinator_TranslateWithConsensus(t *testing.T) {
 	coordinator := &MultiLLMCoordinator{
 		instances: []*LLMInstance{

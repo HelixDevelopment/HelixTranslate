@@ -62,7 +62,19 @@ type MultiLLMCoordinator struct {
 	disableLocalLLMs  bool
 	preferDistributed bool
 	distributedCoord  interface{} // *distributed.DistributedCoordinator
+	translatorFactory EnsembleTranslatorFactory
 }
+
+// EnsembleTranslatorFactory supplies the coordinator's translators from an
+// external source (e.g. the provider-diverse LLMsVerifier bridge) instead of the
+// built-in per-provider NewLLMTranslator discovery. Each returned translator MUST
+// carry a usable GetName()/provider identity. nil = use the built-in discovery
+// (default, behaviour-preserving).
+//
+// This type is deliberately decoupled (§11.4.28): it references only
+// translator.Translator + context, never the bridge or internal/verifier
+// packages, so the coordination package stays project-not-aware and reusable.
+type EnsembleTranslatorFactory func(ctx context.Context) ([]translator.Translator, error)
 
 // CoordinatorConfig holds configuration for the coordinator
 type CoordinatorConfig struct {
@@ -73,6 +85,12 @@ type CoordinatorConfig struct {
 	DisableLocalLLMs  bool        // When true, only use distributed workers, no local LLM providers
 	PreferDistributed bool        // When true, prefer distributed workers over local LLMs
 	DistributedCoord  interface{} // Optional distributed coordinator for remote instances
+
+	// TranslatorFactory, when non-nil, is the injectable seam that supplies the
+	// ensemble translators from an external provider-diverse source instead of
+	// the built-in NewLLMTranslator discovery loop. The zero value (nil) is the
+	// behaviour-preserving default: discovery runs exactly as before.
+	TranslatorFactory EnsembleTranslatorFactory
 }
 
 // NewMultiLLMCoordinator creates a new multi-LLM coordinator
@@ -94,6 +112,7 @@ func NewMultiLLMCoordinator(config CoordinatorConfig) *MultiLLMCoordinator {
 		disableLocalLLMs:  config.DisableLocalLLMs,
 		preferDistributed: config.PreferDistributed,
 		distributedCoord:  config.DistributedCoord,
+		translatorFactory: config.TranslatorFactory,
 	}
 
 	// Auto-discover and initialize LLM instances
@@ -102,8 +121,28 @@ func NewMultiLLMCoordinator(config CoordinatorConfig) *MultiLLMCoordinator {
 	return coordinator
 }
 
-// initializeLLMInstances discovers and initializes available LLM instances
+// NewMultiLLMCoordinatorWithFactory creates a coordinator whose ensemble
+// translators come from the supplied external factory instead of the built-in
+// per-provider discovery. It is a thin convenience over setting
+// CoordinatorConfig.TranslatorFactory; passing a nil factory is byte-for-byte
+// equivalent to NewMultiLLMCoordinator(config) (the default discovery path).
+func NewMultiLLMCoordinatorWithFactory(config CoordinatorConfig, factory EnsembleTranslatorFactory) *MultiLLMCoordinator {
+	config.TranslatorFactory = factory
+	return NewMultiLLMCoordinator(config)
+}
+
+// initializeLLMInstances discovers and initializes available LLM instances.
+//
+// When an external EnsembleTranslatorFactory has been injected it is the source
+// of the ensemble and the built-in per-provider discovery is bypassed entirely.
+// When no factory is injected (the default), behaviour is byte-for-byte
+// identical to before: discoverProviders + the NewLLMTranslator loop run unchanged.
 func (c *MultiLLMCoordinator) initializeLLMInstances() {
+	if c.translatorFactory != nil {
+		c.initializeFromFactory()
+		return
+	}
+
 	// Check for available LLM providers based on API keys
 	providers := c.discoverProviders()
 
@@ -201,6 +240,65 @@ func (c *MultiLLMCoordinator) initializeLLMInstances() {
 		Data: map[string]interface{}{
 			"instance_count": len(c.instances),
 			"providers":      c.getProviderList(),
+		},
+	})
+}
+
+// initializeFromFactory builds the ensemble from the injected
+// EnsembleTranslatorFactory. Each returned translator becomes exactly one
+// *LLMInstance: Provider/Model are taken from the translator's GetName() identity,
+// Priority is the API-key tier (10), and Available starts true.
+//
+// The factory needs a context but initializeLLMInstances is reached from the
+// no-ctx constructor; context.Background() is used here because instance
+// construction has no caller deadline to honour (the per-translation deadline is
+// carried by the ctx passed to TranslateWithRetry/TranslateWithConsensus).
+func (c *MultiLLMCoordinator) initializeFromFactory() {
+	translators, err := c.translatorFactory(context.Background())
+	if err != nil {
+		c.emitWarning(fmt.Sprintf("Ensemble translator factory failed: %v", err))
+		return
+	}
+
+	if len(translators) == 0 {
+		c.emitWarning("Ensemble translator factory returned no translators")
+		return
+	}
+
+	instanceID := 1
+	for _, trans := range translators {
+		if trans == nil {
+			c.emitWarning("Ensemble translator factory returned a nil translator; skipping")
+			continue
+		}
+
+		name := trans.GetName()
+		instance := &LLMInstance{
+			ID:         fmt.Sprintf("%s-%d", name, instanceID),
+			Translator: trans,
+			Provider:   name,
+			Model:      name,
+			Priority:   10, // factory-supplied ensemble = API-key tier
+			Available:  true,
+			LastUsed:   time.Time{},
+		}
+		c.instances = append(c.instances, instance)
+		instanceID++
+	}
+
+	if len(c.instances) == 0 {
+		c.emitWarning("No LLM instances could be initialized from factory")
+		return
+	}
+
+	c.emitEvent(events.Event{
+		Type:      "multi_llm_ready",
+		SessionID: c.sessionID,
+		Message:   fmt.Sprintf("Multi-LLM coordinator ready with %d instances (factory)", len(c.instances)),
+		Data: map[string]interface{}{
+			"instance_count": len(c.instances),
+			"providers":      c.getProviderList(),
+			"source":         "factory",
 		},
 	})
 }

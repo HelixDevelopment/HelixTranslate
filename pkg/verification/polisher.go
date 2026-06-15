@@ -7,6 +7,7 @@ import (
 	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/translator/llm"
 	"fmt"
+	"sort"
 	"strings"
 	"sync"
 )
@@ -98,20 +99,90 @@ type llmVerification struct {
 	Issues          []Issue
 }
 
+// EnsembleTranslatorFactory supplies the polisher's ensemble translators from an
+// external source (e.g. the provider-diverse LLMsVerifier bridge) instead of the
+// built-in per-provider NewLLMTranslator construction. nil = built-in
+// construction (default, behaviour-preserving).
+type EnsembleTranslatorFactory func(ctx context.Context) ([]translator.Translator, error)
+
 // BookPolisher performs multi-LLM verification and polishing
 type BookPolisher struct {
 	config      PolishingConfig
 	translators map[string]*llm.LLMTranslator
-	eventBus    *events.EventBus
-	sessionID   string
+	// ensemble holds externally-supplied (factory-injected) translators keyed by
+	// provider name. It is nil on the default path — only populated when a
+	// non-nil EnsembleTranslatorFactory is passed to NewBookPolisherWithFactory.
+	//
+	// Why a SECOND map rather than reusing `translators`: `translators` is the
+	// concrete `map[string]*llm.LLMTranslator`, but the factory returns the
+	// `translator.Translator` INTERFACE, which is not assignable to
+	// `*llm.LLMTranslator`. The only operation any polishing code performs on a
+	// map value is `.Translate(ctx, text, context) (string, error)`, which the
+	// interface satisfies, so the read site (resolveProvider) selects the
+	// interface map when present and falls back to the concrete map otherwise —
+	// keeping the concrete map's type (and the entire default code path)
+	// byte-for-byte unchanged.
+	ensemble  map[string]translator.Translator
+	eventBus  *events.EventBus
+	sessionID string
 }
 
-// NewBookPolisher creates a new multi-LLM book polisher
+// NewBookPolisher creates a new multi-LLM book polisher.
+//
+// Behaviour-preserving wrapper: it delegates to NewBookPolisherWithFactory with
+// context.Background() and a nil factory, so the default per-provider
+// construction path is provably identical to the prior implementation.
 func NewBookPolisher(
 	config PolishingConfig,
 	eventBus *events.EventBus,
 	sessionID string,
 ) (*BookPolisher, error) {
+	return NewBookPolisherWithFactory(context.Background(), config, eventBus, sessionID, nil)
+}
+
+// NewBookPolisherWithFactory creates a multi-LLM book polisher, optionally
+// receiving its ensemble translators from an external factory.
+//
+// When factory is nil the behaviour is identical to the original NewBookPolisher:
+// a concrete map[string]*llm.LLMTranslator is built from config.TranslationConfigs
+// via llm.NewLLMTranslator, with the same "missing translation config" and
+// "failed to create translator" errors.
+//
+// When factory is non-nil the built-in construction is skipped entirely; the
+// returned translator.Translator values are keyed by each translator's GetName()
+// into the interface-typed ensemble map, and config.Providers /
+// config.TranslationConfigs are NOT consulted (the bridge supplies the provider
+// set).
+func NewBookPolisherWithFactory(
+	ctx context.Context,
+	config PolishingConfig,
+	eventBus *events.EventBus,
+	sessionID string,
+	factory EnsembleTranslatorFactory,
+) (*BookPolisher, error) {
+	if factory != nil {
+		injected, err := factory(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("ensemble translator factory failed: %w", err)
+		}
+
+		ensemble := make(map[string]translator.Translator, len(injected))
+		for _, t := range injected {
+			if t == nil {
+				continue
+			}
+			ensemble[t.GetName()] = t
+		}
+
+		return &BookPolisher{
+			config:    config,
+			ensemble:  ensemble,
+			eventBus:  eventBus,
+			sessionID: sessionID,
+		}, nil
+	}
+
+	// Default path (factory == nil): unchanged from the original implementation.
 	// Create LLM translators for each provider
 	translators := make(map[string]*llm.LLMTranslator)
 
@@ -135,6 +206,36 @@ func NewBookPolisher(
 		eventBus:    eventBus,
 		sessionID:   sessionID,
 	}, nil
+}
+
+// providerSet returns the ordered provider set the polisher iterates over. On the
+// default path this is exactly config.Providers (unchanged). When an ensemble was
+// injected, the provider set is derived from the injected translators' GetName()
+// keys (the operator may not have populated config.Providers for the bridge case).
+func (bp *BookPolisher) providerSet() []string {
+	if bp.ensemble != nil {
+		providers := make([]string, 0, len(bp.ensemble))
+		for name := range bp.ensemble {
+			providers = append(providers, name)
+		}
+		sort.Strings(providers) // deterministic iteration (§11.4.50)
+		return providers
+	}
+	return bp.config.Providers
+}
+
+// resolveTranslator returns the translator for a provider as a translator.Translator
+// (the interface). When an ensemble was injected it routes to the interface-typed
+// ensemble map; otherwise it returns the concrete *llm.LLMTranslator from the
+// unchanged default map (which satisfies translator.Translator). A missing entry
+// yields (nil, false).
+func (bp *BookPolisher) resolveTranslator(provider string) (translator.Translator, bool) {
+	if bp.ensemble != nil {
+		t, ok := bp.ensemble[provider]
+		return t, ok
+	}
+	t, ok := bp.translators[provider]
+	return t, ok
 }
 
 // PolishBook performs comprehensive multi-LLM verification and polishing
@@ -388,13 +489,16 @@ func (bp *BookPolisher) polishSection(
 	originalText string,
 	translatedText string,
 ) (*PolishingResult, error) {
-	// Get verifications from all LLMs in parallel
-	verifications := make([]llmVerification, len(bp.config.Providers))
+	// Get verifications from all LLMs in parallel.
+	// providerSet() returns config.Providers on the default path (unchanged) and
+	// the injected ensemble's provider keys when a factory was supplied.
+	providers := bp.providerSet()
+	verifications := make([]llmVerification, len(providers))
 	var wg sync.WaitGroup
 	var mu sync.Mutex
-	errors := make([]error, len(bp.config.Providers))
+	errors := make([]error, len(providers))
 
-	for i, provider := range bp.config.Providers {
+	for i, provider := range providers {
 		wg.Add(1)
 		go func(idx int, prov string) {
 			defer wg.Done()
@@ -423,7 +527,7 @@ func (bp *BookPolisher) polishSection(
 	for i, err := range errors {
 		if err != nil {
 			bp.emitWarning(fmt.Sprintf("Verification failed for %s with %s: %v",
-				location, bp.config.Providers[i], err))
+				location, providers[i], err))
 		}
 	}
 
@@ -447,7 +551,10 @@ func (bp *BookPolisher) verifyWithLLM(
 	translatedText string,
 	location string,
 ) (*llmVerification, error) {
-	translator := bp.translators[provider]
+	translator, ok := bp.resolveTranslator(provider)
+	if !ok || translator == nil {
+		return nil, fmt.Errorf("no translator available for provider: %s", provider)
+	}
 
 	// Create verification prompt
 	prompt := bp.createVerificationPrompt(originalText, translatedText)
