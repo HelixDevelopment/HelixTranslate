@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>LLMSVERIFIER_BRIDGE_USAGE</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="llmsverifier-bridge-usage-guide">LLMsVerifier Bridge — Usage
+Guide</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-15T19:40:00Z <strong>Authority:</strong> Operator mandate
+2026-06-15 (LLMsVerifier-only, no local llama.cpp)
+<strong>Scope:</strong> How every HelixTranslate component, and a Claude
+Code agent session, obtains and calls the LLMsVerifier-obtained
+<strong>strongest verified model</strong> through the single
+<code>pkg/bridge</code> facade — out of the box, with no manual tuning.
+<strong>Design reference:</strong>
+<code>docs/design/LLMSVERIFIER_BRIDGE.md</code> (architecture + removal
+map).</p>
+<hr />
+<h2 id="what-the-bridge-is">1. What the bridge is</h2>
+<p><code>pkg/bridge</code> is the single facade between the
+HelixTranslate System and the LLMsVerifier-obtained
+<strong>strongest</strong> verified models. It wraps the EXISTING
+<code>internal/verifier</code> pipeline + <code>selection.Engine</code>
++ <code>pkg/translator/llm.VerifiedFactory</code> (no reimplementation
+of discovery / scoring / selection — §11.4.74) behind four entry
+points:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Method</th>
+<th>Purpose</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BestTranslator(ctx, task)</code></td>
+<td>Strongest verified model as a <code>translator.Translator</code>
+<strong>plus a deterministic score-descending fallback
+chain</strong>.</td>
+<td>Every translating component.</td>
+</tr>
+<tr>
+<td><code>Invoke(ctx, system, prompt)</code></td>
+<td>The raw chat capability of the strongest model.</td>
+<td>The Claude Code agent (direct model access).</td>
+</tr>
+<tr>
+<td><code>BestModel(ctx, task)</code></td>
+<td>Metadata for the single strongest verified model (no API key).</td>
+<td>Agent / diagnostics.</td>
+</tr>
+<tr>
+<td><code>ListVerified(ctx)</code></td>
+<td>All verified models ranked strongest-first (no API keys).</td>
+<td>Agent / diagnostics.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>“Strongest” = the highest-scoring verified model</strong>
+(<code>FallbackOrder == 1</code>), score-descending, with the rest of
+the verified set forming the fallback chain (top-1 + fallback — the
+locked operator decision D4).</p>
+<hr />
+<h2 id="how-a-component-calls-it">2. How a COMPONENT calls it</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;digital.vasic.translator/internal/verifier/selection&quot;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;digital.vasic.translator/pkg/bridge&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>b<span class="op">,</span> err <span class="op">:=</span> bridge<span class="op">.</span>Open<span class="op">(</span>ctx<span class="op">,</span> bridge<span class="op">.</span>Options<span class="op">{})</span> <span class="co">// zero value = OOTB in-process mode</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> err <span class="co">// honest hard error if no provider keys are present (see §5)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>tr<span class="op">,</span> fallbacks<span class="op">,</span> err <span class="op">:=</span> b<span class="op">.</span>BestTranslator<span class="op">(</span>ctx<span class="op">,</span> selection<span class="op">.</span>TaskRequirements<span class="op">{})</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> err</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">// tr is a translator.Translator backed by the strongest verified model.</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">// fallbacks is a score-descending chain of model IDs to try if tr is unreachable.</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>out<span class="op">,</span> err <span class="op">:=</span> tr<span class="op">.</span>Translate<span class="op">(</span>ctx<span class="op">,</span> sourceText<span class="op">,</span> prompt<span class="op">)</span></span></code></pre></div>
+<p>A component never names a provider, a model, a base URL, or an API
+key: the bridge selects the strongest verified model and materializes it
+(provider → base_url → key) automatically. There is <strong>no local
+llama.cpp / Ollama fallback</strong> — local inference is forbidden by
+the mandate; if no verified model can be provisioned the bridge returns
+an honest error.</p>
+<hr />
+<h2 id="how-the-agent-claude-code-calls-it">3. How the AGENT (Claude
+Code) calls it</h2>
+<p>Two transports — both out of the box (locked decision D3 = CLI
+<strong>and</strong> MCP):</p>
+<h3 id="cli-subcommands-cmdmodel-bridge-built-to-.buildmodel-bridge">3.1
+CLI subcommands (<code>cmd/model-bridge</code>, built to
+<code>./build/model-bridge</code>)</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build once:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> build/model-bridge ./cmd/model-bridge/</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Strongest model + fallback chain (human-readable; add -json for JSON):</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/model-bridge</span> best-model</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># All verified models, JSON, strongest-first:</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/model-bridge</span> list</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Send a raw prompt to the strongest model (prompt via flag or stdin):</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/model-bridge</span> invoke <span class="at">-prompt</span> <span class="st">&quot;Translate &#39;good morning&#39; to Spanish.&quot;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Summarize this in one line: ...&quot;</span> <span class="kw">|</span> <span class="ex">./build/model-bridge</span> invoke</span></code></pre></div>
+<p>Common bootstrap flags (all subcommands): <code>-db PATH</code>
+(SQLite store, default <code>./data/verified_models.db</code>),
+<code>-min-score F</code>, <code>-max N</code> (models per provider to
+verify on a fresh pass; bounds wall-clock + tokens — §11.4.82),
+<code>-verify-timeout</code>, <code>-force-verify</code>,
+<code>-api-url</code> / <code>-api-key</code> (HTTP service, see
+§4).</p>
+<p><strong>API-key VALUES are never printed</strong> (§11.4.10) — only
+provider IDs, model IDs, scores, and real model completions.</p>
+<h3 id="mcp-stdio-server-native-agent-tools">3.2 MCP stdio server
+(native agent tools)</h3>
+<p><code>model-bridge mcp</code> runs a self-contained MCP (Model
+Context Protocol) stdio server exposing three tools the agent calls
+natively:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Arguments</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bridge_invoke</code></td>
+<td><code>{prompt, system?}</code></td>
+<td>The strongest model’s real completion.</td>
+</tr>
+<tr>
+<td><code>bridge_best_model</code></td>
+<td><code>{}</code></td>
+<td>Strongest model metadata + fallback chain.</td>
+</tr>
+<tr>
+<td><code>bridge_list</code></td>
+<td><code>{}</code></td>
+<td>All verified models, strongest-first.</td>
+</tr>
+</tbody>
+</table>
+<p>It is wired into the repo-root <code>.mcp.json</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;mcpServers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;model-bridge&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;./build/model-bridge&quot;</span><span class="fu">,</span> <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;mcp&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;env&quot;</span><span class="fu">:</span> <span class="fu">{}</span> <span class="fu">}</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Build the binary
+(<code>go build -o build/model-bridge ./cmd/model-bridge/</code>),
+ensure at least one provider key is exported (§5), and restart the
+Claude Code session so it loads <code>.mcp.json</code>. The three
+<code>bridge_*</code> tools then appear as native tools. The MCP server
+completes the <code>initialize</code> / <code>tools/list</code>
+handshake immediately and provisions the bridge <strong>lazily</strong>
+on the first tool call that needs a model.</p>
+<hr />
+<h2 id="out-of-the-box-bootstrap-no-manual-tuning">4. Out-of-the-box
+bootstrap (no manual tuning)</h2>
+<p><code>bridge.Open</code> resolution order (§11.4.6 — no
+guessing):</p>
+<ol type="1">
+<li><strong><code>LLMSVERIFIER_API_URL</code> set</strong> → HTTP mode:
+talk to a running LLMsVerifier service (<code>-api-url</code> /
+<code>LLMSVERIFIER_API_URL</code>, Bearer via <code>-api-key</code>).
+The bridge <code>Ping</code>s it and fails honestly if unreachable.</li>
+<li><strong>Otherwise (canonical OOTB)</strong> → in-process mode:
+<code>ProvidersFromGetenv()</code> discovers every provider whose
+<code>*_API_KEY</code> is set → loads any already-verified models from
+the SQLite store at <code>-db</code> → if none are selectable, runs ONE
+bounded <code>RunVerification</code> pass against the
+<strong>real</strong> provider APIs (8-step pipeline: reachability /
+auth / model-existence / response-format / latency / capabilities /
+rate-limits / error-handling) → persists passing models → selects the
+strongest. <strong>No running service is required.</strong></li>
+<li><strong>No <code>*_API_KEY</code> present</strong> → honest hard
+error naming the env vars to set. There is no local-model fallback
+(forbidden by the mandate).</li>
+</ol>
+<p>The SQLite store holds verified-model <strong>metadata only</strong>
+— never API keys.</p>
+<hr />
+<h2 id="provider-keys-11.4.10-required-everywhere-r2">5. Provider keys
+(§11.4.10 — required everywhere, R2)</h2>
+<p>Export at least one provider key before using the bridge (any subset
+of the 16 OpenAI-compatible providers in
+<code>internal/verifier/providers_env.go</code>):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">DEEPSEEK_API_KEY</span><span class="op">=</span>...      <span class="co"># or OPENAI_API_KEY / GROQ_API_KEY / GEMINI_API_KEY / ...</span></span></code></pre></div>
+<p>Keys are read from the environment <strong>in memory only</strong>
+and are never logged, printed, or persisted. Per the operator mandate
+(R2) keys are required on every path — there is no offline / keyless
+mode, and tests that exercise the real in-process pipeline
+<strong>fail</strong> (not skip) when keys are genuinely required.</p>
+<p><code>.env</code> (git-ignored) is the recommended local store; do
+not commit keys.</p>
+<hr />
+<h2 id="zero-tuning-full-decoupling">6. Zero tuning, full
+decoupling</h2>
+<ul>
+<li>The provider set is the single source of truth in
+<code>internal/verifier</code>’s <code>envProviderSpecs</code>; adding a
+provider there makes it resolvable with no extra bridge wiring.</li>
+<li>A verified model carries only a <code>ProviderID</code> (a named id
+in-process, or a numeric id from the HTTP server path). The bridge’s
+<code>ProviderResolver</code> materializes
+<code>(factoryProvider, base_url, apiKey)</code> for both forms —
+closing the load-bearing “verified model → translating client” gap
+(design §3.3).</li>
+<li>Every OpenAI-compatible provider is served by the generic
+OpenAI-compatible client (which honours <code>BaseURL</code>), so
+providers the legacy factory switch does not natively case (openrouter /
+together / fireworks / nvidia / …) still work.</li>
+</ul>
+<hr />
+<h2 id="tests">7. Tests</h2>
+<ul>
+<li><code>internal/verifier/provider_resolver_test.go</code> — named-id
++ numeric-id (HTTP path) + every-provider + missing-key + out-of-range
+resolution; the numeric-id case is a §11.4.115 RED-then-GREEN regression
+for the load-bearing bug.</li>
+<li><code>pkg/bridge/bridge_test.go</code> — strongest-first ranking,
+best-model top-score, score-descending fallback chain,
+numeric-ProviderID end-to-end through the bridge, empty-registry honest
+error, <strong>no-keys honest hard error</strong>.</li>
+<li><code>cmd/model-bridge/mcp_test.go</code> — MCP
+<code>initialize</code> / <code>tools/list</code> /
+<code>tools/call</code> routing, an
+<strong>unforgeable-challenge</strong> (§11.4.78) proving
+<code>bridge_invoke</code> carries the real model round-trip (a per-call
+nonce), honest tool-error surfacing, and a full byte-stream
+<code>serve</code> end-to-end.</li>
+</ul>
+<p>All three suites are mutation-verified (§1.1): breaking the
+numeric-id branch, the ranking sort, or the invoke round-trip each makes
+a test FAIL.</p>
+<hr />
+<h2 id="sources-verified">Sources verified</h2>
+<ul>
+<li>Model Context Protocol — stdio transport + JSON-RPC 2.0 message
+shapes (<code>initialize</code>, <code>tools/list</code>,
+<code>tools/call</code>): https://modelcontextprotocol.io/docs (verified
+2026-06-15). The MCP server is a self-contained implementation of this
+wire protocol — no external MCP-framework dependency was added
+(§11.4.74).</li>
+</ul>
+</body>
+</html>

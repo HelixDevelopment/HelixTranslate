@@ -69,3 +69,12 @@ qa-results/
 *.go.bak
 *.bak
 *.backup
+
+# §11.4.77 — LLMsVerifier bridge: verified-models SQLite cache is a build derivative
+# regenerated out-of-the-box by `model-bridge best-model`/`invoke` (in-process verification
+# pipeline from *_API_KEY env keys → verify → SQLite). Never versioned (§11.4.30).
+data/
+pkg/bridge/data/
+*.db
+*.db-wal
+*.db-shm

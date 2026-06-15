@@ -50,9 +50,20 @@ var envProviderSpecs = []envProviderSpec{
 // configs in memory only — they are never logged, printed, or persisted by this
 // function (§11.4.10).
 func ProvidersFromEnv() []ProviderConfig {
+	return ProvidersFromGetenv(os.Getenv)
+}
+
+// ProvidersFromGetenv is ProvidersFromEnv with an injectable key source. The
+// bridge passes its own getenv so its bootstrap honours the same environment
+// view as its resolver (deterministic + unit-testable without mutating the
+// process environment, §11.4.10). getenv nil → os.Getenv.
+func ProvidersFromGetenv(getenv func(string) string) []ProviderConfig {
+	if getenv == nil {
+		getenv = os.Getenv
+	}
 	var out []ProviderConfig
 	for _, spec := range envProviderSpecs {
-		key := os.Getenv(spec.EnvVar)
+		key := getenv(spec.EnvVar)
 		if key == "" {
 			continue
 		}

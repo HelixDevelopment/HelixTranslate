@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "model-bridge": {
+      "command": "./build/model-bridge",
+      "args": ["mcp"],
+      "env": {}
+    }
+  }
+}
