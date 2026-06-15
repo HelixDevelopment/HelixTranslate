@@ -1,15 +1,20 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 65
-**Last modified:** 2026-06-15T14:02:00Z
+**Revision:** 66
+**Last modified:** 2026-06-15T14:08:00Z
 
-## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 18 parallel subagents over 6 waves, all verified+pushed)
-After the green validation run, dispatched 6 successive 3-wide worktree-isolated
-subagent waves on the highest-remaining-yield autonomous surfaces. **17 genuine,
-conductor-verified, independently mutation-proven fixes (campaign 63→80) + 1
+## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 21 parallel subagents over 7 waves, all verified+pushed)
+After the green validation run, dispatched 7 successive 3-wide worktree-isolated
+subagent waves on the highest-remaining-yield autonomous surfaces. **20 genuine,
+conductor-verified, independently mutation-proven fixes (campaign 63→83) + 1
 teeth-proven regression guard; honest clean non-findings + documented honest gaps on
-the rest (§11.4.118/§11.4.6). HEAD `2d65ee0`; build exit 0 / vet exit 0 / test 59 ok /
-0 FAIL after the git-pointer repair below.**
+the rest (§11.4.118/§11.4.6). HEAD `55ca2c9`; build/vet/test green after the
+git-pointer repair (see ENV FORENSIC below).**
+
+WAVE 7 (`internal/verifier`, `internal/services`+verified-models, `cmd/monitor-server`):
+- **services MinScoreThreshold scale divergence** (`55ca2c9`): GetPreferences compared the threshold on a 0-10 normalized scale while the /verified-models handler + registry/selection use raw 0-100 → an operator threshold of 50 silently dropped ALL preferences. Fix = raw-scale compare. RED + §11.4.120 stale-test reconciliation; mutation→both tests FAIL→restore→GREEN.
+- **verifier bare-array catalog false-not-found** (`4b93d3b`): checkModelExistence double-read a consumed resp.Body → providers returning a bare `[{id}]` /models had every model reported 'not found' + blocked from verification. Fix = buffer body once, unmarshal both forms. RED+mutation-proven.
+- **monitor-server MONITOR_SERVER_PORT ignored** (`4cbefed`): port hardcoded 8090 despite the env var documented in 5 places. Fix = resolvePort with validation. RED+mutation-proven.
 
 ⚠️ **ENV FORENSIC + REPAIR (§11.4.6/§9, 2026-06-15):** the worktree+submodule
 interaction during the parallel campaign corrupted the main-tree `llms_verifier/.git`
@@ -80,7 +85,7 @@ Clean non-findings (audited, no RED reproducible): SQLite concurrent-writer cont
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **80 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 6 waves = 17 fixes + 1 regression guard, newest `1377bd6`/`a7140f9`/`2d65ee0`, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
+- **83 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 7 waves = 20 fixes + 1 regression guard, newest `4cbefed`/`4b93d3b`/`55ca2c9`, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
