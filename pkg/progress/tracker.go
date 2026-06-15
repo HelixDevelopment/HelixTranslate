@@ -207,14 +207,20 @@ func (t *Tracker) updateProgress() {
 		// counters so an items-based run shows real progress instead of a
 		// 0% bar through to completion. Mirrors the items-based ETA fallback
 		// in GetProgress, which is only meaningful when chapters are absent.
-		completed := t.progress.ItemsCompleted
-		if completed > t.progress.ItemsTotal {
-			completed = t.progress.ItemsTotal // never exceed 100% on overshoot
+		//
+		// A FAILED item is still a PROCESSED item — it is accounted for against
+		// ItemsTotal and is not retried, so it MUST count toward completion.
+		// Counting only ItemsCompleted leaves a fully-finished run (every item
+		// either completed or failed) reporting a partial percentage forever
+		// (a stuck progress bar) with an ETA that never resolves.
+		processed := t.progress.ItemsCompleted + t.progress.ItemsFailed
+		if processed > t.progress.ItemsTotal {
+			processed = t.progress.ItemsTotal // never exceed 100% on overshoot
 		}
-		if completed < 0 {
-			completed = 0
+		if processed < 0 {
+			processed = 0
 		}
-		t.progress.PercentComplete = float64(completed) / float64(t.progress.ItemsTotal) * 100.0
+		t.progress.PercentComplete = float64(processed) / float64(t.progress.ItemsTotal) * 100.0
 	}
 
 	// Update elapsed time
