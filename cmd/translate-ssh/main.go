@@ -1039,19 +1039,7 @@ func printFinalReport(progress *TranslationProgress) {
 	}
 
 	fmt.Println("\nExpected Output Files:")
-	inputDir := filepath.Dir(progress.InputFile)
-	ext := filepath.Ext(progress.InputFile)
-	baseName := strings.TrimSuffix(filepath.Base(progress.InputFile), ext)
-
-	expectedFiles := []string{
-		progress.InputFile,
-		baseName + "_original.md",
-		baseName + "_translated.md",
-		progress.OutputFile,
-	}
-
-	for _, file := range expectedFiles {
-		fullPath := filepath.Join(inputDir, file)
+	for _, fullPath := range expectedReportFiles(progress) {
 		if _, err := os.Stat(fullPath); err == nil {
 			fmt.Printf("✓ %s\n", fullPath)
 		} else {
@@ -1075,6 +1063,29 @@ func printFinalReport(progress *TranslationProgress) {
 	}
 
 	fmt.Println(strings.Repeat("=", 80))
+}
+
+// expectedReportFiles returns the local paths the final report should check for
+// existence: the input file, the two markdown sidecars (next to the input
+// file), and the translated EPUB (at the exact operator-requested OutputFile).
+//
+// Previously the report built each path with filepath.Join(inputDir, file)
+// where `file` was an ABSOLUTE path (progress.InputFile / progress.OutputFile).
+// filepath.Join of an absolute base with an absolute element produces a doubled
+// nonsense path (inputDir + "/" + absoluteOutput), so os.Stat always missed and
+// the report told the operator their genuinely-present artifacts were "not
+// found" — directly contradicting the Summary block on every successful run.
+func expectedReportFiles(progress *TranslationProgress) []string {
+	inputDir := filepath.Dir(progress.InputFile)
+	ext := filepath.Ext(progress.InputFile)
+	baseName := strings.TrimSuffix(filepath.Base(progress.InputFile), ext)
+
+	return []string{
+		progress.InputFile,
+		filepath.Join(inputDir, baseName+"_original.md"),
+		filepath.Join(inputDir, baseName+"_translated.md"),
+		progress.OutputFile,
+	}
 }
 
 // localDownloadPath maps a remote generated file to its correct local
