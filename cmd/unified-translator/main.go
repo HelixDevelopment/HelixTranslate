@@ -14,6 +14,7 @@ import (
 
 	"digital.vasic.translator/internal/verifier"
 	"digital.vasic.translator/internal/verifier/selection"
+	"digital.vasic.translator/pkg/bridge"
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/logger"
@@ -487,42 +488,76 @@ func executeAPITranslation(ctx context.Context, config *UnifiedConfig, session *
 		"model":    config.Model,
 	})
 
-	var llmTranslator *llm.LLMTranslator
+	// trans is the translator.Translator surface every branch produces; the
+	// caller (executeProviderTranslation) needs only TranslateWithProgress, which
+	// the interface satisfies, so the concrete *llm.LLMTranslator return type is
+	// no longer required.
+	var trans translator.Translator
 	var err error
 
-	if config.VerifierEnabled {
-		// CONST-034: Use VerifiedFactory as single source of truth
-		llmTranslator, err = executeVerifiedTranslation(ctx, config, session)
+	switch {
+	case config.Provider == "mock":
+		// The mock provider is a deliberate in-process test/demo seam (no network,
+		// no API key) — it MUST NOT route through the bridge (which requires real
+		// verified models). Build it directly via the llm factory, unchanged.
+		trans, err = llm.NewLLMTranslator(translator.TranslationConfig{
+			SourceLang: config.SourceLang,
+			TargetLang: config.TargetLang,
+			Provider:   "mock",
+			Model:      config.Model,
+		})
+		if err != nil {
+			return "", fmt.Errorf("failed to create mock translator: %w", err)
+		}
+	case config.VerifierEnabled:
+		// CONST-034: explicit -use-verifier keeps the HTTP-client VerifiedFactory
+		// path (operator-provided LLMsVerifier service via -verifier-url).
+		var lt *llm.LLMTranslator
+		lt, err = executeVerifiedTranslation(ctx, config, session)
 		if err != nil {
 			return "", fmt.Errorf("verified translation failed: %w", err)
 		}
-	} else {
-		// Legacy direct provider path
-		llmConfig := translator.TranslationConfig{
-			SourceLang:  config.SourceLang,
-			TargetLang:  config.TargetLang,
-			Provider:    config.Provider,
-			Model:       config.Model,
-			Temperature: config.Temperature,
-			MaxTokens:   config.MaxTokens,
-			Timeout:     config.Timeout,
-			APIKey:      config.APIKey,
-			BaseURL:     config.BaseURL,
-		}
-
-		llmTranslator, err = llm.NewLLMTranslator(llmConfig)
+		trans = lt
+	default:
+		// R-1/R2 default: source the strongest verified model from the LLMsVerifier
+		// bridge — NO local runtime, NO hardcoded provider. On no API keys the
+		// bridge hard-errors honestly (§11.4.69); there is NEVER a silent local
+		// llama.cpp/Ollama fallback. The legacy direct-provider NewLLMTranslator
+		// path is replaced by this bridge selection.
+		trans, err = bridgeTranslator(ctx, config)
 		if err != nil {
-			return "", fmt.Errorf("failed to create LLM translator: %w", err)
+			return "", fmt.Errorf("bridge translation unavailable (no local-runtime fallback): %w", err)
 		}
 	}
 
 	// Translate
-	result, err := llmTranslator.TranslateWithProgress(ctx, text, "Ebook content", session.EventBus, session.ID)
+	result, err := trans.TranslateWithProgress(ctx, text, "Ebook content", session.EventBus, session.ID)
 	if err != nil {
 		return "", fmt.Errorf("API translation failed: %w", err)
 	}
 
 	return result, nil
+}
+
+// bridgeTranslator opens the LLMsVerifier bridge and returns the strongest
+// verified translator for the run's language pair. It is the R-1/R2 default
+// source for unified-translator's API path: no local runtime, honest hard error
+// when no provider API key + no verified model is available (§11.4.69). The
+// in-process bridge is bounded by config.VerifyTimeout-equivalent defaults.
+func bridgeTranslator(ctx context.Context, config *UnifiedConfig) (translator.Translator, error) {
+	b, err := bridge.Open(ctx, bridge.Options{})
+	if err != nil {
+		return nil, err
+	}
+	task := selection.TaskRequirements{
+		SourceLang: config.SourceLang,
+		TargetLang: config.TargetLang,
+	}
+	tr, _, err := b.BestTranslator(ctx, task)
+	if err != nil {
+		return nil, err
+	}
+	return tr, nil
 }
 
 // executeVerifiedTranslation uses VerifiedFactory to select and translate with a verified model.
