@@ -352,6 +352,21 @@ func (s *APIServer) startTranslation(c *gin.Context) {
 		return
 	}
 
+	// A nil-error RPC does NOT mean the translation started: the backend reports
+	// business-level failure via TranslationResponse.status ("error" per the proto
+	// contract: started, queued, error). Forwarding such a response through
+	// sendSuccessResponse is a PASS-bluff — the client believes work started while
+	// the backend explicitly errored.
+	if resp.GetStatus() == "error" {
+		s.logger.Error("Backend rejected translation start", map[string]interface{}{
+			"session_id": req.SessionID,
+			"status":     resp.GetStatus(),
+			"message":    resp.GetMessage(),
+		})
+		s.sendErrorResponse(c, http.StatusBadGateway, "Failed to start translation", resp.GetMessage())
+		return
+	}
+
 	s.sendSuccessResponse(c, resp)
 }
 
@@ -419,6 +434,19 @@ func (s *APIServer) cancelTranslation(c *gin.Context) {
 			"error":      err.Error(),
 		})
 		s.sendErrorResponse(c, http.StatusInternalServerError, "Failed to cancel translation", err.Error())
+		return
+	}
+
+	// CancelTranslationResponse carries an explicit success bool: the backend
+	// returns success=false when the session does not exist or cannot be
+	// cancelled. A nil-error RPC with success=false MUST NOT be reported to the
+	// client as a successful cancellation — doing so is a PASS-bluff.
+	if !resp.GetSuccess() {
+		s.logger.Warn("Backend reported cancellation failure", map[string]interface{}{
+			"session_id": sessionID,
+			"message":    resp.GetMessage(),
+		})
+		s.sendErrorResponse(c, http.StatusBadGateway, "Failed to cancel translation", resp.GetMessage())
 		return
 	}
 
