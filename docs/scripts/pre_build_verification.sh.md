@@ -1,7 +1,7 @@
 # pre_build_verification.sh — companion guide
 
-**Revision:** 4
-**Last modified:** 2026-06-14T18:45:00Z
+**Revision:** 5
+**Last modified:** 2026-06-16T00:00:00Z
 
 ## Overview
 
@@ -30,6 +30,7 @@ bluff.
 | `CM-ATM-TICKET-IDS` | §11.4.54 | Every `###`/`##` `§X.` workable-item heading in `docs/Issues.md` + `docs/Fixed.md` carries an `[ATM-NNN]` token; the union of all ids is **unique** and **monotonic with no gaps** — the contiguous sequence `ATM-001..ATM-NNN`. A heading without a token, a duplicate id, or a gap in the sequence is a §11.4.54 violation. |
 | `CM-DOC-SIBLING-SYNC` | §11.4.65 | Every in-scope tracked `*.md` (project-root `*.md`, `docs/**`, `scripts/**` companions; EXCLUDING owned-submodule trees + `build`/`out`/`dist`/`external`/`prebuilts`/`node_modules`/`vendor`/`qa-results`) has BOTH a tracked `.html` AND a tracked `.pdf` sibling, and each sibling's mtime is `>=` the `.md` mtime. A missing or stale (older) sibling is a §11.4.65 universal-Markdown-export violation. The exclusion set mirrors `scripts/testing/sync_all_markdown_exports.sh` (the generator) so gate and generator agree on scope. |
 | `CM-NO-FORCE-PUSH-ABSOLUTE` | §11.4.113 | No tracked script under `scripts/` contains an **actual force-push invocation**: a `git push` carrying `--force` / `--force-with-lease` / `-f`, OR a `git push` with a leading-`+` forced refspec (e.g. `git push origin +main:main`). Force-push is STRICTLY FORBIDDEN with no exception. Comment lines, `case`-pattern arms, and `die`/`echo` refusal strings (the `commit_all.sh` §11.4.113 GUARD) are NOT invocations and do NOT trip the gate (anti-FAIL-bluff, §11.4.1). |
+| `CM-NO-LOCAL-RUNTIME` | §11.4.69 / R-5 | The **default** translator provisioning path sources ONLY the LLMsVerifier bridge — no local-runtime (llama.cpp / Ollama) client is constructed on it. Three arms over the redirect-DEFAULT construction sites (`cmd/unified-translator`, `cmd/cli`, `cmd/server`, `cmd/markdown-translator`, `cmd/preparation-translator`, `pkg/api/handler.go`, `pkg/grpc/core_translator.go`): **Arm 1** — no default-path file constructs a local-runtime client (`NewLlamaCppClient` / `NewOllamaClient` / `NewLlamaCppProvider`, or a `ProviderLlamaCpp` / `ProviderOllama` provider-string construction; comment lines are stripped first); **Arm 2** (primary/durable) — each present default-path file references the bridge (`bridge.` or `bridgeTranslator(`) so the redirect is real; **Arm 3** — `pkg/bridge/bridge.go` still carries the no-fail-open prohibition literal `local llama.cpp fallback is not permitted`. DOCUMENTED EXCEPTIONS (never flagged): retained proto wire-fields + `cmd/api-server` proto use, `config.distributed.*` / `config.worker.json`, comments / flag-name / help mentions, `pkg/translator/llm/mock.go`, `*_test.go`. No fail-open / SKIP (§11.4.69). |
 
 ## Prerequisites
 
@@ -153,13 +154,19 @@ mutated.
   for `CM-DOC-SIBLING-SYNC`.
 - `scripts/testing/meta_test_no_force_push_absolute.sh` — paired §1.1 mutation
   proof for `CM-NO-FORCE-PUSH-ABSOLUTE`.
+- `scripts/testing/meta_test_no_local_runtime.sh` — paired §1.1 mutation proof
+  for `CM-NO-LOCAL-RUNTIME` (baseline PASS; Mut1 re-add `ProviderOllama`
+  construction → Arm 1 FAILs; Mut2 delete the bridge prohibition string → Arm 3
+  FAILs; Neg explicit `case "llamacpp"` arm + comment + worker config → PASS).
 - `scripts/testing/sync_all_markdown_exports.sh` — the §11.4.65 export generator
   whose exclusion set `CM-DOC-SIBLING-SYNC` mirrors.
 - `scripts/testing/meta_test_constitution_inheritance.sh` — the pre-existing
   inheritance meta-test (sibling discipline).
 - `scripts/commit_all.sh` — the authorised commit + push wrapper.
 
-**Last verified:** 2026-06-14 (all 8 gates PASS on current tree; all eight paired
+**Last verified:** 2026-06-16 (CM-NO-LOCAL-RUNTIME added — PASSes on the real
+tree across 7 default-path sites; its paired mutation test PASSes: baseline PASS,
+Mut1 Arm-1 FAIL, Mut2 Arm-3 FAIL, Neg PASS. The 8 prior gates: paired
 mutation tests PASS — every gate FAILs on a real violation and PASSes when
 restored. CM-DOC-SIBLING-SYNC catches a missing `.html`, a missing `.pdf`, and a
 stale (backdated) sibling without false-FAILing excluded owned-submodule docs;

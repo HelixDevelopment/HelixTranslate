@@ -243,8 +243,8 @@
 <h1
 id="pre_build_verificationsh--companion-guide">pre_build_verification.sh
 — companion guide</h1>
-<p><strong>Revision:</strong> 4 <strong>Last modified:</strong>
-2026-06-14T18:45:00Z</p>
+<p><strong>Revision:</strong> 5 <strong>Last modified:</strong>
+2026-06-16T00:00:00Z</p>
 <h2 id="overview">Overview</h2>
 <p><code>scripts/pre_build_verification.sh</code> is the project's
 pre-build gate-suite runner (WORKING_PLAN item P4.2). It runs a small
@@ -359,6 +359,34 @@ FORBIDDEN with no exception. Comment lines, <code>case</code>-pattern
 arms, and <code>die</code>/<code>echo</code> refusal strings (the
 <code>commit_all.sh</code> §11.4.113 GUARD) are NOT invocations and do
 NOT trip the gate (anti-FAIL-bluff, §11.4.1).</td>
+</tr>
+<tr>
+<td><code>CM-NO-LOCAL-RUNTIME</code></td>
+<td>§11.4.69 / R-5</td>
+<td>The <strong>default</strong> translator provisioning path sources
+ONLY the LLMsVerifier bridge — no local-runtime (llama.cpp / Ollama)
+client is constructed on it. Three arms over the redirect-DEFAULT
+construction sites (<code>cmd/unified-translator</code>,
+<code>cmd/cli</code>, <code>cmd/server</code>,
+<code>cmd/markdown-translator</code>,
+<code>cmd/preparation-translator</code>,
+<code>pkg/api/handler.go</code>,
+<code>pkg/grpc/core_translator.go</code>): <strong>Arm 1</strong> — no
+default-path file constructs a local-runtime client
+(<code>NewLlamaCppClient</code> / <code>NewOllamaClient</code> /
+<code>NewLlamaCppProvider</code>, or a <code>ProviderLlamaCpp</code> /
+<code>ProviderOllama</code> provider-string construction; comment lines
+are stripped first); <strong>Arm 2</strong> (primary/durable) — each
+present default-path file references the bridge (<code>bridge.</code> or
+<code>bridgeTranslator(</code>) so the redirect is real; <strong>Arm
+3</strong> — <code>pkg/bridge/bridge.go</code> still carries the
+no-fail-open prohibition literal
+<code>local llama.cpp fallback is not permitted</code>. DOCUMENTED
+EXCEPTIONS (never flagged): retained proto wire-fields +
+<code>cmd/api-server</code> proto use, <code>config.distributed.*</code>
+/ <code>config.worker.json</code>, comments / flag-name / help mentions,
+<code>pkg/translator/llm/mock.go</code>, <code>*_test.go</code>. No
+fail-open / SKIP (§11.4.69).</td>
 </tr>
 </tbody>
 </table>
@@ -509,6 +537,11 @@ paired §1.1 mutation proof for
 <li><code>scripts/testing/meta_test_no_force_push_absolute.sh</code> —
 paired §1.1 mutation proof for
 <code>CM-NO-FORCE-PUSH-ABSOLUTE</code>.</li>
+<li><code>scripts/testing/meta_test_no_local_runtime.sh</code> — paired
+§1.1 mutation proof for <code>CM-NO-LOCAL-RUNTIME</code> (baseline PASS;
+Mut1 re-add <code>ProviderOllama</code> construction → Arm 1 FAILs; Mut2
+delete the bridge prohibition string → Arm 3 FAILs; Neg explicit
+<code>case "llamacpp"</code> arm + comment + worker config → PASS).</li>
 <li><code>scripts/testing/sync_all_markdown_exports.sh</code> — the
 §11.4.65 export generator whose exclusion set
 <code>CM-DOC-SIBLING-SYNC</code> mirrors.</li>
@@ -517,12 +550,14 @@ the pre-existing inheritance meta-test (sibling discipline).</li>
 <li><code>scripts/commit_all.sh</code> — the authorised commit + push
 wrapper.</li>
 </ul>
-<p><strong>Last verified:</strong> 2026-06-14 (all 8 gates PASS on
-current tree; all eight paired mutation tests PASS — every gate FAILs on
-a real violation and PASSes when restored. CM-DOC-SIBLING-SYNC catches a
-missing <code>.html</code>, a missing <code>.pdf</code>, and a stale
-(backdated) sibling without false-FAILing excluded owned-submodule docs;
-CM-NO-FORCE-PUSH-ABSOLUTE catches <code>--force</code>,
+<p><strong>Last verified:</strong> 2026-06-16 (CM-NO-LOCAL-RUNTIME added
+— PASSes on the real tree across 7 default-path sites; its paired
+mutation test PASSes: baseline PASS, Mut1 Arm-1 FAIL, Mut2 Arm-3 FAIL,
+Neg PASS. The 8 prior gates: paired mutation tests PASS — every gate
+FAILs on a real violation and PASSes when restored. CM-DOC-SIBLING-SYNC
+catches a missing <code>.html</code>, a missing <code>.pdf</code>, and a
+stale (backdated) sibling without false-FAILing excluded owned-submodule
+docs; CM-NO-FORCE-PUSH-ABSOLUTE catches <code>--force</code>,
 <code>--force-with-lease</code>, and a <code>+</code>-refspec push
 without false-FAILing the <code>commit_all.sh</code>-class force-push
 GUARD; CM-TRACKER-DOCS-PRESENT catches a missing doc + a missing

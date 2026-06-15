@@ -61,6 +61,23 @@
 #       forced refspec. Force-push is STRICTLY FORBIDDEN with no exception.
 #       Comment lines, case-pattern arms, and die/echo refusal strings (the
 #       commit_all.sh §11.4.113 GUARD) are NOT invocations and do NOT trip it.
+#   CM-NO-LOCAL-RUNTIME          (§11.4.69 / bridge phase-2 R-5) — the default
+#       translator provisioning path sources ONLY the LLMsVerifier bridge; no
+#       local-runtime (llama.cpp / Ollama) client is constructed on it. Three
+#       arms over the redirect-DEFAULT construction sites (cmd/unified-translator,
+#       cmd/cli, cmd/server, cmd/markdown-translator, cmd/preparation-translator,
+#       pkg/api/handler.go, pkg/grpc/core_translator.go):
+#         Arm 1 — no default-path file constructs a local-runtime client
+#                 (NewLlamaCppClient / NewOllamaClient / NewLlamaCppProvider, or
+#                 a ProviderLlamaCpp / ProviderOllama provider-string construction).
+#         Arm 2 (primary/durable) — each present default-path file references the
+#                 bridge ('bridge.' or 'bridgeTranslator(') so the redirect is real.
+#         Arm 3 — pkg/bridge/bridge.go still carries the no-fail-open prohibition
+#                 literal 'local llama.cpp fallback is not permitted' (§11.4.69).
+#       DOCUMENTED EXCEPTIONS (never flagged): the retained proto wire-fields +
+#       cmd/api-server proto use, config.distributed.* / config.worker.json,
+#       comments / flag-name / help mentions, pkg/translator/llm/mock.go, *_test.go.
+#       No fail-open / SKIP (§11.4.69).
 #
 # Usage:
 #   scripts/pre_build_verification.sh            # run all gates
@@ -93,6 +110,7 @@
 #   scripts/testing/meta_test_atm_ticket_ids.sh               — paired mutation (§1.1)
 #   scripts/testing/meta_test_doc_sibling_sync.sh             — paired mutation (§1.1)
 #   scripts/testing/meta_test_no_force_push_absolute.sh       — paired mutation (§1.1)
+#   scripts/testing/meta_test_no_local_runtime.sh             — paired mutation (§1.1)
 #   §11.4.67 target-shell-parseable — passes `bash -n` AND `sh -n`.
 #
 # Parseability note (§11.4.67): written in POSIX-portable shell. No arrays,
@@ -601,6 +619,79 @@ EOF2
 }
 
 # ---------------------------------------------------------------------------
+# Gate: CM-NO-LOCAL-RUNTIME (§11.4.69 / bridge phase-2 R-5)
+#
+# OPTION A (default-path-only): assert the default translator provisioning path
+# sources ONLY the LLMsVerifier bridge, never a local runtime (llama.cpp/Ollama).
+#
+# The redirect-DEFAULT construction sites (each routes the default arm through
+# bridge.BestTranslator / bridge.BestClient / bridgeTranslator):
+_NLR_DEFAULT_PATH_FILES="cmd/unified-translator/main.go cmd/cli/main.go cmd/server/main.go cmd/markdown-translator/main.go cmd/preparation-translator/main.go pkg/api/handler.go pkg/grpc/core_translator.go"
+_NLR_BRIDGE_FILE="pkg/bridge/bridge.go"
+# Local-runtime CONSTRUCTOR tokens forbidden on the default path (Arm 1). These
+# are construction sites, not flag-name / help / comment mentions: NewLlamaCppClient,
+# NewOllamaClient, NewLlamaCppProvider (factory constructors); ProviderLlamaCpp(/
+# ProviderOllama( as a function/conversion-style construction. Bare ProviderOllama
+# without a trailing '(' would be a const reference; the removal already deleted
+# the consts, so any reappearance constructs/uses a local provider — flagged.
+_NLR_CTOR_RE='NewLlamaCppClient|NewOllamaClient|NewLlamaCppProvider|ProviderLlamaCpp|ProviderOllama|OllamaClient\{'
+# Arm 2 durable proof: the default arm references the bridge.
+_NLR_BRIDGE_RE='bridge\.|bridgeTranslator\('
+# Arm 3 no-fail-open prohibition literal that MUST remain in pkg/bridge/bridge.go.
+_NLR_PROHIBITION='local llama.cpp fallback is not permitted'
+
+gate_no_local_runtime() {
+  _arm1=""   # default-path files that construct a local-runtime client
+  _arm2=""   # present default-path files that do NOT reference the bridge
+  _present=0
+
+  for _f in $_NLR_DEFAULT_PATH_FILES; do
+    # Only check files actually tracked + present (a tmp meta-test repo may
+    # contain only a subset; an absent canonical file is caught by the build).
+    [ -f "$_f" ] || continue
+    git ls-files --error-unmatch "$_f" >/dev/null 2>&1 || continue
+    _present=$((_present + 1))
+
+    # Arm 1 — local-runtime constructor on the default path. Strip // comments
+    # and // doc lines so a comment naming a removed provider never trips it.
+    _ctor=$(grep -nE "$_NLR_CTOR_RE" "$_f" 2>/dev/null \
+              | grep -vE '^[0-9]+:[[:space:]]*//' || true)
+    if [ -n "$_ctor" ]; then
+      _arm1="$_arm1
+$_f:
+$(printf '%s\n' "$_ctor" | sed 's/^/    /')"
+    fi
+
+    # Arm 2 — file must reference the bridge somewhere (durable redirect proof).
+    if ! grep -qE "$_NLR_BRIDGE_RE" "$_f" 2>/dev/null; then
+      _arm2="$_arm2
+$_f (no '$_NLR_BRIDGE_RE' reference — default path does not route through the bridge)"
+    fi
+  done
+
+  # Arm 3 — the no-fail-open prohibition literal must remain in bridge.go.
+  _arm3=""
+  if [ -f "$_NLR_BRIDGE_FILE" ] && git ls-files --error-unmatch "$_NLR_BRIDGE_FILE" >/dev/null 2>&1; then
+    if ! grep -qF "$_NLR_PROHIBITION" "$_NLR_BRIDGE_FILE" 2>/dev/null; then
+      _arm3="$_NLR_BRIDGE_FILE (missing no-fail-open literal: '$_NLR_PROHIBITION')"
+    fi
+  fi
+
+  _arm1=$(printf '%s\n' "$_arm1" | sed '/^[[:space:]]*$/d')
+  _arm2=$(printf '%s\n' "$_arm2" | sed '/^[[:space:]]*$/d')
+
+  if [ -n "$_arm1" ] || [ -n "$_arm2" ] || [ -n "$_arm3" ]; then
+    echo "FAIL CM-NO-LOCAL-RUNTIME — default translator path is not bridge-only (§11.4.69):"
+    [ -n "$_arm1" ] && { echo "         Arm1 — local-runtime constructor on the default path:"; printf '%s\n' "$_arm1" | sed 's/^/           /'; }
+    [ -n "$_arm2" ] && { echo "         Arm2 — default-path file does not reference the bridge:"; printf '%s\n' "$_arm2" | sed 's/^/           - /'; }
+    [ -n "$_arm3" ] && { echo "         Arm3 — bridge no-fail-open prohibition removed:"; printf '%s\n' "         - $_arm3"; }
+    return 1
+  fi
+  echo "PASS CM-NO-LOCAL-RUNTIME — default path bridge-only across $_present site(s); no local-runtime constructor; bridge prohibition intact"
+  return 0
+}
+
+# ---------------------------------------------------------------------------
 # Dispatch.
 # ---------------------------------------------------------------------------
 run_one() {
@@ -613,11 +704,12 @@ run_one() {
     CM-ATM-TICKET-IDS)                gate_atm_ticket_ids ;;
     CM-DOC-SIBLING-SYNC)              gate_doc_sibling_sync ;;
     CM-NO-FORCE-PUSH-ABSOLUTE)        gate_no_force_push_absolute ;;
+    CM-NO-LOCAL-RUNTIME)              gate_no_local_runtime ;;
     *) echo "pre_build_verification: ERROR — unknown gate '$1'" >&2; return 2 ;;
   esac
 }
 
-GATES="CM-GITIGNORE-PRECOMMIT-AUDIT CM-NO-FAKES-BEYOND-UNIT CM-SCRIPT-TARGET-SHELL-PARSEABLE CM-VERSION-SINGLE-SOURCE CM-TRACKER-DOCS-PRESENT CM-ATM-TICKET-IDS CM-DOC-SIBLING-SYNC CM-NO-FORCE-PUSH-ABSOLUTE"
+GATES="CM-GITIGNORE-PRECOMMIT-AUDIT CM-NO-FAKES-BEYOND-UNIT CM-SCRIPT-TARGET-SHELL-PARSEABLE CM-VERSION-SINGLE-SOURCE CM-TRACKER-DOCS-PRESENT CM-ATM-TICKET-IDS CM-DOC-SIBLING-SYNC CM-NO-FORCE-PUSH-ABSOLUTE CM-NO-LOCAL-RUNTIME"
 
 if [ "${1:-}" = "--list" ]; then
   for g in $GATES; do echo "$g"; done
