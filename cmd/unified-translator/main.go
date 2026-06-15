@@ -44,7 +44,7 @@ type UnifiedConfig struct {
 	Script     string // cyrillic, latin
 
 	// Provider Selection
-	Provider string // openai, anthropic, zhipu, deepseek, qwen, gemini, llamacpp, ssh
+	Provider string // openai, anthropic, zhipu, deepseek, qwen, gemini, ssh
 
 	// API/Local LLM Configuration
 	APIKey      string
@@ -54,17 +54,17 @@ type UnifiedConfig struct {
 	MaxTokens   int
 	Timeout     time.Duration
 
-	// SSH Worker Configuration (for provider=ssh)
+	// SSH Worker Configuration (for provider=ssh). The remote worker runs
+	// llama.cpp, so LlamaBinary / LlamaModel point at the binary + model ON THE
+	// REMOTE host (see buildSSHTranslateCommand). There is NO local llama.cpp
+	// runtime in-process (removed in bridge phase-2 R-3).
 	SSHHost     string
 	SSHUser     string
 	SSHPassword string
 	SSHPort     int
 	RemoteDir   string
-
-	// Local Llama.cpp Configuration (for provider=llamacpp)
-	LlamaBinary string
-	LlamaModel  string
-	ContextSize int
+	LlamaBinary string // remote llama.cpp binary path (provider=ssh)
+	LlamaModel  string // remote llama.cpp model path (provider=ssh)
 
 	// Execution Options
 	Workers      int
@@ -304,9 +304,12 @@ func executeProviderTranslation(ctx context.Context, config *UnifiedConfig, sess
 	switch config.Provider {
 	case "ssh":
 		return executeSSHTranslation(ctx, config, session, text)
-	case "llamacpp":
-		return executeLlamaCppTranslation(ctx, config, session, text)
 	default:
+		// No local-runtime path: any non-SSH provider (incl. the former
+		// "llamacpp" local arm, removed in bridge phase-2 R-3) routes to the
+		// API path, which sources the strongest verified model via the bridge
+		// and hard-errors honestly when no API key is set (§11.4.69). There is
+		// NEVER a silent local llama.cpp fallback.
 		return executeAPITranslation(ctx, config, session, text)
 	}
 }
@@ -442,43 +445,6 @@ func languageDisplayName(code string) string {
 // any embedded single quotes via the '"'"' idiom so no value can break out.
 func shellSingleQuote(s string) string {
 	return "'" + strings.ReplaceAll(s, "'", `'"'"'`) + "'"
-}
-
-// executeLlamaCppTranslation uses local llama.cpp for translation
-func executeLlamaCppTranslation(ctx context.Context, config *UnifiedConfig, session *TranslationSession, text string) (string, error) {
-	session.Logger.Info("Starting local llama.cpp translation", map[string]interface{}{
-		"binary": config.LlamaBinary,
-		"model":  config.LlamaModel,
-	})
-
-	// Create LLM translator
-	llmConfig := translator.TranslationConfig{
-		SourceLang:  config.SourceLang,
-		TargetLang:  config.TargetLang,
-		Provider:    "llamacpp",
-		Model:       config.Model,
-		Temperature: config.Temperature,
-		MaxTokens:   config.MaxTokens,
-		Timeout:     config.Timeout,
-		Options: map[string]interface{}{
-			"binary_path":  config.LlamaBinary,
-			"model_path":   config.LlamaModel,
-			"context_size": config.ContextSize,
-		},
-	}
-
-	llmTranslator, err := llm.NewLLMTranslator(llmConfig)
-	if err != nil {
-		return "", fmt.Errorf("failed to create LLM translator: %w", err)
-	}
-
-	// Translate
-	result, err := llmTranslator.TranslateWithProgress(ctx, text, "Ebook content", session.EventBus, session.ID)
-	if err != nil {
-		return "", fmt.Errorf("LLM translation failed: %w", err)
-	}
-
-	return result, nil
 }
 
 // executeAPITranslation uses API-based LLM providers
@@ -638,7 +604,6 @@ func parseFlags() *UnifiedConfig {
 		Concurrency:    4,
 		VerifyOutput:   true,
 		MonitoringPort: 8080,
-		ContextSize:    2048,
 	}
 
 	flag.StringVar(&config.InputFile, "input", "", "Input ebook file")
@@ -650,7 +615,7 @@ func parseFlags() *UnifiedConfig {
 	flag.StringVar(&config.TargetLang, "target-lang", "sr", "Target language (default: sr)")
 	flag.StringVar(&config.Script, "script", "cyrillic", "Target script: cyrillic, latin (default: cyrillic)")
 
-	flag.StringVar(&config.Provider, "provider", "openai", "Translation provider: openai, anthropic, zhipu, deepseek, qwen, gemini, llamacpp, ssh")
+	flag.StringVar(&config.Provider, "provider", "openai", "Translation provider: openai, anthropic, zhipu, deepseek, qwen, gemini, ssh")
 	flag.StringVar(&config.Model, "model", "gpt-4", "Model name")
 	flag.StringVar(&config.APIKey, "api-key", "", "API key for provider")
 	flag.StringVar(&config.BaseURL, "base-url", "", "Base URL for provider (if needed)")
@@ -658,17 +623,15 @@ func parseFlags() *UnifiedConfig {
 	flag.IntVar(&config.MaxTokens, "max-tokens", 4096, "Maximum tokens")
 	flag.DurationVar(&config.Timeout, "timeout", 30*time.Second, "Request timeout")
 
-	// SSH options
+	// SSH options (the remote worker runs llama.cpp; -llama-binary / -llama-model
+	// point at the binary + model ON THE REMOTE host).
 	flag.StringVar(&config.SSHHost, "ssh-host", "", "SSH host (for provider=ssh)")
 	flag.StringVar(&config.SSHUser, "ssh-user", "", "SSH username (for provider=ssh)")
 	flag.StringVar(&config.SSHPassword, "ssh-password", "", "SSH password (for provider=ssh)")
 	flag.IntVar(&config.SSHPort, "ssh-port", 22, "SSH port (default: 22)")
 	flag.StringVar(&config.RemoteDir, "remote-dir", "/tmp/translator", "Remote directory (default: /tmp/translator)")
-
-	// Llama.cpp options
-	flag.StringVar(&config.LlamaBinary, "llama-binary", "/usr/local/bin/llama.cpp", "Path to llama.cpp binary")
-	flag.StringVar(&config.LlamaModel, "llama-model", "", "Path to llama.cpp model")
-	flag.IntVar(&config.ContextSize, "context-size", 2048, "LLM context size")
+	flag.StringVar(&config.LlamaBinary, "llama-binary", "/usr/local/bin/llama.cpp", "Remote llama.cpp binary path (for provider=ssh)")
+	flag.StringVar(&config.LlamaModel, "llama-model", "", "Remote llama.cpp model path (for provider=ssh)")
 
 	// Execution options
 	flag.IntVar(&config.Workers, "workers", 1, "Number of parallel workers")
@@ -729,11 +692,6 @@ func parseFlags() *UnifiedConfig {
 			fmt.Fprintf(os.Stderr, "Error: SSH host, user, and password required for provider=ssh\n")
 			os.Exit(1)
 		}
-	case "llamacpp":
-		if config.LlamaModel == "" {
-			fmt.Fprintf(os.Stderr, "Error: llama-model path required for provider=llamacpp\n")
-			os.Exit(1)
-		}
 	case "mock":
 		// No API key required for the mock offline test seam.
 	default:
@@ -775,8 +733,7 @@ Providers:
   deepseek    - DeepSeek models (requires API key)
   qwen        - Qwen models (requires API key)
   gemini      - Google Gemini models (requires API key)
-  llamacpp    - Local llama.cpp models
-  ssh         - Remote SSH worker with llama.cpp
+  ssh         - Remote SSH worker running llama.cpp
 
 Basic Options:
   -i, -input <file>        Input ebook file (FB2, EPUB, PDF, DOCX, TXT, HTML)
@@ -800,11 +757,8 @@ SSH Configuration (provider=ssh):
   -ssh-password <pass>      SSH password
   -ssh-port <port>          SSH port (default: 22)
   -remote-dir <dir>         Remote directory (default: /tmp/translator)
-
-Llama.cpp Configuration (provider=llamacpp):
-  -llama-binary <path>      Path to llama.cpp binary
-  -llama-model <path>       Path to llama.cpp model
-  -context-size <size>      LLM context size (default: 2048)
+  -llama-binary <path>      Remote llama.cpp binary path
+  -llama-model <path>       Remote llama.cpp model path
 
 Execution Options:
   -workers <num>            Parallel workers (default: 1)
@@ -832,9 +786,6 @@ Other:
 Examples:
   # Translate with OpenAI
   unified-translator -i book.fb2 -provider openai -api-key YOUR_KEY
-
-  # Translate with local llama.cpp
-  unified-translator -i book.fb2 -provider llamacpp -llama-model ./model.gguf
 
   # Translate via SSH worker
   unified-translator -i book.fb2 -provider ssh -ssh-host worker.local -ssh-user user -ssh-password pass

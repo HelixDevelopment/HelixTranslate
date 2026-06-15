@@ -245,9 +245,11 @@ func TestProviderValidation(t *testing.T) {
 			valid:    false,
 		},
 		{
-			name:     "llamacpp provider",
+			// R-3 removal contract (operator D1/D2 — no local runtime): llamacpp is
+			// no longer a valid provider.
+			name:     "llamacpp provider removed",
 			provider: "llamacpp",
-			valid:    true,
+			valid:    false,
 		},
 		{
 			name:     "invalid provider",
@@ -268,7 +270,6 @@ func TestProviderValidation(t *testing.T) {
 				"anthropic": true,
 				"deepseek":  true,
 				"zhipu":     true,
-				"llamacpp":  true,
 			}
 
 			isValid := validProviders[tt.provider]

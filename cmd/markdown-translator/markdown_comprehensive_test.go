@@ -30,7 +30,7 @@ func TestAdvancedFlagParsing(t *testing.T) {
 		outputFile := flag.String("output", "", "Output file (optional, auto-generated if not provided)")
 		outputFormat := flag.String("format", "epub", "Output format (epub, md)")
 		targetLang := flag.String("lang", "en", "Target language code (default: English)")
-		provider := flag.String("provider", "deepseek", "LLM provider (deepseek, openai, anthropic, llamacpp)")
+		provider := flag.String("provider", "deepseek", "LLM provider (deepseek, openai, anthropic)")
 		model := flag.String("model", "", "LLM model (optional, uses provider default)")
 		keepMarkdown := flag.Bool("keep-md", true, "Keep intermediate markdown files")
 		enablePreparation := flag.Bool("prepare", false, "Enable preparation phase with multi-LLM analysis")
@@ -63,7 +63,7 @@ func TestAdvancedFlagParsing(t *testing.T) {
 		outputFile := flag.String("output", "", "Output file (optional, auto-generated if not provided)")
 		outputFormat := flag.String("format", "epub", "Output format (epub, md)")
 		targetLang := flag.String("lang", "en", "Target language code (default: English)")
-		provider := flag.String("provider", "deepseek", "LLM provider (deepseek, openai, anthropic, llamacpp)")
+		provider := flag.String("provider", "deepseek", "LLM provider (deepseek, openai, anthropic)")
 		model := flag.String("model", "", "LLM model (optional, uses provider default)")
 		keepMarkdown := flag.Bool("keep-md", true, "Keep intermediate markdown files")
 		enablePreparation := flag.Bool("prepare", false, "Enable preparation phase with multi-LLM analysis")
@@ -240,7 +240,6 @@ func TestAdvancedProviderConfiguration(t *testing.T) {
 			"deepseek",
 			"openai",
 			"anthropic",
-			"llamacpp",
 		}
 
 		for _, provider := range providers {
@@ -254,7 +253,6 @@ func TestAdvancedProviderConfiguration(t *testing.T) {
 			"deepseek":  {"deepseek-chat", "deepseek-coder"},
 			"openai":    {"gpt-4", "gpt-3.5-turbo", "gpt-4-turbo"},
 			"anthropic": {"claude-3-sonnet", "claude-3-haiku", "claude-3-opus"},
-			"llamacpp":  {"llama-2-7b", "llama-2-13b", "mistral-7b"},
 		}
 
 		for provider, models := range validProviders {
@@ -312,7 +310,6 @@ func TestAdvancedTranslatorConfiguration(t *testing.T) {
 			{"deepseek", "deepseek-chat"},
 			{"openai", "gpt-4"},
 			{"anthropic", "claude-3-sonnet"},
-			{"llamacpp", "llama-2-7b"},
 		}
 
 		for _, config := range modelConfigs {
@@ -492,10 +489,6 @@ func TestLLMProviderCreation(t *testing.T) {
 			{
 				Name:    "anthropic",
 				Enabled: false,
-			},
-			{
-				Name:    "llamacpp",
-				Enabled: true,
 			},
 		}
 

@@ -19,7 +19,6 @@ import (
 	"digital.vasic.translator/pkg/markdown"
 	"digital.vasic.translator/pkg/sshworker"
 	"digital.vasic.translator/pkg/translator"
-	"digital.vasic.translator/pkg/translator/llm"
 )
 
 // CoreTranslatorImpl implements the CoreTranslator interface
@@ -256,9 +255,12 @@ func (ct *CoreTranslatorImpl) executeTranslation(job *TranslationJob, text strin
 	switch req.ProviderConfig.Type {
 	case "ssh":
 		return ct.executeSSHTranslation(job, text, eventBus)
-	case "llamacpp":
-		return ct.executeLlamaCppTranslation(job, text, eventBus)
 	default:
+		// No local-runtime path: any non-SSH provider (incl. the former
+		// "llamacpp" local arm, removed in bridge phase-2 R-3) routes to the
+		// API path, which sources the strongest verified model via the bridge
+		// and hard-errors honestly when no API key is set (§11.4.69). There is
+		// NEVER a silent local llama.cpp fallback.
 		return ct.executeAPITranslation(job, text, eventBus)
 	}
 }
@@ -330,50 +332,6 @@ func (ct *CoreTranslatorImpl) executeSSHTranslation(job *TranslationJob, text st
 	_ = os.Remove(tempFile)
 
 	return string(translatedData), nil
-}
-
-// executeLlamaCppTranslation uses local llama.cpp
-func (ct *CoreTranslatorImpl) executeLlamaCppTranslation(job *TranslationJob, text string, eventBus *events.EventBus) (string, error) {
-	req := job.Request
-
-	ct.logger.Info("Executing local llama.cpp translation", map[string]interface{}{
-		"session_id": job.ID,
-		"binary":     req.ProviderConfig.LlamaBinary,
-		"model":      req.ProviderConfig.LlamaModel,
-	})
-
-	// Create LLM translator
-	llmConfig := translator.TranslationConfig{
-		SourceLang:  req.SourceLang,
-		TargetLang:  req.TargetLang,
-		Provider:    "llamacpp",
-		Model:       req.ProviderConfig.Model,
-		Temperature: req.ProviderConfig.Temperature,
-		MaxTokens:   int(req.ProviderConfig.MaxTokens),
-		Timeout:     time.Duration(req.ProviderConfig.TimeoutSeconds) * time.Second,
-		Options: map[string]interface{}{
-			"binary_path":  req.ProviderConfig.LlamaBinary,
-			"model_path":   req.ProviderConfig.LlamaModel,
-			"context_size": req.ProviderConfig.ContextSize,
-		},
-	}
-
-	llmTranslator, err := llm.NewLLMTranslator(llmConfig)
-	if err != nil {
-		return "", fmt.Errorf("failed to create LLM translator: %w", err)
-	}
-
-	ct.emitProgress(eventBus, job.ID, "llm_ready", "translation", 10, "LLM translator initialized")
-
-	// Translate
-	result, err := llmTranslator.TranslateWithProgress(job.Context, text, "Ebook content", eventBus, job.ID)
-	if err != nil {
-		return "", fmt.Errorf("LLM translation failed: %w", err)
-	}
-
-	ct.emitProgress(eventBus, job.ID, "translation_complete", "translation", 90, "Translation completed")
-
-	return result, nil
 }
 
 // executeAPITranslation uses API-based providers

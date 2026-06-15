@@ -768,16 +768,10 @@ func TestLLMTranslatorGetName(t *testing.T) {
 		{"deepseek", "deepseek-chat", "llm-deepseek"},
 		{"qwen", "qwen-max", "llm-qwen"},
 		{"gemini", "gemini-pro", "llm-gemini"},
-		{"llamacpp", "mistral", "llm-llamacpp"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.provider, func(t *testing.T) {
-			// Skip LlamaCpp test as it requires actual models
-			if tt.provider == "llamacpp" {
-				t.Skip("LlamaCpp requires actual models to be installed") // SKIP-OK: #legacy-untriaged
-			}
-
 			config := translator.TranslationConfig{
 				Provider: tt.provider,
 				Model:    tt.model,
@@ -1281,19 +1275,27 @@ func TestNewLLMTranslatorWithConfigErrorPaths(t *testing.T) {
 		}
 	})
 
-	t.Run("llamacpp_valid_model", func(t *testing.T) {
+	// R-3 removal contract (operator D1/D2 — no local runtime): the llama.cpp
+	// provider is removed; the factory MUST now reject "llamacpp" as an
+	// unsupported provider rather than building a local client. This is the GREEN
+	// guard for the removal (selecting llamacpp now → honest unsupported error,
+	// NEVER a silent local fallback). §11.4.115 polarity: RED on the pre-R-3
+	// artifact (factory built a LlamaCppClient), GREEN here on the fixed artifact.
+	t.Run("llamacpp_now_unsupported", func(t *testing.T) {
 		config := TranslationConfig{
 			Provider: "llamacpp",
-			Model:    "llama2", // Valid model in the list
+			Model:    "llama2",
 		}
 
 		translator, err := NewLLMTranslatorWithConfig(config)
-		// This might fail if llama2 model doesn't exist locally, but that's expected
-		if err != nil {
-			t.Logf("Expected potential failure with LlamaCpp model (may not exist locally): %v", err)
+		if err == nil {
+			t.Error("Expected error: llamacpp provider removed (R-3), must be unsupported")
 		}
 		if translator != nil {
-			t.Logf("Successfully created translator with LlamaCpp model")
+			t.Error("Translator must be nil for removed llamacpp provider")
+		}
+		if err != nil && !strings.Contains(err.Error(), "unsupported LLM provider") {
+			t.Errorf("Expected unsupported provider error for llamacpp, got: %v", err)
 		}
 	})
 }

@@ -49,7 +49,7 @@ message TranslationRequest {
 
 // Provider Configuration
 message ProviderConfig {
-  string type = 1;  // openai, anthropic, zhipu, deepseek, qwen, gemini, llamacpp, ssh
+  string type = 1;  // openai, anthropic, zhipu, deepseek, qwen, gemini, ssh
   string model = 2;
   double temperature = 3;
   int32 max_tokens = 4;
@@ -66,7 +66,11 @@ message ProviderConfig {
   int32 ssh_port = 11;
   string remote_dir = 12;
   
-  // Llama.cpp Configuration
+  // Remote SSH-worker llama.cpp configuration (the SSH worker — type="ssh" —
+  // runs llama.cpp; these point at the binary + model ON THE REMOTE host).
+  // There is no in-process local llama.cpp runtime (removed in bridge phase-2
+  // R-3). Wire numbers preserved; the SSH/distributed worker path (R-4) owns
+  // these fields.
   string llama_binary = 13;
   string llama_model = 14;
   int32 context_size = 15;

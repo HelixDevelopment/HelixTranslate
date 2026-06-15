@@ -624,12 +624,6 @@ func (h *Handler) listProviders(c *gin.Context) {
 			"requires_api_key": true,
 			"models":           []string{"deepseek-chat"},
 		},
-		{
-			"name":             "llamacpp",
-			"description":      "Local Llama.cpp models",
-			"requires_api_key": false,
-			"models":           []string{"llama-3.2-3b-instruct"},
-		},
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -1858,7 +1852,7 @@ func (h *Handler) validateTranslationRequest(c *gin.Context) {
 		}
 	}
 
-	validProviders := []string{"openai", "anthropic", "zhipu", "deepseek", "llamacpp"}
+	validProviders := []string{"openai", "anthropic", "zhipu", "deepseek"}
 	isValidProvider := false
 	for _, p := range validProviders {
 		if p == provider {

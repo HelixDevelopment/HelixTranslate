@@ -38,7 +38,7 @@ func main() {
 	outputFile := flag.String("output", "", "Output file (optional, auto-generated if not provided)")
 	outputFormat := flag.String("format", "epub", "Output format (epub, md)")
 	targetLang := flag.String("lang", "en", "Target language code (default: English)")
-	provider := flag.String("provider", "deepseek", "LLM provider (deepseek, openai, anthropic, llamacpp)")
+	provider := flag.String("provider", "deepseek", "LLM provider (deepseek, openai, anthropic)")
 	model := flag.String("model", "", "LLM model (optional, uses provider default)")
 	keepMarkdown := flag.Bool("keep-md", true, "Keep intermediate markdown files")
 	enablePreparation := flag.Bool("prepare", false, "Enable preparation phase with multi-LLM analysis")

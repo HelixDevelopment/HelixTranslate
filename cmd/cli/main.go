@@ -692,7 +692,7 @@ Options:
   -detect                 Detect source language and exit
 
   -p, -provider <name>    Translation provider (openai, anthropic,
-                          zhipu, deepseek, qwen, llamacpp) [default: openai]
+                          zhipu, deepseek, qwen) [default: openai]
   -model <name>           LLM model name (e.g., gpt-4, claude-3-sonnet)
   -api-key <key>          API key for LLM provider
   -base-url <url>         Base URL for LLM provider
@@ -743,9 +743,6 @@ Examples:
 
   # Output as plain text
   translator -input book.epub -locale de -format txt
-
-  # Local llama.cpp translation
-  translator -input book.txt -locale es -provider llamacpp -model mistral
 
 `, version, getSupportedLanguagesString())
 }

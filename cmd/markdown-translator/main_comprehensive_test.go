@@ -650,7 +650,7 @@ func TestTranslatorConfiguration(t *testing.T) {
 			assert.Equal(t, tt.apiKey, config.APIKey)
 
 			// Valid providers check
-			validProviders := []string{"deepseek", "openai", "anthropic", "zhipu", "llamacpp"}
+			validProviders := []string{"deepseek", "openai", "anthropic", "zhipu"}
 			isValid := false
 			for _, valid := range validProviders {
 				if tt.provider == valid {

@@ -31,7 +31,6 @@ const (
 	ProviderDeepSeek    Provider = "deepseek"
 	ProviderQwen        Provider = "qwen"
 	ProviderGemini      Provider = "gemini"
-	ProviderLlamaCpp    Provider = "llamacpp"
 	ProviderMock        Provider = "mock"
 	ProviderGroq        Provider = "groq"
 	ProviderCohere      Provider = "cohere"
@@ -66,7 +65,6 @@ var ValidModels = map[Provider][]string{
 	ProviderDeepSeek:    {"deepseek-chat", "deepseek-coder", "deepseek-v4-flash", "deepseek-v4-pro"},
 	ProviderQwen:        {"qwen-max", "qwen-plus", "qwen-turbo"},
 	ProviderGemini:      {"gemini-pro", "gemini-pro-vision", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-pro"},
-	ProviderLlamaCpp:    {"llama2", "mistral", "vicuna"},
 	ProviderMock:        {"mock"},
 	ProviderGroq:        {"llama-3.1-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768", "llama-3.3-70b-versatile", "gemma2-9b-it"},
 	ProviderCohere:      {"command-r", "command-r-plus", "command"},
@@ -240,10 +238,6 @@ func NewLLMTranslatorWithConfig(config TranslationConfig) (*LLMTranslator, error
 					config.Model, provider, validModels)
 			}
 		}
-		// For LlamaCpp, we allow custom models but warn
-		if provider == ProviderLlamaCpp {
-			fmt.Printf("Warning: Using custom model '%s' with %s provider\n", config.Model, provider) //nolint:forbidigo
-		}
 	}
 
 	var client LLMClient
@@ -262,8 +256,6 @@ func NewLLMTranslatorWithConfig(config TranslationConfig) (*LLMTranslator, error
 		client, err = NewQwenClient(config)
 	case ProviderGemini:
 		client, err = NewGeminiClient(config)
-	case ProviderLlamaCpp:
-		client, err = NewLlamaCppClient(config)
 	case ProviderGroq:
 		client, err = NewGroqClient(config)
 	case ProviderCohere:

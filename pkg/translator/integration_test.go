@@ -16,10 +16,10 @@ import (
 // from hardware detection through model selection to actual translation
 func TestFullPipeline_Integration(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
+		t.Skip("Skipping integration test in short mode") // SKIP-OK: #short-mode
 	}
 
-	t.Skip("Skipping integration tests that require API keys and model downloads")  // SKIP-OK: #requires-upstream-key
+	t.Skip("Skipping integration tests that require API keys and model downloads") // SKIP-OK: #requires-upstream-key
 
 	t.Run("Hardware Detection Pipeline", func(t *testing.T) {
 		// Step 1: Detect hardware capabilities
@@ -135,16 +135,16 @@ func TestFullPipeline_Integration(t *testing.T) {
 // TestTranslationWorkflow_E2E tests end-to-end translation workflows
 func TestTranslationWorkflow_E2E(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping E2E test in short mode")  // SKIP-OK: #short-mode
+		t.Skip("Skipping E2E test in short mode") // SKIP-OK: #short-mode
 	}
 
-	t.Skip("Skipping E2E tests that require API keys and model downloads")  // SKIP-OK: #requires-upstream-key
+	t.Skip("Skipping E2E tests that require API keys and model downloads") // SKIP-OK: #requires-upstream-key
 
 	t.Run("DeepSeek Translation Workflow", func(t *testing.T) {
 		// Check if API key is available
 		apiKey := os.Getenv("DEEPSEEK_API_KEY")
 		if apiKey == "" {
-			t.Skip("DEEPSEEK_API_KEY not set - skipping DeepSeek E2E test")  // SKIP-OK: #requires-upstream-key
+			t.Skip("DEEPSEEK_API_KEY not set - skipping DeepSeek E2E test") // SKIP-OK: #requires-upstream-key
 		}
 
 		// Create translator config
@@ -185,51 +185,18 @@ Serbian:`
 		}
 	})
 
-	t.Run("LlamaCpp Translation Workflow", func(t *testing.T) {
-		// Try to create client - it will skip if llama.cpp not available
-		config := translator.TranslationConfig{
-			Provider:   "llamacpp",
-			SourceLang: "ru",
-			TargetLang: "sr",
-			Script:     "cyrillic",
-		}
-
-		client, err := llm.NewLlamaCppClient(config)
-		if err != nil {
-			t.Skipf("llama.cpp not available - skipping LlamaCpp E2E test: %v", err)
-		}
-
-		// Test translation (client already created above)
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-		defer cancel()
-
-		testText := "Привет, мир!"
-		prompt := `Translate the following Russian text to Serbian (Cyrillic):
-
-Russian: Привет, мир!
-Serbian:`
-
-		result, err := client.Translate(ctx, testText, prompt)
-		if err != nil {
-			t.Fatalf("Translation failed: %v", err)
-		}
-
-		t.Logf("Translation result: %s", result)
-
-		// Verify result is not empty
-		if len(result) == 0 {
-			t.Error("Translation result is empty")
-		}
-	})
+	// NOTE: the former "LlamaCpp Translation Workflow" subtest was removed in
+	// bridge phase-2 R-3 — the in-process local llama.cpp runtime (llm.NewLlamaCppClient)
+	// no longer exists; translation now sources verified API models via the bridge.
 }
 
 // TestConfigurationScenarios tests various configuration scenarios
 func TestConfigurationScenarios(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping configuration tests in short mode")  // SKIP-OK: #short-mode
+		t.Skip("Skipping configuration tests in short mode") // SKIP-OK: #short-mode
 	}
 
-	t.Skip("Skipping configuration tests that require API keys and model downloads")  // SKIP-OK: #requires-upstream-key
+	t.Skip("Skipping configuration tests that require API keys and model downloads") // SKIP-OK: #requires-upstream-key
 
 	scenarios := []struct {
 		name        string
@@ -262,17 +229,6 @@ func TestConfigurationScenarios(t *testing.T) {
 			skipReason:  "DEEPSEEK_API_KEY",
 		},
 		{
-			name: "LlamaCpp with Auto Model Selection",
-			config: translator.TranslationConfig{
-				Provider:   "llamacpp",
-				SourceLang: "ru",
-				TargetLang: "sr",
-				Script:     "cyrillic",
-			},
-			shouldError: false,
-			skipReason:  "",
-		},
-		{
 			name: "Invalid Provider",
 			config: translator.TranslationConfig{
 				Provider:   "invalid-provider",
@@ -297,8 +253,6 @@ func TestConfigurationScenarios(t *testing.T) {
 			switch scenario.config.Provider {
 			case "deepseek":
 				_, err = llm.NewDeepSeekClient(scenario.config)
-			case "llamacpp":
-				_, err = llm.NewLlamaCppClient(scenario.config)
 			default:
 				err = translator.ErrInvalidProvider
 			}
@@ -318,7 +272,7 @@ func TestConfigurationScenarios(t *testing.T) {
 
 // TestErrorHandling tests error handling in various scenarios
 func TestErrorHandling(t *testing.T) {
-	t.Skip("Skipping error handling tests that require API keys")  // SKIP-OK: #requires-upstream-key
+	t.Skip("Skipping error handling tests that require API keys") // SKIP-OK: #requires-upstream-key
 	t.Run("Invalid Hardware Detection", func(t *testing.T) {
 		// Hardware detection should never completely fail on supported platforms
 		detector := hardware.NewDetector()
@@ -358,7 +312,7 @@ func TestErrorHandling(t *testing.T) {
 	t.Run("Translation Timeout", func(t *testing.T) {
 		apiKey := os.Getenv("DEEPSEEK_API_KEY")
 		if apiKey == "" {
-			t.Skip("DEEPSEEK_API_KEY not set")  // SKIP-OK: #requires-upstream-key
+			t.Skip("DEEPSEEK_API_KEY not set") // SKIP-OK: #requires-upstream-key
 		}
 
 		config := translator.TranslationConfig{
@@ -389,14 +343,14 @@ func TestErrorHandling(t *testing.T) {
 // TestConcurrentTranslations tests concurrent translation requests
 func TestConcurrentTranslations(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping concurrent tests in short mode")  // SKIP-OK: #short-mode
+		t.Skip("Skipping concurrent tests in short mode") // SKIP-OK: #short-mode
 	}
 
-	t.Skip("Skipping concurrent tests that require API keys")  // SKIP-OK: #requires-upstream-key
+	t.Skip("Skipping concurrent tests that require API keys") // SKIP-OK: #requires-upstream-key
 
 	apiKey := os.Getenv("DEEPSEEK_API_KEY")
 	if apiKey == "" {
-		t.Skip("DEEPSEEK_API_KEY not set")  // SKIP-OK: #requires-upstream-key
+		t.Skip("DEEPSEEK_API_KEY not set") // SKIP-OK: #requires-upstream-key
 	}
 
 	config := translator.TranslationConfig{
@@ -460,5 +414,5 @@ func BenchmarkFullPipeline(b *testing.B) {
 	}
 }
 
-// Note: findLlamaCppExecutable is internal to llm package
-// Tests use NewLlamaCppClient which handles detection internally
+// Note: the former local llama.cpp client (NewLlamaCppClient) was removed in
+// bridge phase-2 R-3; the hardware detector is exercised directly above.
