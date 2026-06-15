@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"time"
 
 	"digital.vasic.translator/internal/config"
@@ -230,6 +231,7 @@ func loadDeploymentPlan(filename string) (*deployment.DeploymentPlan, error) {
 
 func generateDeploymentPlan(cfg *config.Config) *deployment.DeploymentPlan {
 	plan := &deployment.DeploymentPlan{
+		Main:    generateMainConfig(cfg),
 		Workers: []*deployment.DeploymentConfig{},
 	}
 
@@ -268,4 +270,76 @@ func generateDeploymentPlan(cfg *config.Config) *deployment.DeploymentPlan {
 	}
 
 	return plan
+}
+
+// generateMainConfig builds the coordinator (Main) instance config for a
+// generated deployment plan. validateDeploymentPlan REQUIRES a non-nil Main
+// with Host/User/DockerImage/ContainerName/>=1 Port, and DeployDistributedSystem
+// dereferences plan.Main on its success-event path — so generate-plan MUST emit
+// a populated Main, otherwise the tool's own `deploy` action rejects the tool's
+// own output ("main instance configuration is required").
+//
+// SSH credentials are sourced (deterministically, by sorted worker key) from the
+// first configured worker since the coordinator is typically reachable over the
+// same access; the host falls back to the server host then localhost. The
+// operator is expected to review/edit the emitted plan before deploying.
+func generateMainConfig(cfg *config.Config) *deployment.DeploymentConfig {
+	host := cfg.Server.Host
+	user := "deploy"
+	password := ""
+
+	// Deterministically pick the first worker (sorted by id) for SSH access.
+	if len(cfg.Distributed.Workers) > 0 {
+		ids := make([]string, 0, len(cfg.Distributed.Workers))
+		for id := range cfg.Distributed.Workers {
+			ids = append(ids, id)
+		}
+		sort.Strings(ids)
+		first := cfg.Distributed.Workers[ids[0]]
+		if first.User != "" {
+			user = first.User
+		}
+		password = first.Password
+		if host == "" {
+			host = first.Host
+		}
+	}
+
+	if host == "" {
+		host = "localhost"
+	}
+
+	mainPort := cfg.Server.Port
+	if mainPort <= 0 {
+		mainPort = 8443
+	}
+
+	return &deployment.DeploymentConfig{
+		Host:          host,
+		User:          user,
+		Password:      password,
+		SSHKeyPath:    "",
+		DockerImage:   "translator:latest",
+		ContainerName: "translator-main",
+		Ports: []deployment.PortMapping{
+			{HostPort: mainPort, ContainerPort: 8443, Protocol: "tcp"},
+		},
+		Environment: map[string]string{
+			"JWT_SECRET": "main-secret",
+			"MAIN_HOST":  host,
+			"ROLE":       "coordinator",
+		},
+		Volumes: []deployment.VolumeMapping{
+			{HostPath: "./certs", ContainerPath: "/app/certs", ReadOnly: true},
+			{HostPath: "./config.json", ContainerPath: "/app/config.json", ReadOnly: true},
+		},
+		Networks:      []string{"translator-network"},
+		RestartPolicy: "unless-stopped",
+		HealthCheck: &deployment.HealthCheckConfig{
+			Test:     []string{"CMD", "curl", "-f", "https://localhost:8443/health"},
+			Interval: 30 * time.Second,
+			Timeout:  10 * time.Second,
+			Retries:  3,
+		},
+	}
 }
