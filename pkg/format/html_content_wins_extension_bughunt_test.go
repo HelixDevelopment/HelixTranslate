@@ -19,10 +19,14 @@ import (
 // structure flattened, tags emitted as literal prose) — the same silent
 // data-loss class.
 //
-// Polarity switch: RED_MODE=1 reproduces the defect on the pre-fix behaviour
-// expectation (documents what was broken); the standing assertions (RED_MODE
-// unset / "0") assert the FIXED behaviour — HTML content wins over a generic
-// extension, while genuine plain text NEVER gets reclassified.
+// Polarity switch: RED_MODE=1 DOCUMENTS (logs) the pre-fix behaviour expectation
+// — on the FIXED tree it cannot re-create the defect, so it only records what was
+// broken (the .txt-extension HTML cases used to come back TXT); a true RED
+// reproduction would require the pre-fix artifact (§11.4.115). Even under
+// RED_MODE the negative (plain-prose) cases are still asserted to stay TXT (the
+// anchored-guard invariant holds in both modes). The standing assertions
+// (RED_MODE unset / "0") assert the FIXED behaviour — HTML content wins over a
+// generic extension, while genuine plain text NEVER gets reclassified.
 
 func writeProbeFile(t *testing.T, name string, data []byte) string {
 	t.Helper()
@@ -89,8 +93,14 @@ func TestDetectFile_HTMLContentWinsGenericExtension(t *testing.T) {
 			t.Fatalf("%s: unexpected error: %v", c.name, err)
 		}
 		if red {
-			// Pre-fix reproduction: the .txt-extension HTML cases came back TXT.
+			// Pre-fix expectation log (no live reproduction on the fixed tree).
 			t.Logf("RED %-22s -> %s (want %s)", c.name, got, c.want)
+			// Real assertion held in BOTH modes: the anchored guard must NEVER
+			// reclassify genuine plain prose as HTML — a substring-sniff regression
+			// (the failure mode the anchoring prevents) would surface HERE.
+			if c.want == FormatTXT && got != FormatTXT {
+				t.Errorf("%s: plain prose reclassified as %s under RED — anchored HTML guard regressed (substring sniff)", c.name, got)
+			}
 			continue
 		}
 		if got != c.want {

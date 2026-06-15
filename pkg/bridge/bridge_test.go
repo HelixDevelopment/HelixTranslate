@@ -120,9 +120,11 @@ func TestBridge_FallbackChain_ScoreDescending(t *testing.T) {
 }
 
 // TestBridge_NumericProviderID_HTTPPath proves a verified model carrying a
-// NUMERIC ProviderID (the HTTP server path emits fmt.Sprintf("%d", ...))
-// materializes through the bridge — the §3.3 part-1 load-bearing bug, exercised
-// end-to-end at the bridge layer (not just the resolver unit).
+// NUMERIC ProviderID (the HTTP server path emits fmt.Sprintf("%d", ...)) is
+// RESOLVED through the bridge's ListVerified — the numeric id maps to a non-empty
+// FactoryName + the correct provider BaseURL (the §3.3 part-1 load-bearing bug).
+// This exercises provider RESOLUTION at the bridge layer (FactoryName/BaseURL),
+// not end-to-end translate dispatch.
 func TestBridge_NumericProviderID_HTTPPath(t *testing.T) {
 	// envProviderSpecs[1] is deepseek per the canonical table.
 	b := newTestBridge(func(k string) string {
@@ -440,6 +442,29 @@ func TestBridge_ProviderDiverseTranslators_OnePerProviderRankedByScore(t *testin
 		if tr == nil {
 			t.Fatalf("translators[%d] is nil", i)
 		}
+	}
+
+	// Provider identity + order (mirrors the ProviderDiverseClients sibling):
+	// each translator's GetName() reports its provider id, ordered score-desc by
+	// each provider's strongest model — openai(0.93) → deepseek(0.80) → groq(0.70).
+	// A regression that drops the score-descending order trips this.
+	wantProviders := []string{"openai", "deepseek", "groq"}
+	for i, want := range wantProviders {
+		if got := trs[i].GetName(); got != want {
+			t.Errorf("translators[%d].GetName() = %q, want %q (provider-diverse, score-desc)", i, got, want)
+		}
+	}
+
+	// Dedup invariant: no duplicate provider in the translator ensemble (a
+	// regression removing the per-provider dedup returns the weaker same-provider
+	// models too, surfacing a duplicate provider here → FAIL).
+	seen := map[string]bool{}
+	for _, tr := range trs {
+		p := tr.GetName()
+		if seen[p] {
+			t.Errorf("duplicate provider %q in provider-diverse translator set — diversity violated", p)
+		}
+		seen[p] = true
 	}
 }
 

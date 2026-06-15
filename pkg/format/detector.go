@@ -141,12 +141,18 @@ func (d *Detector) isHTMLContent(data []byte) bool {
 	if bytes.HasPrefix(lower, []byte("<html>")) || bytes.HasPrefix(lower, []byte("<html ")) {
 		return true
 	}
-	// XML prolog (XHTML): "<?xml ...?>" optionally followed by whitespace/comments
-	// and then an <html element. We require the <html element to appear and not be
-	// a FictionBook (that case is handled by isFB2Content before this guard runs).
+	// XML prolog (XHTML): "<?xml ...?>" whose declaration is IMMEDIATELY followed
+	// (modulo whitespace) by an <html element. We anchor the <html to the position
+	// right after the prolog's "?>" close rather than accepting <html anywhere in
+	// the buffer — otherwise a plain-text/XML document that opens with <?xml and
+	// merely MENTIONS "<html" mid-prose would false-match as HTML. (FictionBook is
+	// already handled by isFB2Content before this guard runs.)
 	if bytes.HasPrefix(lower, []byte("<?xml")) {
-		if bytes.Contains(lower, []byte("<html")) {
-			return true
+		if end := bytes.Index(lower, []byte("?>")); end >= 0 {
+			rest := bytes.TrimLeft(lower[end+2:], " \t\r\n")
+			if bytes.HasPrefix(rest, []byte("<html>")) || bytes.HasPrefix(rest, []byte("<html ")) {
+				return true
+			}
 		}
 	}
 	return false

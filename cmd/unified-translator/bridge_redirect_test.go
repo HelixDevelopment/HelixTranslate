@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"digital.vasic.translator/pkg/bridge"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/logger"
 )
@@ -26,12 +27,22 @@ func testSession(id string) *TranslationSession {
 //
 // This is the load-bearing R-1 contract for unified-translator: the legacy
 // default branch was redirected to bridgeTranslator (bridge.BestTranslator), but
-// the mock test/demo seam must keep working offline. If a future change routed
-// "mock" through the bridge, this test FAILs (the bridge would hard-error with no
-// keys, or attempt a live verification pass), proving the seam guard is real
-// (§11.4.115 polarity — the failure mode it catches is "mock collapsed into the
-// bridge path").
+// the mock test/demo seam must keep working offline. The assertion is made
+// env-independent by installing a sentinel bridgeOpener that t.Fatal's if it is
+// ever called: a correct mock path never opens the bridge, so the sentinel stays
+// untouched; a regression that routed "mock" through the bridge would invoke the
+// opener and fail loudly — a POSITIVE assertion that does NOT depend on the host
+// carrying (or lacking) provider keys / network (§11.4.3).
 func TestExecuteAPITranslation_MockSeamBypassesBridge(t *testing.T) {
+	// Sentinel opener: the mock path MUST NOT reach the bridge. If it does, this
+	// fails regardless of the host's key/network state.
+	orig := bridgeOpener
+	t.Cleanup(func() { bridgeOpener = orig })
+	bridgeOpener = func(context.Context) (*bridge.Bridge, error) {
+		t.Fatal("mock-provider path opened the LLMsVerifier bridge — the mock seam must bypass the bridge entirely (§11.4.69/R-1)")
+		return nil, nil
+	}
+
 	cfg := &UnifiedConfig{
 		SourceLang: "en",
 		TargetLang: "es",

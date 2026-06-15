@@ -364,13 +364,22 @@ func executeAPITranslation(ctx context.Context, config *UnifiedConfig, session *
 	return result, nil
 }
 
+// bridgeOpener opens the underlying LLMsVerifier bridge. It is a package-level
+// seam so tests can install a sentinel opener (e.g. a t.Fatal opener) to assert
+// — env-independently — that a code path NEVER opens the bridge (the mock seam),
+// without depending on the host's provider-key / network state (§11.4.3). The
+// default opens the real bridge with default options.
+var bridgeOpener = func(ctx context.Context) (*bridge.Bridge, error) {
+	return bridge.Open(ctx, bridge.Options{})
+}
+
 // bridgeTranslator opens the LLMsVerifier bridge and returns the strongest
 // verified translator for the run's language pair. It is the R-1/R2 default
 // source for unified-translator's API path: no local runtime, honest hard error
 // when no provider API key + no verified model is available (§11.4.69). The
 // in-process bridge is bounded by config.VerifyTimeout-equivalent defaults.
 func bridgeTranslator(ctx context.Context, config *UnifiedConfig) (translator.Translator, error) {
-	b, err := bridge.Open(ctx, bridge.Options{})
+	b, err := bridgeOpener(ctx)
 	if err != nil {
 		return nil, err
 	}
