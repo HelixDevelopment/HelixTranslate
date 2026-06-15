@@ -107,6 +107,17 @@ for sub in ./docs ./scripts; do
     find "$sub" $prune_args -type f -name '*.md' -print >>"$TMP_LIST" 2>/dev/null || true
 done
 
+# Per-file exclusion: raw DATA sources that are NOT published documents and so
+# do NOT get .html/.pdf exports (§11.4.65 governs documents, not data sources).
+# docs/features/.feature_inventory_raw.md is a dotfile-prefixed raw inventory
+# DATA source (self-described "DATA-GATHERING raw material to seed Status.md",
+# per §11.4.153) — Status.md / Status_Summary.md ARE the published feature docs
+# and DO get exports; the raw dotfile feeding them does not. MUST stay in sync
+# with the identical exclusion in scripts/pre_build_verification.sh
+# gate_doc_sibling_sync (§11.4.65 — gate and generator agree on scope).
+grep -vxF './docs/features/.feature_inventory_raw.md' "$TMP_LIST" >"$TMP_LIST.f" \
+    && mv "$TMP_LIST.f" "$TMP_LIST"
+
 # Sort + de-dup.
 sort -u "$TMP_LIST" -o "$TMP_LIST"
 

@@ -505,8 +505,20 @@ gate_doc_sibling_sync() {
 
   # In-scope tracked .md: root-level *.md OR under docs/ OR under scripts/,
   # minus the excluded trees.
+  # Per-file exclusion: raw DATA sources that are NOT published documents and so
+  # do NOT get .html/.pdf exports (§11.4.65 governs documents, not data sources).
+  # docs/features/.feature_inventory_raw.md is a dotfile-prefixed raw inventory
+  # DATA source (self-described "DATA-GATHERING raw material to seed Status.md",
+  # per §11.4.153) — Status.md / Status_Summary.md ARE the published feature docs
+  # and DO get exports; the raw dotfile feeding them does not. MUST stay in sync
+  # with the identical exclusion in
+  # scripts/testing/sync_all_markdown_exports.sh (gate and generator agree on
+  # scope, §11.4.65).
+  _excl_files='^docs/features/\.feature_inventory_raw\.md$'
+
   _mds=$(git ls-files -- '*.md' 2>/dev/null \
            | grep -Ev "$_excl" \
+           | grep -Ev "$_excl_files" \
            | grep -E '^[^/]+\.md$|^docs/|^scripts/' || true)
 
   _bad=""

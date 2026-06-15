@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>bridge_phase2_p1_r1_review_20260615</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">bridge_phase2_p1_r1_review_20260615</h1>
+</header>
+<h1
+id="independent-code-review--bridge-phase-2-no-local-runtime-redirect-p-1--r-1">Independent
+Code Review — Bridge Phase-2 No-Local-Runtime Redirect (P-1 → R-1)</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-15T21:01:10Z <strong>Reviewer:</strong> independent code-review
+agent (structurally separate from the author, §11.4.142 / §11.4.125)
+<strong>Authority:</strong> §11.4.142 (every change reviewed), §11.4.125
+(review gate before build), §11.4.134 (iterate-until-GO), §11.4.69 (no
+silent fallback) <strong>Scope:</strong> parent repo
+<code>/Volumes/T7/Projects/helix_translate</code>, commits
+<code>e5307ce..35cb12c</code> reviewed as one logical change.</p>
+<hr />
+<h2 id="verdict-go-no-blocking-findings">Verdict: <strong>GO</strong>
+(no BLOCKING findings)</h2>
+<p>The no-local-runtime redirect is correct, the R2 no-silent-fallback
+mandate holds on every redirected path, the new tests genuinely catch
+mis-wiring, the nil-default seams are behaviour-preserving, the
+deferrals (R-3/R-4) are correctly scoped, and the 3 reported failures
+are git-proven pre-existing and unrelated. <strong>R-2/R-3 removals may
+proceed.</strong> Three NIT-level hardening items are listed (none gate
+the build).</p>
+<p>Build green at HEAD (<code>go build ./cmd/... ./pkg/...</code> →
+BUILD_OK). <code>go vet</code> clean on all touched packages. All
+redirect test suites pass at HEAD:</p>
+<pre><code>ok  pkg/bridge        ok  pkg/coordination   ok  pkg/preparation   ok  pkg/verification
+ok  pkg/api (Bridge)  ok  pkg/grpc (Bridge)  ok  cmd/unified-translator (Bridge)</code></pre>
+<hr />
+<h2 id="commits-reviewed">Commits reviewed</h2>
+<ul>
+<li>P-1 <code>e5307ce</code> — <code>bridge.BestClient</code> adapter +
+<code>Invoke</code> extract-method refactor</li>
+<li>P-1.5 <code>86816a4</code> — <code>ProviderDiverse*</code> API +
+injectable <code>EnsembleTranslatorFactory</code> seams</li>
+<li>R-1 <code>9f6be23</code> / <code>0713bec</code> /
+<code>3cd4a77</code> / <code>0a3b607</code> / <code>7f843fc</code> /
+<code>15cab94</code> / <code>35cb12c</code> — adapters + ~10 single-site
++ 3 ensemble-site redirects + R2 honest no-key error</li>
+</ul>
+<hr />
+<h2 id="dimension-1--correctness--go">Dimension 1 — Correctness —
+<strong>GO</strong></h2>
+<ul>
+<li><strong>P-1 <code>Invoke</code> refactor is behaviour-preserving
+(FACT).</strong> <code>git show e5307ce</code> shows a pure
+extract-method: <code>resolveBest</code> (bridge.go:382) is the verbatim
+prior inline selection→resolution→marker logic;
+<code>realClientBuild</code> (bridge.go:313) is the verbatim prior
+<code>NewOpenAIClient</code> call. <code>Invoke</code> (bridge.go:425)
+and the new <code>BestClient</code> (bridge.go:413) both route through
+the single <code>clientBuild</code> construction path — exactly ONE
+construction path, as documented.</li>
+<li><strong>Bridge opened once per binary, not per-request.</strong> api
+<code>Handler.bridgeFor</code> (handler.go:~790) and grpc
+<code>CoreTranslatorImpl.bridgeFor</code> (core_translator.go) both
+lazy-open via <code>sync.Once</code> (<code>bridgeOnce.Do</code>)
+caching <code>bridge</code>+<code>bridgeErr</code>;
+cli/server/markdown/preparation mains <code>bridge.Open(...)</code> once
+in <code>main</code>. No per-request leak.</li>
+<li><strong><code>sync.Once</code> lazy handlers are
+thread-safe.</strong> <code>bridge</code>/<code>bridgeErr</code> are
+written only inside <code>Once.Do</code> and read only after
+<code>Do</code> returns — the standard safe <code>sync.Once</code> memo
+pattern. No data race.</li>
+<li><strong>Provider-diverse adapter genuinely gives one-per-provider,
+no collapse (FACT).</strong> <code>ProviderDiverseModels</code>
+(bridge.go:455-480) dedups via a <code>seen map[providerID]bool</code>
+over the score-descending <code>ListVerified</code>, keeping
+first-per-provider (= strongest per provider).
+<code>FallbackOrder</code> re-numbered 1..N.
+<code>ProviderDiverseClients</code>/<code>Translators</code> build
+through the same whitelist-immune <code>clientBuild</code> seam.
+Mutation-proven by
+<code>TestBridge_ProviderDiverseClients_OnePerProviderRankedByScore</code>
+(RED FAILs <code>got 3, want 5</code>).</li>
+<li><strong><code>clientTranslator.Translate</code> threads
+<code>contextStr</code> verbatim</strong> (bridge.go:554-555) — no
+argument loss. Sole ensemble consumer is
+<code>polisher.go:563 translator.Translate(ctx, prompt, location)</code>,
+matching the thin surface (FACT).</li>
+</ul>
+<h2 id="dimension-2--r2-no-silent-fallback-core-mandate--go">Dimension 2
+— R2 no-silent-fallback (core mandate) — <strong>GO</strong></h2>
+<p>Every redirected default path returns an honest hard error on no-key
+and CANNOT reach a local runtime:</p>
+<ul>
+<li><strong><code>bridge.Open</code> is the choke point</strong>
+(bridge.go:98). No <code>*_API_KEY</code> →
+<code>bootstrapInProcess</code> returns the honest error
+<code>"no provider API keys set ... (local llama.cpp fallback is not permitted)"</code>
+(bridge.go:160-164). No code path constructs llama.cpp/Ollama from
+<code>Open</code>.</li>
+<li><strong>api</strong> <code>createTranslator</code> (handler.go:790)
+routes everything except <code>provider=="distributed"</code> through
+<code>bridgeFor()</code>; the old
+<code>llm.NewLLMTranslator(config)</code> is deleted.
+<code>bridgeErr</code> is cached and surfaced, never masked.</li>
+<li><strong>grpc</strong> <code>executeTranslation</code> switch
+(core_translator.go:255) — <code>ssh</code>→SSH (R-3 deferred),
+<code>llamacpp</code>→explicit operator-chosen local (R-3 deferred),
+<strong><code>default</code>→<code>executeAPITranslation</code>→bridge</strong>.
+The deleted <code>llm.NewLLMTranslator</code> is replaced by
+<code>ct.bridgeFor()</code>. Local llama.cpp reachable ONLY by explicit
+<code>ProviderConfig.Type=="llamacpp"</code> (operator choice, not
+silent fallback).</li>
+<li><strong>cli</strong> (main.go) — bridge opened once; multi-LLM via
+<code>NewMultiLLMTranslatorWrapperWithFactory(..., b.EnsembleFactory(task))</code>,
+single fallback via <code>b.BestTranslatorFunc(task)(ctx)</code>; no-key
+→
+<code>return fmt.Errorf("LLMsVerifier bridge unavailable (no local-runtime fallback): %w", ...)</code>.</li>
+<li><strong>server</strong> (main.go) —
+<code>NewMultiLLMCoordinatorWithFactory(..., b.EnsembleFactory(...))</code>;
+no-key →
+<code>log.Fatalf("LLMsVerifier bridge unavailable (no local-runtime fallback)")</code>.</li>
+<li><strong>markdown-translator</strong> (main.go) — the old
+<code>createTranslator</code> <code>case "llamacpp"</code> no-key local
+arm is DELETED; replaced by
+<code>createTranslator(ctx, b, task)</code>→<code>b.BestTranslatorFunc</code>.
+No-key → <code>log.Fatalf</code>.</li>
+<li><strong>preparation-translator</strong> (main.go) — base translator
+now <code>b.BestTranslator(ctx, task)</code> instead of hardcoded
+<code>deepseek</code> <code>NewLLMTranslator</code>; no-key →
+fatal.</li>
+<li><strong>unified-translator</strong> (main.go:488) —
+<code>executeAPITranslation</code> default branch →
+<code>bridgeTranslator</code>→<code>bridge.Open</code>+<code>BestTranslator</code>;
+<code>mock</code> is an explicit offline seam,
+<code>ssh</code>/<code>llamacpp</code> arms untouched (R-3/R-4). No-key
+→
+<code>"bridge translation unavailable (no local-runtime fallback)"</code>.</li>
+</ul>
+<p>The remaining <code>llamacpp</code>/<code>Ollama</code> constructors
+in the tree (<code>cmd/unified-translator:307/448</code>,
+<code>pkg/grpc/core_translator.go:259</code>,
+<code>pkg/translator/llm/llamacpp*.go</code>,
+<code>cmd/translate-ssh</code>) are all reachable ONLY via an EXPLICIT
+operator provider selection (R-3/R-4 deferred scope) — never from a
+redirected default. <strong>No silent-fallback path found.</strong></p>
+<h2 id="dimension-3--test-genuineness-11--1141--go">Dimension 3 — Test
+genuineness (§1.1 / §11.4.1) — <strong>GO</strong></h2>
+<p>Independent adversarial sub-review (full transcript on file) examined
+all redirect tests, ran each offline, and verified all six
+<code>RED_MODE</code> polarities genuinely FAIL on the broken branch.
+Findings:</p>
+<ul>
+<li><strong><code>pkg/bridge/bridge_test.go</code> — GENUINE.</strong>
+<code>invokeDispatch</code>/<code>clientBuild</code> are real package
+vars on the single production routing path; guards independently
+recompute the oracle via <code>BestModel</code> and assert captured
+<code>(providerMarker, modelID)</code> equals it.
+<code>TestBridge_Invoke_RoutesToBestModel</code> RED proven FAIL
+(<code>routed to "deepseek-chat", want "gpt-4o"</code>). The
+<code>BestClient</code> provider-name pair deliberately uses a
+<strong>deepseek</strong> strongest model so the bare
+<code>*OpenAIClient</code> <code>"openai"</code> would FAIL —
+load-bearing against the exact hardcoded-openai defect.
+<code>TestOpen_NoKeys_HonestHardError</code> deterministic via empty
+<code>Getenv</code>, asserts the R2 error text + that any "llama"
+mention is framed "not permitted".</li>
+<li><strong><code>pkg/api</code> / <code>pkg/grpc</code>
+<code>bridge_redirect_test.go</code> — GENUINE.</strong> Inject a fake
+<code>bridgeTranslatorFactory</code>, assert the fake's
+<code>BRIDGE:</code>/<code>GetName()=="bridge-verified"</code> output is
+actually returned (not the old <code>NewLLMTranslator</code> path) AND
+lang pair threaded. No-key tests run the REAL <code>bridge.Open</code>
+with empty <code>Getenv</code> → assert
+<code>"no provider API keys"</code>. Distributed-arm test installs a
+factory that <code>t.Fatal</code>s if reached.</li>
+<li><strong><code>cmd/unified-translator/bridge_redirect_test.go</code>
+— GENUINE.</strong> The mock-seam IS load-bearing: removing
+<code>case "mock"</code> drops it to the bridge default → real
+<code>os.Getenv</code> → mis-route FAILs the <code>err==nil</code>
+assertion.</li>
+<li><strong>coordination/preparation/verification
+<code>*_factory_test.go</code> — GENUINE.</strong> RED polarity (factory
+not injected / set on a discarded struct) proven FAIL on all three;
+GREEN asserts the factory is reached with the run's ctx (sentinel) and
+yields the exact injected provider instances.</li>
+</ul>
+<p>No tautology that would pass on a wrong route was found.</p>
+<h2
+id="dimension-4--nil-default-seam-behaviour-preservation--go">Dimension
+4 — nil-default seam behaviour-preservation — <strong>GO</strong></h2>
+<ul>
+<li><code>MultiLLMCoordinator.translatorFactory</code> is consumed at
+exactly ONE branch — <code>initializeLLMInstances</code> line 141
+<code>if c.translatorFactory != nil { initializeFromFactory(); return }</code>.
+When nil (un-redirected callers, <code>config.TranslatorFactory</code>
+zero value), control falls through to the unchanged
+<code>discoverProviders + NewLLMTranslator loop</code>. Docstring claim
+"byte-for-byte identical to before" is FACT-accurate.</li>
+<li>Original <code>NewMultiLLMCoordinator</code> (line 97) retained with
+unchanged signature; new <code>NewMultiLLMCoordinatorWithFactory</code>
+(line 129) is additive. The same additive nil-default pattern applies to
+preparation/verification per the P-1.5 + R-1c diffs and their
+<code>_NilFactoryUnchanged</code> companion tests.</li>
+</ul>
+<h2 id="dimension-5--regression-blast-radius--go">Dimension 5 —
+regression blast-radius — <strong>GO</strong></h2>
+<ul>
+<li>Changed signatures (<code>createTranslator</code>,
+<code>executeAPITranslation</code>, the <code>*WithFactory</code>
+constructors) verified: callers compile (build green) and the original
+no-factory constructors are preserved, so un-redirected callers are
+unbroken.</li>
+<li><strong>The 3 reported failures are git-proven PRE-EXISTING and
+unrelated</strong> (independent sub-review, full transcript on file).
+<code>git diff --stat 49d94f2..35cb12c</code> is EMPTY for
+<code>internal/verifier/</code>, <code>test/distributed/</code>,
+<code>pkg/distributed/</code>, and the SSH test — the redirect touched
+none of them, so it definitionally cannot have caused them.
+<ul>
+<li><strong><code>TestAffirmativeResponseIsHardGate</code></strong> —
+<code>internal/verifier/pipeline_affirmative_gate_test.go</code>. The
+default suite PASSES (<code>ok ... 0.194s</code>); it FAILs ONLY under
+explicit <code>RED_MODE=1</code> (by-design §11.4.115 reproduction). The
+GREEN-default polarity was set by <code>97a8afd</code>, an ancestor of
+baseline <code>49d94f2</code>. <strong>CORRECTION to author's
+framing:</strong> it is NOT "in default-RED mode" — default is
+GREEN/PASS. Not a regression; just imprecise wording in the
+handoff.</li>
+<li><strong><code>test/distributed</code> race</strong> —
+<code>manager_test.go:587-588</code> unguarded
+<code>worker.ActiveJobs++</code> in the test's own mock; byte-identical
+at baseline; surfaces only under <code>-race</code>.</li>
+<li><strong><code>test/integration</code> SSH</strong> —
+<code>TestSSHTranslationIntegration</code> PASSES at HEAD via an
+in-process mock SSH server; only the e2e variants topology-SKIP. Not a
+failure at HEAD.</li>
+</ul></li>
+</ul>
+<h2 id="dimension-6--deferred-r-1d-correctness--go">Dimension 6 —
+deferred R-1d correctness — <strong>GO</strong></h2>
+<ul>
+<li><code>modelsbridge.New</code> — <strong>zero callers</strong> in
+<code>pkg/</code>/<code>cmd/</code>/<code>internal/</code> (grep empty).
+No live consumer left broken; deferring to R-4 is correct.</li>
+<li>markdown <code>LLMProvider</code> (<code>llm.LLMClient</code>
+consumer) — the only non-test construction site is
+<code>cmd/translate-ssh/main.go:231</code> which sets it to
+<code>nil</code> ("Will be created remotely"). Non-nil only in the
+SSH-worker path (R-3/R-4 deferred). No consumer silently broken;
+deferral correct.</li>
+</ul>
+<h2 id="dimension-7--safety--go">Dimension 7 — safety —
+<strong>GO</strong></h2>
+<ul>
+<li>No host/data regression: changes are in-process translator wiring
+only; no destructive ops, no power-state/host-session calls.</li>
+<li>No secret leakage: <code>ModelInfo</code> is key-free (§11.4.10);
+keys read in-memory via
+<code>ProviderResolver</code>/<code>SetKeyResolver</code> and never
+returned/logged. <code>bridge_test.go</code> no-key tests use an empty
+<code>Getenv</code> override (no real keys touched).</li>
+<li>Build green at HEAD; vet clean. History is sequential additive
+commits (P-1 prerequisite → P-1.5 seams → R-1c threading → per-binary
+redirects), each replacing a <code>NewLLMTranslator</code> site with a
+bridge call while keeping the original constructors — consistent with
+green-at-each-commit.</li>
+</ul>
+<hr />
+<h2 id="nit-level-hardening-non-blocking--do-not-gate-r-2r-3">NIT-level
+hardening (non-blocking — do NOT gate R-2/R-3)</h2>
+<ol type="1">
+<li><strong><code>bridge_test.go:436</code>
+<code>TestBridge_ProviderDiverseTranslators...</code></strong> asserts
+only <code>len==3</code> + non-nil; add provider-identity + order
+assertions (or a <code>RED_MODE</code> polarity) to match its
+<code>...Clients</code> sibling. Currently covered transitively via the
+shared <code>ProviderDiverseModels</code> path, so not blocking.</li>
+<li><strong><code>cmd/unified-translator/bridge_redirect_test.go:34</code></strong>
+— make the mock-seam guard <em>positively</em> assert the bridge was not
+reached (inject a <code>bridgeOpener</code> that <code>t.Fatal</code>s,
+mirroring api's distributed-arm test), and soften the env-dependent
+"live network attempt" docstring.</li>
+<li><strong>Docstring trims</strong> —
+<code>TestBridge_NumericProviderID_HTTPPath</code> exercises resolution,
+not dispatch ("end-to-end at the bridge layer" overstates); and the
+handoff note for <code>TestAffirmativeResponseIsHardGate</code> should
+be corrected from "default-RED" to "GREEN-default; RED only under
+RED_MODE=1".</li>
+</ol>
+<hr />
+<h2 id="114134-iterate-until-go">§11.4.134 iterate-until-GO</h2>
+<p>No BLOCKING findings → the review loop terminates at a clean
+<strong>GO</strong> this pass. The 3 NITs are tracked here for the
+author but do not re-arm the loop (they introduce no defect and no
+false-result/bluff capability). The author may address them
+opportunistically; they are not preconditions for R-2/R-3 removals.</p>
+</body>
+</html>
