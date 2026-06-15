@@ -1,17 +1,27 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 69
-**Last modified:** 2026-06-15T14:48:00Z
+**Revision:** 70
+**Last modified:** 2026-06-15T15:00:00Z
 
-## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 28 parallel subagents over 10 waves, all verified+pushed)
-After the green validation run, dispatched 10 successive worktree-isolated subagent
-waves (3-wide, last two throttled to 2-wide for FD safety) sweeping essentially the
-ENTIRE main-module Go surface. **29 genuine, conductor-verified, independently
-mutation-proven fixes (campaign 63→92) + 1 teeth-proven regression guard; honest clean
-non-findings + documented honest gaps on the rest (§11.4.118/§11.4.6). HEAD `a7cdce4`;
-build/vet/test green after the git-pointer repair (see ENV FORENSIC below). NOTE:
-recurring host FD pressure (`ENFILE`) under 3 concurrent -race agents — waves 9–10
-throttled to 2-wide (§12).**
+## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 30 parallel subagents over 11 waves, all verified+pushed)
+After the green validation run, dispatched 11 worktree-isolated subagent waves (3-wide,
+later throttled to 2-wide for FD safety) sweeping the ENTIRE main-module Go surface +
+starting the owned submodules (§11.4.28). **32 genuine, conductor-verified, independently
+mutation-proven fixes (campaign 63→95) + 1 teeth-proven regression guard; honest clean
+non-findings + documented honest gaps (§11.4.118/§11.4.6). Parent HEAD `5778aec`,
+build/vet/test green. NOTE: recurring host FD pressure (`ENFILE`) under 3 concurrent
+-race agents — waves 9+ throttled to 2-wide (§12).**
+
+WAVE 11 — OWNED SUBMODULES (§11.4.28 equal-codebase; init-only, no rm/symlink; committed
+into each submodule's OWN repo FF-only §11.4.113 + gitlink synced; 2/2 found real bugs):
+- **doc_processor** `de1d023` (gitlink `4057d31`): fenced-code-block `#` line parsed as a heading → phantom section + content truncation. Fix = codeFenceRanges + filterHeadingsOutsideCodeFences. RED+mutation-proven; 10 pkgs -race green; pushed FF to DocProcessor.
+- **llm_orchestrator** `a446a3d` (gitlink `5778aec`): PipeTransport.Receive lost/mis-ordered a message on ctx-cancel (throwaway goroutine read+discarded) + pt.closed race. Fix = persistent in-order reader + sticky termErr. RED(RED_MODE)+mutation-proven; 9 pkgs -race green. §11.4.113 INTEGRATED onto latest master (rebased over a parallel-session opencode WaitDelay fix, disjoint, both coexist) then FF-pushed all LLMOrchestrator remotes.
+
+SECURITY-REVIEW REMEDIATION (`f6815b4`): automated review flagged the wave-10
+deployment fix — generate-plan emitted hardcoded JWT secrets (main-secret /
+worker-<id>-secret = known signing keys → auth bypass). Fixed: generateJWTSecret() via
+crypto/rand for Main + workers (placeholder on rand failure). RED+mutation-proven; 2
+pre-existing tests §11.4.120-reconciled to the secure behavior.
 
 MAIN-MODULE SURFACE NOW FULLY SWEPT (10 waves): storage, ebook(all formats incl FB2),
 distributed, verification, preparation, batch, security, events, websocket, coordination,
@@ -114,7 +124,7 @@ Clean non-findings (audited, no RED reproducible): SQLite concurrent-writer cont
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **92 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 10 waves = 29 fixes + 1 regression guard, newest `78c7b45`/`a7cdce4`, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak + deployment Docker-health PASS-bluff + server TLS-key leak + api-server backend-error PASS-bluffs). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
+- **95 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + owned submodules (full table below; latest 11 waves = 32 fixes + 1 regression guard, newest `f6815b4` JWT-secret security + submodules `de1d023`/`a446a3d`, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak + deployment Docker-health + server TLS-key leak + api-server backend-error PASS-bluffs + deployment hardcoded-JWT-secret). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
