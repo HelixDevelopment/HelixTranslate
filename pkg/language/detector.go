@@ -235,7 +235,9 @@ func (d *Detector) detectCyrillicLanguage(text string) Language {
 			serbianChars++
 		case 'є', 'ї', 'ґ':
 			ukrainianChars++
-		case 'ъ', 'щ', 'й': // 'й' is more common in Bulgarian
+		case 'ъ', 'щ': // 'ъ' is highly characteristic of Bulgarian; 'й' removed —
+			// it is one of the most common letters in Russian, not Bulgarian-specific,
+			// and a single 'й' wrongly flipped plain Russian text to Bulgarian.
 			bulgarianChars++
 		}
 	}

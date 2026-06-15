@@ -295,6 +295,17 @@ func (pt *ProgressTracker) GetProgress() map[string]interface{} {
 	pt.mu.RLock()
 	defer pt.mu.RUnlock()
 
+	// Deep-copy Details so the returned snapshot does NOT alias the live internal
+	// map. Returning pt.Details directly handed callers a reference they read
+	// AFTER the lock was released, racing concurrent locked writers
+	// (tracker.Details[...] = ... in ExecuteCommandWithProgress /
+	// MonitorLongRunningCommand) — a data race / "concurrent map read and map
+	// write" panic. GetCopy already deep-copies for this exact reason.
+	detailsCopy := make(map[string]interface{}, len(pt.Details))
+	for k, v := range pt.Details {
+		detailsCopy[k] = v
+	}
+
 	return map[string]interface{}{
 		"operation":   pt.Operation,
 		"total":       pt.Total,
@@ -303,7 +314,7 @@ func (pt *ProgressTracker) GetProgress() map[string]interface{} {
 		"start_time":  pt.StartTime,
 		"last_update": pt.LastUpdate,
 		"status":      pt.Status,
-		"details":     pt.Details,
+		"details":     detailsCopy,
 		"elapsed":     time.Since(pt.StartTime).String(),
 		"percentage":  pt.getPercentage(),
 	}

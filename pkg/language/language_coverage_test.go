@@ -82,7 +82,7 @@ func TestLanguageDetector_CharacterSetDetection(t *testing.T) {
 			text     string
 			expected Language
 		}{
-			{"Русский язык", Bulgarian}, // Algorithm detects "й" as Bulgarian character
+			{"Русский язык", Russian}, // "Russian language" — unambiguously Russian (was wrongly Bulgarian via the 'й' bug)
 			{"Српски језик", Serbian},
 			{"Українська мова", Ukrainian},
 			{"Български език", Bulgarian},
@@ -142,7 +142,7 @@ func TestLanguageDetector_DistinguishingSimilarLanguages(t *testing.T) {
 			text     string
 			expected Language
 		}{
-			{"Российская Федерация", Bulgarian}, // Contains "й" which is detected as Bulgarian
+			{"Российская Федерация", Russian}, // "Russian Federation" — unambiguously Russian (was wrongly Bulgarian via the 'й' bug)
 			{"Република Србија", Russian},       // Falls back to Russian (no Serbian-specific characters)
 			{"Україна", Ukrainian},
 			{"Република България", Bulgarian},
@@ -262,7 +262,10 @@ func TestLanguageDetector_BoundaryConditions(t *testing.T) {
 
 		lang, err := detector.Detect(context.Background(), text)
 		assert.NoError(t, err)
-		assert.Equal(t, Bulgarian, lang) // Contains "й" detected as Bulgarian
+		// "Русский текст" ("Russian text") is unambiguously Russian. Previously this
+		// asserted Bulgarian because 'й' was wrongly treated as Bulgarian-specific;
+		// reconciled to the correct expectation after that bug was fixed.
+		assert.Equal(t, Russian, lang)
 	})
 
 	t.Run("More than 1000 characters", func(t *testing.T) {

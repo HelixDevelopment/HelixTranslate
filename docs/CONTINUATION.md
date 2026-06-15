@@ -1,9 +1,10 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 52
-**Last modified:** 2026-06-15T04:15:00Z
+**Revision:** 53
+**Last modified:** 2026-06-15T05:30:00Z
 
-<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 38 real bugs (20 submodule + 18 main) -->
+<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 41 real bugs (20 submodule + 21 main) -->
+<!-- OPERATOR AWAY until morning 2026-06-15: autonomous; priority = most-stable build; release tag DEFERRED (zero-risk, needs full §11.4.40). Full ./... sweep GREEN at c56363c. -->
 
 ### Session 2026-06-14v — cross-submodule bug-hunt campaign (§11.4.28 equal-codebase)
 
@@ -40,7 +41,12 @@ parallel session (64b7d08) so it was integrated, NOT double-fixed.** Host API ra
 | **MAIN** pkg/coordination | TranslateWithRetry never retried (gave up after 1 attempt/instance despite maxRetries) — silent loss of recoverable translation | 84d462e |
 | **MAIN** pkg/preparation | truncateContent byte-sliced mid-rune → invalid UTF-8 Cyrillic fed to the analysis LLM, degrading character/terminology JSON; rune-boundary backup | ae33585 |
 | **MAIN** pkg/grpc | CoreTranslatorImpl GetStatus read job state lock-free while the pipeline mutated it — data race on every in-flight status poll (RPC); RLock + mutator locks | (wave 12) |
-| **MAIN** pkg/progress | items-only mode (totalChapters=0) never computed PercentComplete — dashboard bar stuck at 0% to completion; items-driven percent branch | (wave 12) |
+| **MAIN** pkg/progress | items-only mode (totalChapters=0) never computed PercentComplete — dashboard bar stuck at 0% to completion; items-driven percent branch | e4c96f6 |
+| **MAIN** pkg/language | detectCyrillicLanguage classified `'й'` as Bulgarian → plain Russian (Война и мир, Российская Федерация) detected as Bulgarian → WRONG target language → wrong translation; `'й'` removed + §11.4.120 reconcile of 3 tests | (wave 13) |
+| **MAIN** pkg/api | `GET /languages` advertised 29 languages the translate endpoints reject with HTTP 400 (cross-endpoint contract violation); now sourced from language.GetSupportedLanguages() | (wave 13) |
+| **MAIN** pkg/sshworker | ProgressTracker.GetProgress leaked the live Details map into the snapshot → concurrent map read+write race (event subscribers); deep-copy under RLock | (wave 13) |
+
+**Flagged not-hermetically-testable (honest §11.4.6, NOT fabricated):** pkg/sshworker UploadFile/DownloadFile/UploadData build unquoted shell commands (`mkdir -p %s`, `cat %s`, `> %s`) — a remote path with spaces/metacharacters breaks/injects; no executor seam to test hermetically (dials real *ssh.Client). Worth a command-runner-interface refactor → P-list. Also ExecuteCommand hardcodes ExitCode:1 (loses *ssh.ExitError fidelity) — same live-SSH-only constraint.
 
 **More clean non-findings (§11.4.6):** pkg/format + pkg/hardware (detection correct; 2 Windows-only leads UNCONFIRMED-flagged, not fabricated), pkg/report (snapshot+clamp+locks correct). Hunt has reached the well-hardened core — consecutive clean non-findings across format/hardware/report/translator/events/websocket/script signal §11.4.118 completeness for the rule-based + already-hardened packages.
 

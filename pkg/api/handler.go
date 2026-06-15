@@ -1729,53 +1729,21 @@ func (h *Handler) getEmbeddedDashboardHTML() string {
 
 // listLanguages returns list of supported languages
 func (h *Handler) listLanguages(c *gin.Context) {
-	languages := []map[string]interface{}{
-		{"code": "en", "name": "English", "native": "English"},
-		{"code": "es", "name": "Spanish", "native": "Español"},
-		{"code": "fr", "name": "French", "native": "Français"},
-		{"code": "de", "name": "German", "native": "Deutsch"},
-		{"code": "it", "name": "Italian", "native": "Italiano"},
-		{"code": "pt", "name": "Portuguese", "native": "Português"},
-		{"code": "ru", "name": "Russian", "native": "Русский"},
-		{"code": "zh", "name": "Chinese", "native": "中文"},
-		{"code": "ja", "name": "Japanese", "native": "日本語"},
-		{"code": "ko", "name": "Korean", "native": "한국어"},
-		{"code": "ar", "name": "Arabic", "native": "العربية"},
-		{"code": "hi", "name": "Hindi", "native": "हिन्दी"},
-		{"code": "tr", "name": "Turkish", "native": "Türkçe"},
-		{"code": "pl", "name": "Polish", "native": "Polski"},
-		{"code": "nl", "name": "Dutch", "native": "Nederlands"},
-		{"code": "sv", "name": "Swedish", "native": "Svenska"},
-		{"code": "da", "name": "Danish", "native": "Dansk"},
-		{"code": "no", "name": "Norwegian", "native": "Norsk"},
-		{"code": "fi", "name": "Finnish", "native": "Suomi"},
-		{"code": "cs", "name": "Czech", "native": "Čeština"},
-		{"code": "hu", "name": "Hungarian", "native": "Magyar"},
-		{"code": "ro", "name": "Romanian", "native": "Română"},
-		{"code": "bg", "name": "Bulgarian", "native": "Български"},
-		{"code": "hr", "name": "Croatian", "native": "Hrvatski"},
-		{"code": "sr", "name": "Serbian", "native": "Српски"},
-		{"code": "sk", "name": "Slovak", "native": "Slovenčina"},
-		{"code": "sl", "name": "Slovenian", "native": "Slovenščina"},
-		{"code": "et", "name": "Estonian", "native": "Eesti"},
-		{"code": "lv", "name": "Latvian", "native": "Latviešu"},
-		{"code": "lt", "name": "Lithuanian", "native": "Lietuvių"},
-		{"code": "el", "name": "Greek", "native": "Ελληνικά"},
-		{"code": "he", "name": "Hebrew", "native": "עברית"},
-		{"code": "th", "name": "Thai", "native": "ไทย"},
-		{"code": "vi", "name": "Vietnamese", "native": "Tiếng Việt"},
-		{"code": "id", "name": "Indonesian", "native": "Bahasa Indonesia"},
-		{"code": "ms", "name": "Malay", "native": "Bahasa Melayu"},
-		{"code": "tl", "name": "Filipino", "native": "Filipino"},
-		{"code": "sw", "name": "Swahili", "native": "Kiswahili"},
-		{"code": "af", "name": "Afrikaans", "native": "Afrikaans"},
-		{"code": "is", "name": "Icelandic", "native": "Íslenska"},
-		{"code": "mt", "name": "Maltese", "native": "Malti"},
-		{"code": "cy", "name": "Welsh", "native": "Cymraeg"},
-		{"code": "ga", "name": "Irish", "native": "Gaeilge"},
-		{"code": "gd", "name": "Scottish Gaelic", "native": "Gàidhlig"},
-		{"code": "eu", "name": "Basque", "native": "Euskara"},
-		{"code": "ca", "name": "Catalan", "native": "Català"},
+	// Advertise ONLY the languages the API can actually translate. The list MUST
+	// be derived from language.GetSupportedLanguages() — the same source of truth
+	// language.ParseLanguage validates against — so that every code returned here
+	// is accepted by /translate, /translate/string, /translate/validate, etc.
+	// Hardcoding a wider catalogue (the prior behaviour) advertised 29 languages
+	// the parser rejects, so a client selecting an advertised language received a
+	// 400 "invalid target language" for a language the API claimed to support.
+	supported := language.GetSupportedLanguages()
+	languages := make([]map[string]interface{}, 0, len(supported))
+	for _, lang := range supported {
+		languages = append(languages, map[string]interface{}{
+			"code":   lang.Code,
+			"name":   lang.Name,
+			"native": lang.Native,
+		})
 	}
 
 	c.JSON(http.StatusOK, gin.H{
