@@ -175,8 +175,43 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 75 <strong>Last modified:</strong>
-2026-06-15T17:42:00Z</p>
+<p><strong>Revision:</strong> 76 <strong>Last modified:</strong>
+2026-06-15T18:05:00Z</p>
+<h2
+id="gap-closure-batch-2026-06-15-videocoverage-surfaced-gaps-all-reviewed-go-pushed">✅
+GAP-CLOSURE BATCH (2026-06-15, video/coverage-surfaced gaps — all
+reviewed GO + pushed)</h2>
+<p>Three gap-closures (each RED-first §11.4.115, mutation-verified,
+independent batch review VERDICT GO §11.4.142) landed + pushed: -
+<strong>Parent <code>d53e085</code></strong> (pushed all remotes): (1)
+<strong>cmd/cli title path-leak FIXED</strong> — TXT parser set
+<code>Metadata.Title=filepath</code> → translated → leaked into output
+EPUB <code>&lt;dc:title&gt;</code>; <code>sanitizeBookTitle()</code>
+added at the cmd/cli input→book seam (genuine titles pass through; real
+run <code>&lt;dc:title&gt;Tiha bašta&lt;/dc:title&gt;</code>, NO LEAK).
+(2) <strong>pkg/verification multipass engine WIRED</strong> (§11.4.124
+— git-history proved it was NEVER imported by any cmd/, born dormant
+<code>717bf18</code>, finished real code not scaffolding) via opt-in
+<code>-multipass</code> flag (default OFF, back-compat; guardrails:
+passes≥1, base preserved on error/empty); RED→GREEN httptest + real
+DeepSeek “Step 4: Multi-pass Polishing ✅”; §11.4.150 research
+<code>docs/research/20260615_video_surfaced_fixes/verification_multipass_wiring.md</code>.
+- <strong>llm_provider <code>724e284</code></strong> (pushed LLMProvider
+remote; parent gitlink bumped in <code>d53e085</code>): contract test
+for the interface-only <code>pkg/provider</code> (zero-coverage §11.4.28
+gap; mutation-proven; suite green).</p>
+<p><strong>NEXT (open gaps, tracked — none blocking the current
+scope):</strong> implement DOCX/PDF <strong>output</strong> writers in
+<code>pkg/ebook</code> (input-only today); implement
+<code>cmd/translator</code> local path (STUB “not yet implemented”); fix
+cmd/cli silent-fail-exit-0 when <code>-model</code> omitted (incidental
+finding); record a <code>-multipass</code> video for §11.4.153 ledger
+confirmation (currently real-run+RED→GREEN evidenced, no .mp4 yet);
+gofmt the 23 pre-existing flagged files in llm_provider; web-dashboard
+translation video is <strong>OPERATOR-BLOCKED</strong> (HelixQA-gated,
+separate session).
+<code>translate-ssh</code>/<code>ebook-translator</code> stay
+OPERATOR-BLOCKED (need remote SSH/llama.cpp host).</p>
 <h2
 id="feature-status-video-confirmation-sync-2026-06-15-25-real-videos-ledger-honest">🎬
 §11.4.153 FEATURE-STATUS VIDEO-CONFIRMATION SYNC (2026-06-15, ~25 real

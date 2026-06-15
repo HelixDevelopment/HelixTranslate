@@ -1,7 +1,14 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 75
-**Last modified:** 2026-06-15T17:42:00Z
+**Revision:** 76
+**Last modified:** 2026-06-15T18:05:00Z
+
+## ✅ GAP-CLOSURE BATCH (2026-06-15, video/coverage-surfaced gaps — all reviewed GO + pushed)
+Three gap-closures (each RED-first §11.4.115, mutation-verified, independent batch review VERDICT GO §11.4.142) landed + pushed:
+- **Parent `d53e085`** (pushed all remotes): (1) **cmd/cli title path-leak FIXED** — TXT parser set `Metadata.Title=filepath` → translated → leaked into output EPUB `<dc:title>`; `sanitizeBookTitle()` added at the cmd/cli input→book seam (genuine titles pass through; real run `<dc:title>Tiha bašta</dc:title>`, NO LEAK). (2) **pkg/verification multipass engine WIRED** (§11.4.124 — git-history proved it was NEVER imported by any cmd/, born dormant `717bf18`, finished real code not scaffolding) via opt-in `-multipass` flag (default OFF, back-compat; guardrails: passes≥1, base preserved on error/empty); RED→GREEN httptest + real DeepSeek "Step 4: Multi-pass Polishing ✅"; §11.4.150 research `docs/research/20260615_video_surfaced_fixes/verification_multipass_wiring.md`.
+- **llm_provider `724e284`** (pushed LLMProvider remote; parent gitlink bumped in `d53e085`): contract test for the interface-only `pkg/provider` (zero-coverage §11.4.28 gap; mutation-proven; suite green).
+
+**NEXT (open gaps, tracked — none blocking the current scope):** implement DOCX/PDF **output** writers in `pkg/ebook` (input-only today); implement `cmd/translator` local path (STUB "not yet implemented"); fix cmd/cli silent-fail-exit-0 when `-model` omitted (incidental finding); record a `-multipass` video for §11.4.153 ledger confirmation (currently real-run+RED→GREEN evidenced, no .mp4 yet); gofmt the 23 pre-existing flagged files in llm_provider; web-dashboard translation video is **OPERATOR-BLOCKED** (HelixQA-gated, separate session). `translate-ssh`/`ebook-translator` stay OPERATOR-BLOCKED (need remote SSH/llama.cpp host).
 
 ## 🎬 §11.4.153 FEATURE-STATUS VIDEO-CONFIRMATION SYNC (2026-06-15, ~25 real videos → ledger honest)
 The §11.4.153 per-feature Status ledger is now in honest sync with the real video evidence
