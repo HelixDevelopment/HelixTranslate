@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"digital.vasic.translator/internal/verifier/selection"
+	"digital.vasic.translator/pkg/bridge"
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/language"
@@ -703,77 +705,52 @@ func (m *MockMarkdownTranslator) SupportsLanguage(lang *language.Language) bool 
 	return args.Bool(0)
 }
 
-// TestCreateTranslatorFunction tests the createTranslator function
+// TestCreateTranslatorFunction tests the R2 createTranslator contract: it sources
+// the translator from the LLMsVerifier bridge (strongest verified model), NEVER a
+// local/hardcoded provider, and NEVER silently falls back to a local runtime when
+// no API keys are present (§11.4.69).
+//
+// RED-baseline contract (§11.4.115): under the pre-R2 code, createTranslator
+// constructed a local llama.cpp translator with NO API key (the "llamacpp (no API
+// key required)" path) — a silent local fallback. This test asserts that path is
+// GONE: with NO provider API keys the bridge cannot open, so the binary fails
+// loudly rather than translating via a local runtime.
 func TestCreateTranslatorFunction(t *testing.T) {
-	tests := []struct {
-		name          string
-		provider      string
-		model         string
-		setEnvVars    map[string]string
-		expectError   bool
-		expectedError string
-	}{
-		{
-			name:     "deepseek provider with API key",
-			provider: "deepseek",
-			model:    "deepseek-chat",
-			setEnvVars: map[string]string{
-				"DEEPSEEK_API_KEY": "test-api-key",
-			},
-			expectError: false,
-		},
-		{
-			name:          "deepseek provider without API key",
-			provider:      "deepseek",
-			setEnvVars:    map[string]string{},
-			expectError:   true,
-			expectedError: "API key not set",
-		},
-		{
-			name:        "llamacpp provider (no API key required)",
-			provider:    "llamacpp",
-			setEnvVars:  map[string]string{},
-			expectError: false,
-		},
-		{
-			name:          "unsupported provider",
-			provider:      "unknown",
-			setEnvVars:    map[string]string{},
-			expectError:   true,
-			expectedError: "unsupported provider",
-		},
+	hasAnyKey := func() bool {
+		for _, k := range []string{
+			"OPENAI_API_KEY", "ANTHROPIC_API_KEY", "DEEPSEEK_API_KEY",
+			"ZHIPU_API_KEY", "QWEN_API_KEY", "GEMINI_API_KEY",
+			"GROQ_API_KEY", "MISTRAL_API_KEY", "XAI_API_KEY",
+			"COHERE_API_KEY", "TOGETHER_API_KEY",
+		} {
+			if strings.TrimSpace(os.Getenv(k)) != "" {
+				return true
+			}
+		}
+		return false
+	}()
+
+	ctx := context.Background()
+	task := selection.TaskRequirements{TargetLang: "es"}
+
+	b, err := bridge.Open(ctx, bridge.Options{})
+	if !hasAnyKey {
+		// No keys ⇒ honest hard error, NEVER a local-runtime fallback. This is
+		// the R2 behaviour change vs the deleted "llamacpp no API key" path.
+		assert.Error(t, err, "bridge.Open with no provider API keys MUST error, not fall back to a local runtime")
+		assert.Nil(t, b)
+		return
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Set environment variables
-			for k, v := range tt.setEnvVars {
-				os.Setenv(k, v)
-			}
-			defer func() {
-				// Clean up environment variables
-				for k := range tt.setEnvVars {
-					os.Unsetenv(k)
-				}
-			}()
-
-			// Call createTranslator
-			translator, err := createTranslator(tt.provider, tt.model, "Spanish")
-
-			if tt.expectError {
-				assert.Error(t, err)
-				assert.Nil(t, translator)
-				if tt.expectedError != "" {
-					assert.Contains(t, err.Error(), tt.expectedError)
-				}
-			} else {
-				// In test environment, translator creation might fail due to missing dependencies
-				// So we just check that the function doesn't panic and returns appropriate error
-				if err != nil {
-					// Accept errors related to API keys being invalid or connection issues
-					t.Logf("Expected error in test environment: %v", err)
-				}
-			}
-		})
+	// Keys present: the positive path needs the real verification pipeline, which
+	// performs live provider calls — gate it with SKIP-with-reason (§11.4.3) so
+	// the offline suite never depends on network/credentials.
+	if err != nil {
+		t.Skipf("SKIP-OK (§11.4.3): API keys present but bridge.Open could not provision a verified model (live pipeline unavailable): %v", err)
 	}
+	tr, err := createTranslator(ctx, b, task)
+	if err != nil {
+		t.Skipf("SKIP-OK (§11.4.3): bridge open but no verified translator selectable in this environment: %v", err)
+	}
+	assert.NotNil(t, tr, "createTranslator MUST return the bridge's strongest verified translator when keys are present")
 }

@@ -2,18 +2,22 @@ package main
 
 import (
 	"context"
+	"digital.vasic.translator/internal/verifier/selection"
+	"digital.vasic.translator/pkg/bridge"
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/language"
 	"digital.vasic.translator/pkg/preparation"
-	"digital.vasic.translator/pkg/translator"
-	"digital.vasic.translator/pkg/translator/llm"
 	"flag"
 	"log"
 	"os"
 	"strings"
 	"time"
 )
+
+// bridgeOpenTimeout bounds the one-time LLMsVerifier bridge bootstrap (default
+// 5m verify pass + 30s headroom, mirroring cmd/model-bridge's openBridge).
+const bridgeOpenTimeout = 5*time.Minute + 30*time.Second
 
 // resolveLanguageCodes maps the human-readable -source / -target flag values
 // (e.g. "English", "Spanish", or an ISO code like "en") to the language.Language
@@ -158,24 +162,25 @@ func main() {
 		APIKey: resolveAPIKey(providerList[0], *apiKey),
 	}
 
-	// Create base translator (for translation phase)
-	log.Printf("\n3. Creating translator...")
-	const translationProvider = "deepseek"
-	translatorConfig := translator.TranslationConfig{
-		SourceLang: sourceLanguage.Code,
-		TargetLang: targetLanguage.Code,
-		Provider:   translationProvider,
-		Model:      "deepseek-chat",
-		// Resolve the API key from the -api-key flag, falling back to the
-		// provider's well-known env var (DEEPSEEK_API_KEY). Without this the
-		// DeepSeek client always failed with "DeepSeek API key is required".
-		APIKey: resolveAPIKey(translationProvider, *apiKey),
-	}
-
-	baseTranslator, err := llm.NewLLMTranslator(translatorConfig)
+	// Create base translator (for translation phase) from the LLMsVerifier bridge
+	// (R-1a/R2): the translator is the STRONGEST verified model the bridge selects,
+	// NOT a hardcoded local/DeepSeek provider. With no provider API keys present the
+	// bridge returns an honest hard error and we fail loudly — there is NO local-
+	// runtime fallback (§11.4.69). The -api-key/-providers flags are advisory under
+	// R2 (the bridge selects the verified model); they are retained (removal is R-2/R-4).
+	log.Printf("\n3. Creating translator (LLMsVerifier bridge)...")
+	bridgeCtx, bridgeCancel := context.WithTimeout(context.Background(), bridgeOpenTimeout)
+	b, err := bridge.Open(bridgeCtx, bridge.Options{})
+	bridgeCancel()
 	if err != nil {
-		log.Fatalf("Failed to create translator: %v", err)
+		log.Fatalf("LLMsVerifier bridge unavailable (no local-runtime fallback): %v", err)
 	}
+	task := selection.TaskRequirements{SourceLang: sourceLanguage.Code, TargetLang: targetLanguage.Code}
+	baseTranslator, _, err := b.BestTranslator(context.Background(), task)
+	if err != nil {
+		log.Fatalf("Failed to obtain verified translator from bridge: %v", err)
+	}
+	log.Printf("   bridge source: %s", b.Source())
 
 	// Create preparation-aware translator
 	log.Printf("\n4. Creating preparation-aware translator...")

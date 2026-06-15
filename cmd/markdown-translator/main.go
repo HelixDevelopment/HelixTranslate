@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"digital.vasic.translator/internal/verifier/selection"
+	"digital.vasic.translator/pkg/bridge"
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/markdown"
 	"digital.vasic.translator/pkg/preparation"
 	"digital.vasic.translator/pkg/translator"
-	"digital.vasic.translator/pkg/translator/llm"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // validateOutputFormat checks the -format flag against the closed set of
@@ -92,6 +94,28 @@ func main() {
 		log.Fatalf("Failed to create Books directory: %v", err)
 	}
 
+	// Open the LLMsVerifier bridge ONCE (R-1a/R2). Every translator + preparation
+	// component this binary builds now obtains its model(s) from the strongest
+	// verified model(s) the bridge selects — NOT a local/hardcoded provider. With
+	// no provider API keys present the bridge returns an honest hard error here and
+	// we fail loudly; we NEVER silently fall back to a local runtime (§11.4.69).
+	// The -provider/-model flags are advisory under R2 (the bridge selects the
+	// verified model); they are retained for compatibility (removal is R-2/R-4).
+	bridgeCtx, bridgeCancel := context.WithTimeout(context.Background(), bridgeOpenTimeout)
+	b, err := bridge.Open(bridgeCtx, bridge.Options{})
+	bridgeCancel()
+	if err != nil {
+		log.Fatalf("LLMsVerifier bridge unavailable (no local-runtime fallback): %v", err)
+	}
+	task := selection.TaskRequirements{TargetLang: *targetLang}
+
+	// -provider/-model are advisory under R2 (the bridge selects the verified
+	// model). Surface them so the operator sees they no longer drive selection,
+	// and so the retained flags remain referenced (removal is R-2/R-4).
+	if *model != "" {
+		fmt.Printf("ℹ️  -provider=%s -model=%s are advisory; the bridge selects the strongest verified model.\n", *provider, *model)
+	}
+
 	fmt.Printf("🚀 Markdown-Based Translation Pipeline\n\n")
 	fmt.Printf("Input:  %s (format: %s)\n", *inputFile, inputExt)
 	fmt.Printf("Output: %s (format: %s)\n\n", *outputFile, *outputFormat)
@@ -165,12 +189,15 @@ func main() {
 			TargetLanguage:     *targetLang,
 		}
 
-		prepCoordinator, err := preparation.NewPreparationCoordinator(prepConfig)
+		ctx := context.Background()
+		// Source the preparation providers from the bridge's provider-diverse
+		// verified ensemble (R-1a/R2) instead of the built-in per-provider
+		// NewLLMTranslator construction.
+		prepCoordinator, err := preparation.NewPreparationCoordinatorWithFactory(ctx, prepConfig, b.EnsembleFactory(task))
 		if err != nil {
 			log.Fatalf("Failed to create preparation coordinator: %v", err)
 		}
 
-		ctx := context.Background()
 		prepResult, err = prepCoordinator.PrepareBook(ctx, book)
 		if err != nil {
 			log.Printf("⚠️  Warning: Preparation failed: %v", err)
@@ -197,16 +224,16 @@ func main() {
 
 	// Step 2: Create translator
 	fmt.Printf("🔧 Step %d/%d: Initializing translator...\n", stepNum, totalSteps)
-	llmTranslator, err := createTranslator(*provider, *model, *targetLang)
+	ctx := context.Background()
+	llmTranslator, err := createTranslator(ctx, b, task)
 	if err != nil {
 		log.Fatalf("Failed to create translator: %v", err)
 	}
-	fmt.Printf("✓ Using provider: %s\n\n", *provider)
+	fmt.Printf("✓ Using bridge source: %s\n\n", b.Source())
 	stepNum++
 
 	// Step 3: Translate Markdown
 	fmt.Printf("🌍 Step %d/%d: Translating markdown content...\n", stepNum, totalSteps)
-	ctx := context.Background()
 	mdTranslator := markdown.NewMarkdownTranslator(func(text string) (string, error) {
 		return llmTranslator.Translate(ctx, text, "")
 	})
@@ -264,52 +291,17 @@ func main() {
 	}
 }
 
-// createTranslator creates an LLM translator based on provider
-func createTranslator(provider, model, targetLang string) (translator.Translator, error) {
-	// Get API keys from environment
-	var apiKey string
-	var defaultModel string
+// bridgeOpenTimeout bounds the one-time LLMsVerifier bridge bootstrap (default
+// 5m verify pass + 30s headroom, mirroring cmd/model-bridge's openBridge).
+const bridgeOpenTimeout = 5*time.Minute + 30*time.Second
 
-	switch provider {
-	case "deepseek":
-		apiKey = os.Getenv("DEEPSEEK_API_KEY")
-		defaultModel = "deepseek-chat"
-	case "openai":
-		apiKey = os.Getenv("OPENAI_API_KEY")
-		defaultModel = "gpt-4"
-	case "anthropic":
-		apiKey = os.Getenv("ANTHROPIC_API_KEY")
-		defaultModel = "claude-3-sonnet-20240229"
-	case "zhipu":
-		apiKey = os.Getenv("ZHIPU_API_KEY")
-		defaultModel = "glm-4"
-	case "llamacpp":
-		// llamacpp doesn't need API key (local inference)
-		apiKey = ""
-		defaultModel = "" // Auto-select based on hardware
-	default:
-		return nil, fmt.Errorf("unsupported provider: %s", provider)
-	}
-
-	// Only require API key for cloud providers (not llamacpp)
-	if apiKey == "" && provider != "llamacpp" {
-		return nil, fmt.Errorf("API key not set for provider %s (check environment variables)", provider)
-	}
-
-	// Use default model if not specified
-	if model == "" {
-		model = defaultModel
-	}
-
-	// Create translator config
-	config := translator.TranslationConfig{
-		SourceLang: "",
-		TargetLang: targetLang,
-		Provider:   provider,
-		Model:      model,
-		APIKey:     apiKey,
-	}
-
-	// Create LLM translator (it handles all providers internally)
-	return llm.NewLLMTranslator(config)
+// createTranslator returns the single STRONGEST LLMsVerifier-verified translator
+// for the task (R-1a/R2). It no longer constructs a local/hardcoded provider via
+// llm.NewLLMTranslator: the model is selected by the bridge from the verified
+// set. With no provider API keys present the bridge's BestTranslator returns an
+// honest hard error — there is NO local-runtime (e.g. llama.cpp) fallback
+// (§11.4.69). The former -provider/llamacpp arm is intentionally removed (its
+// local-inference path is the silent-no-key fallback this redirect eliminates).
+func createTranslator(ctx context.Context, b *bridge.Bridge, task selection.TaskRequirements) (translator.Translator, error) {
+	return b.BestTranslatorFunc(task)(ctx)
 }
