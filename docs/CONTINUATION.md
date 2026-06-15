@@ -1,7 +1,17 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 59
-**Last modified:** 2026-06-15T12:32:00Z
+**Revision:** 60
+**Last modified:** 2026-06-15T12:48:00Z
+
+## 🔬 POST-VALIDATION BUG-HUNT WAVE (2026-06-15, 3 parallel subagents, all verified+pushed)
+After the green validation run, dispatched 3 worktree-isolated subagents on the
+highest-remaining-yield autonomous surfaces. **5 genuine, conductor-verified,
+independently mutation-proven fixes (campaign 63→68); honest clean non-findings on
+the rest (§11.4.118):**
+- **FB2 parser data loss** (`a22d0de`): section-level `<subtitle>/<epigraph>/<poem>/<cite>` silently dropped before translation+output; multi-line section `<title>` truncated to first line. Fix = recursive flatten + join all title lines. RED through real `FB2Parser.Parse`; mutation revert→"verse line not found"/"title not found"→restore→GREEN.
+- **storage CreateSession data loss** (`9ff5049`, both sqlite+postgres): INSERT omitted `end_time`+`error_message` → already-completed sessions persisted NULL → `GetStatistics.AverageDuration` reported 0 over zero rows. Fix = add columns to INSERT. RED + postgres integration guard; mutation→"EndTime lost"→restore→GREEN.
+- **distributed AlertManager ×2** (`0366941`): (1) `SendAlert` held `am.mu` across blocking channel SMTP/webhook I/O (~30s) stalling all AlertManager methods → snapshot-then-unlock; (2) `GetAlertHistory`/`GetAlerts` leaked shared `*DriftAlert` pointers → `-race`-proven field race vs `AcknowledgeAlert` → `copyDriftAlert` deep-copy. No protocol/message-shape change (worker version-compat held). RED -race; mutation revert→DATA RACE / "GetAlertHistory blocked"→restore→GREEN.
+Clean non-findings (audited, no RED reproducible): SQLite concurrent-writer contention (GREEN under -race), cache-key collisions (already hardened), CheckWorkerVersion race, CircuitBreaker breaker-serialization, HTML/DOCX/TXT/PDF round-trips. All 3 worktrees removed post-integration. HEAD `0366941` green+pushed both upstreams.
 
 ## ✅ FULL VALIDATION RUN (2026-06-15, operator-requested "run all tests, challenges, helix qa")
 **360 packages GREEN, ZERO failures project-wide** (real captured evidence, no bluff):
@@ -20,7 +30,7 @@
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **63 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
+- **68 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest wave = 5 fixes `a22d0de`/`9ff5049`/`0366941`, see POST-VALIDATION BUG-HUNT WAVE block at top). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
