@@ -88,6 +88,19 @@ func (d *Detector) DetectFile(filename string) (Format, error) {
 		return FormatFB2, nil
 	}
 
+	// Same reasoning for HTML as for FB2 above: an (X)HTML document carrying a
+	// generic or wrong extension (.txt, .xml, no extension) would otherwise be
+	// classified by extension as plain text and handed to the plain-text parser,
+	// which flattens its heading/paragraph structure and emits tags as literal
+	// prose — the same silent data-loss class the FB2 guard prevents. Unmistakable
+	// HTML markup MUST win over a generic extension. isHTMLContent is anchored to
+	// real document markup (a leading <?xml ...><html, a <!DOCTYPE html>, or a
+	// root <html ...> element) so it never hijacks plain prose that merely mentions
+	// "<html>" or the word "html" in passing.
+	if d.isHTMLContent(header) {
+		return FormatHTML, nil
+	}
+
 	if formatByExt != FormatUnknown {
 		return formatByExt, nil
 	}
@@ -106,6 +119,37 @@ func (d *Detector) isFB2Content(data []byte) bool {
 		return false
 	}
 	return bytes.Contains(trimmed, []byte("FictionBook"))
+}
+
+// isHTMLContent reports whether the header is unmistakably an HTML document.
+// It is intentionally anchored to leading document markup so it fires only for
+// genuine HTML files (never for plain prose that happens to contain "<html>" or
+// the word "html" mid-text): a BOM-or-whitespace-leading document whose start is
+// an XML prolog immediately followed by an <html root, a <!DOCTYPE html ...>, or
+// a root <html ...> / <html> element.
+func (d *Detector) isHTMLContent(data []byte) bool {
+	// Strip a UTF-8 BOM if present so the prefix checks still match.
+	data = bytes.TrimPrefix(data, []byte{0xEF, 0xBB, 0xBF})
+	trimmed := bytes.TrimLeft(data, " \t\r\n")
+	lower := bytes.ToLower(trimmed)
+
+	// <!DOCTYPE html ...> at the very start.
+	if bytes.HasPrefix(lower, []byte("<!doctype html")) {
+		return true
+	}
+	// Root <html> element (with or without attributes) at the very start.
+	if bytes.HasPrefix(lower, []byte("<html>")) || bytes.HasPrefix(lower, []byte("<html ")) {
+		return true
+	}
+	// XML prolog (XHTML): "<?xml ...?>" optionally followed by whitespace/comments
+	// and then an <html element. We require the <html element to appear and not be
+	// a FictionBook (that case is handled by isFB2Content before this guard runs).
+	if bytes.HasPrefix(lower, []byte("<?xml")) {
+		if bytes.Contains(lower, []byte("<html")) {
+			return true
+		}
+	}
+	return false
 }
 
 // detectByExtension detects format by file extension
