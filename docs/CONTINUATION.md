@@ -1,14 +1,26 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 63
-**Last modified:** 2026-06-15T13:26:00Z
+**Revision:** 64
+**Last modified:** 2026-06-15T13:38:00Z
 
-## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 12 parallel subagents over 4 waves, all verified+pushed)
-After the green validation run, dispatched 4 successive 3-wide worktree-isolated
-subagent waves on the highest-remaining-yield autonomous surfaces. **11 genuine,
-conductor-verified, independently mutation-proven fixes (campaign 63→74) + 1
+## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 15 parallel subagents over 5 waves, all verified+pushed)
+After the green validation run, dispatched 5 successive 3-wide worktree-isolated
+subagent waves on the highest-remaining-yield autonomous surfaces. **14 genuine,
+conductor-verified, independently mutation-proven fixes (campaign 63→77) + 1
 teeth-proven regression guard; honest clean non-findings + documented honest gaps on
-the rest (§11.4.118/§11.4.6). HEAD `ba1ee96` green+pushed both upstreams.**
+the rest (§11.4.118/§11.4.6). HEAD `d7ec633` green+pushed both upstreams. Full-tree
+sweep GREEN (59 ok / 0 FAIL, build+vet clean) confirmed the baseline mid-campaign.**
+
+WAVE 6 IN FLIGHT (2 confirmed-lead PWUs + secondary CLIs): gRPC EPUB-input data-flow
+(EPUB inputs can't translate via gRPC — convertToMarkdown writes ExtractText to a
+.epub temp + re-parses as zip); markdown block-leading `1. `/`- `/`#`/`> ` round-trip
+(prose paragraph → list/heading/blockquote, digit lost); cmd/ebook-translator+cli+
+translator hunt. Both leads were honestly DEFERRED (not half-fixed) when first found.
+
+WAVE 5 (`pkg/grpc`+`cmd/grpc-server`, `pkg/markdown` reverse, `pkg/format`+`pkg/report`+`pkg/progress`):
+- **grpc nil-Options crash** (`d7ec633`, HIGH): req.Options deref panicked the translation goroutine AFTER the EPUB was written → session stuck 'running', completed work never reported. Fix = nil-safe GetOptions().GetEnableMonitoring(). RED; mutation→nil-pointer panic→restore→GREEN (3/3 -race).
+- **markdown EPUB→MD round-trip corruption** (`0ba2f48`): prose text emitted unescaped → literal `_`/`*`/`[]` reinterpreted as emphasis/links on return trip. Fix = escapeMarkdownText (inCode-gated). RED 5 tests; mutation no-op→3 corruption FAILs→restore→GREEN; full suite no-regression.
+- **progress stuck bar** (`cebf4f7`): items-only mode never counted failed items → 60% forever. Fix = ItemsCompleted+ItemsFailed. RED; mutation→'got 60.00'→restore→GREEN. (format+report clean.)
 
 WAVE 4 (`pkg/api`+`cmd/api-server`+`cmd/server`, `pkg/translator` core, primary CLIs) — driven by §11.4.118 discovery-pressure on the batch PASS-bluff class:
 - **translator ctx-cancel silent success** (`ba1ee96`): `TranslateBook` never checked `ctx.Err()` → a cancelled (timeout/Ctrl-C) run reported success with a partial/no-op book. Fix = up-front + per-chapter ctx guards wrapping context.Canceled. RED; mutation strip-both-guards→"got nil (silent partial-result)"→restore→GREEN.
@@ -51,7 +63,7 @@ Clean non-findings (audited, no RED reproducible): SQLite concurrent-writer cont
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **74 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 4 waves = 11 fixes + 1 regression guard `a22d0de`/`9ff5049`/`0366941`/`a8cf0cd`/`39ae131`/`46db0c6`/`5baf804`/`4b9c1e4`/`85d9849`/`ba1ee96`, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe PASS-bluffs). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
+- **77 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 5 waves = 14 fixes + 1 regression guard, newest `cebf4f7`/`0ba2f48`/`d7ec633`, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options PASS-bluffs/crashes). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
