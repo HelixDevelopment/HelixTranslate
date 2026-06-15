@@ -1,7 +1,16 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 73
-**Last modified:** 2026-06-15T15:36:00Z
+**Revision:** 74
+**Last modified:** 2026-06-15T16:08:00Z
+
+## 🔬 WAVE 15 — SECOND-PASS + determinism (campaign 101→110; second pass STILL productive)
+Parent HEAD `6c89910`, build/vet/test green, git OK, llms_verifier pointer intact.
+- **pkg/ebook** `6c11dee` (#102): EPUB parser set chapter.Title to the zip entry name → EPUB→translate→EPUB rendered "OEBPS/chapter1.xhtml" as every chapter heading + TOC entry (core use case). Fix = extractChapterTitle (<title>/<h1>). RED+mutation-proven.
+- **pkg/translator/llm** `4413b76` (#103,#104): gemini + llamacpp ignored -temperature/-max-tokens (gemini silently capped output at 4000 tokens). Fix = standard Options>typed>default precedence. RED+mutation-proven.
+- **llms_verifier** `cd908195` (gitlink `6c89910`, #105–#110): 6 §11.4.50 determinism defects — 4 ID-collision PRODUCT bugs (security/scheduler×2/logging UnixNano-only → duplicate audit/run/log IDs; crypto/rand suffix) + 2 flaky tests (scoring recency-date drift, client brotli live-endpoint coupling). Mutation-proven; 5 pkgs deterministic -count=3..30; FF-pushed all LLMsVerifier remotes.
+SECOND-PASS LESSON (§11.4.118): re-hunting "already-swept" surfaces with fresh angles STILL found 9 genuine bugs — fresh angles find what the first pass missed.
+KNOWN follow-up (§11.4.118, flagged NOT fixed): ~12 other UnixNano-only ID generators in llms_verifier (api/audit_logger, events/websocket_server, notifications, scoring/alert_manager+api_handlers, enhanced/*) have NO uniqueness test — latent collision risk.
+
 
 ## 🏁 COMPREHENSIVE BUG-HUNT COMPLETE — 101 fixes + 1 guard; main module + ALL 8 owned submodules swept
 Wave 14 (challenges + llms_verifier) closed the submodule sweep. Parent HEAD `c47989a`, git OK, llms_verifier pointer intact.
@@ -143,7 +152,7 @@ Clean non-findings (audited, no RED reproducible): SQLite concurrent-writer cont
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **101 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + ALL 8 owned submodules (full table below; latest 14 waves = 38 fixes + 1 regression guard, newest submodules `349b0f1` challenges + `1e0de43c` llms_verifier; submodule yield 8/8 COMPLETE, see COMPREHENSIVE BUG-HUNT COMPLETE block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak + deployment Docker-health + server TLS-key leak + api-server backend-error PASS-bluffs + deployment hardcoded-JWT-secret). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
+- **110 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + ALL 8 owned submodules + a productive second pass (full table below; latest 15 waves = 47 fixes + 1 regression guard, newest `6c11dee` ebook + `4413b76` translator/llm + `cd908195` llms_verifier-determinism; submodule yield 8/8, see WAVE 15 + COMPREHENSIVE BUG-HUNT COMPLETE blocks at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak + deployment Docker-health + server TLS-key leak + api-server backend-error PASS-bluffs + deployment hardcoded-JWT-secret). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
