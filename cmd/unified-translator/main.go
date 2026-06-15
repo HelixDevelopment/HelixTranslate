@@ -1116,7 +1116,8 @@ func verifyTranslation(text, targetLang, script string) bool {
 // another). The output format is now honored. An unsupported extension is an
 // explicit, honest error (§11.4.6) rather than a misnamed EPUB.
 //
-// Supported: .epub (default / no extension), .fb2, .html, .htm, .txt, .md, .docx.
+// Supported: .epub (default / no extension), .fb2, .html, .htm, .txt, .md, .docx, .pdf.
+// PDF output requires weasyprint (honest typed error when absent — see pkg/ebook/pdf_writer.go).
 func generateOutput(content, outputPath, inputFile string) error {
 	ext := strings.ToLower(strings.TrimPrefix(filepath.Ext(outputPath), "."))
 	switch ext {
@@ -1148,8 +1149,17 @@ func generateOutput(content, outputPath, inputFile string) error {
 			}},
 		}
 		return ebook.NewDOCXWriter().Write(book, outputPath)
+	case "pdf":
+		book := &ebook.Book{
+			Metadata: ebook.Metadata{Title: titleFromInput(inputFile)},
+			Chapters: []ebook.Chapter{{
+				Title:    titleFromInput(inputFile),
+				Sections: []ebook.Section{{Content: content}},
+			}},
+		}
+		return ebook.NewPDFWriter().Write(book, outputPath)
 	default:
-		return fmt.Errorf("unsupported output format %q (supported: .epub, .fb2, .html, .txt, .md, .docx)", ext)
+		return fmt.Errorf("unsupported output format %q (supported: .epub, .fb2, .html, .txt, .md, .docx, .pdf)", ext)
 	}
 }
 
