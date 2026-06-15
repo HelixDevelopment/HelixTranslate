@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>docx_output_writer</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="docx-output-writer-deep-multi-angle-research-11.4.150">DOCX
+output writer — deep multi-angle research (§11.4.150)</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-15T00:00:00Z <strong>Scope:</strong> unified-translator DOCX
+(<code>.docx</code>) OUTPUT support —
+<code>pkg/ebook/docx_writer.go</code> +
+<code>cmd/unified-translator/main.go</code> output-format switch.
+<strong>Authority:</strong> constitution §11.4.150
+(deep-research-first), §11.4.99 (latest-source), §11.4.6 (no-guessing),
+§11.4.3 (honest typed error on unavailable dependency).</p>
+<h2 id="gap-fact">Gap (FACT)</h2>
+<p><code>unified-translator</code> supports OUTPUT formats
+<code>epub</code> / <code>fb2</code> / <code>html</code> /
+<code>htm</code> / <code>txt</code> / <code>md</code> only
+(<code>cmd/unified-translator/main.go</code>
+<code>generateOutput</code>, default case returns
+<code>unsupported output format %q (supported: .epub, .fb2, .html, .txt, .md)</code>).
+DOCX is INPUT-only in <code>pkg/ebook</code>
+(<code>docx_parser.go</code>; there is no <code>docx_writer.go</code>).
+DOCX is a genuinely useful manuscript-review OUTPUT the operator
+video-tested.</p>
+<h2 id="options-considered">Options considered</h2>
+<h3 id="a-pandoc-backed-render-content-markdown-docx-via-pandoc">(a)
+Pandoc-backed (render content → markdown → docx via
+<code>pandoc</code>)</h3>
+<ul>
+<li>Pandoc 3.9.0.2 is installed (<code>/opt/homebrew/bin/pandoc</code>)
+and already used elsewhere for doc exports.</li>
+<li>Pros: rich markdown fidelity (tables, lists, citations), maintained,
+battle-tested.</li>
+<li>Cons: a RUNTIME external-process dependency — fragile on hosts/CI
+without pandoc (must gate on availability with an honest typed error per
+§11.4.3/§11.4.6, never silent). Lossy round-trip is irrelevant here
+because the translator’s content is already plain markdown-ish text, so
+pandoc’s rich-feature advantage is largely unused. Adds process-spawn +
+temp-file surface.</li>
+</ul>
+<h3 id="b-pure-go-ooxml-writer-stdlib-archivezip-encodingxml">(b)
+Pure-Go OOXML writer (stdlib <code>archive/zip</code> +
+<code>encoding/xml</code>)</h3>
+<ul>
+<li>The minimal valid WordprocessingML (.docx) part set is small and
+standardized by ISO/IEC 29500 (verified against the Microsoft Open XML
+structure doc, see Sources): four parts —
+<code>[Content_Types].xml</code>, <code>_rels/.rels</code>,
+<code>word/document.xml</code>,
+<code>word/_rels/document.xml.rels</code> — and the minimal body is
+<code>w:document &gt; w:body &gt; w:p &gt; w:r &gt; w:t</code>.</li>
+<li>Pros: ZERO new dependencies (stdlib only); no runtime
+external-process failure mode; fully testable in-process; matches the
+existing pure-Go writer pattern (FB2/EPUB writers spawn no external
+process); deterministic full control of the OOXML; non-lossy for the
+translator’s in-memory structured Book (title + chapters/sections →
+headings + paragraphs).</li>
+<li>Cons: must implement OOXML correctly (mitigated — minimal part set
+is tiny and standardized; validity asserted programmatically by
+unzipping + checking the required parts + the translated text, plus a
+real <code>file</code>/<code>unzip -l</code> proof and
+Word-openability).</li>
+</ul>
+<h3
+id="c-maintained-go-docx-library-unioffice-go-docx-v2-docxgo-gooxml">(c)
+Maintained Go docx library (unioffice / go-docx v2 / docxgo /
+gooxml)</h3>
+<ul>
+<li>Pros: handles OOXML internals.</li>
+<li>Cons: a new module dependency for a small, well-bounded need;
+several are heavyweight (unioffice is commercial-licensed for some
+uses); §11.4.74/§11.4.28 favour not pulling a dependency we can satisfy
+with stdlib. Rejected — disproportionate dependency for the scope.</li>
+</ul>
+<h2 id="decision-option-b-pure-go-ooxml-writer">Decision — Option (b),
+pure-Go OOXML writer</h2>
+<p>Most robust + lowest-risk for THIS content: the translator output is
+plain structured text, so pandoc’s rich-feature edge is unused while its
+runtime-process fragility is a real cost; a third-party library is a
+disproportionate dependency. A pure-Go writer over stdlib
+<code>archive/zip</code> + <code>encoding/xml</code>, emitting the
+ISO/IEC 29500 minimal valid part set, is dependency-free, in-process
+testable, deterministic, and non-lossy for the Book model. Headings
+(book title, chapter titles, section titles) are emitted as bold +
+larger-size paragraphs; body text is split on blank lines into separate
+<code>w:p</code> paragraphs (mirroring the FB2/HTML writers). All text
+is carried as <code>w:t</code> chardata with
+<code>xml:space="preserve"</code> so the <code>encoding/xml</code>
+encoder escapes XML specials automatically (translated content can never
+inject markup).</p>
+<p>Validity is proven programmatically (unzip the produced
+<code>.docx</code>; assert <code>[Content_Types].xml</code> +
+<code>word/document.xml</code> present + the translated chapter text
+appears in <code>document.xml</code>) AND on-screen in a real run
+(<code>file</code> reports a Word document, <code>unzip -l</code> lists
+the OOXML parts, the translated text is grep-able in
+<code>word/document.xml</code>). A mutation (break the writer) flips the
+test RED.</p>
+<p>This is NOT a half-baked/lossy writer — for the translator’s
+plain-text book content the OOXML mapping is complete; the §11.4.6
+STOP-and-report path (research concludes a quality writer can’t be done
+safely) does NOT apply, because the stdlib path is both safe and
+quality.</p>
+<h2 id="sources-verified">Sources verified</h2>
+<ul>
+<li>Microsoft Learn — Structure of a WordprocessingML document (ISO/IEC
+29500 minimal document scenario; required
+<code>w:document &gt; w:body &gt; w:p &gt; w:r &gt; w:t</code>; minimal
+part set):
+https://learn.microsoft.com/en-us/office/open-xml/word/structure-of-a-wordprocessingml-document
+(accessed 2026-06-15)</li>
+<li>Pandoc markdown→docx command reference (option (a) baseline):
+https://opensource.com/article/19/5/convert-markdown-to-word-pandoc
+(accessed 2026-06-15)</li>
+<li>Go OOXML library survey (option (c) — rejected as disproportionate
+dependency): https://github.com/unidoc/unioffice ,
+https://github.com/mmonterroca/docxgo (accessed 2026-06-15)</li>
+</ul>
+<hr />
+<p>Deep-research 2026-06-15:
+https://learn.microsoft.com/en-us/office/open-xml/word/structure-of-a-wordprocessingml-document
+; https://opensource.com/article/19/5/convert-markdown-to-word-pandoc ;
+https://github.com/unidoc/unioffice</p>
+</body>
+</html>

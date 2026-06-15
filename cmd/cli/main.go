@@ -381,31 +381,13 @@ func translateEbook(
 		convertBookToLatin(book, converter)
 	}
 
-	// Write output in requested format
+	// Write output in requested format. writeOutput guarantees that a write
+	// failure never leaves a partial/empty file at the user's output path and
+	// never truncates a pre-existing file (it writes to a sibling temp file and
+	// atomically renames into place only on full success).
 	fmt.Printf("Writing output file...\n")
-	outFormat := format.ParseFormat(outputFormat)
-
-	switch outFormat {
-	case format.FormatEPUB:
-		writer := ebook.NewEPUBWriter()
-		if err := writer.Write(book, outputFile); err != nil {
-			return fmt.Errorf("failed to write EPUB: %w", err)
-		}
-
-	case format.FormatFB2:
-		writer := ebook.NewFB2Writer()
-		if err := writer.Write(book, outputFile); err != nil {
-			return fmt.Errorf("failed to write FB2: %w", err)
-		}
-
-	case format.FormatTXT:
-		// Write as plain text
-		if err := writeAsText(book, outputFile); err != nil {
-			return fmt.Errorf("failed to write TXT: %w", err)
-		}
-
-	default:
-		return fmt.Errorf("unsupported output format: %s", outputFormat)
+	if err := writeOutput(book, outputFile, outputFormat); err != nil {
+		return err
 	}
 
 	// Print statistics
@@ -449,6 +431,73 @@ func convertSectionToLatin(section *ebook.Section, converter *script.Converter) 
 	for i := range section.Subsections {
 		convertSectionToLatin(&section.Subsections[i], converter)
 	}
+}
+
+// writeOutput writes the book to outputFile in the requested format with an
+// all-or-nothing guarantee (§11.4 / §11.4.1 — a failed run must never leave a
+// partial/empty output the user mistakes for success):
+//
+//   - The format is validated BEFORE any filesystem write, so an unsupported
+//     format never touches the output path.
+//   - The content is written to a temporary sibling file (same directory, so the
+//     final os.Rename is atomic on POSIX). A mid-write failure removes that temp
+//     file and leaves the user's pre-existing output (if any) untouched.
+//   - Only on FULL success is the temp file atomically renamed into place,
+//     replacing any stale prior file with complete, fresh content.
+//
+// Net effect: the caller-visible output path holds either the user's prior file
+// (on failure) or a complete fresh file (on success) — never a partial/empty
+// half-written artefact.
+func writeOutput(book *ebook.Book, outputFile, outputFormat string) error {
+	outFormat := format.ParseFormat(outputFormat)
+
+	// Validate the format up front so an unsupported format never creates or
+	// truncates anything at the output path.
+	switch outFormat {
+	case format.FormatEPUB, format.FormatFB2, format.FormatTXT:
+	default:
+		return fmt.Errorf("unsupported output format: %s", outputFormat)
+	}
+
+	dir := filepath.Dir(outputFile)
+	tmp, err := os.CreateTemp(dir, "."+filepath.Base(outputFile)+".tmp-*")
+	if err != nil {
+		return fmt.Errorf("failed to create temporary output file: %w", err)
+	}
+	tmpName := tmp.Name()
+	// We only need the path; the format writers open the file themselves.
+	_ = tmp.Close()
+
+	// Best-effort removal of the temp file on every failure path. On success the
+	// rename consumes it, so this os.Remove becomes a no-op.
+	committed := false
+	defer func() {
+		if !committed {
+			_ = os.Remove(tmpName)
+		}
+	}()
+
+	switch outFormat {
+	case format.FormatEPUB:
+		if err := ebook.NewEPUBWriter().Write(book, tmpName); err != nil {
+			return fmt.Errorf("failed to write EPUB: %w", err)
+		}
+	case format.FormatFB2:
+		if err := ebook.NewFB2Writer().Write(book, tmpName); err != nil {
+			return fmt.Errorf("failed to write FB2: %w", err)
+		}
+	case format.FormatTXT:
+		if err := writeAsText(book, tmpName); err != nil {
+			return fmt.Errorf("failed to write TXT: %w", err)
+		}
+	}
+
+	// Atomically move the fully-written temp file into place.
+	if err := os.Rename(tmpName, outputFile); err != nil {
+		return fmt.Errorf("failed to finalize output file %q: %w", outputFile, err)
+	}
+	committed = true
+	return nil
 }
 
 func writeAsText(book *ebook.Book, filename string) error {

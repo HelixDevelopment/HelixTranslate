@@ -1,7 +1,9 @@
 package main
 
 import (
+	"archive/zip"
 	"bytes"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -94,6 +96,53 @@ func TestGenerateOutput_HonorsExtension(t *testing.T) {
 		}
 		if !strings.Contains(string(b), "&lt;script&gt;") {
 			t.Errorf(".html should contain the escaped form &lt;script&gt;")
+		}
+	})
+
+	t.Run("docx is a valid WordprocessingML package with translated content", func(t *testing.T) {
+		out := filepath.Join(dir, "book.docx")
+		if err := generateOutput(content, out, "in.pdf"); err != nil {
+			t.Fatalf("generateOutput(.docx) failed: %v", err)
+		}
+		b, err := os.ReadFile(out)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// A .docx is a ZIP package — it MUST start with the PK signature (unlike
+		// txt/fb2/html). This is the inverse assertion of the always-EPUB guard:
+		// here PK is correct, but the parts must be OOXML, not EPUB.
+		if !bytes.HasPrefix(b, []byte("PK")) {
+			t.Errorf(".docx output is not a ZIP package (got prefix %q)", b[:min(8, len(b))])
+		}
+		zr, err := zip.NewReader(bytes.NewReader(b), int64(len(b)))
+		if err != nil {
+			t.Fatalf(".docx is not a readable zip: %v", err)
+		}
+		var docXML string
+		var haveCT, haveDoc bool
+		for _, f := range zr.File {
+			switch f.Name {
+			case "[Content_Types].xml":
+				haveCT = true
+			case "word/document.xml":
+				haveDoc = true
+				rc, _ := f.Open()
+				bb, _ := io.ReadAll(rc)
+				rc.Close()
+				docXML = string(bb)
+			}
+		}
+		if !haveCT {
+			t.Errorf(".docx missing [Content_Types].xml")
+		}
+		if !haveDoc {
+			t.Errorf(".docx missing word/document.xml")
+		}
+		if !strings.Contains(docXML, "wordprocessingml") {
+			t.Errorf("word/document.xml is not WordprocessingML; got prefix %q", docXML[:min(120, len(docXML))])
+		}
+		if !strings.Contains(docXML, "Здраво свете") {
+			t.Errorf(".docx missing translated content in word/document.xml")
 		}
 	})
 
