@@ -375,12 +375,23 @@ func (pc *PreparationCoordinator) extractChapterContent(chapter *ebook.Chapter) 
 	return content.String()
 }
 
-// writeSectionContent appends a section's content and then recurses into its
-// subsections. FB2 (and other nested formats) populate Section.Subsections, and
-// the translator recurses into them — so the analysis input MUST include nested
-// text too, otherwise the LLM analyses an incomplete chapter and the resulting
-// terminology / caveats / context silently miss everything in the subsections.
+// writeSectionContent appends a section's title and content, then recurses into
+// its subsections. FB2 (and other nested formats) populate Section.Subsections,
+// and the translator recurses into them — so the analysis input MUST include
+// nested text too, otherwise the LLM analyses an incomplete chapter and the
+// resulting terminology / caveats / context silently miss everything in the
+// subsections.
+//
+// Section.Title is included as well: translateSection translates section and
+// subsection titles, so a title is real end-user-visible text that can carry
+// character names, untranslatable terms, and cultural references. Excluding it
+// from the analysis input would let those go undetected — the same data-loss
+// class as dropping subsection content.
 func writeSectionContent(content *strings.Builder, section *ebook.Section) {
+	if section.Title != "" {
+		content.WriteString(section.Title)
+		content.WriteString("\n\n")
+	}
 	if section.Content != "" {
 		content.WriteString(section.Content)
 		content.WriteString("\n\n")
