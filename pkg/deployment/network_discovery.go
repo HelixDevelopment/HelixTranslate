@@ -275,10 +275,18 @@ func containsMiddle(s, substr string) bool {
 	return false
 }
 
-// GetDiscoveredServices returns all discovered services
+// GetDiscoveredServices returns all discovered services, evicting any whose TTL
+// has elapsed.
+//
+// This method MUTATES nd.services (it deletes expired entries), so it MUST hold
+// the full write lock — not a read lock. Holding only RLock here was a data race:
+// RLock permits multiple concurrent holders, so two concurrent callers could run
+// delete() on the same map simultaneously (concurrent map write), and a delete
+// under RLock also races a concurrent writer holding the write lock in
+// handleDiscoveryMessage.
 func (nd *NetworkDiscoverer) GetDiscoveredServices() map[string]*NetworkService {
-	nd.mu.RLock()
-	defer nd.mu.RUnlock()
+	nd.mu.Lock()
+	defer nd.mu.Unlock()
 
 	// Clean up expired services
 	now := time.Now()

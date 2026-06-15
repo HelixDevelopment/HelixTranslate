@@ -2,6 +2,7 @@ package deployment
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -318,14 +319,77 @@ func (do *DockerOrchestrator) checkServicesHealth(ctx context.Context, composeDi
 		return false, err
 	}
 
-	// Parse the JSON output to check service states
-	// This is a simplified check - in production you'd parse the JSON properly
-	outputStr := string(output)
-	if strings.Contains(outputStr, "healthy") || strings.Contains(outputStr, "running") {
-		return true, nil
+	return parseHealthFromComposePS(string(output)), nil
+}
+
+// parseHealthFromComposePS reports whether ALL services described by
+// `docker compose ps --format json` output are healthy. docker compose emits one
+// JSON object per service (NDJSON: one object per line, or a single JSON array),
+// each carrying a "State" (e.g. running/exited/restarting) and a "Health" (e.g.
+// healthy/unhealthy/starting, empty when the service declares no healthcheck).
+//
+// A service is considered healthy when its State is "running" AND its Health is
+// either "healthy" or empty (no declared healthcheck). It is considered NOT
+// healthy when Health is "unhealthy"/"starting" or State is anything other than
+// running (exited/restarting/dead/...). The whole set is healthy only when there
+// is at least one service AND every service is healthy.
+//
+// This replaces a naive strings.Contains(output,"healthy") check, which treated
+// "unhealthy" as healthy ("healthy" is a substring of "unhealthy") and accepted
+// the set as healthy if ANY substring matched — a PASS-bluff that reported broken
+// deployments as successful.
+func parseHealthFromComposePS(output string) bool {
+	type composePSEntry struct {
+		State  string `json:"State"`
+		Health string `json:"Health"`
 	}
 
-	return false, nil
+	entryHealthy := func(e composePSEntry) bool {
+		if strings.ToLower(strings.TrimSpace(e.State)) != "running" {
+			return false
+		}
+		switch strings.ToLower(strings.TrimSpace(e.Health)) {
+		case "", "healthy":
+			return true
+		default: // unhealthy, starting, ...
+			return false
+		}
+	}
+
+	var entries []composePSEntry
+
+	// docker compose may emit either a single JSON array or NDJSON (one object
+	// per line). Try the array form first, then fall back to line-by-line.
+	trimmed := strings.TrimSpace(output)
+	if strings.HasPrefix(trimmed, "[") {
+		if err := json.Unmarshal([]byte(trimmed), &entries); err != nil {
+			return false
+		}
+	} else {
+		for _, line := range strings.Split(output, "\n") {
+			line = strings.TrimSpace(line)
+			if line == "" {
+				continue
+			}
+			var e composePSEntry
+			if err := json.Unmarshal([]byte(line), &e); err != nil {
+				// Unparseable output: do not fail open to "healthy".
+				return false
+			}
+			entries = append(entries, e)
+		}
+	}
+
+	if len(entries) == 0 {
+		return false
+	}
+
+	for _, e := range entries {
+		if !entryHealthy(e) {
+			return false
+		}
+	}
+	return true
 }
 
 // ScaleService scales a service to the specified number of replicas
@@ -517,13 +581,7 @@ func (do *DockerOrchestrator) checkServiceHealth(ctx context.Context, serviceNam
 		return false, err
 	}
 
-	// Parse the JSON output to check service state
-	outputStr := string(output)
-	if strings.Contains(outputStr, "healthy") || strings.Contains(outputStr, "running") {
-		return true, nil
-	}
-
-	return false, nil
+	return parseHealthFromComposePS(string(output)), nil
 }
 
 // GetServiceStatus returns the status of a specific service
