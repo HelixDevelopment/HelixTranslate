@@ -79,9 +79,13 @@ func main() {
 	// silently override an explicit CLI choice (e.g. -provider openai must win
 	// over config.DefaultProvider). flag.Visit only reports flags actually set.
 	explicitProvider := false
+	explicitAPIKey := false
 	flag.Visit(func(f *flag.Flag) {
 		if f.Name == "provider" || f.Name == "p" {
 			explicitProvider = true
+		}
+		if f.Name == "api-key" {
+			explicitAPIKey = true
 		}
 	})
 
@@ -234,6 +238,7 @@ func main() {
 		disableLocalLLMs,
 		preferDistributed,
 		explicitProvider,
+		explicitAPIKey,
 	); err != nil {
 		fmt.Fprintf(os.Stderr, "Translation failed: %v\n", err)
 		os.Exit(1)
@@ -250,7 +255,7 @@ func translateEbook(
 	appConfig *config.Config,
 	sourceLang, targetLang language.Language,
 	eventBus *events.EventBus,
-	disableLocalLLMs, preferDistributed, explicitProvider bool,
+	disableLocalLLMs, preferDistributed, explicitProvider, explicitAPIKey bool,
 ) error {
 	ctx := context.Background()
 
@@ -260,9 +265,21 @@ func translateEbook(
 
 		// Override CLI parameters with config values if not explicitly set.
 		// The CLI flag wins over the config default (see resolveProvider).
+		originalProvider := providerName
 		providerName = resolveProvider(providerName, explicitProvider, appConfig.Translation.DefaultProvider)
 		if model == "" && appConfig.Translation.DefaultModel != "" {
 			model = appConfig.Translation.DefaultModel
+		}
+
+		// If config resolution switched us to a DIFFERENT provider than the one
+		// the env key was pre-loaded for (main loads getAPIKeyFromEnv for the
+		// CLI-default provider BEFORE config is read), the pre-loaded key belongs
+		// to the wrong provider and MUST NOT be treated as user-supplied. Drop it
+		// so the per-provider config key / per-provider env key path below can
+		// resolve the correct credential. An explicit -api-key always wins and is
+		// never dropped.
+		if !explicitAPIKey && providerName != originalProvider {
+			apiKey = ""
 		}
 
 		// Load provider-specific config
@@ -276,6 +293,12 @@ func translateEbook(
 			if model == "" && providerConfig.Model != "" {
 				model = providerConfig.Model
 			}
+		}
+
+		// Last-resort: if still no key and the provider changed, consult the
+		// environment variable for the RESOLVED provider (not the CLI default).
+		if apiKey == "" && !explicitAPIKey && providerName != originalProvider {
+			apiKey = getAPIKeyFromEnv(providerName)
 		}
 	}
 

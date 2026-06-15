@@ -676,6 +676,7 @@ func TestTranslateEbookFunction(t *testing.T) {
 			false,
 			false,
 			true, // provider explicitly set
+			true, // api-key explicitly set
 		)
 
 		// We expect an error due to missing API key in test environment
@@ -745,6 +746,7 @@ func TestTranslateEbookFunction(t *testing.T) {
 			false,
 			false,
 			false, // provider not explicitly set — config default applies
+			false, // api-key not explicitly set — config/env applies
 		)
 
 		// (1) the config-key + base-url provider path completed successfully.
