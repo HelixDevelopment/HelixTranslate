@@ -1,21 +1,38 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 64
-**Last modified:** 2026-06-15T13:38:00Z
+**Revision:** 65
+**Last modified:** 2026-06-15T14:02:00Z
 
-## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 15 parallel subagents over 5 waves, all verified+pushed)
-After the green validation run, dispatched 5 successive 3-wide worktree-isolated
-subagent waves on the highest-remaining-yield autonomous surfaces. **14 genuine,
-conductor-verified, independently mutation-proven fixes (campaign 63→77) + 1
+## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 18 parallel subagents over 6 waves, all verified+pushed)
+After the green validation run, dispatched 6 successive 3-wide worktree-isolated
+subagent waves on the highest-remaining-yield autonomous surfaces. **17 genuine,
+conductor-verified, independently mutation-proven fixes (campaign 63→80) + 1
 teeth-proven regression guard; honest clean non-findings + documented honest gaps on
-the rest (§11.4.118/§11.4.6). HEAD `d7ec633` green+pushed both upstreams. Full-tree
-sweep GREEN (59 ok / 0 FAIL, build+vet clean) confirmed the baseline mid-campaign.**
+the rest (§11.4.118/§11.4.6). HEAD `2d65ee0`; build exit 0 / vet exit 0 / test 59 ok /
+0 FAIL after the git-pointer repair below.**
 
-WAVE 6 IN FLIGHT (2 confirmed-lead PWUs + secondary CLIs): gRPC EPUB-input data-flow
-(EPUB inputs can't translate via gRPC — convertToMarkdown writes ExtractText to a
-.epub temp + re-parses as zip); markdown block-leading `1. `/`- `/`#`/`> ` round-trip
-(prose paragraph → list/heading/blockquote, digit lost); cmd/ebook-translator+cli+
-translator hunt. Both leads were honestly DEFERRED (not half-fixed) when first found.
+⚠️ **ENV FORENSIC + REPAIR (§11.4.6/§9, 2026-06-15):** the worktree+submodule
+interaction during the parallel campaign corrupted the main-tree `llms_verifier/.git`
+pointer — it got rewritten to a DELETED worktree gitdir
+(`.git/worktrees/agent-a4196278.../modules/llms_verifier`), making `git status` +
+`go build ./...` VCS-stamping fail with `exit status 128`. Product was unaffected
+(Go uses the `replace ./llms_verifier/llm-verifier` FILES not git → tests stayed 59
+ok; commits/pushes worked). Root-caused exactly: the intact gitdir is
+`.git/modules/LLMsVerifier` (capitalized); only the working-tree `.git` pointer was
+wrong. REPAIRED reversibly (no network, no data loss, §9 backup to /tmp): repointed
+`llms_verifier/.git` → `gitdir: ../.git/modules/LLMsVerifier`; submodule now resolves
+at pinned `6f19503b` (§11.4.79), nested llm-verifier intact, build+vet+status clean.
+The `.git` pointer is untracked (local-env only, nothing to commit). PROCESS NOTE for
+future waves: a worktree subagent running `git submodule update --init llms_verifier`
+inside its worktree + the subsequent `git worktree remove` is the suspected trigger;
+verify `git status` after each worktree-wave cleanup.
+
+WAVE 6 (gRPC EPUB-input, markdown block-marker, secondary CLIs) — both confirmed leads
+fixed + a security finding; required 2 conductor MERGES (subagent worktrees predated
+#76/#77, blind copy would have reverted them — caught per §11.4.84/§11.4.142):
+- **gRPC EPUB inputs unusable** (`1377bd6`): convertToMarkdown wrote ExtractText to a .epub temp + re-parsed as zip (always failed). Fix = convert the REAL input file path. RED+mutation-proven; merged on top of #77.
+- **markdown block-marker round-trip** (`a7140f9`): prose `<p>` starting `1. `/`- `/`> `/`#` → list/heading/blockquote, digit lost. Fix = escapeLeadingBlockMarker. RED 7 cases+mutation; merged on top of #76.
+- **cmd/cli cross-provider key leak** (`2d65ee0`, §11.4.10 security): config provider-switch sent OPENAI_API_KEY as bearer to the deepseek endpoint. Fix = drop stale pre-loaded key on provider switch unless -api-key explicit. RED+mutation-proven.
 
 WAVE 5 (`pkg/grpc`+`cmd/grpc-server`, `pkg/markdown` reverse, `pkg/format`+`pkg/report`+`pkg/progress`):
 - **grpc nil-Options crash** (`d7ec633`, HIGH): req.Options deref panicked the translation goroutine AFTER the EPUB was written → session stuck 'running', completed work never reported. Fix = nil-safe GetOptions().GetEnableMonitoring(). RED; mutation→nil-pointer panic→restore→GREEN (3/3 -race).
@@ -63,7 +80,7 @@ Clean non-findings (audited, no RED reproducible): SQLite concurrent-writer cont
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **77 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 5 waves = 14 fixes + 1 regression guard, newest `cebf4f7`/`0ba2f48`/`d7ec633`, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options PASS-bluffs/crashes). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
+- **80 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 6 waves = 17 fixes + 1 regression guard, newest `1377bd6`/`a7140f9`/`2d65ee0`, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
