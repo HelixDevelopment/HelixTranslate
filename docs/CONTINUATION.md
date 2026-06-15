@@ -1,15 +1,23 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 66
-**Last modified:** 2026-06-15T14:08:00Z
+**Revision:** 67
+**Last modified:** 2026-06-15T14:23:00Z
 
-## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 21 parallel subagents over 7 waves, all verified+pushed)
-After the green validation run, dispatched 7 successive 3-wide worktree-isolated
-subagent waves on the highest-remaining-yield autonomous surfaces. **20 genuine,
-conductor-verified, independently mutation-proven fixes (campaign 63→83) + 1
+## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 24 parallel subagents over 8 waves, all verified+pushed)
+After the green validation run, dispatched 8 successive 3-wide worktree-isolated
+subagent waves on the highest-remaining-yield autonomous surfaces. **24 genuine,
+conductor-verified, independently mutation-proven fixes (campaign 63→87) + 1
 teeth-proven regression guard; honest clean non-findings + documented honest gaps on
-the rest (§11.4.118/§11.4.6). HEAD `55ca2c9`; build/vet/test green after the
-git-pointer repair (see ENV FORENSIC below).**
+the rest (§11.4.118/§11.4.6). HEAD `396f70a`; build/vet/test green after the
+git-pointer repair (see ENV FORENSIC below). NOTE: recurring host FD pressure
+(`ENFILE`) under 3 concurrent -race agents — throttle wave width if it persists (§12).**
+
+WAVE 8 (`internal/config`+CORS, `pkg/hardware`+`version`, `pkg/logger`+`deployment`):
+- **deployment Docker-health PASS-bluff** (`3a2a516`): checkServicesHealth used substring match — 'healthy' is a substring of 'unhealthy', so an unhealthy service was counted healthy → deploy reported success while broken. Fix = JSON-parse compose-ps, all-services-healthy. RED+mutation-proven.
+- **deployment GetDiscoveredServices race** (`3a2a516`): delete() under RLock → concurrent map write. Fix = RLock→Lock. RED -race+mutation-proven.
+- **version cross-OS hash instability** (`396f70a`): CodebaseHasher recorded raw OS-separator paths → same tree hashes differently per-OS → false distributed-worker version drift. Fix = canonicalize separators. RED+mutation-proven.
+- **hardware Windows multi-socket core undercount** (`396f70a`): per-socket NumberOfCores lines errored the single-int parser → silent fallback to logical cores. Fix = parseWindowsCoreCount sums sockets. RED+mutation-proven.
+- **`internal/config`+CORS clean non-finding**: CORS already hardened (wildcard sans credentials, exact-match allowlist, 5 bypass vectors rejected, fail-closed defaults).
 
 WAVE 7 (`internal/verifier`, `internal/services`+verified-models, `cmd/monitor-server`):
 - **services MinScoreThreshold scale divergence** (`55ca2c9`): GetPreferences compared the threshold on a 0-10 normalized scale while the /verified-models handler + registry/selection use raw 0-100 → an operator threshold of 50 silently dropped ALL preferences. Fix = raw-scale compare. RED + §11.4.120 stale-test reconciliation; mutation→both tests FAIL→restore→GREEN.
@@ -85,7 +93,7 @@ Clean non-findings (audited, no RED reproducible): SQLite concurrent-writer cont
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **83 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 7 waves = 20 fixes + 1 regression guard, newest `4cbefed`/`4b93d3b`/`55ca2c9`, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
+- **87 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 8 waves = 24 fixes + 1 regression guard, newest `3a2a516`/`396f70a`, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak + deployment Docker-health PASS-bluff). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
