@@ -1,16 +1,21 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 70
-**Last modified:** 2026-06-15T15:00:00Z
+**Revision:** 71
+**Last modified:** 2026-06-15T15:12:00Z
 
-## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 30 parallel subagents over 11 waves, all verified+pushed)
-After the green validation run, dispatched 11 worktree-isolated subagent waves (3-wide,
-later throttled to 2-wide for FD safety) sweeping the ENTIRE main-module Go surface +
-starting the owned submodules (§11.4.28). **32 genuine, conductor-verified, independently
-mutation-proven fixes (campaign 63→95) + 1 teeth-proven regression guard; honest clean
-non-findings + documented honest gaps (§11.4.118/§11.4.6). Parent HEAD `5778aec`,
-build/vet/test green. NOTE: recurring host FD pressure (`ENFILE`) under 3 concurrent
--race agents — waves 9+ throttled to 2-wide (§12).**
+## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 32 parallel subagents over 12 waves, all verified+pushed)
+After the green validation run, dispatched 12 worktree-isolated subagent waves (3-wide,
+later 2-wide for FD safety) sweeping the ENTIRE main-module Go surface + the owned
+submodules (§11.4.28). **34 genuine, conductor-verified, independently mutation-proven
+fixes (campaign 63→97) + 1 teeth-proven regression guard; honest clean non-findings +
+documented honest gaps (§11.4.118/§11.4.6). Parent HEAD `d7db22f`, build/vet/test green.
+SUBMODULE YIELD 4/4 (each fix committed into its OWN repo FF-only §11.4.113 + gitlink
+synced + parent pushed; 2 needed §11.4.113 rebase-onto-latest over parallel sessions).
+NOTE: host FD pressure (`ENFILE`) under 3 concurrent -race agents — waves 9+ at 2-wide (§12).**
+
+WAVE 12 — submodules:
+- **docs_chain** `0c72cdd` (gitlink `a57ebd9`): canonicalDumpAllTables content-hash collision (unescaped TAB/NL → distinct DB states share a hash → verify false-in-sync / sync misses change) in the §11.4.106 engine. Fix = escapeDumpField injective escaping. RED+mutation-proven; 8 pkgs -race green; FF-pushed vasic-digital/docs_chain.
+- **containers** `a5269f3` (gitlink `d7db22f`): LazyBooter.err plain-field data race (torn/stale boot-error read + -race crash). Fix = atomic.Pointer[error]. RED+mutation-proven; 38-pkg suite green; §11.4.113 rebased over a parallel health/custom fix + FF-pushed all 7 Containers remotes.
 
 WAVE 11 — OWNED SUBMODULES (§11.4.28 equal-codebase; init-only, no rm/symlink; committed
 into each submodule's OWN repo FF-only §11.4.113 + gitlink synced; 2/2 found real bugs):
@@ -124,7 +129,7 @@ Clean non-findings (audited, no RED reproducible): SQLite concurrent-writer cont
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **95 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + owned submodules (full table below; latest 11 waves = 32 fixes + 1 regression guard, newest `f6815b4` JWT-secret security + submodules `de1d023`/`a446a3d`, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak + deployment Docker-health + server TLS-key leak + api-server backend-error PASS-bluffs + deployment hardcoded-JWT-secret). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
+- **97 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + owned submodules (full table below; latest 12 waves = 34 fixes + 1 regression guard, newest submodules `0c72cdd` docs_chain + `a5269f3` containers, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak + deployment Docker-health + server TLS-key leak + api-server backend-error PASS-bluffs + deployment hardcoded-JWT-secret). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
