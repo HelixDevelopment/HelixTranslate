@@ -1,13 +1,20 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 60
-**Last modified:** 2026-06-15T12:48:00Z
+**Revision:** 61
+**Last modified:** 2026-06-15T12:59:00Z
 
-## 🔬 POST-VALIDATION BUG-HUNT WAVE (2026-06-15, 3 parallel subagents, all verified+pushed)
-After the green validation run, dispatched 3 worktree-isolated subagents on the
-highest-remaining-yield autonomous surfaces. **5 genuine, conductor-verified,
-independently mutation-proven fixes (campaign 63→68); honest clean non-findings on
-the rest (§11.4.118):**
+## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 6 parallel subagents over 2 waves, all verified+pushed)
+After the green validation run, dispatched 2 successive 3-wide worktree-isolated
+subagent waves on the highest-remaining-yield autonomous surfaces. **7 genuine,
+conductor-verified, independently mutation-proven fixes (campaign 63→70); honest
+clean non-findings on the rest (§11.4.118). HEAD `39ae131` green+pushed both upstreams.**
+
+WAVE 2 (`pkg/script`, `pkg/verification`, `pkg/preparation`):
+- **verification content-wipe** (`39ae131`, HIGH severity): a failed provider's zero-value `llmVerification{}` (empty PolishedText) fed `buildConsensus` → could win consensus and WIPE the section's translated content to `""`, plus diluted scores (0.9→0.300 with 2/3 failing). Fix = drop empty-Provider phantom entries before aggregation. RED; mutation disable-filter→"CONTENT CORRUPTION got ''"+"SCORE DILUTION 0.300"→restore→GREEN.
+- **preparation title data loss** (`a8cf0cd`): `writeSectionContent` wrote section.Content but never section.Title, yet the translator translates titles → names/terms in titles never reached the prep LLM. Fix = write Title before content. RED; mutation→"dropped section title"→restore→GREEN.
+- **`pkg/script` clean non-finding**: 30-letter table, 3 digraphs, all-caps engine, round-trip identity, DetectScript all audited correct; only candidates were already-pinned ambiguous/lossy cases (§11.4.6 — not bugs).
+
+WAVE 1 (`pkg/ebook`-FB2, `pkg/storage`, `pkg/distributed`):
 - **FB2 parser data loss** (`a22d0de`): section-level `<subtitle>/<epigraph>/<poem>/<cite>` silently dropped before translation+output; multi-line section `<title>` truncated to first line. Fix = recursive flatten + join all title lines. RED through real `FB2Parser.Parse`; mutation revert→"verse line not found"/"title not found"→restore→GREEN.
 - **storage CreateSession data loss** (`9ff5049`, both sqlite+postgres): INSERT omitted `end_time`+`error_message` → already-completed sessions persisted NULL → `GetStatistics.AverageDuration` reported 0 over zero rows. Fix = add columns to INSERT. RED + postgres integration guard; mutation→"EndTime lost"→restore→GREEN.
 - **distributed AlertManager ×2** (`0366941`): (1) `SendAlert` held `am.mu` across blocking channel SMTP/webhook I/O (~30s) stalling all AlertManager methods → snapshot-then-unlock; (2) `GetAlertHistory`/`GetAlerts` leaked shared `*DriftAlert` pointers → `-race`-proven field race vs `AcknowledgeAlert` → `copyDriftAlert` deep-copy. No protocol/message-shape change (worker version-compat held). RED -race; mutation revert→DATA RACE / "GetAlertHistory blocked"→restore→GREEN.
@@ -30,7 +37,7 @@ Clean non-findings (audited, no RED reproducible): SQLite concurrent-writer cont
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **68 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest wave = 5 fixes `a22d0de`/`9ff5049`/`0366941`, see POST-VALIDATION BUG-HUNT WAVE block at top). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
+- **70 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 2 waves = 7 fixes `a22d0de`/`9ff5049`/`0366941`/`a8cf0cd`/`39ae131`, see POST-VALIDATION BUG-HUNT WAVES block at top). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
