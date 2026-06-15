@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"errors"
@@ -40,6 +41,13 @@ type Handler struct {
 	authService        *security.UserAuthService
 	wsHub              *websocket.Hub
 	distributedManager interface{} // Will be *distributed.DistributedManager
+
+	// dashboard backs the Web Dashboard translation session endpoints
+	// (GET/POST/DELETE /api/v1/translations). Lazily initialised via
+	// dashboardStoreFor so zero-valued Handlers (constructed directly in tests)
+	// work without extra setup.
+	dashboard     *dashboardStore
+	dashboardOnce sync.Once
 }
 
 // NewHandler creates a new API handler
@@ -65,7 +73,10 @@ func NewHandler(
 func (h *Handler) RegisterRoutes(router *gin.Engine) {
 	// Health check
 	router.GET("/health", h.healthCheck)
-	router.GET("/", h.apiInfo)
+	// Root serves the Web Dashboard so end users land on the translation UI.
+	// Machine-readable API info moves to /api (preserved, not removed).
+	router.GET("/", h.serveDashboardPage)
+	router.GET("/api", h.apiInfo)
 
 	// WebSocket endpoint
 	router.GET("/ws", h.websocketHandler)
@@ -128,6 +139,11 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 
 		// Register batch processing routes
 		h.RegisterBatchRoutes(v1)
+
+		// Register Web Dashboard page + translation session endpoints. Without
+		// these the dashboard HTML is served at no route and
+		// /api/v1/translations 404s — the dashboard is dead for end users.
+		h.RegisterDashboardRoutes(router, v1)
 
 		// Authentication (if enabled)
 		if h.config.Security.EnableAuth {
