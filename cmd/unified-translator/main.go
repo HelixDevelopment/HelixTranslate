@@ -44,7 +44,7 @@ type UnifiedConfig struct {
 	Script     string // cyrillic, latin
 
 	// Provider Selection
-	Provider string // openai, anthropic, zhipu, deepseek, qwen, gemini, ollama, llamacpp, ssh
+	Provider string // openai, anthropic, zhipu, deepseek, qwen, gemini, llamacpp, ssh
 
 	// API/Local LLM Configuration
 	APIKey      string
@@ -522,7 +522,7 @@ func executeAPITranslation(ctx context.Context, config *UnifiedConfig, session *
 		// R-1/R2 default: source the strongest verified model from the LLMsVerifier
 		// bridge — NO local runtime, NO hardcoded provider. On no API keys the
 		// bridge hard-errors honestly (§11.4.69); there is NEVER a silent local
-		// llama.cpp/Ollama fallback. The legacy direct-provider NewLLMTranslator
+		// llama.cpp fallback. The legacy direct-provider NewLLMTranslator
 		// path is replaced by this bridge selection.
 		trans, err = bridgeTranslator(ctx, config)
 		if err != nil {
@@ -650,7 +650,7 @@ func parseFlags() *UnifiedConfig {
 	flag.StringVar(&config.TargetLang, "target-lang", "sr", "Target language (default: sr)")
 	flag.StringVar(&config.Script, "script", "cyrillic", "Target script: cyrillic, latin (default: cyrillic)")
 
-	flag.StringVar(&config.Provider, "provider", "openai", "Translation provider: openai, anthropic, zhipu, deepseek, qwen, gemini, ollama, llamacpp, ssh")
+	flag.StringVar(&config.Provider, "provider", "openai", "Translation provider: openai, anthropic, zhipu, deepseek, qwen, gemini, llamacpp, ssh")
 	flag.StringVar(&config.Model, "model", "gpt-4", "Model name")
 	flag.StringVar(&config.APIKey, "api-key", "", "API key for provider")
 	flag.StringVar(&config.BaseURL, "base-url", "", "Base URL for provider (if needed)")
@@ -734,8 +734,8 @@ func parseFlags() *UnifiedConfig {
 			fmt.Fprintf(os.Stderr, "Error: llama-model path required for provider=llamacpp\n")
 			os.Exit(1)
 		}
-	case "mock", "ollama":
-		// No API key required for mock or local Ollama
+	case "mock":
+		// No API key required for the mock offline test seam.
 	default:
 		// Fall back to the provider's well-known env var (e.g. DEEPSEEK_API_KEY)
 		// when -api-key was not passed. The gate previously checked ONLY the flag,
@@ -775,7 +775,6 @@ Providers:
   deepseek    - DeepSeek models (requires API key)
   qwen        - Qwen models (requires API key)
   gemini      - Google Gemini models (requires API key)
-  ollama      - Local Ollama models
   llamacpp    - Local llama.cpp models
   ssh         - Remote SSH worker with llama.cpp
 

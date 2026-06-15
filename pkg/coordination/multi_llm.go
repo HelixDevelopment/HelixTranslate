@@ -373,15 +373,10 @@ func (c *MultiLLMCoordinator) discoverProviders() map[string]map[string]interfac
 		}
 	}
 
-	// Check Ollama (local, no API key needed - lowest priority)
-	// Skip local LLMs if disabled
-	if !c.disableLocalLLMs && os.Getenv("OLLAMA_ENABLED") == "true" {
-		providers["ollama"] = map[string]interface{}{
-			"api_key":  "",
-			"model":    getEnvOrDefault("OLLAMA_MODEL", "llama3:8b"),
-			"priority": 1, // Free/local = low priority
-		}
-	}
+	// Local-runtime provider discovery removed per operator decision D2 — no local
+	// runtime. The disableLocalLLMs gate is retained (still meaningful for the
+	// remaining local-runtime work tracked under R-3/R-4); it currently gates no
+	// built-in discovery here.
 
 	return providers
 }

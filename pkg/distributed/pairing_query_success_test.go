@@ -19,7 +19,7 @@ func TestPairingManager_queryServiceInfoSuccess(t *testing.T) {
 			// Return providers response
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(`{
-				"providers": ["openai", "anthropic", "ollama"]
+				"providers": ["openai", "anthropic", "deepseek"]
 			}`))
 		} else if strings.Contains(r.URL.Path, "/health") {
 			// Return health response
@@ -111,7 +111,7 @@ func TestPairingManager_queryServiceInfoSuccess(t *testing.T) {
 	}
 
 	// Check that providers were extracted
-	expectedProviders := []string{"openai", "anthropic", "ollama"}
+	expectedProviders := []string{"openai", "anthropic", "deepseek"}
 	if len(service.Capabilities.Providers) != len(expectedProviders) {
 		t.Fatalf("Expected %d providers, got %d", len(expectedProviders), len(service.Capabilities.Providers))
 	}

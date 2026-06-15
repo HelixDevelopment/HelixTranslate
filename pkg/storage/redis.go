@@ -300,8 +300,8 @@ func (r *RedisStorage) Close() error {
 // implementation joined the metadata fields with a RAW ':' delimiter and only
 // hashed sourceText, so two DISTINCT (srcLang,tgtLang,provider,model) tuples
 // whose fields contained ':' concatenated to the SAME key — e.g.
-// provider="ollama" model="llama3:8b" collided with provider="ollama:llama3"
-// model="8b" (Ollama model ids natively contain ':'), serving the WRONG cached
+// provider="local" model="llama3:8b" collided with provider="local:llama3"
+// model="8b" (some model ids natively contain ':'), serving the WRONG cached
 // translation. A subsequent NUL-join was still not injection-proof (NUL can
 // appear in free-form sourceText / externally-supplied fields). The readable
 // "cache:<src>:<tgt>:<provider>:<model>:" prefix is retained for debuggability,

@@ -333,13 +333,13 @@ func TestFlagValidation(t *testing.T) {
 	// Test 2: Skip host flag validation for now
 	t.Run("HostFlagValidation", func(t *testing.T) {
 		// This test is disabled because flag parsing conflicts
-		t.Skip("Flag parsing conflicts in test environment")  // SKIP-OK: #legacy-untriaged
+		t.Skip("Flag parsing conflicts in test environment") // SKIP-OK: #legacy-untriaged
 	})
 
 	// Test 3: Skip port flag validation for now
 	t.Run("PortFlagValidation", func(t *testing.T) {
 		// This test is disabled because flag parsing conflicts
-		t.Skip("Flag parsing conflicts in test environment")  // SKIP-OK: #legacy-untriaged
+		t.Skip("Flag parsing conflicts in test environment") // SKIP-OK: #legacy-untriaged
 	})
 
 	// Test 4: Valid flags
@@ -485,7 +485,7 @@ func mockTranslationWorkflow(client *MockSSHClient, config *SSHConfig) error {
 	}
 
 	// Validate provider
-	validProviders := []string{"openai", "anthropic", "zhipu", "deepseek", "ollama"}
+	validProviders := []string{"openai", "anthropic", "zhipu", "deepseek"}
 	valid := false
 	for _, provider := range validProviders {
 		if config.Provider == provider {

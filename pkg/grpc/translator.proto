@@ -49,7 +49,7 @@ message TranslationRequest {
 
 // Provider Configuration
 message ProviderConfig {
-  string type = 1;  // openai, anthropic, zhipu, deepseek, qwen, gemini, ollama, llamacpp, ssh
+  string type = 1;  // openai, anthropic, zhipu, deepseek, qwen, gemini, llamacpp, ssh
   string model = 2;
   double temperature = 3;
   int32 max_tokens = 4;

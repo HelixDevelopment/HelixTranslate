@@ -134,46 +134,6 @@ func TestGeminiGetProviderName(t *testing.T) {
 	}
 }
 
-// TestOllamaTranslate tests Ollama Translate method
-func TestOllamaTranslate(t *testing.T) {
-	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Verify request contains expected data
-		if r.Method != "POST" {
-			t.Errorf("Expected POST request, got %s", r.Method)
-		}
-
-		// Return mock response
-		response := map[string]interface{}{
-			"response": "Bonjour le monde",
-			"done":     true,
-		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
-	}))
-	defer mockServer.Close()
-
-	config := TranslationConfig{
-		APIKey:  "test-key",
-		BaseURL: mockServer.URL,
-		Model:   "llama2",
-	}
-
-	client, err := NewOllamaClient(config)
-	if err != nil {
-		t.Fatalf("Error creating client: %v", err)
-	}
-
-	ctx := context.Background()
-	result, err := client.Translate(ctx, "Hello world", "Translate to French")
-	if err != nil {
-		t.Errorf("Translate() error = %v", err)
-		return
-	}
-	if result != "Bonjour le monde" {
-		t.Errorf("Translate() = %v, want %v", result, "Bonjour le monde")
-	}
-}
-
 // TestQwenOAuthTokenManagement tests OAuth token functions
 func TestQwenOAuthTokenManagement(t *testing.T) {
 	// Test with temporary directory for token storage
@@ -960,70 +920,6 @@ func TestAnthropicTranslate(t *testing.T) {
 	}
 }
 
-// TestTranslateErrorHandling tests error handling in Translate methods
-func TestTranslateErrorHandling(t *testing.T) {
-	// Test with server that returns an error
-	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
-	}))
-	defer mockServer.Close()
-
-	config := TranslationConfig{
-		APIKey:  "test-key",
-		BaseURL: mockServer.URL,
-		Model:   "llama2",
-	}
-
-	client, err := NewOllamaClient(config)
-	if err != nil {
-		t.Fatalf("Error creating client: %v", err)
-	}
-
-	ctx := context.Background()
-	_, err = client.Translate(ctx, "Hello world", "Translate to French")
-	if err == nil {
-		t.Error("Expected error for server error response")
-	}
-}
-
-// TestTranslateWithLongText tests handling of longer text
-func TestTranslateWithLongText(t *testing.T) {
-	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Return mock response
-		response := map[string]interface{}{
-			"response": "This is a very long translation",
-			"done":     true,
-		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
-	}))
-	defer mockServer.Close()
-
-	config := TranslationConfig{
-		APIKey:  "test-key",
-		BaseURL: mockServer.URL,
-		Model:   "llama2",
-	}
-
-	client, err := NewOllamaClient(config)
-	if err != nil {
-		t.Fatalf("Error creating client: %v", err)
-	}
-
-	ctx := context.Background()
-	// Test with longer text
-	longText := "This is a longer piece of text that would normally trigger different code paths in the translation logic."
-	result, err := client.Translate(ctx, longText, "Translate to German")
-	if err != nil {
-		t.Errorf("Translate() error = %v", err)
-		return
-	}
-	if result != "This is a very long translation" {
-		t.Errorf("Translate() = %v, want %v", result, "This is a very long translation")
-	}
-}
-
 // TestClientValidation tests client creation validation
 func TestClientValidation(t *testing.T) {
 	tests := []struct {
@@ -1031,13 +927,6 @@ func TestClientValidation(t *testing.T) {
 		config  TranslationConfig
 		wantErr bool
 	}{
-		{
-			name: "valid Ollama config",
-			config: TranslationConfig{
-				Model: "llama2",
-			},
-			wantErr: false,
-		},
 		{
 			name: "invalid Anthropic config - no API key",
 			config: TranslationConfig{
@@ -1061,8 +950,6 @@ func TestClientValidation(t *testing.T) {
 			// Test different providers based on model
 			var err error
 			switch {
-			case tt.config.Model == "llama2":
-				_, err = NewOllamaClient(tt.config)
 			case strings.Contains(tt.config.Model, "claude"):
 				_, err = NewAnthropicClient(tt.config)
 			case strings.Contains(tt.config.Model, "gemini"):
@@ -1165,12 +1052,6 @@ func TestProviderErrorHandling(t *testing.T) {
 		expectError  bool
 	}{
 		{
-			name:        "Ollama server error",
-			provider:    "ollama",
-			statusCode:  http.StatusInternalServerError,
-			expectError: true,
-		},
-		{
 			name:        "Gemini rate limit error",
 			provider:    "gemini",
 			statusCode:  http.StatusTooManyRequests,
@@ -1199,12 +1080,6 @@ func TestProviderErrorHandling(t *testing.T) {
 			var err error
 
 			switch tt.provider {
-			case "ollama":
-				config = TranslationConfig{
-					Model:   "llama2",
-					BaseURL: mockServer.URL,
-				}
-				client, err = NewOllamaClient(config)
 			case "gemini":
 				config = TranslationConfig{
 					APIKey:  "test-key",
@@ -1671,7 +1546,7 @@ func TestQwenRefreshTokenNetworkErrorPaths(t *testing.T) {
 // TestNewLlamaCppClientErrorPaths tests error paths in NewLlamaCppClient
 func TestNewLlamaCppClientErrorPaths(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
+		t.Skip("llama.cpp not installed") // SKIP-OK: #legacy-untriaged
 	}
 	seedLlamaCppModelsOffline(t) // keep auto-select offline + deterministic (§11.4.98)
 	tests := []struct {
@@ -1706,7 +1581,7 @@ func TestNewLlamaCppClientErrorPaths(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.skipIf != nil && tt.skipIf() {
-				t.Skip("Prerequisites not met for this test")  // SKIP-OK: #legacy-untriaged
+				t.Skip("Prerequisites not met for this test") // SKIP-OK: #legacy-untriaged
 			}
 
 			client, err := NewLlamaCppClient(tt.config)
@@ -1730,7 +1605,7 @@ func TestNewLlamaCppClientErrorPaths(t *testing.T) {
 // TestNewLlamaCppClientUncoveredPaths tests additional error paths in NewLlamaCppClient
 func TestNewLlamaCppClientUncoveredPaths(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
+		t.Skip("llama.cpp not installed") // SKIP-OK: #legacy-untriaged
 	}
 	seedLlamaCppModelsOffline(t) // keep auto-select offline + deterministic (§11.4.98)
 	// Test 1: Invalid model name that doesn't exist
@@ -2557,7 +2432,7 @@ func TestNewLlamaCppClientHardwareAndModelPaths(t *testing.T) {
 // TestNewLlamaCppClientDownloadPaths tests model download and caching paths in NewLlamaCppClient
 func TestNewLlamaCppClientDownloadPaths(t *testing.T) {
 	if _, err := findLlamaCppExecutable(); err != nil {
-		t.Skip("llama.cpp not installed")  // SKIP-OK: #legacy-untriaged
+		t.Skip("llama.cpp not installed") // SKIP-OK: #legacy-untriaged
 	}
 	seedLlamaCppModelsOffline(t) // keep auto-select offline + deterministic (§11.4.98)
 	// Test 1: Model selection and caching behavior
@@ -3009,166 +2884,6 @@ func TestAnthropicTranslateWithOptions(t *testing.T) {
 	client, err := NewAnthropicClient(config)
 	if err != nil {
 		t.Fatalf("Failed to create Anthropic client: %v", err)
-	}
-
-	ctx := context.Background()
-	result, err := client.Translate(ctx, "Hello", "Translate to French")
-	assert.NoError(t, err)
-	assert.Equal(t, "Bonjour", result)
-}
-
-// TestOllamaTranslateErrorPaths tests error paths in Ollama Translate function
-func TestOllamaTranslateErrorPaths(t *testing.T) {
-	tests := []struct {
-		name           string
-		serverResponse string
-		statusCode     int
-		expectError    bool
-		errorContains  string
-	}{
-		{
-			name:           "api_error_response",
-			serverResponse: `{"error": "model not found"}`,
-			statusCode:     404,
-			expectError:    true,
-			errorContains:  "Ollama API error (status 404)",
-		},
-		{
-			name:           "empty_response",
-			serverResponse: `{"response": ""}`,
-			statusCode:     200,
-			expectError:    false, // Empty response is technically valid
-		},
-		{
-			name:           "invalid_json_response",
-			serverResponse: `invalid json response`,
-			statusCode:     200,
-			expectError:    true,
-			errorContains:  "failed to unmarshal response",
-		},
-		{
-			name:           "network_error",
-			serverResponse: "", // Not used due to mock server failure
-			statusCode:     200,
-			expectError:    true,
-			errorContains:  "failed to send request",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.name == "network_error" {
-				// Test with invalid URL to simulate network error
-				config := TranslationConfig{
-					APIKey:  "test-key",
-					BaseURL: "http://invalid-host-name-12345.invalid",
-					Model:   "llama3:8b",
-				}
-
-				client, err := NewOllamaClient(config)
-				if err != nil {
-					t.Fatalf("Failed to create Ollama client: %v", err)
-				}
-
-				ctx := context.Background()
-				_, err = client.Translate(ctx, "Hello", "Translate to Spanish")
-				assert.Error(t, err)
-				assert.Contains(t, err.Error(), tt.errorContains)
-			} else {
-				// Create mock server
-				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					assert.Equal(t, "POST", r.Method)
-					assert.Equal(t, "/api/generate", r.URL.Path)
-					assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
-
-					w.WriteHeader(tt.statusCode)
-					w.Write([]byte(tt.serverResponse))
-				}))
-				defer server.Close()
-
-				config := TranslationConfig{
-					APIKey:  "test-api-key",
-					BaseURL: server.URL,
-					Model:   "llama3:8b",
-				}
-
-				client, err := NewOllamaClient(config)
-				if err != nil {
-					t.Fatalf("Failed to create Ollama client: %v", err)
-				}
-
-				ctx := context.Background()
-				_, err = client.Translate(ctx, "Hello", "Translate to Chinese")
-				if tt.expectError {
-					assert.Error(t, err)
-					if tt.errorContains != "" {
-						assert.Contains(t, err.Error(), tt.errorContains)
-					}
-				} else {
-					assert.NoError(t, err)
-				}
-			}
-		})
-	}
-}
-
-// TestOllamaTranslateWithContext tests context cancellation
-func TestOllamaTranslateWithContext(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Take some time to allow for context cancellation
-		time.Sleep(100 * time.Millisecond)
-		w.WriteHeader(200)
-		w.Write([]byte(`{"response": "Hola"}`))
-	}))
-	defer server.Close()
-
-	config := TranslationConfig{
-		APIKey:  "test-api-key",
-		BaseURL: server.URL,
-		Model:   "llama3:8b",
-	}
-
-	client, err := NewOllamaClient(config)
-	if err != nil {
-		t.Fatalf("Failed to create Ollama client: %v", err)
-	}
-
-	// Test with canceled context
-	ctx, cancel := context.WithCancel(context.Background())
-	cancel() // Cancel immediately
-
-	_, err = client.Translate(ctx, "Hello", "Translate to Spanish")
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "context canceled")
-}
-
-// TestOllamaTranslateWithCustomModel tests custom model names
-func TestOllamaTranslateWithCustomModel(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Read request body to verify model
-		body, _ := io.ReadAll(r.Body)
-		var request map[string]interface{}
-		json.Unmarshal(body, &request)
-
-		// Verify custom model is passed
-		if model, ok := request["model"].(string); !ok || model != "custom-model:latest" {
-			t.Errorf("Expected custom-model:latest, got %v", request["model"])
-		}
-
-		w.WriteHeader(200)
-		w.Write([]byte(`{"response": "Bonjour"}`))
-	}))
-	defer server.Close()
-
-	config := TranslationConfig{
-		APIKey:  "test-api-key",
-		BaseURL: server.URL,
-		Model:   "custom-model:latest",
-	}
-
-	client, err := NewOllamaClient(config)
-	if err != nil {
-		t.Fatalf("Failed to create Ollama client: %v", err)
 	}
 
 	ctx := context.Background()

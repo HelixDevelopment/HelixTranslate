@@ -46,7 +46,7 @@ func TestTranslateWithRemoteInstances_SliceRace(t *testing.T) {
 			dc.remoteInstances = append(dc.remoteInstances, &RemoteLLMInstance{
 				ID:        "inst",
 				WorkerID:  "missing-worker",
-				Provider:  "ollama",
+				Provider:  "deepseek",
 				Model:     "x",
 				Available: true,
 			})

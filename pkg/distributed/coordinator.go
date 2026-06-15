@@ -203,7 +203,7 @@ func (dc *DistributedCoordinator) queryRemoteProviders(ctx context.Context, serv
 
 	// Extract providers from response - handle both array and map formats
 	if providersList, ok := response["providers"].([]interface{}); ok {
-		// Array format: [{"name": "ollama", "models": [...], ...}, ...]
+		// Array format: [{"name": "llamacpp", "models": [...], ...}, ...]
 		for _, item := range providersList {
 			if providerMap, ok := item.(map[string]interface{}); ok {
 				if name, ok := providerMap["name"].(string); ok {
@@ -212,7 +212,7 @@ func (dc *DistributedCoordinator) queryRemoteProviders(ctx context.Context, serv
 			}
 		}
 	} else if providersMap, ok := response["providers"].(map[string]interface{}); ok {
-		// Map format: {"ollama": {...}, ...}
+		// Map format: {"llamacpp": {...}, ...}
 		for provider, config := range providersMap {
 			if configMap, ok := config.(map[string]interface{}); ok {
 				providers[provider] = configMap
@@ -228,7 +228,7 @@ func (dc *DistributedCoordinator) getPriorityForProvider(provider string) int {
 	switch provider {
 	case "openai", "anthropic", "zhipu", "deepseek":
 		return 10 // API key providers - highest priority
-	case "ollama", "llamacpp":
+	case "llamacpp":
 		return 5 // Local LLM providers - medium priority
 	default:
 		return 1 // Default priority

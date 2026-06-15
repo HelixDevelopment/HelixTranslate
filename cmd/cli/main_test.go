@@ -238,9 +238,11 @@ func TestProviderValidation(t *testing.T) {
 			valid:    true,
 		},
 		{
-			name:     "ollama provider",
+			// R-2 removal contract (operator D2 — no local runtime): ollama is no
+			// longer a valid provider.
+			name:     "ollama provider removed",
 			provider: "ollama",
-			valid:    true,
+			valid:    false,
 		},
 		{
 			name:     "llamacpp provider",
@@ -266,7 +268,6 @@ func TestProviderValidation(t *testing.T) {
 				"anthropic": true,
 				"deepseek":  true,
 				"zhipu":     true,
-				"ollama":    true,
 				"llamacpp":  true,
 			}
 
@@ -413,7 +414,7 @@ func TestErrorHandling(t *testing.T) {
 
 func TestIntegrationWorkflow(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")  // SKIP-OK: #short-mode
+		t.Skip("Skipping integration test in short mode") // SKIP-OK: #short-mode
 	}
 
 	// Test complete CLI workflow

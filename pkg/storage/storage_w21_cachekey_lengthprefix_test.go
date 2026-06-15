@@ -46,8 +46,8 @@ func TestW21_MakeCacheKey_NoDelimiterCollision(t *testing.T) {
 	}
 
 	// Length-prefix encoding must also keep the §W20 ':'-injection class collision-free.
-	keyC := r.makeCacheKey("Дом", "ru", "en", "ollama", "llama3:8b")
-	keyD := r.makeCacheKey("Дом", "ru", "en", "ollama:llama3", "8b")
+	keyC := r.makeCacheKey("Дом", "ru", "en", "local", "llama3:8b")
+	keyD := r.makeCacheKey("Дом", "ru", "en", "local:llama3", "8b")
 	if keyC == keyD {
 		t.Fatalf("':'-injection collision regressed in makeCacheKey: %q", keyC)
 	}

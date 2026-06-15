@@ -44,7 +44,7 @@ func TestUniversalTranslatorBasicFunctionality(t *testing.T) {
 
 // TestUniversalTranslatorProviderSwitching tests provider switching
 func TestUniversalTranslatorProviderSwitching(t *testing.T) {
-	providers := []string{"openai", "anthropic", "gemini", "ollama", "mock"}
+	providers := []string{"openai", "anthropic", "gemini", "deepseek", "mock"}
 
 	for _, provider := range providers {
 		t.Run(provider, func(t *testing.T) {

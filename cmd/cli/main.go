@@ -692,7 +692,7 @@ Options:
   -detect                 Detect source language and exit
 
   -p, -provider <name>    Translation provider (openai, anthropic,
-                          zhipu, deepseek, qwen, ollama, llamacpp) [default: openai]
+                          zhipu, deepseek, qwen, llamacpp) [default: openai]
   -model <name>           LLM model name (e.g., gpt-4, claude-3-sonnet)
   -api-key <key>          API key for LLM provider
   -base-url <url>         Base URL for LLM provider
@@ -702,7 +702,7 @@ Options:
 
    -c, -config <file>      Configuration file path
    -create-config <file>   Create a config file template
-   -disable-local-llms     Disable local LLM providers (Ollama), use only API providers
+   -disable-local-llms     Disable local LLM providers, use only API providers
    -prefer-distributed     Prefer distributed workers over local LLMs (when available)
    -v, -version            Show version
    -h, -help               Show this help
@@ -744,8 +744,8 @@ Examples:
   # Output as plain text
   translator -input book.epub -locale de -format txt
 
-  # Local Ollama translation
-  translator -input book.txt -locale es -provider ollama -model llama3:8b
+  # Local llama.cpp translation
+  translator -input book.txt -locale es -provider llamacpp -model mistral
 
 `, version, getSupportedLanguagesString())
 }

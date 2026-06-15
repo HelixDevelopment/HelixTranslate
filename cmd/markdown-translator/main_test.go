@@ -159,7 +159,7 @@ func TestFileOperations(t *testing.T) {
 }
 
 func TestProviderValidation(t *testing.T) {
-	validProviders := []string{"openai", "anthropic", "zhipu", "deepseek", "qwen", "gemini", "ollama"}
+	validProviders := []string{"openai", "anthropic", "zhipu", "deepseek", "qwen", "gemini"}
 
 	tests := []struct {
 		name     string
@@ -172,7 +172,7 @@ func TestProviderValidation(t *testing.T) {
 		{"ValidDeepSeek", "deepseek", true},
 		{"ValidQwen", "qwen", true},
 		{"ValidGemini", "gemini", true},
-		{"ValidOllama", "ollama", true},
+		{"RemovedOllama", "ollama", false}, // R-2: ollama provider removed (operator D2)
 		{"InvalidProvider", "invalid", false},
 		{"EmptyProvider", "", false},
 	}
@@ -313,7 +313,7 @@ func TestErrorHandling(t *testing.T) {
 		// Remove read permissions (on Unix systems)
 		err = os.Chmod(testFile, 0000)
 		if err != nil {
-			t.Skip("Cannot change file permissions on this system")  // SKIP-OK: #legacy-untriaged
+			t.Skip("Cannot change file permissions on this system") // SKIP-OK: #legacy-untriaged
 		}
 
 		// Restore permissions after test

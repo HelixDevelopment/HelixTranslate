@@ -34,7 +34,7 @@ type ServiceCapabilities struct {
 	MaxConcurrent     int      `json:"max_concurrent"`
 	SupportsBatch     bool     `json:"supports_batch"`
 	SupportsWebSocket bool     `json:"supports_websocket"`
-	LocalLLMs         []string `json:"local_llms,omitempty"` // ollama, llamacpp models
+	LocalLLMs         []string `json:"local_llms,omitempty"` // local-runtime models (e.g. llamacpp)
 }
 
 // VersionInfo represents version information for codebase and components

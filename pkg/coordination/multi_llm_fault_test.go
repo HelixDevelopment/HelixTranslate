@@ -55,9 +55,11 @@ func (m *faultMockTranslator) TranslateWithProgress(ctx context.Context, text, c
 	return m.Translate(ctx, text, c)
 }
 
-func (m *faultMockTranslator) GetStats() translator.TranslationStats { return translator.TranslationStats{} }
-func (m *faultMockTranslator) GetName() string                       { return "fault-mock" }
-func (m *faultMockTranslator) callCount() int64                      { return atomic.LoadInt64(&m.calls) }
+func (m *faultMockTranslator) GetStats() translator.TranslationStats {
+	return translator.TranslationStats{}
+}
+func (m *faultMockTranslator) GetName() string  { return "fault-mock" }
+func (m *faultMockTranslator) callCount() int64 { return atomic.LoadInt64(&m.calls) }
 
 // newCoordinator builds a coordinator directly with the given instances,
 // bypassing env discovery so tests are deterministic (§11.4.50).
@@ -511,7 +513,7 @@ func clearLLMEnv(t *testing.T) {
 	t.Helper()
 	for _, k := range []string{
 		"OPENAI_API_KEY", "ANTHROPIC_API_KEY", "ZHIPU_API_KEY",
-		"DEEPSEEK_API_KEY", "QWEN_API_KEY", "OLLAMA_ENABLED",
+		"DEEPSEEK_API_KEY", "QWEN_API_KEY",
 	} {
 		t.Setenv(k, "")
 	}

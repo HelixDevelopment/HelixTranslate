@@ -29,7 +29,7 @@ func TestNewMultiLLMTranslatorWrapperWithFactory_InjectedEnsembleThreaded(t *tes
 	// Ensure no ambient API keys leak the discovery path into a non-zero count.
 	for _, k := range []string{
 		"OPENAI_API_KEY", "ANTHROPIC_API_KEY", "ZHIPU_API_KEY",
-		"DEEPSEEK_API_KEY", "QWEN_API_KEY", "OLLAMA_ENABLED",
+		"DEEPSEEK_API_KEY", "QWEN_API_KEY",
 	} {
 		os.Unsetenv(k)
 	}
@@ -97,7 +97,7 @@ func TestNewMultiLLMTranslatorWrapperWithFactory_InjectedEnsembleThreaded(t *tes
 func TestNewMultiLLMTranslatorWrapperWithFactory_NilFactoryUnchanged(t *testing.T) {
 	for _, k := range []string{
 		"OPENAI_API_KEY", "ANTHROPIC_API_KEY", "ZHIPU_API_KEY",
-		"DEEPSEEK_API_KEY", "QWEN_API_KEY", "OLLAMA_ENABLED",
+		"DEEPSEEK_API_KEY", "QWEN_API_KEY",
 	} {
 		os.Unsetenv(k)
 	}

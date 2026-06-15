@@ -29,7 +29,7 @@ func NewLLMProviderChallenge() *LLMProviderChallenge {
 // Execute runs the LLM provider challenge.
 func (c *LLMProviderChallenge) Execute(ctx context.Context) (*challenge.Result, error) {
 	start := time.Now()
-	providers := []string{"openai", "anthropic", "deepseek", "zhipu", "qwen", "gemini", "ollama", "llamacpp"}
+	providers := []string{"openai", "anthropic", "deepseek", "zhipu", "qwen", "gemini", "llamacpp"}
 	assertions := []challenge.AssertionResult{}
 	allPass := true
 

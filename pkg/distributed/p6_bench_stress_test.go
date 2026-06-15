@@ -32,7 +32,7 @@ func newP6Fallback() *FallbackManager {
 
 func BenchmarkGetPriorityForProvider(b *testing.B) {
 	dc := newP6Coordinator()
-	providers := []string{"openai", "anthropic", "ollama", "llamacpp", "qwen", "unknown"}
+	providers := []string{"openai", "anthropic", "llamacpp", "qwen", "unknown"}
 	b.ResetTimer()
 	b.ReportAllocs()
 	var sink int
@@ -182,7 +182,8 @@ func TestStress_Coordinator_ConcurrentPriorityDecisions(t *testing.T) {
 	}
 	cases := []want{
 		{"openai", 10}, {"anthropic", 10}, {"zhipu", 10}, {"deepseek", 10},
-		{"ollama", 5}, {"llamacpp", 5},
+		{"llamacpp", 5},
+		{"ollama", 1}, // R-2: ollama removed — now default priority
 		{"qwen", 1}, {"", 1}, {"unknown-provider", 1},
 	}
 

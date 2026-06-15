@@ -86,7 +86,7 @@ func TestDistributedCoordinator(t *testing.T) {
 			{"anthropic", 10},
 			{"zhipu", 10},
 			{"deepseek", 10},
-			{"ollama", 5},
+			{"ollama", 1}, // R-2: ollama removed — now falls to default priority
 			{"llamacpp", 5},
 			{"unknown", 1},
 		}

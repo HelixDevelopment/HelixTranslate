@@ -113,7 +113,7 @@ func (h *Handler) HandleTranslateString(c *gin.Context) {
 	// selected by the bridge, and on no provider keys the bridge hard-errors
 	// (no silent local fallback, §11.4.69).
 	switch provider {
-	case "openai", "anthropic", "zhipu", "deepseek", "ollama", "llamacpp", "mock":
+	case "openai", "anthropic", "zhipu", "deepseek", "llamacpp", "mock":
 		trans, err = h.bridgeFor()(c.Request.Context(), selection.TaskRequirements{
 			SourceLang: sourceLang.Code,
 			TargetLang: targetLang.Code,
@@ -221,7 +221,7 @@ func (h *Handler) HandleTranslateDirectory(c *gin.Context) {
 	// the bridge selects the model and hard-errors on no provider keys (no silent
 	// local fallback, §11.4.69).
 	switch provider {
-	case "openai", "anthropic", "zhipu", "deepseek", "ollama", "llamacpp", "mock":
+	case "openai", "anthropic", "zhipu", "deepseek", "llamacpp", "mock":
 		trans, err = h.bridgeFor()(c.Request.Context(), selection.TaskRequirements{
 			SourceLang: sourceLang.Code,
 			TargetLang: targetLang.Code,

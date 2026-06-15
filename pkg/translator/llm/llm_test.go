@@ -768,7 +768,6 @@ func TestLLMTranslatorGetName(t *testing.T) {
 		{"deepseek", "deepseek-chat", "llm-deepseek"},
 		{"qwen", "qwen-max", "llm-qwen"},
 		{"gemini", "gemini-pro", "llm-gemini"},
-		{"ollama", "llama2", "llm-ollama"},
 		{"llamacpp", "mistral", "llm-llamacpp"},
 	}
 
@@ -776,7 +775,7 @@ func TestLLMTranslatorGetName(t *testing.T) {
 		t.Run(tt.provider, func(t *testing.T) {
 			// Skip LlamaCpp test as it requires actual models
 			if tt.provider == "llamacpp" {
-				t.Skip("LlamaCpp requires actual models to be installed")  // SKIP-OK: #legacy-untriaged
+				t.Skip("LlamaCpp requires actual models to be installed") // SKIP-OK: #legacy-untriaged
 			}
 
 			config := translator.TranslationConfig{
@@ -1202,19 +1201,6 @@ func TestCreateTranslationPrompt(t *testing.T) {
 	}
 }
 
-// TestOllamaProviderName tests Ollama GetProviderName method
-func TestOllamaProviderName(t *testing.T) {
-	config := TranslationConfig{Model: "llama2"}
-	client, err := NewOllamaClient(config)
-	if err != nil {
-		t.Fatalf("Error creating client: %v", err)
-	}
-
-	if client.GetProviderName() != "ollama" {
-		t.Errorf("Expected provider name \"ollama\", got \"%s\"", client.GetProviderName())
-	}
-}
-
 // TestNewLLMTranslatorWithConfigErrorPaths tests uncovered error paths in NewLLMTranslatorWithConfig
 func TestNewLLMTranslatorWithConfigErrorPaths(t *testing.T) {
 	t.Run("missing_provider", func(t *testing.T) {
@@ -1274,18 +1260,24 @@ func TestNewLLMTranslatorWithConfigErrorPaths(t *testing.T) {
 		}
 	})
 
-	t.Run("ollama_valid_model", func(t *testing.T) {
+	// R-2 removal contract (operator D2 — no local runtime): the Ollama provider
+	// is removed; the factory MUST now reject "ollama" as an unsupported provider
+	// rather than building a client. This is the GREEN guard for the removal.
+	t.Run("ollama_now_unsupported", func(t *testing.T) {
 		config := TranslationConfig{
 			Provider: "ollama",
-			Model:    "llama2", // Valid model in the list
+			Model:    "llama2",
 		}
 
 		translator, err := NewLLMTranslatorWithConfig(config)
-		if err != nil {
-			t.Errorf("Expected success with valid Ollama model, got error: %v", err)
+		if err == nil {
+			t.Error("Expected error: ollama provider removed (R-2), must be unsupported")
 		}
-		if translator == nil {
-			t.Error("Translator should not be nil with valid config")
+		if translator != nil {
+			t.Error("Translator must be nil for removed ollama provider")
+		}
+		if err != nil && !strings.Contains(err.Error(), "unsupported LLM provider") {
+			t.Errorf("Expected unsupported provider error for ollama, got: %v", err)
 		}
 	})
 
