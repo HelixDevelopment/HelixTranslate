@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -229,6 +231,23 @@ func loadDeploymentPlan(filename string) (*deployment.DeploymentPlan, error) {
 	return &plan, nil
 }
 
+// generateJWTSecret returns a cryptographically-random 256-bit secret as a hex
+// string for a generated deployment plan. A generated plan MUST NOT carry a
+// hardcoded/predictable JWT secret (e.g. "main-secret" / "worker-<id>-secret"):
+// an operator who deploys the plan without editing it would ship a known-constant
+// signing key — a trivial auth-bypass (§11.4.10 credentials mandate). crypto/rand
+// gives each generated plan a unique, unguessable secret with no review friction.
+// On the (practically impossible) rand read failure the field is left as an
+// explicit placeholder that validateDeploymentPlan-class checks can reject, rather
+// than silently emitting a weak constant.
+func generateJWTSecret() string {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "CHANGE_ME_BEFORE_DEPLOY"
+	}
+	return hex.EncodeToString(b)
+}
+
 func generateDeploymentPlan(cfg *config.Config) *deployment.DeploymentPlan {
 	plan := &deployment.DeploymentPlan{
 		Main:    generateMainConfig(cfg),
@@ -249,7 +268,7 @@ func generateDeploymentPlan(cfg *config.Config) *deployment.DeploymentPlan {
 				{HostPort: 8443 + workerIndex, ContainerPort: 8443, Protocol: "tcp"},
 			},
 			Environment: map[string]string{
-				"JWT_SECRET":   fmt.Sprintf("worker-%s-secret", workerID),
+				"JWT_SECRET":   generateJWTSecret(),
 				"WORKER_INDEX": fmt.Sprintf("%d", workerIndex),
 			},
 			Volumes: []deployment.VolumeMapping{
@@ -325,7 +344,7 @@ func generateMainConfig(cfg *config.Config) *deployment.DeploymentConfig {
 			{HostPort: mainPort, ContainerPort: 8443, Protocol: "tcp"},
 		},
 		Environment: map[string]string{
-			"JWT_SECRET": "main-secret",
+			"JWT_SECRET": generateJWTSecret(),
 			"MAIN_HOST":  host,
 			"ROLE":       "coordinator",
 		},

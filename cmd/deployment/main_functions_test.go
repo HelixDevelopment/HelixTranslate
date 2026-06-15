@@ -186,7 +186,15 @@ func TestGenerateDeploymentPlan(t *testing.T) {
 			expected := expectedValues[workerID]
 			assert.Equal(t, expected.Host, worker.Host)
 			assert.Equal(t, expected.User, worker.User)
-			assert.Equal(t, "worker-"+workerID+"-secret", worker.Environment["JWT_SECRET"])
+			// §11.4.120 reconciliation + §11.4.10: JWT_SECRET is now a crypto-random
+			// per-plan secret, NOT the old hardcoded "worker-<id>-secret" constant
+			// (which was a known signing key → auth bypass). Assert it is present,
+			// not the old constant, and a 256-bit hex secret.
+			secret := worker.Environment["JWT_SECRET"]
+			assert.NotEqual(t, "worker-"+workerID+"-secret", secret,
+				"worker JWT_SECRET must not be the old hardcoded constant")
+			assert.GreaterOrEqual(t, len(secret), 64,
+				"worker JWT_SECRET must be a 256-bit random hex secret")
 		}
 	}
 }
@@ -307,7 +315,13 @@ func TestDeploymentPlanGeneration(t *testing.T) {
 				assert.Equal(t, "testuser", worker.User)
 				assert.Equal(t, "translator-worker-worker1", worker.ContainerName)
 				assert.Equal(t, 8444, worker.Ports[0].HostPort)
-				assert.Equal(t, "worker-worker1-secret", worker.Environment["JWT_SECRET"])
+				// §11.4.120 reconciliation + §11.4.10: JWT_SECRET is now a crypto-random
+				// per-plan secret, not the old hardcoded "worker-worker1-secret" constant.
+				secret := worker.Environment["JWT_SECRET"]
+				assert.NotEqual(t, "worker-worker1-secret", secret,
+					"worker JWT_SECRET must not be the old hardcoded constant")
+				assert.GreaterOrEqual(t, len(secret), 64,
+					"worker JWT_SECRET must be a 256-bit random hex secret")
 			},
 		},
 		{
