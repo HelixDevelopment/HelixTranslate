@@ -48,6 +48,23 @@ type MultiPassPolisher struct {
 	database  *PolishingDatabase
 	eventBus  *events.EventBus
 	sessionID string
+
+	// ensembleFactory, when non-nil, is the injectable seam (R-1c) that supplies
+	// each pass's BookPolisher ensemble translators from an external source (e.g.
+	// the provider-diverse LLMsVerifier bridge) instead of the built-in
+	// per-provider NewLLMTranslator construction. nil = built-in construction
+	// (default, behaviour-preserving). It is set via SetEnsembleFactory by the
+	// binary main; the field is a plain function value, so this package stays
+	// decoupled from the bridge / internal/verifier packages (§11.4.28).
+	ensembleFactory EnsembleTranslatorFactory
+}
+
+// SetEnsembleFactory injects the optional provider-diverse ensemble factory used
+// to construct each pass's BookPolisher. Passing nil restores the default
+// built-in construction (behaviour-preserving). This is the additive plumbing
+// (R-1c) that lets the binary main redirect multi-pass polishing to the bridge.
+func (mpp *MultiPassPolisher) SetEnsembleFactory(factory EnsembleTranslatorFactory) {
+	mpp.ensembleFactory = factory
 }
 
 // PassResult contains results from a single pass
@@ -285,8 +302,13 @@ func (mpp *MultiPassPolisher) performPass(
 		}
 	}
 
-	// Create polisher
-	polisher, err := NewBookPolisher(polishingConfig, mpp.eventBus, fmt.Sprintf("%s_pass%d", mpp.sessionID, passNumber))
+	// Create polisher. When an ensemble factory has been injected (R-1c), source
+	// the pass's ensemble translators from it via NewBookPolisherWithFactory using
+	// the ctx already in scope for this pass; otherwise the nil branch runs the
+	// EXACT built-in per-provider construction (NewBookPolisher itself delegates to
+	// the factory variant with a background ctx + nil factory, so the default path
+	// is unchanged).
+	polisher, err := NewBookPolisherWithFactory(ctx, polishingConfig, mpp.eventBus, fmt.Sprintf("%s_pass%d", mpp.sessionID, passNumber), mpp.ensembleFactory)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create polisher: %w", err)
 	}

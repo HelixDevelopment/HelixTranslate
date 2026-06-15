@@ -17,9 +17,34 @@ func NewMultiLLMTranslatorWrapper(config translator.TranslationConfig, eventBus 
 	return NewMultiLLMTranslatorWrapperWithConfig(config, eventBus, sessionID, false, false)
 }
 
-// NewMultiLLMTranslatorWrapperWithConfig creates a new wrapper with configuration options
+// NewMultiLLMTranslatorWrapperWithConfig creates a new wrapper with configuration options.
+//
+// Behaviour-preserving wrapper: it delegates to
+// NewMultiLLMTranslatorWrapperWithFactory with a nil factory, so the default
+// per-provider discovery path is provably identical to the prior implementation.
 func NewMultiLLMTranslatorWrapperWithConfig(config translator.TranslationConfig, eventBus *events.EventBus, sessionID string, disableLocalLLMs bool, preferDistributed bool) (*MultiLLMTranslatorWrapper, error) {
-	coordinator := NewMultiLLMCoordinator(CoordinatorConfig{
+	return NewMultiLLMTranslatorWrapperWithFactory(config, eventBus, sessionID, disableLocalLLMs, preferDistributed, nil)
+}
+
+// NewMultiLLMTranslatorWrapperWithFactory creates a wrapper whose underlying
+// coordinator optionally sources its ensemble translators from an injected
+// EnsembleTranslatorFactory (e.g. the provider-diverse LLMsVerifier bridge)
+// instead of the built-in per-provider discovery. It is the additive plumbing
+// (R-1c) that threads the optional factory from the binary main down to the
+// coordinator leaf seam (NewMultiLLMCoordinatorWithFactory).
+//
+// When factory is nil the behaviour is byte-for-byte identical to the prior
+// NewMultiLLMTranslatorWrapperWithConfig: discovery runs exactly as before and
+// the same ErrNoLLMInstances is returned when no instances are available.
+func NewMultiLLMTranslatorWrapperWithFactory(
+	config translator.TranslationConfig,
+	eventBus *events.EventBus,
+	sessionID string,
+	disableLocalLLMs bool,
+	preferDistributed bool,
+	factory EnsembleTranslatorFactory,
+) (*MultiLLMTranslatorWrapper, error) {
+	coordinator := NewMultiLLMCoordinatorWithFactory(CoordinatorConfig{
 		MaxRetries:        3,
 		RetryDelay:        0, // No delay between retries with different instances
 		EventBus:          eventBus,
@@ -27,7 +52,7 @@ func NewMultiLLMTranslatorWrapperWithConfig(config translator.TranslationConfig,
 		DisableLocalLLMs:  disableLocalLLMs,
 		PreferDistributed: preferDistributed,
 		DistributedCoord:  nil, // CLI doesn't use distributed coordinator
-	})
+	}, factory)
 
 	if coordinator.GetInstanceCount() == 0 {
 		// Fall back to single translator if no instances available

@@ -20,6 +20,23 @@ type PreparationAwareTranslator struct {
 	preparationConfig *PreparationConfig
 	preparationResult *PreparationResult
 	enablePreparation bool
+
+	// ensembleFactory, when non-nil, is the injectable seam (R-1c) that supplies
+	// the preparation coordinator's provider-diverse translators from an external
+	// source (e.g. the LLMsVerifier bridge) instead of the built-in per-provider
+	// NewLLMTranslator construction. nil = built-in construction (default,
+	// behaviour-preserving). It is set via SetEnsembleFactory by the binary main;
+	// the field is a plain function value, so this package stays decoupled from
+	// the bridge / internal/verifier packages (§11.4.28).
+	ensembleFactory EnsembleTranslatorFactory
+}
+
+// SetEnsembleFactory injects the optional provider-diverse ensemble factory used
+// to construct the preparation coordinator. Passing nil restores the default
+// built-in construction (behaviour-preserving). This is the additive plumbing
+// (R-1c) that lets the binary main redirect the preparation phase to the bridge.
+func (pat *PreparationAwareTranslator) SetEnsembleFactory(factory EnsembleTranslatorFactory) {
+	pat.ensembleFactory = factory
 }
 
 // NewPreparationAwareTranslator creates a translator with optional preparation phase
@@ -77,8 +94,13 @@ func (pat *PreparationAwareTranslator) runPreparation(
 			"providers":  pat.preparationConfig.Providers,
 		})
 
-	// Create preparation coordinator
-	coordinator, err := NewPreparationCoordinator(*pat.preparationConfig)
+	// Create preparation coordinator. When an ensemble factory has been injected
+	// (R-1c), source the providers from it via NewPreparationCoordinatorWithFactory
+	// using the ctx already in scope for this preparation run; otherwise the nil
+	// branch runs the EXACT built-in construction (NewPreparationCoordinator
+	// itself delegates to the factory variant with a background ctx + nil factory,
+	// so the default path is unchanged).
+	coordinator, err := NewPreparationCoordinatorWithFactory(ctx, *pat.preparationConfig, pat.ensembleFactory)
 	if err != nil {
 		return fmt.Errorf("failed to create preparation coordinator: %w", err)
 	}
