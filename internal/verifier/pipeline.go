@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 )
@@ -179,18 +180,27 @@ func (p *Pipeline) checkModelExistence(ctx context.Context, provider ProviderCon
 		}
 	}
 
-	// Parse OpenAI-compatible models list: {"data":[{"id":"model-name",...}]}
+	// Parse OpenAI-compatible models list: {"data":[{"id":"model-name",...}]}.
+	// The body must be buffered first: resp.Body is a single-use stream, so the
+	// envelope-decode and the plain-array fallback decode MUST both read from the
+	// SAME buffered bytes. Decoding twice straight off resp.Body left the fallback
+	// reading an already-exhausted stream, so a bare-array ([{"id":...}]) catalog
+	// was never parsed and a present model was falsely reported "not found".
+	catalogBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return VerificationResult{Step: "model_existence", Passed: false, Score: 0, Error: err.Error()}
+	}
 	var modelsResp struct {
 		Data []struct {
 			ID string `json:"id"`
 		} `json:"data"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&modelsResp); err != nil {
-		// Try plain array fallback
+	if err := json.Unmarshal(catalogBody, &modelsResp); err != nil {
+		// Try plain array fallback from the same buffered bytes.
 		var plain []struct {
 			ID string `json:"id"`
 		}
-		if err := json.NewDecoder(resp.Body).Decode(&plain); err == nil {
+		if err := json.Unmarshal(catalogBody, &plain); err == nil {
 			modelsResp.Data = plain
 		}
 	}
