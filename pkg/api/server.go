@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,9 @@ type Server struct {
 	config     ServerConfig
 	router     *gin.Engine
 	translator translator.Translator
+
+	mu         sync.Mutex
+	httpServer *http.Server
 }
 
 // ServerConfig holds the server configuration
@@ -84,21 +88,31 @@ func (s *Server) GetRouter() *gin.Engine {
 	return s.router
 }
 
-// Start starts the server
+// Start starts the server. It blocks until the server is shut down (via Stop)
+// or fails. On a graceful Stop it returns http.ErrServerClosed.
 func (s *Server) Start(ctx context.Context) error {
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", s.config.Port),
 		Handler: s.router,
 	}
+	s.mu.Lock()
+	s.httpServer = srv
+	s.mu.Unlock()
 
 	return srv.ListenAndServe()
 }
 
-// Stop stops the server
+// Stop gracefully shuts the running server down. Returns nil if no server was
+// started; otherwise delegates to http.Server.Shutdown so in-flight requests
+// drain and the listener is closed (unblocking Start with http.ErrServerClosed).
 func (s *Server) Stop(ctx context.Context) error {
-	// Implementation would need to track the server instance
-	// For now, this is a placeholder
-	return nil
+	s.mu.Lock()
+	srv := s.httpServer
+	s.mu.Unlock()
+	if srv == nil {
+		return nil
+	}
+	return srv.Shutdown(ctx)
 }
 
 // SetTranslator sets the translator implementation
