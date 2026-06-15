@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -8,7 +9,9 @@ import (
 	"testing"
 
 	"digital.vasic.translator/internal/config"
+	"digital.vasic.translator/internal/verifier/selection"
 	"digital.vasic.translator/pkg/events"
+	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/websocket"
 
 	"github.com/gin-gonic/gin"
@@ -58,6 +61,7 @@ func TestTranslateFB2MoreCoverage(t *testing.T) {
 			distributedManager: nil,
 		}
 
+		installMockBridge(handler) // R-1b/R2: source translator from the bridge seam
 		router := gin.New()
 		router.POST("/translate/fb2", handler.translateFB2)
 
@@ -100,6 +104,7 @@ func TestTranslateFB2MoreCoverage(t *testing.T) {
 			distributedManager: nil,
 		}
 
+		installMockBridge(handler) // R-1b/R2: source translator from the bridge seam
 		router := gin.New()
 		router.POST("/translate/fb2", handler.translateFB2)
 
@@ -132,6 +137,12 @@ func TestTranslateFB2MoreCoverage(t *testing.T) {
 			distributedManager: nil,
 		}
 
+		// R-1b/R2: this case asserts the honest translator-creation failure path
+		// (empty config / no verified provider) maps to a 4xx/5xx. Inject the
+		// bridge hard error deterministically (§11.4.69).
+		handler.bridgeTranslatorFactory = func(_ context.Context, _ selection.TaskRequirements) (translator.Translator, error) {
+			return nil, fmt.Errorf("bridge: no verified translator available")
+		}
 		router := gin.New()
 		router.POST("/translate/fb2", handler.translateFB2)
 
@@ -165,6 +176,10 @@ func TestTranslateFB2MoreCoverage(t *testing.T) {
 			distributedManager: nil,
 		}
 
+		// R-1b/R2: assert the honest translator-creation failure path maps to 4xx/5xx.
+		handler.bridgeTranslatorFactory = func(_ context.Context, _ selection.TaskRequirements) (translator.Translator, error) {
+			return nil, fmt.Errorf("bridge: no verified translator available")
+		}
 		router := gin.New()
 		router.POST("/translate/fb2", handler.translateFB2)
 

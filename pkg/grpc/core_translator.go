@@ -9,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"digital.vasic.translator/internal/verifier/selection"
+	"digital.vasic.translator/pkg/bridge"
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/format"
@@ -25,6 +27,45 @@ type CoreTranslatorImpl struct {
 	logger   logger.Logger
 	sessions map[string]*TranslationJob
 	mutex    sync.RWMutex
+
+	// --- LLMsVerifier bridge seam (R-1b/R2) ---
+	// The default/API translation arm sources the STRONGEST verified model from
+	// the LLMsVerifier bridge instead of a local/hardcoded provider runtime. On
+	// no provider keys the bridge hard-errors — there is NO silent local fallback
+	// (§11.4.69).
+	//
+	// bridgeTranslatorFactory, when set, is the canonical build path (tests inject
+	// a fake so they need no real keys). When nil, bridgeFor lazily opens a real
+	// bridge (once) via bridgeOpener and uses BestTranslatorFunc.
+	bridgeTranslatorFactory func(context.Context, selection.TaskRequirements) (translator.Translator, error)
+	bridgeOpener            func(context.Context) (*bridge.Bridge, error)
+	bridge                  *bridge.Bridge
+	bridgeErr               error
+	bridgeOnce              sync.Once
+}
+
+// bridgeFor returns the active bridge translator factory, lazily opening a real
+// bridge exactly once when no factory was injected. The lazy open surfaces the
+// bridge's honest no-key hard error (§11.4.69) rather than masking it.
+func (ct *CoreTranslatorImpl) bridgeFor() func(context.Context, selection.TaskRequirements) (translator.Translator, error) {
+	if ct.bridgeTranslatorFactory != nil {
+		return ct.bridgeTranslatorFactory
+	}
+	return func(ctx context.Context, task selection.TaskRequirements) (translator.Translator, error) {
+		ct.bridgeOnce.Do(func() {
+			opener := ct.bridgeOpener
+			if opener == nil {
+				opener = func(c context.Context) (*bridge.Bridge, error) {
+					return bridge.Open(c, bridge.Options{})
+				}
+			}
+			ct.bridge, ct.bridgeErr = opener(ctx)
+		})
+		if ct.bridgeErr != nil {
+			return nil, ct.bridgeErr
+		}
+		return ct.bridge.BestTranslatorFunc(task)(ctx)
+	}
 }
 
 // TranslationJob represents an active translation job
@@ -345,28 +386,25 @@ func (ct *CoreTranslatorImpl) executeAPITranslation(job *TranslationJob, text st
 		"model":      req.ProviderConfig.Model,
 	})
 
-	// Create LLM translator
-	llmConfig := translator.TranslationConfig{
-		SourceLang:  req.SourceLang,
-		TargetLang:  req.TargetLang,
-		Provider:    req.ProviderConfig.Type,
-		Model:       req.ProviderConfig.Model,
-		Temperature: req.ProviderConfig.Temperature,
-		MaxTokens:   int(req.ProviderConfig.MaxTokens),
-		Timeout:     time.Duration(req.ProviderConfig.TimeoutSeconds) * time.Second,
-		APIKey:      req.ProviderConfig.ApiKey,
-		BaseURL:     req.ProviderConfig.BaseUrl,
-	}
-
-	llmTranslator, err := llm.NewLLMTranslator(llmConfig)
+	// R-1b/R2: source the translator from the LLMsVerifier bridge — the strongest
+	// verified model for the requested language pair — instead of constructing a
+	// local llm.NewLLMTranslator from the request's provider/model. On no provider
+	// keys the bridge returns a hard error which is surfaced honestly here; there
+	// is NO silent local-runtime fallback (§11.4.69). The request's provider /
+	// model / api_key fields no longer select a local client (the bridge selects
+	// the verified model); they remain on the wire for compatibility.
+	bridgeTranslator, err := ct.bridgeFor()(job.Context, selection.TaskRequirements{
+		SourceLang: req.SourceLang,
+		TargetLang: req.TargetLang,
+	})
 	if err != nil {
-		return "", fmt.Errorf("failed to create LLM translator: %w", err)
+		return "", fmt.Errorf("failed to create verified translator via bridge: %w", err)
 	}
 
-	ct.emitProgress(eventBus, job.ID, "api_ready", "translation", 10, "API client initialized")
+	ct.emitProgress(eventBus, job.ID, "api_ready", "translation", 10, "Verified model selected via bridge")
 
 	// Translate
-	result, err := llmTranslator.TranslateWithProgress(job.Context, text, "Ebook content", eventBus, job.ID)
+	result, err := bridgeTranslator.TranslateWithProgress(job.Context, text, "Ebook content", eventBus, job.ID)
 	if err != nil {
 		return "", fmt.Errorf("API translation failed: %w", err)
 	}

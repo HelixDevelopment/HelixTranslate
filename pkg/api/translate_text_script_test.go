@@ -31,6 +31,10 @@ func newScriptTestHandler() (*Handler, *gin.Engine) {
 	eventBus := events.NewEventBus()
 	wsHub := websocket.NewHub(eventBus)
 	h := &Handler{config: cfg, eventBus: eventBus, wsHub: wsHub, distributedManager: nil}
+	// R-1b/R2: translator construction now flows through the LLMsVerifier bridge.
+	// Inject the deterministic in-memory bridge factory so the script-conversion
+	// assertions exercise the seam without real provider keys (§11.4.27).
+	installMockBridge(h)
 	router := gin.New()
 	router.POST("/translate", h.translateText)
 	return h, router

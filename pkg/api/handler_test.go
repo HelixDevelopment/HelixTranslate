@@ -15,9 +15,11 @@ import (
 
 	"digital.vasic.translator/internal/cache"
 	"digital.vasic.translator/internal/config"
+	"digital.vasic.translator/internal/verifier/selection"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/models"
 	"digital.vasic.translator/pkg/security"
+	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -149,6 +151,13 @@ func TestTranslateText(t *testing.T) {
 				DefaultProvider: "openai",
 			},
 		},
+	}
+	// R-1b/R2: translator construction flows through the LLMsVerifier bridge, which
+	// hard-errors when no provider is verified (§11.4.69). These cases assert that
+	// honest translator-creation failure maps to a 400; inject a bridge factory
+	// that returns that hard error deterministically (no real keys / no network).
+	h.bridgeTranslatorFactory = func(_ context.Context, _ selection.TaskRequirements) (translator.Translator, error) {
+		return nil, fmt.Errorf("bridge: no verified translator available")
 	}
 
 	router := gin.New()
@@ -713,6 +722,12 @@ func TestTranslateFB2(t *testing.T) {
 				DefaultProvider: "openai",
 			},
 		},
+	}
+	// R-1b/R2: createTranslator now sources from the LLMsVerifier bridge; this test
+	// asserts the honest translator-creation failure path maps to 400. Inject the
+	// hard error deterministically (no real keys / no network) (§11.4.69).
+	h.bridgeTranslatorFactory = func(_ context.Context, _ selection.TaskRequirements) (translator.Translator, error) {
+		return nil, fmt.Errorf("bridge: no verified translator available")
 	}
 
 	router := gin.New()
@@ -1435,10 +1450,10 @@ type MockDistributedManager struct{}
 func (m *MockDistributedManager) TranslateDistributed(ctx context.Context, text, contextHint string) (string, error) {
 	return "distributed result", nil
 }
-func (m *MockDistributedManager) Initialize(localCoordinator interface{}) error { return nil }
-func (m *MockDistributedManager) DiscoverAndPairWorkers(ctx context.Context) error { return nil }
-func (m *MockDistributedManager) GetStatus() map[string]interface{} { return map[string]interface{}{} }
+func (m *MockDistributedManager) Initialize(localCoordinator interface{}) error          { return nil }
+func (m *MockDistributedManager) DiscoverAndPairWorkers(ctx context.Context) error       { return nil }
+func (m *MockDistributedManager) GetStatus() map[string]interface{}                      { return map[string]interface{}{} }
 func (m *MockDistributedManager) AddWorker(workerID string, workerCfg interface{}) error { return nil }
-func (m *MockDistributedManager) RemoveWorker(workerID string) error { return nil }
-func (m *MockDistributedManager) PairWorker(workerID string) error { return nil }
-func (m *MockDistributedManager) UnpairWorker(workerID string) error { return nil }
+func (m *MockDistributedManager) RemoveWorker(workerID string) error                     { return nil }
+func (m *MockDistributedManager) PairWorker(workerID string) error                       { return nil }
+func (m *MockDistributedManager) UnpairWorker(workerID string) error                     { return nil }

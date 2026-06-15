@@ -35,6 +35,11 @@ func newDashboardTestRouter(t *testing.T) *gin.Engine {
 	eventBus := events.NewEventBus()
 	wsHub := websocket.NewHub(eventBus)
 	h := NewHandler(cfg, eventBus, nil, nil, wsHub, nil)
+	// R-1b/R2: the dashboard start path translates via h.createTranslator, which now
+	// sources from the LLMsVerifier bridge. Inject the deterministic in-memory
+	// bridge factory so the wired-path translation produces real text without real
+	// provider keys or a network call (§11.4.27).
+	installMockBridge(h)
 
 	router := gin.New()
 	h.RegisterRoutes(router)

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -13,9 +14,11 @@ import (
 
 	"digital.vasic.translator/internal/cache"
 	"digital.vasic.translator/internal/config"
+	"digital.vasic.translator/internal/verifier/selection"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/models"
 	"digital.vasic.translator/pkg/security"
+	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/websocket"
 
 	"github.com/gin-gonic/gin"
@@ -68,6 +71,14 @@ func setupTestRouter() (*gin.Engine, *Handler) {
 	wsHub := websocket.NewHub(eventBus)
 
 	handler := NewHandler(cfg, eventBus, cache, authService, wsHub, nil)
+	// R-1b/R2: translator construction flows through the LLMsVerifier bridge, which
+	// hard-errors when no provider is verified (§11.4.69). The translate-path cases
+	// below assert that honest failure maps to a 400 ("missing API keys"); inject
+	// the hard error deterministically so the result does not depend on whatever
+	// keys the test host happens to have in its environment.
+	handler.bridgeTranslatorFactory = func(_ context.Context, _ selection.TaskRequirements) (translator.Translator, error) {
+		return nil, fmt.Errorf("bridge: no verified translator available")
+	}
 
 	router := gin.New()
 	handler.RegisterRoutes(router)

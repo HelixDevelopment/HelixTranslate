@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	"digital.vasic.translator/internal/verifier/selection"
 	"digital.vasic.translator/pkg/batch"
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/language"
 	"digital.vasic.translator/pkg/translator"
-	"digital.vasic.translator/pkg/translator/llm"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -106,21 +106,18 @@ func (h *Handler) HandleTranslateString(c *gin.Context) {
 		}
 	}
 
-	model := req.Model
-	if model == "" {
-		model = h.config.Translation.DefaultModel
-	}
-
-	translatorConfig := translator.TranslationConfig{
-		SourceLang: sourceLang.Code,
-		TargetLang: targetLang.Code,
-		Provider:   provider,
-		Model:      model,
-	}
-
+	// R-1b/R2: route translator construction through the LLMsVerifier bridge —
+	// the strongest verified model for this language pair — instead of a local
+	// NewLLMTranslator. The provider switch is retained ONLY as request
+	// validation (reject an unsupported provider with a 400); the actual model is
+	// selected by the bridge, and on no provider keys the bridge hard-errors
+	// (no silent local fallback, §11.4.69).
 	switch provider {
 	case "openai", "anthropic", "zhipu", "deepseek", "ollama", "llamacpp", "mock":
-		trans, err = llm.NewLLMTranslator(translatorConfig)
+		trans, err = h.bridgeFor()(c.Request.Context(), selection.TaskRequirements{
+			SourceLang: sourceLang.Code,
+			TargetLang: targetLang.Code,
+		})
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to create translator: %v", err)})
 			return
@@ -218,21 +215,17 @@ func (h *Handler) HandleTranslateDirectory(c *gin.Context) {
 		}
 	}
 
-	model := req.Model
-	if model == "" {
-		model = h.config.Translation.DefaultModel
-	}
-
-	translatorConfig := translator.TranslationConfig{
-		SourceLang: sourceLang.Code,
-		TargetLang: targetLang.Code,
-		Provider:   provider,
-		Model:      model,
-	}
-
+	// R-1b/R2: route translator construction through the LLMsVerifier bridge (the
+	// strongest verified model for this language pair) instead of a local
+	// NewLLMTranslator. The provider switch is retained ONLY as request validation;
+	// the bridge selects the model and hard-errors on no provider keys (no silent
+	// local fallback, §11.4.69).
 	switch provider {
 	case "openai", "anthropic", "zhipu", "deepseek", "ollama", "llamacpp", "mock":
-		trans, err = llm.NewLLMTranslator(translatorConfig)
+		trans, err = h.bridgeFor()(c.Request.Context(), selection.TaskRequirements{
+			SourceLang: sourceLang.Code,
+			TargetLang: targetLang.Code,
+		})
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to create translator: %v", err)})
 			return

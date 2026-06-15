@@ -42,6 +42,10 @@ func TestTranslate_NilOptions_NoPanic_CompletesPipeline(t *testing.T) {
 	outputEpub := filepath.Join(dir, "book_out.epub")
 
 	ct := newCT()
+	// R-1b/R2: the API translation arm sources from the LLMsVerifier bridge; inject
+	// the deterministic in-memory factory (mock "translated: <text>" transform) so
+	// the pipeline runs offline without real provider keys (§11.4.27).
+	installMockBridge(ct)
 	req := &proto.TranslationRequest{
 		SessionId:  "nil-options-session",
 		InputFile:  inputTxt,

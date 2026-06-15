@@ -13,8 +13,10 @@ import (
 	"digital.vasic.translator/pkg/script"
 	"digital.vasic.translator/pkg/security"
 	"digital.vasic.translator/pkg/translator"
-	"digital.vasic.translator/pkg/translator/llm"
 	"digital.vasic.translator/pkg/websocket"
+
+	"digital.vasic.translator/internal/verifier/selection"
+	"digital.vasic.translator/pkg/bridge"
 	"fmt"
 	"io"
 	"log"
@@ -48,6 +50,49 @@ type Handler struct {
 	// work without extra setup.
 	dashboard     *dashboardStore
 	dashboardOnce sync.Once
+
+	// --- LLMsVerifier bridge seam (R-1b/R2) ---
+	// All single-translator construction now sources the STRONGEST verified model
+	// from the LLMsVerifier bridge instead of a local/hardcoded provider runtime.
+	// On no provider keys the bridge hard-errors — there is NO silent local
+	// fallback (§11.4.69).
+	//
+	// bridgeTranslatorFactory, when set, is the canonical build path: it returns a
+	// translator.Translator for a selection.TaskRequirements. Tests inject a fake
+	// here so they need no real provider keys. When nil, bridgeFor lazily opens a
+	// real bridge (once) via bridgeOpener and uses BestTranslatorFunc.
+	bridgeTranslatorFactory func(context.Context, selection.TaskRequirements) (translator.Translator, error)
+	// bridgeOpener opens the underlying bridge. Defaults to bridge.Open with the
+	// zero Options (in-process, env keys). Overridable in tests to exercise the
+	// honest no-key hard-error path deterministically.
+	bridgeOpener func(context.Context) (*bridge.Bridge, error)
+	bridge       *bridge.Bridge
+	bridgeErr    error
+	bridgeOnce   sync.Once
+}
+
+// bridgeFor returns the active bridge translator factory, lazily opening a real
+// bridge exactly once when no factory was injected. The lazy open surfaces the
+// bridge's honest no-key hard error (§11.4.69) rather than masking it.
+func (h *Handler) bridgeFor() func(context.Context, selection.TaskRequirements) (translator.Translator, error) {
+	if h.bridgeTranslatorFactory != nil {
+		return h.bridgeTranslatorFactory
+	}
+	return func(ctx context.Context, task selection.TaskRequirements) (translator.Translator, error) {
+		h.bridgeOnce.Do(func() {
+			opener := h.bridgeOpener
+			if opener == nil {
+				opener = func(c context.Context) (*bridge.Bridge, error) {
+					return bridge.Open(c, bridge.Options{})
+				}
+			}
+			h.bridge, h.bridgeErr = opener(ctx)
+		})
+		if h.bridgeErr != nil {
+			return nil, h.bridgeErr
+		}
+		return h.bridge.BestTranslatorFunc(task)(ctx)
+	}
 }
 
 // NewHandler creates a new API handler
@@ -728,19 +773,26 @@ func (h *Handler) websocketHandler(c *gin.Context) {
 
 // Helper methods
 
-// createTranslator builds a translator for the given provider/model and
-// source/target language pair. When sourceLang/targetLang are both empty the
-// historical Russian→Serbian default is preserved (backward compatibility):
-// existing callers that pass "" keep their prior behaviour, while the
-// translateText handler now threads the request's source_lang/target_lang so a
-// caller asking for e.g. Spanish actually gets a Spanish translator instead of
-// the hardcoded Serbian one.
-func (h *Handler) createTranslator(providerName, model, sourceLang, targetLang string) (translator.Translator, error) {
+// createTranslator builds a translator for the given source/target language pair.
+//
+// R-1b/R2: the translator is now sourced from the LLMsVerifier bridge — the
+// STRONGEST verified model for the requested language pair — instead of a
+// local/hardcoded provider runtime. On no provider keys the bridge returns a
+// hard error and createTranslator propagates it honestly; there is NO silent
+// local fallback (§11.4.69). The legacy provider/model arguments no longer pick a
+// local client (the bridge selects the model); they are retained on the signature
+// for caller compatibility, except the special "distributed" provider which is
+// still routed to the distributed manager.
+//
+// When sourceLang/targetLang are both empty the historical Russian→Serbian
+// default is preserved (backward compatibility) so omitting the fields keeps the
+// previous language pair while an explicit pair is honoured.
+func (h *Handler) createTranslator(providerName, _, sourceLang, targetLang string) (translator.Translator, error) {
 	if providerName == "" {
 		providerName = h.config.Translation.DefaultProvider
 	}
 
-	// Handle distributed provider specially
+	// Handle distributed provider specially — unchanged by the bridge redirect.
 	if providerName == "distributed" {
 		if h.distributedManager == nil {
 			return nil, fmt.Errorf("distributed translation not available")
@@ -757,25 +809,10 @@ func (h *Handler) createTranslator(providerName, model, sourceLang, targetLang s
 		targetLang = "sr"
 	}
 
-	config := translator.TranslationConfig{
+	return h.bridgeFor()(context.Background(), selection.TaskRequirements{
 		SourceLang: sourceLang,
 		TargetLang: targetLang,
-		Provider:   providerName,
-		Model:      model,
-		Options:    make(map[string]interface{}),
-	}
-
-	// Load provider config
-	if providerCfg, ok := h.config.Translation.Providers[providerName]; ok {
-		config.APIKey = providerCfg.APIKey
-		config.BaseURL = providerCfg.BaseURL
-		if model == "" {
-			config.Model = providerCfg.Model
-		}
-		config.Options = providerCfg.Options
-	}
-
-	return llm.NewLLMTranslator(config)
+	})
 }
 
 // distributedTranslator wraps the distributed manager to implement translator.Translator interface

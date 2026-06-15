@@ -172,6 +172,9 @@ func TestTranslateTextSuccess(t *testing.T) {
 		wsHub:              wsHub,
 		distributedManager: nil, // Test local translation path
 	}
+	// R-1b/R2: translator construction flows through the LLMsVerifier bridge; inject
+	// the deterministic in-memory factory so the success path needs no real keys.
+	installMockBridge(handler)
 
 	router := gin.New()
 	router.POST("/translate", handler.translateText)

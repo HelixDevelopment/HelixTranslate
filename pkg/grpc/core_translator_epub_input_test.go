@@ -108,6 +108,11 @@ func TestCoreTranslator_EPUBInput_ProducesTranslatedContent(t *testing.T) {
 
 	log := logger.NewLogger(logger.LoggerConfig{Level: "error"})
 	ct := NewCoreTranslator(log)
+	// R-1b/R2: the API translation arm now sources its translator from the
+	// LLMsVerifier bridge. Inject the deterministic in-memory bridge factory
+	// (reproducing the mock provider's "translated: <text>" transform) so this
+	// end-to-end EPUB job runs without real provider keys (§11.4.27).
+	installMockBridge(ct.(*CoreTranslatorImpl))
 
 	req := &proto.TranslationRequest{
 		SessionId:  "epub-input-test",

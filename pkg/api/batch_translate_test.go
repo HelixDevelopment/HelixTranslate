@@ -42,6 +42,7 @@ func TestBatchTranslateMoreCoverage(t *testing.T) {
 			distributedManager: nil,
 		}
 
+		installMockBridge(handler) // R-1b/R2: source translator from the bridge seam
 		router := gin.New()
 		router.POST("/batch", handler.batchTranslate)
 
@@ -90,6 +91,7 @@ func TestBatchTranslateMoreCoverage(t *testing.T) {
 			distributedManager: nil,
 		}
 
+		installMockBridge(handler) // R-1b/R2: source translator from the bridge seam
 		router := gin.New()
 		router.POST("/batch", handler.batchTranslate)
 
@@ -199,6 +201,7 @@ func TestBatchTranslateMoreCoverage(t *testing.T) {
 			distributedManager: nil,
 		}
 
+		installMockBridge(handler) // R-1b/R2: source translator from the bridge seam
 		router := gin.New()
 		router.POST("/batch", handler.batchTranslate)
 
@@ -214,7 +217,11 @@ func TestBatchTranslateMoreCoverage(t *testing.T) {
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
-		// Should return 400 for invalid provider
-		assert.Equal(t, http.StatusBadRequest, w.Code)
+		// R-1b/R2: the "provider" field is now ADVISORY — the LLMsVerifier bridge
+		// selects the strongest VERIFIED model regardless of the requested provider
+		// name, so batchTranslate no longer rejects an unknown provider at the
+		// local-construction layer (the prior NewLLMTranslator allowlist is gone).
+		// The request is accepted and the bridge-sourced translator runs.
+		assert.Equal(t, http.StatusOK, w.Code)
 	})
 }
