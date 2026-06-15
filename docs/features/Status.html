@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 5 <strong>Last modified:</strong>
-2026-06-15T22:30:00Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 6 <strong>Last modified:</strong>
+2026-06-15T23:05:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -195,7 +195,7 @@ genuinely demonstrates the feature working (each cited <code>.mp4</code>
 was ffprobe-verified for non-zero duration+frames and content-verified
 against its claimed behaviour — e.g. real DeepSeek output in the target
 language, real gRPC translated text, live WebSocket count change).
-<strong>22 feature rows are video-confirmed</strong> this session across
+<strong>23 feature rows are video-confirmed</strong> this session across
 unified-translator (DeepSeek translate, EPUB→TXT / HTML→EPUB / FB2→EPUB
 / FB2→FB2 conversions, Serbian-Cyrillic, <code>-script</code>
 Cyrillic↔︎Latin, format-detection, help/version, <code>-verify</code>,
@@ -211,7 +211,15 @@ library client, and the <strong>LLMsVerifier→agent bridge CLI</strong>
 in-process verify→SQLite store→select strongest
 <code>novita/Sao10K/L3-8B-Stheno-v3.2</code> score 0.919 → live
 <code>invoke</code> EN→ES “Good morning, friend.” → “Buenos días,
-amigo.”; ffprobe 8.0s/80 frames, ≥6 frames content-verified).
+amigo.”; ffprobe 8.0s/80 frames, ≥6 frames content-verified) <strong>and
+the LLMsVerifier→agent bridge MCP-stdio surface</strong>
+(<code>cmd/model-bridge mcp</code> —
+<code>helixtranslate-bridge-mcp-stdio-20260615.mp4</code>: a real
+JSON-RPC MCP session over stdio —
+initialize→tools/list→<code>bridge_best_model</code>→<code>bridge_invoke</code>
+— where tool <code>bridge_invoke</code> returned a live verified-model
+translation “Le pont relie deux rives.” (isError:None); ffprobe
+11.88s/10 frames, ≥6 frames content-verified).
 <strong>Real-artifact-confirmed (not video):</strong> <strong>DOCX
 output</strong> is now Implemented — a real DeepSeek run produced
 <code>garden_es.docx</code> = <code>Microsoft Word 2007+</code>
@@ -311,20 +319,23 @@ remote SSH/llama.cpp worker host)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td><strong>22</strong> (real, content-verified recordings this session
-— see Anti-bluff note) — ≈ 4.6% of 478 enumerated rows (≈ 5.3% of the
+<td><strong>23</strong> (real, content-verified recordings this session
+— see Anti-bluff note) — ≈ 4.8% of 478 enumerated rows (≈ 5.5% of the
 417 headline). Plus <strong>2 real-artifact/unit-confirmed</strong>
 (DOCX output — produced <code>.docx</code> = Microsoft Word 2007+; PDF
 output — <code>pkg/ebook</code> tests green + weasyprint present; both
-video PENDING). Rev-5 (this run) flips the <strong>LLMsVerifier→agent
-bridge CLI</strong> row video PENDING→CONFIRMED
-(<code>helixtranslate-bridge-bestmodel-translate-20260615.mp4</code> —
-live <code>novita/Sao10K/L3-8B-Stheno-v3.2</code> EN→ES translation,
-ffprobe-verified). The MCP-stdio row stays video PENDING (the recording
-shows best-model+invoke, not the MCP surface — no bluff). Other Rev-4
-additions (pkg/bridge, internal/verifier gate, pkg/api/dashboard.go) are
-PASS at unit/integration/live-run level with video PENDING / SKIP / N/A
-— none claim a video that doesn’t exist</td>
+video PENDING). Rev-6 (this run) flips the <strong>LLMsVerifier→agent
+bridge MCP-stdio server</strong> row video PENDING→CONFIRMED
+(<code>helixtranslate-bridge-mcp-stdio-20260615.mp4</code> — a real
+JSON-RPC MCP-stdio session:
+initialize→tools/list→<code>bridge_best_model</code>→<code>bridge_invoke</code>,
+tool <code>bridge_invoke</code> returned live verified-model translation
+“Le pont relie deux rives.” isError:None, ffprobe 11.88s/10 frames, ≥6
+frames content-verified). Rev-5 had flipped the bridge CLI row
+(<code>helixtranslate-bridge-bestmodel-translate-20260615.mp4</code>).
+Other Rev-4 additions (pkg/bridge, internal/verifier gate,
+pkg/api/dashboard.go) are PASS at unit/integration/live-run level with
+video PENDING / SKIP / N/A — none claim a video that doesn’t exist</td>
 </tr>
 <tr>
 <td>Video-confirmation PENDING</td>
@@ -2760,10 +2771,20 @@ visible, not frozen/spinner per §11.4.107)</td>
 <code>model-bridge</code> in <code>.mcp.json</code>
 (<code>./build/model-bridge</code>)</td>
 <td>Covered (<code>cmd/model-bridge/mcp_test.go</code>)</td>
-<td><strong>PASS — MCP live nonce-echo captured</strong>
-(<code>HELIX-PROOF-9b21x</code> round-tripped through the MCP
-server)</td>
-<td>PENDING (terminal surface; recording owed)</td>
+<td><strong>PASS — real MCP JSON-RPC round-trip captured</strong>
+(initialize→tools/list→<code>bridge_best_model</code>→<code>bridge_invoke</code>
+over stdio; tool <code>bridge_invoke</code> returned live verified-model
+translation “Le pont relie deux rives.”, isError:None)</td>
+<td><strong>CONFIRMED</strong> — real-use video
+<code>/Volumes/T7/Downloads/Recordings/helixtranslate-bridge-mcp-stdio-20260615.mp4</code>
+(asciinema→agg→ffmpeg; ffprobe 11.88s / 10 frames / 790×560; ≥6 frames
+readable showing the progressive REAL MCP-stdio session —
+<code>tools/list</code>=[bridge_invoke, bridge_best_model, bridge_list],
+<code>bridge_best_model</code> strongest
+<code>novita/Sao10K/L3-8B-Stheno-v3.2</code> score 0.919 + fallback
+chain, and tool <code>bridge_invoke</code> real verified-model OUTPUT
+“Le pont relie deux rives.” with isError:None — not frozen/spinner per
+§11.4.107)</td>
 </tr>
 </tbody>
 </table>

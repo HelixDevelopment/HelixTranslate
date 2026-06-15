@@ -1,7 +1,7 @@
 # HelixTranslate — Feature Status Summary
 
-**Revision:** 5
-**Last modified:** 2026-06-15T22:30:00Z
+**Revision:** 6
+**Last modified:** 2026-06-15T23:05:00Z
 **Authority:** Two-audience companion to `docs/features/Status.md` (§11.4.56). Derived from the same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync), §11.4.6 (no-guessing).
 
 ---
@@ -14,13 +14,13 @@
 
 - We have a complete catalogue of **every feature** in the product and its 8 owned add-on modules — **478 individual capabilities** catalogued (470 from the source inventory + 2 output rows [DOCX + PDF output, both now built] + 6 new rows this round [the agent bridge CLI+MCP, the bridge library, the model-verification fix, the web-dashboard backend]; the headline "417" is the same list with closely-related sub-options counted once).
 - The majority are fully built and reachable: the command-line translators, the web dashboards, the REST and gRPC servers, ~32 built-in AI providers, ebook format readers (FB2, EPUB, DOCX, HTML, TXT, PDF) and writers (EPUB, FB2, TXT, HTML, Markdown, **DOCX and now PDF**), caching, security, and all 8 add-on modules.
-- **22 features are proven on real recordings** — each checked frame-by-frame to confirm it genuinely shows the feature working (real translated text in the right language, a live connection count changing, etc.), not just "a screen". These include: the primary command-line translator doing real DeepSeek translations and converting between ebook formats (EPUB→TXT, HTML→EPUB, FB2→EPUB, FB2→FB2), Serbian Cyrillic/Latin handling, the **multi-pass polishing engine (`-multipass`)**, the REST API server translating for real, the gRPC server translating English→Spanish, the markdown round-trip tool, the preparation/analysis runner (fixed), the simple CLI translator, the live monitoring dashboard, and **the agent bridge command-line tool** (picks the best verifier-scored model and translates through it — recording shows it choosing `novita/Sao10K/L3-8B-Stheno-v3.2` and translating "Good morning, friend." → "Buenos días, amigo.").
+- **23 features are proven on real recordings** — each checked frame-by-frame to confirm it genuinely shows the feature working (real translated text in the right language, a live connection count changing, etc.), not just "a screen". These include: the primary command-line translator doing real DeepSeek translations and converting between ebook formats (EPUB→TXT, HTML→EPUB, FB2→EPUB, FB2→FB2), Serbian Cyrillic/Latin handling, the **multi-pass polishing engine (`-multipass`)**, the REST API server translating for real, the gRPC server translating English→Spanish, the markdown round-trip tool, the preparation/analysis runner (fixed), the simple CLI translator, the live monitoring dashboard, **the agent bridge command-line tool** (picks the best verifier-scored model and translates through it — recording shows it choosing `novita/Sao10K/L3-8B-Stheno-v3.2` and translating "Good morning, friend." → "Buenos días, amigo."), and **the agent bridge MCP-stdio server** (a real JSON-RPC MCP session — recording shows `tools/list`, `bridge_best_model`, and the `bridge_invoke` tool returning a live model translation "Le pont relie deux rives.").
 - **DOCX output** is built and proven by the produced file itself (a real `.docx` = "Microsoft Word 2007+" with real translated text). **PDF output is newly built this round** and proven by passing tests (it renders the translated book to a real, valid PDF that keeps Serbian Cyrillic readable). Screen recordings of both are still owed, so they count as file/test-proven rather than video-proven for now.
-- **New this round:** the **agent bridge command-line tool** is now **video-proven** (`helixtranslate-bridge-bestmodel-translate-20260615.mp4` — real run picked `novita/Sao10K/L3-8B-Stheno-v3.2` and translated correctly); its **MCP server** counterpart is built, tested and live-proven at the code level but its screen recording is still owed; a **correctness fix in the model-verification gate** (a model that fails the basic "do you respond?" check is now properly rejected); and the **web dashboard's translation page** which used to return "page not found" and now genuinely translates.
+- **New this round:** the **agent bridge MCP-stdio server** is now **video-proven** (`helixtranslate-bridge-mcp-stdio-20260615.mp4` — a real JSON-RPC MCP session over stdio: initialize→tools/list→`bridge_best_model`→`bridge_invoke`, with the `bridge_invoke` tool returning a live verified-model translation "Le pont relie deux rives."), joining the **agent bridge command-line tool** which was video-proven the previous round (`helixtranslate-bridge-bestmodel-translate-20260615.mp4`); a **correctness fix in the model-verification gate** (a model that fails the basic "do you respond?" check is now properly rejected); and the **web dashboard's translation page** which used to return "page not found" and now genuinely translates.
 
 ## What is pending or limited
 
-- **Video proof is still the main gap:** **22 of 478** features have a recorded, watch-it-yourself demonstration (≈ 4.6%). Everything else is built and present in the code, but a recording is still owed. Nothing is claimed proven just because the code exists.
+- **Video proof is still the main gap:** **23 of 478** features have a recorded, watch-it-yourself demonstration (≈ 4.8%). Everything else is built and present in the code, but a recording is still owed. Nothing is claimed proven just because the code exists.
 - **PDF *output* is now built** (this round). The product can *read* DOCX and PDF, and can now *write* DOCX **and PDF**. Output is now EPUB, FB2, TXT, HTML, Markdown, DOCX and PDF. (PDF writing needs the `weasyprint` tool, which is installed here.)
 - **The web dashboard's video proof is honestly skipped, not faked:** recording the dashboard translating end-to-end needs the HelixQA web/video test backend, which was off-limits to this round. The page is proven working by its tests + a real run, but its on-camera proof is owed.
 - **Two remote-worker tools are blocked on infrastructure:** the SSH-based translators (`translate-ssh`, `ebook-translator`) need a remote helper machine running a local AI engine, which we don't have available. They build and start, then stop at the missing machine.
@@ -31,7 +31,7 @@
 
 ## Video-confirmation coverage
 
-**22 / 478 ≈ 4.6%**, plus **2 real-artifact/test-confirmed** (DOCX + PDF output, video PENDING). This is the headline number to keep improving: each new genuine recording raises it.
+**23 / 478 ≈ 4.8%**, plus **2 real-artifact/test-confirmed** (DOCX + PDF output, video PENDING). This is the headline number to keep improving: each new genuine recording raises it.
 
 ## Team actions
 
@@ -57,7 +57,7 @@ Derived 1:1 from `docs/features/.feature_inventory_raw.md` (Rev 1). Every detail
 | Not implemented (gap rows) | 0 (PDF-write flipped gap→Implemented Rev 4, commit fb265e7) |
 | Partial | 3 (`POST /api/batch`; `vision_engine` OpenCV; `cmd/translator` local STUB + remote OPERATOR-BLOCKED) |
 | Operator-blocked | 2 (`translate-ssh`, `ebook-translator`) |
-| Video-confirmed | 22 (+ 2 real-artifact/test-confirmed: DOCX + PDF output) |
+| Video-confirmed | 23 (+ 2 real-artifact/test-confirmed: DOCX + PDF output) |
 | Video PENDING | runtime/user-visible, no recording yet |
 | Video N/A | flags / internal types / infra middleware |
 
@@ -96,7 +96,7 @@ None — both former gap rows are now Implemented.
 
 ## New Rev 4 features (built + tested this round, recordings owed/skipped)
 
-1. **cmd/model-bridge + pkg/bridge** — LLMsVerifier→component+agent bridge (no local models): selects the best verifier-scored model (top-1 + fallback) and exposes it via a CLI and an MCP stdio server (`.mcp.json`). Commits ab1bed3 + a5860b2. PASS (real run: best-model `novita/Sao10K/L3-8B-Stheno-v3.2` score 0.919, `Invoke`→"Buenos días, amigo."; MCP nonce-echo `HELIX-PROOF-9b21x`; `go test -race ./pkg/bridge` green; §1.1 routing-guard `TestBridge_Invoke_RoutesToBestModel`). **CLI video CONFIRMED** (`helixtranslate-bridge-bestmodel-translate-20260615.mp4`, ffprobe 8.0s/80fr, §11.4.107 content-verified); MCP-stdio surface video still PENDING.
+1. **cmd/model-bridge + pkg/bridge** — LLMsVerifier→component+agent bridge (no local models): selects the best verifier-scored model (top-1 + fallback) and exposes it via a CLI and an MCP stdio server (`.mcp.json`). Commits ab1bed3 + a5860b2. PASS (real run: best-model `novita/Sao10K/L3-8B-Stheno-v3.2` score 0.919, `Invoke`→"Buenos días, amigo."; MCP nonce-echo `HELIX-PROOF-9b21x`; `go test -race ./pkg/bridge` green; §1.1 routing-guard `TestBridge_Invoke_RoutesToBestModel`). **CLI video CONFIRMED** (`helixtranslate-bridge-bestmodel-translate-20260615.mp4`, ffprobe 8.0s/80fr, §11.4.107 content-verified); **MCP-stdio surface video CONFIRMED** (`helixtranslate-bridge-mcp-stdio-20260615.mp4` — real JSON-RPC MCP session: initialize→tools/list→`bridge_best_model`→`bridge_invoke`, tool `bridge_invoke` real output "Le pont relie deux rives." isError:None; ffprobe 11.88s/10fr, ≥6 frames §11.4.107 content-verified).
 2. **internal/verifier affirmative-response hard-gate** — commit 97a8afd: a model with `affirmative_response=0` is now a hard disqualifier. PASS (§11.4.115 polarity guard `pipeline_affirmative_gate_test.go`: default RED reproduces pre-fix defect, `RED_MODE=0` GREEN guard green this session). Video N/A (internal gate, no user-visible surface).
 3. **pkg/api/dashboard.go web-dashboard backend** — commit f6ba5cc: dashboard page + translations endpoints, previously 404, now genuinely translates. PASS unit/integration (`dashboard_test.go` §11.4.115 RED→GREEN, `go test -race ./pkg/api` green; live run → "Dobro jutro, prijatelju."). Video **SKIP** (§11.4.3/§11.4.52 — autonomous browser+video capture needs the HelixQA web/video backend, off-limits this round; migration item owed; NOT a faked confirmation).
 
@@ -118,7 +118,7 @@ None — both former gap rows are now Implemented.
 
 ## Top gaps (engineering)
 
-1. **Video-confirmation 22/478** (+ 2 real-artifact/test-confirmed: DOCX + PDF output). 22 rows carry real, ffprobe- and content-verified recordings (Status.md cites each `.mp4`; the `-multipass` video is `helixtranslate-cli-multipass-verify-20260615.mp4`, ffprobe 888x630/93fr/9.3s; the bridge CLI video is `helixtranslate-bridge-bestmodel-translate-20260615.mp4`, ffprobe 790×560/80fr/8.0s; the 3 video-surfaced bug fixes — prep-translator dead, server TLS startup, REST hardcoded target-lang — are in commit `a5e8866`). The remaining Rev-4 additions carry `PENDING` (bridge MCP-stdio surface, PDF), `SKIP` (web dashboard — needs HelixQA web/video backend) or `N/A` (internal verifier gate). Per §11.4.2/§11.4.107 nothing may be marked video-confirmed without a real, content-verified file.
+1. **Video-confirmation 23/478** (+ 2 real-artifact/test-confirmed: DOCX + PDF output). 23 rows carry real, ffprobe- and content-verified recordings (Status.md cites each `.mp4`; the `-multipass` video is `helixtranslate-cli-multipass-verify-20260615.mp4`, ffprobe 888x630/93fr/9.3s; the bridge CLI video is `helixtranslate-bridge-bestmodel-translate-20260615.mp4`, ffprobe 790×560/80fr/8.0s; the bridge MCP-stdio video is `helixtranslate-bridge-mcp-stdio-20260615.mp4`, ffprobe 790×560/10fr/11.88s; the 3 video-surfaced bug fixes — prep-translator dead, server TLS startup, REST hardcoded target-lang — are in commit `a5e8866`). The remaining Rev-4 additions carry `PENDING` (PDF), `SKIP` (web dashboard — needs HelixQA web/video backend) or `N/A` (internal verifier gate). Per §11.4.2/§11.4.107 nothing may be marked video-confirmed without a real, content-verified file.
 2. **PDF output now Implemented** (Rev 4, commit fb265e7) — `pkg/ebook` now has FB2/EPUB/DOCX/PDF writers; zero open gap rows remain. Output is EPUB/FB2/TXT/HTML/MD/DOCX/PDF.
 3. **`-multipass` wired (d53e085); `-verify` ≠ `-multipass`** — unified-translator `-verify` runs the CLI's own per-step check; the new `-multipass` flag invokes the `pkg/verification` multi-pass polisher engine (now wired + video-confirmed). cmd/cli write-safety FIXED (87cd2be, atomic write/no-clobber, guard cmd/cli/no_partial_output_test.go) + title path-leak FIXED (d53e085).
 4. **2 binaries OPERATOR-BLOCKED + 1 local STUB** — `translate-ssh`/`ebook-translator` need a remote SSH/llama.cpp host; `cmd/translator` local path is a STUB.
@@ -129,7 +129,7 @@ None — both former gap rows are now Implemented.
 
 ## Video-coverage ratio
 
-`22 / 478` enumerated rows = **4.6%** (≈ 5.3% against the 417 headline). Plus 2 real-artifact/test-confirmed (DOCX + PDF output, video PENDING). This is the primary metric to drive upward; each anti-bluff §11.4.107 recording increments the numerator.
+`23 / 478` enumerated rows = **4.8%** (≈ 5.5% against the 417 headline). Plus 2 real-artifact/test-confirmed (DOCX + PDF output, video PENDING). This is the primary metric to drive upward; each anti-bluff §11.4.107 recording increments the numerator.
 
 ## Cross-references
 
