@@ -335,7 +335,7 @@ func rateLimitMiddleware(limiter *security.RateLimiter) gin.HandlerFunc {
 
 func generateTLSCertificates() error {
 	certDir := "certs"
-	if err := os.MkdirAll(certDir, 0755); err != nil {
+	if err := os.MkdirAll(certDir, 0700); err != nil {
 		return fmt.Errorf("failed to create certs directory: %w", err)
 	}
 
@@ -375,9 +375,18 @@ func generateTLSCertificates() error {
 	certOut.Close()
 
 	keyFile := filepath.Join(certDir, "server.key")
-	keyOut, err := os.Create(keyFile)
+	// Private key MUST NOT be world/group readable (credential-leak class
+	// defect): open with 0600 instead of os.Create's default 0666 (umask-masked
+	// to 0644). See §11.4.10 credentials-handling mandate.
+	keyOut, err := os.OpenFile(keyFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to create key file: %w", err)
+	}
+	// Enforce 0600 even when the file pre-existed (O_CREATE leaves an existing
+	// file's permissions untouched).
+	if err := keyOut.Chmod(0600); err != nil {
+		keyOut.Close()
+		return fmt.Errorf("failed to chmod key file: %w", err)
 	}
 	privateKeyBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
 	if err != nil {
