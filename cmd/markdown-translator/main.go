@@ -7,7 +7,6 @@ import (
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/markdown"
 	"digital.vasic.translator/pkg/preparation"
-	"digital.vasic.translator/pkg/translator"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -222,20 +221,27 @@ func main() {
 		fmt.Println()
 	}
 
-	// Step 2: Create translator
+	// Step 2: Create translator.
+	//
+	// R-1d wiring: markdown.WorkflowConfig.LLMProvider is the markdown package's
+	// dependency-injection seam for the LLM client. Its producer is the
+	// LLMsVerifier bridge — bridge.BestClient sources the strongest verified
+	// model's client (NO local runtime; honest hard error on no keys, §11.4.69).
+	// The workflow's translate step consumes the SAME client through that field,
+	// so the seam is genuinely wired (not an unset, nil-panicking field).
 	fmt.Printf("🔧 Step %d/%d: Initializing translator...\n", stepNum, totalSteps)
 	ctx := context.Background()
-	llmTranslator, err := createTranslator(ctx, b, task)
+	workflowCfg, err := bridgeWorkflowConfig(ctx, b, task)
 	if err != nil {
 		log.Fatalf("Failed to create translator: %v", err)
 	}
 	fmt.Printf("✓ Using bridge source: %s\n\n", b.Source())
 	stepNum++
 
-	// Step 3: Translate Markdown
+	// Step 3: Translate Markdown — driven through WorkflowConfig.LLMProvider.
 	fmt.Printf("🌍 Step %d/%d: Translating markdown content...\n", stepNum, totalSteps)
 	mdTranslator := markdown.NewMarkdownTranslator(func(text string) (string, error) {
-		return llmTranslator.Translate(ctx, text, "")
+		return workflowCfg.LLMProvider.Translate(ctx, text, "")
 	})
 
 	if err := mdTranslator.TranslateMarkdownFile(sourceMD, translatedMD); err != nil {
@@ -295,13 +301,23 @@ func main() {
 // 5m verify pass + 30s headroom, mirroring cmd/model-bridge's openBridge).
 const bridgeOpenTimeout = 5*time.Minute + 30*time.Second
 
-// createTranslator returns the single STRONGEST LLMsVerifier-verified translator
-// for the task (R-1a/R2). It no longer constructs a local/hardcoded provider via
-// llm.NewLLMTranslator: the model is selected by the bridge from the verified
-// set. With no provider API keys present the bridge's BestTranslator returns an
-// honest hard error — there is NO local-runtime (e.g. llama.cpp) fallback
-// (§11.4.69). The former -provider/llamacpp arm is intentionally removed (its
-// local-inference path is the silent-no-key fallback this redirect eliminates).
-func createTranslator(ctx context.Context, b *bridge.Bridge, task selection.TaskRequirements) (translator.Translator, error) {
-	return b.BestTranslatorFunc(task)(ctx)
+// bridgeWorkflowConfig produces a markdown.WorkflowConfig whose LLMProvider seam
+// is sourced from the LLMsVerifier bridge (R-1d wiring). bridge.BestClient
+// returns the strongest verified model's llm.LLMClient — NO local/hardcoded
+// provider, NO local runtime: with no provider API keys present BestClient
+// returns an honest hard error and this function propagates it, so there is
+// NEVER a silent local-runtime (e.g. llama.cpp) fallback (§11.4.69). The former
+// -provider/llamacpp arm is intentionally removed.
+func bridgeWorkflowConfig(ctx context.Context, b *bridge.Bridge, task selection.TaskRequirements) (markdown.WorkflowConfig, error) {
+	client, err := b.BestClient(ctx, task)
+	if err != nil {
+		return markdown.WorkflowConfig{}, err
+	}
+	return markdown.WorkflowConfig{
+		ChunkSize:        2000,
+		OverlapSize:      0,
+		MaxConcurrency:   4,
+		TranslationCache: map[string]string{},
+		LLMProvider:      client,
+	}, nil
 }
