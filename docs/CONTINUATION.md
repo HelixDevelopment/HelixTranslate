@@ -1,7 +1,25 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 74
-**Last modified:** 2026-06-15T16:08:00Z
+**Revision:** 75
+**Last modified:** 2026-06-15T17:42:00Z
+
+## 🎬 §11.4.153 FEATURE-STATUS VIDEO-CONFIRMATION SYNC (2026-06-15, ~25 real videos → ledger honest)
+The §11.4.153 per-feature Status ledger is now in honest sync with the real video evidence
+captured this session (docs uncommitted — conductor to commit; do NOT `git add -A`).
+
+**What landed before this sync (already pushed):**
+- **§11.4.153 doc set** (`docs/features/Status.md` + `Status_Summary.md`, 470/472 features, four-format HTML+PDF+DOCX) shipped in `58178a5`; constitution bump `74e7fbe`.
+- **3 video-surfaced bugs FIXED + pushed** in `a5e8866` (the green suite had missed all 3, §11.4.4/§11.4.138): (1) preparation-translator DEAD — DeepSeek API key never reached config (`-api-key`/env not wired) → "DeepSeek API key is required", no analysis JSON; (2) cmd/server TLS startup — config with no `tls_cert_file` failed to start; fix backfills self-signed certs in LoadConfig; (3) REST `POST /api/v1/translate` ignored `target_lang` (hardcoded) → always Serbian regardless of requested language.
+- **~25 real videos** captured under `/Volumes/T7/Downloads/Recordings/helixtranslate-*.mp4` (all ffprobe-verified dur>0+frames>0; key ones content-verified frame-by-frame this session).
+- **All 9 owned submodules GREEN** — coverage logs `qa-results/submodule_coverage_20260615/`.
+- **README §11.4.57** Tracked-Items doc-link section added (prior session).
+
+**This sync (Status.md/Status_Summary.md Rev 1→2 + exports re-synced):**
+- **Video-confirmed: 1 → 20** feature rows (≈4.3% of 472), each flipped to `Confirmed:` ONLY after the cited `.mp4` was content-verified (§11.4.6 no overclaim). Confirmed: unified-translator (DeepSeek translate; EPUB→TXT / HTML→EPUB / FB2→EPUB / FB2→FB2; Serbian-Cyrillic; `-script` Cyrillic↔Latin; format-detection; help/version; `-verify`), REST API (POST /api/v1/translate real DeepSeek + target_lang FIXED, TLS startup FIXED, /health·/version·/providers), gRPC (real EN→ES), markdown-translator (EPUB↔MD round-trip), preparation-translator (FIXED), cmd/cli (real DeepSeek), monitor-server (live WS hub), DeepSeek library client.
+- **Honest gaps recorded (§11.4.6, NOT confirmed):** DOCX output + PDF output UNIMPLEMENTED (no writer in `pkg/ebook`; unified-translator rejects them; 2 new gap rows added → 472 total); `-verify` ≠ `pkg/verification` multipass engine (engine has no CLI entry point wired in); `cmd/translator` local path = STUB ("local translation not yet implemented"); `cmd/translate-ssh` + `cmd/ebook-translator` = OPERATOR-BLOCKED (need remote SSH/llama.cpp worker host); `GET /api/v1/verified-models` = 404 (LLMsVerifier disabled in config); cmd/cli minor cosmetic file-path-leak into title metadata.
+- **Exports + fingerprint re-synced** via `docs_chain sync features` (applied: 6 derived nodes — HTML/PDF/DOCX × 2 docs) → `docs_chain verify features` = **in-sync** (RC=0); evidence `qa-results/docs_chain/20260615T144104Z/sync.log`; docs_chain state.json = §11.4.86 content-hash fingerprint store.
+
+**NEXT (open gaps queued):** implement DOCX/PDF output writers in `pkg/ebook`; wire `pkg/verification` multipass engine into a CLI entry point; implement `cmd/translator` local path; produce videos for remaining PENDING runtime features (web dashboard translation, other providers) to lift coverage. `translate-ssh`/`ebook-translator` stay OPERATOR-BLOCKED until a remote SSH/llama.cpp host is provided.
 
 ## 🔬 WAVE 15 — SECOND-PASS + determinism (campaign 101→110; second pass STILL productive)
 Parent HEAD `6c89910`, build/vet/test green, git OK, llms_verifier pointer intact.

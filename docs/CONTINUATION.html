@@ -173,78 +173,510 @@
 </head>
 <body>
 <h1
-id="continuation--helixtranslate-session-resumption-file">CONTINUATION —
+id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 58 <strong>Last modified:</strong>
-2026-06-15T12:20:00Z</p>
+<p><strong>Revision:</strong> 75 <strong>Last modified:</strong>
+2026-06-15T17:42:00Z</p>
 <h2
-id="white_check_mark-full-validation-run-2026-06-15-operator-requested-run-all-tests-challenges-helix-qa">✅
-FULL VALIDATION RUN (2026-06-15, operator-requested "run all tests,
-challenges, helix qa")</h2>
-<p><strong>360 packages GREEN, ZERO failures project-wide</strong> (real
-captured evidence, no bluff):</p>
+id="feature-status-video-confirmation-sync-2026-06-15-25-real-videos-ledger-honest">🎬
+§11.4.153 FEATURE-STATUS VIDEO-CONFIRMATION SYNC (2026-06-15, ~25 real
+videos → ledger honest)</h2>
+<p>The §11.4.153 per-feature Status ledger is now in honest sync with
+the real video evidence captured this session (docs uncommitted —
+conductor to commit; do NOT <code>git add -A</code>).</p>
+<p><strong>What landed before this sync (already pushed):</strong> -
+<strong>§11.4.153 doc set</strong> (<code>docs/features/Status.md</code>
++ <code>Status_Summary.md</code>, 470/472 features, four-format
+HTML+PDF+DOCX) shipped in <code>58178a5</code>; constitution bump
+<code>74e7fbe</code>. - <strong>3 video-surfaced bugs FIXED +
+pushed</strong> in <code>a5e8866</code> (the green suite had missed all
+3, §11.4.4/§11.4.138): (1) preparation-translator DEAD — DeepSeek API
+key never reached config (<code>-api-key</code>/env not wired) →
+“DeepSeek API key is required”, no analysis JSON; (2) cmd/server TLS
+startup — config with no <code>tls_cert_file</code> failed to start; fix
+backfills self-signed certs in LoadConfig; (3) REST
+<code>POST /api/v1/translate</code> ignored <code>target_lang</code>
+(hardcoded) → always Serbian regardless of requested language. -
+<strong>~25 real videos</strong> captured under
+<code>/Volumes/T7/Downloads/Recordings/helixtranslate-*.mp4</code> (all
+ffprobe-verified dur&gt;0+frames&gt;0; key ones content-verified
+frame-by-frame this session). - <strong>All 9 owned submodules
+GREEN</strong> — coverage logs
+<code>qa-results/submodule_coverage_20260615/</code>. - <strong>README
+§11.4.57</strong> Tracked-Items doc-link section added (prior
+session).</p>
+<p><strong>This sync (Status.md/Status_Summary.md Rev 1→2 + exports
+re-synced):</strong> - <strong>Video-confirmed: 1 → 20</strong> feature
+rows (≈4.3% of 472), each flipped to <code>Confirmed:</code> ONLY after
+the cited <code>.mp4</code> was content-verified (§11.4.6 no overclaim).
+Confirmed: unified-translator (DeepSeek translate; EPUB→TXT / HTML→EPUB
+/ FB2→EPUB / FB2→FB2; Serbian-Cyrillic; <code>-script</code>
+Cyrillic↔︎Latin; format-detection; help/version; <code>-verify</code>),
+REST API (POST /api/v1/translate real DeepSeek + target_lang FIXED, TLS
+startup FIXED, /health·/version·/providers), gRPC (real EN→ES),
+markdown-translator (EPUB↔︎MD round-trip), preparation-translator
+(FIXED), cmd/cli (real DeepSeek), monitor-server (live WS hub), DeepSeek
+library client. - <strong>Honest gaps recorded (§11.4.6, NOT
+confirmed):</strong> DOCX output + PDF output UNIMPLEMENTED (no writer
+in <code>pkg/ebook</code>; unified-translator rejects them; 2 new gap
+rows added → 472 total); <code>-verify</code> ≠
+<code>pkg/verification</code> multipass engine (engine has no CLI entry
+point wired in); <code>cmd/translator</code> local path = STUB (“local
+translation not yet implemented”); <code>cmd/translate-ssh</code> +
+<code>cmd/ebook-translator</code> = OPERATOR-BLOCKED (need remote
+SSH/llama.cpp worker host); <code>GET /api/v1/verified-models</code> =
+404 (LLMsVerifier disabled in config); cmd/cli minor cosmetic
+file-path-leak into title metadata. - <strong>Exports + fingerprint
+re-synced</strong> via <code>docs_chain sync features</code> (applied: 6
+derived nodes — HTML/PDF/DOCX × 2 docs) →
+<code>docs_chain verify features</code> = <strong>in-sync</strong>
+(RC=0); evidence
+<code>qa-results/docs_chain/20260615T144104Z/sync.log</code>; docs_chain
+state.json = §11.4.86 content-hash fingerprint store.</p>
+<p><strong>NEXT (open gaps queued):</strong> implement DOCX/PDF output
+writers in <code>pkg/ebook</code>; wire <code>pkg/verification</code>
+multipass engine into a CLI entry point; implement
+<code>cmd/translator</code> local path; produce videos for remaining
+PENDING runtime features (web dashboard translation, other providers) to
+lift coverage. <code>translate-ssh</code>/<code>ebook-translator</code>
+stay OPERATOR-BLOCKED until a remote SSH/llama.cpp host is provided.</p>
+<h2
+id="wave-15-second-pass-determinism-campaign-101110-second-pass-still-productive">🔬
+WAVE 15 — SECOND-PASS + determinism (campaign 101→110; second pass STILL
+productive)</h2>
+Parent HEAD <code>6c89910</code>, build/vet/test green, git OK,
+llms_verifier pointer intact. - <strong>pkg/ebook</strong>
+<code>6c11dee</code> (#102): EPUB parser set chapter.Title to the zip
+entry name → EPUB→translate→EPUB rendered “OEBPS/chapter1.xhtml” as
+every chapter heading + TOC entry (core use case). Fix =
+extractChapterTitle (
+<title>
+/
+<h1>
+<p>). RED+mutation-proven. - <strong>pkg/translator/llm</strong>
+<code>4413b76</code> (#103,#104): gemini + llamacpp ignored
+-temperature/-max-tokens (gemini silently capped output at 4000 tokens).
+Fix = standard Options&gt;typed&gt;default precedence.
+RED+mutation-proven. - <strong>llms_verifier</strong>
+<code>cd908195</code> (gitlink <code>6c89910</code>, #105–#110): 6
+§11.4.50 determinism defects — 4 ID-collision PRODUCT bugs
+(security/scheduler×2/logging UnixNano-only → duplicate audit/run/log
+IDs; crypto/rand suffix) + 2 flaky tests (scoring recency-date drift,
+client brotli live-endpoint coupling). Mutation-proven; 5 pkgs
+deterministic -count=3..30; FF-pushed all LLMsVerifier remotes.
+SECOND-PASS LESSON (§11.4.118): re-hunting “already-swept” surfaces with
+fresh angles STILL found 9 genuine bugs — fresh angles find what the
+first pass missed. KNOWN follow-up (§11.4.118, flagged NOT fixed): ~12
+other UnixNano-only ID generators in llms_verifier (api/audit_logger,
+events/websocket_server, notifications,
+scoring/alert_manager+api_handlers, enhanced/*) have NO uniqueness test
+— latent collision risk.</p>
+<h2
+id="comprehensive-bug-hunt-complete-101-fixes-1-guard-main-module-all-8-owned-submodules-swept">🏁
+COMPREHENSIVE BUG-HUNT COMPLETE — 101 fixes + 1 guard; main module + ALL
+8 owned submodules swept</h2>
+<p>Wave 14 (challenges + llms_verifier) closed the submodule sweep.
+Parent HEAD <code>c47989a</code>, git OK, llms_verifier pointer intact.
+- <strong>challenges</strong> <code>349b0f1</code> (gitlink
+<code>a449d13</code>, #100): bank ValidateFile JSON-only rejected YAML
+banks + skipped test_cases validation — a bluff in the anti-bluff
+framework. RED+mutation-proven; §11.4.113 rebased over a parallel
+session; FF-pushed all Challenges remotes. -
+<strong>llms_verifier</strong> <code>1e0de43c</code> (gitlink
+<code>c47989a</code>, #101): the verification GATE (CONST-036) certified
+code-BLIND models as Status=verified → IsModelVerified passed them. Fix
+keys off CodeVisibility. RED + §11.4.120 reconciliation of the
+bluff-enshrining test + mutation-proven; verification pkg -race green;
+FF-pushed all LLMsVerifier remotes. Submodule yield 8/8 (doc_processor,
+llm_orchestrator, docs_chain, containers, security, vision_engine,
+challenges, llms_verifier) — every owned submodule had a genuine fix.
+<strong>KNOWN follow-up (honest disclosure §11.4.118, NOT yet
+fixed):</strong> llms_verifier has PRE-EXISTING flaky/time-dependent
+tests in scoring (recency-date drift), security (timestamp uniqueness),
+client (brotli env) — independent of #101, don’t import verification — a
+§11.4.50 determinism cleanup for a follow-up.</p>
+<h2
+id="submodule-wave-13-security-vision_engine-campaign-9799-submodule-yield-66">🔬
+SUBMODULE WAVE 13 (security, vision_engine) — campaign 97→99, submodule
+yield 6/6</h2>
 <ul>
-<li><strong>Main module:</strong> 59 ok / 0 FAIL
-(<code>go test ./... -p 1</code>, clean baseline).</li>
-<li><strong>9 Go submodules:</strong> 176 ok / 0 FAIL (challenges 18,
-containers 38, doc_processor 10, docs_chain 8, llm_orchestrator 9,
-llm_provider 52, llms_verifier 15, security 18, vision_engine 8;
-constitution = non-Go).</li>
-<li><strong>HelixQA tool (digital.vasic.helixqa):</strong> 125 ok / 0
-FAIL (own core suite; build clean).</li>
-<li><strong>Challenge suite:</strong> all PASS or honest §11.4.3 SKIP —
-cache_invalidation, degraded_mode, model_verification_gate,
+<li><strong>security</strong> <code>3782c27</code> (gitlink
+<code>fb7cc11</code>, HIGH): securestorage read-path RLock while helpers
+mutate the in-memory AES key + cache → concurrent readers corrupt the
+secret key. Fix = RLock→Lock + lock the unlocked IsSecure.
+RED+mutation-proven; 18 pkgs -race green; FF-pushed all Security
+remotes. (SSRF/e2ee/AES-GCM audited hardened.)</li>
+<li><strong>vision_engine</strong> <code>e40e6f9</code> (gitlink
+<code>799121e</code>): Gemini response returned only Parts[0].Text →
+multi-part analyses silently truncated. Fix = concatenate all parts +
+empty guard. RED+mutation-proven; 8 pkgs -race green; FF-pushed all
+VisionEngine remotes. Owned submodules hunted 6/6 ALL with genuine
+fixes: doc_processor, llm_orchestrator, docs_chain, containers,
+security, vision_engine. Remaining: challenges, llms_verifier (in flight
+wave 14).</li>
+</ul>
+<h2
+id="post-validation-bug-hunt-waves-2026-06-15-32-parallel-subagents-over-12-waves-all-verifiedpushed">🔬
+POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 32 parallel subagents over
+12 waves, all verified+pushed)</h2>
+<p>After the green validation run, dispatched 12 worktree-isolated
+subagent waves (3-wide, later 2-wide for FD safety) sweeping the ENTIRE
+main-module Go surface + the owned submodules (§11.4.28). <strong>34
+genuine, conductor-verified, independently mutation-proven fixes
+(campaign 63→97) + 1 teeth-proven regression guard; honest clean
+non-findings + documented honest gaps (§11.4.118/§11.4.6). Parent HEAD
+<code>d7db22f</code>, build/vet/test green. SUBMODULE YIELD 4/4 (each
+fix committed into its OWN repo FF-only §11.4.113 + gitlink synced +
+parent pushed; 2 needed §11.4.113 rebase-onto-latest over parallel
+sessions). NOTE: host FD pressure (<code>ENFILE</code>) under 3
+concurrent -race agents — waves 9+ at 2-wide (§12).</strong></p>
+<p>WAVE 12 — submodules: - <strong>docs_chain</strong>
+<code>0c72cdd</code> (gitlink <code>a57ebd9</code>):
+canonicalDumpAllTables content-hash collision (unescaped TAB/NL →
+distinct DB states share a hash → verify false-in-sync / sync misses
+change) in the §11.4.106 engine. Fix = escapeDumpField injective
+escaping. RED+mutation-proven; 8 pkgs -race green; FF-pushed
+vasic-digital/docs_chain. - <strong>containers</strong>
+<code>a5269f3</code> (gitlink <code>d7db22f</code>): LazyBooter.err
+plain-field data race (torn/stale boot-error read + -race crash). Fix =
+atomic.Pointer[error]. RED+mutation-proven; 38-pkg suite green;
+§11.4.113 rebased over a parallel health/custom fix + FF-pushed all 7
+Containers remotes.</p>
+<p>WAVE 11 — OWNED SUBMODULES (§11.4.28 equal-codebase; init-only, no
+rm/symlink; committed into each submodule’s OWN repo FF-only §11.4.113 +
+gitlink synced; 2/2 found real bugs): - <strong>doc_processor</strong>
+<code>de1d023</code> (gitlink <code>4057d31</code>): fenced-code-block
+<code>#</code> line parsed as a heading → phantom section + content
+truncation. Fix = codeFenceRanges + filterHeadingsOutsideCodeFences.
+RED+mutation-proven; 10 pkgs -race green; pushed FF to DocProcessor. -
+<strong>llm_orchestrator</strong> <code>a446a3d</code> (gitlink
+<code>5778aec</code>): PipeTransport.Receive lost/mis-ordered a message
+on ctx-cancel (throwaway goroutine read+discarded) + pt.closed race. Fix
+= persistent in-order reader + sticky termErr.
+RED(RED_MODE)+mutation-proven; 9 pkgs -race green. §11.4.113 INTEGRATED
+onto latest master (rebased over a parallel-session opencode WaitDelay
+fix, disjoint, both coexist) then FF-pushed all LLMOrchestrator
+remotes.</p>
+<p>SECURITY-REVIEW REMEDIATION (<code>f6815b4</code>): automated review
+flagged the wave-10 deployment fix — generate-plan emitted hardcoded JWT
+secrets (main-secret / worker-<id>-secret = known signing keys → auth
+bypass). Fixed: generateJWTSecret() via crypto/rand for Main + workers
+(placeholder on rand failure). RED+mutation-proven; 2 pre-existing tests
+§11.4.120-reconciled to the secure behavior.</p>
+<p>MAIN-MODULE SURFACE NOW FULLY SWEPT (10 waves): storage, ebook(all
+formats incl FB2), distributed, verification, preparation, batch,
+security, events, websocket, coordination, grpc, markdown, format,
+report, progress, translator-core, api, all 6 CLIs, monitor-server,
+internal/verifier+services+config, hardware, version, logger,
+deployment, cmd/server, cmd/api-server, cmd/grpc-server,
+cmd/translate-ssh, cmd/deployment. Remaining un-hunted = root demo-*.go
+scripts (NOT source-of-truth) + the 9 owned submodules (had a dedicated
+pass in the prior 2026-06-14v session; higher git-corruption risk via
+worktrees). <strong>Dominant finding class = error-swallowing
+PASS-bluffs at every entry point</strong> (batch/grpc/
+api-server/server/deployment/translate-ssh all reported success while
+the op failed).</p>
+<p>WAVE 10 (<code>cmd/translate-ssh</code>,
+<code>cmd/grpc-server</code>+<code>cmd/deployment</code>): -
+<strong>translate-ssh final-report false-negative</strong>
+(<code>78c7b45</code>): printFinalReport filepath.Join(inputDir,
+absolutePath) doubled paths → real artifacts shown not-found,
+contradicting the success summary. Fix = expectedReportFiles helper.
+RED+mutation-proven. - <strong>deployment generate-plan
+undeployable</strong> (<code>a7cdce4</code>): emitted plan had nil Main
+→ the tool s own deploy action rejects it + nil-derefs. Fix =
+generateMainConfig. RED+mutation-proven. (cmd/grpc-server clean.)</p>
+<p>WAVE 9 (<code>cmd/server</code>, <code>cmd/api-server</code> —
+completeness-confirmation; STILL found 3 real bugs): - <strong>server
+TLS private-key world-readable</strong> (<code>3bc1ede</code>, HIGH
+§11.4.10): certs/server.key written 0644 via os.Create → any local user
+could read it. Fix = 0600 + dir 0700. RED+mutation-proven. -
+<strong>api-server cancelTranslation PASS-bluff</strong>
+(<code>c5ce9ae</code>): backend success=false forwarded as REST 200
+success:true. Fix = check resp.GetSuccess()→502. RED+mutation-proven. -
+<strong>api-server startTranslation PASS-bluff</strong>
+(<code>c5ce9ae</code>): backend status=error forwarded as REST 200
+success:true. Fix = check resp.GetStatus()==error→502.
+RED+mutation-proven. - HONEST follow-ups flagged NOT fixed
+(§11.4.6/§11.4.124, MEDIUM, operator-decision): api-server + grpc
+req.Options untyped map silently discarded (needs a JSON-key→proto-field
+mapping decision); HTTP/3 ALPN-config sharing needs an integration
+harness to reproduce.</p>
+<p>WAVE 8 (<code>internal/config</code>+CORS,
+<code>pkg/hardware</code>+<code>version</code>,
+<code>pkg/logger</code>+<code>deployment</code>): - <strong>deployment
+Docker-health PASS-bluff</strong> (<code>3a2a516</code>):
+checkServicesHealth used substring match — ‘healthy’ is a substring of
+‘unhealthy’, so an unhealthy service was counted healthy → deploy
+reported success while broken. Fix = JSON-parse compose-ps,
+all-services-healthy. RED+mutation-proven. - <strong>deployment
+GetDiscoveredServices race</strong> (<code>3a2a516</code>): delete()
+under RLock → concurrent map write. Fix = RLock→Lock. RED
+-race+mutation-proven. - <strong>version cross-OS hash
+instability</strong> (<code>396f70a</code>): CodebaseHasher recorded raw
+OS-separator paths → same tree hashes differently per-OS → false
+distributed-worker version drift. Fix = canonicalize separators.
+RED+mutation-proven. - <strong>hardware Windows multi-socket core
+undercount</strong> (<code>396f70a</code>): per-socket NumberOfCores
+lines errored the single-int parser → silent fallback to logical cores.
+Fix = parseWindowsCoreCount sums sockets. RED+mutation-proven. -
+<strong><code>internal/config</code>+CORS clean non-finding</strong>:
+CORS already hardened (wildcard sans credentials, exact-match allowlist,
+5 bypass vectors rejected, fail-closed defaults).</p>
+<p>WAVE 7 (<code>internal/verifier</code>,
+<code>internal/services</code>+verified-models,
+<code>cmd/monitor-server</code>): - <strong>services MinScoreThreshold
+scale divergence</strong> (<code>55ca2c9</code>): GetPreferences
+compared the threshold on a 0-10 normalized scale while the
+/verified-models handler + registry/selection use raw 0-100 → an
+operator threshold of 50 silently dropped ALL preferences. Fix =
+raw-scale compare. RED + §11.4.120 stale-test reconciliation;
+mutation→both tests FAIL→restore→GREEN. - <strong>verifier bare-array
+catalog false-not-found</strong> (<code>4b93d3b</code>):
+checkModelExistence double-read a consumed resp.Body → providers
+returning a bare <code>[{id}]</code> /models had every model reported
+‘not found’ + blocked from verification. Fix = buffer body once,
+unmarshal both forms. RED+mutation-proven. - <strong>monitor-server
+MONITOR_SERVER_PORT ignored</strong> (<code>4cbefed</code>): port
+hardcoded 8090 despite the env var documented in 5 places. Fix =
+resolvePort with validation. RED+mutation-proven.</p>
+<p>⚠️ <strong>ENV FORENSIC + REPAIR (§11.4.6/§9, 2026-06-15):</strong>
+the worktree+submodule interaction during the parallel campaign
+corrupted the main-tree <code>llms_verifier/.git</code> pointer — it got
+rewritten to a DELETED worktree gitdir
+(<code>.git/worktrees/agent-a4196278.../modules/llms_verifier</code>),
+making <code>git status</code> + <code>go build ./...</code>
+VCS-stamping fail with <code>exit status 128</code>. Product was
+unaffected (Go uses the
+<code>replace ./llms_verifier/llm-verifier</code> FILES not git → tests
+stayed 59 ok; commits/pushes worked). Root-caused exactly: the intact
+gitdir is <code>.git/modules/LLMsVerifier</code> (capitalized); only the
+working-tree <code>.git</code> pointer was wrong. REPAIRED reversibly
+(no network, no data loss, §9 backup to /tmp): repointed
+<code>llms_verifier/.git</code> →
+<code>gitdir: ../.git/modules/LLMsVerifier</code>; submodule now
+resolves at pinned <code>6f19503b</code> (§11.4.79), nested llm-verifier
+intact, build+vet+status clean. The <code>.git</code> pointer is
+untracked (local-env only, nothing to commit). PROCESS NOTE for future
+waves: a worktree subagent running
+<code>git submodule update --init llms_verifier</code> inside its
+worktree + the subsequent <code>git worktree remove</code> is the
+suspected trigger; verify <code>git status</code> after each
+worktree-wave cleanup.</p>
+<p>WAVE 6 (gRPC EPUB-input, markdown block-marker, secondary CLIs) —
+both confirmed leads fixed + a security finding; required 2 conductor
+MERGES (subagent worktrees predated #76/#77, blind copy would have
+reverted them — caught per §11.4.84/§11.4.142): - <strong>gRPC EPUB
+inputs unusable</strong> (<code>1377bd6</code>): convertToMarkdown wrote
+ExtractText to a .epub temp + re-parsed as zip (always failed). Fix =
+convert the REAL input file path. RED+mutation-proven; merged on top of
+#77. - <strong>markdown block-marker round-trip</strong>
+(<code>a7140f9</code>): prose <code>&lt;p&gt;</code> starting
+<code>1.</code>/<code>-</code>/<code>&gt;</code>/<code>#</code> →
+list/heading/blockquote, digit lost. Fix = escapeLeadingBlockMarker. RED
+7 cases+mutation; merged on top of #76. - <strong>cmd/cli cross-provider
+key leak</strong> (<code>2d65ee0</code>, §11.4.10 security): config
+provider-switch sent OPENAI_API_KEY as bearer to the deepseek endpoint.
+Fix = drop stale pre-loaded key on provider switch unless -api-key
+explicit. RED+mutation-proven.</p>
+<p>WAVE 5 (<code>pkg/grpc</code>+<code>cmd/grpc-server</code>,
+<code>pkg/markdown</code> reverse,
+<code>pkg/format</code>+<code>pkg/report</code>+<code>pkg/progress</code>):
+- <strong>grpc nil-Options crash</strong> (<code>d7ec633</code>, HIGH):
+req.Options deref panicked the translation goroutine AFTER the EPUB was
+written → session stuck ‘running’, completed work never reported. Fix =
+nil-safe GetOptions().GetEnableMonitoring(). RED; mutation→nil-pointer
+panic→restore→GREEN (3/3 -race). - <strong>markdown EPUB→MD round-trip
+corruption</strong> (<code>0ba2f48</code>): prose text emitted unescaped
+→ literal <code>_</code>/<code>*</code>/<code>[]</code> reinterpreted as
+emphasis/links on return trip. Fix = escapeMarkdownText (inCode-gated).
+RED 5 tests; mutation no-op→3 corruption FAILs→restore→GREEN; full suite
+no-regression. - <strong>progress stuck bar</strong>
+(<code>cebf4f7</code>): items-only mode never counted failed items → 60%
+forever. Fix = ItemsCompleted+ItemsFailed. RED; mutation→‘got
+60.00’→restore→GREEN. (format+report clean.)</p>
+<p>WAVE 4
+(<code>pkg/api</code>+<code>cmd/api-server</code>+<code>cmd/server</code>,
+<code>pkg/translator</code> core, primary CLIs) — driven by §11.4.118
+discovery-pressure on the batch PASS-bluff class: - <strong>translator
+ctx-cancel silent success</strong> (<code>ba1ee96</code>):
+<code>TranslateBook</code> never checked <code>ctx.Err()</code> → a
+cancelled (timeout/Ctrl-C) run reported success with a partial/no-op
+book. Fix = up-front + per-chapter ctx guards wrapping context.Canceled.
+RED; mutation strip-both-guards→“got nil (silent
+partial-result)”→restore→GREEN. - <strong>api Server.Stop no-op</strong>
+(<code>85d9849</code>): Start() made a LOCAL http.Server, Stop() held no
+ref and <code>return nil</code> → claimed graceful shutdown while
+listener stayed open + Start hung forever. Fix = mutex-guarded
+httpServer + Shutdown(ctx). RED lifecycle test; mutation revert→“Start
+did not return after Stop”→restore→GREEN. -
+<strong>preparation-translator lang-flags ignored</strong>
+(<code>4b9c1e4</code>): <code>-source</code>/<code>-target</code>
+hardcoded to ru/sr codes → wrong translation direction + wrong language
+tag for any other pair. Fix = resolveLanguageCodes via
+language.ParseLanguage. RED; logic-mutation→“English=ru, want
+en”→restore→GREEN. - <strong>HONEST GAPS documented, NOT fake-fixed
+(§11.4.6 — for operator):</strong> cmd/api-server
+<code>getMetrics</code> + pkg/api
+<code>getStatus</code>/<code>statsHandler</code> return hardcoded 0 /
+“completed” because NO session/translation state store exists at that
+layer — wiring real values requires building a metrics/session-tracking
+FEATURE (operator-gated), not a bug fix. WebSocket
+<code>CheckOrigin: return true</code> is the known dev default (no
+demonstrable bypass). pkg/api <code>batchHandler</code> 202-queued has
+no backing queue (incomplete async feature, not a false-completion).</p>
+<p>WAVE 3 (<code>pkg/security</code>,
+<code>pkg/events</code>+<code>pkg/websocket</code>,
+<code>pkg/batch</code>+<code>pkg/coordination</code>):</p>
+<p>WAVE 3 (<code>pkg/security</code>,
+<code>pkg/events</code>+<code>pkg/websocket</code>,
+<code>pkg/batch</code>+<code>pkg/coordination</code>): - <strong>batch
+processFile PASS-bluff</strong> (<code>5baf804</code>, HIGHEST
+severity): processFile parsed→wrote WITHOUT invoking the translator yet
+returned Success:true — every file/directory batch incl. the
+<code>/translate/directory</code> API shipped an UNTRANSLATED copy as
+‘translation completed’ (§11.4/CONST-035). Fix = translate book in place
+(recursive title+Section Title+Content+Subsections, ctx-honoring) when
+Translator!=nil. RED; mutation neutralize→“translator never invoked:
+untranslated copy reported as success”→restore→GREEN. -
+<strong><code>pkg/security</code> clean non-finding</strong>: JWT
+alg-confusion/none/expired/nbf all rejected, refresh re-validates
+liveness, rate-limiter per-key race-clean, API-key store
+RWMutex-guarded, login timing defends CWE-208+CWE-204. HS512-when-HS256
+candidate correctly rejected (forging still needs the secret — not a
+vuln). - <strong><code>pkg/events</code>+<code>pkg/websocket</code>
+clean non-finding + teeth-proven guard</strong> (<code>46db0c6</code>):
+both hardened (lock-released-before-fan-out, delete-before-close,
+session-filter, batched-drain). Added combined-concurrency regression
+guard <code>hub_combined_stress_test.go</code>; teeth proven (weaken
+unregister lock→DATA RACE caught→restore→GREEN).</p>
+<p>WAVE 2 (<code>pkg/script</code>, <code>pkg/verification</code>,
+<code>pkg/preparation</code>): - <strong>verification
+content-wipe</strong> (<code>39ae131</code>, HIGH severity): a failed
+provider’s zero-value <code>llmVerification{}</code> (empty
+PolishedText) fed <code>buildConsensus</code> → could win consensus and
+WIPE the section’s translated content to <code>""</code>, plus diluted
+scores (0.9→0.300 with 2/3 failing). Fix = drop empty-Provider phantom
+entries before aggregation. RED; mutation disable-filter→“CONTENT
+CORRUPTION got ’’”+“SCORE DILUTION 0.300”→restore→GREEN. -
+<strong>preparation title data loss</strong> (<code>a8cf0cd</code>):
+<code>writeSectionContent</code> wrote section.Content but never
+section.Title, yet the translator translates titles → names/terms in
+titles never reached the prep LLM. Fix = write Title before content.
+RED; mutation→“dropped section title”→restore→GREEN. -
+<strong><code>pkg/script</code> clean non-finding</strong>: 30-letter
+table, 3 digraphs, all-caps engine, round-trip identity, DetectScript
+all audited correct; only candidates were already-pinned ambiguous/lossy
+cases (§11.4.6 — not bugs).</p>
+<p>WAVE 1 (<code>pkg/ebook</code>-FB2, <code>pkg/storage</code>,
+<code>pkg/distributed</code>): - <strong>FB2 parser data loss</strong>
+(<code>a22d0de</code>): section-level
+<code>&lt;subtitle&gt;/&lt;epigraph&gt;/&lt;poem&gt;/&lt;cite&gt;</code>
+silently dropped before translation+output; multi-line section
+<code>&lt;title&gt;</code> truncated to first line. Fix = recursive
+flatten + join all title lines. RED through real
+<code>FB2Parser.Parse</code>; mutation revert→“verse line not
+found”/“title not found”→restore→GREEN. - <strong>storage CreateSession
+data loss</strong> (<code>9ff5049</code>, both sqlite+postgres): INSERT
+omitted <code>end_time</code>+<code>error_message</code> →
+already-completed sessions persisted NULL →
+<code>GetStatistics.AverageDuration</code> reported 0 over zero rows.
+Fix = add columns to INSERT. RED + postgres integration guard;
+mutation→“EndTime lost”→restore→GREEN. - <strong>distributed
+AlertManager ×2</strong> (<code>0366941</code>): (1)
+<code>SendAlert</code> held <code>am.mu</code> across blocking channel
+SMTP/webhook I/O (~30s) stalling all AlertManager methods →
+snapshot-then-unlock; (2)
+<code>GetAlertHistory</code>/<code>GetAlerts</code> leaked shared
+<code>*DriftAlert</code> pointers → <code>-race</code>-proven field race
+vs <code>AcknowledgeAlert</code> → <code>copyDriftAlert</code>
+deep-copy. No protocol/message-shape change (worker version-compat
+held). RED -race; mutation revert→DATA RACE / “GetAlertHistory
+blocked”→restore→GREEN. Clean non-findings (audited, no RED
+reproducible): SQLite concurrent-writer contention (GREEN under -race),
+cache-key collisions (already hardened), CheckWorkerVersion race,
+CircuitBreaker breaker-serialization, HTML/DOCX/TXT/PDF round-trips. All
+3 worktrees removed post-integration. HEAD <code>0366941</code>
+green+pushed both upstreams.</p>
+<h2
+id="full-validation-run-2026-06-15-operator-requested-run-all-tests-challenges-helix-qa">✅
+FULL VALIDATION RUN (2026-06-15, operator-requested “run all tests,
+challenges, helix qa”)</h2>
+<p><strong>360 packages GREEN, ZERO failures project-wide</strong> (real
+captured evidence, no bluff): - <strong>Main module:</strong> 59 ok / 0
+FAIL (<code>go test ./... -p 1</code>, clean baseline). -
+<strong>§11.4.27 additional test types (build-tagged) — ALL GREEN after
+2 fixes:</strong> integration 1/0, e2e PASS, security PASS, stress 1/0,
+performance 10 benchmarks/0 FAIL
+(<code>go test -tags=&lt;type&gt; ./test/&lt;type&gt;/... -p 1</code>).
+Two test-layer §11.4.1 FAIL-bluffs found by running them + FIXED
+(mutation-proven, <code>b3381237</code>): (a) <code>test/security</code>
+<code>TestAPIKeys_NoHardcodedKeys</code> flagged a submodule MOCK
+fixture <code>sk-mock-key-1</code> → scan now skips
+tests/testdata/mocks/fixtures/test dirs +
+mock/fake/example/dummy/placeholder lines; mutation-proven a real
+<code>sk-</code> in PRODUCTION <code>internal/config/*.go</code> is
+STILL caught. (b) <code>test/e2e</code>
+<code>TestCLIBypassIssue/APIReturnsValidEPUB</code> parsed a stale
+gitignored 29-byte placeholder → now generates a real EPUB in-test via
+EPUBWriter→t.TempDir()→parse-back (directly verifies a valid parseable
+EPUB, the test’s actual intent). - <strong>9 Go submodules:</strong> 176
+ok / 0 FAIL (challenges 18, containers 38, doc_processor 10, docs_chain
+8, llm_orchestrator 9, llm_provider 52, llms_verifier 15, security 18,
+vision_engine 8; constitution = non-Go). - <strong>HelixQA tool
+(digital.vasic.helixqa):</strong> 125 ok / 0 FAIL (own core suite; build
+clean). - <strong>Challenge suite:</strong> all PASS or honest §11.4.3
+SKIP — cache_invalidation, degraded_mode, model_verification_gate,
 helixqa_wiring, provider_sync, anti_bluff_execution,
 api_key_provisioning, no_suspend_calls PASS; llmsverifier_connectivity
 PASS (runtime SKIP, no API key); host_no_auto_suspend N/A on macOS
-(Linux <code>/etc/systemd/</code> host check).</li>
-<li><strong>3 real challenge issues found by running them + FIXED
-(mutation-proven, committed):</strong> (1) <code>no_suspend_calls</code>
-§11.4.1 FAIL-bluff on doc <code>.html</code>/<code>.pdf</code> exports +
+(Linux <code>/etc/systemd/</code> host check). - <strong>3 real
+challenge issues found by running them + FIXED (mutation-proven,
+committed):</strong> (1) <code>no_suspend_calls</code> §11.4.1
+FAIL-bluff on doc <code>.html</code>/<code>.pdf</code> exports +
 <code>Constitution.md</code> case-miss + <code>CHALLENGE.md</code>
 test-inputs + <code>qa-results/</code> logs → scanner excludes added,
 real <code>.sh</code>/<code>.go</code> calls still caught
 (<code>a24f806</code>); (2) <code>anti_bluff_execution</code> scanned
 wrong dir (0 vs 11 real challenges) → fixed to its own dir
 (<code>d1667dc</code>); (3) <code>./.env</code> was mode 644 →
-<code>chmod 600</code> per §11.4.10 (untracked/gitignored,
-perms-only).</li>
-<li><strong>Full autonomous HelixQA QA session DEFERRED (§11.4.3
+<code>chmod 600</code> per §11.4.10 (untracked/gitignored, perms-only).
+- <strong>Full autonomous HelixQA QA session DEFERRED (§11.4.3
 topology-SKIP):</strong> needs the live HelixTranslate stack as a target
 (servers + DB/Redis via the §11.4.76 Containers submodule), not up;
-helix_qa is another session's active area (§11.4.119). Not launched
-unattended (zero-risk).</li>
-</ul>
+helix_qa is another session’s active area (§11.4.119). Not launched
+unattended (zero-risk).</p>
 <!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 48 real bugs (21 submodule + 27 main) -->
-
-<h2
-id="star-overnight-final-state-2026-06-15-operator-away--read-first">⭐
+<h2 id="overnight-final-state-2026-06-15-operator-away-read-first">⭐
 OVERNIGHT FINAL STATE (2026-06-15, operator away) — READ FIRST</h2>
 <p><strong>The build is at its best, most-stable, verified-green,
-fully-pushed state.</strong></p>
-<ul>
-<li><strong>Main HEAD <code>fc86064</code></strong> on BOTH upstreams
-(origin milos85vasic/Translator + HelixDevelopment/HelixTranslate).
+fully-pushed state.</strong> - <strong>Main HEAD
+<code>fc86064</code></strong> on BOTH upstreams (origin
+milos85vasic/Translator + HelixDevelopment/HelixTranslate).
 <code>go build ./...</code> = exit 0, <code>go vet ./...</code> = exit
 0, <code>go test ./... -p 1</code> = <strong>zero FAIL</strong> (full
-quiescent sweep).</li>
-<li><strong>63 genuine, reproduce-first, mutation-proven bug
-fixes</strong> this session across the whole main module + 9 owned
-submodules (full table below). Each RED-on-broken → fix → GREEN →
+quiescent sweep). - <strong>110 genuine, reproduce-first,
+mutation-proven bug fixes</strong> this session across the whole main
+module + ALL 8 owned submodules + a productive second pass (full table
+below; latest 15 waves = 47 fixes + 1 regression guard, newest
+<code>6c11dee</code> ebook + <code>4413b76</code> translator/llm +
+<code>cd908195</code> llms_verifier-determinism; submodule yield 8/8,
+see WAVE 15 + COMPREHENSIVE BUG-HUNT COMPLETE blocks at top;
+highest-severity = batch processFile + verification content-wipe + grpc
+nil-Options + cli cross-provider key-leak + deployment Docker-health +
+server TLS-key leak + api-server backend-error PASS-bluffs + deployment
+hardcoded-JWT-secret). Each RED-on-broken → fix → GREEN →
 mutation-proven, conductor-verified, committed + pushed; submodule
 gitlink pointers all synced. (Latest: a systemic EOF-last-chunk
 streamed-content data-loss across 14 llm_provider adapters + ollama
 error-body, <code>0f21fb0</code> — merged cleanly with a parallel
-session's HealthCheck-baseURL fixes.)</li>
-<li><strong>Whole codebase hunted</strong> — every main
-<code>pkg/*</code> + <code>cmd/*</code> user-facing CLI + 9 submodules.
-Recent waves return clean non-findings (§11.4.118 completeness on the
-high-yield surface).</li>
-<li><strong>Nothing half-done:</strong> zero uncommitted source/test
-work anywhere; working tree holds only pre-existing build-artifact
-binaries (§11.4.30, not committed) + <code>helix_qa</code> other-session
-state (§11.4.119).</li>
-</ul>
+session’s HealthCheck-baseURL fixes.) - <strong>Whole codebase
+hunted</strong> — every main <code>pkg/*</code> + <code>cmd/*</code>
+user-facing CLI + 9 submodules. Recent waves return clean non-findings
+(§11.4.118 completeness on the high-yield surface). - <strong>Nothing
+half-done:</strong> zero uncommitted source/test work anywhere; working
+tree holds only pre-existing build-artifact binaries (§11.4.30, not
+committed) + <code>helix_qa</code> other-session state (§11.4.119).</p>
 <p><strong>Autonomous decisions made (zero-risk, §11.4.101):</strong>
 (1) NO release tag cut — a tag asserts a fully-validated release but the
 §11.4.40 7-step (on-device/Challenge/HelixQA) cannot be completed solo;
@@ -264,22 +696,26 @@ wrappers, deeper submodule passes, governance completeness (P4.1 migrate
 the 48 fixes into Fixed.md/workable_items.db, P4.4 .gitignore root
 binaries).</p>
 <!-- OPERATOR AWAY until morning 2026-06-15: autonomous; priority = most-stable build; release tag DEFERRED (zero-risk, needs full §11.4.40). Full ./... sweep GREEN at c56363c. -->
-
 <h3
-id="session-2026-06-14v--cross-submodule-bug-hunt-campaign-11428-equal-codebase">Session
+id="session-2026-06-14v-cross-submodule-bug-hunt-campaign-11.4.28-equal-codebase">Session
 2026-06-14v — cross-submodule bug-hunt campaign (§11.4.28
 equal-codebase)</h3>
 <p>Parallel subagent-driven (§11.4.70/§11.4.103) hunt across owned
 submodules — each bug reproduce-first RED (§11.4.115) → fix → GREEN →
 mutation-proven (revert→FAIL/race→restore→PASS), verified by the
 conductor against repo state before commit (§11.4.142), committed in
-each submodule's own repo (raw git, FF-only, no force §11.4.113,
+each submodule’s own repo (raw git, FF-only, no force §11.4.113,
 multi-mirror §2.1). <strong>18 genuine mutation-proven bugs fixed +
-pushed; vision_engine's was independently fixed upstream by a parallel
+pushed; vision_engine’s was independently fixed upstream by a parallel
 session (64b7d08) so it was integrated, NOT double-fixed.</strong> Host
-API rate-limit (prior session's 6-subagent killer) had recovered —
+API rate-limit (prior session’s 6-subagent killer) had recovered —
 proven by a probe wave that all survived.</p>
 <table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
 <thead>
 <tr>
 <th>Submodule</th>
@@ -468,7 +904,7 @@ under RLock</td>
 <tr>
 <td><strong>MAIN</strong> pkg/models</td>
 <td>FindBestModel tie-break iterated a map (random order) → different
-"best" model selected run-to-run on identical inputs (§11.4.50,
+“best” model selected run-to-run on identical inputs (§11.4.50,
 translation-critical); sort candidates by ID</td>
 <td>(wave 14)</td>
 </tr>
@@ -521,7 +957,7 @@ adapters
 (openai/groq/together/fireworks/generic/deepseek/xai/perplexity/cohere/mistral/qwen/nvidia/sambanova/cerebras
 — final SSE delta + stop frame dropped when last chunk has no trailing
 newline) + ollama success-on-HTTP-error-body + W1A empty-choices guards;
-merged with a parallel session's HealthCheck fixes</td>
+merged with a parallel session’s HealthCheck fixes</td>
 <td>0f21fb0</td>
 </tr>
 </tbody>
@@ -531,9 +967,10 @@ fabricated):</strong> pkg/sshworker UploadFile/DownloadFile/UploadData
 build unquoted shell commands (<code>mkdir -p %s</code>,
 <code>cat %s</code>, <code>&gt; %s</code>) — a remote path with
 spaces/metacharacters breaks/injects; no executor seam to test
-hermetically (dials real *ssh.Client). Worth a command-runner-interface
-refactor → P-list. Also ExecuteCommand hardcodes ExitCode:1 (loses
-*ssh.ExitError fidelity) — same live-SSH-only constraint.</p>
+hermetically (dials real <em>ssh.Client). Worth a
+command-runner-interface refactor → P-list. Also ExecuteCommand
+hardcodes ExitCode:1 (loses </em>ssh.ExitError fidelity) — same
+live-SSH-only constraint.</p>
 <p><strong>More clean non-findings (§11.4.6):</strong> pkg/format +
 pkg/hardware (detection correct; 2 Windows-only leads
 UNCONFIRMED-flagged, not fabricated), pkg/report (snapshot+clamp+locks
@@ -553,7 +990,7 @@ submodules.</p>
 Cyrillic↔︎Latin) audited — conversion correct for its rule-based scope
 (all 30 letters both directions, uppercase-digraph all-caps logic sound,
 rune-iterated); the loanword <code>nj</code>/<code>dž</code>
-disambiguation (e.g. <code>injekcija</code>→<code>инјекција</code>) is
+disambiguation (e.g. <code>injekcija</code>→<code>инјекција</code>) is
 an inherent rule-based-transliteration limitation needing an exception
 dictionary, NOT a narrow bug — no fix manufactured.</p>
 <p><strong>Main-repo + submodule-pointer sync (operator directive
@@ -562,7 +999,7 @@ dictionary, NOT a narrow bug — no fix manufactured.</p>
 submodule gitlink pointers
 (challenges/containers/doc_processor/docs_chain/llm_orchestrator/llm_provider/llms_verifier/vision_engine)
 to their pushed HEADs so parent ↔︎ submodules are in sync. NOT staged:
-<code>helix_qa</code> (<code>m</code>, another session's in-flight work,
+<code>helix_qa</code> (<code>m</code>, another session’s in-flight work,
 §11.4.119); tracked rebuilt binaries
 <code>preparation-translator</code>/<code>translate-ssh</code>/<code>unified-translator</code>
 + untracked <code>hash</code>/<code>workable-items</code> (build
@@ -579,11 +1016,10 @@ tree). A subagent accidentally wrote the first RoundRobinSelector fix
 THERE; I left it untouched (unknown provenance) and re-applied the fix
 correctly inside the submodule (committed 4e08b93). That sibling now
 holds a stale, superseded, uncommitted change — safe to discard, but
-flagged so it isn't mistaken for live work.</p>
+flagged so it isn’t mistaken for live work.</p>
 <!-- session 2026-06-14u: wave 14 governance/coverage build-out + e2e fix (HEAD 84f7a46) -->
-
 <h3
-id="session-2026-06-14u--wave-14-governance-depth--coverage--e2e-build-fix-head-84f7a46">Session
+id="session-2026-06-14u-wave-14-governance-depth-coverage-e2e-build-fix-head-84f7a46">Session
 2026-06-14u — wave 14: governance depth + coverage + e2e build-fix (HEAD
 84f7a46)</h3>
 <ul>
@@ -601,7 +1037,7 @@ caught a real gate-regex bug pre-commit.</li>
 EPUB/FB2 + httptest-provider HTTP path), asserts actual output-artifact
 content, empty-stub mutation-proven.</li>
 <li><strong>84f7a46</strong> fixed a pre-existing §11.4.1 build break:
-<code>test/e2e</code> package didn't compile (unused
+<code>test/e2e</code> package didn’t compile (unused
 <code>discovery</code> import) — removed;
 <code>go vet -tags e2e ./test/e2e/</code> now clean.</li>
 </ul>
@@ -617,7 +1053,7 @@ catches them post-hoc; the gate agent had to regen CONTINUATION siblings
 manually). Follow-on: wire the export-sync into commit_all.sh (§11.4.75
 layer-2). Until then, regen siblings when committing a doc.</p>
 <h4
-id="session-final-state-unchanged-from-rev-43--wave-14--autonomous-queue-drained">SESSION
+id="session-final-state-unchanged-from-rev-43-wave-14-autonomous-queue-drained">SESSION
 FINAL STATE (unchanged from Rev 43 + wave 14) — autonomous queue
 DRAINED</h4>
 <p>Loop correctly rests on operator decisions. Remaining items (all
@@ -630,37 +1066,33 @@ full §11.4.27 test-type matrix · full §11.4.40 retest → §11.4.151
 release tag. Resume: point a fresh session at this file +
 docs/WORKING_PLAN.md.</p>
 <!-- session 2026-06-14t: plan-execution wave 13 — autonomous queue DRAINED (HEAD 6444e38) -->
-
 <h3
-id="session-2026-06-14t--plan-execution-wave-13-autonomous-queue-drained-head-6444e38">Session
+id="session-2026-06-14t-plan-execution-wave-13-autonomous-queue-drained-head-6444e38">Session
 2026-06-14t — plan-execution wave 13; autonomous queue DRAINED (HEAD
 6444e38)</h3>
 <p>Wave 13 closed the last clean autonomous WORKING_PLAN items (3
-background subagents, disjoint, all real + proven):</p>
-<ul>
-<li><strong>e623ffb</strong> §11.4.93 workable-items SQLite SSoT:
+background subagents, disjoint, all real + proven): -
+<strong>e623ffb</strong> §11.4.93 workable-items SQLite SSoT:
 <code>cmd/workable-items</code> Go tool
 (<code>sync md-to-db</code>/<code>validate</code>/<code>list</code>) +
 tracked <code>docs/workable_items.db</code> (§11.4.95). Real run: 81
 items (64 fixed + 17 open), validate exit 0, verified via
 <code>sqlite3 SELECT</code>; mutation-proven. (Fuller schema —
 item_history/obsolete_details/db-to-md/fingerprint — is a tracked
-follow-on.)</li>
-<li><strong>78023a7</strong> P4.2 +2 gates: CM-TRACKER-DOCS-PRESENT +
-CM-ATM-TICKET-IDS → <strong>pre-build suite now 6 gates, all
-green</strong>, each paired-mutation-proven.</li>
-<li><strong>6444e38</strong> P4.3/ATM-076 §11.4.65 doc-export:
+follow-on.) - <strong>78023a7</strong> P4.2 +2 gates:
+CM-TRACKER-DOCS-PRESENT + CM-ATM-TICKET-IDS → <strong>pre-build suite
+now 6 gates, all green</strong>, each paired-mutation-proven. -
+<strong>6444e38</strong> P4.3/ATM-076 §11.4.65 doc-export:
 <code>scripts/testing/sync_all_markdown_exports.sh</code> (pandoc html +
 weasyprint pdf, idempotent, <code>--check</code> gate mode, §11.4.106
 honest tool-absence) + <strong>225 siblings generated (0 failures, 0
 stale)</strong> for 120 in-scope docs. Caught + excluded a stray
-docs/research/helix_qa/ workspace dump (§11.4.30 guard).</li>
-</ul>
+docs/research/helix_qa/ workspace dump (§11.4.30 guard).</p>
 <p><strong>FINAL integration sweep GREEN</strong> at HEAD 6444e38
 (quiescent): <code>go test ./... -p 1</code> = <strong>58 ok / 0
 FAIL</strong>; 6-gate pre-build suite PASS; build+vet clean. All
 FF-pushed both upstreams (no force §11.4.113).</p>
-<h4 id="session-final-state--autonomous-queue-drained">SESSION FINAL
+<h4 id="session-final-state-autonomous-queue-drained">SESSION FINAL
 STATE — autonomous queue DRAINED</h4>
 <p><strong>Delivered:</strong> ~30 genuine mutation-proven bug fixes (13
 waves; main-module bug-hunt SATURATED per §11.4.118 completeness audit);
@@ -672,33 +1104,29 @@ siblings); perf/stress/chaos coverage (5 hot-path packages);
 docs/WORKING_PLAN.md (canonical unfinished+known-issues inventory).</p>
 <p><strong>REMAINING — all operator-gated or larger tracked follow-ons
 (NOT autonomously closable; see docs/WORKING_PLAN.md + docs/Issues.md
-ATM-065..081):</strong></p>
-<ol type="1">
-<li><strong>OPERATOR DECISIONS:</strong> P1.0 version number (2.3.0 vs
-3.0.0; wiring done) · P3.1 pkg/hash remove-vs-relocate · P1.1 provider
-keys/balance (OPENAI/ANTHROPIC absent, GEMINI invalid, ZHIPU no-balance)
-→ unblocks stale-allowlist audits (deepseek pattern proven) · P2.x
-design calls (inert flags, MinScoreThreshold scale, reasoning-model
-structured-content, markdown first-class input).</li>
-<li><strong>LARGER TRACKED FOLLOW-ONS:</strong> fuller §11.4.93 schema
-(item_history/db-to-md/fingerprint) · owned-submodule bug-hunt waves
-(§11.4.28 — ANOTHER SESSION ACTIVE on helix_qa, coordinate per
-§11.4.119) · full §11.4.27 test-type matrix + HelixQA/Challenges banks ·
-P2.6 cmd/translator SSH download-dir (needs live SSH via §11.4.76
-Containers).</li>
-<li><strong>RELEASE:</strong> P0.2 full §11.4.40 7-step retest → P0.3
-§11.4.151 <code>helix_translate-&lt;version&gt;</code> tag (after the
-operator decisions + the test-type matrix).</li>
-</ol>
+ATM-065..081):</strong> 1. <strong>OPERATOR DECISIONS:</strong> P1.0
+version number (2.3.0 vs 3.0.0; wiring done) · P3.1 pkg/hash
+remove-vs-relocate · P1.1 provider keys/balance (OPENAI/ANTHROPIC
+absent, GEMINI invalid, ZHIPU no-balance) → unblocks stale-allowlist
+audits (deepseek pattern proven) · P2.x design calls (inert flags,
+MinScoreThreshold scale, reasoning-model structured-content, markdown
+first-class input). 2. <strong>LARGER TRACKED FOLLOW-ONS:</strong>
+fuller §11.4.93 schema (item_history/db-to-md/fingerprint) ·
+owned-submodule bug-hunt waves (§11.4.28 — ANOTHER SESSION ACTIVE on
+helix_qa, coordinate per §11.4.119) · full §11.4.27 test-type matrix +
+HelixQA/Challenges banks · P2.6 cmd/translator SSH download-dir (needs
+live SSH via §11.4.76 Containers). 3. <strong>RELEASE:</strong> P0.2
+full §11.4.40 7-step retest → P0.3 §11.4.151
+<code>helix_translate-&lt;version&gt;</code> tag (after the operator
+decisions + the test-type matrix).</p>
 <p><strong>Loop status (§11.4.94(A)/§11.4.101/§11.4.126):</strong>
 correctly rests on operator decisions — every remaining item is
 externally/operator-gated and explicitly tracked; nothing silently
 dropped. Resume by pointing a fresh session at this file +
 docs/WORKING_PLAN.md.</p>
 <!-- session 2026-06-14s: WORKING_PLAN + plan-execution waves 10-12 (HEAD 06a8a16) -->
-
 <h3
-id="session-2026-06-14s--working_plan-created--plan-execution-begins-head-06a8a16">Session
+id="session-2026-06-14s-working_plan-created-plan-execution-begins-head-06a8a16">Session
 2026-06-14s — WORKING_PLAN created + plan-execution begins (HEAD
 06a8a16)</h3>
 <p>Operator mandate: comprehensive subagent-driven plan of all
@@ -753,9 +1181,8 @@ ZHIPU no balance) to unblock allowlist audits; (4) P2.x design decisions
 (inert flags, MinScoreThreshold scale, reasoning-content support). See
 docs/WORKING_PLAN.md.</p>
 <!-- session 2026-06-14r: bug-hunt waves 8-9 — 7 more genuine fixes (HEAD daa2f70) -->
-
 <h3
-id="session-2026-06-14r--bug-hunt-waves-8-9-7-more-genuine-mutation-proven-fixes-head-daa2f70">Session
+id="session-2026-06-14r-bug-hunt-waves-8-9-7-more-genuine-mutation-proven-fixes-head-daa2f70">Session
 2026-06-14r — bug-hunt waves 8-9: 7 more genuine mutation-proven fixes
 (HEAD daa2f70)</h3>
 <p>Continued the §11.4.70/§11.4.103 parallel campaign (background
@@ -779,7 +1206,7 @@ sliced <code>ContainerID[:12]</code> unconditionally → panic crashing
 the whole status command on any &lt;12-char/empty ID.</li>
 <li><strong>93e89d7</strong> cmd/grpc-server + cmd/monitor-server: wired
 the dead <code>-max-connections</code> flag (was hardcoded 50) + stopped
-swallowing monitor-server's <code>router.Run()</code> bind error (silent
+swallowing monitor-server’s <code>router.Run()</code> bind error (silent
 failed start).</li>
 <li><strong>daa2f70</strong> logger: JSON reserved-key collision — a
 user field named
@@ -797,7 +1224,7 @@ previously had none). build+vet exit 0.</p>
 flight to confirm saturation.</p>
 <p>REMAINING (operator/design-gated, unchanged): OPENAI/ANTHROPIC keys
 absent; GEMINI_API_KEY invalid; ZHIPU out of balance (allowlist stale,
-can't verify); ~30 other provider allowlists need funded keys; verifier
+can’t verify); ~30 other provider allowlists need funded keys; verifier
 <code>MinScoreThreshold</code> 0-100-vs-0-10 scale (no caller, operator
 decision); <code>-chunk-size</code> inert flag (design); markdown
 first-class input (design); reasoning-model
@@ -807,9 +1234,8 @@ intermediate-md download-dir inconsistency (needs live SSH); submodules
 not collide (§11.4.119). NO release tag yet (needs §11.4.40 full retest
 + operator confirm + §11.4.151 prefix).</p>
 <!-- session 2026-06-14q: parallel subagent bug-hunt campaign — 18 genuine fixes across 7 waves (HEAD 4bbac9a) -->
-
 <h3
-id="session-2026-06-14q--parallel-subagent-driven-bug-hunt-campaign-11470114103-18-genuine-mutation-proven-fixes-across-7-waves-head-4bbac9a">Session
+id="session-2026-06-14q-parallel-subagent-driven-bug-hunt-campaign-11.4.7011.4.103-18-genuine-mutation-proven-fixes-across-7-waves-head-4bbac9a">Session
 2026-06-14q — parallel subagent-driven bug-hunt campaign
 (§11.4.70/§11.4.103): 18 genuine mutation-proven fixes across 7 waves
 (HEAD 4bbac9a)</h3>
@@ -822,69 +1248,60 @@ mutation-proven (§1.1) + single-package
 upstreams (no force §11.4.113). 4 subagents honestly reported NO bug
 (events/websocket, storage, api/services) — no manufactured changes
 (§11.4.6).</p>
-<p><strong>The 18 fixes:</strong></p>
-<ul>
-<li><strong>80d627b</strong> hardware: <code>parseLscpuCores</code>
-undercounts cores on multi-socket hosts (ignored <code>Socket(s)</code>;
-dual-socket 16-core → 8).</li>
-<li><strong>0df25d9</strong> preparation: coordinator never stamped
+<p><strong>The 18 fixes:</strong> - <strong>80d627b</strong> hardware:
+<code>parseLscpuCores</code> undercounts cores on multi-socket hosts
+(ignored <code>Socket(s)</code>; dual-socket 16-core → 8). -
+<strong>0df25d9</strong> preparation: coordinator never stamped
 <code>ChapterNum</code> → 0 → positional-fallback chapter-context
-mis-attribution after a failed chapter compacts.</li>
-<li><strong>c3117f8</strong> batch: same-stem/different-ext inputs
+mis-attribution after a failed chapter compacts. -
+<strong>c3117f8</strong> batch: same-stem/different-ext inputs
 (<code>book.fb2</code>+<code>book.epub</code>) collide onto one output →
-data loss; reconciled the 3 stem-only tests (§11.4.120).</li>
-<li><strong>d0fe40a</strong> security: <code>RefreshToken</code> minted
+data loss; reconciled the 3 stem-only tests (§11.4.120). -
+<strong>d0fe40a</strong> security: <code>RefreshToken</code> minted
 fresh tokens from EXPIRED/no-expiry claims (auth-bypass, session
-resurrection); zero residue confirmed.</li>
-<li><strong>d8142e5</strong> verifier:
-<code>/api/v1/verified-models</code> hard-errored on zero verified
-models (<code>{"models":null}</code> fell through to array-decode).</li>
-<li><strong>20beda7</strong> distributed: <code>getFailureRate</code>
-fabricated 100% failure rate on zero/expired window → falsely traps
-coordinator in degraded mode.</li>
-<li><strong>8f52370</strong> fb2:
+resurrection); zero residue confirmed. - <strong>d8142e5</strong>
+verifier: <code>/api/v1/verified-models</code> hard-errored on zero
+verified models (<code>{"models":null}</code> fell through to
+array-decode). - <strong>20beda7</strong> distributed:
+<code>getFailureRate</code> fabricated 100% failure rate on zero/expired
+window → falsely traps coordinator in degraded mode. -
+<strong>8f52370</strong> fb2:
 <code>&lt;v&gt;</code>/<code>&lt;subtitle&gt;</code>/<code>&lt;text-author&gt;</code>
-dropped inline-element text (verse/quote/attribution data loss).</li>
-<li><strong>a728e57</strong> llm/ollama: dropped
+dropped inline-element text (verse/quote/attribution data loss). -
+<strong>a728e57</strong> llm/ollama: dropped
 <code>temperature</code>/<code>max_tokens</code> (must be in
 <code>options</code> per official API §11.4.99) → non-deterministic
-output.</li>
-<li><strong>be81550</strong> markdown: chapter XHTML
+output. - <strong>be81550</strong> markdown: chapter XHTML
 <code>&lt;title&gt;</code> unescaped → malformed EPUB for titles with
-<code>&amp;</code>/<code>&lt;</code>/<code>&gt;</code>.</li>
-<li><strong>7434ee4</strong> verification:
+<code>&amp;</code>/<code>&lt;</code>/<code>&gt;</code>. -
+<strong>7434ee4</strong> verification:
 <code>polishChapter</code>/<code>polishSectionRecursive</code>
-index-out-of-range panic when translated has fewer sections.</li>
-<li><strong>fd07e18</strong> grpc: <code>SubscribeEvents</code>
-delivered lifecycle events with empty <code>session_id</code>.</li>
-<li><strong>107e570</strong> ebook/epub_parser: chapter text shipped
-HTML entities literally (<code>Tom &amp;amp; Jerry</code>,
-<code>caf&amp;#233;</code>).</li>
-<li><strong>fa35d2e</strong> config: nil-map panic in
-<code>LoadConfig</code> (omitted <code>providers</code> + any API-key
-env var set).</li>
-<li><strong>8316e3f</strong> translator core: data race /
-concurrent-map-write crash in <code>BaseTranslator</code> cache+stats
-(race-proven).</li>
-<li><strong>c416bd8</strong> ebook/epub_writer: cover image mislabeled
-<code>image/jpeg</code> for PNG/GIF/WEBP/SVG covers → broken cover.</li>
-<li><strong>36f740a</strong> cmd/unified-translator: SSH provider used a
-hardcoded "ru→sr-cyrillic" prompt + hardcoded binary/model paths,
-ignoring all user flags (also carried the cmd/api-server health fix
-below, swept in by the wrapper).</li>
-<li><strong>(36f740a)</strong> cmd/api-server: <code>healthCheck</code>
-returned 200 "healthy" regardless of gRPC backend state → derives from
-<code>conn.GetState()</code> → 503 when not Ready.</li>
-<li><strong>85b3362</strong> cmd/markdown-translator:
-<code>-format</code> flag never validated → unsupported value prints
-success but writes no file (false-success bluff).</li>
-<li><strong>4bbac9a</strong> .gitignore (§11.4.30): bare
-<code>api-server</code> pattern ignored the whole
+index-out-of-range panic when translated has fewer sections. -
+<strong>fd07e18</strong> grpc: <code>SubscribeEvents</code> delivered
+lifecycle events with empty <code>session_id</code>. -
+<strong>107e570</strong> ebook/epub_parser: chapter text shipped HTML
+entities literally (<code>Tom &amp;amp; Jerry</code>,
+<code>caf&amp;#233;</code>). - <strong>fa35d2e</strong> config: nil-map
+panic in <code>LoadConfig</code> (omitted <code>providers</code> + any
+API-key env var set). - <strong>8316e3f</strong> translator core: data
+race / concurrent-map-write crash in <code>BaseTranslator</code>
+cache+stats (race-proven). - <strong>c416bd8</strong> ebook/epub_writer:
+cover image mislabeled <code>image/jpeg</code> for PNG/GIF/WEBP/SVG
+covers → broken cover. - <strong>36f740a</strong>
+cmd/unified-translator: SSH provider used a hardcoded “ru→sr-cyrillic”
+prompt + hardcoded binary/model paths, ignoring all user flags (also
+carried the cmd/api-server health fix below, swept in by the wrapper). -
+<strong>(36f740a)</strong> cmd/api-server: <code>healthCheck</code>
+returned 200 “healthy” regardless of gRPC backend state → derives from
+<code>conn.GetState()</code> → 503 when not Ready. -
+<strong>85b3362</strong> cmd/markdown-translator: <code>-format</code>
+flag never validated → unsupported value prints success but writes no
+file (false-success bluff). - <strong>4bbac9a</strong> .gitignore
+(§11.4.30): bare <code>api-server</code> pattern ignored the whole
 <code>cmd/api-server/</code> SOURCE dir (no repo-root binary exists;
 build output is <code>build/api-server</code>) → hid the package +
 blocked its tests (api-server had ZERO committed tests). Anchored to
-<code>/api-server</code>; committed the health regression guard.</li>
-</ul>
+<code>/api-server</code>; committed the health regression guard.</p>
 <p><strong>Operator-flag (no production caller, design
 decision):</strong> verifier <code>MinScoreThreshold</code> scale
 inconsistency — handler compares raw 0-100, adapter compares normalized
@@ -892,7 +1309,7 @@ inconsistency — handler compares raw 0-100, adapter compares normalized
 production caller; needs an operator decision on the canonical scale
 before either is wired (not guessed, §11.4.6/§11.4.120).</p>
 <p><strong>Process lesson (§11.4.119):</strong> the full
-<code>go test ./... -p 1</code> integration sweep includes pkg/version's
+<code>go test ./... -p 1</code> integration sweep includes pkg/version’s
 CodebaseHasher which hashes the whole tree (.go + .md + docs/) — it MUST
 run on a QUIESCENT tree; running it concurrently with file-writing
 subagents produces a spurious pkg/version hash-mismatch FAIL (confirmed
@@ -902,12 +1319,11 @@ BETWEEN parallel waves.</p>
 checkpoint: waves 1-5 → 54 ok/0; waves 6+7 → <strong>55 ok/0
 FAIL</strong> (HEAD 4bbac9a; cmd/api-server now has committed tests).
 build+vet exit 0. <strong>SESSION GRAND TOTAL: ~25 real fixes</strong>
-(this campaign's 18 + earlier: PDF revival, format matrix + .html,
+(this campaign’s 18 + earlier: PDF revival, format matrix + .html,
 deepseek-v4 allowlist, websocket race, ssh-test, 2 doc-syncs).</p>
 <!-- session 2026-06-14p: zhipu allowlist finding (operator-blocked) + queue-drained status (HEAD a33f20b) -->
-
 <h3
-id="session-2026-06-14p--zhipu-allowlist-114150-finding-operator-blocked-autonomously-provable-queue-drained">Session
+id="session-2026-06-14p-zhipu-allowlist-11.4.150-finding-operator-blocked-autonomously-provable-queue-drained">Session
 2026-06-14p — Zhipu allowlist §11.4.150 finding (operator-blocked);
 autonomously-provable queue drained</h3>
 <ul>
@@ -919,9 +1335,9 @@ family
 (glm-4/glm-3-turbo/glm-4-plus/glm-4-flash/glm-4-air/glm-4-airx/glm-4-long/glm-4-flashx)
 are listed. The generic factory (llm.go:218) HARD-REJECTS unlisted
 models, so a funded account requesting a current model is rejected (this
-is what the earlier "zhipu rejects documented models" flag actually
+is what the earlier “zhipu rejects documented models” flag actually
 was). <strong>Why not fixed autonomously:</strong> the account is OUT OF
-BALANCE (chat API error 1113 "余额不足/insufficient balance") → I cannot
+BALANCE (chat API error 1113 “余额不足/insufficient balance”) → I cannot
 obtain §11.4.123 translation proof NOR verify response-shape
 compatibility (the magistral lesson: glm-5 reasoning models may return
 structured-list <code>content</code> our string-content client cannot
@@ -942,38 +1358,33 @@ established; it just needs a funded provider account.</li>
 clearly-actionable, evidence-provable main-module work this session is
 done + green. Remaining known issues are ALL
 operator/research/design-gated (cannot be closed with rock-solid proof
-autonomously):</p>
-<ul>
-<li><strong>Operator (credentials/balance):</strong> add OPENAI_API_KEY
-+ ANTHROPIC_API_KEY (absent); refresh GEMINI_API_KEY (live /models =
-"API Key not found"); recharge/replace ZHIPU_API_KEY (balance 1113).
-Each unblocks a verify-then-fix allowlist/E2E pass.</li>
-<li><strong>Research (needs funded keys):</strong> ~30 other provider
+autonomously): - <strong>Operator (credentials/balance):</strong> add
+OPENAI_API_KEY + ANTHROPIC_API_KEY (absent); refresh GEMINI_API_KEY
+(live /models = “API Key not found”); recharge/replace ZHIPU_API_KEY
+(balance 1113). Each unblocks a verify-then-fix allowlist/E2E pass. -
+<strong>Research (needs funded keys):</strong> ~30 other provider
 allowlists not audited (audit pattern proven: live /models →
-verify-translate + string-content shape → additive update).</li>
-<li><strong>Design:</strong> <code>-chunk-size</code> CLI flag is inert
+verify-translate + string-content shape → additive update). -
+<strong>Design:</strong> <code>-chunk-size</code> CLI flag is inert
 (real chunking is automatic+correct via translateWithRetry/splitText;
 wiring the flag has ambiguous semantics OR removing it needs §11.4.122
 operator confirm); markdown not a first-class CLI input (works as TXT
 today); reasoning-model structured-list <code>content</code> support in
 the OpenAI-compatible clients (would enable magistral/glm-5-class
-models).</li>
-<li><strong>Release:</strong> NO tag yet — needs §11.4.40 full retest +
-operator confirm + §11.4.151 <code>&lt;prefix&gt;-&lt;version&gt;</code>
-naming.</li>
-</ul>
+models). - <strong>Release:</strong> NO tag yet — needs §11.4.40 full
+retest + operator confirm + §11.4.151
+<code>&lt;prefix&gt;-&lt;version&gt;</code> naming.</p>
 <p>Loop status (§11.4.94(A)/§11.4.101/§11.4.126): idle-on-blocked —
 every remaining item is externally/operator-gated; no item is
 autonomously closable with rock-solid proof. Build is the most stable
 this session: full sweep 54 ok/0 FAIL, websocket race-clean, format
 matrix complete (6 in × 5 out), deepseek current.</p>
 <!-- session 2026-06-14o: latent brittle-test fixes surfaced by the sweeps (HEAD 817b9dd) -->
-
 <h3
-id="session-2026-06-14o--latent-brittle-test-harness-defects-fixed-head-817b9dd-full-sweep-green-540">Session
+id="session-2026-06-14o-latent-brittle-test-harness-defects-fixed-head-817b9dd-full-sweep-green-540">Session
 2026-06-14o — latent brittle test-harness defects fixed (HEAD 817b9dd);
 full sweep GREEN 54/0</h3>
-<p>Two latent test defects (NOT caused by this session's source changes
+<p>Two latent test defects (NOT caused by this session’s source changes
 — different packages) surfaced one-per-sweep by the §11.4.118
 discovery-pressure of repeated full sweeps, root-caused (§11.4.102) +
 fixed + proven:</p>
@@ -989,21 +1400,21 @@ read helpers
 (clientCount/sessionCount/sessionSnapshot/totalSessionEvents, lock+copy,
 no I/O under lock) for /status + every assertion; TestMultipleClients
 writers joined via sync.WaitGroup (sleep = no happens-before edge →
-leaked writer raced another test's write to the same gorilla conn).
+leaked writer raced another test’s write to the same gorilla conn).
 PROVEN: <code>-race -count=3</code> → 0 races; plain
 <code>-count=5</code> → ok.</li>
 <li><strong>817b9dd</strong> tests: DETERMINISTIC fail in
 cmd/translate-ssh TestSSHErrorHandling/connection_timeout — the
-'connection timeout' case asserted the error contains 'connection
-refused', but this host's slow localhost resolver returns 'lookup
-localhost: i/o timeout' (§11.4.1 FAIL-bluff: failed on environment, not
+‘connection timeout’ case asserted the error contains ‘connection
+refused’, but this host’s slow localhost resolver returns ‘lookup
+localhost: i/o timeout’ (§11.4.1 FAIL-bluff: failed on environment, not
 product defect). Broadened the connection-class assertion to accept any
 connection-failure indicator (refused/timeout/no route/unreachable/no
 such host/lookup); auth case keeps its specific check; still requires a
 real error. PROVEN: <code>-count=5</code> → ok.</li>
 </ul>
-<p><strong>Scope note (§11.4.28):</strong> the same brittle 'connection
-refused' assertion class exists in the challenges/containers/helix_qa
+<p><strong>Scope note (§11.4.28):</strong> the same brittle ‘connection
+refused’ assertion class exists in the challenges/containers/helix_qa
 SUBMODULES (separate go.mod → NOT in the main <code>go test ./...</code>
 sweep; their own repos/sweeps — separate work, noted for follow-up).</p>
 <p><strong>FULL SWEEP GREEN</strong> at HEAD 817b9dd:
@@ -1013,9 +1424,8 @@ main-stream commits this session (PDF, output-format, .html, doc-sync,
 deepseek-v4, websocket-race, ssh-test) pushed FF to both upstreams (no
 force §11.4.113).</p>
 <!-- session 2026-06-14n: provider allowlist §11.4.150 audit — deepseek v4 fix + findings (HEAD 0fd1a34) -->
-
 <h3
-id="session-2026-06-14n--provider-model-allowlist-114150-audit-live-models-not-memory">Session
+id="session-2026-06-14n-provider-model-allowlist-11.4.150-audit-live-models-not-memory">Session
 2026-06-14n — provider model-allowlist §11.4.150 audit (live /models,
 not memory)</h3>
 <ul>
@@ -1047,16 +1457,15 @@ field — verified.)</li>
 <code>API Key not found</code> → §11.4.6 the gemini failures are an
 OPERATOR CREDENTIAL issue, NOT a code bug. Operator action: refresh
 GEMINI_API_KEY.</li>
-<li>Other ~30 providers' allowlists: not audited (no keys / would need
+<li>Other ~30 providers’ allowlists: not audited (no keys / would need
 per-provider live verification). Adding current models is
 safe-but-must-be-verified-per-model (string-content shape + real
 translation), never from memory (§11.4.99/§11.4.150).</li>
 </ul></li>
 </ul>
 <!-- session 2026-06-14m: .html output added — format matrix complete (HEAD fb07a59) -->
-
 <h3
-id="session-2026-06-14m--html-output-added-inputoutput-format-matrix-complete-head-fb07a59">Session
+id="session-2026-06-14m-.html-output-added-inputoutput-format-matrix-complete-head-fb07a59">Session
 2026-06-14m — .html output added; input×output format matrix complete
 (HEAD fb07a59)</h3>
 <ul>
@@ -1080,9 +1489,8 @@ reconciliations. build+vet exit 0; full <code>go test ./... -p 1</code>
 sweep GREEN at HEAD fb07a59: <strong>54 ok / 0 FAIL</strong>
 (qa-results/full_sweep_20260614_152400.log).</p>
 <!-- session 2026-06-14l: CLI output-format honored + 2 gate reconciliations (HEAD ca5608f) -->
-
 <h3
-id="session-2026-06-14l--cli-honors--o-output-format--2-114120-reconciliations-head-ca5608f">Session
+id="session-2026-06-14l-cli-honors--o-output-format-2-11.4.120-reconciliations-head-ca5608f">Session
 2026-06-14l — CLI honors -o output format + 2 §11.4.120 reconciliations
 (HEAD ca5608f)</h3>
 <ul>
@@ -1106,7 +1514,7 @@ sweep:</strong>
 supportedFormats (real extractors landed); MOBI stays unsupported.</li>
 <li>cmd/cli TestTranslateEbookFunction/with_app_config: was a §11.4.98
 BLUFF — skip-guard fired only with NO key, then forced openai + fake
-"config-key", dialled REAL OpenAI, 401'd, failed NoError whenever ANY
+“config-key”, dialled REAL OpenAI, 401’d, failed NoError whenever ANY
 other provider key was in env (DEEPSEEK/ZHIPU/GEMINI/MISTRAL present
 this session). Rewritten to a self-driving httptest OpenAI mock (config
 BaseURL→mock); asserts success + mock-hit + non-empty output. No real
@@ -1122,26 +1530,25 @@ ca5608f: <strong>54 ok / 0 FAIL</strong> (was 52 ok/2 stale-gate FAIL
 pre-reconcile; qa-results/full_sweep_20260614_151656.log). build+vet
 exit 0.</p>
 <!-- session 2026-06-14k: PDF input revived (HEAD 18d6f73) -->
-
 <h3
-id="session-2026-06-14k--pdf-input-revived-license-gated-unipdf--mit-ledongthucpdf-head-18d6f73">Session
+id="session-2026-06-14k-pdf-input-revived-license-gated-unipdf-mit-ledongthucpdf-head-18d6f73">Session
 2026-06-14k — PDF input revived: license-gated unipdf → MIT
 ledongthuc/pdf (HEAD 18d6f73)</h3>
 <ul>
 <li><strong>18d6f73</strong> ebook: PDF INPUT was non-functional —
-<code>github.com/unidoc/unipdf</code>'s <code>ExtractText</code> is
-LICENSE-GATED ("unipdf license code required" for every real PDF), so
-PDF input shipped dead (same §11.4 "ships but cannot be used" class DOCX
+<code>github.com/unidoc/unipdf</code>’s <code>ExtractText</code> is
+LICENSE-GATED (“unipdf license code required” for every real PDF), so
+PDF input shipped dead (same §11.4 “ships but cannot be used” class DOCX
 was, now both fixed). Swapped to MIT
 <code>github.com/ledongthuc/pdf</code>; dropped
 <code>unidoc/unipdf</code> via <code>go mod tidy</code>. Wired
 <code>FormatPDF</code> into <code>pkg/format/detector.go</code>
 IsSupported + GetSupportedFormats (§11.4.108 source→artifact gate;
-§11.4.120 reconcile of detector_test + pdf_parser_test's unipdf-coupled
+§11.4.120 reconcile of detector_test + pdf_parser_test’s unipdf-coupled
 error-string assertion). REAL E2E PROVEN
 (docs/qa/e2e_pdf_input_20260614_150421/): minimal English PDF → real
-DeepSeek deepseek-chat (1.9s) → valid Serbian Cyrillic EPUB ("Храбри
-витез јахао је преко тихог сванућа у зору"), 138 Cyrillic chars, differs
+DeepSeek deepseek-chat (1.9s) → valid Serbian Cyrillic EPUB (“Храбри
+витез јахао је преко тихог сванућа у зору”), 138 Cyrillic chars, differs
 from source, no placeholders, no API-key leak (§11.4.10). Permanent
 regression guard (§11.4.135):
 <code>pkg/ebook/pdf_extraction_regression_test.go</code> +
@@ -1158,47 +1565,40 @@ background (FD ~95%, host-safe). build exit 0.</p>
 <p>REMAINING KNOWN ISSUES (operator/research/design-gated):
 OpenAI/Anthropic keys absent; GEMINI_API_KEY invalid; zhipu
 account/model access; markdown not a first-class CLI input; other ~30
-providers' model-allowlists not audited; verifier 3-tier merge
+providers’ model-allowlists not audited; verifier 3-tier merge
 precedence + run.go registry flags (design); RefreshToken no expiry
 re-validate (no caller); CLI always emits EPUB (no TXT writer); SQLite
 encryption DSN needs SQLCipher; G1/G2 carry-overs; W16 Models→submodule.
 NO release tag yet (needs §11.4.40 full retest + operator confirm).</p>
 <!-- session 2026-06-14j: known-issue cleanup wave (HEAD b83038c) -->
-
 <h3
-id="session-2026-06-14j--designknown-issue-cleanup-head-b83038c--3-more-real-fixes--geminizhipu-clients-cleared">Session
+id="session-2026-06-14j-designknown-issue-cleanup-head-b83038c-3-more-real-fixes-geminizhipu-clients-cleared">Session
 2026-06-14j — design/known-issue cleanup (HEAD b83038c) — 3 more real
 fixes + gemini/zhipu clients cleared</h3>
 <p>Subagent-driven wave (1 completed via subagent, 3 rate-limited →
-finished inline per §11.4.101/§11.4.147):</p>
-<ul>
-<li><strong>77a0c15</strong> coordination: TranslateWithConsensus
-tie-break was non-deterministic (map-iteration order on vote ties) →
-sort candidates, strict '&gt;', lexicographic tie-break. Mutation-proven
-(1000 runs identical).</li>
-<li><strong>9640a00</strong> verification: multipass chapter loop
-panicked (index out of range) when the translation has FEWER chapters
-than the original → bound the loop by min(original,current,polished) +
-log/skip the tail. FACT code-analysis root cause; build+vet+tests
-green.</li>
-<li><strong>b83038c</strong> ebook: FB2 writer dropped
-section/subsection TITLES (content was already lossless) → prepend each
-non-empty title as a paragraph. RED→GREEN→mutation-proven (real
-write→read).</li>
-<li>gemini/zhipu CLIENT investigation (issue #5) RESOLVED as <strong>no
-client bug</strong> (§11.4.6): gemini.go correctly uses <a
-href="https://generativelanguage.googleapis.com/v1beta">https://generativelanguage.googleapis.com/v1beta</a>
-+ ?key= + :generateContent; zhipu.go correctly uses <a
-href="https://open.bigmodel.cn/api/paas/v4">https://open.bigmodel.cn/api/paas/v4</a>
-+ /chat/completions + Bearer. Their live failures are OPERATOR
-credential/account issues (invalid GEMINI_API_KEY; zhipu account lacks
-the model), NOT code.</li>
-</ul>
+finished inline per §11.4.101/§11.4.147): - <strong>77a0c15</strong>
+coordination: TranslateWithConsensus tie-break was non-deterministic
+(map-iteration order on vote ties) → sort candidates, strict ‘&gt;’,
+lexicographic tie-break. Mutation-proven (1000 runs identical). -
+<strong>9640a00</strong> verification: multipass chapter loop panicked
+(index out of range) when the translation has FEWER chapters than the
+original → bound the loop by min(original,current,polished) + log/skip
+the tail. FACT code-analysis root cause; build+vet+tests green. -
+<strong>b83038c</strong> ebook: FB2 writer dropped section/subsection
+TITLES (content was already lossless) → prepend each non-empty title as
+a paragraph. RED→GREEN→mutation-proven (real write→read). - gemini/zhipu
+CLIENT investigation (issue #5) RESOLVED as <strong>no client
+bug</strong> (§11.4.6): gemini.go correctly uses
+https://generativelanguage.googleapis.com/v1beta + ?key= +
+:generateContent; zhipu.go correctly uses
+https://open.bigmodel.cn/api/paas/v4 + /chat/completions + Bearer. Their
+live failures are OPERATOR credential/account issues (invalid
+GEMINI_API_KEY; zhipu account lacks the model), NOT code.</p>
 <p><strong>SESSION GRAND TOTAL: ~81 real bugs</strong> + 3
 reconciliations + §11.4.98 conversion + real E2E proofs (5-format matrix
 via DeepSeek + Mistral). Post-wave sweep at HEAD b83038c: 53 ok; the
-single pkg/distributed FAIL was ENFILE host-exhaustion ("too many open
-files", FD ~95%), NOT a regression — TestSSHConnection_ExecuteCommand
+single pkg/distributed FAIL was ENFILE host-exhaustion (“too many open
+files”, FD ~95%), NOT a regression — TestSSHConnection_ExecuteCommand
 passes deterministically in isolation (-count=3 green); nothing in
 pkg/distributed changed this round. build+vet exit 0.</p>
 <p>REMAINING KNOWN ISSUES (operator/research/design-gated — see the
@@ -1206,116 +1606,107 @@ operator-facing status report): OpenAI/Anthropic keys absent;
 GEMINI_API_KEY invalid; zhipu account/model access; PDF input
 non-functional (license-gated unipdf, same class DOCX was — needs a free
 PDF lib / go.mod decision); markdown not a first-class CLI input; other
-~30 providers' model-allowlists not audited; verifier 3-tier merge
+~30 providers’ model-allowlists not audited; verifier 3-tier merge
 precedence + run.go registry flags (design); RefreshToken no expiry
 re-validate (no caller); CLI always emits EPUB (no TXT writer); SQLite
 encryption DSN needs SQLCipher; G1/G2 carry-overs; W16 Models→submodule.
 NO release tag yet (needs §11.4.40 full retest + operator confirm).</p>
 <!-- session 2026-06-14i: real-translation E2E matrix caught + fixed more bugs (HEAD b23bcac) -->
-
 <h3
-id="session-2026-06-14i--real-providerformat-e2e-matrix-found--fixed-more-bugs-head-b23bcac">Session
+id="session-2026-06-14i-real-providerformat-e2e-matrix-found-fixed-more-bugs-head-b23bcac">Session
 2026-06-14i — real provider×format E2E matrix found + fixed more bugs
 (HEAD b23bcac)</h3>
 <p>Driving REAL translations across formats/providers (rate-limited
-subagents → done inline) surfaced + fixed:</p>
-<ul>
-<li><strong>41063cb</strong> FB2 + EPUB INPUT broken end-to-end:
-convertToMarkdown re-parsed already-extracted text as the original
-format ('failed to parse FB2: EOF' / 'not a valid zip'). Fixed → all 5
-input formats translate. PROVEN: real DeepSeek E2E matrix
-FB2/EPUB/TXT/DOCX/HTML all → valid Serbian-Cyrillic EPUB
-(docs/qa/e2e_format_matrix_*).</li>
-<li><strong>9821e0f</strong> zhipu missing from cmd/unified-translator
+subagents → done inline) surfaced + fixed: - <strong>41063cb</strong>
+FB2 + EPUB INPUT broken end-to-end: convertToMarkdown re-parsed
+already-extracted text as the original format (‘failed to parse FB2:
+EOF’ / ‘not a valid zip’). Fixed → all 5 input formats translate.
+PROVEN: real DeepSeek E2E matrix FB2/EPUB/TXT/DOCX/HTML all → valid
+Serbian-Cyrillic EPUB (docs/qa/e2e_format_matrix_<em>). -
+<strong>9821e0f</strong> zhipu missing from cmd/unified-translator
 resolveProviderAPIKey env map → ZHIPU_API_KEY never satisfied the gate.
 Fixed (proven: now reaches the live Zhipu API). + Multi-provider proven:
-Mistral E2E PASS (docs/qa/e2e_multiprovider_*).</li>
-<li><strong>b23bcac</strong> stale provider model-allowlists
+Mistral E2E PASS (docs/qa/e2e_multiprovider_</em>). -
+<strong>b23bcac</strong> stale provider model-allowlists
 (gemini/groq/zhipu accepted only DEPRECATED models, rejected current →
 providers unusable). Added current models; live-proven the gate blocker
-is gone (groq llama-3.3-70b → 429 'recognized'; gemini-1.5-flash →
+is gone (groq llama-3.3-70b → 429 ‘recognized’; gemini-1.5-flash →
 reaches API (auth err); zhipu glm-4-flash → reaches API (account err)).
-docs/qa/allowlist_fix_*.</li>
-</ul>
+docs/qa/allowlist_fix_*.</p>
 <p><strong>SESSION GRAND TOTAL: ~78 real bugs</strong> + 3
 reconciliations + §11.4.98 conversion + real E2E proofs (5-format matrix
 via DeepSeek + Mistral 2nd-provider). OPERATOR/research-gated
 remainders: add OPENAI/ANTHROPIC keys (absent); GEMINI_API_KEY appears
-invalid/expired (gemini reaches API but 'API Key not found'); zhipu
-key's account/endpoint rejects documented models (possible gemini/zhipu
-CLIENT endpoint bug like Qwen's — flagged for investigation, not guessed
+invalid/expired (gemini reaches API but ‘API Key not found’); zhipu
+key’s account/endpoint rejects documented models (possible gemini/zhipu
+CLIENT endpoint bug like Qwen’s — flagged for investigation, not guessed
 §11.4.6). Post-wave full sweep GREEN at HEAD b23bcac: 54 ok / 0 FAIL.
 Build+vet exit 0.</p>
 <!-- session 2026-06-14h: all 4 operator-selected directives executed (HEAD c6c2930) -->
-
 <h3
-id="session-2026-06-14h--operator-selected-directions-all-executed-head-c6c2930-real-e2e-translation-proven">Session
+id="session-2026-06-14h-operator-selected-directions-all-executed-head-c6c2930-real-e2e-translation-proven">Session
 2026-06-14h — operator-selected directions ALL executed (HEAD c6c2930);
 real E2E translation PROVEN</h3>
 <p>Operator selected all four next-directions; executed with conductor
-verification + push FF:</p>
-<ul>
-<li><p><strong>Qwen endpoint</strong> (556002d + 2f0e359): client posted
-native DashScope path under a compatible-mode base AND the CODE DEFAULT
-base was native /api/v1 while the struct+config are compatible-mode →
-wrong URL + unparseable shape (Qwen was broken for default+production).
-Fixed: default base → /compatible-mode/v1 + path /chat/completions +
-choices[] (all consistent, §11.4.150 docs-verified). Live test made
-§11.4.98-honest (SKIP on auth/endpoint failure).</p></li>
-<li><p><strong>Storage dedup</strong> (367adce): cache served STALE
-translation on tuple collision (no UNIQUE index; dedup only on id PK) →
-lookup_hash UNIQUE index + idempotent UPSERT + safe dedup migration,
-both backends. Mutation-proven.</p></li>
-<li><p><strong>DOCX</strong> (d433210): input was NON-FUNCTIONAL
-(license-gated unioffice returned 'license required' for every real
-.docx). Rewrote as a stdlib parser (archive/zip + encoding/xml over
-word/document.xml + docProps/core.xml); dropped unioffice (+ transitive
-msoleps) via go mod tidy. Proven on a real in-test .docx
-(text+metadata+UTF-8). DOCX input now actually works.</p></li>
-<li><p><strong>Stress/chaos + metrics race</strong> (bf81517): added
-§11.4.85 stress/chaos suites (events/coordination/distributed) which
-UNCOVERED a real VersionManager.metrics data race + 40-60% lost counter
-updates → fixed with metricsMu + snapshot-on-read; KNOWN_BUG guard
-flipped to active GREEN (§11.4.115).</p></li>
-<li><p><strong>CLI env-key gate</strong> (c6c2930): unified-translator's
-API-key gate ignored provider *_API_KEY env vars → fixed (falls back to
-resolveProviderAPIKey).</p></li>
-<li><p><strong>REAL E2E TRANSLATION PROOF</strong> (c6c2930,
+verification + push FF: - <strong>Qwen endpoint</strong> (556002d +
+2f0e359): client posted native DashScope path under a compatible-mode
+base AND the CODE DEFAULT base was native /api/v1 while the
+struct+config are compatible-mode → wrong URL + unparseable shape (Qwen
+was broken for default+production). Fixed: default base →
+/compatible-mode/v1 + path /chat/completions + choices[] (all
+consistent, §11.4.150 docs-verified). Live test made §11.4.98-honest
+(SKIP on auth/endpoint failure). - <strong>Storage dedup</strong>
+(367adce): cache served STALE translation on tuple collision (no UNIQUE
+index; dedup only on id PK) → lookup_hash UNIQUE index + idempotent
+UPSERT + safe dedup migration, both backends. Mutation-proven. -
+<strong>DOCX</strong> (d433210): input was NON-FUNCTIONAL (license-gated
+unioffice returned ‘license required’ for every real .docx). Rewrote as
+a stdlib parser (archive/zip + encoding/xml over word/document.xml +
+docProps/core.xml); dropped unioffice (+ transitive msoleps) via go mod
+tidy. Proven on a real in-test .docx (text+metadata+UTF-8). DOCX input
+now actually works. - <strong>Stress/chaos + metrics race</strong>
+(bf81517): added §11.4.85 stress/chaos suites
+(events/coordination/distributed) which UNCOVERED a real
+VersionManager.metrics data race + 40-60% lost counter updates → fixed
+with metricsMu + snapshot-on-read; KNOWN_BUG guard flipped to active
+GREEN (§11.4.115). - <strong>CLI env-key gate</strong> (c6c2930):
+unified-translator’s API-key gate ignored provider *_API_KEY env vars →
+fixed (falls back to resolveProviderAPIKey). - <strong>REAL E2E
+TRANSLATION PROOF</strong> (c6c2930,
 docs/qa/e2e_deepseek_20260614T130829/): unified-translator translated
 test/assets/crow_and_pitcher_en.txt EN→Serbian via REAL DeepSeek
-(deepseek-chat, 2.89s) into a VALID EPUB — 205 Cyrillic chars ('Гавран и
-крчаг…'), differs from source, no placeholders, no key leak
+(deepseek-chat, 2.89s) into a VALID EPUB — 205 Cyrillic chars (‘Гавран и
+крчаг…’), differs from source, no placeholders, no key leak
 (§11.4.83/§11.4.107/§11.4.10). Full detect→parse→translate→EPUB-write
-pipeline confirmed working after the session's fixes.</p></li>
-<li><p><strong>DOCX CLI wiring</strong> (6304f60): a broader
-multi-format E2E proof caught that the CLI still rejected .docx with
-'format docx is not yet supported' —
-format.Detector.IsSupported/GetSupportedFormats excluded FormatDOCX
-(§11.4.108 source→artifact gap: parser fixed+registered but the pipeline
-gate refused it). Added FormatDOCX to both; reconciled detector_test
-(§11.4.120). REAL E2E proven
+pipeline confirmed working after the session’s fixes.</p>
+<ul>
+<li><strong>DOCX CLI wiring</strong> (6304f60): a broader multi-format
+E2E proof caught that the CLI still rejected .docx with ‘format docx is
+not yet supported’ — format.Detector.IsSupported/GetSupportedFormats
+excluded FormatDOCX (§11.4.108 source→artifact gap: parser
+fixed+registered but the pipeline gate refused it). Added FormatDOCX to
+both; reconciled detector_test (§11.4.120). REAL E2E proven
 (docs/qa/e2e_docx_pipeline_20260614T131850/): real .docx → real DeepSeek
 → Serbian Cyrillic EPUB. DOCX input now works through the actual
-CLI.</p></li>
+CLI.</li>
 </ul>
 <p><strong>SESSION GRAND TOTAL: ~75 real bugs</strong> + 3
 reconciliations + §11.4.98 conversion + 2 real E2E proofs (DeepSeek on
 TXT + on DOCX, both → valid Serbian-Cyrillic EPUB). OPERATOR ACTIONS to
 widen coverage: add OPENAI_API_KEY / ANTHROPIC_API_KEY to ~/api_keys.sh
 (not present; ~34 other providers available). FLAGGED (not fixed, needs
-current-model research §11.4.150): the gemini provider's valid-model
+current-model research §11.4.150): the gemini provider’s valid-model
 allowlist is STALE — accepts only gemini-pro/gemini-pro-vision (both
 deprecated by Google), rejects gemini-2.0-flash/1.5. Post-wave full
 sweep GREEN at HEAD 6304f60: 54 ok / 0 FAIL. Build+vet exit 0.</p>
 <!-- session 2026-06-14g: 7th (final-coverage) SECOND-PASS wave (HEAD 5dfe003) — 4 more real bugs; comprehensive second pass COMPLETE -->
-
 <h3
-id="session-2026-06-14g--7thfinal-114118-second-pass-wave-head-5dfe003--4-more-real-bugs-whole-codebase-second-pass-essentially-complete">Session
+id="session-2026-06-14g-7thfinal-11.4.118-second-pass-wave-head-5dfe003-4-more-real-bugs-whole-codebase-second-pass-essentially-complete">Session
 2026-06-14g — 7th/final §11.4.118 second-pass wave (HEAD 5dfe003) — 4
 more real bugs; whole-codebase second pass essentially COMPLETE</h3>
 <ul>
 <li><strong>b1b747f</strong> progress: formatDuration trailing space in
-dashboard ETA ('5 hours '); events: generateEventID non-unique within a
+dashboard ETA (‘5 hours’); events: generateEventID non-unique within a
 microsecond (8172 dups/10000 in a burst → broke ID-keyed consumers).
 Both fixed.</li>
 <li><strong>5dfe003</strong> cmd: preparation-translator -providers flag
@@ -1346,9 +1737,8 @@ verifier 3-tier merge precedence + run.go registry flags; coordination
 consensus tie-break determinism; G1 verify→server-DB bridge; G2 batched
 ~30-provider sweep; G3 add OPENAI/ANTHROPIC keys.</p>
 <!-- session 2026-06-14f: 6th SECOND-PASS wave (HEAD 837f528) — 4 more real bugs (batch/coordination/translator-core) -->
-
 <h3
-id="session-2026-06-14f--6th-114118-second-pass-wave-head-837f528--4-more-real-bugs">Session
+id="session-2026-06-14f-6th-11.4.118-second-pass-wave-head-837f528-4-more-real-bugs">Session
 2026-06-14f — 6th §11.4.118 second-pass wave (HEAD 837f528) — 4 more
 real bugs</h3>
 <ul>
@@ -1362,9 +1752,9 @@ TranslateWithConsensus only scanned the first requiredAgreement
 instances → skipped available-and-agreeing instances behind unavailable
 ones. Both fixed.</li>
 <li><strong>837f528</strong> translator: successful-but-empty
-translation ('', nil) silently OVERWROTE source content across
-metadata/chapter/section/subsection (7 fields) — 'tests pass but book
-destroyed' data loss; fix: keepIfTranslationEmpty preserves source when
+translation (’‘, nil) silently OVERWROTE source content across
+metadata/chapter/section/subsection (7 fields) — ’tests pass but book
+destroyed’ data loss; fix: keepIfTranslationEmpty preserves source when
 translation empty + source non-empty. Latent flag: detected source-lang
 not propagated to llm translator.</li>
 </ul>
@@ -1373,15 +1763,14 @@ not propagated to llm translator.</li>
 conversion. Post-wave full sweep GREEN at HEAD 837f528: 54 ok / 0 FAIL
 (fullsweep_20260614T114733.log).</p>
 <!-- session 2026-06-14e: 5th SECOND-PASS wave (HEAD 367d88b) — 5 more real bugs incl CWE-208 timing oracle -->
-
 <h3
-id="session-2026-06-14e--5th-114118-second-pass-wave-head-367d88b--5-more-real-bugs-grpcsecuritypreparation">Session
+id="session-2026-06-14e-5th-11.4.118-second-pass-wave-head-367d88b-5-more-real-bugs-grpcsecuritypreparation">Session
 2026-06-14e — 5th §11.4.118 second-pass wave (HEAD 367d88b) — 5 more
 real bugs (grpc/security/preparation)</h3>
 <ul>
 <li><strong>45f6152</strong> grpc: GetTranslationStatus returned
 codes.Unknown for unknown session (→ NotFound); cleanupOldSessions
-leaked session timeout context (didn't call CancelFunc → 24h
+leaked session timeout context (didn’t call CancelFunc → 24h
 timer/goroutine leak).</li>
 <li><strong>5871848</strong> security: CWE-208 username-enumeration
 TIMING oracle — no bcrypt compare on user-not-found path → ~1.7M× faster
@@ -1389,7 +1778,7 @@ than wrong-password → reveals valid usernames. Fix: dummy-bcrypt compare
 at init (OWASP constant-time).</li>
 <li><strong>367d88b</strong> preparation: failed-chapter analysis
 MISATTRIBUTION (positional index after results compaction → chapter got
-wrong chapter's analysis; fix: lookup by ChapterNum); nested-subsection
+wrong chapter’s analysis; fix: lookup by ChapterNum); nested-subsection
 content DROPPED from analysis input (extractors ignored
 Section.Subsections; FB2 populates them; fix: recursive
 writeSectionContent).</li>
@@ -1399,9 +1788,8 @@ writeSectionContent).</li>
 conversion. Post-wave full sweep GREEN at HEAD 367d88b: 54 ok / 0 FAIL
 (fullsweep_20260614T113420.log).</p>
 <!-- session 2026-06-14c+d: two more parallel SECOND-PASS waves (HEAD 4a95b06) — 11 more real bugs, FD-safe -->
-
 <h3
-id="session-2026-06-14cd--two-more-114118-second-pass-waves-head-4a95b06--11-more-real-bugs-3-stream-low-fd-method-proven-repeatable-at-95-fd-no-enfile">Session
+id="session-2026-06-14cd-two-more-11.4.118-second-pass-waves-head-4a95b06-11-more-real-bugs-3-stream-low-fd-method-proven-repeatable-at-95-fd-no-enfile">Session
 2026-06-14c/d — two more §11.4.118 second-pass waves (HEAD 4a95b06) — 11
 more real bugs; 3-stream low-FD method proven repeatable at ~95% FD, NO
 ENFILE</h3>
@@ -1414,7 +1802,7 @@ ENFILE</h3>
 ending in EXAMPLES (no IMPLICATIONS); NaN Confidence (count==0 divide);
 multipass section under-count (pointer aliasing).</li>
 <li><strong>9946d85</strong> storage: Redis makeCacheKey metadata
-delimiter-injection collision (Ollama 'llama3:8b' has ':') → wrong
+delimiter-injection collision (Ollama ‘llama3:8b’ has ‘:’) → wrong
 translation; fixed NUL-joined hash.</li>
 <li><strong>d055b8c</strong> markdown: EPUB↔︎MD code blocks destroyed,
 GFM tables lost both ways, backslash-escapes corrupted — all fixed
@@ -1438,31 +1826,29 @@ pinned optimization). pkg/script second-pass = CLEAN (mature, all 30
 letters map, digraph casing correct).</p>
 <p><strong>SESSION GRAND TOTAL: 55 real bugs</strong> (5 parallel waves
 + 3 inline + 4 second-pass waves) + 2 reconciliations + §11.4.98
-conversion. Post-wave full sweep GREEN at HEAD 4a95b06: go test ./... -p
-1 = 54 ok / 0 FAIL (fullsweep_20260614T112302.log). build+vet exit
-0.</p>
+conversion. Post-wave full sweep GREEN at HEAD 4a95b06: go test ./… -p 1
+= 54 ok / 0 FAIL (fullsweep_20260614T112302.log). build+vet exit 0.</p>
 <!-- session 2026-06-14b: parallel SECOND-PASS discovery wave (HEAD 47ea69d) — 5 more real bugs, FD-safe -->
-
 <h3
-id="session-2026-06-14b--parallel-114118-second-pass-discovery-wave-head-47ea69d--5-more-real-bugs-ran-3-subagents-at-95-fd-with-low-fd-discipline-no-enfile">Session
+id="session-2026-06-14b-parallel-11.4.118-second-pass-discovery-wave-head-47ea69d-5-more-real-bugs-ran-3-subagents-at-95-fd-with-low-fd-discipline-no-enfile">Session
 2026-06-14b — parallel §11.4.118 second-pass discovery wave (HEAD
 47ea69d) — 5 more real bugs; ran 3 subagents at ~95% FD with low-FD
 discipline, NO ENFILE</h3>
 <p>Operator repeatedly requested parallel subagents; FDs never freed
 (~95%, 15 claude procs). Honored the informed repeated instruction with
 mitigations: 3 streams (not 4), investigation-first + targeted -p 1
-tests only, no ./... , no -race during hunt. Result: NO ENFILE, 5 real
+tests only, no ./… , no -race during hunt. Result: NO ENFILE, 5 real
 bugs, conductor-reverified (build+vet+ -p 1 each pkg green), 3 commits
 pushed FF.</p>
 <ul>
 <li><strong>87a8048</strong> — Anthropic client returned only
 response.Content[0].Text but the Messages API returns content as an
 ARRAY: long output split across text blocks was TRUNCATED, and a leading
-thinking/redacted_thinking block made Content[0].Text=="" → EMPTY
+thinking/redacted_thinking block made Content[0].Text==“” → EMPTY
 translation. Fix: concatenate all text blocks (skip thinking/tool).
 httptest RED→GREEN→mutation.</li>
 <li><strong>edadd73</strong> — distributed performance.go
-ResultCache.Set evicted on every update-while-full (didn't check
+ResultCache.Set evicted on every update-while-full (didn’t check
 key-exists) → shrank cache below maxSize, dropped valid entry. +
 coordinator.go round-robin currentIndex never reset on
 DiscoverRemoteInstances rebuild → index-out-of-range PANIC after worker
@@ -1470,10 +1856,10 @@ pool shrinks (translation hot path). Both RED→GREEN→mutation (-p
 1).</li>
 <li><strong>47ea69d</strong> — ebook epub_parser.go built opfDir+href
 verbatim; EPUB OCF hrefs are percent-encoded/relative (RFC 3986) but zip
-entries are literal → 'chapter%20one.xhtml' never matched 'OEBPS/chapter
-one.xhtml' → chapter+cover SILENTLY DROPPED (data loss). Fix:
+entries are literal → ‘chapter%20one.xhtml’ never matched ‘OEBPS/chapter
+one.xhtml’ → chapter+cover SILENTLY DROPPED (data loss). Fix:
 resolveEPUBHref (PathUnescape + ./ ../ normalize). + html_parser.go
-removed a hardcoded 'Nestedtexthere'-&gt;'Nested text here' test-hack
+removed a hardcoded ‘Nestedtexthere’-&gt;‘Nested text here’ test-hack
 that corrupted any real doc containing that substring.
 RED→GREEN→mutation.</li>
 </ul>
@@ -1497,14 +1883,13 @@ a new session at THIS file, run <code>git fetch --all</code>, and say
 <strong>continue</strong>.</p>
 <hr />
 <!-- session 2026-06-14a: host-safe single-stream inline (HEAD bd8a1ef) — 2 more real bugs while FD-pressured -->
-
 <h3
-id="session-2026-06-14a--host-safe-single-stream-inline-head-bd8a1ef--2-more-real-datacorrectness-bugs-in-pkgtranslatorllm-the-chunking-path-subagents-skipped">Session
+id="session-2026-06-14a-host-safe-single-stream-inline-head-bd8a1ef-2-more-real-datacorrectness-bugs-in-pkgtranslatorllm-the-chunking-path-subagents-skipped">Session
 2026-06-14a — host-safe single-stream inline (HEAD bd8a1ef) — 2 more
 real data/correctness bugs in pkg/translator/llm (the chunking path
 subagents skipped)</h3>
 <p>Context: operator returned, asked for 3-4 parallel subagents; chose
-"free FDs first" but host <code>kern.num_files</code> stayed ~94-95% of
+“free FDs first” but host <code>kern.num_files</code> stayed ~94-95% of
 maxfiles (13+ concurrent claude processes, NOT freed). Per §12
 host-safety I did NOT launch parallel subagents (ENFILE risk); instead
 ran host-safe single-stream INLINE work (targeted -p 1 tests never hit
@@ -1514,26 +1899,25 @@ FF.</p>
 <ul>
 <li><strong>24b0fd0</strong> — splitText DROPPED PARAGRAPH SEPARATORS at
 chunk boundaries (the &gt;20KB size-error retry path subagents had
-skipped as out-of-scope). It stripped "\n\n" via Split + re-added
+skipped as out-of-scope). It stripped “” via Split + re-added
 inconsistently (never around an oversized para, never across a chunk
-seam); reassembly strings.Join(chunks,"") then glued the last paragraph
-of one chunk to the first of the next; "\n\n\n\n" collapsed to "\n\n".
-Structural data loss in translated large chapters. Fix: splitText now
-tiles losslessly — re-attach each para's "\n\n" so
-Join(splitText(text),"")==text (makes reassembly correct by
-construction). RED (5 cases dropped \n\n) -&gt; GREEN -&gt; mutation
-polarity proven.</li>
+seam); reassembly strings.Join(chunks,““) then glued the last paragraph
+of one chunk to the first of the next;”” collapsed to “”. Structural
+data loss in translated large chapters. Fix: splitText now tiles
+losslessly — re-attach each para’s “” so Join(splitText(text),““)==text
+(makes reassembly correct by construction). RED (5 cases dropped ) -&gt;
+GREEN -&gt; mutation polarity proven.</li>
 <li><strong>bd8a1ef</strong> — in-memory cache-key COLLISION served
-wrong translation: key was fmt.Sprintf("%s:%s",text,contextStr); ":"
-inside text means ("a:b","c") and ("a","b:c") both -&gt; "a<span
-class="emoji" data-emoji="b">🅱️</span>c" -&gt; 2nd request served 1st's
-translation (same class as the storage Redis fix). Fix: makeLLMCacheKey
-injective via length prefix "%d:%s:%s". RED (Translate served xlate(a:b)
-for input "a") -&gt; GREEN -&gt; mutation-proven (helper body).</li>
+wrong translation: key was fmt.Sprintf(“%s:%s”,text,contextStr); “:”
+inside text means (“a:b”,“c”) and (“a”,“b:c”) both -&gt; “a:b:c” -&gt;
+2nd request served 1st’s translation (same class as the storage Redis
+fix). Fix: makeLLMCacheKey injective via length prefix “%d:%s:%s”. RED
+(Translate served xlate(a:b) for input “a”) -&gt; GREEN -&gt;
+mutation-proven (helper body).</li>
 <li><strong>71babe1</strong> — FB2 writer DROPPED deeply-nested section
 content (&gt;2 levels): chapter loop only descended sec.Content + direct
 sub.Content, never sub.Subsections (depth 3+) -&gt; deep translated text
-vanished from the .fb2 (EPUB writer's recursive formatSection preserves
+vanished from the .fb2 (EPUB writer’s recursive formatSection preserves
 it). Fix: collectSectionParagraphs recurses the full Subsections tree.
 RED (real write-&gt;read: LEVEL_3/_4 missing) -&gt; GREEN -&gt;
 mutation-proven. Honest note (§11.4.6, NOT fixed — ambiguous intent):
@@ -1545,17 +1929,16 @@ identifier, Chapter has no orphan Content field — no data-loss; no bug
 invented.</li>
 </ul>
 <p><strong>SESSION GRAND TOTAL now: 39 real bugs</strong> (waves 1-5 =
-32 + wave-5 4... see below) + 2 reconciliations + §11.4.98 conversion.
+32 + wave-5 4… see below) + 2 reconciliations + §11.4.98 conversion.
 Build STABLE GREEN, <code>go build ./...</code> exit 0;
 pkg/translator/llm passes offline. Watcher b3qgjr30s armed (40min cap) →
 auto-launch 3-4 parallel subagents for a §11.4.118 second-pass discovery
 wave the moment FD&lt;80%. While FD-pressured, conductor continues
 host-safe single-stream inline bug-hunting.</p>
 <!-- session 2026-06-13g: bug-hunt wave 5 + STABLE GREEN BUILD + §12 host-safety pace (HEAD ceab1db) -->
-
 <h3
-id="session-2026-06-13g--bug-hunt-wave-5-head-ceab1db--4-real-bugs-incl-cwe-22-path-traversal--pairingmanager-race-build-stable-green-paced-for-12-host-safety">Session
-2026-06-13g — bug-hunt wave 5 (HEAD ceab1db) — 4 real bugs incl. CWE-22
+id="session-2026-06-13g-bug-hunt-wave-5-head-ceab1db-4-real-bugs-incl.-cwe-22-path-traversal-pairingmanager-race-build-stable-green-paced-for-12-host-safety">Session
+2026-06-13g — bug-hunt wave 5 (HEAD ceab1db) — 4 real bugs incl. CWE-22
 path traversal + PairingManager race; build STABLE GREEN; paced for §12
 host-safety</h3>
 <p>Mode: §11.4.126 autonomous loop + §11.4.103 3 parallel subagents
@@ -1579,16 +1962,16 @@ multi-byte char (→ 2 RUNES); + DetectLanguage prompt sample rune-fix
 (source-only, network-gated). Mutation-proven, -race ×3.</li>
 <li><strong>ceab1db</strong> — pkg/api PATH TRAVERSAL (CWE-22):
 uploadUpdate/applyUpdate interpolated the X-Update-Version header into a
-filepath.Join, '..' escaped the update dir → arbitrary file write. →
-validateUpdateVersion allowlist (reject ''/'..'/separators/NUL/&gt;128,
+filepath.Join, ‘..’ escaped the update dir → arbitrary file write. →
+validateUpdateVersion allowlist (reject ’‘/’..’/separators/NUL/&gt;128,
 charset [A-Za-z0-9.+_-]). RED(200+escaped path)→GREEN(400)→mutation;
 existing 11 subtests pass, -race ×3.</li>
 </ul>
 <p><strong>BUILD STATE — STABLE GREEN.</strong> Every package passes:
 the post-wave-5 full sweep showed 52 ok + 2 transient FAILs
 (pkg/translator TestMemoryUsage + test/integration build) that were
-proven ENVIRONMENTAL (§11.4.7), NOT code: error was literally "too many
-open files in system"; <code>go test -c ./test/integration</code>
+proven ENVIRONMENTAL (§11.4.7), NOT code: error was literally “too many
+open files in system”; <code>go test -c ./test/integration</code>
 compiles exit 0; both re-ran GREEN at <code>-p 1</code>. Root cause:
 host <code>kern.num_files</code> at ~95.8% of <code>kern.maxfiles</code>
 (122880) from 5 waves of parallel subagents + repeated full
@@ -1609,7 +1992,7 @@ services, config, cache, translator-core, distributed, language, api).
 Per §11.4.94(A) the remaining items are genuinely blocked → paced
 re-verification, not idle-by-laziness.</p>
 <h3
-id="session-grand-total-2026-06-13--06-14-36-real-bugs-fixed-across-5-waves-710784--2-reconciliations--11498-llm-offline-conversion">SESSION
+id="session-grand-total-2026-06-13-06-14-36-real-bugs-fixed-across-5-waves-710784-2-reconciliations-11.4.98-llm-offline-conversion">SESSION
 GRAND TOTAL (2026-06-13 → 06-14): 36 real bugs fixed across 5 waves
 (7+10+7+8+4) + 2 reconciliations + §11.4.98 llm offline conversion</h3>
 <p>All reproduce-first + mutation-proven +
@@ -1628,9 +2011,8 @@ defense-in-depth); G1 verify→server-DB bridge; G2 batched ~30-provider
 sweep; G3 add OPENAI/ANTHROPIC keys to api_keys.sh. These need operator
 decisions (user away) — correctly deferred per §11.4.101/§11.4.122.</p>
 <!-- session 2026-06-13f: parallel bug-hunt wave 4 + FULL-REPO SWEEP GREEN (HEAD de25a98) -->
-
 <h3
-id="session-2026-06-13f--bug-hunt-wave-4--full-repo-sweep-green-head-de25a98--8-real-bugs-go-test---54-ok--0-fail-offline">Session
+id="session-2026-06-13f-bug-hunt-wave-4-full-repo-sweep-green-head-de25a98-8-real-bugs-go-test-....-54-ok-0-fail-offline">Session
 2026-06-13f — bug-hunt wave 4 + full-repo sweep GREEN (HEAD de25a98) — 8
 real bugs; <code>go test ./...</code> = 54 ok / 0 FAIL offline</h3>
 <p>Mode: §11.4.126 autonomous loop + §11.4.103 4 parallel subagents
@@ -1642,10 +2024,10 @@ sweep. 4 commits (eeda1ee..de25a98) pushed FF.</p>
 claimed sorted-by-score but did NO sort (passed only on pre-sorted
 fixture) → sort desc; FallbackOrder used unfiltered index → first
 accepted pref got 2 not 1 → contiguous post-filter rank; config all-zero
-scoring weights fail-open ('total&gt;0 &amp;&amp;' skipped the sum
+scoring weights fail-open (‘total&gt;0 &amp;&amp;’ skipped the sum
 check) → reject. Mutation-proven.</li>
 <li><strong>9d4f4a4</strong> — internal/cache cleanup goroutine LEAK:
-NewCache(_,true) launched 'for range ticker.C' with no Close/stop → one
+NewCache(_,true) launched ‘for range ticker.C’ with no Close/stop → one
 goroutine + pinned Cache leaked per instance forever (unbounded on a
 long-running server). Added stop chan + Once-guarded Close() +
 cleanupWG; backward-compatible. Mutation-proven (200 caches→200
@@ -1655,9 +2037,9 @@ language-detection sample sliced sample[:2000] by BYTE → mid-rune split
 → invalid UTF-8 to Detect (common case for Cyrillic/CJK ebooks) →
 truncateOnRuneBoundary. Mutation-proven, drives real detector.</li>
 <li><strong>de25a98</strong> — pkg/distributed 3 bugs:
-checkServiceHealth set Status='online' unconditionally → every paired
+checkServiceHealth set Status=‘online’ unconditionally → every paired
 worker DEMOTED+dropped after first 30s tick → all work distribution lost
-(HIGH); versionCache map had NO mutex (existing one is AlertManager's) →
+(HIGH); versionCache map had NO mutex (existing one is AlertManager’s) →
 BatchUpdateWorkers data race → cacheMu; ssh LastUsed two-locks-one-field
 race → conn.mu touch()/idleSince(). Mutation-proven, full pkg -race
 ok.</li>
@@ -1680,9 +2062,8 @@ pkg/api (deeper non-integration logic), the PairingManager mutex
 (careful single-mutex + -race). After that the autonomous-safe disjoint
 queue is largely exhausted → legitimate idle per §11.4.94.</p>
 <!-- session 2026-06-13e: parallel bug-hunt wave 3 + FULL-REPO SWEEP GREEN (HEAD 8d0b1b6) -->
-
 <h3
-id="session-2026-06-13e--bug-hunt-wave-3--full-repo-sweep-green-head-8d0b1b6--7-real-bugs--2-interaction-defect-reconciliations-go-test---54-ok--0-fail-offline">Session
+id="session-2026-06-13e-bug-hunt-wave-3-full-repo-sweep-green-head-8d0b1b6-7-real-bugs-2-interaction-defect-reconciliations-go-test-....-54-ok-0-fail-offline">Session
 2026-06-13e — bug-hunt wave 3 + full-repo sweep GREEN (HEAD 8d0b1b6) — 7
 real bugs + 2 interaction-defect reconciliations;
 <code>go test ./...</code> = 54 ok / 0 FAIL offline</h3>
@@ -1693,7 +2074,7 @@ conductor verify-then-commit. Then a full-repo
 caught 2 latent defects, both reconciled. 6 commits (6e1b1f2..8d0b1b6)
 pushed FF.</p>
 <ul>
-<li><strong>6e1b1f2</strong> — grpc 2 bugs: StartTranslation deref'd
+<li><strong>6e1b1f2</strong> — grpc 2 bugs: StartTranslation deref’d
 req.ProviderConfig.Type unconditionally (proto3 optional → nil panic, no
 grpc recovery → remote-DoS CRASH the serving goroutine) → validate up
 front, InvalidArgument; session-limit TOCTOU (RLock-check then
@@ -1709,15 +2090,15 @@ a §11.4.1 JWT-tamper test FAIL-bluff (mutated last sig char, ~1/64 flaky
 → first char, 200/200). RED(exploit)→GREEN→mutation, -race ×3,
 downstream pkg/api green.</li>
 <li><strong>95323d8</strong> — ebook HTML: td/th/dt/dd cells
-concatenated with no separator ('cell Acell B') + <br> dropped ('line
-oneline two') → isCellElement newline + <br> newline. Mutation-proven.
+concatenated with no separator (‘cell Acell B’) + <br> dropped (‘line
+oneline two’) → isCellElement newline + <br> newline. Mutation-proven.
 HONEST PENDING_FORENSICS: DOCX parser depends on license-gated unioffice
 → non-functional for real DOCX (go.mod-scope, not fixed).</li>
 <li><strong>044bacb</strong> — hardware: vm_stat malformed page-size
 discarded parse error → 0 available RAM → guard (err==nil &amp;&amp;
 &gt;0); meminfo kB*1024 uint64 overflow wrap → maxKB guard. progress:
-GetProgress clobbered Complete()'s 'Completed' ETA → gate override on
-&lt;100% &amp;&amp; status!='completed'. Mutation-proven.</li>
+GetProgress clobbered Complete()‘s ’Completed’ ETA → gate override on
+&lt;100% &amp;&amp; status!=‘completed’. Mutation-proven.</li>
 <li><strong>8d0b1b6</strong> — full-sweep interaction reconciliations
 (§11.4.120/§11.4.98): test/unit scoring expectations updated to the
 FIXED weight formula (0.78→0.675, 0.625→0.5, math-verified, not a
@@ -1739,9 +2120,8 @@ pkg/distributed (deeper pure-logic), cmd more. Carry-over latent
 DOCX unioffice license (go.mod); security RefreshToken re-validate.
 Operator-gated: G1/G2/G3.</p>
 <!-- session 2026-06-13d: parallel subagent bug-hunt wave 2 (HEAD 39ee07a) -->
-
 <h3
-id="session-2026-06-13d--parallel-subagent-bug-hunt-wave-2-head-39ee07a--10-real-bugs-all-reproduce-first--mutation-proven--conductor-reverified--race--pushed-ff-no-force-114113">Session
+id="session-2026-06-13d-parallel-subagent-bug-hunt-wave-2-head-39ee07a-10-real-bugs-all-reproduce-first-mutation-proven-conductor-reverified--race-pushed-ff-no-force-11.4.113">Session
 2026-06-13d — parallel subagent bug-hunt wave 2 (HEAD 39ee07a) — 10 real
 bugs, all reproduce-first + mutation-proven + conductor-reverified
 (-race) + pushed FF (no force §11.4.113)</h3>
@@ -1755,17 +2135,17 @@ to milos85vasic/Translator + HelixDevelopment/HelixTranslate.</p>
 scoring/engine.go applied weights.Capability TWICE + DROPPED Recency
 (sum 1.15, broke 0..1 contract); discovery HF models keyed on legacy
 <code>modelId</code> only → valid <code>id</code>-only payload collided
-every model on ID="" → ZERO usable models; registry
+every model on ID=“” → ZERO usable models; registry
 FilterVerified/ListModels map-iteration nondeterministic order (latent
 flake). All mutation-proven, -race.</li>
 <li><strong>1bee190</strong> — pkg/preparation 3 bugs: analyzeChapters
 appended goroutine results in COMPLETION order →
-GetTranslationContext[n-1] mis-attributed each chapter's analysis to the
+GetTranslationContext[n-1] mis-attributed each chapter’s analysis to the
 wrong chapter (→ slot-indexed, no mutex); multi-pass consolidation set
 FinalAnalysis from fresh parse with no chapter_analyses → all
 per-chapter analysis silently lost (→ re-attach); isUntranslatable
-strings.Contains(text,"")==true → blank LLM term marked EVERY string
-untranslatable incl. title (→ skip empty). Mutation-proven, -race
+strings.Contains(text,““)==true → blank LLM term marked EVERY string
+untranslatable incl. title (→ skip empty). Mutation-proven, -race
 ×3.</li>
 <li><strong>0a415b1</strong> — pkg/storage negative CacheHitRate in
 GetStatistics (all 3 backends sqlite/postgres/redis):
@@ -1800,9 +2180,8 @@ html/docx parsers, pkg/hardware, pkg/version/progress. Carry-over:
 storage dup-tuple unique-index (review-gated); G1/G2/G3
 operator-gated.</p>
 <!-- session 2026-06-13c: parallel subagent bug-hunt wave (HEAD f451468) -->
-
 <h3
-id="session-2026-06-13c--parallel-subagent-bug-hunt-wave-head-f451468--7-real-bugs-all-reproduce-first--mutation-proven--conductor-reverified--race--pushed-ff-no-force-114113">Session
+id="session-2026-06-13c-parallel-subagent-bug-hunt-wave-head-f451468-7-real-bugs-all-reproduce-first-mutation-proven-conductor-reverified--race-pushed-ff-no-force-11.4.113">Session
 2026-06-13c — parallel subagent bug-hunt wave (HEAD f451468) — 7 real
 bugs, all reproduce-first + mutation-proven + conductor-reverified
 (-race) + pushed FF (no force §11.4.113)</h3>
@@ -1816,10 +2195,10 @@ HelixDevelopment/HelixTranslate.</p>
 <ul>
 <li><strong>caa39c1</strong> — websocket <code>Hub.StartServer</code>
 SESSION FAN-OUT HOLE: /ws handler left <code>Client.SessionID</code>
-empty → hub's per-session filter skipped → every dashboard got EVERY
-session's events (real caller cmd/ssh-translation). Fixed (read
+empty → hub’s per-session filter skipped → every dashboard got EVERY
+session’s events (real caller cmd/ssh-translation). Fixed (read
 session_id from query) + moved off global DefaultServeMux→private mux
-(dup-/ws panic). Mutation-proven (alpha client saw beta's BETA-LEAK
+(dup-/ws panic). Mutation-proven (alpha client saw beta’s BETA-LEAK
 frame), -race ×3.</li>
 <li><strong>91e71c4</strong> — fb2 <code>Paragraph</code> had
 UnmarshalXML but NO MarshalXML (Text/FullText are <code>xml:"-"</code>)
@@ -1829,16 +2208,18 @@ id/style attrs, escaped once). Mutation-proven.</li>
 <li><strong>ef8b3c7</strong> — ebook EPUB fallback cleaner 2 bugs:
 CleanXMLData blind 2-char prefix rewrite corrupted valid entities
 (&amp;→&amp;mp;) + text (Q&amp;A); removeHTMLTags regex EXCLUDED
-self-closing/void tags (<br/> <img/> <hr/>) → leaked literal markup into
-chapter text. Fixed (escapeBareAmpersands + unified htmlTagRe,
-RE2-safe). Mutation-proven; stale test reconciled §11.4.120.</li>
+self-closing/void tags (<br/> <img/>
+<hr/>
+) → leaked literal markup into chapter text. Fixed (escapeBareAmpersands
++ unified htmlTagRe, RE2-safe). Mutation-proven; stale test reconciled
+§11.4.120.</li>
 <li><strong>7e05c5e</strong> — batch <code>Process(ctx)</code> NEVER
 honored cancellation (no ctx.Err/Done in either loop) → ran every
 remaining file, error stayed nil. Added seq guard + parallel in-worker
 short-circuit + post-Wait surfacing. Mutation-proven ×2, -race ×3.</li>
 <li><strong>3225c8d</strong> — cmd UPPERCASE/mixed-case ext not
 stripped: <code>TrimSuffix(base, ToLower(ext))</code> left
-"Story.EPUB"→"Story.EPUB_sr.epub" (case-insensitive FS). Fixed in
+“Story.EPUB”→“Story.EPUB_sr.epub” (case-insensitive FS). Fixed in
 unified-translator (3 helpers) + translator. Mutation-proven; stale test
 reconciled §11.4.120; cmd/translator gained first tests.</li>
 <li><strong>f451468</strong> — §11.4.98 offline-ize: openai/qwen/zhipu
@@ -1860,23 +2241,22 @@ pkg/markdown/format/html/docx parsers deeper. Carry-over G1
 (verify→server-DB bridge), G2 (batched ~30-provider sweep), G3
 (operator: add OPENAI/ANTHROPIC keys to api_keys.sh).</p>
 <!-- session 2026-06-13b: parallel subagent bug-hunt wave -->
-
 <h3
-id="session-2026-06-13b--parallel-subagent-bug-hunt-wave-head-86175d0--15-real-bugs-all-reproduce-first--mutation-proven---race--pushed-ff-no-force-114113">Session
+id="session-2026-06-13b-parallel-subagent-bug-hunt-wave-head-86175d0-15-real-bugs-all-reproduce-first-mutation-proven--race-pushed-ff-no-force-11.4.113">Session
 2026-06-13b — parallel subagent bug-hunt wave (HEAD 86175d0) — ~15 real
 bugs, all reproduce-first + mutation-proven + -race + pushed FF (no
 force §11.4.113)</h3>
 <p>Mode: §11.4.126 autonomous loop + §11.4.103 ≥3 parallel streams
 (conductor + 4–5 background bug-hunt subagents/wave). §11.4.147
-exercised heavily — multiple subagents were rate-limit-crashed ("Server
-is temporarily limiting requests") and respawned until complete;
+exercised heavily — multiple subagents were rate-limit-crashed (“Server
+is temporarily limiting requests”) and respawned until complete;
 conductor independently verified every subagent claim (-race + scope
 census + §11.4.142 diff review) BEFORE committing. Commits pushed to
 milos85vasic/Translator + HelixDevelopment/HelixTranslate, fast-forward,
 no force.</p>
 <ul>
 <li><strong>a40a9b9</strong> — logger <code>shouldLog</code> fail-open
-(typo level "warning" → logged everything incl DEBUG in prod) +
+(typo level “warning” → logged everything incl DEBUG in prod) +
 fail-drop (unknown msg level dropped) → <code>levelRank</code> fallback
 (cov 84.3→91.1%); progress tracker 5 bugs (GetProgress data race,
 Complete() 0% clobber, negative %, ETA float truncation, divide-by-zero
@@ -1930,9 +2310,8 @@ pkg/ebook parsers/writers, pkg/distributed deeper, internal/verifier.
 Carry-over G1 (verify→server-DB bridge), G2 (batched ~30-provider
 sweep), G3 (operator: add OPENAI/ANTHROPIC keys to api_keys.sh).</p>
 <!-- W13/W15/W16 wrap-up -->
-
 <h3
-id="session-wrap-up--w13-w15-apigrpc-w16-all-resolved-head-1cc66ac">Session
+id="session-wrap-up-w13-w15-apigrpc-w16-all-resolved-head-1cc66ac">Session
 wrap-up — W13, W15 (api/grpc), W16 all resolved (HEAD 1cc66ac)</h3>
 <ul>
 <li><strong>W15 api/grpc DONE (real, evidence-backed)</strong> —
@@ -1947,7 +2326,7 @@ mutation-proven). LLM-translate leg = honest §11.4.3 SKIP (no provider
 key). Normal <code>go test</code> boots NOTHING; SKIP-clean without
 podman.</li>
 <li><strong>REAL AUTH BUG fixed (W15 api leg, commit 0e2a999)</strong> —
-<code>InMemoryUserRepository.Create</code> stored the caller's pointer;
+<code>InMemoryUserRepository.Create</code> stored the caller’s pointer;
 <code>CreateUser</code> clears <code>Password=""</code> post-Create →
 blanked the stored bcrypt hash → EVERY user registered via CreateUser
 could never log in. Fix: repo stores a COPY. Conductor-reproduced
@@ -1974,90 +2353,72 @@ operator request.</li>
 convert (new upstream repo decision). Per §11.4.94 this is legitimate
 idle.</p>
 <!-- LLMsVerifier real-key integration -->
-
 <h3
-id="llmsverifier-real-key-integration--done-head-e7d6d67-submodule-95fb1cce">LLMsVerifier
+id="llmsverifier-real-key-integration-done-head-e7d6d67-submodule-95fb1cce">LLMsVerifier
 real-key integration — DONE (HEAD e7d6d67; submodule 95fb1cce)</h3>
 <p>Operator directive: use <code>~/api_keys.sh</code> so the
 LLMsVerifier submodule performs its mandatory steps and provides valid
 providers + models to the System. <strong>Done, evidence-backed
-(§11.4.83 docs/qa/llmsverifier_20260613_182600/, key-free):</strong></p>
-<ul>
-<li>Ran the submodule's REAL discovery/verification with real keys →
+(§11.4.83 docs/qa/llmsverifier_20260613_182600/, key-free):</strong> -
+Ran the submodule’s REAL discovery/verification with real keys →
 <strong>89 verified models</strong> (DeepSeek 2, Cerebras 2, Groq 16,
-Mistral 69; OpenAI/Anthropic honestly fail — no key in
-api_keys.sh).</li>
-<li><strong>Two real bugs found + fixed, both §11.4.135 mutation-proven
-guards (exact production errors):</strong>
-<ul>
-<li><strong>Bug B (main, internal/verifier/client.go)
-load-bearing</strong>: the System's SSOT client couldn't decode the
-server's <code>{"count":N,"models":[...]}</code> envelope → consumed
-ZERO models while server healthy. Fixed (envelope-aware decode). Guard:
-client_envelope_test.go. System now fetches all 89 e2e.</li>
-<li><strong>Bug A (submodule llmverifier/models.go, 95fb1cce, pushed
+Mistral 69; OpenAI/Anthropic honestly fail — no key in api_keys.sh). -
+<strong>Two real bugs found + fixed, both §11.4.135 mutation-proven
+guards (exact production errors):</strong> - <strong>Bug B (main,
+internal/verifier/client.go) load-bearing</strong>: the System’s SSOT
+client couldn’t decode the server’s
+<code>{"count":N,"models":[...]}</code> envelope → consumed ZERO models
+while server healthy. Fixed (envelope-aware decode). Guard:
+client_envelope_test.go. System now fetches all 89 e2e. - <strong>Bug A
+(submodule llmverifier/models.go, 95fb1cce, pushed
 GitHub+GitLab)</strong>: numeric <code>context_window</code> (Groq)
 crashed the whole provider decode → 0 models. Fixed (tolerant
-UnmarshalJSON). Guard: context_window_unmarshal_test.go.</li>
-</ul></li>
-<li>Secrets: keys sourced inline only, never printed/logged/committed
-(§11.4.10); evidence dir + edits secret-scanned clean; throwaway run
-artifacts removed (§11.4.14).</li>
-</ul>
+UnmarshalJSON). Guard: context_window_unmarshal_test.go. - Secrets: keys
+sourced inline only, never printed/logged/committed (§11.4.10); evidence
+dir + edits secret-scanned clean; throwaway run artifacts removed
+(§11.4.14).</p>
 <p><strong>Honest follow-up gaps (tracked, not bluffed —
-§11.4.6):</strong></p>
-<ul>
-<li>(G1) Submodule <code>verify</code> (report) pipeline does NOT
-persist into the <code>server</code> SQLite DB — the served DB was
-seeded via live discovery (verifier's own client+database pkgs).
-Architectural bridge worth a workable item.</li>
-<li>(G2) Full ~30-provider exhaustive per-model coding-capability
-scoring timed out at 600s in one pass; reliability-scored the seeded
-set. A bounded/batched sweep is the follow-up.</li>
-<li>(G3) Providers without keys (OpenAI/Anthropic/Perplexity/Together)
-fail auth honestly; add their keys to api_keys.sh to include them.</li>
-</ul>
+§11.4.6):</strong> - (G1) Submodule <code>verify</code> (report)
+pipeline does NOT persist into the <code>server</code> SQLite DB — the
+served DB was seeded via live discovery (verifier’s own client+database
+pkgs). Architectural bridge worth a workable item. - (G2) Full
+~30-provider exhaustive per-model coding-capability scoring timed out at
+600s in one pass; reliability-scored the seeded set. A bounded/batched
+sweep is the follow-up. - (G3) Providers without keys
+(OpenAI/Anthropic/Perplexity/Together) fail auth honestly; add their
+keys to api_keys.sh to include them.</p>
 <!-- bug-hunt waves 2026-06-13 -->
-
 <h3
-id="real-bug-hunt-waves-head-eb7576e--17-real-bugs-fixed-this-session-all-reproduce-first--mutation-proven--pushed">Real-bug-hunt
+id="real-bug-hunt-waves-head-eb7576e-17-real-bugs-fixed-this-session-all-reproduce-first-mutation-proven-pushed">Real-bug-hunt
 waves (HEAD eb7576e) — 17 real bugs fixed this session, all
 reproduce-first + mutation-proven + pushed</h3>
 <p>LLMsVerifier real-key integration: 89 verified models flow to the
-System end-to-end; System's own in-process verifier env-bridge (31
-models, cmd/verify-models); real DeepSeek translation proof ("The sky is
-blue today."-&gt;"El cielo esta azul hoy.").</p>
+System end-to-end; System’s own in-process verifier env-bridge (31
+models, cmd/verify-models); real DeepSeek translation proof (“The sky is
+blue today.”-&gt;“El cielo esta azul hoy.”).</p>
 <p>Bugs fixed (each RED-&gt;GREEN, §11.4.135 guard, §1.1
 mutation-proven, real evidence; commits e7d6d67/dfb250c/f80153b/eb7576e
-+ submodule 95fb1cce):</p>
-<ul>
-<li>Auth lockout (CreateUser blanked stored bcrypt hash); Verifier
-consume (client.go envelope); Verifier serve (listVerifiedModels dropped
-all); Groq context_window (submodule); Hardcoded RU-&gt;SR prompt
-(RU-&gt;SR Ekavica preserved); Uppercase Cyrillic digraph (LJUBAV);
-Ordered-list numbering lost; UTF-8 mid-rune truncation (HIGH, Cyrillic);
-Import data race; FB2 inline+tail text dropped (CRITICAL); FB2 writer
-escaped markup; FB2 format misdetection; EPUB OPF/NCX id mismatch;
-Markdown inline whitespace collapse; silent chapter drop; list reverse
-round-trip; extractJSON wrong span.</li>
-</ul>
-<p>Remaining tracked follow-ups (honest, §11.4.6/§11.4.118):</p>
-<ul>
-<li>G1: submodule verify-pipeline-&gt;server-DB bridge (serial submodule
-wave, §11.4.119 contends with main builds; conductor-owned).</li>
-<li>G2: batched full ~30-provider verification sweep (one-pass timed out
-600s).</li>
-<li>G3: add OPENAI/ANTHROPIC/etc keys to api_keys.sh (operator) to
-include those providers.</li>
-<li>Deferred-broader: markdownToHTML round-trip edges; preparation
-extractJSON LLM-output spec; verification multipass duplicate DB writes;
-ambiguous nj/lj/dz Latin-&gt;Cyrillic (structural §11.4.112
-won't-fix).</li>
-</ul>
++ submodule 95fb1cce): - Auth lockout (CreateUser blanked stored bcrypt
+hash); Verifier consume (client.go envelope); Verifier serve
+(listVerifiedModels dropped all); Groq context_window (submodule);
+Hardcoded RU-&gt;SR prompt (RU-&gt;SR Ekavica preserved); Uppercase
+Cyrillic digraph (LJUBAV); Ordered-list numbering lost; UTF-8 mid-rune
+truncation (HIGH, Cyrillic); Import data race; FB2 inline+tail text
+dropped (CRITICAL); FB2 writer escaped markup; FB2 format misdetection;
+EPUB OPF/NCX id mismatch; Markdown inline whitespace collapse; silent
+chapter drop; list reverse round-trip; extractJSON wrong span.</p>
+<p>Remaining tracked follow-ups (honest, §11.4.6/§11.4.118): - G1:
+submodule verify-pipeline-&gt;server-DB bridge (serial submodule wave,
+§11.4.119 contends with main builds; conductor-owned). - G2: batched
+full ~30-provider verification sweep (one-pass timed out 600s). - G3:
+add OPENAI/ANTHROPIC/etc keys to api_keys.sh (operator) to include those
+providers. - Deferred-broader: markdownToHTML round-trip edges;
+preparation extractJSON LLM-output spec; verification multipass
+duplicate DB writes; ambiguous nj/lj/dz Latin-&gt;Cyrillic (structural
+§11.4.112 won’t-fix).</p>
 <!-- wave3 providers/events/coord/security -->
-
 <h3
-id="bug-hunt-wave-3-head-6c76c3f--6-more-real-bugs-session-total-23-all-mutation-proven--pushed">Bug-hunt
+id="bug-hunt-wave-3-head-6c76c3f-6-more-real-bugs-session-total-23-all-mutation-proven-pushed">Bug-hunt
 wave 3 (HEAD 6c76c3f) — 6 more real bugs (session total ~23), all
 mutation-proven + pushed</h3>
 <ul>
@@ -2066,7 +2427,7 @@ mutation-proven + pushed</h3>
 <li>CLI -temperature/-max-tokens ignored by openai/anthropic/qwen/zhipu
 — Options&gt;typed-field&gt;default precedence.</li>
 <li>Gemini discarded valid MAX_TOKENS partial text (data-loss) — accept
-STOP/MAX_TOKENS/"" (gemini_test.go reconciled §11.4.120).</li>
+STOP/MAX_TOKENS/“” (gemini_test.go reconciled §11.4.120).</li>
 <li>EventBus.Publish unbounded goroutine-per-handler +
 RLock-held-across-spawn → explosion + writer-starvation livelock —
 synchronous dispatch, lock released first (-race clean).</li>
@@ -2081,12 +2442,12 @@ wave)</h3>
 <li><strong>pkg/translator/llm full <code>go test</code> HANGS when
 api_keys.sh is in-env</strong> — a NON-tagged test reaches the network
 (§11.4.98 violation: unit tests must be deterministic/offline). The
-wave's new defect tests are httptest/deterministic; the hang is in a
+wave’s new defect tests are httptest/deterministic; the hang is in a
 pre-existing test. FIX: build-tag or httptest-ize the offending test.
 (Bounded <code>go test -run &lt;name&gt;</code> works fine.)</li>
 </ul>
 <h3
-id="remaining-queue-for-fresh-session-continuation-per-114141114127">Remaining
+id="remaining-queue-for-fresh-session-continuation-per-11.4.14111.4.127">Remaining
 queue (for fresh-session continuation per §11.4.141/§11.4.127)</h3>
 <ul>
 <li>G1: submodule verify-pipeline-&gt;server-DB bridge (serial submodule
@@ -2110,7 +2471,7 @@ multipass duplicate DB writes.</li>
 <blockquote>
 <p>Read <code>docs/CONTINUATION.md</code> then
 <code>.remember/remember.md</code>, run <code>git fetch --all</code>,
-and <strong>continue</strong> the HelixTranslate "raise-to-enterprise"
+and <strong>continue</strong> the HelixTranslate “raise-to-enterprise”
 mandate at <strong>Phase 4 (tests/Challenges/HelixQA to ~100% per type +
 expand real ebook-translation evidence)</strong> while finishing the
 Phase-3 tail (Models decision, governance gaps). Binding: anti-bluff
@@ -2159,32 +2520,28 @@ pushed): 8 submodules renamed; Go pkg
 <code>go build ./...</code> EXIT 0. <strong>Phase 2 — constitution
 §11.4.151</strong> release-prefix rule → pushed to all 6 constitution
 upstreams; parent pointer bumped; inheritance meta-test PASS.
-<strong>Phase 3 (partial):</strong></p>
-<ul>
-<li><code>Security/</code> plain dir → flat <code>security</code>
-submodule (proven byte-identical to upstream, zero loss;
-§11.4.124).</li>
-<li>All submodules + main synced to every upstream (one stale
-<code>containers</code> gitlab mirror FF'd).</li>
-<li><strong>docs_chain OPERATIONAL</strong>:
+<strong>Phase 3 (partial):</strong> - <code>Security/</code> plain dir →
+flat <code>security</code> submodule (proven byte-identical to upstream,
+zero loss; §11.4.124). - All submodules + main synced to every upstream
+(one stale <code>containers</code> gitlab mirror FF’d). -
+<strong>docs_chain OPERATIONAL</strong>:
 <code>.docs_chain/contexts/tracked_docs.yaml</code> registered; real
 pandoc+weasyprint sync produced
 <code>docs/CONTINUATION.{html,pdf}</code> +
 <code>README.{html,pdf}</code>; <code>verify</code> = in-sync. See
-<code>docs/DOCS_CHAIN.md</code>.</li>
-<li><strong>Real translation PROVEN (anti-bluff)</strong>: EN→Serbian
-via DeepSeek <code>deepseek-chat</code>, 208 Cyrillic chars, differs
-from source, no placeholders. Evidence:
-<code>qa-results/translation/&lt;ts&gt;/</code> (raw, git-ignored).
-Asset: <code>test/assets/crow_and_pitcher_en.txt</code>.</li>
-<li><strong>Fixed a regression I introduced</strong>: challenge scripts'
+<code>docs/DOCS_CHAIN.md</code>. - <strong>Real translation PROVEN
+(anti-bluff)</strong>: EN→Serbian via DeepSeek
+<code>deepseek-chat</code>, 208 Cyrillic chars, differs from source, no
+placeholders. Evidence: <code>qa-results/translation/&lt;ts&gt;/</code>
+(raw, git-ignored). Asset:
+<code>test/assets/crow_and_pitcher_en.txt</code>. - <strong>Fixed a
+regression I introduced</strong>: challenge scripts’
 <code>PROJECT_ROOT="${SCRIPT_DIR}/../.."</code> broke when moved 1 level
 deeper → corrected to <code>../../..</code>; 3 challenges re-verified
 PASS (cache_invalidation, model_verification_gate, anti_bluff
-step1-3).</li>
-</ul>
+step1-3).</p>
 <h2
-id="closed-this-session-2026-06-13-batch-e775088--llm_provider-b3dc7f9--all-pushed-captured-evidence">CLOSED
+id="closed-this-session-2026-06-13-batch-e775088-llm_provider-b3dc7f9-all-pushed-captured-evidence">CLOSED
 this session (2026-06-13, batch e775088 / llm_provider b3dc7f9 — all
 pushed, captured evidence)</h2>
 <ul>
@@ -2252,9 +2609,9 @@ rate-limit-crashed at report stage; conductor verified+adopted their
 work (not lost, not blindly trusted).</li>
 </ul>
 <p><strong>Session total: ~39 items resolved</strong> (+ D10
-pkg/distributed FULLY -race-clean 9→0 races [4 sources incl.
-FallbackManager.Stop() lifecycle fix]; + D9 hardware parser testability
-44.6→68.4%)</p>
+pkg/distributed FULLY -race-clean 9→0 races [4 sources
+incl. FallbackManager.Stop() lifecycle fix]; + D9 hardware parser
+testability 44.6→68.4%)</p>
 <p><strong>Prior: ~37 items</strong> (+ models bridge wiring
 digital.vasic.models into the system; + D12 REAL CORS auth-bypass vuln
 fixed; + D11 doc)</p>
@@ -2273,9 +2630,15 @@ W3 translator + sshworker-leak + D3 + D7 + D5 + D6). Real prod bugs
 fixed: translator cache race, SMTP no-deadline, dangling step-ptr,
 sshworker map-leak, event races (D2/D3/D7), note-content loss (D5).</p>
 <h2
-id="open-workable-items-queue--many-parallelizable-disjoint-scope">OPEN
+id="open-workable-items-queue-many-parallelizable-disjoint-scope">OPEN
 workable items (queue — many parallelizable, disjoint scope)</h2>
 <table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
 <thead>
 <tr>
 <th>#</th>
@@ -2290,7 +2653,7 @@ workable items (queue — many parallelizable, disjoint scope)</h2>
 <td><code>Models/</code> (<code>digital.vasic.models</code>) orphan
 module</td>
 <td>RESOLVED-via-bridge</td>
-<td>Operator directed "create bridge": pkg/modelsbridge now CONSUMES
+<td>Operator directed “create bridge”: pkg/modelsbridge now CONSUMES
 digital.vasic.models (go.mod require+replace=&gt;./Models),
 contract-tested 100%, mutation-verified (146b2b5). No longer orphan. W16
 (convert to git submodule) still optional/operator-gated.</td>
@@ -2345,7 +2708,7 @@ integration via containers/pkg/brokertest (StartPostgres + new
 StartRedis), build-tagged; pkg/storage CRUD+chaos exercised real DBs;
 <strong>found+fixed PG unbounded-pool DoS</strong> (default 25/5).
 REMAINING: api/grpc DB+LLM <em>pipeline</em> paths need operator-gated
-LLM keys/SSH (can't autonomously). Pattern + helpers in place for any
+LLM keys/SSH (can’t autonomously). Pattern + helpers in place for any
 future slice.</td>
 </tr>
 <tr>
@@ -2361,7 +2724,7 @@ resolved</td>
 literal <code>CONST-036</code></td>
 <td>Task</td>
 <td>§11.4.118 discovery. They use §11.4.X cascade scheme (not
-CONST-NNN); challenge doesn't check them. Governance-design decision
+CONST-NNN); challenge doesn’t check them. Governance-design decision
 needed — do NOT blindly inject CONST-NNN (§11.4.6).</td>
 </tr>
 <tr>
@@ -2422,13 +2785,13 @@ mutation-verified.</td>
 <td>✅ DONE — reviewed + adopted</td>
 <td>Task</td>
 <td>Independent review: guards sound (force-reject full-argv, FF-only
-via merge-base --is-ancestor, multi-upstream URL-dedup,
+via merge-base –is-ancestor, multi-upstream URL-dedup,
 explicit-pathspec, quiescence). FOUND+FIXED cross-platform hardening:
 mutation grep lacked <code>-I</code> → GNU grep (Linux) false-aborts on
-binary <code>.pdf</code>/<code>.html</code> pathspecs (BSD grep doesn't;
+binary <code>.pdf</code>/<code>.html</code> pathspecs (BSD grep doesn’t;
 §11.4.81). Self-test 13/0. ADOPTED for normal source/doc commits.
 Dogfood surfaced finding #2: the §11.4.84 residue scan false-positives
-on files that legitimately CONTAIN marker strings (the script's own
+on files that legitimately CONTAIN marker strings (the script’s own
 MUTATION_MARKERS def, governance docs, marker-referencing tests) —
 inherent to grep-based detection; §11.4.84 has no escape hatch
 (correct), so commit such files via manual explicit-path git.

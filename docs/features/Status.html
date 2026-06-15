@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
-2026-06-15T13:44:25Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 2 <strong>Last modified:</strong>
+2026-06-15T17:30:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -190,18 +190,54 @@ included.</p>
 <blockquote>
 <p><strong>Anti-bluff note (§11.4.6 / §11.4.2 / §11.4.107):</strong>
 <code>Video-confirmation</code> is set to a real file
-<strong>only</strong> where a recording exists. Exactly one feature is
-video-confirmed today (the unified-translator DeepSeek EN→Spanish run).
-Everything else is <code>PENDING</code> (a recording is owed) or
-<code>N/A</code> (no user-visible video applies — e.g. CLI flags,
-internal library types). <code>Validation</code> reflects the strongest
-evidence the inventory supports; absence of a runtime recording is
-stated honestly, never papered over.</p>
+<strong>only</strong> where a recording exists AND that recording
+genuinely demonstrates the feature working (each cited <code>.mp4</code>
+was ffprobe-verified for non-zero duration+frames and content-verified
+against its claimed behaviour — e.g. real DeepSeek output in the target
+language, real gRPC translated text, live WebSocket count change).
+<strong>20 feature rows are video-confirmed</strong> this session across
+unified-translator (DeepSeek translate, EPUB→TXT / HTML→EPUB / FB2→EPUB
+/ FB2→FB2 conversions, Serbian-Cyrillic, <code>-script</code>
+Cyrillic↔︎Latin, format-detection, help/version, <code>-verify</code>),
+the REST API server (POST /api/v1/translate real DeepSeek + target_lang
+FIXED, TLS startup FIXED, /health · /api/v1/version ·
+/api/v1/providers), the gRPC server (real EN→ES), markdown-translator
+(EPUB↔︎MD round-trip), preparation-translator (FIXED real analysis),
+cmd/cli (real DeepSeek), monitor-server (live WS hub), and the DeepSeek
+library client. <strong>Honest gaps recorded, NOT confirmed:</strong>
+DOCX output + PDF output are unimplemented (no writer in
+<code>pkg/ebook</code>; unified-translator rejects them);
+<code>-verify</code> is the CLI’s own per-step check, NOT the
+<code>pkg/verification</code> multipass engine (that engine has no CLI
+entry point wired in); <code>cmd/translator</code> local path is a STUB
+(“local translation not yet implemented”); <code>translate-ssh</code> +
+<code>ebook-translator</code> are OPERATOR-BLOCKED (need a remote
+SSH/llama.cpp worker host); <code>GET /api/v1/verified-models</code>
+returns 404 because LLMsVerifier is disabled in config. Everything else
+is <code>PENDING</code> (a recording is owed) or <code>N/A</code> (no
+user-visible video applies — e.g. CLI flags, internal library types).
+Absence of a runtime recording is stated honestly, never papered
+over.</p>
 </blockquote>
 <h2 id="operator-blocked-items-read-first-11.4.45">Operator-blocked
 items (read first, §11.4.45)</h2>
-<p>None. No feature in this set is currently
-<code>Operator-blocked</code>.</p>
+<p>Two binaries are OPERATOR-BLOCKED — both require a remote SSH worker
+host running llama.cpp, which is not available in this environment. The
+binaries build and run as far as the missing host allows (captured in
+<code>helixtranslate-cmd-blocked-binaries_20260615-172456.mp4</code>):</p>
+<ul>
+<li><strong><code>cmd/translate-ssh</code></strong> — SSH worker 4-step
+FB2→EPUB translator. <strong>Unblock condition:</strong> a reachable SSH
+host with llama.cpp + a model.</li>
+<li><strong><code>cmd/ebook-translator</code></strong> — FB2
+remote-translate workflow (syncs binary to remote, runs remote
+translate, downloads outputs). <strong>Unblock condition:</strong> same
+remote SSH/llama.cpp host.</li>
+<li><strong><code>cmd/translator</code> (remote path)</strong> — remote
+SSH/llama.cpp translate path is OPERATOR-BLOCKED (same host
+requirement); its LOCAL path is a separate STUB (“local translation not
+yet implemented”).</li>
+</ul>
 <h2 id="coverage-summary">Coverage summary</h2>
 <table>
 <colgroup>
@@ -221,13 +257,13 @@ tally)</td>
 <td><strong>417</strong></td>
 </tr>
 <tr>
-<td>Enumerated feature rows in this doc (= detailed rows in the source
-inventory, 1:1)</td>
-<td><strong>470</strong></td>
+<td>Enumerated feature rows in this doc</td>
+<td><strong>472</strong> (470 source-inventory rows + 2 honest gap rows
+added Rev 2: DOCX-write, PDF-write — both unimplemented)</td>
 </tr>
 <tr>
 <td>Implemented</td>
-<td>464</td>
+<td>463</td>
 </tr>
 <tr>
 <td>Stub</td>
@@ -237,16 +273,28 @@ inventory, 1:1)</td>
 <code>POST /api/v1/translate-with-verification</code>)</td>
 </tr>
 <tr>
+<td>Not implemented (gap rows)</td>
+<td>2 (<code>pkg/ebook</code> DOCX-write, PDF-write — no writer exists;
+output limited to EPUB/FB2/TXT/HTML/MD)</td>
+</tr>
+<tr>
 <td>Partial</td>
-<td>2 (<code>POST /api/batch</code> on standalone
+<td>3 (<code>POST /api/batch</code> on standalone
 <code>pkg/api/server.go</code> — returns <code>queued</code> batch_id
 only, no translation; <code>vision_engine</code> OpenCV — stub default,
-real impl behind build tag)</td>
+real impl behind build tag; <code>cmd/translator</code> — local path
+STUB + remote OPERATOR-BLOCKED)</td>
+</tr>
+<tr>
+<td>Operator-blocked</td>
+<td>2 (<code>translate-ssh</code>, <code>ebook-translator</code> — need
+remote SSH/llama.cpp worker host)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td><strong>1</strong> (unified-translator DeepSeek translation) — ≈
-0.21% of 470 enumerated rows (≈ 0.24% of the 417 headline)</td>
+<td><strong>20</strong> (real, content-verified recordings this session
+— see Anti-bluff note) — ≈ 4.3% of 470 enumerated rows (≈ 4.8% of the
+417 headline)</td>
 </tr>
 <tr>
 <td>Video-confirmation PENDING</td>
@@ -604,8 +652,10 @@ writes results dir</td>
 <td>Parse ebook → translate → write EPUB/FB2/TXT; multi-llm/distributed
 support</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — real DeepSeek run captured</strong> (real Serbian TXT
+output). Minor cosmetic note: source file path leaks into title metadata
+(non-blocking)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek-translate_20260615-172211.mp4</td>
 </tr>
 <tr>
 <td>cli</td>
@@ -982,8 +1032,11 @@ support</td>
 <td>SSH worker syncs binary, runs remote FB2→MD→translate→EPUB,
 downloads + verifies outputs</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>OPERATOR-BLOCKED</strong> — needs a remote SSH worker host +
+remote llama.cpp; none available. Binary builds + prints usage in
+blocked-binaries demo</td>
+<td>OPERATOR-BLOCKED;
+evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-cmd-blocked-binaries_20260615-172456.mp4</td>
 </tr>
 <tr>
 <td>ebook-translator</td>
@@ -1046,8 +1099,9 @@ check</td>
 <td>gRPC server (:50051):
 Start/Status/List/Cancel/Stream/GetProviders/SubscribeEvents</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — real EN→ES translation over gRPC captured</strong>
+(StartTranslation → real Spanish DeepSeek output)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-grpc-deepseek-20260615-171206-v2.mp4</td>
 </tr>
 <tr>
 <td>grpc-server</td>
@@ -1175,8 +1229,8 @@ Start/Status/List/Cancel/Stream/GetProviders/SubscribeEvents</td>
 <td>EPUB/MD → markdown → translate → EPUB/MD; optional preparation
 phase</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — EPUB↔︎MD round-trip captured</strong></td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-markdown-roundtrip-20260615.mp4</td>
 </tr>
 <tr>
 <td>markdown-translator</td>
@@ -1315,8 +1369,10 @@ phase</td>
 <td>Gin server (:8090, <code>MONITOR_SERVER_PORT</code>): /ws, /monitor
 dashboard, status + health</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — live WS hub captured</strong> (real client
+connect→<code>websockets:1</code>→disconnect→<code>websockets:0</code>;
+/monitor serves real dashboard HTML)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-monitor-server-websocket_20260615-172343.mp4</td>
 </tr>
 <tr>
 <td>monitor-server</td>
@@ -1412,8 +1468,10 @@ session lookup)</td>
 <td>Parse ebook → multi-LLM preparation analysis → translate → write
 EPUB + analysis JSON</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — FIXED, real analysis captured</strong> (key-wiring
+bug a5e8866; real preparation phase:
+tokens/genre/characters/cultural-refs/key-themes)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-preparation-translator-FIXED-20260615.mp4</td>
 </tr>
 <tr>
 <td>preparation-translator</td>
@@ -1530,8 +1588,10 @@ EPUB + analysis JSON</td>
 <td>TLS REST/WebSocket API (config.json); CORS + rate limit + JWT;
 optional distributed + LLMsVerifier</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — FIXED, real TLS startup captured</strong> (TLS cert
+backfill bug a5e8866; “Server started successfully” + HTTP/2 TLS on
+:8443)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-api-translate-target-lang-FIXED-20260615.mp4</td>
 </tr>
 <tr>
 <td>server</td>
@@ -1690,8 +1750,11 @@ langs, llama providers)</td>
 <td>FB2→MD → translate (remote llama.cpp) → MD→EPUB; standalone worker
 invoked by coordinator</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>OPERATOR-BLOCKED</strong> — needs a remote SSH worker host
+running llama.cpp; none available. Binary builds + runs as far as
+possible (blocked-binaries demo)</td>
+<td>OPERATOR-BLOCKED;
+evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-cmd-blocked-binaries_20260615-172456.mp4</td>
 </tr>
 <tr>
 <td>translate-ssh</td>
@@ -1814,13 +1877,17 @@ invoked by coordinator</td>
 <td>translator</td>
 <td>Documented FB2 local/remote translator</td>
 <td>CLI</td>
-<td>Implemented</td>
+<td><strong>Partial</strong> (local path is STUB; remote needs SSH
+worker)</td>
 <td>Wired</td>
-<td>Translates locally or via SSH worker (llama.cpp); produces integral
-documentation report</td>
+<td>Remote SSH/llama.cpp path produces a documentation report; LOCAL
+path is a STUB — emits “local translation not yet implemented”
+(captured). Remote path is OPERATOR-BLOCKED (no SSH worker host)</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>GAP — local STUB captured; remote
+OPERATOR-BLOCKED</strong></td>
+<td>PENDING/OPERATOR-BLOCKED;
+evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-cmd-blocked-binaries_20260615-172456.mp4</td>
 </tr>
 <tr>
 <td>translator</td>
@@ -2059,9 +2126,98 @@ documentation report</td>
 <td>Parse → MD → translate (API/llamacpp/ssh) → script-normalize →
 output (epub/fb2/html/txt/md) + session report</td>
 <td>Not-inventoried</td>
-<td><strong>Real run captured</strong> (DeepSeek EN→Spanish, fix
-verified)</td>
+<td><strong>PASS — real run captured</strong> (DeepSeek → real Serbian
+output)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek-translate_20260615-172211.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td>DeepSeek translate (provider=deepseek)</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>EN→Serbian DeepSeek run, real LLM output written to TXT</td>
+<td>Not-inventoried</td>
+<td><strong>PASS — real Serbian translation captured</strong></td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek-translation-FIXED_20260615_163824.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td>EPUB→TXT conversion</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>EPUB parse → DeepSeek translate → TXT writer, real Serbian text</td>
+<td>Not-inventoried</td>
+<td><strong>PASS — captured</strong></td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-format-conversion-epub-to-txt-20260615.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td>HTML→EPUB conversion</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>HTML parse → DeepSeek translate → EPUB writer</td>
+<td>Not-inventoried</td>
+<td><strong>PASS — captured</strong></td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-html-to-epub-deepseek_20260615-171805.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td>FB2→EPUB conversion</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>FB2 parse → DeepSeek translate → EPUB writer</td>
+<td>Not-inventoried</td>
+<td><strong>PASS — captured</strong></td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-fb2-to-epub-deepseek_20260615-171725.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td>FB2→FB2 conversion</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>FB2 parse → DeepSeek translate → FB2 writer (namespaces
+preserved)</td>
+<td>Not-inventoried</td>
+<td><strong>PASS — captured</strong></td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-fb2-to-fb2-deepseek_20260615-172006.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td>Serbian Cyrillic output</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Translate with Serbian-Cyrillic target output</td>
+<td>Not-inventoried</td>
+<td><strong>PASS — captured</strong></td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-serbian-cyrillic_20260615-164729.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td>Format detection</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Input-format auto-detection on real input</td>
+<td>Not-inventoried</td>
+<td><strong>PASS — captured</strong></td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-format-detection_20260615-164729.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td>help/version output</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td><code>-help</code>/<code>-version</code> usage banner</td>
+<td>Not-inventoried</td>
+<td><strong>PASS — captured</strong></td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-help_20260615-164729.mp4</td>
 </tr>
 <tr>
 <td>unified-translator</td>
@@ -2109,14 +2265,14 @@ verified)</td>
 </tr>
 <tr>
 <td>unified-translator</td>
-<td><code>-script</code></td>
+<td><code>-script</code> (Serbian Cyrillic↔︎Latin)</td>
 <td>CLI</td>
 <td>Implemented</td>
 <td>Wired</td>
-<td>Target script (cyrillic/latin)</td>
+<td>Target script (cyrillic/latin) script normalization on real run</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
+<td><strong>PASS — captured</strong></td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-serbian-script-cyrillic-latin_20260615-171843.mp4</td>
 </tr>
 <tr>
 <td>unified-translator</td>
@@ -2319,14 +2475,18 @@ verified)</td>
 </tr>
 <tr>
 <td>unified-translator</td>
-<td><code>-verify</code></td>
+<td><code>-verify</code> (output-quality check)</td>
 <td>CLI</td>
 <td>Implemented</td>
 <td>Wired</td>
-<td>Verify output</td>
+<td>Built-in per-step verification:
+input/markdown/translation-quality/valid-EPUB verdicts in session
+report. NOTE: this is the unified-translator’s own verify pass, NOT the
+<code>pkg/verification</code> multipass engine (that engine is not wired
+into this CLI — see gap row below)</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
+<td><strong>PASS — captured</strong> (session report verdicts)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-verify-flag-quality-check_20260615-171920.mp4</td>
 </tr>
 <tr>
 <td>unified-translator</td>
@@ -3215,6 +3375,32 @@ translation, progress events</td>
 <td>Source-confirmed</td>
 <td>N/A</td>
 </tr>
+<tr>
+<td>ebook</td>
+<td>DOCX write (output)</td>
+<td>Library</td>
+<td><strong>Not implemented</strong></td>
+<td>Unwired</td>
+<td>GAP (§11.4.6): no DOCX writer exists in <code>pkg/ebook</code>; DOCX
+is parse-only. unified-translator rejects <code>-output</code> .docx.
+Output formats are limited to EPUB/FB2/TXT/HTML/MD</td>
+<td>None</td>
+<td><strong>GAP — unimplemented (no writer)</strong></td>
+<td>N/A (no feature to record)</td>
+</tr>
+<tr>
+<td>ebook</td>
+<td>PDF write (output)</td>
+<td>Library</td>
+<td><strong>Not implemented</strong></td>
+<td>Unwired</td>
+<td>GAP (§11.4.6): no PDF writer exists in <code>pkg/ebook</code>; PDF
+is extract-only. unified-translator rejects <code>-output</code> .pdf.
+Output formats are limited to EPUB/FB2/TXT/HTML/MD</td>
+<td>None</td>
+<td><strong>GAP — unimplemented (no writer)</strong></td>
+<td>N/A (no feature to record)</td>
+</tr>
 </tbody>
 </table>
 <h2 id="pkgfb2-fb2-specific-xml">pkg/fb2 — FB2-specific XML</h2>
@@ -3624,10 +3810,16 @@ workflow</h2>
 <td>Multi-pass polisher</td>
 <td>Library</td>
 <td>Implemented</td>
-<td>Wired</td>
-<td>Iterative multi-LLM polishing w/ note-taking &amp; consensus</td>
+<td><strong>Unwired into unified-translator</strong></td>
+<td>Iterative multi-LLM polishing w/ note-taking &amp; consensus. GAP
+(§11.4.6): this engine is NOT what the unified-translator
+<code>-verify</code> flag invokes — <code>-verify</code> runs the CLI’s
+own per-step output check (row above), not this
+<code>pkg/verification</code> multipass engine. The multipass engine has
+no CLI entry point wired in</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
+<td>Source-confirmed (library present); <strong>GAP — not wired into
+CLI</strong></td>
 <td>PENDING</td>
 </tr>
 <tr>
@@ -5040,8 +5232,9 @@ pkg/api/handler.go (primary <code>Handler</code>, gin)</h2>
 <td>Wired</td>
 <td>Static/info/version/provider list/cache stats</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — captured</strong> (/health, /api/v1/version,
+/api/v1/providers real provider list returned)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-api-endpoints_20260615-170755.mp4</td>
 </tr>
 <tr>
 <td>api/handler.go</td>
@@ -5060,10 +5253,13 @@ pkg/api/handler.go (primary <code>Handler</code>, gin)</h2>
 <td>API</td>
 <td>Implemented</td>
 <td>Wired</td>
-<td>Distributed or <code>TranslateWithProgress</code></td>
+<td>Distributed or <code>TranslateWithProgress</code>; honors
+<code>target_lang</code> (FIXED a5e8866 — was hardcoded)</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — real DeepSeek translation captured</strong> (real
+Serbian output via API; target_lang=spanish FIXED run returns real
+Spanish)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-api-translate-deepseek_20260615-170716.mp4</td>
 </tr>
 <tr>
 <td>api/handler.go</td>
@@ -5420,11 +5616,16 @@ API — pkg/api/verifier_handlers.go (LLMsVerifier, under /api/v1)</h2>
 <td>GET /api/v1/verified-models</td>
 <td>API</td>
 <td>Implemented</td>
-<td>Wired</td>
-<td>List verified models (LLMsVerifier API call)</td>
+<td>Wired (only when LLMsVerifier enabled)</td>
+<td>List verified models (LLMsVerifier API call). GAP (§11.4.6):
+LLMsVerifier is DISABLED in the current config, so the route is not
+mounted and returns HTTP 404. Not a defect — feature-disabled-by-config;
+needs a verifier-enabled config to confirm</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>GAP — 404 captured</strong> (verifier disabled in config;
+route not mounted)</td>
+<td>PENDING (verifier-enabled config needed);
+evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-api-endpoints_20260615-170755.mp4</td>
 </tr>
 <tr>
 <td>api/verifier_handlers.go</td>
@@ -7268,10 +7469,31 @@ distributed llama.cpp RPC</td>
 <h2 id="honest-gaps-caveats-11.4.6">Honest gaps &amp; caveats
 (§11.4.6)</h2>
 <ol type="1">
-<li><strong>Video coverage is 1/417.</strong> Only the
-unified-translator DeepSeek run is recorded. Every other
+<li><strong>Video coverage is 20 feature rows.</strong> 20 features are
+confirmed by real, ffprobe- and content-verified recordings this session
+(see the Anti-bluff note for the full list). Every other
 runtime/user-visible feature is <code>PENDING</code> a recording. This
-is stated, not hidden.</li>
+is stated, not hidden. 1a. <strong>DOCX output + PDF output are
+unimplemented</strong> — <code>pkg/ebook</code> has FB2-write and
+EPUB-write only; DOCX and PDF are parse/extract-only. unified-translator
+rejects <code>.docx</code>/<code>.pdf</code> as output. Output formats
+are EPUB/FB2/TXT/HTML/MD. 1b. <strong><code>-verify</code> ≠ multipass
+engine.</strong> The unified-translator <code>-verify</code> flag runs
+the CLI’s own per-step output check, NOT the
+<code>pkg/verification</code> multi-pass polisher (which has no CLI
+entry point wired in). 1c. <strong><code>cmd/translator</code> local
+path is a STUB</strong> (“local translation not yet implemented”); its
+remote path is OPERATOR-BLOCKED (no SSH/llama.cpp worker host). 1d.
+<strong><code>translate-ssh</code> + <code>ebook-translator</code> are
+OPERATOR-BLOCKED</strong> — both require a remote SSH worker host
+running llama.cpp; none available. Binaries build and run as far as
+possible (blocked-binaries demo recorded). 1e.
+<strong><code>GET /api/v1/verified-models</code> returns 404</strong> —
+LLMsVerifier is disabled in the current config so the route is not
+mounted (feature-disabled-by-config, not a defect). 1f.
+<strong><code>cmd/cli</code> cosmetic note:</strong> the source file
+path leaks into the output title metadata (non-blocking, real
+translation otherwise correct).</li>
 <li><strong>Tests = <code>Not-inventoried</code></strong> for all rows:
 the raw inventory did not perform per-feature test attribution. The repo
 carries extensive <code>_test.go</code> + <code>test/</code> suites, but

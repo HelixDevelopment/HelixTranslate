@@ -1,26 +1,32 @@
 # HelixTranslate — Feature Status
 
-**Revision:** 1
-**Last modified:** 2026-06-15T13:44:25Z
+**Revision:** 2
+**Last modified:** 2026-06-15T17:30:00Z
 **Authority:** Derived from `docs/features/.feature_inventory_raw.md` (Revision 1). Per §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header), §11.4.56 (two-audience summary → `Status_Summary.md`), §11.4.60 (always-sync), §11.4.6 (no-guessing — every status reflects what the inventory actually found in source).
 **Scope:** Every one of the 417 inventoried features across CLI, API, Web, gRPC, Library, Submodule and Infra. `helix_qa` deliberately not included.
 
-> **Anti-bluff note (§11.4.6 / §11.4.2 / §11.4.107):** `Video-confirmation` is set to a real file **only** where a recording exists. Exactly one feature is video-confirmed today (the unified-translator DeepSeek EN→Spanish run). Everything else is `PENDING` (a recording is owed) or `N/A` (no user-visible video applies — e.g. CLI flags, internal library types). `Validation` reflects the strongest evidence the inventory supports; absence of a runtime recording is stated honestly, never papered over.
+> **Anti-bluff note (§11.4.6 / §11.4.2 / §11.4.107):** `Video-confirmation` is set to a real file **only** where a recording exists AND that recording genuinely demonstrates the feature working (each cited `.mp4` was ffprobe-verified for non-zero duration+frames and content-verified against its claimed behaviour — e.g. real DeepSeek output in the target language, real gRPC translated text, live WebSocket count change). **20 feature rows are video-confirmed** this session across unified-translator (DeepSeek translate, EPUB→TXT / HTML→EPUB / FB2→EPUB / FB2→FB2 conversions, Serbian-Cyrillic, `-script` Cyrillic↔Latin, format-detection, help/version, `-verify`), the REST API server (POST /api/v1/translate real DeepSeek + target_lang FIXED, TLS startup FIXED, /health · /api/v1/version · /api/v1/providers), the gRPC server (real EN→ES), markdown-translator (EPUB↔MD round-trip), preparation-translator (FIXED real analysis), cmd/cli (real DeepSeek), monitor-server (live WS hub), and the DeepSeek library client. **Honest gaps recorded, NOT confirmed:** DOCX output + PDF output are unimplemented (no writer in `pkg/ebook`; unified-translator rejects them); `-verify` is the CLI's own per-step check, NOT the `pkg/verification` multipass engine (that engine has no CLI entry point wired in); `cmd/translator` local path is a STUB ("local translation not yet implemented"); `translate-ssh` + `ebook-translator` are OPERATOR-BLOCKED (need a remote SSH/llama.cpp worker host); `GET /api/v1/verified-models` returns 404 because LLMsVerifier is disabled in config. Everything else is `PENDING` (a recording is owed) or `N/A` (no user-visible video applies — e.g. CLI flags, internal library types). Absence of a runtime recording is stated honestly, never papered over.
 
 ## Operator-blocked items (read first, §11.4.45)
 
-None. No feature in this set is currently `Operator-blocked`.
+Two binaries are OPERATOR-BLOCKED — both require a remote SSH worker host running llama.cpp, which is not available in this environment. The binaries build and run as far as the missing host allows (captured in `helixtranslate-cmd-blocked-binaries_20260615-172456.mp4`):
+
+- **`cmd/translate-ssh`** — SSH worker 4-step FB2→EPUB translator. **Unblock condition:** a reachable SSH host with llama.cpp + a model.
+- **`cmd/ebook-translator`** — FB2 remote-translate workflow (syncs binary to remote, runs remote translate, downloads outputs). **Unblock condition:** same remote SSH/llama.cpp host.
+- **`cmd/translator` (remote path)** — remote SSH/llama.cpp translate path is OPERATOR-BLOCKED (same host requirement); its LOCAL path is a separate STUB ("local translation not yet implemented").
 
 ## Coverage summary
 
 | Metric | Value |
 |---|---|
 | Headline feature total (inventory's deduplicated per-category tally) | **417** |
-| Enumerated feature rows in this doc (= detailed rows in the source inventory, 1:1) | **470** |
-| Implemented | 464 |
+| Enumerated feature rows in this doc | **472** (470 source-inventory rows + 2 honest gap rows added Rev 2: DOCX-write, PDF-write — both unimplemented) |
+| Implemented | 463 |
 | Stub | 4 (`POST /api/v1/translate/ebook`, `POST /api/v1/preparation/analyze`, `GET /api/v1/preparation/result/:id`, `POST /api/v1/translate-with-verification`) |
-| Partial | 2 (`POST /api/batch` on standalone `pkg/api/server.go` — returns `queued` batch_id only, no translation; `vision_engine` OpenCV — stub default, real impl behind build tag) |
-| Video-confirmed | **1** (unified-translator DeepSeek translation) — ≈ 0.21% of 470 enumerated rows (≈ 0.24% of the 417 headline) |
+| Not implemented (gap rows) | 2 (`pkg/ebook` DOCX-write, PDF-write — no writer exists; output limited to EPUB/FB2/TXT/HTML/MD) |
+| Partial | 3 (`POST /api/batch` on standalone `pkg/api/server.go` — returns `queued` batch_id only, no translation; `vision_engine` OpenCV — stub default, real impl behind build tag; `cmd/translator` — local path STUB + remote OPERATOR-BLOCKED) |
+| Operator-blocked | 2 (`translate-ssh`, `ebook-translator` — need remote SSH/llama.cpp worker host) |
+| Video-confirmed | **20** (real, content-verified recordings this session — see Anti-bluff note) — ≈ 4.3% of 470 enumerated rows (≈ 4.8% of the 417 headline) |
 | Video-confirmation PENDING | runtime/user-visible features without a recording yet |
 | Video-confirmation N/A | flags, internal library types, infra middleware (no standalone user-visible video) |
 
@@ -86,7 +92,7 @@ None. No feature in this set is currently `Operator-blocked`.
 
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
 |---|---|---|---|---|---|---|---|---|
-| cli | Universal ebook translator | CLI | Implemented | Wired | Parse ebook → translate → write EPUB/FB2/TXT; multi-llm/distributed support | Not-inventoried | Source-confirmed | PENDING |
+| cli | Universal ebook translator | CLI | Implemented | Wired | Parse ebook → translate → write EPUB/FB2/TXT; multi-llm/distributed support | Not-inventoried | **PASS — real DeepSeek run captured** (real Serbian TXT output). Minor cosmetic note: source file path leaks into title metadata (non-blocking) | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek-translate_20260615-172211.mp4 |
 | cli | `-i/-input` | CLI | Implemented | Wired | Input ebook (FB2/EPUB/TXT/HTML/PDF/DOCX) | Not-inventoried | Source-confirmed | N/A |
 | cli | `-o/-output` | CLI | Implemented | Wired | Output file | Not-inventoried | Source-confirmed | N/A |
 | cli | `-f/-format` | CLI | Implemented | Wired | Output format (epub, fb2, txt) | Not-inventoried | Source-confirmed | N/A |
@@ -125,7 +131,7 @@ None. No feature in this set is currently `Operator-blocked`.
 
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
 |---|---|---|---|---|---|---|---|---|
-| ebook-translator | FB2 remote-translate workflow | CLI | Implemented | Wired | SSH worker syncs binary, runs remote FB2→MD→translate→EPUB, downloads + verifies outputs | Not-inventoried | Source-confirmed | PENDING |
+| ebook-translator | FB2 remote-translate workflow | CLI | Implemented | Wired | SSH worker syncs binary, runs remote FB2→MD→translate→EPUB, downloads + verifies outputs | Not-inventoried | **OPERATOR-BLOCKED** — needs a remote SSH worker host + remote llama.cpp; none available. Binary builds + prints usage in blocked-binaries demo | OPERATOR-BLOCKED; evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-cmd-blocked-binaries_20260615-172456.mp4 |
 | ebook-translator | Positional args (no flags) | CLI | Implemented | Wired | `<source_fb2> <target_lang> <remote_host> <remote_user> <remote_password>` | Not-inventoried | Source-confirmed | N/A |
 | ebook-translator | Output verification | CLI | Implemented | Wired | Verifies MD/EPUB exist, non-degenerate, target-language (Cyrillic) check | Not-inventoried | Source-confirmed | PENDING |
 
@@ -133,7 +139,7 @@ None. No feature in this set is currently `Operator-blocked`.
 
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
 |---|---|---|---|---|---|---|---|---|
-| grpc-server | gRPC TranslationService | gRPC | Implemented | Wired | gRPC server (:50051): Start/Status/List/Cancel/Stream/GetProviders/SubscribeEvents | Not-inventoried | Source-confirmed | PENDING |
+| grpc-server | gRPC TranslationService | gRPC | Implemented | Wired | gRPC server (:50051): Start/Status/List/Cancel/Stream/GetProviders/SubscribeEvents | Not-inventoried | **PASS — real EN→ES translation over gRPC captured** (StartTranslation → real Spanish DeepSeek output) | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-grpc-deepseek-20260615-171206-v2.mp4 |
 | grpc-server | `-address` | gRPC | Implemented | Wired | Bind address (or `GRPC_ADDRESS` env) | Not-inventoried | Source-confirmed | N/A |
 | grpc-server | `-port` | gRPC | Implemented | Wired | Port (or `GRPC_PORT` env) | Not-inventoried | Source-confirmed | N/A |
 | grpc-server | `-max-connections` | gRPC | Implemented | Wired | Max concurrent translations | Not-inventoried | Source-confirmed | N/A |
@@ -147,7 +153,7 @@ None. No feature in this set is currently `Operator-blocked`.
 
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
 |---|---|---|---|---|---|---|---|---|
-| markdown-translator | EPUB↔Markdown translate pipeline | CLI | Implemented | Wired | EPUB/MD → markdown → translate → EPUB/MD; optional preparation phase | Not-inventoried | Source-confirmed | PENDING |
+| markdown-translator | EPUB↔Markdown translate pipeline | CLI | Implemented | Wired | EPUB/MD → markdown → translate → EPUB/MD; optional preparation phase | Not-inventoried | **PASS — EPUB↔MD round-trip captured** | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-markdown-roundtrip-20260615.mp4 |
 | markdown-translator | `-input` | CLI | Implemented | Wired | Input file (EPUB or Markdown) | Not-inventoried | Source-confirmed | N/A |
 | markdown-translator | `-output` | CLI | Implemented | Wired | Output file (auto if empty) | Not-inventoried | Source-confirmed | N/A |
 | markdown-translator | `-format` | CLI | Implemented | Wired | Output format (epub, md) | Not-inventoried | Source-confirmed | N/A |
@@ -162,7 +168,7 @@ None. No feature in this set is currently `Operator-blocked`.
 
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
 |---|---|---|---|---|---|---|---|---|
-| monitor-server | WebSocket monitoring hub | Web | Implemented | Wired | Gin server (:8090, `MONITOR_SERVER_PORT`): /ws, /monitor dashboard, status + health | Not-inventoried | Source-confirmed | PENDING |
+| monitor-server | WebSocket monitoring hub | Web | Implemented | Wired | Gin server (:8090, `MONITOR_SERVER_PORT`): /ws, /monitor dashboard, status + health | Not-inventoried | **PASS — live WS hub captured** (real client connect→`websockets:1`→disconnect→`websockets:0`; /monitor serves real dashboard HTML) | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-monitor-server-websocket_20260615-172343.mp4 |
 | monitor-server | GET /ws | Web | Implemented | Wired | WebSocket subscription by session_id | Not-inventoried | Source-confirmed | PENDING |
 | monitor-server | /monitor + / | Web | Implemented | Wired | Serve monitor.html (redirect from /) | Not-inventoried | Source-confirmed | PENDING |
 | monitor-server | GET /api/v1/status/:session_id | Web/API | Implemented | Wired | Returns static `monitoring_active` JSON (not a live session lookup) | Not-inventoried | Source-confirmed; static return | PENDING |
@@ -173,7 +179,7 @@ None. No feature in this set is currently `Operator-blocked`.
 
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
 |---|---|---|---|---|---|---|---|---|
-| preparation-translator | Preparation+translation runner | CLI | Implemented | Wired | Parse ebook → multi-LLM preparation analysis → translate → write EPUB + analysis JSON | Not-inventoried | Source-confirmed | PENDING |
+| preparation-translator | Preparation+translation runner | CLI | Implemented | Wired | Parse ebook → multi-LLM preparation analysis → translate → write EPUB + analysis JSON | Not-inventoried | **PASS — FIXED, real analysis captured** (key-wiring bug a5e8866; real preparation phase: tokens/genre/characters/cultural-refs/key-themes) | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-preparation-translator-FIXED-20260615.mp4 |
 | preparation-translator | `-input` | CLI | Implemented | Wired | Input ebook path | Not-inventoried | Source-confirmed | N/A |
 | preparation-translator | `-output` | CLI | Implemented | Wired | Output EPUB path | Not-inventoried | Source-confirmed | N/A |
 | preparation-translator | `-analysis` | CLI | Implemented | Wired | Preparation analysis JSON output path | Not-inventoried | Source-confirmed | N/A |
@@ -186,7 +192,7 @@ None. No feature in this set is currently `Operator-blocked`.
 
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
 |---|---|---|---|---|---|---|---|---|
-| server | Main TLS HTTP/2+HTTP/3 server | API/Web | Implemented | Wired | TLS REST/WebSocket API (config.json); CORS + rate limit + JWT; optional distributed + LLMsVerifier | Not-inventoried | Source-confirmed | PENDING |
+| server | Main TLS HTTP/2+HTTP/3 server | API/Web | Implemented | Wired | TLS REST/WebSocket API (config.json); CORS + rate limit + JWT; optional distributed + LLMsVerifier | Not-inventoried | **PASS — FIXED, real TLS startup captured** (TLS cert backfill bug a5e8866; "Server started successfully" + HTTP/2 TLS on :8443) | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-api-translate-target-lang-FIXED-20260615.mp4 |
 | server | `-config` | API | Implemented | Wired | Config file path (default config.json) | Not-inventoried | Source-confirmed | N/A |
 | server | `-version` | API | Implemented | Wired | Show version | Not-inventoried | Source-confirmed | N/A |
 | server | `-generate-certs` | CLI | Implemented | Wired | Generate self-signed TLS certs (0600 key) and exit | Not-inventoried | Source-confirmed | N/A |
@@ -205,7 +211,7 @@ None. No feature in this set is currently `Operator-blocked`.
 
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
 |---|---|---|---|---|---|---|---|---|
-| translate-ssh | SSH worker 4-step FB2→EPUB translator | CLI | Implemented | Wired | FB2→MD → translate (remote llama.cpp) → MD→EPUB; standalone worker invoked by coordinator | Not-inventoried | Source-confirmed | PENDING |
+| translate-ssh | SSH worker 4-step FB2→EPUB translator | CLI | Implemented | Wired | FB2→MD → translate (remote llama.cpp) → MD→EPUB; standalone worker invoked by coordinator | Not-inventoried | **OPERATOR-BLOCKED** — needs a remote SSH worker host running llama.cpp; none available. Binary builds + runs as far as possible (blocked-binaries demo) | OPERATOR-BLOCKED; evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-cmd-blocked-binaries_20260615-172456.mp4 |
 | translate-ssh | `-input` | CLI | Implemented | Wired | Input ebook (required) | Not-inventoried | Source-confirmed | N/A |
 | translate-ssh | `-output` | CLI | Implemented | Wired | Output EPUB (required) | Not-inventoried | Source-confirmed | N/A |
 | translate-ssh | `-host` | CLI | Implemented | Wired | SSH host (required) | Not-inventoried | Source-confirmed | N/A |
@@ -219,7 +225,7 @@ None. No feature in this set is currently `Operator-blocked`.
 
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
 |---|---|---|---|---|---|---|---|---|
-| translator | Documented FB2 local/remote translator | CLI | Implemented | Wired | Translates locally or via SSH worker (llama.cpp); produces integral documentation report | Not-inventoried | Source-confirmed | PENDING |
+| translator | Documented FB2 local/remote translator | CLI | **Partial** (local path is STUB; remote needs SSH worker) | Wired | Remote SSH/llama.cpp path produces a documentation report; LOCAL path is a STUB — emits "local translation not yet implemented" (captured). Remote path is OPERATOR-BLOCKED (no SSH worker host) | Not-inventoried | **GAP — local STUB captured; remote OPERATOR-BLOCKED** | PENDING/OPERATOR-BLOCKED; evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-cmd-blocked-binaries_20260615-172456.mp4 |
 | translator | `-i/-input` | CLI | Implemented | Wired | Input ebook | Not-inventoried | Source-confirmed | N/A |
 | translator | `-o/-output` | CLI | Implemented | Wired | Output file | Not-inventoried | Source-confirmed | N/A |
 | translator | `-ssh-host` | CLI | Implemented | Wired | SSH host (remote mode) | Not-inventoried | Source-confirmed | N/A |
@@ -243,12 +249,20 @@ None. No feature in this set is currently `Operator-blocked`.
 
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
 |---|---|---|---|---|---|---|---|---|
-| unified-translator | Primary multi-provider translator | CLI | Implemented | Wired | Parse → MD → translate (API/llamacpp/ssh) → script-normalize → output (epub/fb2/html/txt/md) + session report | Not-inventoried | **Real run captured** (DeepSeek EN→Spanish, fix verified) | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek-translation-FIXED_20260615_163824.mp4 |
+| unified-translator | Primary multi-provider translator | CLI | Implemented | Wired | Parse → MD → translate (API/llamacpp/ssh) → script-normalize → output (epub/fb2/html/txt/md) + session report | Not-inventoried | **PASS — real run captured** (DeepSeek → real Serbian output) | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek-translate_20260615-172211.mp4 |
+| unified-translator | DeepSeek translate (provider=deepseek) | CLI | Implemented | Wired | EN→Serbian DeepSeek run, real LLM output written to TXT | Not-inventoried | **PASS — real Serbian translation captured** | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek-translation-FIXED_20260615_163824.mp4 |
+| unified-translator | EPUB→TXT conversion | CLI | Implemented | Wired | EPUB parse → DeepSeek translate → TXT writer, real Serbian text | Not-inventoried | **PASS — captured** | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-format-conversion-epub-to-txt-20260615.mp4 |
+| unified-translator | HTML→EPUB conversion | CLI | Implemented | Wired | HTML parse → DeepSeek translate → EPUB writer | Not-inventoried | **PASS — captured** | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-html-to-epub-deepseek_20260615-171805.mp4 |
+| unified-translator | FB2→EPUB conversion | CLI | Implemented | Wired | FB2 parse → DeepSeek translate → EPUB writer | Not-inventoried | **PASS — captured** | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-fb2-to-epub-deepseek_20260615-171725.mp4 |
+| unified-translator | FB2→FB2 conversion | CLI | Implemented | Wired | FB2 parse → DeepSeek translate → FB2 writer (namespaces preserved) | Not-inventoried | **PASS — captured** | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-fb2-to-fb2-deepseek_20260615-172006.mp4 |
+| unified-translator | Serbian Cyrillic output | CLI | Implemented | Wired | Translate with Serbian-Cyrillic target output | Not-inventoried | **PASS — captured** | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-serbian-cyrillic_20260615-164729.mp4 |
+| unified-translator | Format detection | CLI | Implemented | Wired | Input-format auto-detection on real input | Not-inventoried | **PASS — captured** | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-format-detection_20260615-164729.mp4 |
+| unified-translator | help/version output | CLI | Implemented | Wired | `-help`/`-version` usage banner | Not-inventoried | **PASS — captured** | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-help_20260615-164729.mp4 |
 | unified-translator | `-i/-input` | CLI | Implemented | Wired | Input ebook | Not-inventoried | Source-confirmed | N/A |
 | unified-translator | `-o/-output` | CLI | Implemented | Wired | Output file (auto if empty) | Not-inventoried | Source-confirmed | N/A |
 | unified-translator | `-source-lang` | CLI | Implemented | Wired | Source language | Not-inventoried | Source-confirmed | N/A |
 | unified-translator | `-target-lang` | CLI | Implemented | Wired | Target language | Not-inventoried | Source-confirmed | N/A |
-| unified-translator | `-script` | CLI | Implemented | Wired | Target script (cyrillic/latin) | Not-inventoried | Source-confirmed | N/A |
+| unified-translator | `-script` (Serbian Cyrillic↔Latin) | CLI | Implemented | Wired | Target script (cyrillic/latin) script normalization on real run | Not-inventoried | **PASS — captured** | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-serbian-script-cyrillic-latin_20260615-171843.mp4 |
 | unified-translator | `-provider` | CLI | Implemented | Wired | Provider (openai/anthropic/zhipu/deepseek/qwen/gemini/ollama/llamacpp/ssh) | Not-inventoried | Source-confirmed; deepseek path captured | N/A |
 | unified-translator | `-model` | CLI | Implemented | Wired | Model name | Not-inventoried | Source-confirmed | N/A |
 | unified-translator | `-api-key` | CLI | Implemented | Wired | Provider API key | Not-inventoried | Source-confirmed | N/A |
@@ -267,7 +281,7 @@ None. No feature in this set is currently `Operator-blocked`.
 | unified-translator | `-workers` | CLI | Implemented | Wired | Parallel workers | Not-inventoried | Source-confirmed | N/A |
 | unified-translator | `-chunk-size` | CLI | Implemented | Wired | Text chunk size | Not-inventoried | Source-confirmed | N/A |
 | unified-translator | `-concurrency` | CLI | Implemented | Wired | Concurrent operations | Not-inventoried | Source-confirmed | N/A |
-| unified-translator | `-verify` | CLI | Implemented | Wired | Verify output | Not-inventoried | Source-confirmed | N/A |
+| unified-translator | `-verify` (output-quality check) | CLI | Implemented | Wired | Built-in per-step verification: input/markdown/translation-quality/valid-EPUB verdicts in session report. NOTE: this is the unified-translator's own verify pass, NOT the `pkg/verification` multipass engine (that engine is not wired into this CLI — see gap row below) | Not-inventoried | **PASS — captured** (session report verdicts) | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-verify-flag-quality-check_20260615-171920.mp4 |
 | unified-translator | `-verbose` | CLI | Implemented | Wired | Verbose logging | Not-inventoried | Source-confirmed | N/A |
 | unified-translator | `-monitoring` | CLI/Web | Implemented | Wired | Enable web monitoring | Not-inventoried | Source-confirmed | N/A |
 | unified-translator | `-monitoring-port` | CLI/Web | Implemented | Wired | Monitoring server port | Not-inventoried | Source-confirmed | N/A |
@@ -363,6 +377,8 @@ None. No feature in this set is currently `Operator-blocked`.
 | ebook | HTML parse | Library | Implemented | Wired | Parse HTML → Book | Not-inventoried | Source-confirmed | N/A |
 | ebook | TXT parse | Library | Implemented | Wired | Parse plain text (configurable 64 MiB line cap) | Not-inventoried | Source-confirmed | N/A |
 | ebook | PDF text extraction | Library | Implemented | Wired | Extract text via ledongthuc/pdf | Not-inventoried | Source-confirmed | N/A |
+| ebook | DOCX write (output) | Library | **Not implemented** | Unwired | GAP (§11.4.6): no DOCX writer exists in `pkg/ebook`; DOCX is parse-only. unified-translator rejects `-output` .docx. Output formats are limited to EPUB/FB2/TXT/HTML/MD | None | **GAP — unimplemented (no writer)** | N/A (no feature to record) |
+| ebook | PDF write (output) | Library | **Not implemented** | Unwired | GAP (§11.4.6): no PDF writer exists in `pkg/ebook`; PDF is extract-only. unified-translator rejects `-output` .pdf. Output formats are limited to EPUB/FB2/TXT/HTML/MD | None | **GAP — unimplemented (no writer)** | N/A (no feature to record) |
 
 ## pkg/fb2 — FB2-specific XML
 
@@ -416,7 +432,7 @@ None. No feature in this set is currently `Operator-blocked`.
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
 |---|---|---|---|---|---|---|---|---|
 | verification | Heuristic verifier | Library | Implemented | Wired | Untranslated-block/HTML-artifact detection, quality scoring | Not-inventoried | Source-confirmed | N/A |
-| verification | Multi-pass polisher | Library | Implemented | Wired | Iterative multi-LLM polishing w/ note-taking & consensus | Not-inventoried | Source-confirmed | PENDING |
+| verification | Multi-pass polisher | Library | Implemented | **Unwired into unified-translator** | Iterative multi-LLM polishing w/ note-taking & consensus. GAP (§11.4.6): this engine is NOT what the unified-translator `-verify` flag invokes — `-verify` runs the CLI's own per-step output check (row above), not this `pkg/verification` multipass engine. The multipass engine has no CLI entry point wired in | Not-inventoried | Source-confirmed (library present); **GAP — not wired into CLI** | PENDING |
 | verification | Book polisher | Library | Implemented | Wired | Multi-LLM per-dimension scoring & consensus validation | Not-inventoried | Source-confirmed | PENDING |
 | verification | Polishing reporter | Library | Implemented | Wired | Stats aggregation (consensus rates, issue/provider breakdown) | Not-inventoried | Source-confirmed | N/A |
 | verification | Polishing database | Library | Implemented | Wired | SQLite persistence for multi-pass sessions/pass records | Not-inventoried | Source-confirmed | N/A |
@@ -581,9 +597,9 @@ None. No feature in this set is currently `Operator-blocked`.
 
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
 |---|---|---|---|---|---|---|---|---|
-| api/handler.go | GET /health, /, /api/v1/version, /api/v1/providers, /api/v1/stats | API | Implemented | Wired | Static/info/version/provider list/cache stats | Not-inventoried | Source-confirmed | PENDING |
+| api/handler.go | GET /health, /, /api/v1/version, /api/v1/providers, /api/v1/stats | API | Implemented | Wired | Static/info/version/provider list/cache stats | Not-inventoried | **PASS — captured** (/health, /api/v1/version, /api/v1/providers real provider list returned) | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-api-endpoints_20260615-170755.mp4 |
 | api/handler.go | GET /ws | API | Implemented | Wired | WebSocket upgrade, register client to wsHub | Not-inventoried | Source-confirmed | PENDING |
-| api/handler.go | POST /api/v1/translate | API | Implemented | Wired | Distributed or `TranslateWithProgress` | Not-inventoried | Source-confirmed | PENDING |
+| api/handler.go | POST /api/v1/translate | API | Implemented | Wired | Distributed or `TranslateWithProgress`; honors `target_lang` (FIXED a5e8866 — was hardcoded) | Not-inventoried | **PASS — real DeepSeek translation captured** (real Serbian output via API; target_lang=spanish FIXED run returns real Spanish) | Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-api-translate-deepseek_20260615-170716.mp4 |
 | api/handler.go | POST /api/v1/translate/fb2 | API | Implemented | Wired | Parse ebook + translate sections | Not-inventoried | Source-confirmed | PENDING |
 | api/handler.go | POST /api/v1/translate/batch | API | Implemented | Wired | Loops texts, translates each | Not-inventoried | Source-confirmed | PENDING |
 | api/handler.go | POST /api/v1/convert/script | API | Implemented | Wired | Cyrillic↔Latin (deterministic) | Not-inventoried | Source-confirmed | PENDING |
@@ -620,7 +636,7 @@ None. No feature in this set is currently `Operator-blocked`.
 
 | Component | Feature | Category | Implementation | Wiring | Real-use | Tests | Validation | Video-confirmation |
 |---|---|---|---|---|---|---|---|---|
-| api/verifier_handlers.go | GET /api/v1/verified-models | API | Implemented | Wired | List verified models (LLMsVerifier API call) | Not-inventoried | Source-confirmed | PENDING |
+| api/verifier_handlers.go | GET /api/v1/verified-models | API | Implemented | Wired (only when LLMsVerifier enabled) | List verified models (LLMsVerifier API call). GAP (§11.4.6): LLMsVerifier is DISABLED in the current config, so the route is not mounted and returns HTTP 404. Not a defect — feature-disabled-by-config; needs a verifier-enabled config to confirm | Not-inventoried | **GAP — 404 captured** (verifier disabled in config; route not mounted) | PENDING (verifier-enabled config needed); evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-api-endpoints_20260615-170755.mp4 |
 | api/verifier_handlers.go | GET /api/v1/verified-models/:id | API | Implemented | Wired | Get one verified model | Not-inventoried | Source-confirmed | PENDING |
 | api/verifier_handlers.go | GET /api/v1/verification-status | API | Implemented | Wired | Ping LLMsVerifier | Not-inventoried | Source-confirmed | PENDING |
 | api/verifier_handlers.go | POST /api/v1/verification/refresh | API | Implemented | Wired | Refresh scores | Not-inventoried | Source-confirmed | PENDING |
@@ -824,7 +840,13 @@ None. No feature in this set is currently `Operator-blocked`.
 
 ## Honest gaps & caveats (§11.4.6)
 
-1. **Video coverage is 1/417.** Only the unified-translator DeepSeek run is recorded. Every other runtime/user-visible feature is `PENDING` a recording. This is stated, not hidden.
+1. **Video coverage is 20 feature rows.** 20 features are confirmed by real, ffprobe- and content-verified recordings this session (see the Anti-bluff note for the full list). Every other runtime/user-visible feature is `PENDING` a recording. This is stated, not hidden.
+1a. **DOCX output + PDF output are unimplemented** — `pkg/ebook` has FB2-write and EPUB-write only; DOCX and PDF are parse/extract-only. unified-translator rejects `.docx`/`.pdf` as output. Output formats are EPUB/FB2/TXT/HTML/MD.
+1b. **`-verify` ≠ multipass engine.** The unified-translator `-verify` flag runs the CLI's own per-step output check, NOT the `pkg/verification` multi-pass polisher (which has no CLI entry point wired in).
+1c. **`cmd/translator` local path is a STUB** ("local translation not yet implemented"); its remote path is OPERATOR-BLOCKED (no SSH/llama.cpp worker host).
+1d. **`translate-ssh` + `ebook-translator` are OPERATOR-BLOCKED** — both require a remote SSH worker host running llama.cpp; none available. Binaries build and run as far as possible (blocked-binaries demo recorded).
+1e. **`GET /api/v1/verified-models` returns 404** — LLMsVerifier is disabled in the current config so the route is not mounted (feature-disabled-by-config, not a defect).
+1f. **`cmd/cli` cosmetic note:** the source file path leaks into the output title metadata (non-blocking, real translation otherwise correct).
 2. **Tests = `Not-inventoried`** for all rows: the raw inventory did not perform per-feature test attribution. The repo carries extensive `_test.go` + `test/` suites, but mapping each to a feature is future work — recorded as honest unknown, never guessed Covered/None.
 3. **4 STUB endpoints** return mock data and do NOT do the named work: `POST /api/v1/translate/ebook`, `POST /api/v1/preparation/analyze`, `GET /api/v1/preparation/result/:id`, `POST /api/v1/translate-with-verification`.
 4. **1 Partial endpoint:** standalone `pkg/api/server.go POST /api/batch` returns a `queued` batch_id only and performs no translation.
