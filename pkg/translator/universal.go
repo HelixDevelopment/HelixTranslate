@@ -72,6 +72,14 @@ func (ut *UniversalTranslator) TranslateBook(
 		return fmt.Errorf("book cannot be nil")
 	}
 
+	// Honor a cancelled/expired context up front: a user who cancels (timeout
+	// or Ctrl-C) MUST NOT get a partial or no-op book reported as a successful
+	// translation. Without this check the loop below keeps invoking a
+	// ctx-ignoring translator and returns nil — a silent partial-result bluff.
+	if err := ctx.Err(); err != nil {
+		return fmt.Errorf("translation cancelled before start: %w", err)
+	}
+
 	// Detect source language if not specified
 	if ut.sourceLanguage.Code == "" && ut.langDetector != nil {
 		EmitProgress(eventBus, sessionID, "Detecting source language", nil)
@@ -109,6 +117,13 @@ func (ut *UniversalTranslator) TranslateBook(
 	// Translate chapters
 	totalChapters := len(book.Chapters)
 	for i := range book.Chapters {
+		// Stop promptly if the context is cancelled mid-run rather than
+		// continuing to "translate" the remaining chapters and reporting
+		// success on a partial book.
+		if err := ctx.Err(); err != nil {
+			return fmt.Errorf("translation cancelled at chapter %d/%d: %w", i+1, totalChapters, err)
+		}
+
 		EmitProgress(eventBus, sessionID,
 			fmt.Sprintf("Translating chapter %d/%d", i+1, totalChapters),
 			map[string]interface{}{
