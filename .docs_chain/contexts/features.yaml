@@ -1,0 +1,22 @@
+context: features
+description: helix_translate feature Status docs — Status + Status_Summary kept in sync (md -> html -> pdf, md -> docx) per §11.4.45 / §11.4.56 / §11.4.60 / §11.4.106
+nodes:
+  status_md:           { kind: markdown, path: docs/features/Status.md }
+  status_html:         { kind: html,     path: docs/features/Status.html }
+  status_pdf:          { kind: pdf,      path: docs/features/Status.pdf }
+  status_docx:         { kind: docx,     path: docs/features/Status.docx }
+  status_summary_md:   { kind: markdown, path: docs/features/Status_Summary.md }
+  status_summary_html: { kind: html,     path: docs/features/Status_Summary.html }
+  status_summary_pdf:  { kind: pdf,      path: docs/features/Status_Summary.pdf }
+  status_summary_docx: { kind: docx,     path: docs/features/Status_Summary.docx }
+edges:
+  - { type: derive-from, from: status_md,           to: status_html,         transform: md2html }
+  - { type: derive-from, from: status_html,         to: status_pdf,          transform: html2pdf }
+  - { type: derive-from, from: status_md,           to: status_docx,         transform: md2docx }
+  - { type: derive-from, from: status_summary_md,   to: status_summary_html, transform: md2html }
+  - { type: derive-from, from: status_summary_html, to: status_summary_pdf,  transform: html2pdf }
+  - { type: derive-from, from: status_summary_md,   to: status_summary_docx, transform: md2docx }
+transforms:
+  md2html:  { builtin: pandoc-html }
+  html2pdf: { builtin: weasyprint-pdf }
+  md2docx:  { builtin: pandoc-docx }

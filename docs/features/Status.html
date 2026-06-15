@@ -1,0 +1,7303 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Status</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Status</h1>
+</header>
+<h1 id="helixtranslate-feature-status">HelixTranslate — Feature
+Status</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-15T13:44:25Z <strong>Authority:</strong> Derived from
+<code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
+§11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
+§11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
+§11.4.60 (always-sync), §11.4.6 (no-guessing — every status reflects
+what the inventory actually found in source). <strong>Scope:</strong>
+Every one of the 417 inventoried features across CLI, API, Web, gRPC,
+Library, Submodule and Infra. <code>helix_qa</code> deliberately not
+included.</p>
+<blockquote>
+<p><strong>Anti-bluff note (§11.4.6 / §11.4.2 / §11.4.107):</strong>
+<code>Video-confirmation</code> is set to a real file
+<strong>only</strong> where a recording exists. Exactly one feature is
+video-confirmed today (the unified-translator DeepSeek EN→Spanish run).
+Everything else is <code>PENDING</code> (a recording is owed) or
+<code>N/A</code> (no user-visible video applies — e.g. CLI flags,
+internal library types). <code>Validation</code> reflects the strongest
+evidence the inventory supports; absence of a runtime recording is
+stated honestly, never papered over.</p>
+</blockquote>
+<h2 id="operator-blocked-items-read-first-11.4.45">Operator-blocked
+items (read first, §11.4.45)</h2>
+<p>None. No feature in this set is currently
+<code>Operator-blocked</code>.</p>
+<h2 id="coverage-summary">Coverage summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Headline feature total (inventory’s deduplicated per-category
+tally)</td>
+<td><strong>417</strong></td>
+</tr>
+<tr>
+<td>Enumerated feature rows in this doc (= detailed rows in the source
+inventory, 1:1)</td>
+<td><strong>470</strong></td>
+</tr>
+<tr>
+<td>Implemented</td>
+<td>464</td>
+</tr>
+<tr>
+<td>Stub</td>
+<td>4 (<code>POST /api/v1/translate/ebook</code>,
+<code>POST /api/v1/preparation/analyze</code>,
+<code>GET /api/v1/preparation/result/:id</code>,
+<code>POST /api/v1/translate-with-verification</code>)</td>
+</tr>
+<tr>
+<td>Partial</td>
+<td>2 (<code>POST /api/batch</code> on standalone
+<code>pkg/api/server.go</code> — returns <code>queued</code> batch_id
+only, no translation; <code>vision_engine</code> OpenCV — stub default,
+real impl behind build tag)</td>
+</tr>
+<tr>
+<td>Video-confirmed</td>
+<td><strong>1</strong> (unified-translator DeepSeek translation) — ≈
+0.21% of 470 enumerated rows (≈ 0.24% of the 417 headline)</td>
+</tr>
+<tr>
+<td>Video-confirmation PENDING</td>
+<td>runtime/user-visible features without a recording yet</td>
+</tr>
+<tr>
+<td>Video-confirmation N/A</td>
+<td>flags, internal library types, infra middleware (no standalone
+user-visible video)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>§11.4.6 reconciliation:</strong> The inventory’s headline is
+<strong>417</strong> — its own note states this is an <em>approximate,
+deduplicated</em> per-category tally where “some rows are sub-features…
+counted once, and a few rows span two categories (counted once, in the
+first/primary category).” The inventory’s <em>detailed</em> tables
+actually enumerate <strong>470</strong> feature rows. This document
+transcribes <strong>all 470 detailed rows 1:1</strong> so <strong>no
+feature is dropped</strong> (which would itself be a bluff). The 417
+headline and the 470 enumerated rows are both reported honestly; the
+53-row gap is dedup, not missing coverage.</p>
+</blockquote>
+<blockquote>
+<p>“Static-return” endpoints (e.g. <code>GET /api/stats</code> hardcoded
+zeros, <code>GET /api/v1/status/:id</code> hardcoded
+<code>completed</code>, <code>GET /api/v1/metrics</code> static,
+monitor-server <code>GET /api/v1/status</code> static
+<code>monitoring_active</code>) are marked <strong>Implemented</strong>
+at the route level but their <code>Real-use</code> cell states the
+static/hardcoded behaviour honestly so no false “working backend”
+impression is created.</p>
+</blockquote>
+<h3 id="per-category-counts">Per-category counts</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLI</td>
+<td>130</td>
+</tr>
+<tr>
+<td>API</td>
+<td>70</td>
+</tr>
+<tr>
+<td>Web</td>
+<td>23</td>
+</tr>
+<tr>
+<td>gRPC</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Library</td>
+<td>81</td>
+</tr>
+<tr>
+<td>Submodule</td>
+<td>95</td>
+</tr>
+<tr>
+<td>Infra</td>
+<td>11</td>
+</tr>
+<tr>
+<td><strong>TOTAL</strong></td>
+<td><strong>417</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="legend">Legend</h2>
+<ul>
+<li><strong>Implementation:</strong> <code>Implemented</code> (real code
+path present) / <code>Stub</code> (returns mock, no real work) /
+<code>Partial</code> (does some but not the named work).</li>
+<li><strong>Wiring:</strong> <code>Wired</code> (reachable from a binary
+/ route / public API) / <code>Unwired</code> (present but not
+reached).</li>
+<li><strong>Real-use:</strong> what the code actually does at runtime
+(honest, §11.4.6).</li>
+<li><strong>Tests:</strong> <code>Covered</code>
+(unit/integration/challenge present in repo) / <code>None</code> (no
+test found / not asserted in inventory).</li>
+<li><strong>Validation:</strong> strongest evidence available.</li>
+<li><strong>Video-confirmation:</strong>
+<code>Confirmed:&lt;file&gt;</code> only with a real recording; else
+<code>PENDING</code> / <code>N/A</code>.</li>
+</ul>
+<blockquote>
+<p>Per §11.4.6, where the inventory did not read test files
+line-by-line, <code>Tests</code> is recorded
+<code>Not-inventoried</code> (honest unknown) rather than guessed as
+Covered or None. The repo is known to carry extensive
+<code>_test.go</code> suites and a <code>test/</code> tree, but
+per-feature test attribution was not part of the raw inventory.</p>
+</blockquote>
+<hr />
+<h1 id="cli-binaries-cmd">1. CLI Binaries — cmd/</h1>
+<h2 id="cmdapi-server">cmd/api-server</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api-server</td>
+<td>REST translation server</td>
+<td>API/Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Gin HTTP server (:8080) proxying to gRPC backend; serves dashboard +
+static files</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed (cmd/api-server/main.go)</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api-server</td>
+<td><code>-http-port</code> flag</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Override HTTP port (else <code>HTTP_PORT</code> env)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>api-server</td>
+<td><code>-http-address</code> flag</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Override HTTP bind address (else <code>HTTP_ADDRESS</code> env)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>api-server</td>
+<td><code>-grpc-address</code> flag</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Override gRPC backend address (else <code>GRPC_ADDRESS</code>
+env)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>api-server</td>
+<td><code>-debug</code> flag</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Enable debug / Gin debug mode</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmdchallenge-runner">cmd/challenge-runner</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>challenge-runner</td>
+<td>Challenge orchestrator</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Registers + runs all anti-bluff challenges, prints PASS/FAIL/SKIP,
+writes results dir</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>challenge-runner</td>
+<td><code>-parallel</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Run challenges in parallel</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenge-runner</td>
+<td><code>-max-concurrency</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Max concurrent challenges</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenge-runner</td>
+<td><code>-stop-on-failure</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Stop on first failure</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenge-runner</td>
+<td><code>-verbose</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Verbose output</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenge-runner</td>
+<td><code>-timeout</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Per-challenge timeout</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenge-runner</td>
+<td><code>-filter</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Comma-separated challenge IDs to run</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenge-runner</td>
+<td><code>-category</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Limit to a category</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenge-runner</td>
+<td><code>-results-dir</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Results output directory</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmdcli">cmd/cli</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cli</td>
+<td>Universal ebook translator</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Parse ebook → translate → write EPUB/FB2/TXT; multi-llm/distributed
+support</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-i/-input</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Input ebook (FB2/EPUB/TXT/HTML/PDF/DOCX)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-o/-output</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Output file</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-f/-format</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Output format (epub, fb2, txt)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-p/-provider</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Translation provider</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-model</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LLM model name</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-api-key</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Provider API key</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-base-url</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Provider base URL</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-script</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Output script (default/cyrillic/latin)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-locale</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Target language locale code</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-language</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Target language name</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-source</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Source language (auto-detect if unset)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-detect</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Detect source language and exit (LLM detector if API key)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-v/-version</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Show version</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-h/-help</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Show help</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-create-config</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Write a config-file template</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-disable-local-llms</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Use only distributed/API providers</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-prefer-distributed</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Prefer distributed workers</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-c/-config</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Config file path</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cli</td>
+<td><code>-hash-codebase</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Compute codebase hash and exit</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmddeployment">cmd/deployment</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>deployment</td>
+<td>Distributed deployment manager</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Orchestrates Docker-based main+worker deployment over SSH</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>deployment</td>
+<td><code>-config</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Config file (default config.distributed.json)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>deployment</td>
+<td><code>-action</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>deploy/status/stop/cleanup/update/restart/generate-plan</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>deployment</td>
+<td><code>-service</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Service name for update/restart</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>deployment</td>
+<td><code>-image</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>New image for update</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>deployment</td>
+<td><code>-plan</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Deployment plan JSON file</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>deployment</td>
+<td><code>-verbose</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Verbose logging</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>deployment</td>
+<td>deploy/status/stop/cleanup/update/restart actions</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Execute deployment lifecycle ops</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>deployment</td>
+<td>generate-plan action</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Generate deployment-plan.json (random JWT secret per instance)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmdebook-translator">cmd/ebook-translator</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ebook-translator</td>
+<td>FB2 remote-translate workflow</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH worker syncs binary, runs remote FB2→MD→translate→EPUB,
+downloads + verifies outputs</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>ebook-translator</td>
+<td>Positional args (no flags)</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td><code>&lt;source_fb2&gt; &lt;target_lang&gt; &lt;remote_host&gt; &lt;remote_user&gt; &lt;remote_password&gt;</code></td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>ebook-translator</td>
+<td>Output verification</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Verifies MD/EPUB exist, non-degenerate, target-language (Cyrillic)
+check</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmdgrpc-server">cmd/grpc-server</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>grpc-server</td>
+<td>gRPC TranslationService</td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>gRPC server (:50051):
+Start/Status/List/Cancel/Stream/GetProviders/SubscribeEvents</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>grpc-server</td>
+<td><code>-address</code></td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Bind address (or <code>GRPC_ADDRESS</code> env)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>grpc-server</td>
+<td><code>-port</code></td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Port (or <code>GRPC_PORT</code> env)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>grpc-server</td>
+<td><code>-max-connections</code></td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Max concurrent translations</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>grpc-server</td>
+<td><code>-reflection</code></td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Enable gRPC reflection (or <code>ENABLE_REFLECTION</code> env)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>grpc-server</td>
+<td><code>-metrics</code></td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Enable metrics (or <code>ENABLE_METRICS</code> env)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>grpc-server</td>
+<td><code>-log-level</code></td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Log level (or <code>LOG_LEVEL</code> env)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>grpc-server</td>
+<td><code>-version</code></td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Show version</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>grpc-server</td>
+<td><code>-help</code></td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Show help</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmdmarkdown-translator">cmd/markdown-translator</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>markdown-translator</td>
+<td>EPUB↔︎Markdown translate pipeline</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>EPUB/MD → markdown → translate → EPUB/MD; optional preparation
+phase</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>markdown-translator</td>
+<td><code>-input</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Input file (EPUB or Markdown)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>markdown-translator</td>
+<td><code>-output</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Output file (auto if empty)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>markdown-translator</td>
+<td><code>-format</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Output format (epub, md)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>markdown-translator</td>
+<td><code>-lang</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Target language code</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>markdown-translator</td>
+<td><code>-provider</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LLM provider (deepseek/openai/anthropic/llamacpp)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>markdown-translator</td>
+<td><code>-model</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LLM model</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>markdown-translator</td>
+<td><code>-keep-md</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Keep intermediate markdown</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>markdown-translator</td>
+<td><code>-prepare</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Enable multi-LLM preparation/analysis phase</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>markdown-translator</td>
+<td><code>-prep-passes</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Number of preparation passes</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmdmonitor-server">cmd/monitor-server</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>monitor-server</td>
+<td>WebSocket monitoring hub</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Gin server (:8090, <code>MONITOR_SERVER_PORT</code>): /ws, /monitor
+dashboard, status + health</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>monitor-server</td>
+<td>GET /ws</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>WebSocket subscription by session_id</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>monitor-server</td>
+<td>/monitor + /</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Serve monitor.html (redirect from /)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>monitor-server</td>
+<td>GET /api/v1/status/:session_id</td>
+<td>Web/API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Returns static <code>monitoring_active</code> JSON (not a live
+session lookup)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; static return</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>monitor-server</td>
+<td>GET /health</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Health + client count</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>monitor-server</td>
+<td><code>MONITOR_SERVER_PORT</code> env</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Configure bind port (no CLI flag)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmdpreparation-translator">cmd/preparation-translator</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>preparation-translator</td>
+<td>Preparation+translation runner</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Parse ebook → multi-LLM preparation analysis → translate → write
+EPUB + analysis JSON</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>preparation-translator</td>
+<td><code>-input</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Input ebook path</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>preparation-translator</td>
+<td><code>-output</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Output EPUB path</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>preparation-translator</td>
+<td><code>-analysis</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Preparation analysis JSON output path</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>preparation-translator</td>
+<td><code>-source</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Source language</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>preparation-translator</td>
+<td><code>-target</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Target language</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>preparation-translator</td>
+<td><code>-passes</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Number of preparation passes</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>preparation-translator</td>
+<td><code>-providers</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Comma-separated LLM providers</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmdserver">cmd/server</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>server</td>
+<td>Main TLS HTTP/2+HTTP/3 server</td>
+<td>API/Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>TLS REST/WebSocket API (config.json); CORS + rate limit + JWT;
+optional distributed + LLMsVerifier</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>server</td>
+<td><code>-config</code></td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Config file path (default config.json)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>server</td>
+<td><code>-version</code></td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Show version</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>server</td>
+<td><code>-generate-certs</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Generate self-signed TLS certs (0600 key) and exit</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>server</td>
+<td>HTTP/3 (QUIC) + HTTP/2 fallback serving</td>
+<td>API/Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Serve API over TLS; HTTP/3 if <code>EnableHTTP3</code></td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>server</td>
+<td>API routes (pkg/api Handler)</td>
+<td>API/Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Registers translation REST + WebSocket routes</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>server</td>
+<td>LLMsVerifier routes (if enabled)</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Registers verifier endpoints</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmdssh-translation">cmd/ssh-translation</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ssh-translation</td>
+<td>SSH translation system (fixed-config)</td>
+<td>CLI/Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Hardcoded Russian→Serbian-Cyrillic workflow over SSH worker w/
+llama.cpp; WebSocket monitoring</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>ssh-translation</td>
+<td>(no CLI flags)</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>All config hardcoded in <code>SystemConfig</code> (host, creds,
+langs, llama providers)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmdtranslate-ssh">cmd/translate-ssh</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>translate-ssh</td>
+<td>SSH worker 4-step FB2→EPUB translator</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>FB2→MD → translate (remote llama.cpp) → MD→EPUB; standalone worker
+invoked by coordinator</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>translate-ssh</td>
+<td><code>-input</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Input ebook (required)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translate-ssh</td>
+<td><code>-output</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Output EPUB (required)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translate-ssh</td>
+<td><code>-host</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH host (required)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translate-ssh</td>
+<td><code>-user</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH username (required)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translate-ssh</td>
+<td><code>-password</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH password (required)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translate-ssh</td>
+<td><code>-port</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH port</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translate-ssh</td>
+<td><code>-remote-dir</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Remote working directory</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translate-ssh</td>
+<td><code>-report-dir</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Report output directory</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmdtranslator">cmd/translator</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>translator</td>
+<td>Documented FB2 local/remote translator</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Translates locally or via SSH worker (llama.cpp); produces integral
+documentation report</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-i/-input</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Input ebook</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-o/-output</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Output file</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-ssh-host</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH host (remote mode)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-ssh-user</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH username</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-ssh-password</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH password</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-ssh-port</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH port</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-remote-dir</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Remote working directory</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-workers</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Parallel workers</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-chunk-size</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Text chunk size</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-concurrency</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Max concurrent operations</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-verify</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Verify translated output</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-verbose</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Verbose logging</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-llama-binary</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Path to llama.cpp binary</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-temperature</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LLM temperature</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-context</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LLM context size</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-version</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Show version</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-help</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Show help</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>translator</td>
+<td><code>-hash-codebase</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Compute codebase hash</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmdunified-translator-primary-cli">cmd/unified-translator
+(PRIMARY CLI)</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>unified-translator</td>
+<td>Primary multi-provider translator</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Parse → MD → translate (API/llamacpp/ssh) → script-normalize →
+output (epub/fb2/html/txt/md) + session report</td>
+<td>Not-inventoried</td>
+<td><strong>Real run captured</strong> (DeepSeek EN→Spanish, fix
+verified)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek-translation-FIXED_20260615_163824.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-i/-input</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Input ebook</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-o/-output</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Output file (auto if empty)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-source-lang</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Source language</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-target-lang</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Target language</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-script</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Target script (cyrillic/latin)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-provider</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Provider
+(openai/anthropic/zhipu/deepseek/qwen/gemini/ollama/llamacpp/ssh)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; deepseek path captured</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-model</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Model name</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-api-key</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Provider API key</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-base-url</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Provider base URL</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-temperature</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LLM temperature</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-max-tokens</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Max tokens</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-timeout</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Request timeout</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-ssh-host</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH host (provider=ssh)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-ssh-user</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH username</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-ssh-password</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH password</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-ssh-port</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH port</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-remote-dir</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Remote directory</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-llama-binary</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Path to llama.cpp binary</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-llama-model</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Path to llama.cpp model</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-context-size</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LLM context size</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-workers</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Parallel workers</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-chunk-size</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Text chunk size</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-concurrency</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Concurrent operations</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-verify</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Verify output</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-verbose</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Verbose logging</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-monitoring</code></td>
+<td>CLI/Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Enable web monitoring</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-monitoring-port</code></td>
+<td>CLI/Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Monitoring server port</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-use-verifier</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Use LLMsVerifier for model selection</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-verifier-url</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LLMsVerifier API URL</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-verifier-api-key</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LLMsVerifier API key</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-version</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Show version</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td><code>-help</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Show help</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmdverify-models">cmd/verify-models</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>verify-models</td>
+<td>In-process LLMsVerifier runner</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Runs verification pipeline against env-keyed providers; persists
+verified models to SQLite</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>verify-models</td>
+<td><code>-db</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SQLite store path</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>verify-models</td>
+<td><code>-max</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Max models/provider through pipeline</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>verify-models</td>
+<td><code>-min-score</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Min overall score to persist</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>verify-models</td>
+<td><code>-timeout</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Overall verification timeout</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cmdworkable-items">cmd/workable-items</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>workable-items</td>
+<td>§11.4.93 workable-items SQLite tool</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Bidirectional sync between Issues/Fixed markdown and SQLite
+single-source-of-truth</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>workable-items</td>
+<td><code>sync md-to-db</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Parse ATM-NNN headings from markdown into DB</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>workable-items</td>
+<td><code>sync db-to-md</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Regenerate Issues_Summary/Fixed_Summary from DB</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>workable-items</td>
+<td><code>validate</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Verify DB matches markdown; exit non-zero on drift</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>workable-items</td>
+<td><code>diff</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Print md-vs-db drift human-readably</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>workable-items</td>
+<td><code>list</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Print items in DB</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>workable-items</td>
+<td><code>record-event</code></td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Append event to item_history audit trail</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>workable-items</td>
+<td>path/value flags</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td><code>-issues</code>/<code>-fixed</code>/<code>-db</code>/<code>-issues-summary</code>/<code>-fixed-summary</code>/<code>-atm</code>/<code>-event</code>/<code>-on</code>/<code>-note</code></td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="library-packages-pkg">2. Library Packages — pkg/</h1>
+<h2
+id="pkgtranslatorllm-llm-provider-clients-factory">pkg/translator/llm —
+LLM provider clients &amp; factory</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLM Core</td>
+<td>LLMClient interface &amp; factory</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td><code>LLMClient</code> interface + <code>NewLLMTranslator</code>
+factory dispatching to ~32 providers</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>LLM Core</td>
+<td>Type-coercion utilities</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>JSON config conversion helpers</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>LLM Core</td>
+<td>Verified factory</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LLMsVerifier-gated translator construction w/ fallback chain
+(CONST-034)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>LLM Core</td>
+<td>Mock client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Test mock LLMClient with fault injection (test-only)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>OpenAI</td>
+<td>OpenAI client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>GPT chat-completions translation</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td>Anthropic Claude client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Claude /v1/messages translation</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>Gemini client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Google Gemini generativelanguage API</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>DeepSeek</td>
+<td>DeepSeek client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>DeepSeek OpenAI-compatible chat-completions</td>
+<td>Not-inventoried</td>
+<td><strong>Exercised in unified-translator real run</strong></td>
+<td>Confirmed (via
+unified-translator):/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek-translation-FIXED_20260615_163824.mp4</td>
+</tr>
+<tr>
+<td>Zhipu</td>
+<td>Zhipu (GLM) client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Zhipu GLM /api/paas/v4</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Alibaba</td>
+<td>Qwen client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Qwen/DashScope (OAuth2-capable)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Ollama</td>
+<td>Ollama local client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Local /api/generate inference</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llama.cpp</td>
+<td>llama.cpp client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>llama-cli wrapper w/ hardware detection, model download, GPU
+accel</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llama.cpp</td>
+<td>llama.cpp multi-worker coordinator</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Worker pool for parallel local llama.cpp inference</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Groq</td>
+<td>Groq client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Cohere</td>
+<td>Cohere client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>command-r via OpenAI-compat endpoint</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Mistral</td>
+<td>Mistral client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>xAI</td>
+<td>xAI (Grok) client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Replicate</td>
+<td>Replicate client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Async prediction-polling API</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Cerebras</td>
+<td>Cerebras client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper (base-URL/model specifics
+UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Cloudflare</td>
+<td>Cloudflare Workers AI client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>/client/v4 Workers AI</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>SiliconFlow</td>
+<td>SiliconFlow client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Hyperbolic</td>
+<td>Hyperbolic client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>TogetherAI</td>
+<td>TogetherAI client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>SambaNova</td>
+<td>SambaNova client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Kimi</td>
+<td>Kimi (Moonshot) client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Novita</td>
+<td>Novita client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>/v3/openai-compatible wrapper</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>NLPCloud</td>
+<td>NLPCloud client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Upstage</td>
+<td>Upstage (Solar) client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Sarvam</td>
+<td>Sarvam client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Modal</td>
+<td>Modal client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>PublicAI</td>
+<td>PublicAI client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>NIA</td>
+<td>NIA client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>Vulavula</td>
+<td>Vulavula client</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI-compatible wrapper (specifics UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgtranslator-translation-core">pkg/translator — translation
+core</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Translator Core</td>
+<td>Translator interface + BaseTranslator</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td><code>Translate</code>/<code>TranslateWithProgress</code>/<code>GetStats</code>
++ base impl w/ caching &amp; stats</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Translator Core</td>
+<td>Translation config</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td><code>TranslationConfig</code>
+(provider/model/key/temp/tokens/lang-pair/script)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Translator Core</td>
+<td>UniversalTranslator</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>High-level ebook translator: lang detection, per-chapter
+translation, progress events</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgebook-format-parsers-writers">pkg/ebook — format parsers
+&amp; writers</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ebook</td>
+<td>Universal parser dispatcher</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Multi-format parser (FB2/EPUB/TXT/HTML/DOCX/PDF)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>ebook</td>
+<td>FB2 parse</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Parse FictionBook 2.0 → Book, namespace-preserving</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>ebook</td>
+<td>FB2 write</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Write Book → FB2 XML</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>ebook</td>
+<td>EPUB parse</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Parse EPUB (ZIP+OPF/NCX)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>ebook</td>
+<td>EPUB write</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Write Book → EPUB 2.0 ZIP</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>ebook</td>
+<td>DOCX parse</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Parse .docx (archive/zip + encoding/xml)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>ebook</td>
+<td>HTML parse</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Parse HTML → Book</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>ebook</td>
+<td>TXT parse</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Parse plain text (configurable 64 MiB line cap)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>ebook</td>
+<td>PDF text extraction</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Extract text via ledongthuc/pdf</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgfb2-fb2-specific-xml">pkg/fb2 — FB2-specific XML</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fb2</td>
+<td>FB2 parser (mixed-content)</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Parse FB2 preserving paragraphs/verses/inline mixed content</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>fb2</td>
+<td>FB2→Markdown converter</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Convert FB2 → Markdown (author/annotation/epigraph/poem/cite)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgformat">pkg/format</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>format</td>
+<td>Format detector</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Detect format by magic bytes/extension/content; ZIP disambiguation
+(EPUB/DOCX/AZW3)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgmarkdown-epubmarkdown-workflow">pkg/markdown — EPUB↔︎Markdown
+workflow</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>markdown</td>
+<td>EPUB→Markdown converter</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>EPUB→MD w/ YAML frontmatter, image extraction, GFM tables</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>markdown</td>
+<td>Markdown→EPUB converter</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>MD→EPUB 2.0 w/ OPF/NCX, lists/tables/blockquotes</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>markdown</td>
+<td>Simple workflow</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>ebook→markdown→translate→ebook pipeline w/ progress</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>markdown</td>
+<td>Markdown translator</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Line-by-line MD translation preserving formatting/code blocks</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgscript">pkg/script</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>script</td>
+<td>Cyrillic↔︎Latin conversion</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Bidirectional Serbian script conversion, context-aware digraphs</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgstorage">pkg/storage</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>storage</td>
+<td>Storage interface</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Abstract session + translation-cache persistence</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>storage</td>
+<td>PostgreSQL backend</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Pooled Postgres w/ UNIQUE-tuple dedup</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>storage</td>
+<td>Redis backend</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Redis cache, sha256-hashed tuple keys (collision-proof)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>storage</td>
+<td>SQLite backend</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SQLite (optional SQLCipher) w/ UNIQUE-tuple migrations</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>storage</td>
+<td>Cache-key hashing</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Length-prefixed tuple encoding for collision-resistant keys</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgsecurity">pkg/security</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>security</td>
+<td>JWT auth service</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>JWT generate/validate/refresh w/ timing-attack mitigation</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>security</td>
+<td>API-key store</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Thread-safe key validation w/ expiry &amp; revocation</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>security</td>
+<td>Rate limiter</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Token-bucket per-key limiting w/ cleanup &amp; stats</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>security</td>
+<td>User auth service</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Login/user-create w/ timing &amp; enumeration mitigation</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgverification-quality-verification-polishing">pkg/verification
+— quality verification &amp; polishing</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>verification</td>
+<td>Heuristic verifier</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Untranslated-block/HTML-artifact detection, quality scoring</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>verification</td>
+<td>Multi-pass polisher</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Iterative multi-LLM polishing w/ note-taking &amp; consensus</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>verification</td>
+<td>Book polisher</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Multi-LLM per-dimension scoring &amp; consensus validation</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>verification</td>
+<td>Polishing reporter</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Stats aggregation (consensus rates, issue/provider breakdown)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>verification</td>
+<td>Polishing database</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SQLite persistence for multi-pass sessions/pass records</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>verification</td>
+<td>Literary notes</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Character/tone/theme/terminology/cultural note collection</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgpreparation-pre-translation-analysis">pkg/preparation —
+pre-translation analysis</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>preparation</td>
+<td>Preparation coordinator</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Multi-pass content analysis (character/terminology/cultural)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>preparation</td>
+<td>Preparation-aware translator</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Wraps base translator w/ analysis phase + context passing</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>preparation</td>
+<td>Prompt builder</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Context-aware analysis prompts refined across passes</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>preparation</td>
+<td>Domain types</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Content-classification/character/cultural/terminology structs</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>preparation</td>
+<td>Utilities</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>JSON serialization + human-readable summaries</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgcoordination-multi-llm-coordination">pkg/coordination —
+multi-LLM coordination</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>coordination</td>
+<td>Multi-LLM coordinator</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Multiple LLM instances w/ round-robin, retry, distributed
+fallback</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>coordination</td>
+<td>Multi-LLM translator wrapper</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Adapts coordinator to <code>translator.Translator</code>
+interface</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgdistributed-ssh-distributed-workers">pkg/distributed — SSH
+distributed workers</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>distributed</td>
+<td>Coordinator (distribute + aggregate)</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Distributes work across remote LLM instances, round-robin, failover
+to local</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>distributed</td>
+<td>SSH connection pool</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Pooled SSH connections w/ idle-timeout cleanup</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>distributed</td>
+<td>Worker pairing/discovery</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Discover/pair/health-check remote translator services</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>distributed</td>
+<td>Fallback / graceful degradation</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Retry w/ backoff, degraded-mode entry/exit, recovery tracking</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>distributed</td>
+<td>Version manager</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Version check/update/rollback, signed packages, backups, drift
+alerts (no LLM)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>distributed</td>
+<td>Performance instrumentation</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Conn pooling, TTL result cache, circuit breaker, batch
+processing</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>distributed</td>
+<td>Security hardening</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH host-key verify, TLS validation, network ACLs, security event
+log</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>distributed</td>
+<td>Manager / orchestration</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Init/discover/pair/version-manage + translation delegation</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgsshworker">pkg/sshworker</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sshworker</td>
+<td>SSH worker</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH exec, file up/download, codebase sync, key generation</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>sshworker</td>
+<td>Monitored worker</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Event-monitored progress tracking for long commands</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgdeployment">pkg/deployment</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>deployment</td>
+<td>Deployment orchestrator</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Automated multi-host instance deployment</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>deployment</td>
+<td>Docker orchestrator</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Generate/manage docker-compose for multi-service deploy</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>deployment</td>
+<td>SSH deployer</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH-based deploy w/ validation &amp; error handling</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>deployment</td>
+<td>Network discovery</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>UDP service discovery/broadcast</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>deployment</td>
+<td>API comm logger</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Retrofit-style REST request/response logging between nodes</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>deployment</td>
+<td>Deployment types</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>DeploymentPlan/Status/NetworkService/APICommunicationLog</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkggrpc">pkg/grpc</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>grpc</td>
+<td>gRPC TranslationService</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>gRPC server: sessions, event streaming, provider registry,
+concurrency</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>grpc</td>
+<td>Core translator pipeline</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Translation job exec w/ step tracking + progress via llm
+factory</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgapi-library-layer">pkg/api (library layer)</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api</td>
+<td>REST API server</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>HTTP server: auth, CSRF, rate-limit, routing</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api</td>
+<td>Translation endpoints</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>text/FB2/ebook translate, batch ops, lang/provider listing</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api</td>
+<td>Batch translation handlers</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Batch requests w/ queue, progress, concurrency</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api</td>
+<td>Verifier endpoints</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LLMsVerifier model verification/scoring/selection;
+/verified-models</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2
+id="pkgevents-websocket-batch-progress-report-logger-hardware-hash">pkg/events,
+websocket, batch, progress, report, logger, hardware, hash</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>events</td>
+<td>Event pub/sub bus</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Thread-safe pub/sub w/ subscription IDs + type filtering</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>websocket</td>
+<td>WebSocket hub</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Real-time session event broadcast to dashboards</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>batch</td>
+<td>Batch processor</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>File/dir translation w/ concurrency &amp; progress</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>progress</td>
+<td>Progress tracker</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Chapter/section progress w/ ETA</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>report</td>
+<td>Report generator</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Session reporting (issues/warnings/logs/results)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>logger</td>
+<td>Structured logger</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Text/JSON logging w/ levels</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>hardware</td>
+<td>Hardware detector</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>CPU/RAM/GPU detection + model-size estimation</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>hash</td>
+<td>Codebase hash generator</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SHA256 of source/config/deps/binaries</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkglanguage">pkg/language</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>language</td>
+<td>Language registry / heuristic detector</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>ISO 639-1 registry + heuristic detection (18+ langs)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>language</td>
+<td>LLM language detector</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LLM-driven language detection</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgmodels-modelsbridge">pkg/models &amp; modelsbridge</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>models</td>
+<td>Model registry</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Translation-model metadata registry (50+ models)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>models</td>
+<td>Model downloader</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>HTTP model download w/ caching + sha256 verification</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>models</td>
+<td>User domain</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>User struct, bcrypt hashing, in-memory repo</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>models</td>
+<td>Error definitions</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Domain error constants</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>models</td>
+<td>Verifier registry</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LLMsVerifier-backed registry w/ thresholds &amp; filtering</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>modelsbridge</td>
+<td>Models bridge</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Adapter mapping models.LLMRequest/Response → llm.LLMClient</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pkgversion">pkg/version</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>version</td>
+<td>App version</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Singleton version constant (2.3.0)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>version</td>
+<td>Codebase hasher</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SHA256 codebase versioning over dirs/extensions w/ exclude
+patterns</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2
+id="pkgchallenge_runner-anti-bluff-test-harness-uses-digital.vasic.challenges">pkg/challenge_runner
+— anti-bluff test harness (uses
+<code>digital.vasic.challenges</code>)</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>challenge_runner</td>
+<td>Challenge orchestrator</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Coordinates 18+ integration challenges, parallel exec +
+filtering</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>challenge_runner</td>
+<td>Build &amp; format-detection challenges</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Build-verification + FB2/EPUB/TXT/HTML/PDF/DOCX format-detection
+challenges</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>challenge_runner</td>
+<td>Infrastructure challenges</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Event-bus + other infra challenges (run <code>go test</code>)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>challenge_runner</td>
+<td>Provider challenges</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Verify LLM provider factory/interface compile+load (build, not live
+calls)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="web-dashboards-endpoints">3. Web Dashboards &amp; Endpoints</h1>
+<h2 id="web-dashboards">Web Dashboards</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>monitor.html</td>
+<td>WebSocket connection status</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Green/red pulse dot + Connected/Disconnected indicator</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>monitor.html</td>
+<td>Session/Client ID display</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Static fields (demo-session-123, web-demo)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; static demo values</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>monitor.html</td>
+<td>Overall progress bar + percent</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Driven by WS translation_progress/step_completed events</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>monitor.html</td>
+<td>Current step / step message panel</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Shows current step + message from WS</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>monitor.html</td>
+<td>Duration timer</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Client-side elapsed clock</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>monitor.html</td>
+<td>Status badge</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Pending/Running/Completed/Failed</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>monitor.html</td>
+<td>Event log</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Scrolling list of received WS events</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>monitor.html</td>
+<td>Control Panel: Simulate Progress</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Locally fakes &amp; echoes progress events over WS (demo only)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; demo-only</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>monitor.html</td>
+<td>Clear Log / Disconnect / Reconnect WS</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Local log clear + WS connect/disconnect to
+ws://localhost:8090/ws</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>enhanced-monitor.html</td>
+<td>Stats header (Active/Completed/Errors)</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Aggregated counters from WS-tracked sessions</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>enhanced-monitor.html</td>
+<td>Control panel: Connect/Disconnect/Clear</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>WS to ws://localhost:8090/ws?client_id=dashboard</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>enhanced-monitor.html</td>
+<td>Monitor specific session</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Input + button to filter UI to a given session_id</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>enhanced-monitor.html</td>
+<td>Worker Information panel</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Host:port, model, capacity from WS worker_info</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>enhanced-monitor.html</td>
+<td>Current Session Progress panel</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Progress bar, step, current/total items, duration, status</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>enhanced-monitor.html</td>
+<td>Live progress chart (Chart.js)</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Progress % over time, last 20 points</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>enhanced-monitor.html</td>
+<td>Event log</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Color-coded WS event stream</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>enhanced-monitor.html</td>
+<td>Session History table</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Last 10 sessions: id, worker, status, duration, progress, start</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>dashboard.html</td>
+<td>Stats cards (Total/Completed/Running/Failed)</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Polls GET /api/v1/translations every 5s</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>dashboard.html</td>
+<td>Active Sessions table</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Lists sessions w/ provider, status, progress, duration</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>dashboard.html</td>
+<td>Session Details view</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Progress bar, steps, generated files via GET
+/api/v1/translations/:id</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>dashboard.html</td>
+<td>Live progress via WebSocket</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Connects ws://localhost:8080/ws?session_id=…;
+progress_update/step_*</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>dashboard.html</td>
+<td>New Translation modal</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>File input, provider selector, source/target lang, API-key/SSH/llama
+fields (UI only)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>dashboard.html</td>
+<td>Start Translation (submit)</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>POST /api/v1/translations with provider config — triggers backend
+translation</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>dashboard.html</td>
+<td>Cancel session</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>DELETE /api/v1/translations/:id</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rest-api-pkgapiserver.go-standalone-server-gin">REST API —
+pkg/api/server.go (standalone <code>Server</code>, gin)</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api/server.go</td>
+<td>GET /health</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Status + translator name</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/server.go</td>
+<td>POST /api/translate</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td><code>translator.Translate(...)</code></td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/server.go</td>
+<td>GET /api/languages</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Static language list</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; static return</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/server.go</td>
+<td>GET /api/stats</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Returns hardcoded zeros (not live metrics)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; hardcoded</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/server.go</td>
+<td>POST /api/upload</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Save uploaded file, detect format</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/server.go</td>
+<td>POST /api/batch</td>
+<td>API</td>
+<td><strong>Partial</strong></td>
+<td>Wired</td>
+<td>Returns batch_id <code>queued</code> only; performs NO
+translation</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; no real work</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rest-api-pkgapihandler.go-primary-handler-gin">REST API —
+pkg/api/handler.go (primary <code>Handler</code>, gin)</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api/handler.go</td>
+<td>GET /health, /, /api/v1/version, /api/v1/providers,
+/api/v1/stats</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Static/info/version/provider list/cache stats</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>GET /ws</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>WebSocket upgrade, register client to wsHub</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/translate</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Distributed or <code>TranslateWithProgress</code></td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/translate/fb2</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Parse ebook + translate sections</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/translate/batch</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Loops texts, translates each</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/convert/script</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Cyrillic↔︎Latin (deterministic)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>GET /api/v1/status/:session_id</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Returns hardcoded <code>completed</code> (not a live session
+lookup)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; hardcoded</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>GET /api/v1/languages</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Static list from language.GetSupportedLanguages()</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; static</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/translate/validate</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Validates request (lang/provider/length); no execution</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/preparation/analyze</td>
+<td>API</td>
+<td><strong>Stub</strong></td>
+<td>Wired</td>
+<td>File stat/count + emits events; stub analysis, no LLM</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; STUB</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>GET /api/v1/preparation/result/:session_id</td>
+<td>API</td>
+<td><strong>Stub</strong></td>
+<td>Wired</td>
+<td>Returns mock result</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; STUB</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/translate/ebook</td>
+<td>API</td>
+<td><strong>Stub</strong></td>
+<td>Wired</td>
+<td>Emits start event, returns mock; does NOT translate</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; STUB</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/translate/cancel/:session_id</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Emits cancel event, returns <code>cancelled</code></td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>GET /api/v1/distributed/status</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td><code>dm.GetStatus()</code></td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/distributed/workers/discover</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH worker discovery</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/distributed/workers/:worker_id/pair</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Pair worker</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>DELETE /api/v1/distributed/workers/:worker_id/pair</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Unpair worker</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/distributed/translate</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td><code>dm.TranslateDistributed(...)</code></td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/update/{upload,apply,rollback}</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Worker self-update (tar.gz upload/install/rollback)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>GET
+/api/v1/monitoring/version/{metrics,alerts,health,dashboard}</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Version-sync monitoring reads</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/monitoring/version/drift-check</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Trigger drift check</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>GET /api/v1/monitoring/version/alerts/history</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Alert history</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/monitoring/version/alerts/:alert_id/acknowledge</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Ack alert</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST
+/api/v1/monitoring/version/alerts/channels/{email,webhook,slack}</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Add alert channels</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>GET /api/v1/monitoring/version/dashboard.html</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Serve embedded dashboard HTML</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>POST /api/v1/auth/login, /auth/token</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>JWT auth (if Security.EnableAuth)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/handler.go</td>
+<td>GET /api/v1/profile</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Return claims (behind auth middleware)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rest-api-pkgapibatch_handlers.go-under-apiv1">REST API —
+pkg/api/batch_handlers.go (under /api/v1)</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api/batch_handlers.go</td>
+<td>POST /api/v1/translate/string</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td><code>NewLLMTranslator</code> + <code>Translate</code></td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/batch_handlers.go</td>
+<td>POST /api/v1/translate/directory</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Batch processor translates each file</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2
+id="rest-api-pkgapiverifier_handlers.go-llmsverifier-under-apiv1">REST
+API — pkg/api/verifier_handlers.go (LLMsVerifier, under /api/v1)</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api/verifier_handlers.go</td>
+<td>GET /api/v1/verified-models</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>List verified models (LLMsVerifier API call)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/verifier_handlers.go</td>
+<td>GET /api/v1/verified-models/:id</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Get one verified model</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/verifier_handlers.go</td>
+<td>GET /api/v1/verification-status</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Ping LLMsVerifier</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/verifier_handlers.go</td>
+<td>POST /api/v1/verification/refresh</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Refresh scores</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/verifier_handlers.go</td>
+<td>GET /api/v1/providers/verified</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Aggregated verified providers</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api/verifier_handlers.go</td>
+<td>POST /api/v1/translate-with-verification</td>
+<td>API</td>
+<td><strong>Stub</strong></td>
+<td>Wired</td>
+<td>Selects/verifies a model, returns metadata + text preview; does NOT
+translate</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; STUB</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rest-api-cmdapi-servermain.go-grpc-proxying-rest-8080">REST API
+— cmd/api-server/main.go (gRPC-proxying REST, :8080)</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api-server</td>
+<td>POST /api/v1/translations</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Proxies grpcClient.StartTranslation</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api-server</td>
+<td>GET /api/v1/translations/:session_id</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Get status (proxy)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api-server</td>
+<td>GET /api/v1/translations</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>List (proxy)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api-server</td>
+<td>DELETE /api/v1/translations/:session_id</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Cancel (proxy)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api-server</td>
+<td>GET /api/v1/translations/:session_id/stream</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>WS proxy of gRPC StreamTranslationProgress</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api-server</td>
+<td>GET /api/v1/providers</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Get providers (proxy)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api-server</td>
+<td>GET /api/v1/health</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Derived from gRPC conn state</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api-server</td>
+<td>GET /api/v1/metrics</td>
+<td>API</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Returns static/zero metrics (not live)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; static</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api-server</td>
+<td>GET /ws</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>WS upgrade, register to wsHub (requires session_id)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api-server</td>
+<td>GET /static/*</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Static file server (./web/static)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>api-server</td>
+<td>GET /</td>
+<td>Web</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Render dashboard.html template</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="websocket-hub-fan-out">WebSocket — hub &amp; fan-out</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>websocket/hub.go</td>
+<td>/ws endpoint (package mux)</td>
+<td>Infra</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>WS upgrade; reads client_id + session_id</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>websocket/hub.go</td>
+<td>Event fan-out</td>
+<td>Infra</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Subscribes to ALL bus events; marshals events.Event JSON;
+per-session filter; Broadcast()</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="grpc-pkggrpcserver.go-service-translationservice">gRPC —
+pkg/grpc/server.go (service <code>TranslationService</code>)</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>grpc</td>
+<td>StartTranslation</td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Reserves session, spawns runTranslation →
+translator.Translate(…)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>grpc</td>
+<td>GetTranslationStatus</td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Snapshot session + translator.GetStatus</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>grpc</td>
+<td>ListTranslations</td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Iterate sessions</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>grpc</td>
+<td>CancelTranslation</td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Cancel ctx + translator.Cancel</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>grpc</td>
+<td>StreamTranslationProgress</td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Stream session progress events</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>grpc</td>
+<td>GetProviders</td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Static ProviderRegistry (openai, anthropic, ssh)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; static</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>grpc</td>
+<td>SubscribeEvents</td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Stream filtered SystemEvents from bus</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cors-middleware-auth-infra">CORS / Middleware / Auth
+(Infra)</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cmd/server</td>
+<td>corsMiddleware</td>
+<td>Infra</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Driven by cfg.Security.CORSOrigins; reflects allowlisted Origin +
+Allow-Credentials; wildcard <code>*</code> no-credentials;
+OPTIONS→204</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>cmd/server</td>
+<td>rateLimitMiddleware</td>
+<td>Infra</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Per-ClientIP via security.RateLimiter; 429 on exceed</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>pkg/api/handler.go</td>
+<td>authMiddleware</td>
+<td>Infra</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Bearer JWT validation; applied to protected subgroup, gated by
+Security.EnableAuth</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>pkg/api/server.go</td>
+<td>authMiddleware (standalone)</td>
+<td>Infra</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>X-API-Key header == config.Security.APIKey, if
+Security.RequireAuth</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>pkg/grpc/server.go</td>
+<td>message-size limits</td>
+<td>Infra</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>4 MB recv/send msg-size limits; no interceptors/auth/rate-limit
+registered</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="owned-submodules">4. Owned Submodules</h1>
+<h2 id="challenges">challenges/</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>challenges</td>
+<td>Challenge core engine</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Challenge interface, Config, Result, BaseChallenge, ProgressReporter
+(liveness)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>Registry + dependency ordering</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Challenge registration, Kahn topological sort by deps</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>Runner / execution engine</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Sequential/parallel/pipeline execution, liveness/stall
+monitoring</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>Assertion engine</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>16 built-in evaluators (not_empty, contains, min_count,
+max_latency…) + custom</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>Report generation</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Markdown / JSON / HTML reporters</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>Live monitoring</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>WebSocket dashboard, progress liveness</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>Metrics</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Prometheus-compatible challenge metrics</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>HTTP client</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Generic REST client with JWT auth, functional options</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>Challenge bank loader</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Load challenge definitions from JSON/YAML</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>Plugin system</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Custom challenge types + assertion plugins</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>Infra bridge</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Bridge to digital.vasic.containers for test infra</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>User-flow automation</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>8 adapter interfaces / 21 impls (Playwright, ADB, Tauri, HTTP, gRPC,
+WS, Gradle, Cargo, npm), 19 templates, 12 evaluators</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; LLM-in-evaluators UNCONFIRMED</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>userflow-runner CLI</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>CLI runner for user-flow challenges</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>panoptic / i18n / env / logging</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Observation, i18n, env-var redaction, structured logging</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>challenges</td>
+<td>anti_bluff lib</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Shell anti-bluff helper library</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="containers">containers/</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>containers</td>
+<td>boot manager</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>On-demand infra boot/start orchestration</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>compose</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>docker/podman compose file orchestration</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>health checking</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>TCP/HTTP health-check primitives</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>runtime auto-detect</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Docker/Podman/Kubernetes runtime detection</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>endpoint</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>ServiceEndpoint builder</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>lifecycle</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Container lifecycle management</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>service discovery / registry</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Service discovery + registry</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>orchestrator / scheduler</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Orchestration + scheduling</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>emulator suite</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Android/device emulator boot/matrix/cleanup/canary</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>genymotion</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Genymotion device support</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>vm-matrix</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>VM matrix orchestration</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>distributed build/test</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Distributed build + test commands</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>crossbuild</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Cross-platform build</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>ctop</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Container top / monitoring TUI</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>network / volume</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Network + volume primitives</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>supporting primitives</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>cache/metrics/monitor/event/policy/remote/lazyservice/brokertest/envconfig</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="doc_processor">doc_processor/</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>doc_processor</td>
+<td>Document loader</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Loads Markdown / YAML / HTML docs (10 MB cap)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>doc_processor</td>
+<td>Feature-map builder</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Builds structured FeatureMap; heuristic extraction + LLM Enrich</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>doc_processor</td>
+<td>LLMAgent interface</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Summarize/ExtractFeatures/ClassifyFeature/InferScreens/GenerateTestSteps</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>doc_processor</td>
+<td>Coverage tracker</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Verification coverage tracking by platform/category</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>doc_processor</td>
+<td>DocGraph</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Doc node/edge graph</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>doc_processor</td>
+<td>Config / i18n</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Configuration + i18n</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>doc_processor</td>
+<td>docprocessor CLI</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>CLI running feature extraction against a docs dir</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>doc_processor</td>
+<td>archdoc (internal)</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Architecture-doc helper (LLM-use UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="docs_chain">docs_chain/</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>docs_chain</td>
+<td><code>sync</code> command</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Propagate changes through chain (regenerate + re-export
+atomically)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; used to produce this doc’s exports</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>docs_chain</td>
+<td><code>verify</code> command</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Deterministic CI/pre-build gate (chain in sync)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>docs_chain</td>
+<td><code>doctor</code> command</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Diagnostics</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>docs_chain</td>
+<td><code>graph</code> command</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Show DAG / topo order</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>docs_chain</td>
+<td><code>watch</code> daemon</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>fsnotify-driven continuous sync</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>docs_chain</td>
+<td><code>exec:</code> transforms</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Shell-out transforms (pandoc md→html/docx, weasyprint html→pdf)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>docs_chain</td>
+<td>content-hash engine</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Content-hash incremental recompute; roster/corpus fingerprint
+(§11.4.86)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>docs_chain</td>
+<td>DAG + recompute</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Node/Edge/Graph, cycle detection, Kahn topo, early-cutoff, sync-edge
+conflict</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>docs_chain</td>
+<td>adapters</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>FileAdapter, SQLiteAdapter (pure-Go modernc), DERIVED
+pandoc/weasyprint (ToolAbsentError)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>docs_chain</td>
+<td>orchestrator</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Atomic run: staged writes, SQLite-txn commit + rollback</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>docs_chain</td>
+<td>DB builtins</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Bidirectional md-to-sqlite / sqlite-to-md (row-level drift);
+colorize-html</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>docs_chain</td>
+<td>config + state</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>YAML multi-context loader; state.json</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="llm_orchestrator">llm_orchestrator/</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>llm_orchestrator</td>
+<td>Agent interface + AgentPool</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Thread-safe pool, capability matching, acquire/release, health</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llm_orchestrator</td>
+<td>CLI agent adapters</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenCode, ClaudeCode, Gemini, Junie, QwenCode adapters
+(BaseAdapter)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llm_orchestrator</td>
+<td>Transport / protocol</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>PipeTransport (JSON-line stdin/stdout) + FileTransport, protocol
+types</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>llm_orchestrator</td>
+<td>Response parser</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Parses agent JSON-line responses</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>llm_orchestrator</td>
+<td>HealthMonitor + CircuitBreaker</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Health tracking + fault tolerance over agents</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>llm_orchestrator</td>
+<td>Config / i18n</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Pool/agent config; i18n</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>llm_orchestrator</td>
+<td>orchestrator CLI</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>CLI entry for orchestration</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="llm_provider">llm_provider/</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>llm_provider</td>
+<td>LLMProvider interface</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Complete/CompleteStream/HealthCheck/GetCapabilities/ValidateConfig</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>llm_provider</td>
+<td>Circuit breaker</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>closed/open/half-open fault tolerance</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>llm_provider</td>
+<td>Health monitor</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>healthy/degraded/unhealthy/unknown</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>llm_provider</td>
+<td>Retry logic</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Exponential backoff + jitter, HTTP-status detection</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>llm_provider</td>
+<td>Model discovery</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Provider/model discovery (HTTP/endpoint-based)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llm_provider</td>
+<td>API-key management</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>API key handling</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>llm_provider</td>
+<td>HTTP client + models + i18n</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Shared HTTP client, request/response models, i18n</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>llm_provider</td>
+<td>Provider implementations (43)</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>ai21, anthropic, cerebras, chutes, claude, cloudflare, codestral,
+cohere, deepseek, fireworks, gemini, generic, githubmodels, groq,
+huggingface, hyperbolic, junie, kilo, kimi, mistral, modal, nia,
+nlpcloud, novita, nvidia, ollama, openai, openrouter, perplexity,
+publicai, qwen, replicate, sambanova, sarvam, siliconflow, together,
+upstage, venice, vulavula, xai, zai, zen, zhipu</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed (43 provider dirs)</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="llms_verifier">llms_verifier/</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>llms_verifier</td>
+<td>Model verification</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>“Do you see my code?” +
+existence/responsiveness/latency/streaming/function-calling/vision/embeddings
+tests</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>Provider adapters</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI, Anthropic, Cohere, Groq, Together, Mistral, xAI, Replicate,
+DeepSeek, Cerebras, Cloudflare, SiliconFlow (12+)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>Scoring engine</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Quality scoring system (LLM-use UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>Capabilities detection</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Per-model capability discovery</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>Failover / health monitoring</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Real-time monitoring + intelligent failover (probes call LLM)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>AI analytics / recommendations</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>AI-powered insights, trend analysis, model recommendations</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>RAG / context mgmt</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Vector DB semantic search, LLM-powered summarization</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>LLMOps / self-improve / benchmark</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LLM operations, self-improvement loop, benchmarking</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>Messaging</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Notification/messaging integration (Splunk/DataDog/etc.)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>suffix / verified export</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Mandatory branding suffix + verified-only config export</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>Auth / security / API / API-keys</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>LDAP/SSO/SAML/OIDC, SQLCipher, REST API, key mgmt</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>Multi-platform clients</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>CLI, TUI, Web, Desktop, Mobile (UI; LLM-backed)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>helixqa / cliagents / crush / opencode</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Integration packages (LLM-use UNCONFIRMED)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>scheduler / partners / bigdata / multimodal / performance</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Scheduling, partners, big-data, multimodal, perf (multimodal likely
+LLM)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>llms_verifier</td>
+<td>main CLI + ACP</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Main CLI; ACP (Agent Client Protocol)</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
+<h2 id="security">security/</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>security</td>
+<td>Content guardrails</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Rule pipeline (MaxLength, ForbiddenPatterns, RequireFormat) w/
+severities</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>security</td>
+<td>PII detection + redaction</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Email/Phone/SSN/CreditCard(Luhn)/IPv4 detection;
+Mask/Hash/Remove</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>security</td>
+<td>Content filtering</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Composable chain: Length/Pattern/Keyword filters</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>security</td>
+<td>Policy enforcement</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Named policies, 8 condition operators, Allow/Deny/Audit + audit
+trail</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>security</td>
+<td>Vulnerability scanner</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Findings/reports, severity filtering + merging</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>security</td>
+<td>HTTP security headers</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Middleware: CSP/HSTS/X-Frame-Options + 7 standard headers</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>security</td>
+<td>Secure storage</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>AES-256-GCM encrypted file KV store, Argon2id KDF</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>security</td>
+<td>Privilege-escalation scanner</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Probes /proc/self/status, capability bitmasks, namespace
+cgroups</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>security</td>
+<td>SSRF denial</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Denies SSRF on caller’s outbound HTTP client</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>security</td>
+<td>E2EE</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>End-to-end encryption</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>security</td>
+<td>Attestation / GPU attestation</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Attestation primitives</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>security</td>
+<td>i18n</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>i18n</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="vision_engine">vision_engine/</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>vision_engine</td>
+<td>Analyzer interface</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>UI-element/text-region/visual-issue detection, screen analysis/diff,
+key frames</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>vision_engine</td>
+<td>LLM vision adapters</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>OpenAI GPT-4o, Anthropic Claude, Gemini 2.0 Flash, Qwen VL, Kimi,
+StepFun, Ollama + Fallback chain</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>vision_engine</td>
+<td>NavigationGraph</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Directed graph of screens + transitions</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>vision_engine</td>
+<td>Remote Ollama deployment</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>SSH auto-install, model pull, lifecycle; GPU/CPU/RAM detection;
+distributed llama.cpp RPC</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>vision_engine</td>
+<td>OpenCV (stub + build-tag real)</td>
+<td>Submodule</td>
+<td>Partial</td>
+<td>Wired</td>
+<td>OpenCV-based CV — stub by default, real impl behind build tag</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed; real impl gated behind build tag</td>
+<td>PENDING</td>
+</tr>
+<tr>
+<td>vision_engine</td>
+<td>Config / i18n</td>
+<td>Submodule</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Configuration (HELIX_VISION_PROVIDER etc.), i18n</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="honest-gaps-caveats-11.4.6">Honest gaps &amp; caveats
+(§11.4.6)</h2>
+<ol type="1">
+<li><strong>Video coverage is 1/417.</strong> Only the
+unified-translator DeepSeek run is recorded. Every other
+runtime/user-visible feature is <code>PENDING</code> a recording. This
+is stated, not hidden.</li>
+<li><strong>Tests = <code>Not-inventoried</code></strong> for all rows:
+the raw inventory did not perform per-feature test attribution. The repo
+carries extensive <code>_test.go</code> + <code>test/</code> suites, but
+mapping each to a feature is future work — recorded as honest unknown,
+never guessed Covered/None.</li>
+<li><strong>4 STUB endpoints</strong> return mock data and do NOT do the
+named work: <code>POST /api/v1/translate/ebook</code>,
+<code>POST /api/v1/preparation/analyze</code>,
+<code>GET /api/v1/preparation/result/:id</code>,
+<code>POST /api/v1/translate-with-verification</code>.</li>
+<li><strong>1 Partial endpoint:</strong> standalone
+<code>pkg/api/server.go POST /api/batch</code> returns a
+<code>queued</code> batch_id only and performs no translation.</li>
+<li><strong>Static/hardcoded returns</strong> (not stubs, but not live):
+<code>GET /api/stats</code> (zeros), <code>GET /api/v1/status/:id</code>
+(hardcoded <code>completed</code>), <code>GET /api/v1/metrics</code>
+(static), monitor-server <code>GET /api/v1/status</code> (static
+<code>monitoring_active</code>), several static language/provider lists.
+Marked Implemented with the static behaviour stated in Real-use.</li>
+<li><strong>vision_engine OpenCV</strong> is <code>Partial</code> — stub
+by default, real CV only behind a build tag.</li>
+<li><strong>UNCONFIRMED LLM determinations</strong> carried verbatim
+from the inventory for thin OpenAI-compatible providers, several
+<code>llms_verifier</code> packages, <code>challenges/userflow</code>
+evaluators, and <code>doc_processor/archdoc</code> — noted inline rather
+than asserted.</li>
+</ol>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Status_Summary</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Status_Summary</h1>
+</header>
+<h1 id="helixtranslate-feature-status-summary">HelixTranslate — Feature
+Status Summary</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-15T13:44:25Z <strong>Authority:</strong> Two-audience companion
+to <code>docs/features/Status.md</code> (§11.4.56). Derived from the
+same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync),
+§11.4.6 (no-guessing).</p>
+<hr />
+<h1 id="page-1-for-the-team-non-developer">Page 1 — For the team
+(non-developer)</h1>
+<p><strong>What is this?</strong> HelixTranslate is an ebook translation
+system. This page is a plain-language snapshot of how much of it we have
+catalogued and how much we have proven works on camera.</p>
+<h2 id="what-works">What works</h2>
+<ul>
+<li>We have a complete catalogue of <strong>every feature</strong> in
+the product and its 8 owned add-on modules — <strong>470 individual
+capabilities</strong> (the headline “417” is the same list with
+closely-related sub-options counted once).</li>
+<li>The vast majority — <strong>464 of 470</strong> — are fully built
+and reachable in the product: the command-line translators, the web
+dashboards, the REST and gRPC servers, ~32 built-in AI providers, ebook
+format readers/writers (FB2, EPUB, DOCX, HTML, TXT, PDF), caching,
+security, and all 8 add-on modules.</li>
+<li><strong>One feature is proven on a real recording:</strong> the
+primary command-line translator (<code>unified-translator</code>) doing
+a real English → Spanish translation with the DeepSeek AI provider. The
+fix it depended on was verified in that recording.</li>
+</ul>
+<h2 id="what-is-pending-or-limited">What is pending or limited</h2>
+<ul>
+<li><strong>Video proof is the big gap.</strong> Only <strong>1 of
+470</strong> features has a recorded, watch-it-yourself demonstration so
+far (about 0.2%). Everything else is built and present in the code, but
+a recording proving it end-to-end is still owed. This is shown honestly
+— we are not claiming a feature is proven just because the code
+exists.</li>
+<li><strong>4 features are “stubs”</strong> — they look like real
+endpoints but currently return placeholder data instead of doing the
+real work: ebook-translate-via-API, the two preparation/analysis API
+endpoints, and translate-with-verification.</li>
+<li><strong>2 features are partial:</strong> one batch API endpoint just
+queues without translating, and the image-analysis (OpenCV) module ships
+a placeholder unless a special build option is turned on.</li>
+<li>A handful of small API endpoints return fixed/sample data (e.g. a
+stats endpoint that always shows zeros). These are flagged in the
+detailed document.</li>
+</ul>
+<h2 id="video-confirmation-coverage">Video-confirmation coverage</h2>
+<p><strong>1 / 470 ≈ 0.2%.</strong> This is the headline number to
+improve: each future recording raises it.</p>
+<h2 id="team-actions">Team actions</h2>
+<ul>
+<li>No operator decision is currently blocked.</li>
+<li>Priority ask: produce real recordings for the next-most-important
+runtime features (web dashboard translation, gRPC translation, the other
+AI providers) to lift the video-confirmation coverage.</li>
+</ul>
+<hr />
+<h1 id="page-2-for-software-engineers">Page 2 — For software
+engineers</h1>
+<h2 id="source-method">Source &amp; method</h2>
+<p>Derived 1:1 from <code>docs/features/.feature_inventory_raw.md</code>
+(Rev 1). Every detailed inventory row → one Status row. Statuses set per
+§11.4.6 from what the inventory actually found in source; no test files
+were attributed per-feature (recorded <code>Not-inventoried</code>, an
+honest unknown, never guessed).</p>
+<h2 id="counts">Counts</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Headline total (dedup per-category tally)</td>
+<td>417</td>
+</tr>
+<tr>
+<td>Enumerated detailed rows (this doc + Status.md)</td>
+<td>470</td>
+</tr>
+<tr>
+<td>Implemented</td>
+<td>464</td>
+</tr>
+<tr>
+<td>Stub</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Partial</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Video-confirmed</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Video PENDING</td>
+<td>runtime/user-visible, no recording yet</td>
+</tr>
+<tr>
+<td>Video N/A</td>
+<td>flags / internal types / infra middleware</td>
+</tr>
+</tbody>
+</table>
+<h3 id="per-category-inventory-headline">Per-category (inventory
+headline)</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLI</td>
+<td>130</td>
+</tr>
+<tr>
+<td>API</td>
+<td>70</td>
+</tr>
+<tr>
+<td>Web</td>
+<td>23</td>
+</tr>
+<tr>
+<td>gRPC</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Library</td>
+<td>81</td>
+</tr>
+<tr>
+<td>Submodule</td>
+<td>95</td>
+</tr>
+<tr>
+<td>Infra</td>
+<td>11</td>
+</tr>
+<tr>
+<td><strong>TOTAL</strong></td>
+<td><strong>417</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="stub-list-implementationstub-returns-mock-no-real-work">Stub
+list (Implementation=Stub — returns mock, no real work)</h2>
+<ol type="1">
+<li><code>POST /api/v1/translate/ebook</code> —
+<code>pkg/api/handler.go:1954</code> (emits start event, returns mock;
+does NOT translate).</li>
+<li><code>POST /api/v1/preparation/analyze</code> —
+<code>pkg/api/handler.go:1832</code> (file stat/count + events; stub
+analysis, no LLM).</li>
+<li><code>GET /api/v1/preparation/result/:session_id</code> —
+<code>pkg/api/handler.go:1927</code> (returns mock result).</li>
+<li><code>POST /api/v1/translate-with-verification</code> —
+<code>pkg/api/verifier_handlers.go</code> (selects/verifies a model,
+returns metadata + preview; does NOT translate).</li>
+</ol>
+<h2 id="partial-list">Partial list</h2>
+<ol type="1">
+<li><code>POST /api/batch</code> (standalone
+<code>pkg/api/server.go</code>) — returns <code>queued</code> batch_id
+only, no translation executed.</li>
+<li><code>vision_engine</code> OpenCV — stub by default; real CV only
+behind a build tag.</li>
+</ol>
+<h2
+id="static-hardcoded-return-endpoints-implemented-but-not-live">Static /
+hardcoded-return endpoints (Implemented, but not live)</h2>
+<ul>
+<li><code>GET /api/stats</code> (<code>pkg/api/server.go</code>) —
+hardcoded zeros.</li>
+<li><code>GET /api/v1/status/:session_id</code>
+(<code>pkg/api/handler.go</code>) — hardcoded
+<code>completed</code>.</li>
+<li><code>GET /api/v1/metrics</code>
+(<code>cmd/api-server/main.go</code>) — static/zero.</li>
+<li><code>GET /api/v1/status/:session_id</code>
+(<code>cmd/monitor-server/main.go</code>) — static
+<code>monitoring_active</code>.</li>
+<li><code>GET /api/v1/providers</code> (gRPC <code>GetProviders</code>)
+— static ProviderRegistry (openai, anthropic, ssh).</li>
+<li>Static language/provider lists in several
+<code>GET /api/.../languages</code> routes.</li>
+</ul>
+<h2 id="top-gaps-engineering">Top gaps (engineering)</h2>
+<ol type="1">
+<li><strong>Video-confirmation 1/470.</strong> The single recorded proof
+is the <code>unified-translator</code> DeepSeek EN→Spanish run:
+<code>/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek-translation-FIXED_20260615_163824.mp4</code>.
+All other runtime features carry <code>PENDING</code>. Per
+§11.4.2/§11.4.107 nothing else may be marked video-confirmed without a
+real file.</li>
+<li><strong>Per-feature test attribution missing</strong>
+(<code>Not-inventoried</code> everywhere). Repo has extensive
+<code>_test.go</code> + <code>test/</code> suites; mapping suites →
+features is future work.</li>
+<li><strong>4 stubs + 2 partials</strong> must either be implemented or
+reclassified per §11.4.90 before they can be claimed as working
+capabilities.</li>
+<li><strong>UNCONFIRMED LLM determinations</strong> carried from the
+inventory: thin OpenAI-compatible providers’ base-URL/model specifics;
+several <code>llms_verifier</code> packages
+(scoring/helixqa/cliagents/crush/opencode/scheduler/partners/bigdata/multimodal/performance);
+<code>challenges/userflow</code> evaluators;
+<code>doc_processor/archdoc</code>.</li>
+</ol>
+<h2 id="video-coverage-ratio">Video-coverage ratio</h2>
+<p><code>1 / 470</code> enumerated rows = <strong>0.21%</strong> (≈
+0.24% against the 417 headline). This is the primary metric to drive
+upward; each anti-bluff §11.4.107 recording increments the
+numerator.</p>
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li>Detail: <code>docs/features/Status.md</code></li>
+<li>Source: <code>docs/features/.feature_inventory_raw.md</code></li>
+<li>Sync context: <code>.docs_chain/contexts/features.yaml</code>
+(§11.4.106)</li>
+</ul>
+</body>
+</html>
