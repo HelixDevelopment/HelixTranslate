@@ -581,10 +581,24 @@ $_sib (STALE — older than $_md)"
 # §11.4.113 violation; a §11.4.109-class PreToolUse guard blocks the class at
 # the tool-call boundary, this gate is the committed-tree complement.
 # ---------------------------------------------------------------------------
+# DOCUMENTED EXCEPTION (§11.4.120 — fix the gate, NEVER fake-pass): the gate's
+# OWN paired §1.1 meta-test legitimately embeds `git push --force` /
+# `--force-with-lease` / `+refspec` literals in heredoc FIXTURE bodies that it
+# writes to a THROWAWAY temp repo to PROVE this gate bites on a real force-push.
+# Those literals never run against any real remote — they are test data, not an
+# invocation in a production script. Scanning the meta-test's own source for the
+# very tokens it exists to plant is a self-false-positive (§11.4.1 FAIL-bluff).
+# The exclusion CANNOT mask a real regression: the meta-test runs THIS gate
+# against the temp repo and asserts it FAILs on each planted force-push, so the
+# gate's real biting power stays mechanically proven by §1.1.
+_NO_FORCE_PUSH_GATE_OWN_METATEST='scripts/testing/meta_test_no_force_push_absolute.sh'
+
 gate_no_force_push_absolute() {
   _bad=""
   for _f in $(git ls-files 'scripts/*.sh' 'scripts/*/*.sh' 'scripts/*/*/*.sh' 2>/dev/null); do
     [ -f "$_f" ] || continue
+    # Skip the gate's OWN meta-test (documented §11.4.120 exception above).
+    [ "$_f" = "$_NO_FORCE_PUSH_GATE_OWN_METATEST" ] && continue
     # Candidate lines: contain 'git push' AND a force token — either a force
     # FLAG (--force / --force-with-lease / -f as a word) anywhere on the line,
     # OR a '+'-prefixed forced refspec token (e.g. '+main:main') which may sit
