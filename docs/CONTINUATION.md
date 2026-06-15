@@ -1,9 +1,40 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 78
-**Last modified:** 2026-06-15T19:05:00Z
+**Revision:** 79
+**Last modified:** 2026-06-15T22:30:00Z
 
-## ⛔ RATE-LIMIT BLOCK + OWED CRASHED-STREAM WORK (2026-06-15 ~19:05; subagents reset 7:10pm Europe/Moscow) — RESUME HERE
+## ▶️ RESUME HERE (2026-06-15 ~22:30) — submodule reconciliation COMPLETE; bridge phase-2 P-1 DONE, P-1.5 IN FLIGHT
+
+### §11.4.127 SHORT resumption (paste this first sentence into a fresh session)
+Read `docs/CONTINUATION.md` (this file) + `.remember/remember.md` FIRST, then `git fetch --all --prune`; we are mid **bridge phase-2 — the no-local-runtime mandate** (operator CRITICAL): P-1 (BestClient adapter) is DONE, **P-1.5** (provider-diverse verified-model API + injectable factory seam) is IN FLIGHT, then R-1→R-5 redirect/remove per `docs/design/BRIDGE_PHASE2_EXECUTION_PLAN.md` — continue the endless autonomous loop (§11.4.126), no force-push (§11.4.113), require API keys (no local llama.cpp/Ollama/SSH-distributed).
+
+### §11.4.127 FULL resumption (live-state anchors — verified this session against git)
+- **Parent HEAD `4a4e29b`** on `main`, local == `origin/main` (0 ahead / 0 behind). Working tree carries UNCOMMITTED doc/build/submodule-pointer churn — conductor commits the doc-set ONLY (no `git add -A`, §11.4.30).
+- **All owned submodules reconciled (governance markers stripped to canonical-per-constitution bodies), CLEAN, synced, gitlinks bumped** — verified this session:
+  - security `24b9bb7` · doc_processor `5316c4a` · llm_orchestrator `ab2eec6` · llm_provider `55057ee` · vision_engine `e19b52b` · constitution `9f3147e` (FF-integrated remote anchors §11.4.154–157)
+  - challenges `349b0f1` · docs_chain `0c72cdd` · llms_verifier `89719e2b` · containers `2a9923a` — verified clean+synced, NO work needed (challenges shows only untracked `Containers/`+`Panoptic/` scratch dirs, recorded gitlink matches HEAD).
+  - Parent gitlink-bump commits this session: `49d94f2`, `c62128f`, `6a620f5`.
+- **Key parent commits this session:** verifier affirmative-response hard-gate fix `97a8afd` (RED→GREEN, -race clean); bridge Invoke routing-seam `a5860b2`; **bridge `BestClient` adapter `e5307ce` (P-1 — returns `llm.LLMClient`, `GetProviderName` from `BestModel.ProviderID`)**; bridge phase-2 execution plan `afc3c35`; §11.4.153 ledger `5b266ad` + bridge real-use video `4a4e29b` (video-confirmed 21→22, model **novita/Sao10K/L3-8B-Stheno-v3.2** score **0.919**, live EN→ES "Buenos días, amigo.", ffprobe 8.0s/80fr, `.mp4` at `/Volumes/T7/Downloads/Recordings/helixtranslate-bridge-bestmodel-translate-20260615.mp4`); constitution §11.4.154–157 propagation into CLAUDE/AGENTS/QWEN/GEMINI `6e0e4d9` + parent CONSTITUTION.md `5d05ab7`.
+
+### Bridge phase-2 — the CRITICAL no-local-runtime mandate (current state + remaining work)
+Operator-CRITICAL: NO local runtime — only LLMsVerifier strongest models, bridged to components AND this Claude Code session. Plan doc: **`docs/design/BRIDGE_PHASE2_EXECUTION_PLAN.md`** (+ design `docs/design/LLMSVERIFIER_BRIDGE.md`, removal map `docs/design/LOCAL_RUNTIME_REMOVAL.md`).
+
+**LOCKED operator decisions:** D1 remove local runtimes entirely; D2 forbid ALL local runtimes (llama.cpp **+** Ollama); R1 **Obsolete** the SSH/distributed worker path (§11.4.90); R2 **require API keys everywhere** (no offline/local fallback — tests FAIL, not skip, when keys absent); D4/D5 **top-1 + fallback, in-process**; **ensemble semantics = "Provider-diverse verified"** (strongest verified model per distinct provider, preserving the multi-LLM cross-check).
+
+**Status:**
+- **P-1 (BestClient adapter) — DONE** (`e5307ce`): `pkg/bridge` exposes `BestClient` returning `llm.LLMClient`.
+- **R-1 (redirect) — STOPPED HONESTLY**, blocked on prerequisites now being built in **P-1.5** (provider-diverse verified-model API + injectable factory seam) — **IN FLIGHT**.
+
+**REMAINING (phased):** P-1.5 → **R-1** wire main + redirect the 15 call-sites to `bridge.BestClient`/`BestTranslator` → **R-2** remove Ollama → **R-3** remove llama.cpp (+ proto regen, `pkg/hardware` §11.4.124 investigate-before-remove) → **R-4** Obsolete SSH/distributed (§11.4.90) → **R-5** add `CM-NO-LOCAL-RUNTIME` gate + paired mutation + full §11.4.40 retest.
+
+### Standing constraints (binding every session)
+- **No force-push EVER** (§11.4.113 — merge-onto-latest-main, FF-only); **never `git add -A`** (§11.4.30); **never touch the `helix_qa` submodule** — another session owns it (§11.4.119 single-resource-owner).
+- **No host power-management** (§12 / CONST-033). **Require API keys, NO local llama.cpp/Ollama/SSH-distributed runtimes.** Operator-blocked → `AskUserQuestion` (§11.4.66). Endless autonomous loop is the DEFAULT (§11.4.126) with 3–4 parallel subagent streams (§11.4.103).
+- **Working API keys:** `DEEPSEEK_API_KEY` + `GROQ_API_KEY` present (real translations work); `GEMINI`/`ZHIPU` invalid/quota-blocked (honest errors). NEVER print key values (§11.4.10).
+
+---
+
+## ⛔ (SUPERSEDED 2026-06-15 ~22:30 — subagent runtime has since reset; reconciliation + P-1 landed) RATE-LIMIT BLOCK + OWED CRASHED-STREAM WORK (2026-06-15 ~19:05)
 The subagent runtime hit a session/usage limit (subagents die instantly, ~178 tokens). NO new subagents can run until the **7:10pm Europe/Moscow reset**. Two phase-1 bridge streams CRASHED mid-work (§11.4.147 crash≠done — work OWED, partial state PRESERVED uncommitted in the worktree, do NOT discard, do NOT commit-incomplete §11.4.84/§11.4.121):
 
 **LLMsVerifier-bridge mandate (operator CRITICAL 2026-06-15): no local llama.cpp — only LLMsVerifier strongest models + bridge to components AND this Claude Code session. Design: `docs/design/LLMSVERIFIER_BRIDGE.md`; removal map: `docs/design/LOCAL_RUNTIME_REMOVAL.md`.**
