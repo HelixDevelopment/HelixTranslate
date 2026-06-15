@@ -241,13 +241,15 @@
 <h1 class="title">AGENTS</h1>
 </header>
 <!-- AGENTS.md - Universal Multi-Format Multi-Language Ebook Translation System -->
+
 <blockquote>
 <p>Base agent rules: <code>constitution/AGENTS.md</code> — READ IT
 FIRST. The base file is authoritative for any topic not covered here.
 Project-specific rules below extend them; they never weaken them.</p>
 <p>Locate the constitution submodule from any nested depth with its
 <code>constitution/find_constitution.sh</code> helper. Canonical
-reference: https://github.com/HelixDevelopment/HelixConstitution</p>
+reference: <a
+href="https://github.com/HelixDevelopment/HelixConstitution">https://github.com/HelixDevelopment/HelixConstitution</a></p>
 </blockquote>
 <p>This file contains project-specific information intended for AI
 coding agents. The reader is expected to know nothing about the project
@@ -258,13 +260,27 @@ beforehand.</p>
 between multiple languages using various LLM providers. It supports
 multiple input/output formats (FB2, EPUB, TXT, HTML, PDF, DOCX) and
 provides both CLI tools and API servers for translation workflows.</p>
-<p>Key capabilities: - Multi-format ebook parsing and generation -
-Integration with multiple LLM providers (OpenAI, Anthropic, DeepSeek,
-Zhipu, Qwen, Gemini, Ollama, LlamaCpp) - Distributed translation via SSH
-workers - Real-time WebSocket monitoring dashboard - REST API and gRPC
-interfaces - Translation caching, quality verification, and multi-pass
-processing - Preparation phase analysis for improved translation quality
-- Markdown workflow (EPUB to Markdown and back)</p>
+<p>Key capabilities:</p>
+<ul>
+<li>Multi-format ebook parsing and generation</li>
+<li>Integration with multiple API LLM providers (OpenAI, Anthropic,
+DeepSeek, Zhipu, Qwen, Gemini, and 20+ more via the LLMsVerifier
+bridge). <strong>As of bridge phase-2 (R-2..R-4) the local-runtime
+providers (Ollama, llama.cpp) and the SSH-local translation path were
+removed</strong> — the default translator path sources the strongest
+verified API model via the LLMsVerifier bridge
+(<code>pkg/bridge</code>); selecting a removed local provider explicitly
+now returns an honest error, never a silent local fallback
+(§11.4.69).</li>
+<li>Distributed translation (kept) via the distributed/API worker
+coordinator</li>
+<li>Real-time WebSocket monitoring dashboard</li>
+<li>REST API and gRPC interfaces</li>
+<li>Translation caching, quality verification, and multi-pass
+processing</li>
+<li>Preparation phase analysis for improved translation quality</li>
+<li>Markdown workflow (EPUB to Markdown and back)</li>
+</ul>
 <hr />
 <h2 id="technology-stack">Technology Stack</h2>
 <ul>
@@ -522,13 +538,17 @@ variables or secure config files.</li>
 </ul>
 <h3 id="linting-configuration">Linting Configuration</h3>
 <p>The <code>.golangci.yml</code> file enables a strict set of linters
-including: - <code>govet</code>, <code>staticcheck</code>,
-<code>gosimple</code>, <code>ineffassign</code> for correctness -
-<code>gocyclo</code>, <code>funlen</code>, <code>gocognit</code>,
-<code>nestif</code> for complexity - <code>gosec</code> for security
-issues - <code>goimports</code> with local prefix
-<code>digital.vasic.translator</code> - <code>misspell</code> with US
-English locale</p>
+including:</p>
+<ul>
+<li><code>govet</code>, <code>staticcheck</code>, <code>gosimple</code>,
+<code>ineffassign</code> for correctness</li>
+<li><code>gocyclo</code>, <code>funlen</code>, <code>gocognit</code>,
+<code>nestif</code> for complexity</li>
+<li><code>gosec</code> for security issues</li>
+<li><code>goimports</code> with local prefix
+<code>digital.vasic.translator</code></li>
+<li><code>misspell</code> with US English locale</li>
+</ul>
 <p>Test files and <code>cmd/</code> entry points have relaxed rules for
 <code>funlen</code>, <code>gochecknoinits</code>, <code>gosec</code>,
 <code>errcheck</code>, etc.</p>
@@ -605,7 +625,7 @@ starting from 30000.</li>
 </ul>
 <h3 id="coverage">Coverage</h3>
 <ul>
-<li><strong>Tool</strong>: Go’s built-in coverage
+<li><strong>Tool</strong>: Go's built-in coverage
 (<code>go test -cover</code>)</li>
 <li><strong>Makefile target</strong>:
 <code>make test-coverage</code></li>
@@ -669,14 +689,37 @@ the target format (EPUB writer, Markdown converter).</li>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    Translate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> text <span class="dt">string</span><span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    GetProviderName<span class="op">()</span> <span class="dt">string</span></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p><strong>Supported providers</strong>: - API-based: OpenAI, Anthropic,
-Zhipu, DeepSeek, Qwen, Gemini - Self-hosted: Ollama (local HTTP),
-LlamaCpp (executes local binary) - Distributed: SSH workers for remote
-processing - Test: Mock provider</p>
+<p><strong>Supported providers</strong>:</p>
+<ul>
+<li>API-based: OpenAI, Anthropic, Zhipu, DeepSeek, Qwen, Gemini (+ 20+
+more reachable via the LLMsVerifier bridge / verified discovery)</li>
+<li>Test: Mock provider</li>
+<li><strong>Removed (bridge phase-2 R-2..R-4):</strong> Ollama (local
+HTTP) and LlamaCpp (local binary) self-hosted runtimes, and the
+SSH-local remote-worker path, are no longer supported. Explicit
+selection (<code>-provider ollama|llamacpp|ssh</code>) returns an honest
+error — there is NEVER a silent local fallback (§11.4.69). The KEPT
+distributed/API worker coordination path remains.</li>
+</ul>
+<p><strong>Default path = the LLMsVerifier bridge.</strong> The default
+translator provisioning across the binaries (unified-translator,
+cmd/cli, cmd/server / pkg/api, grpc-server, markdown-translator,
+preparation-translator) sources the strongest verified API model +
+fallback chain via <code>pkg/bridge</code> (<code>bridge.Open</code> →
+<code>BestTranslator</code>/<code>BestClient</code>); the mock seam is
+the only deliberate bypass. With no provider API key the bridge
+hard-errors honestly. The pre-build gate
+<strong><code>CM-NO-LOCAL-RUNTIME</code></strong> (§11.4.69)
+mechanically asserts no local-runtime client is constructed on the
+default path, the default arm references the bridge, and
+<code>pkg/bridge</code> retains its no-fail-open prohibition (paired
+§1.1 mutation:
+<code>scripts/testing/meta_test_no_local_runtime.sh</code>).</p>
 <p>Provider selection uses a factory pattern
 (<code>NewLLMTranslatorWithConfig()</code>) that validates
-provider/model and creates the appropriate client. Valid models are
-registered in <code>ValidModels</code> map.</p>
+provider/model and creates the appropriate client (used by the mock seam
++ verified factory). Valid models are registered in
+<code>ValidModels</code> map.</p>
 <p><strong>Import cycle avoidance</strong>:
 <code>pkg/translator/llm/</code> uses a type alias
 (<code>type TranslationConfig = translator.TranslationConfig</code>) to
@@ -710,8 +753,8 @@ orchestrator composing <code>SSHPool</code>,
 <li><code>pkg/sshworker/worker.go</code> handles SSH connection
 management, file transfer, remote command execution, and codebase
 version synchronization.</li>
-<li><code>pkg/distributed/version_manager.go</code> compares local
-vs. remote codebase versions, supports update/rollback flows, and emits
+<li><code>pkg/distributed/version_manager.go</code> compares local vs.
+remote codebase versions, supports update/rollback flows, and emits
 drift alerts.</li>
 <li><code>pkg/distributed/fallback.go</code> tracks per-component
 failure rates with exponential backoff and degraded mode fallback
@@ -770,7 +813,7 @@ production.</li>
 <li><strong>Transport</strong>: HTTP/3 uses TLS 1.3 with <code>h3</code>
 ALPN; HTTP/2 fallback uses TLS 1.2+.</li>
 </ul>
-<h3 id="sensitive-files-already-in-.gitignore">Sensitive Files (Already
+<h3 id="sensitive-files-already-in-gitignore">Sensitive Files (Already
 in .gitignore)</h3>
 <ul>
 <li><code>config_with_keys.json</code>, <code>api_keys.json</code></li>
@@ -783,28 +826,36 @@ in .gitignore)</h3>
 <hr />
 <h2 id="deployment-processes">Deployment Processes</h2>
 <h3 id="docker-deployment">Docker Deployment</h3>
-<p>A multi-stage <code>Dockerfile</code> is provided: - <strong>Builder
-stage</strong>: <code>golang:1.24-alpine</code> with <code>git</code>
-and <code>make</code> - <strong>Production stage</strong>:
-<code>alpine:latest</code> with <code>ca-certificates</code> and
-<code>tzdata</code> - Runs as non-root user (<code>appuser</code>, UID
-1000) - Exposes port 8443 (TCP and UDP for HTTP/3) - Health check
-endpoint: <code>https://localhost:8443/health</code> - Default command:
-<code>/app/translator-server -config /app/config/config.json</code> -
-Volumes exposed for <code>/app/certs</code> and
-<code>/app/config</code></p>
+<p>A multi-stage <code>Dockerfile</code> is provided:</p>
+<ul>
+<li><strong>Builder stage</strong>: <code>golang:1.24-alpine</code> with
+<code>git</code> and <code>make</code></li>
+<li><strong>Production stage</strong>: <code>alpine:latest</code> with
+<code>ca-certificates</code> and <code>tzdata</code></li>
+<li>Runs as non-root user (<code>appuser</code>, UID 1000)</li>
+<li>Exposes port 8443 (TCP and UDP for HTTP/3)</li>
+<li>Health check endpoint:
+<code>https://localhost:8443/health</code></li>
+<li>Default command:
+<code>/app/translator-server -config /app/config/config.json</code></li>
+<li>Volumes exposed for <code>/app/certs</code> and
+<code>/app/config</code></li>
+</ul>
 <p><strong>Note</strong>: The <code>Dockerfile</code> references
 <code>make build-server</code>, which does not exist in the root
 <code>Makefile</code>. The Makefile defines <code>build</code>,
 <code>build-grpc</code>, <code>build-api</code>, and
 <code>build-cli</code> instead.</p>
 <h3 id="docker-compose">Docker Compose</h3>
-<p><code>docker-compose.yml</code> provides a full production stack: -
-PostgreSQL 16 (with health checks and optional init script) - Redis 7
-(with password, 512MB maxmemory, <code>allkeys-lru</code> policy) -
-Translator API server (depends on healthy postgres &amp; redis) -
-Optional admin tools (Adminer, Redis Commander) via
-<code>--profile admin</code></p>
+<p><code>docker-compose.yml</code> provides a full production stack:</p>
+<ul>
+<li>PostgreSQL 16 (with health checks and optional init script)</li>
+<li>Redis 7 (with password, 512MB maxmemory, <code>allkeys-lru</code>
+policy)</li>
+<li>Translator API server (depends on healthy postgres &amp; redis)</li>
+<li>Optional admin tools (Adminer, Redis Commander) via
+<code>--profile admin</code></li>
+</ul>
 <p><code>docker-compose.distributed.yml</code> provides a distributed
 worker stack with main server, worker instances, and Ollama
 services.</p>
@@ -823,17 +874,23 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href=
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="ex">./build/monitor-server</span></span></code></pre></div>
 <h3 id="deployment-scripts">Deployment Scripts</h3>
 <p><code>internal/scripts/</code> contains extensive operational
-scripts: - <code>deploy-system.sh</code> - Automated deployment using
-<code>./build/deployment-cli</code> - <code>deploy_ssh_worker.sh</code>
-/ <code>deploy_worker.sh</code> - SSH worker deployment -
-<code>check-health.sh</code> / <code>check_worker.sh</code> - Health
-checks - <code>monitor-production.sh</code> - Full production monitoring
-with disk/CPU/memory/API/DB/Redis checks and alerting -
-<code>start.sh</code> / <code>stop.sh</code> / <code>restart.sh</code> /
-<code>logs.sh</code> / <code>exec.sh</code> - Docker lifecycle
-management - <code>demo_production_system.sh</code> /
+scripts:</p>
+<ul>
+<li><code>deploy-system.sh</code> - Automated deployment using
+<code>./build/deployment-cli</code></li>
+<li><code>deploy_ssh_worker.sh</code> / <code>deploy_worker.sh</code> -
+SSH worker deployment</li>
+<li><code>check-health.sh</code> / <code>check_worker.sh</code> - Health
+checks</li>
+<li><code>monitor-production.sh</code> - Full production monitoring with
+disk/CPU/memory/API/DB/Redis checks and alerting</li>
+<li><code>start.sh</code> / <code>stop.sh</code> /
+<code>restart.sh</code> / <code>logs.sh</code> / <code>exec.sh</code> -
+Docker lifecycle management</li>
+<li><code>demo_production_system.sh</code> /
 <code>test_production_system.sh</code> - Production verification
-suites</p>
+suites</li>
+</ul>
 <hr />
 <h2 id="development-conventions">Development Conventions</h2>
 <h3 id="adding-a-new-llm-provider">Adding a New LLM Provider</h3>
@@ -955,8 +1012,8 @@ submodules:</p>
 ./Models           → digital.vasic.models         (Shared data types)
 ./Security         → digital.vasic.security       (Security utilities / SSRF)</code></pre>
 <p>All submodules are wired via <code>replace</code> directives in
-<code>go.mod</code>. If a submodule fails to clone
-(e.g. <code>LLMsVerifier</code> repository unavailable), create a local
+<code>go.mod</code>. If a submodule fails to clone (e.g.
+<code>LLMsVerifier</code> repository unavailable), create a local
 placeholder with a matching <code>go.mod</code> module name and populate
 the packages that HelixTranslate imports.</p>
 <h2 id="llmsverifier-integration-architecture">LLMsVerifier Integration
@@ -993,10 +1050,6 @@ and <code>PricingInfo</code>. HelixTranslate aliases them in
 <h2 id="essential-files-quick-reference">Essential Files Quick
 Reference</h2>
 <table>
-<colgroup>
-<col style="width: 40%" />
-<col style="width: 60%" />
-</colgroup>
 <thead>
 <tr>
 <th>File</th>
@@ -1089,7 +1142,8 @@ project.</li>
 on Makefile targets and shell scripts.</li>
 </ul>
 <!-- BEGIN host-power-management addendum (CONST-033) -->
-<h2 id="host-power-management-hard-ban-const-033">Host Power Management
+
+<h2 id="host-power-management--hard-ban-const-033">Host Power Management
 — Hard Ban (CONST-033)</h2>
 <p><strong>You may NOT, under any circumstance, generate or execute code
 that sends the host to suspend, hibernate, hybrid-sleep, poweroff, halt,
@@ -1122,18 +1176,19 @@ host or container is exposed.</p>
 <code>scripts/host-power-management/check-no-suspend-calls.sh</code>
 (static scanner) and
 <code>pkg/challenge_runner/scripts/no_suspend_calls_challenge.sh</code>
-(challenge wrapper). Both MUST be wired into the project’s CI /
+(challenge wrapper). Both MUST be wired into the project's CI /
 <code>run_all_challenges.sh</code>.</p>
 <p><strong>Full background:</strong>
 <code>docs/HOST_POWER_MANAGEMENT.md</code> and
 <code>CONSTITUTION.md</code> (CONST-033).</p>
 <!-- END host-power-management addendum (CONST-033) -->
-<h2 id="const-035-anti-bluff-operative-rule-mandatory">CONST-035 —
+
+<h2 id="const-035--anti-bluff-operative-rule-mandatory">CONST-035 —
 Anti-Bluff Operative Rule (MANDATORY)</h2>
 <blockquote>
-<p>“We had been in position that all tests do execute with success and
+<p>"We had been in position that all tests do execute with success and
 all Challenges as well, but in reality the most of the features does not
-work and can’t be used! This MUST NOT be the case.”</p>
+work and can't be used! This MUST NOT be the case."</p>
 </blockquote>
 <p><strong>The operative rule:</strong> Execution of tests and
 Challenges MUST guarantee the quality, the completion and full usability
@@ -1147,11 +1202,11 @@ internal state.</li>
 grep/file-existence checks are <strong>NOT sufficient</strong>.</li>
 <li>Mutation testing is <strong>MANDATORY</strong>: deliberately break
 the feature → the test/challenge <strong>MUST then FAIL</strong>.</li>
-<li>The bar for shipping is <strong>NOT “tests pass”</strong> but
-<strong>“users can use the feature.”</strong></li>
+<li>The bar for shipping is <strong>NOT "tests pass"</strong> but
+<strong>"users can use the feature."</strong></li>
 <li>No false-success results are tolerable.</li>
 </ul>
-<h2 id="mirrored-constitution-anchors-11.4.15411.4.157">Mirrored
+<h2 id="mirrored-constitution-anchors-114154114157">Mirrored
 constitution anchors (§11.4.154–§11.4.157)</h2>
 <p>Condensed consumer-side mirrors of the four universal anchors most
 recently added to the constitution submodule (HEAD
@@ -1170,11 +1225,11 @@ windows; target by stable identity (window id/title, device serial,
 browser context, tmux target) per §11.4.111, never a fixed full-screen
 index; platform genuinely cannot capture below whole-screen ⇒ honest
 §11.4.3 SKIP + tracked migration item. <strong>(B) Fresh-corpus
-rotation</strong> — a new recording run for a scope removes the agent’s
+rotation</strong> — a new recording run for a scope removes the agent's
 OWN prior in-scope stale recordings FIRST (§11.4.107 not-stale +
-§11.4.86 roster-freshness); the agent’s own SAME-scope recordings ONLY,
-NEVER another project’s/operator-authored files (uncertain ⇒ surface,
-don’t delete §11.4.122/§9.2); committed
+§11.4.86 roster-freshness); the agent's own SAME-scope recordings ONLY,
+NEVER another project's/operator-authored files (uncertain ⇒ surface,
+don't delete §11.4.122/§9.2); committed
 <code>docs/qa/&lt;run-id&gt;/</code> evidence (§11.4.83) is the durable
 record, NOT rotated. Classification: universal (§11.4.17). Composes
 §11.4.2/.5/.10/.83/.86/.107/.111/.122/.128/.137/.153/§9.2/.6. Canonical
@@ -1214,7 +1269,7 @@ governed repos; enforcement migrates to the LOCAL §11.4.75 git-hook
 ritual + §11.4.40 pre-tag sweep, never a remote runner. ALL hold:
 <strong>(A)</strong> zero active root-level
 <code>.github/workflows/*.yml|yaml</code> / <code>.gitlab-ci.yml</code>
-/ equivalent; <strong>(B)</strong> “disabled” = a push triggers ZERO
+/ equivalent; <strong>(B)</strong> "disabled" = a push triggers ZERO
 runs — delete OR rename to a non-trigger name (the §11.4.75
 <code>.disabled-local-only</code> pattern); a
 live-<code>on:</code>+<code>if:false</code> workflow is NOT compliant;
@@ -1237,13 +1292,13 @@ never optional/best-effort. ALL hold: <strong>(A)</strong> five-carrier
 lockstep — no governance change is complete until <code>GEMINI.md</code>
 carries it alongside the other three mirrors (added to the §11.4.26
 propagation + cross-reference set); <strong>(B)</strong> no silent drift
-— <code>GEMINI.md</code> lagging the other mirrors’ highest rule is a
+— <code>GEMINI.md</code> lagging the other mirrors' highest rule is a
 §11.4.157 violation (§11.4.65-class); <strong>(C)</strong> equal status
 — <code>GEMINI.md</code> restates the SAME literal <code>11.4.N</code>
 anchors the propagation gates require (§11.4.35), fleet count INCLUDES
-<code>GEMINI.md</code>; <strong>(D)</strong> consumer projects’ own
+<code>GEMINI.md</code>; <strong>(D)</strong> consumer projects' own
 CLAUDE/AGENTS/QWEN/GEMINI bind too (§11.4.35). Honest boundary
-(§11.4.6): claiming <code>GEMINI.md</code> “in sync” while a back-fill
+(§11.4.6): claiming <code>GEMINI.md</code> "in sync" while a back-fill
 is incomplete is itself a §11.4.157 violation. Composes
 §11.4.26/.35/.17/.44/.65/.140/.156. Classification: universal
 (§11.4.17). This parent repo now maintains <code>CLAUDE.md</code> +

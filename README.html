@@ -498,17 +498,32 @@ workers</li>
 fallback</li>
 </ul>
 <h3 id="llm-provider-support">LLM Provider Support</h3>
+<p>The <strong>default translator path is bridge-selected</strong>: it
+sources the strongest verified API model (plus a score-ordered fallback
+chain) automatically via the LLMsVerifier bridge
+(<code>pkg/bridge</code>) — you do not have to pick a provider. With no
+provider API key set, the bridge returns an honest error (there is never
+a silent local fallback, §11.4.69).</p>
 <ul>
-<li><strong>OpenAI</strong>: GPT-3.5, GPT-4, GPT-4 Turbo</li>
+<li><strong>OpenAI</strong>: GPT-3.5, GPT-4, GPT-4 Turbo, GPT-4o</li>
 <li><strong>Anthropic</strong>: Claude-3 Opus, Claude-3 Sonnet, Claude-3
 Haiku</li>
 <li><strong>DeepSeek</strong>: DeepSeek Chat, DeepSeek Coder</li>
 <li><strong>Zhipu</strong>: GLM-4, GLM-3 Turbo</li>
 <li><strong>Qwen</strong>: Qwen Max, Qwen Plus, Qwen Turbo</li>
-<li><strong>Gemini</strong>: Gemini Pro, Gemini Pro Vision</li>
-<li><strong>Ollama</strong>: Local LLM support</li>
-<li><strong>LlamaCpp</strong>: Local model execution</li>
+<li><strong>Gemini</strong>: Gemini Pro, Gemini 1.5/2.x</li>
+<li><strong>+ 20 more</strong> API providers reachable via LLMsVerifier
+verified discovery</li>
 </ul>
+<blockquote>
+<p><strong>Removed (bridge phase-2 R-2..R-4):</strong> the local-runtime
+providers <strong>Ollama</strong> and <strong>LlamaCpp</strong>, and the
+<strong>SSH-local</strong> translation path, are no longer supported.
+Selecting them explicitly (<code>-provider ollama|llamacpp|ssh</code>)
+now returns an honest “no longer supported” error rather than running a
+local model. The kept distributed/API worker coordination path is
+unaffected.</p>
+</blockquote>
 <h3 id="dashboard-features">Dashboard Features</h3>
 <ul>
 <li><strong>Progress Visualization</strong>: Real-time progress bars and
@@ -545,21 +560,31 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="
 <span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Logging</span></span>
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="va">LOG_LEVEL</span><span class="op">=</span>info  <span class="co"># debug, info, warn, error</span></span></code></pre></div>
-<h3 id="ssh-worker-configuration">SSH Worker Configuration</h3>
+<h3 id="distributed-worker-configuration">Distributed Worker
+Configuration</h3>
+<blockquote>
+<p><strong>Note (bridge phase-2 R-4):</strong> the <strong>SSH-local
+llama.cpp worker</strong> path was removed. The distributed/API
+worker-coordination machinery is kept, but a worker no longer runs a
+local llama.cpp model — workers translate via verified API providers
+(the <code>llamacpp</code> tag below is illustrative of the legacy shape
+only and is no longer a supported runtime). Configure API keys per
+provider.</p>
+</blockquote>
 <div class="sourceCode" id="cb6"><pre
 class="sourceCode json"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;distributed&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;workers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;thinker-worker&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;Local Llama.cpp Worker&quot;</span><span class="fu">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;api-worker&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;API Worker&quot;</span><span class="fu">,</span></span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;host&quot;</span><span class="fu">:</span> <span class="st">&quot;localhost&quot;</span><span class="fu">,</span></span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;port&quot;</span><span class="fu">:</span> <span class="dv">8444</span><span class="fu">,</span></span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;user&quot;</span><span class="fu">:</span> <span class="st">&quot;milosvasic&quot;</span><span class="fu">,</span></span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;password&quot;</span><span class="fu">:</span> <span class="st">&quot;password&quot;</span><span class="fu">,</span></span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;max_capacity&quot;</span><span class="fu">:</span> <span class="dv">10</span><span class="fu">,</span></span>
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;tags&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;gpu&quot;</span><span class="ot">,</span> <span class="st">&quot;llamacpp&quot;</span><span class="ot">]</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;tags&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;api&quot;</span><span class="ot">]</span></span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
 <span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;ssh_timeout&quot;</span><span class="fu">:</span> <span class="dv">30</span><span class="fu">,</span></span>

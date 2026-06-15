@@ -18,8 +18,8 @@ This is a Go-based ebook translation system that translates books between multip
 
 Key capabilities:
 - Multi-format ebook parsing and generation
-- Integration with multiple LLM providers (OpenAI, Anthropic, DeepSeek, Zhipu, Qwen, Gemini, Ollama, LlamaCpp)
-- Distributed translation via SSH workers
+- Integration with multiple API LLM providers (OpenAI, Anthropic, DeepSeek, Zhipu, Qwen, Gemini, and 20+ more via the LLMsVerifier bridge). **As of bridge phase-2 (R-2..R-4) the local-runtime providers (Ollama, llama.cpp) and the SSH-local translation path were removed** — the default translator path sources the strongest verified API model via the LLMsVerifier bridge (`pkg/bridge`); selecting a removed local provider explicitly now returns an honest error, never a silent local fallback (§11.4.69).
+- Distributed translation (kept) via the distributed/API worker coordinator
 - Real-time WebSocket monitoring dashboard
 - REST API and gRPC interfaces
 - Translation caching, quality verification, and multi-pass processing
@@ -376,12 +376,13 @@ type LLMClient interface {
 ```
 
 **Supported providers**:
-- API-based: OpenAI, Anthropic, Zhipu, DeepSeek, Qwen, Gemini
-- Self-hosted: Ollama (local HTTP), LlamaCpp (executes local binary)
-- Distributed: SSH workers for remote processing
+- API-based: OpenAI, Anthropic, Zhipu, DeepSeek, Qwen, Gemini (+ 20+ more reachable via the LLMsVerifier bridge / verified discovery)
 - Test: Mock provider
+- **Removed (bridge phase-2 R-2..R-4):** Ollama (local HTTP) and LlamaCpp (local binary) self-hosted runtimes, and the SSH-local remote-worker path, are no longer supported. Explicit selection (`-provider ollama|llamacpp|ssh`) returns an honest error — there is NEVER a silent local fallback (§11.4.69). The KEPT distributed/API worker coordination path remains.
 
-Provider selection uses a factory pattern (`NewLLMTranslatorWithConfig()`) that validates provider/model and creates the appropriate client. Valid models are registered in `ValidModels` map.
+**Default path = the LLMsVerifier bridge.** The default translator provisioning across the binaries (unified-translator, cmd/cli, cmd/server / pkg/api, grpc-server, markdown-translator, preparation-translator) sources the strongest verified API model + fallback chain via `pkg/bridge` (`bridge.Open` → `BestTranslator`/`BestClient`); the mock seam is the only deliberate bypass. With no provider API key the bridge hard-errors honestly. The pre-build gate **`CM-NO-LOCAL-RUNTIME`** (§11.4.69) mechanically asserts no local-runtime client is constructed on the default path, the default arm references the bridge, and `pkg/bridge` retains its no-fail-open prohibition (paired §1.1 mutation: `scripts/testing/meta_test_no_local_runtime.sh`).
+
+Provider selection uses a factory pattern (`NewLLMTranslatorWithConfig()`) that validates provider/model and creates the appropriate client (used by the mock seam + verified factory). Valid models are registered in `ValidModels` map.
 
 **Import cycle avoidance**: `pkg/translator/llm/` uses a type alias (`type TranslationConfig = translator.TranslationConfig`) to avoid direct import cycles with `pkg/translator/`.
 

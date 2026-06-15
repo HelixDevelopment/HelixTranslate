@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>CONTINUATION — HelixTranslate</title>
+  <title>CONTINUATION</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -173,104 +173,102 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">CONTINUATION — HelixTranslate</h1>
+<h1 class="title">CONTINUATION</h1>
 </header>
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 79 <strong>Last modified:</strong>
-2026-06-15T22:30:00Z</p>
+<p><strong>Revision:</strong> 80 <strong>Last modified:</strong>
+2026-06-16T00:00:00Z</p>
 <h2
-id="resume-here-2026-06-15-2230-submodule-reconciliation-complete-bridge-phase-2-p-1-done-p-1.5-in-flight">▶️
-RESUME HERE (2026-06-15 ~22:30) — submodule reconciliation COMPLETE;
-bridge phase-2 P-1 DONE, P-1.5 IN FLIGHT</h2>
+id="resume-here-2026-06-16-bridge-phase-2-r-2..r-5-done-phase-2-near-complete-full-11.4.40-retest-pending">▶️
+RESUME HERE (2026-06-16) — bridge phase-2 R-2..R-5 DONE; phase-2
+NEAR-COMPLETE (full §11.4.40 retest pending)</h2>
 <h3
 id="short-resumption-paste-this-first-sentence-into-a-fresh-session">§11.4.127
 SHORT resumption (paste this first sentence into a fresh session)</h3>
 <p>Read <code>docs/CONTINUATION.md</code> (this file) +
 <code>.remember/remember.md</code> FIRST, then
-<code>git fetch --all --prune</code>; we are mid <strong>bridge phase-2
-— the no-local-runtime mandate</strong> (operator CRITICAL): P-1
-(BestClient adapter) is DONE, <strong>P-1.5</strong> (provider-diverse
-verified-model API + injectable factory seam) is IN FLIGHT, then R-1→R-5
-redirect/remove per
-<code>docs/design/BRIDGE_PHASE2_EXECUTION_PLAN.md</code> — continue the
-endless autonomous loop (§11.4.126), no force-push (§11.4.113), require
-API keys (no local llama.cpp/Ollama/SSH-distributed).</p>
+<code>git fetch --all --prune</code>; <strong>bridge phase-2 is
+near-complete</strong> — local llama.cpp + Ollama + SSH-local runtimes
+are REMOVED (default path sources the LLMsVerifier bridge; explicit
+local selection → honest error), the distributed/API path is KEPT, the
+<code>CM-NO-LOCAL-RUNTIME</code> pre-build gate + paired mutation are
+LANDED, and the §11.4.153 feature ledger is reconciled — the only
+remaining phase-2 step is the <strong>full §11.4.40 retest on a clean
+baseline</strong> (the conductor runs it next); continue the endless
+autonomous loop (§11.4.126), no force-push (§11.4.113), require API keys
+(no local runtime).</p>
 <h3
 id="full-resumption-live-state-anchors-verified-this-session-against-git">§11.4.127
 FULL resumption (live-state anchors — verified this session against
 git)</h3>
 <ul>
-<li><strong>Parent HEAD <code>4a4e29b</code></strong> on
-<code>main</code>, local == <code>origin/main</code> (0 ahead / 0
-behind). Working tree carries UNCOMMITTED doc/build/submodule-pointer
-churn — conductor commits the doc-set ONLY (no <code>git add -A</code>,
-§11.4.30).</li>
-<li><strong>All owned submodules reconciled (governance markers stripped
-to canonical-per-constitution bodies), CLEAN, synced, gitlinks
-bumped</strong> — verified this session:
-<ul>
-<li>security <code>24b9bb7</code> · doc_processor <code>5316c4a</code> ·
-llm_orchestrator <code>ab2eec6</code> · llm_provider
-<code>55057ee</code> · vision_engine <code>e19b52b</code> · constitution
-<code>9f3147e</code> (FF-integrated remote anchors §11.4.154–157)</li>
-<li>challenges <code>349b0f1</code> · docs_chain <code>0c72cdd</code> ·
-llms_verifier <code>89719e2b</code> · containers <code>2a9923a</code> —
-verified clean+synced, NO work needed (challenges shows only untracked
-<code>Containers/</code>+<code>Panoptic/</code> scratch dirs, recorded
-gitlink matches HEAD).</li>
-<li>Parent gitlink-bump commits this session: <code>49d94f2</code>,
-<code>c62128f</code>, <code>6a620f5</code>.</li>
-</ul></li>
-<li><strong>Key parent commits this session:</strong> verifier
-affirmative-response hard-gate fix <code>97a8afd</code> (RED→GREEN,
--race clean); bridge Invoke routing-seam <code>a5860b2</code>;
-<strong>bridge <code>BestClient</code> adapter <code>e5307ce</code> (P-1
-— returns <code>llm.LLMClient</code>, <code>GetProviderName</code> from
-<code>BestModel.ProviderID</code>)</strong>; bridge phase-2 execution
-plan <code>afc3c35</code>; §11.4.153 ledger <code>5b266ad</code> +
-bridge real-use video <code>4a4e29b</code> (video-confirmed 21→22, model
-<strong>novita/Sao10K/L3-8B-Stheno-v3.2</strong> score
-<strong>0.919</strong>, live EN→ES “Buenos días, amigo.”, ffprobe
-8.0s/80fr, <code>.mp4</code> at
-<code>/Volumes/T7/Downloads/Recordings/helixtranslate-bridge-bestmodel-translate-20260615.mp4</code>);
-constitution §11.4.154–157 propagation into CLAUDE/AGENTS/QWEN/GEMINI
-<code>6e0e4d9</code> + parent CONSTITUTION.md <code>5d05ab7</code>.</li>
+<li><strong>Parent HEAD <code>3ce413e</code></strong> on
+<code>main</code>, local == <code>origin/main</code> (verified
+<code>git fetch --all</code> this session; pushed FF to both upstreams
+github+HelixDevelopment). Untracked <code>build/*</code> + root binaries
+are EXTERNAL build-artifact churn (a gemini-cli/data-agent session
+rebuilds them) — NOT committed (§11.4.30).</li>
+<li><strong>⚠️ CONTESTED CHECKOUT (§11.4.84/§11.4.119):</strong> an
+EXTERNAL gemini-cli/data-agent process intermittently runs
+<code>git checkout</code>s + has left a stale
+<code>.git/index.lock</code> in this repo. BEFORE EVERY commit: (a)
+confirm <code>git symbolic-ref -q HEAD == refs/heads/main</code>, (b)
+<code>ls .git/index.lock</code> absent (remove a STALE lock only if no
+live git process), (c) <code>git fetch --all</code> + confirm local ==
+origin/main. Every R-5 commit survived via this protocol.</li>
+<li><strong>R-5 commits this session (all FF-pushed):</strong>
+<code>102c773</code> CM-NO-LOCAL-RUNTIME gate + paired meta-test ·
+<code>abc0912</code> Part-B NITs (bridge/format test asserts +
+bridgeOpener seam + detector XHTML anchor) · <code>7036a30</code>
+config.worker.json default_provider ollama→openai · <code>3ce413e</code>
+§11.4.153 ledger 39 rows Obsolete + verifier-doc framing fix.</li>
+<li><strong>Prior phase-2 commits (P-1..R-4):</strong>
+<code>8325f9d</code> R-4 remove worker configs + SSH/llama/ollama
+scripts · <code>86175d0</code>/earlier R-4 remove SSH binaries +
+pkg/sshworker + pkg/modelsbridge + llamacpp_provider + markdown bridge
+wiring; P-1 BestClient <code>e5307ce</code>.</li>
 </ul>
 <h3
-id="bridge-phase-2-the-critical-no-local-runtime-mandate-current-state-remaining-work">Bridge
-phase-2 — the CRITICAL no-local-runtime mandate (current state +
-remaining work)</h3>
+id="bridge-phase-2-the-critical-no-local-runtime-mandate-state-near-complete">Bridge
+phase-2 — the CRITICAL no-local-runtime mandate (state:
+NEAR-COMPLETE)</h3>
 <p>Operator-CRITICAL: NO local runtime — only LLMsVerifier strongest
-models, bridged to components AND this Claude Code session. Plan doc:
+models via <code>pkg/bridge</code>, bridged to components AND this
+Claude Code session. Plan:
 <strong><code>docs/design/BRIDGE_PHASE2_EXECUTION_PLAN.md</code></strong>
 (+ design <code>docs/design/LLMSVERIFIER_BRIDGE.md</code>, removal map
 <code>docs/design/LOCAL_RUNTIME_REMOVAL.md</code>).</p>
 <p><strong>LOCKED operator decisions:</strong> D1 remove local runtimes
 entirely; D2 forbid ALL local runtimes (llama.cpp <strong>+</strong>
-Ollama); R1 <strong>Obsolete</strong> the SSH/distributed worker path
-(§11.4.90); R2 <strong>require API keys everywhere</strong> (no
-offline/local fallback — tests FAIL, not skip, when keys absent); D4/D5
-<strong>top-1 + fallback, in-process</strong>; <strong>ensemble
-semantics = “Provider-diverse verified”</strong> (strongest verified
-model per distinct provider, preserving the multi-LLM cross-check).</p>
-<p><strong>Status:</strong> - <strong>P-1 (BestClient adapter) —
-DONE</strong> (<code>e5307ce</code>): <code>pkg/bridge</code> exposes
-<code>BestClient</code> returning <code>llm.LLMClient</code>. -
-<strong>R-1 (redirect) — STOPPED HONESTLY</strong>, blocked on
-prerequisites now being built in <strong>P-1.5</strong>
-(provider-diverse verified-model API + injectable factory seam) —
-<strong>IN FLIGHT</strong>.</p>
-<p><strong>REMAINING (phased):</strong> P-1.5 → <strong>R-1</strong>
-wire main + redirect the 15 call-sites to
-<code>bridge.BestClient</code>/<code>BestTranslator</code> →
-<strong>R-2</strong> remove Ollama → <strong>R-3</strong> remove
-llama.cpp (+ proto regen, <code>pkg/hardware</code> §11.4.124
-investigate-before-remove) → <strong>R-4</strong> Obsolete
-SSH/distributed (§11.4.90) → <strong>R-5</strong> add
-<code>CM-NO-LOCAL-RUNTIME</code> gate + paired mutation + full §11.4.40
-retest.</p>
+Ollama); R1 → <strong>R-4 decision (2026-06-16): keep the
+distributed/API path, remove SSH-local</strong> (the SSH-local binaries
++ worker body Obsolete §11.4.90; version_manager/ssh_pool/distributed
+coordination KEPT); R2 <strong>require API keys everywhere</strong> (no
+offline/local fallback — honest error/SKIP, never a silent local
+fallback); D4/D5 <strong>top-1 + fallback, in-process</strong>;
+<strong>ensemble = “Provider-diverse verified”</strong>.</p>
+<p><strong>Status — DONE:</strong> - <strong>P-1 / R-1</strong>
+BestClient/BestTranslator + all default-path components redirected to
+the bridge. - <strong>R-2</strong> Ollama removed · <strong>R-3</strong>
+llama.cpp removed · <strong>R-4</strong> SSH-local binaries +
+pkg/sshworker + pkg/modelsbridge + local worker configs/scripts removed
+(operator-confirmed). - <strong>R-5 (this session):</strong>
+<code>CM-NO-LOCAL-RUNTIME</code> pre-build gate (3 arms,
+default-path-only) + paired §1.1
+<code>meta_test_no_local_runtime.sh</code> (baseline PASS / Mut1 Arm1
+FAIL / Mut2 Arm3 FAIL / Neg PASS); Part-B NITs; config.worker.json
+fixed; §11.4.153 ledger 39 rows Obsolete (docs_chain features re-synced
+HTML/PDF/DOCX); AGENTS.md + README.md + this CONTINUATION updated.</p>
+<p><strong>REMAINING:</strong> the <strong>full §11.4.40 retest on a
+clean baseline</strong> (conductor runs next) → then phase-2 closed.
+Out-of-scope observation:
+<code>internal/working/config.distributed.{json,test,thinker}.json</code>
+still carry legacy <code>llamacpp</code>/<code>gguf</code> tokens (KEPT
+distributed path, excluded from CM-NO-LOCAL-RUNTIME’s documented
+exceptions) — flag for a future R-cycle if the distributed worker body
+is API-migrated.</p>
 <h3 id="standing-constraints-binding-every-session">Standing constraints
 (binding every session)</h3>
 <ul>
@@ -278,16 +276,18 @@ retest.</p>
 merge-onto-latest-main, FF-only); <strong>never
 <code>git add -A</code></strong> (§11.4.30); <strong>never touch the
 <code>helix_qa</code> submodule</strong> — another session owns it
-(§11.4.119 single-resource-owner).</li>
+(§11.4.119 single-resource-owner); <strong>never touch owned
+submodules</strong> in this R-5 scope.</li>
 <li><strong>No host power-management</strong> (§12 / CONST-033).
 <strong>Require API keys, NO local llama.cpp/Ollama/SSH-distributed
 runtimes.</strong> Operator-blocked → <code>AskUserQuestion</code>
-(§11.4.66). Endless autonomous loop is the DEFAULT (§11.4.126) with 3–4
-parallel subagent streams (§11.4.103).</li>
+(§11.4.66). Endless autonomous loop is the DEFAULT (§11.4.126).</li>
 <li><strong>Working API keys:</strong> <code>DEEPSEEK_API_KEY</code> +
 <code>GROQ_API_KEY</code> present (real translations work);
 <code>GEMINI</code>/<code>ZHIPU</code> invalid/quota-blocked (honest
 errors). NEVER print key values (§11.4.10).</li>
+<li><strong>Contested checkout:</strong> apply the pre-commit vigilance
+protocol above before every commit (§11.4.84/§11.4.119).</li>
 </ul>
 <hr />
 <h2

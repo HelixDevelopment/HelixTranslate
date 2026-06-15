@@ -143,14 +143,26 @@ Remote SSH Workers:
 - **Error Handling**: Comprehensive error detection and fallback
 
 ### LLM Provider Support
-- **OpenAI**: GPT-3.5, GPT-4, GPT-4 Turbo
+
+The **default translator path is bridge-selected**: it sources the strongest
+verified API model (plus a score-ordered fallback chain) automatically via the
+LLMsVerifier bridge (`pkg/bridge`) — you do not have to pick a provider. With no
+provider API key set, the bridge returns an honest error (there is never a silent
+local fallback, §11.4.69).
+
+- **OpenAI**: GPT-3.5, GPT-4, GPT-4 Turbo, GPT-4o
 - **Anthropic**: Claude-3 Opus, Claude-3 Sonnet, Claude-3 Haiku
 - **DeepSeek**: DeepSeek Chat, DeepSeek Coder
 - **Zhipu**: GLM-4, GLM-3 Turbo
 - **Qwen**: Qwen Max, Qwen Plus, Qwen Turbo
-- **Gemini**: Gemini Pro, Gemini Pro Vision
-- **Ollama**: Local LLM support
-- **LlamaCpp**: Local model execution
+- **Gemini**: Gemini Pro, Gemini 1.5/2.x
+- **+ 20 more** API providers reachable via LLMsVerifier verified discovery
+
+> **Removed (bridge phase-2 R-2..R-4):** the local-runtime providers **Ollama**
+> and **LlamaCpp**, and the **SSH-local** translation path, are no longer
+> supported. Selecting them explicitly (`-provider ollama|llamacpp|ssh`) now
+> returns an honest "no longer supported" error rather than running a local
+> model. The kept distributed/API worker coordination path is unaffected.
 
 ### Dashboard Features
 - **Progress Visualization**: Real-time progress bars and charts
@@ -185,21 +197,28 @@ GEMINI_API_KEY=your_gemini_key
 LOG_LEVEL=info  # debug, info, warn, error
 ```
 
-### SSH Worker Configuration
+### Distributed Worker Configuration
+
+> **Note (bridge phase-2 R-4):** the **SSH-local llama.cpp worker** path was
+> removed. The distributed/API worker-coordination machinery is kept, but a
+> worker no longer runs a local llama.cpp model — workers translate via verified
+> API providers (the `llamacpp` tag below is illustrative of the legacy shape
+> only and is no longer a supported runtime). Configure API keys per provider.
+
 ```json
 {
   "distributed": {
     "enabled": true,
     "workers": {
-      "thinker-worker": {
-        "name": "Local Llama.cpp Worker",
+      "api-worker": {
+        "name": "API Worker",
         "host": "localhost",
         "port": 8444,
         "user": "milosvasic",
         "password": "password",
         "max_capacity": 10,
         "enabled": true,
-        "tags": ["gpu", "llamacpp"]
+        "tags": ["api"]
       }
     },
     "ssh_timeout": 30,
