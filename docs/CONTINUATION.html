@@ -175,8 +175,69 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 77 <strong>Last modified:</strong>
-2026-06-15T18:50:00Z</p>
+<p><strong>Revision:</strong> 78 <strong>Last modified:</strong>
+2026-06-15T19:05:00Z</p>
+<h2
+id="rate-limit-block-owed-crashed-stream-work-2026-06-15-1905-subagents-reset-710pm-europemoscow-resume-here">⛔
+RATE-LIMIT BLOCK + OWED CRASHED-STREAM WORK (2026-06-15 ~19:05;
+subagents reset 7:10pm Europe/Moscow) — RESUME HERE</h2>
+<p>The subagent runtime hit a session/usage limit (subagents die
+instantly, ~178 tokens). NO new subagents can run until the
+<strong>7:10pm Europe/Moscow reset</strong>. Two phase-1 bridge streams
+CRASHED mid-work (§11.4.147 crash≠done — work OWED, partial state
+PRESERVED uncommitted in the worktree, do NOT discard, do NOT
+commit-incomplete §11.4.84/§11.4.121):</p>
+<p><strong>LLMsVerifier-bridge mandate (operator CRITICAL 2026-06-15):
+no local llama.cpp — only LLMsVerifier strongest models + bridge to
+components AND this Claude Code session. Design:
+<code>docs/design/LLMSVERIFIER_BRIDGE.md</code>; removal map:
+<code>docs/design/LOCAL_RUNTIME_REMOVAL.md</code>.</strong> LOCKED
+operator decisions: D1 remove llama.cpp entirely; D2 <strong>forbid ALL
+local runtimes</strong> (llama.cpp + Ollama + SSH/distributed); D3 agent
+access = <strong>CLI + MCP</strong>; D4/D5 <strong>top-1 + fallback,
+in-process</strong> pipeline (env <code>*_API_KEY</code> keys, no
+service); R1 <strong>Obsolete</strong> cmd/translate-ssh +
+cmd/ssh-translation + llamacpp/ollama worker configs (§11.4.90); R2
+<strong>require keys everywhere</strong> (no offline path — tests FAIL
+not skip when keys absent).</p>
+<p>OWED CRASHED STREAMS (respawn after reset, §11.4.147 + §11.4.84
+quiescence-check first): - <strong>bridge-core</strong> (was a9659f5) —
+INCOMPLETE, does NOT build:
+<code>cmd/model-bridge/main.go:52: undefined: runMCP</code> (crashed
+before writing the MCP stdio server). Preserved partial:
+<code>pkg/bridge/</code> (BestTranslator/Invoke/BestModel/ListVerified
+facade), <code>cmd/model-bridge/main.go</code> (CLI),
+<code>internal/verifier/provider_resolver.go</code>+<code>_test.go</code>
+(numeric-ProviderID gap-fix). RESPAWN to: finish <code>runMCP</code>
+(MCP stdio server) + <code>.mcp.json</code> wiring + full tests + real
+best-model/invoke evidence +
+<code>docs/guides/LLMSVERIFIER_BRIDGE_USAGE.md</code>; then §11.4.142
+review + commit. - <strong>web-UI</strong> (was aaf872a) — BUILDS clean
+(pkg/api + cmd/server). Preserved:
+<code>pkg/api/dashboard.go</code>+<code>dashboard_test.go</code>,
+<code>pkg/api/handler.go</code> (M) — wires the unrouted Web Dashboard
+translation UI (the real §11.4.153 web gap). OWED: independent §11.4.142
+review + real-server real-translation evidence run, then commit. (Note:
+a later phase swaps its provider to
+<code>bridge.BestTranslator</code>.)</p>
+<p>NEXT (post-reset, phased per LOCAL_RUNTIME_REMOVAL.md R-0→R-5): (1)
+respawn bridge-core to finish; (2) review+commit web-UI; (3) phase-2:
+redirect all 9 components to <code>bridge.BestTranslator</code>, remove
+Ollama, remove llama.cpp, Obsolete SSH/distributed (R1), add
+<code>CM-NO-LOCAL-RUNTIME</code> gate + paired mutation,
+require-keys-everywhere (R2); (4) HelixQA web-runner browser+video
+backend extension (needs the helix_qa session) → then the real
+web-dashboard video. Web-dashboard video remains PENDING until both the
+UI wiring lands AND HelixQA gains a web/video backend.</p>
+<p>DONE + PUSHED this session (all remotes, FF-only): constitution
+§11.4.153 (<code>74e7fbe</code>, 10 remotes); parent
+<code>58178a5</code>→<code>a5e8866</code>→<code>86bf81e</code>→<code>d53e085</code>→<code>fb74c2d</code>→<code>87cd2be</code>→<code>e73e0b7</code>→<code>fb265e7</code>;
+submodules llm_provider <code>724e284</code>, containers
+<code>2a9923a</code>, llms_verifier <code>89719e2b</code>. §11.4.153
+mandate + 470/472 ledger (21 video-confirmed) + DOCX &amp; PDF output
+writers + multipass wiring + cli title/atomic-write fixes +
+prep-translator/server/REST bug fixes + README §11.4.57 + all 9
+submodules GREEN.</p>
 <h2
 id="ledger-re-sync-2026-06-15-docx-output--multipass-video-cli-atomic-write">✅
 §11.4.153 LEDGER RE-SYNC (2026-06-15, +DOCX output +

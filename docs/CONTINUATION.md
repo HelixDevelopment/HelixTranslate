@@ -1,7 +1,21 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 77
-**Last modified:** 2026-06-15T18:50:00Z
+**Revision:** 78
+**Last modified:** 2026-06-15T19:05:00Z
+
+## ⛔ RATE-LIMIT BLOCK + OWED CRASHED-STREAM WORK (2026-06-15 ~19:05; subagents reset 7:10pm Europe/Moscow) — RESUME HERE
+The subagent runtime hit a session/usage limit (subagents die instantly, ~178 tokens). NO new subagents can run until the **7:10pm Europe/Moscow reset**. Two phase-1 bridge streams CRASHED mid-work (§11.4.147 crash≠done — work OWED, partial state PRESERVED uncommitted in the worktree, do NOT discard, do NOT commit-incomplete §11.4.84/§11.4.121):
+
+**LLMsVerifier-bridge mandate (operator CRITICAL 2026-06-15): no local llama.cpp — only LLMsVerifier strongest models + bridge to components AND this Claude Code session. Design: `docs/design/LLMSVERIFIER_BRIDGE.md`; removal map: `docs/design/LOCAL_RUNTIME_REMOVAL.md`.**
+LOCKED operator decisions: D1 remove llama.cpp entirely; D2 **forbid ALL local runtimes** (llama.cpp + Ollama + SSH/distributed); D3 agent access = **CLI + MCP**; D4/D5 **top-1 + fallback, in-process** pipeline (env `*_API_KEY` keys, no service); R1 **Obsolete** cmd/translate-ssh + cmd/ssh-translation + llamacpp/ollama worker configs (§11.4.90); R2 **require keys everywhere** (no offline path — tests FAIL not skip when keys absent).
+
+OWED CRASHED STREAMS (respawn after reset, §11.4.147 + §11.4.84 quiescence-check first):
+- **bridge-core** (was a9659f5) — INCOMPLETE, does NOT build: `cmd/model-bridge/main.go:52: undefined: runMCP` (crashed before writing the MCP stdio server). Preserved partial: `pkg/bridge/` (BestTranslator/Invoke/BestModel/ListVerified facade), `cmd/model-bridge/main.go` (CLI), `internal/verifier/provider_resolver.go`+`_test.go` (numeric-ProviderID gap-fix). RESPAWN to: finish `runMCP` (MCP stdio server) + `.mcp.json` wiring + full tests + real best-model/invoke evidence + `docs/guides/LLMSVERIFIER_BRIDGE_USAGE.md`; then §11.4.142 review + commit.
+- **web-UI** (was aaf872a) — BUILDS clean (pkg/api + cmd/server). Preserved: `pkg/api/dashboard.go`+`dashboard_test.go`, `pkg/api/handler.go` (M) — wires the unrouted Web Dashboard translation UI (the real §11.4.153 web gap). OWED: independent §11.4.142 review + real-server real-translation evidence run, then commit. (Note: a later phase swaps its provider to `bridge.BestTranslator`.)
+
+NEXT (post-reset, phased per LOCAL_RUNTIME_REMOVAL.md R-0→R-5): (1) respawn bridge-core to finish; (2) review+commit web-UI; (3) phase-2: redirect all 9 components to `bridge.BestTranslator`, remove Ollama, remove llama.cpp, Obsolete SSH/distributed (R1), add `CM-NO-LOCAL-RUNTIME` gate + paired mutation, require-keys-everywhere (R2); (4) HelixQA web-runner browser+video backend extension (needs the helix_qa session) → then the real web-dashboard video. Web-dashboard video remains PENDING until both the UI wiring lands AND HelixQA gains a web/video backend.
+
+DONE + PUSHED this session (all remotes, FF-only): constitution §11.4.153 (`74e7fbe`, 10 remotes); parent `58178a5`→`a5e8866`→`86bf81e`→`d53e085`→`fb74c2d`→`87cd2be`→`e73e0b7`→`fb265e7`; submodules llm_provider `724e284`, containers `2a9923a`, llms_verifier `89719e2b`. §11.4.153 mandate + 470/472 ledger (21 video-confirmed) + DOCX & PDF output writers + multipass wiring + cli title/atomic-write fixes + prep-translator/server/REST bug fixes + README §11.4.57 + all 9 submodules GREEN.
 
 ## ✅ §11.4.153 LEDGER RE-SYNC (2026-06-15, +DOCX output + `-multipass` video + cli atomic-write)
 Three capabilities became real+evidenced this session and landed+pushed; the feature ledger
