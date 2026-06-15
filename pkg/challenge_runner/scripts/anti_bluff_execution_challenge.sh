@@ -60,6 +60,21 @@ echo ">>> Step 4: Mutation test — breaking code must fail tests..."
 
 MUTATION_TARGET="${PROJECT_ROOT}/internal/verifier/client.go"
 MUTATION_BACKUP="${MUTATION_TARGET}.backup"
+REGISTRY_TARGET="${PROJECT_ROOT}/pkg/models/verifier_registry.go"
+REGISTRY_BACKUP="${REGISTRY_TARGET}.backup"
+
+# Restore BOTH mutation targets even if interrupted (timeout/SIGINT/SIGTERM)
+# during a long `go test` step — otherwise mutated source + .backup leak into
+# the working tree (§11.4.84 mutation residue). Trap armed before any mutation.
+restore_mutation_targets() {
+    if [ -f "${MUTATION_BACKUP}" ]; then
+        cp "${MUTATION_BACKUP}" "${MUTATION_TARGET}" && rm -f "${MUTATION_BACKUP}"
+    fi
+    if [ -f "${REGISTRY_BACKUP}" ]; then
+        cp "${REGISTRY_BACKUP}" "${REGISTRY_TARGET}" && rm -f "${REGISTRY_BACKUP}"
+    fi
+}
+trap restore_mutation_targets EXIT INT TERM
 
 # Backup original
 cp "${MUTATION_TARGET}" "${MUTATION_BACKUP}"

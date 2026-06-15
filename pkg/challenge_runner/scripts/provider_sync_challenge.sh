@@ -29,13 +29,23 @@ fi
 # Step 3: Mutation test — break Discover and confirm tests fail
 echo ">>> Mutation test: breaking Discover..."
 SERVICE_GO="${PROJECT_ROOT}/internal/verifier/discovery/service.go"
+# Restore the source even if interrupted during the long `go test` step,
+# otherwise mutated source + .bak leak into the working tree (§11.4.84).
+restore_service_go() {
+    if [ -f "${SERVICE_GO}.bak" ]; then
+        mv "${SERVICE_GO}.bak" "${SERVICE_GO}"
+    fi
+}
+trap restore_service_go EXIT INT TERM
+
 sed -i.bak 's/s.lastSync = time.Now()/\/\/ s.lastSync = time.Now()/' "${SERVICE_GO}"
 MUTATION_FAILED=0
 if go test -run "TestLastSync" ./internal/verifier/discovery/ >/dev/null 2>&1; then
     echo "FAIL: Mutation test did not fail — discovery sync test is bluffing"
     MUTATION_FAILED=1
 fi
-mv "${SERVICE_GO}.bak" "${SERVICE_GO}"
+restore_service_go
+trap - EXIT INT TERM
 
 if [ "${MUTATION_FAILED}" -eq 1 ]; then
     exit 1

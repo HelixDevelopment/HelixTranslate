@@ -56,6 +56,15 @@ fi
 # 6. Mutation test — break env loading and confirm tests fail
 echo ">>> Mutation test: breaking env-based key loading..."
 UNIFIED_GO="${PROJECT_ROOT}/cmd/unified-translator/main.go"
+# Restore the source even if interrupted during the long `go test` step,
+# otherwise mutated source + .bak leak into the working tree (§11.4.84).
+restore_unified_go() {
+    if [ -f "${UNIFIED_GO}.bak" ]; then
+        mv "${UNIFIED_GO}.bak" "${UNIFIED_GO}"
+    fi
+}
+trap restore_unified_go EXIT INT TERM
+
 # Mutate resolveProviderAPIKey to always return empty string
 sed -i.bak '/^func resolveProviderAPIKey/,/^}/ { s/return "flag-key"/return ""/; s/return os.Getenv(envVar)/return ""/; s/return config.APIKey/return ""/; }' "${UNIFIED_GO}"
 MUTATION_FAILED=0
@@ -63,7 +72,8 @@ if go test -run "TestResolveProviderAPIKey" ./cmd/unified-translator/... >/dev/n
     echo "FAIL: Mutation test did not fail — API key resolver test is bluffing"
     MUTATION_FAILED=1
 fi
-mv "${UNIFIED_GO}.bak" "${UNIFIED_GO}"
+restore_unified_go
+trap - EXIT INT TERM
 
 if [ "${MUTATION_FAILED}" -eq 1 ]; then
     exit 1

@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -313,6 +314,15 @@ func (r *ModelRegistry) FindBestModel(maxRAM uint64, preferredLangs []string, ha
 	if len(candidates) == 0 {
 		return nil, fmt.Errorf("no models found within RAM constraint of %d GB", maxRAM/(1024*1024*1024))
 	}
+
+	// Sort candidates by ID so scoring + tie-breaking are deterministic.
+	// Without this, candidates come from random map iteration and a score tie
+	// at the top (e.g. several equally-good translation models) resolves to
+	// whichever model was iterated first — making identical (RAM, langs, GPU)
+	// inputs return DIFFERENT "best" models across runs (§11.4.50).
+	sort.Slice(candidates, func(i, j int) bool {
+		return candidates[i].ID < candidates[j].ID
+	})
 
 	// Score each model
 	type scoredModel struct {

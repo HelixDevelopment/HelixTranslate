@@ -129,19 +129,13 @@ func TestSSHDeployConfig_Validate(t *testing.T) {
 				assert.Equal(t, tt.errType, ve.Field)
 			} else {
 				require.NoError(t, err)
-				// Verify defaults are set
-				if tt.config.Port == 0 {
-					assert.Equal(t, 22, tt.config.Port)
-				}
-				if tt.config.Timeout == 0 {
-					assert.Equal(t, 30*time.Second, tt.config.Timeout)
-				}
-				if tt.config.ConnectRetries == 0 {
-					assert.Equal(t, 3, tt.config.ConnectRetries)
-				}
-				if tt.config.CommandTimeout == 0 {
-					assert.Equal(t, 10*time.Minute, tt.config.CommandTimeout)
-				}
+				// Validate is pure (no receiver mutation, for concurrency safety);
+				// defaults are applied via withDefaults() on a per-call copy.
+				defaulted := tt.config.withDefaults()
+				assert.Equal(t, 22, defaulted.Port)
+				assert.Equal(t, 30*time.Second, defaulted.Timeout)
+				assert.Equal(t, 3, defaulted.ConnectRetries)
+				assert.Equal(t, 10*time.Minute, defaulted.CommandTimeout)
 			}
 		})
 	}

@@ -68,24 +68,17 @@ type SSHDeployConfig struct {
 	CommandTimeout time.Duration `json:"command_timeout"`
 }
 
+// Validate checks that the configuration has all required fields. It is a pure
+// validator and MUST NOT mutate the receiver: a single *SSHDeployConfig is
+// routinely shared across deployers and goroutines, so writing defaults here
+// (the previous behaviour) created a data race between concurrent callers.
+// Defaults are applied to a per-call working copy via withDefaults / Connect.
 func (c *SSHDeployConfig) Validate() error {
 	if c.Host == "" {
 		return &ValidationError{Field: "host", Message: "host is required"}
 	}
-	if c.Port == 0 {
-		c.Port = 22
-	}
 	if c.Username == "" {
 		return &ValidationError{Field: "username", Message: "username is required"}
-	}
-	if c.Timeout == 0 {
-		c.Timeout = 30 * time.Second
-	}
-	if c.ConnectRetries == 0 {
-		c.ConnectRetries = 3
-	}
-	if c.CommandTimeout == 0 {
-		c.CommandTimeout = 10 * time.Minute
 	}
 
 	if c.Password == "" && c.KeyPath == "" && len(c.KeyData) == 0 {
@@ -93,6 +86,26 @@ func (c *SSHDeployConfig) Validate() error {
 	}
 
 	return nil
+}
+
+// withDefaults returns a copy of the config with zero-valued fields filled in
+// with their defaults. The receiver is never mutated, so it is safe to call
+// concurrently against a shared *SSHDeployConfig.
+func (c *SSHDeployConfig) withDefaults() SSHDeployConfig {
+	cfg := *c
+	if cfg.Port == 0 {
+		cfg.Port = 22
+	}
+	if cfg.Timeout == 0 {
+		cfg.Timeout = 30 * time.Second
+	}
+	if cfg.ConnectRetries == 0 {
+		cfg.ConnectRetries = 3
+	}
+	if cfg.CommandTimeout == 0 {
+		cfg.CommandTimeout = 10 * time.Minute
+	}
+	return cfg
 }
 
 // ValidationError represents a configuration validation error
@@ -138,27 +151,30 @@ func (d *SSHDeployer) Connect(ctx context.Context) error {
 		return &ConnectionError{Type: "config_validation", Err: err}
 	}
 
+	// Work against a defaulted COPY so we never mutate the (possibly shared) config.
+	cfg := d.config.withDefaults()
+
 	// Prepare SSH client configuration
 	sshConfig := &ssh.ClientConfig{
-		User:            d.config.Username,
+		User:            cfg.Username,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // Only for testing
-		Timeout:         d.config.Timeout,
+		Timeout:         cfg.Timeout,
 	}
 
 	// Setup authentication
-	if d.config.Password != "" {
-		sshConfig.Auth = append(sshConfig.Auth, ssh.Password(d.config.Password))
+	if cfg.Password != "" {
+		sshConfig.Auth = append(sshConfig.Auth, ssh.Password(cfg.Password))
 	}
 
-	if d.config.KeyPath != "" || len(d.config.KeyData) > 0 {
+	if cfg.KeyPath != "" || len(cfg.KeyData) > 0 {
 		var keyData []byte
 		var err error
 
-		if len(d.config.KeyData) > 0 {
-			keyData = d.config.KeyData
-		} else if d.config.KeyPath != "" {
+		if len(cfg.KeyData) > 0 {
+			keyData = cfg.KeyData
+		} else if cfg.KeyPath != "" {
 			// Only read file if KeyPath is provided and no KeyData
-			keyData, err = os.ReadFile(d.config.KeyPath)
+			keyData, err = os.ReadFile(cfg.KeyPath)
 			if err != nil {
 				return &ConnectionError{Type: "key_read", Err: err}
 			}
@@ -173,10 +189,10 @@ func (d *SSHDeployer) Connect(ctx context.Context) error {
 	}
 
 	// Attempt connection with retries
-	addr := fmt.Sprintf("%s:%d", d.config.Host, d.config.Port)
+	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	var lastErr error
 
-	for attempt := 1; attempt <= d.config.ConnectRetries; attempt++ {
+	for attempt := 1; attempt <= cfg.ConnectRetries; attempt++ {
 		select {
 		case <-ctx.Done():
 			return &ConnectionError{Type: "timeout", Err: ctx.Err()}
@@ -192,7 +208,7 @@ func (d *SSHDeployer) Connect(ctx context.Context) error {
 		}
 
 		lastErr = err
-		if attempt < d.config.ConnectRetries {
+		if attempt < cfg.ConnectRetries {
 			time.Sleep(time.Duration(attempt) * time.Second)
 		}
 	}

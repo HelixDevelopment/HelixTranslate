@@ -1098,9 +1098,14 @@ func TestSSHDeployConfig_Validate_Defaults(t *testing.T) {
 	err := config.Validate()
 	require.NoError(t, err)
 
-	// Verify defaults are set
-	assert.Equal(t, 22, config.Port)
-	assert.Equal(t, 30*time.Second, config.Timeout)
-	assert.Equal(t, 3, config.ConnectRetries)
-	assert.Equal(t, 10*time.Minute, config.CommandTimeout)
+	// Validate is pure (no receiver mutation, for concurrency safety): the original
+	// config is unchanged, defaults are produced by withDefaults() on a copy.
+	assert.Equal(t, 0, config.Port, "Validate must not mutate the shared config")
+	assert.Equal(t, time.Duration(0), config.Timeout, "Validate must not mutate the shared config")
+
+	defaulted := config.withDefaults()
+	assert.Equal(t, 22, defaulted.Port)
+	assert.Equal(t, 30*time.Second, defaulted.Timeout)
+	assert.Equal(t, 3, defaulted.ConnectRetries)
+	assert.Equal(t, 10*time.Minute, defaulted.CommandTimeout)
 }

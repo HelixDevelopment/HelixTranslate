@@ -464,6 +464,20 @@ func (do *DeploymentOrchestrator) UpdateService(ctx context.Context, serviceName
 	return nil
 }
 
+// imageWithTag returns the given image reference with its tag set to newTag,
+// replacing any existing tag. A tag is the ':' that appears AFTER the final '/'
+// in the reference, so a registry-port reference such as "localhost:5000/img" is
+// handled correctly (the ':5000' is a port, not a tag). Without this, naively
+// appending ":latest" to an already-tagged image (e.g. "repo/img:v1.2.3") yields
+// an invalid double-tag reference "repo/img:v1.2.3:latest".
+func imageWithTag(image, newTag string) string {
+	lastSlash := strings.LastIndex(image, "/")
+	if colon := strings.LastIndex(image, ":"); colon > lastSlash {
+		image = image[:colon]
+	}
+	return image + ":" + newTag
+}
+
 // UpdateAllServices updates all deployed services to their latest images
 func (do *DeploymentOrchestrator) UpdateAllServices(ctx context.Context) error {
 	do.logger.Println("Updating all services...")
@@ -476,7 +490,7 @@ func (do *DeploymentOrchestrator) UpdateAllServices(ctx context.Context) error {
 	do.mu.RUnlock()
 
 	for _, instance := range instances {
-		if err := do.UpdateService(ctx, instance.ID, instance.Config.DockerImage+":latest"); err != nil {
+		if err := do.UpdateService(ctx, instance.ID, imageWithTag(instance.Config.DockerImage, "latest")); err != nil {
 			return fmt.Errorf("failed to update service %s: %w", instance.ID, err)
 		}
 	}

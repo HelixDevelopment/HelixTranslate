@@ -27,13 +27,23 @@ fi
 # Step 3: Mutation test — break the unreachable error and confirm test fails
 echo ">>> Mutation test: breaking unreachable error..."
 CLIENT_GO="${PROJECT_ROOT}/internal/verifier/client.go"
+# Restore the source even if interrupted during the long `go test` step,
+# otherwise mutated source + .bak leak into the working tree (§11.4.84).
+restore_client_go() {
+    if [ -f "${CLIENT_GO}.bak" ]; then
+        mv "${CLIENT_GO}.bak" "${CLIENT_GO}"
+    fi
+}
+trap restore_client_go EXIT INT TERM
+
 sed -i.bak 's/ErrLLMsVerifierUnreachable{URL: c.baseURL}/fmt.Errorf("some other error")/' "${CLIENT_GO}"
 MUTATION_FAILED=0
 if go test -run "TestClientPingUnreachable" ./internal/verifier/ >/dev/null 2>&1; then
     echo "FAIL: Mutation test did not fail — unreachable error test is bluffing"
     MUTATION_FAILED=1
 fi
-mv "${CLIENT_GO}.bak" "${CLIENT_GO}"
+restore_client_go
+trap - EXIT INT TERM
 
 if [ "${MUTATION_FAILED}" -eq 1 ]; then
     exit 1

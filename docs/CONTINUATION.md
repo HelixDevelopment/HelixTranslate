@@ -1,9 +1,9 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 53
-**Last modified:** 2026-06-15T05:30:00Z
+**Revision:** 54
+**Last modified:** 2026-06-15T06:15:00Z
 
-<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 41 real bugs (20 submodule + 21 main) -->
+<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 45 real bugs (20 submodule + 25 main) -->
 <!-- OPERATOR AWAY until morning 2026-06-15: autonomous; priority = most-stable build; release tag DEFERRED (zero-risk, needs full §11.4.40). Full ./... sweep GREEN at c56363c. -->
 
 ### Session 2026-06-14v — cross-submodule bug-hunt campaign (§11.4.28 equal-codebase)
@@ -44,7 +44,10 @@ parallel session (64b7d08) so it was integrated, NOT double-fixed.** Host API ra
 | **MAIN** pkg/progress | items-only mode (totalChapters=0) never computed PercentComplete — dashboard bar stuck at 0% to completion; items-driven percent branch | e4c96f6 |
 | **MAIN** pkg/language | detectCyrillicLanguage classified `'й'` as Bulgarian → plain Russian (Война и мир, Российская Федерация) detected as Bulgarian → WRONG target language → wrong translation; `'й'` removed + §11.4.120 reconcile of 3 tests | (wave 13) |
 | **MAIN** pkg/api | `GET /languages` advertised 29 languages the translate endpoints reject with HTTP 400 (cross-endpoint contract violation); now sourced from language.GetSupportedLanguages() | (wave 13) |
-| **MAIN** pkg/sshworker | ProgressTracker.GetProgress leaked the live Details map into the snapshot → concurrent map read+write race (event subscribers); deep-copy under RLock | (wave 13) |
+| **MAIN** pkg/sshworker | ProgressTracker.GetProgress leaked the live Details map into the snapshot → concurrent map read+write race (event subscribers); deep-copy under RLock | 3065029 |
+| **MAIN** pkg/models | FindBestModel tie-break iterated a map (random order) → different "best" model selected run-to-run on identical inputs (§11.4.50, translation-critical); sort candidates by ID | (wave 14) |
+| **MAIN** pkg/deployment | UpdateAllServices double-tagged pinned images (`repo:v1.2.3:latest` invalid) corrupting every pinned service + SSHDeployConfig.Validate mutated a shared config (data race); tag-aware helper + pure-validator/withDefaults-copy + §11.4.120 reconcile | (wave 14) |
+| **MAIN** pkg/challenge_runner | 6 mutation challenge scripts had NO trap → an interrupted `go test` left REAL project source mutated with a `.bak` (§11.4.84 residue corruption in the anti-bluff harness itself); restore-trap armed before each sed | (wave 14) |
 
 **Flagged not-hermetically-testable (honest §11.4.6, NOT fabricated):** pkg/sshworker UploadFile/DownloadFile/UploadData build unquoted shell commands (`mkdir -p %s`, `cat %s`, `> %s`) — a remote path with spaces/metacharacters breaks/injects; no executor seam to test hermetically (dials real *ssh.Client). Worth a command-runner-interface refactor → P-list. Also ExecuteCommand hardcodes ExitCode:1 (loses *ssh.ExitError fidelity) — same live-SSH-only constraint.
 
