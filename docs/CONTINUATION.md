@@ -1,7 +1,17 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 57
-**Last modified:** 2026-06-15T10:30:00Z
+**Revision:** 58
+**Last modified:** 2026-06-15T12:20:00Z
+
+## ✅ FULL VALIDATION RUN (2026-06-15, operator-requested "run all tests, challenges, helix qa")
+**360 packages GREEN, ZERO failures project-wide** (real captured evidence, no bluff):
+- **Main module:** 59 ok / 0 FAIL (`go test ./... -p 1`, clean baseline).
+- **9 Go submodules:** 176 ok / 0 FAIL (challenges 18, containers 38, doc_processor 10, docs_chain 8, llm_orchestrator 9, llm_provider 52, llms_verifier 15, security 18, vision_engine 8; constitution = non-Go).
+- **HelixQA tool (digital.vasic.helixqa):** 125 ok / 0 FAIL (own core suite; build clean).
+- **Challenge suite:** all PASS or honest §11.4.3 SKIP — cache_invalidation, degraded_mode, model_verification_gate, helixqa_wiring, provider_sync, anti_bluff_execution, api_key_provisioning, no_suspend_calls PASS; llmsverifier_connectivity PASS (runtime SKIP, no API key); host_no_auto_suspend N/A on macOS (Linux `/etc/systemd/` host check).
+- **3 real challenge issues found by running them + FIXED (mutation-proven, committed):** (1) `no_suspend_calls` §11.4.1 FAIL-bluff on doc `.html`/`.pdf` exports + `Constitution.md` case-miss + `CHALLENGE.md` test-inputs + `qa-results/` logs → scanner excludes added, real `.sh`/`.go` calls still caught (`a24f806`); (2) `anti_bluff_execution` scanned wrong dir (0 vs 11 real challenges) → fixed to its own dir (`d1667dc`); (3) `./.env` was mode 644 → `chmod 600` per §11.4.10 (untracked/gitignored, perms-only).
+- **Full autonomous HelixQA QA session DEFERRED (§11.4.3 topology-SKIP):** needs the live HelixTranslate stack as a target (servers + DB/Redis via the §11.4.76 Containers submodule), not up; helix_qa is another session's active area (§11.4.119). Not launched unattended (zero-risk).
+
 
 <!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 48 real bugs (21 submodule + 27 main) -->
 

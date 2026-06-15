@@ -175,8 +175,46 @@
 <h1
 id="continuation--helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 57 <strong>Last modified:</strong>
-2026-06-15T10:30:00Z</p>
+<p><strong>Revision:</strong> 58 <strong>Last modified:</strong>
+2026-06-15T12:20:00Z</p>
+<h2
+id="white_check_mark-full-validation-run-2026-06-15-operator-requested-run-all-tests-challenges-helix-qa">✅
+FULL VALIDATION RUN (2026-06-15, operator-requested "run all tests,
+challenges, helix qa")</h2>
+<p><strong>360 packages GREEN, ZERO failures project-wide</strong> (real
+captured evidence, no bluff):</p>
+<ul>
+<li><strong>Main module:</strong> 59 ok / 0 FAIL
+(<code>go test ./... -p 1</code>, clean baseline).</li>
+<li><strong>9 Go submodules:</strong> 176 ok / 0 FAIL (challenges 18,
+containers 38, doc_processor 10, docs_chain 8, llm_orchestrator 9,
+llm_provider 52, llms_verifier 15, security 18, vision_engine 8;
+constitution = non-Go).</li>
+<li><strong>HelixQA tool (digital.vasic.helixqa):</strong> 125 ok / 0
+FAIL (own core suite; build clean).</li>
+<li><strong>Challenge suite:</strong> all PASS or honest §11.4.3 SKIP —
+cache_invalidation, degraded_mode, model_verification_gate,
+helixqa_wiring, provider_sync, anti_bluff_execution,
+api_key_provisioning, no_suspend_calls PASS; llmsverifier_connectivity
+PASS (runtime SKIP, no API key); host_no_auto_suspend N/A on macOS
+(Linux <code>/etc/systemd/</code> host check).</li>
+<li><strong>3 real challenge issues found by running them + FIXED
+(mutation-proven, committed):</strong> (1) <code>no_suspend_calls</code>
+§11.4.1 FAIL-bluff on doc <code>.html</code>/<code>.pdf</code> exports +
+<code>Constitution.md</code> case-miss + <code>CHALLENGE.md</code>
+test-inputs + <code>qa-results/</code> logs → scanner excludes added,
+real <code>.sh</code>/<code>.go</code> calls still caught
+(<code>a24f806</code>); (2) <code>anti_bluff_execution</code> scanned
+wrong dir (0 vs 11 real challenges) → fixed to its own dir
+(<code>d1667dc</code>); (3) <code>./.env</code> was mode 644 →
+<code>chmod 600</code> per §11.4.10 (untracked/gitignored,
+perms-only).</li>
+<li><strong>Full autonomous HelixQA QA session DEFERRED (§11.4.3
+topology-SKIP):</strong> needs the live HelixTranslate stack as a target
+(servers + DB/Redis via the §11.4.76 Containers submodule), not up;
+helix_qa is another session's active area (§11.4.119). Not launched
+unattended (zero-risk).</li>
+</ul>
 <!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 48 real bugs (21 submodule + 27 main) -->
 
 <h2
