@@ -18,15 +18,15 @@
     "cors_origins": ["*"]
   },
   "translation": {
-    "default_provider": "ollama",
-    "default_model": "llama3.1:8b-instruct-q4_K_M",
+    "default_provider": "openai",
+    "default_model": "gpt-4o",
     "cache_enabled": true,
     "cache_ttl": 3600,
     "max_concurrent": 10,
     "providers": {
-      "ollama": {
-        "base_url": "http://localhost:11434",
-        "model": "llama3.1:8b-instruct-q4_K_M",
+      "openai": {
+        "base_url": "https://api.openai.com/v1",
+        "model": "gpt-4o",
         "options": {
           "temperature": 0.1,
           "top_p": 0.9,
