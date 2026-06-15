@@ -196,7 +196,7 @@ func (x *TranslationRequest) GetClientId() string {
 // Provider Configuration
 type ProviderConfig struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	Type           string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"` // openai, anthropic, zhipu, deepseek, qwen, gemini, llamacpp, ssh
+	Type           string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"` // openai, anthropic, zhipu, deepseek, qwen, gemini, ssh (wire field kept; llamacpp no longer a selectable provider)
 	Model          string                 `protobuf:"bytes,2,opt,name=model,proto3" json:"model,omitempty"`
 	Temperature    float64                `protobuf:"fixed64,3,opt,name=temperature,proto3" json:"temperature,omitempty"`
 	MaxTokens      int32                  `protobuf:"varint,4,opt,name=max_tokens,json=maxTokens,proto3" json:"max_tokens,omitempty"`

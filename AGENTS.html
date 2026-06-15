@@ -878,19 +878,19 @@ scripts:</p>
 <ul>
 <li><code>deploy-system.sh</code> - Automated deployment using
 <code>./build/deployment-cli</code></li>
-<li><code>deploy_ssh_worker.sh</code> / <code>deploy_worker.sh</code> -
-SSH worker deployment</li>
-<li><code>check-health.sh</code> / <code>check_worker.sh</code> - Health
-checks</li>
-<li><code>monitor-production.sh</code> - Full production monitoring with
-disk/CPU/memory/API/DB/Redis checks and alerting</li>
+<li><code>check-health.sh</code> - Health checks</li>
+<li><code>monitor-production.sh</code> /
+<code>monitor-deployment.sh</code> - Full production/deployment
+monitoring with disk/CPU/memory/API/DB/Redis checks and alerting</li>
 <li><code>start.sh</code> / <code>stop.sh</code> /
 <code>restart.sh</code> / <code>logs.sh</code> / <code>exec.sh</code> -
 Docker lifecycle management</li>
-<li><code>demo_production_system.sh</code> /
-<code>test_production_system.sh</code> - Production verification
-suites</li>
 </ul>
+<p>(SSH/llamacpp/ollama worker deployment scripts —
+<code>deploy_ssh_worker.sh</code>, <code>deploy_worker.sh</code>,
+<code>check_worker.sh</code>, and the local-runtime worker configs —
+were removed with the local-runtime cleanup, operator-confirmed; see
+commit <code>8325f9d</code>.)</p>
 <hr />
 <h2 id="development-conventions">Development Conventions</h2>
 <h3 id="adding-a-new-llm-provider">Adding a New LLM Provider</h3>

@@ -482,11 +482,14 @@ make build
 
 `internal/scripts/` contains extensive operational scripts:
 - `deploy-system.sh` - Automated deployment using `./build/deployment-cli`
-- `deploy_ssh_worker.sh` / `deploy_worker.sh` - SSH worker deployment
-- `check-health.sh` / `check_worker.sh` - Health checks
-- `monitor-production.sh` - Full production monitoring with disk/CPU/memory/API/DB/Redis checks and alerting
+- `check-health.sh` - Health checks
+- `monitor-production.sh` / `monitor-deployment.sh` - Full production/deployment monitoring with disk/CPU/memory/API/DB/Redis checks and alerting
 - `start.sh` / `stop.sh` / `restart.sh` / `logs.sh` / `exec.sh` - Docker lifecycle management
-- `demo_production_system.sh` / `test_production_system.sh` - Production verification suites
+
+(SSH/llamacpp/ollama worker deployment scripts — `deploy_ssh_worker.sh`,
+`deploy_worker.sh`, `check_worker.sh`, and the local-runtime worker configs —
+were removed with the local-runtime cleanup, operator-confirmed; see commit
+`8325f9d`.)
 
 ---
 
