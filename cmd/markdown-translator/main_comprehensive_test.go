@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"digital.vasic.translator/internal/verifier/selection"
 	"digital.vasic.translator/pkg/bridge"
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/events"
@@ -730,27 +729,17 @@ func TestCreateTranslatorFunction(t *testing.T) {
 		return false
 	}()
 
+	// Keys present ⇒ bridge.Open runs a LIVE verification pass (real credentials,
+	// network). Skip BEFORE any bridge call so the offline suite never performs it
+	// (§11.4.3/§11.4.98). The no-key honest-error contract is asserted below.
+	if hasAnyKey {
+		t.Skip("SKIP-OK (§11.4.3/§11.4.98): provider key(s) present — bridge.Open would perform a LIVE verification pass; the no-key honest-error contract is only assertable with no keys present")
+	}
+
 	ctx := context.Background()
-	task := selection.TaskRequirements{TargetLang: "es"}
-
+	// No keys ⇒ honest hard error, NEVER a local-runtime fallback. This is the R2
+	// behaviour change vs the deleted "llamacpp no API key required" path.
 	b, err := bridge.Open(ctx, bridge.Options{})
-	if !hasAnyKey {
-		// No keys ⇒ honest hard error, NEVER a local-runtime fallback. This is
-		// the R2 behaviour change vs the deleted "llamacpp no API key" path.
-		assert.Error(t, err, "bridge.Open with no provider API keys MUST error, not fall back to a local runtime")
-		assert.Nil(t, b)
-		return
-	}
-
-	// Keys present: the positive path needs the real verification pipeline, which
-	// performs live provider calls — gate it with SKIP-with-reason (§11.4.3) so
-	// the offline suite never depends on network/credentials.
-	if err != nil {
-		t.Skipf("SKIP-OK (§11.4.3): API keys present but bridge.Open could not provision a verified model (live pipeline unavailable): %v", err)
-	}
-	tr, err := createTranslator(ctx, b, task)
-	if err != nil {
-		t.Skipf("SKIP-OK (§11.4.3): bridge open but no verified translator selectable in this environment: %v", err)
-	}
-	assert.NotNil(t, tr, "createTranslator MUST return the bridge's strongest verified translator when keys are present")
+	assert.Error(t, err, "bridge.Open with no provider API keys MUST error, not fall back to a local runtime")
+	assert.Nil(t, b)
 }
