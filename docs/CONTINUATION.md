@@ -1,14 +1,22 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 62
-**Last modified:** 2026-06-15T13:10:00Z
+**Revision:** 63
+**Last modified:** 2026-06-15T13:26:00Z
 
-## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 9 parallel subagents over 3 waves, all verified+pushed)
-After the green validation run, dispatched 3 successive 3-wide worktree-isolated
-subagent waves on the highest-remaining-yield autonomous surfaces. **8 genuine,
-conductor-verified, independently mutation-proven fixes (campaign 63→71) + 1
-teeth-proven regression guard; honest clean non-findings on the rest (§11.4.118).
-HEAD `5baf804` green+pushed both upstreams.**
+## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 12 parallel subagents over 4 waves, all verified+pushed)
+After the green validation run, dispatched 4 successive 3-wide worktree-isolated
+subagent waves on the highest-remaining-yield autonomous surfaces. **11 genuine,
+conductor-verified, independently mutation-proven fixes (campaign 63→74) + 1
+teeth-proven regression guard; honest clean non-findings + documented honest gaps on
+the rest (§11.4.118/§11.4.6). HEAD `ba1ee96` green+pushed both upstreams.**
+
+WAVE 4 (`pkg/api`+`cmd/api-server`+`cmd/server`, `pkg/translator` core, primary CLIs) — driven by §11.4.118 discovery-pressure on the batch PASS-bluff class:
+- **translator ctx-cancel silent success** (`ba1ee96`): `TranslateBook` never checked `ctx.Err()` → a cancelled (timeout/Ctrl-C) run reported success with a partial/no-op book. Fix = up-front + per-chapter ctx guards wrapping context.Canceled. RED; mutation strip-both-guards→"got nil (silent partial-result)"→restore→GREEN.
+- **api Server.Stop no-op** (`85d9849`): Start() made a LOCAL http.Server, Stop() held no ref and `return nil` → claimed graceful shutdown while listener stayed open + Start hung forever. Fix = mutex-guarded httpServer + Shutdown(ctx). RED lifecycle test; mutation revert→"Start did not return after Stop"→restore→GREEN.
+- **preparation-translator lang-flags ignored** (`4b9c1e4`): `-source`/`-target` hardcoded to ru/sr codes → wrong translation direction + wrong language tag for any other pair. Fix = resolveLanguageCodes via language.ParseLanguage. RED; logic-mutation→"English=ru, want en"→restore→GREEN.
+- **HONEST GAPS documented, NOT fake-fixed (§11.4.6 — for operator):** cmd/api-server `getMetrics` + pkg/api `getStatus`/`statsHandler` return hardcoded 0 / "completed" because NO session/translation state store exists at that layer — wiring real values requires building a metrics/session-tracking FEATURE (operator-gated), not a bug fix. WebSocket `CheckOrigin: return true` is the known dev default (no demonstrable bypass). pkg/api `batchHandler` 202-queued has no backing queue (incomplete async feature, not a false-completion).
+
+WAVE 3 (`pkg/security`, `pkg/events`+`pkg/websocket`, `pkg/batch`+`pkg/coordination`):
 
 WAVE 3 (`pkg/security`, `pkg/events`+`pkg/websocket`, `pkg/batch`+`pkg/coordination`):
 - **batch processFile PASS-bluff** (`5baf804`, HIGHEST severity): processFile parsed→wrote WITHOUT invoking the translator yet returned Success:true — every file/directory batch incl. the `/translate/directory` API shipped an UNTRANSLATED copy as 'translation completed' (§11.4/CONST-035). Fix = translate book in place (recursive title+Section Title+Content+Subsections, ctx-honoring) when Translator!=nil. RED; mutation neutralize→"translator never invoked: untranslated copy reported as success"→restore→GREEN.
@@ -43,7 +51,7 @@ Clean non-findings (audited, no RED reproducible): SQLite concurrent-writer cont
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **71 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 3 waves = 8 fixes + 1 regression guard `a22d0de`/`9ff5049`/`0366941`/`a8cf0cd`/`39ae131`/`46db0c6`/`5baf804`, see POST-VALIDATION BUG-HUNT WAVES block at top; latest = batch processFile PASS-bluff, HIGHEST severity). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
+- **74 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 4 waves = 11 fixes + 1 regression guard `a22d0de`/`9ff5049`/`0366941`/`a8cf0cd`/`39ae131`/`46db0c6`/`5baf804`/`4b9c1e4`/`85d9849`/`ba1ee96`, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe PASS-bluffs). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
