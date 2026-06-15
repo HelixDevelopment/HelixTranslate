@@ -400,7 +400,11 @@ func (d *Detector) getCPUCores() (int, error) {
 		if err != nil {
 			return 0, err
 		}
-		return parseSysctlInt(string(output))
+		// Sum per-socket NumberOfCores lines: a multi-socket host emits one
+		// integer per processor. parseSysctlInt (bare single integer) errored on
+		// such output, making Detect() fall back to runtime.NumCPU() (logical,
+		// not physical) — the multi-socket undercount already fixed for Linux.
+		return parseWindowsCoreCount(string(output))
 
 	case "freebsd", "openbsd", "netbsd", "dragonfly":
 		// Use sysctl for BSD systems
@@ -414,6 +418,34 @@ func (d *Detector) getCPUCores() (int, error) {
 	default:
 		return 0, fmt.Errorf("not implemented for %s", runtime.GOOS)
 	}
+}
+
+// parseWindowsCoreCount parses PowerShell
+// `(Get-CimInstance Win32_Processor).NumberOfCores` output and returns the TOTAL
+// physical core count across all sockets. Multi-socket hosts emit ONE integer
+// line per physical processor; the count is their sum (CPUCores is documented as
+// total physical cores). At least one parseable integer line is required —
+// output with none is an error so Detect() can fall back deterministically
+// instead of silently reporting 0.
+func parseWindowsCoreCount(output string) (int, error) {
+	total := 0
+	found := false
+	for _, line := range strings.Split(output, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		n, err := strconv.Atoi(line)
+		if err != nil {
+			return 0, err
+		}
+		total += n
+		found = true
+	}
+	if !found {
+		return 0, fmt.Errorf("no core count lines in output")
+	}
+	return total, nil
 }
 
 // parseSysctlInt parses a bare integer from raw command output (a single

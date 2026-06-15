@@ -200,6 +200,22 @@ func (h *CodebaseHasher) isDirectoryInRelevantList(path string) bool {
 	return false
 }
 
+// recordPathLine writes the canonical "file:<path>\n" identity line for a file
+// into the hash. The path is separator-NORMALIZED to forward slashes so the hash
+// is consistent across operating systems: filepath.Walk yields '\'-separated
+// paths on Windows and '/'-separated paths on unix, and recording the raw path
+// would make the SAME source tree hash differently per-OS — corrupting
+// distributed-worker version-sync (identical code reported as drifted).
+//
+// We replace '\' UNCONDITIONALLY rather than using filepath.ToSlash, because
+// ToSlash only rewrites the separator on Windows (os.PathSeparator == '\\') and
+// is a no-op on unix. The cross-OS canonical form must be identical regardless
+// of which OS computes the hash, so the backslash-to-slash mapping must not be
+// host-OS-conditional.
+func (h *CodebaseHasher) recordPathLine(hasher io.Writer, path string) {
+	fmt.Fprintf(hasher, "file:%s\n", strings.ReplaceAll(path, "\\", "/"))
+}
+
 // addFileToHash adds a single file to the hash calculation
 func (h *CodebaseHasher) addFileToHash(hasher io.Writer, path string, info os.FileInfo) error {
 	file, err := os.Open(path)
@@ -209,7 +225,7 @@ func (h *CodebaseHasher) addFileToHash(hasher io.Writer, path string, info os.Fi
 	defer file.Close()
 
 	// Write file path and size to hash (removed modtime for consistency)
-	fmt.Fprintf(hasher, "file:%s\n", path)
+	h.recordPathLine(hasher, path)
 	fmt.Fprintf(hasher, "size:%d\n", info.Size())
 
 	// Hash file content
