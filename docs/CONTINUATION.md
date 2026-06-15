@@ -1,7 +1,13 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 71
-**Last modified:** 2026-06-15T15:12:00Z
+**Revision:** 72
+**Last modified:** 2026-06-15T15:22:00Z
+
+## 🔬 SUBMODULE WAVE 13 (security, vision_engine) — campaign 97→99, submodule yield 6/6
+- **security** `3782c27` (gitlink `fb7cc11`, HIGH): securestorage read-path RLock while helpers mutate the in-memory AES key + cache → concurrent readers corrupt the secret key. Fix = RLock→Lock + lock the unlocked IsSecure. RED+mutation-proven; 18 pkgs -race green; FF-pushed all Security remotes. (SSRF/e2ee/AES-GCM audited hardened.)
+- **vision_engine** `e40e6f9` (gitlink `799121e`): Gemini response returned only Parts[0].Text → multi-part analyses silently truncated. Fix = concatenate all parts + empty guard. RED+mutation-proven; 8 pkgs -race green; FF-pushed all VisionEngine remotes.
+Owned submodules hunted 6/6 ALL with genuine fixes: doc_processor, llm_orchestrator, docs_chain, containers, security, vision_engine. Remaining: challenges, llms_verifier (in flight wave 14).
+
 
 ## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 32 parallel subagents over 12 waves, all verified+pushed)
 After the green validation run, dispatched 12 worktree-isolated subagent waves (3-wide,
@@ -129,7 +135,7 @@ Clean non-findings (audited, no RED reproducible): SQLite concurrent-writer cont
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **97 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + owned submodules (full table below; latest 12 waves = 34 fixes + 1 regression guard, newest submodules `0c72cdd` docs_chain + `a5269f3` containers, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak + deployment Docker-health + server TLS-key leak + api-server backend-error PASS-bluffs + deployment hardcoded-JWT-secret). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
+- **99 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + owned submodules (full table below; latest 13 waves = 36 fixes + 1 regression guard, newest submodules `3782c27` security + `e40e6f9` vision_engine; submodule yield 6/6, see POST-VALIDATION BUG-HUNT WAVES + SUBMODULE WAVE blocks at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak + deployment Docker-health + server TLS-key leak + api-server backend-error PASS-bluffs + deployment hardcoded-JWT-secret). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
