@@ -19,16 +19,19 @@ import (
 // averaged Overall score, which other high-scoring steps could carry above the
 // 0.5 threshold.
 //
-// Polarity switch (§11.4.115): the test reproduces the defect on the CURRENT
-// (pre-fix) code by default (RED_MODE unset / "1"). Set RED_MODE=0 after the fix
-// lands to flip it into the standing GREEN regression guard asserting the defect
-// is ABSENT.
+// Polarity switch (§11.4.115 / §11.4.135): now that the fix has landed, this is a
+// STANDING regression guard that is GREEN BY DEFAULT — running the normal suite
+// (`go test ./internal/verifier/...`, no env) asserts the defect is ABSENT. The
+// defect REPRODUCTION on a pre-fix artifact is preserved but OPT-IN via RED_MODE=1,
+// so it never pollutes the default suite / CI red.
 //
-//   - RED_MODE=1 (default): asserts the buggy behaviour is PRESENT (mv.Passed==true
-//     while affirmative_response failed). On the FIXED code this assertion fails —
-//     which is the proof the fix took effect.
-//   - RED_MODE=0: GREEN guard — asserts a model with affirmative_response failed is
-//     NOT Passed (cannot be verified). This MUST hold after the fix.
+//   - default (RED_MODE unset / != "1"): GREEN guard — asserts a model with
+//     affirmative_response failed is NOT Passed (cannot be verified). This MUST hold
+//     on the fixed code and is the load-bearing regression assertion.
+//   - RED_MODE=1: defect reproduction — asserts the buggy behaviour is PRESENT
+//     (mv.Passed==true while affirmative_response failed). This FAILs on the fixed
+//     code (proving the defect is gone) and PASSes only on a pre-fix artifact —
+//     preserving its §11.4.115 evidentiary value.
 func TestAffirmativeResponseIsHardGate(t *testing.T) {
 	// A provider whose /models, auth (200), and /chat/completions all SUCCEED at the
 	// transport layer, but /chat/completions returns an EMPTY assistant message —
@@ -85,24 +88,26 @@ func TestAffirmativeResponseIsHardGate(t *testing.T) {
 			"but it passed; steps=%+v", mv.Steps)
 	}
 
-	redMode := os.Getenv("RED_MODE") != "0" // default RED (reproduce the defect)
+	redMode := os.Getenv("RED_MODE") == "1" // default GREEN guard; opt-in RED reproduction
 
 	if redMode {
-		// RED: prove the bug exists on the current artifact — a model that did NOT
-		// affirmatively respond is nonetheless reported as Passed (and would be
-		// persisted as "verified" by run.go).
+		// RED (opt-in): prove the bug exists on a PRE-FIX artifact — a model that did
+		// NOT affirmatively respond is nonetheless reported as Passed (and would be
+		// persisted as "verified" by run.go). On the FIXED code this FAILs, which is
+		// the proof the fix took effect; it PASSes only against a pre-fix artifact.
 		if !mv.Passed {
 			t.Fatalf("RED expectation not met: model with affirmative_response=FAILED was already "+
-				"rejected (mv.Passed=false, overall=%.4f) — the defect appears absent. "+
-				"If the fix has landed, re-run with RED_MODE=0 to use the GREEN guard.", mv.Overall)
+				"rejected (mv.Passed=false, overall=%.4f) — the defect is ABSENT (fix is in place). "+
+				"RED_MODE=1 only reproduces against a pre-fix artifact.", mv.Overall)
 		}
 		t.Logf("RED reproduced: model with affirmative_response=FAILED was marked Passed "+
 			"(mv.Passed=true, overall=%.4f) — verification gate bluff present.", mv.Overall)
 		return
 	}
 
-	// GREEN guard: after the fix, affirmative_response=FAILED MUST disqualify the
-	// model regardless of how high the other components score.
+	// GREEN guard (default): affirmative_response=FAILED MUST disqualify the model
+	// regardless of how high the other components score. This is the standing
+	// regression assertion that runs in the normal suite.
 	if mv.Passed {
 		t.Fatalf("GREEN guard FAILED: model with affirmative_response=FAILED was marked Passed "+
 			"(overall=%.4f). A zero/failed affirmative response MUST be a hard disqualifier.", mv.Overall)
