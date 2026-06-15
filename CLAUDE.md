@@ -272,3 +272,27 @@ Both must PASS.
 - Mutation testing is **MANDATORY**: deliberately break the feature → the test/challenge **MUST then FAIL**.
 - The bar for shipping is **NOT "tests pass"** but **"users can use the feature."**
 - No false-success results are tolerable.
+
+## Project instantiation of universal constitution clauses (§11.4.35)
+
+These are the concrete consumer-side bindings for universal clauses that
+require per-project parameters. They do **not** restate or weaken the
+universal text (which lives in `constitution/Constitution.md`) — they fill
+in the project-specific blanks.
+
+### §11.4.153 — per-feature Status + Status_Summary + real-use video confirmation
+
+- **Feature Status set:** `docs/features/Status.md` + `docs/features/Status_Summary.md`
+  (two-audience companion per §11.4.56). Feature roster source = the codebase
+  feature inventory (`docs/features/.feature_inventory_raw.md`, 470 enumerated rows).
+- **Real-use video recordings** (the mandatory per-feature confirmation artifact):
+  recording path = `/Volumes/T7/Downloads/Recordings/` with a mandatory
+  `helixtranslate-` filename prefix. A "confirmed" row cites a real video at this
+  path; absent recordings are honest `PENDING` / `N/A` per §11.4.6, never bluffed.
+- **Four-format export** (HTML + PDF + DOCX, this doc class adds DOCX to the
+  §11.4.65 HTML+PDF set): driven by the docs_chain `features` context at
+  `.docs_chain/contexts/features.yaml` (md→html→pdf via pandoc + weasyprint,
+  md→docx via pandoc), kept always-in-sync per §11.4.45 / §11.4.60 / §11.4.106.
+- `helix_qa` is deliberately excluded from this feature ledger.
+
+See universal §11.4.153 for the full mandate.

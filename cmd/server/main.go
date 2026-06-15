@@ -129,6 +129,14 @@ func main() {
 		log.Println("LLMsVerifier integration enabled")
 	}
 
+	// Preflight: the server is TLS-only. Verify the (default-backfilled) cert/key
+	// files exist BEFORE attempting to listen, so the operator gets an actionable
+	// message instead of the opaque "failed to load TLS certificates: open : no
+	// such file" that tls.LoadX509KeyPair emits for missing/empty paths.
+	if err := verifyTLSFiles(cfg.Server.TLSCertFile, cfg.Server.TLSKeyFile); err != nil {
+		log.Fatalf("TLS configuration error: %v", err)
+	}
+
 	// Server configuration
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 
@@ -144,6 +152,27 @@ func main() {
 			log.Fatalf("HTTP/2 server failed: %v", err)
 		}
 	}
+}
+
+// verifyTLSFiles returns an actionable error when the TLS cert/key files are
+// missing or unconfigured, instead of deferring to the opaque error
+// tls.LoadX509KeyPair produces. It does NOT downgrade to plaintext HTTP.
+func verifyTLSFiles(certFile, keyFile string) error {
+	if certFile == "" || keyFile == "" {
+		return fmt.Errorf("TLS cert/key paths are empty; set server.tls_cert_file and server.tls_key_file " +
+			"in config.json or run with -generate-certs to create certs/server.{crt,key}")
+	}
+	for label, path := range map[string]string{"certificate": certFile, "key": keyFile} {
+		if _, err := os.Stat(path); err != nil {
+			if os.IsNotExist(err) {
+				return fmt.Errorf("TLS %s file %q does not exist; run with -generate-certs to create "+
+					"self-signed certs, or point server.tls_%s_file at a valid file", label, path,
+					map[string]string{"certificate": "cert", "key": "key"}[label])
+			}
+			return fmt.Errorf("cannot access TLS %s file %q: %w", label, path, err)
+		}
+	}
+	return nil
 }
 
 func loadOrCreateConfig(filename string) (*config.Config, error) {

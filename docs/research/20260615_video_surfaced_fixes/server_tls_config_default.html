@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>server_tls_config_default</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="deep-research-cmdserver-tls-cert-path-defaulting-fix">Deep
+Research — cmd/server TLS cert-path defaulting fix</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-15T00:00:00Z <strong>Authority:</strong> §11.4.150 deep
+multi-angle web research (run in parallel with the fix per §11.4.150(F))
+<strong>Scope:</strong> Fix (2) — the API server crashed because
+<code>config.json</code> omitted
+<code>tls_cert_file</code>/<code>tls_key_file</code> and
+<code>LoadConfig</code> did not backfill the <code>certs/</code>
+defaults. The fix backfills the default cert paths <strong>when those
+cert files exist</strong>, and otherwise surfaces a clear error.</p>
+<h2 id="the-question">The question</h2>
+<ol type="i">
+<li>Is backfilling sane default cert/key paths
+(<code>certs/server.crt</code>, <code>certs/server.key</code>) when the
+config omits them the best available solution for the startup crash,
+vs. requiring explicit config? (ii) Are we masking a deeper problem — is
+<strong>defaulting TLS cert paths a security smell</strong>
+(e.g. silently serving with an unexpected/wrong cert), and does “crash →
+backfill default” hide a real misconfiguration the operator should
+see?</li>
+</ol>
+<h2
+id="angle-1-go-stdlib-nethttp-listenandservetls-contract-fail-fast-on-missing-cert-external-authority">Angle
+1 — Go stdlib <code>net/http</code> ListenAndServeTLS contract +
+fail-fast on missing cert (external authority)</h2>
+<p>The Go stdlib documents
+<code>func ListenAndServeTLS(addr, certFile, keyFile string, handler Handler) error</code>:
+“files containing a certificate and matching private key for the server
+must be provided.” The function <strong>always returns a non-nil
+error</strong>; if the cert/key files are missing or unreadable it
+returns an error at startup (it does not start an insecure listener). So
+an empty/wrong cert path is a hard startup failure — exactly the crash
+the project saw when <code>config.json</code> had no cert paths and
+nothing backfilled them.</p>
+<p>Best practice from the stdlib + community guidance: either (a) pass
+real <code>certFile</code>/<code>keyFile</code>, or (b) preload certs
+into <code>Server.TLSConfig</code> (via
+<code>tls.LoadX509KeyPair</code>) and pass empty strings to
+<code>ListenAndServeTLS</code>. Both require the cert material to
+actually resolve. A production config should also set
+<code>MinVersion: tls.VersionTLS13</code>, sane cipher/curve
+preferences, and Read/Write/Idle timeouts — orthogonal to this fix but
+worth noting for the server.</p>
+<p>The fix’s design — backfill the known <code>certs/</code> defaults
+<strong>only when the files exist on disk</strong>, else emit a clear
+error — is the correct shape: it converts an opaque
+“always-non-nil-error” stdlib crash into either (a) a working default
+when the project’s shipped <code>certs/server.{crt,key}</code> are
+present (the documented project layout: “TLS certs … live in
+<code>certs/</code> … required by the API server”), or (b) an actionable
+error. This is <strong>fail-fast with a helpful message</strong>, the
+recommended pattern, not silent degradation.</p>
+<ul>
+<li>Go stdlib — <code>net/http</code> ListenAndServeTLS (cert/key
+required, always returns non-nil error) — https://pkg.go.dev/net/http
+(accessed 2026-06-15)</li>
+<li>Go stdlib — <code>crypto/tls</code> (LoadX509KeyPair, TLSConfig,
+MinVersion) — https://pkg.go.dev/crypto/tls (accessed 2026-06-15)</li>
+<li>Setting up a secure HTTPS server with crypto/tls —
+https://www.slingacademy.com/article/setting-up-a-secure-https-server-in-go-with-crypto-tls/
+(accessed 2026-06-15)</li>
+</ul>
+<h2
+id="angle-2-security-is-cert-path-defaulting-a-smell-no-deeper-problem-check-11.4.150c">Angle
+2 — Security: is cert-path defaulting a smell? (no-deeper-problem check,
+§11.4.150(C))</h2>
+<p>The legitimate worry: silently defaulting a cert path could make a
+server serve with an <strong>unexpected</strong> certificate (e.g. a
+stale/dev/self-signed cert) while the operator believes it is using a
+configured one — a security/operational smell. Two facts make this fix
+safe rather than smelly:</p>
+<ol type="1">
+<li><strong>Existence-gated, not blind.</strong> The fix backfills the
+default path <em>only when the default cert files actually exist</em>.
+It is not inventing a path that then fails late, nor substituting a
+wrong cert over a configured one — an explicitly configured
+<code>tls_cert_file</code>/<code>tls_key_file</code> still wins (the
+backfill only fills the <em>omitted</em> case). The default is a
+documented project convention (<code>certs/server.crt</code>), not a
+surprise location.</li>
+<li><strong>Loud on absence.</strong> When the default files are absent,
+the fix produces a clear error instead of crashing opaquely or — the
+real smell to avoid — falling back to plaintext HTTP. The dangerous
+anti-pattern (silently downgrading TLS→HTTP on missing certs) is NOT
+what this fix does; “default-or-clear-error” preserves the
+secure-by-default posture.</li>
+</ol>
+<p>The deeper problem to rule out: did the crash indicate that
+<code>LoadConfig</code> is generally lossy for omitted fields
+(i.e. other required fields could also be silently empty)?
+Recommendation (non-blocking, §11.4.150(C)): treat this as one instance
+of a general “config defaulting” responsibility —
+<code>LoadConfig</code> should apply documented defaults for every field
+that has a shipped default (cert paths, ports, timeouts), and
+validate-or-error for fields with no safe default. Doing it ad-hoc per
+field risks the next omitted field crashing the same way. This is a
+recommended hardening, not a flaw in the cert fix itself.</p>
+<p>Smell that is genuinely avoided: hardcoding cert <em>contents</em> or
+a key path outside the repo’s controlled <code>certs/</code> dir would
+be a smell; defaulting to the in-repo documented <code>certs/</code>
+location, existence-gated, is not.</p>
+<ul>
+<li>Twelve-Factor — config defaults / explicit env separation (why
+omitted-field handling must be deliberate) — https://12factor.net/config
+(accessed 2026-06-15)</li>
+<li>Dynamically update TLS certificates without downtime (GetCertificate
+pattern, for the rotation follow-up) —
+https://opensource.com/article/22/9/dynamically-update-tls-certificates-golang-server-no-downtime
+(accessed 2026-06-15)</li>
+</ul>
+<h2 id="finding">Finding</h2>
+<p><strong>Best-practice-confirmed, with one recommended
+hardening.</strong> Existence-gated backfill of the documented
+<code>certs/</code> default paths, with a clear error when absent and
+explicit config still winning, is the correct fix for the startup crash
+and is NOT a security smell — it preserves secure-by-default and never
+silently downgrades to HTTP or overrides a configured cert. Recommended
+follow-up (non-blocking): generalize <code>LoadConfig</code> so every
+field with a shipped default is backfilled/validated centrally, so the
+next omitted field cannot reproduce the same opaque crash.</p>
+<p>Deep-research 2026-06-15: https://pkg.go.dev/net/http,
+https://pkg.go.dev/crypto/tls,
+https://www.slingacademy.com/article/setting-up-a-secure-https-server-in-go-with-crypto-tls/,
+https://opensource.com/article/22/9/dynamically-update-tls-certificates-golang-server-no-downtime,
+https://12factor.net/config</p>
+</body>
+</html>

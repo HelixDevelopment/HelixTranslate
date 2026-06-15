@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>CLAUDE</title>
+  <title>CLAUDE.md</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -238,7 +238,7 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">CLAUDE</h1>
+<h1 class="title">CLAUDE.md</h1>
 </header>
 <h1 id="claudemd">CLAUDE.md</h1>
 <h2 id="inherited-from-constitutionclaudemd">INHERITED FROM
@@ -658,5 +658,39 @@ the feature → the test/challenge <strong>MUST then FAIL</strong>.</li>
 <strong>"users can use the feature."</strong></li>
 <li>No false-success results are tolerable.</li>
 </ul>
+<h2
+id="project-instantiation-of-universal-constitution-clauses-11435">Project
+instantiation of universal constitution clauses (§11.4.35)</h2>
+<p>These are the concrete consumer-side bindings for universal clauses
+that require per-project parameters. They do <strong>not</strong>
+restate or weaken the universal text (which lives in
+<code>constitution/Constitution.md</code>) — they fill in the
+project-specific blanks.</p>
+<h3
+id="114153--per-feature-status--status_summary--real-use-video-confirmation">§11.4.153
+— per-feature Status + Status_Summary + real-use video confirmation</h3>
+<ul>
+<li><strong>Feature Status set:</strong>
+<code>docs/features/Status.md</code> +
+<code>docs/features/Status_Summary.md</code> (two-audience companion per
+§11.4.56). Feature roster source = the codebase feature inventory
+(<code>docs/features/.feature_inventory_raw.md</code>, 470 enumerated
+rows).</li>
+<li><strong>Real-use video recordings</strong> (the mandatory
+per-feature confirmation artifact): recording path =
+<code>/Volumes/T7/Downloads/Recordings/</code> with a mandatory
+<code>helixtranslate-</code> filename prefix. A "confirmed" row cites a
+real video at this path; absent recordings are honest
+<code>PENDING</code> / <code>N/A</code> per §11.4.6, never bluffed.</li>
+<li><strong>Four-format export</strong> (HTML + PDF + DOCX, this doc
+class adds DOCX to the §11.4.65 HTML+PDF set): driven by the docs_chain
+<code>features</code> context at
+<code>.docs_chain/contexts/features.yaml</code> (md→html→pdf via pandoc
++ weasyprint, md→docx via pandoc), kept always-in-sync per §11.4.45 /
+§11.4.60 / §11.4.106.</li>
+<li><code>helix_qa</code> is deliberately excluded from this feature
+ledger.</li>
+</ul>
+<p>See universal §11.4.153 for the full mandate.</p>
 </body>
 </html>

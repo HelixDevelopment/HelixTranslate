@@ -25,42 +25,42 @@ func ConvertFromTranslatorConfig(config translator.TranslationConfig) Translatio
 type Provider string
 
 const (
-	ProviderOpenAI       Provider = "openai"
-	ProviderAnthropic    Provider = "anthropic"
-	ProviderZhipu        Provider = "zhipu"
-	ProviderDeepSeek     Provider = "deepseek"
-	ProviderQwen         Provider = "qwen"
-	ProviderGemini       Provider = "gemini"
-	ProviderOllama       Provider = "ollama"
-	ProviderLlamaCpp     Provider = "llamacpp"
-	ProviderMock         Provider = "mock"
-	ProviderGroq         Provider = "groq"
-	ProviderCohere       Provider = "cohere"
-	ProviderMistral      Provider = "mistral"
-	ProviderXAI          Provider = "xai"
-	ProviderReplicate    Provider = "replicate"
-	ProviderCerebras     Provider = "cerebras"
-	ProviderCloudflare   Provider = "cloudflare"
-	ProviderSiliconFlow  Provider = "siliconflow"
-	ProviderHyperbolic   Provider = "hyperbolic"
-	ProviderTogetherAI   Provider = "togetherai"
-	ProviderSambaNova    Provider = "sambanova"
-	ProviderKimi         Provider = "kimi"
-	ProviderNovita       Provider = "novita"
-	ProviderNLPCloud     Provider = "nlpcloud"
-	ProviderUpstage      Provider = "upstage"
-	ProviderSarvam       Provider = "sarvam"
-	ProviderModal        Provider = "modal"
-	ProviderPublicAI     Provider = "publicai"
-	ProviderNIA          Provider = "nia"
-	ProviderVulavula     Provider = "vulavula"
+	ProviderOpenAI      Provider = "openai"
+	ProviderAnthropic   Provider = "anthropic"
+	ProviderZhipu       Provider = "zhipu"
+	ProviderDeepSeek    Provider = "deepseek"
+	ProviderQwen        Provider = "qwen"
+	ProviderGemini      Provider = "gemini"
+	ProviderOllama      Provider = "ollama"
+	ProviderLlamaCpp    Provider = "llamacpp"
+	ProviderMock        Provider = "mock"
+	ProviderGroq        Provider = "groq"
+	ProviderCohere      Provider = "cohere"
+	ProviderMistral     Provider = "mistral"
+	ProviderXAI         Provider = "xai"
+	ProviderReplicate   Provider = "replicate"
+	ProviderCerebras    Provider = "cerebras"
+	ProviderCloudflare  Provider = "cloudflare"
+	ProviderSiliconFlow Provider = "siliconflow"
+	ProviderHyperbolic  Provider = "hyperbolic"
+	ProviderTogetherAI  Provider = "togetherai"
+	ProviderSambaNova   Provider = "sambanova"
+	ProviderKimi        Provider = "kimi"
+	ProviderNovita      Provider = "novita"
+	ProviderNLPCloud    Provider = "nlpcloud"
+	ProviderUpstage     Provider = "upstage"
+	ProviderSarvam      Provider = "sarvam"
+	ProviderModal       Provider = "modal"
+	ProviderPublicAI    Provider = "publicai"
+	ProviderNIA         Provider = "nia"
+	ProviderVulavula    Provider = "vulavula"
 )
 
 // ValidModels defines valid model names for each provider
 var ValidModels = map[Provider][]string{
-	ProviderOpenAI:      {"gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o"},
-	ProviderAnthropic:   {"claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"},
-	ProviderZhipu:       {"glm-4", "glm-3-turbo", "glm-4-plus", "glm-4-flash", "glm-4-air", "glm-4-airx", "glm-4-long", "glm-4-flashx"},
+	ProviderOpenAI:    {"gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o"},
+	ProviderAnthropic: {"claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"},
+	ProviderZhipu:     {"glm-4", "glm-3-turbo", "glm-4-plus", "glm-4-flash", "glm-4-air", "glm-4-airx", "glm-4-long", "glm-4-flashx"},
 	// deepseek-v4-flash / deepseek-v4-pro: current models per the live DeepSeek
 	// /models endpoint (verified 2026-06-14); v4-flash proven to translate. The
 	// legacy deepseek-chat/coder remain accepted (still work — §11.4.122).
@@ -116,6 +116,15 @@ type BaseTranslator struct {
 	mu     sync.RWMutex // guards cache and stats for concurrent Translate callers
 	stats  TranslationStats
 	cache  map[string]string
+}
+
+// Config returns the translator's configured settings, including the resolved
+// SourceLang / TargetLang language pair. Exposing it lets callers verify which
+// language pair a constructed translator will actually translate into — the
+// contract that the REST request's target_lang must reach (it previously could
+// not, because the API hardcoded Russian→Serbian).
+func (bt *BaseTranslator) Config() TranslationConfig {
+	return bt.config
 }
 
 // TranslationStats tracks translation statistics (local copy to avoid import cycle)
@@ -658,6 +667,15 @@ func scriptInstruction(targetName, script string) string {
 // path keeps its exact Ekavica + pure-Serbian-vocabulary + Cyrillic guidance;
 // every other configured pair receives a correct generic professional-literary
 // prompt for that pair and script.
+// BuildContractPrompt exposes the translation prompt the translator will send to
+// the LLM for the given text/context, built from the configured SourceLang /
+// TargetLang / Script. It lets contract tests verify the resolved language pair
+// reaches the prompt (e.g. that a Spanish target produces a Spanish prompt, not
+// the hardcoded Serbian one) without performing a live LLM call.
+func (lt *LLMTranslator) BuildContractPrompt(text string, contextStr string) string {
+	return lt.createTranslationPrompt(text, contextStr)
+}
+
 func (lt *LLMTranslator) createTranslationPrompt(text string, contextStr string) string {
 	context := contextStr
 	if context == "" {

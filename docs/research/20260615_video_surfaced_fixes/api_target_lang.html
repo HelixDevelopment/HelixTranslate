@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>api_target_lang</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="deep-research-rest-post-apiv1translate-target-language-fix">Deep
+Research — REST POST /api/v1/translate target-language fix</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-15T00:00:00Z <strong>Authority:</strong> §11.4.150 deep
+multi-angle web research (run in parallel with the fix per §11.4.150(F))
+<strong>Scope:</strong> Fix (3) — the REST handler hardcoded RU→SR; the
+request struct had no <code>target_lang</code>/<code>source_lang</code>.
+The fix adds those fields, threads them through the pipeline, and
+preserves the previous RU→SR default for back-compat.</p>
+<h2 id="the-question">The question</h2>
+<ol type="i">
+<li>Is adding <code>target_lang</code>/<code>source_lang</code> to the
+JSON request body (with a preserved default) the best REST design for
+translation language selection, or should it use
+<code>Accept-Language</code> / query params? (ii) Are we masking a
+deeper problem — specifically, <strong>is adding
+<code>target_lang</code> a backward-compatibility break</strong> for
+existing callers, and is hardcoding any single default the right
+fallback?</li>
+</ol>
+<h2
+id="angle-1-rest-i18n-language-selection-design-conventions-external-authority">Angle
+1 — REST i18n / language-selection design conventions (external
+authority)</h2>
+<p>Authoritative i18n REST guidance recognizes three placements for the
+requested language: the <code>Accept-Language</code> header (RFC 5646),
+a <code>language</code> query parameter, and a request-body field. For a
+<strong>translation API specifically</strong> — where the target
+language is the core <em>payload semantics</em> of the operation, not a
+presentation/locale preference for the response wrapper — the language
+belongs in the <strong>request body</strong> alongside the text being
+translated. Key distinction:</p>
+<ul>
+<li><code>Accept-Language</code> and locale query params describe “what
+language do you want the <em>response framing</em> in” (error messages,
+metadata) — a presentation concern.</li>
+<li>A translation request’s source/target language is the operation’s
+primary input — it determines <em>what work is done</em>, not how the
+result is framed. Putting it in the body
+(<code>source_lang</code>/<code>target_lang</code>) matches how
+translation services model it (e.g. Google Translate v2’s
+<code>target</code>/<code>source</code> are call parameters, not
+Accept-Language).</li>
+</ul>
+<p>So body fields are the correct placement for a translate endpoint.
+Naming <code>source_lang</code>/<code>target_lang</code> is clear and
+conventional (BCP-47/RFC 5646 tags should be accepted as values).</p>
+<ul>
+<li>STAC API Language (I18N) extension — language placement, RFC 5646
+tags, <code>Vary</code> for caches —
+https://github.com/stac-api-extensions/language/blob/main/README.md
+(accessed 2026-06-15)</li>
+<li>Google Cloud Translate client — target/source as call parameters,
+target optional with a default —
+https://docs.cloud.google.com/python/docs/reference/translate/latest/google.cloud.translate_v2.client.Client.html
+(accessed 2026-06-15)</li>
+<li>Spring Boot REST i18n example (Accept-Language is for response
+localization, distinct concern) —
+https://howtodoinjava.com/spring-boot/rest-i18n-example/ (accessed
+2026-06-15)</li>
+</ul>
+<h2
+id="angle-2-backward-compatibility-of-adding-optional-body-fields-preserved-default-no-deeper-problem-check-11.4.150c">Angle
+2 — Backward compatibility of adding optional body fields + preserved
+default (no-deeper-problem check, §11.4.150(C))</h2>
+<p>The core back-compat worry: does adding
+<code>target_lang</code>/<code>source_lang</code> break existing callers
+who don’t send them?</p>
+<p><strong>No — additive optional fields are a non-breaking
+change</strong>, on two independent grounds: 1. <strong>JSON
+deserialization tolerates absent fields.</strong> An existing client
+that POSTs the old body (without the new fields) deserializes fine; the
+new fields take their zero/empty value. This is the standard “additive,
+optional ⇒ compatible” API-evolution rule. 2. <strong>The fix preserves
+the previous default.</strong> When
+<code>target_lang</code>/<code>source_lang</code> are empty, the handler
+falls back to the historical RU→SR behaviour. So a pre-fix caller gets
+byte-identical behaviour to before the fix — the exact definition of
+backward compatibility. New callers gain the ability to choose
+languages.</p>
+<p>This matches the client-library convention that “target language can
+be optional with a default … supporting backward compatibility when the
+parameter is not explicitly provided.”</p>
+<p>Deeper-problem check (§11.4.150(C)): the genuine smell to avoid is a
+hardcoded default that <em>silently mistranslates</em> for callers who
+assumed a different pair. Mitigations to confirm in the fix: - The
+preserved RU→SR default must be <strong>documented</strong> as the
+no-language default (so it is a contract, not a surprise). Recommended
+(non-blocking): once clients are migrated, consider returning a 400 on
+an <em>unknown/unsupported</em> explicit language pair rather than
+silently coercing — but an <em>absent</em> pair correctly uses the
+documented default for back-compat. - Source-language: if
+<code>source_lang</code> is empty, confirm whether the pipeline can
+auto-detect or must assume RU; an unstated assumption here is the
+residual risk. State it explicitly in the API docs. - Values should be
+validated against supported BCP-47/RFC 5646 tags; an invalid explicit
+tag should error, not fall back to the default (falling back would mask
+a client bug).</p>
+<p>Forward-looking, optionally accept <code>Accept-Language</code> as a
+<em>secondary</em> signal for response framing only — but body fields
+remain authoritative for the translation operation, per Angle 1.</p>
+<ul>
+<li>API evolution — additive optional fields are non-breaking; preserved
+default = compatible (STAC <code>Vary</code>/older-client guidance) —
+https://github.com/stac-api-extensions/language/blob/main/README.md
+(accessed 2026-06-15)</li>
+<li>Google Translate — optional target with default = back-compat —
+https://docs.cloud.google.com/python/docs/reference/translate/latest/google.cloud.translate_v2.client.Client.html
+(accessed 2026-06-15)</li>
+</ul>
+<h2 id="finding">Finding</h2>
+<p><strong>Best-practice-confirmed.</strong> Putting
+<code>source_lang</code>/<code>target_lang</code> in the translate
+request body is the correct REST design for a translation endpoint
+(language is operation input, not response-locale framing), and adding
+them as <strong>optional fields with the preserved RU→SR default is a
+non-breaking, backward-compatible change</strong> — existing callers get
+identical behaviour, new callers gain language choice. No deeper problem
+masked. Non-blocking improvements: (a) document the RU→SR no-language
+default as an explicit contract; (b) validate explicit tags against
+supported BCP-47 values and error (don’t silently fall back) on an
+unknown explicit pair; (c) document the empty-<code>source_lang</code>
+behaviour (auto-detect vs assume-RU).</p>
+<p>Deep-research 2026-06-15:
+https://github.com/stac-api-extensions/language/blob/main/README.md,
+https://docs.cloud.google.com/python/docs/reference/translate/latest/google.cloud.translate_v2.client.Client.html,
+https://howtodoinjava.com/spring-boot/rest-i18n-example/</p>
+</body>
+</html>

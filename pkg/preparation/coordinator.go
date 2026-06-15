@@ -8,10 +8,54 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"sync"
 	"time"
 )
+
+// providerEnvAPIKey returns the API key for a provider from its well-known
+// environment variable (e.g. DEEPSEEK_API_KEY). It is the per-provider fallback
+// used when no shared API key is configured, so a multi-provider preparation run
+// resolves each provider's own credential. An unknown provider returns "" (the
+// downstream LLM client then surfaces the precise "<provider> API key is
+// required" error rather than this helper guessing a value).
+func providerEnvAPIKey(provider string) string {
+	envMap := map[string]string{
+		"openai":     "OPENAI_API_KEY",
+		"anthropic":  "ANTHROPIC_API_KEY",
+		"deepseek":   "DEEPSEEK_API_KEY",
+		"zhipu":      "ZHIPU_API_KEY",
+		"qwen":       "QWEN_API_KEY",
+		"gemini":     "GEMINI_API_KEY",
+		"groq":       "GROQ_API_KEY",
+		"mistral":    "MISTRAL_API_KEY",
+		"xai":        "XAI_API_KEY",
+		"cohere":     "COHERE_API_KEY",
+		"togetherai": "TOGETHER_API_KEY",
+	}
+	if envVar, ok := envMap[provider]; ok {
+		return os.Getenv(envVar)
+	}
+	return ""
+}
+
+// providerDefaultModel returns a sensible default chat model for a provider,
+// used when the PreparationConfig does not specify one. It is intentionally
+// limited to providers whose LLM client REJECTS an empty model (e.g. DeepSeek
+// returns "DeepSeek model is required"); for those, the empty model previously
+// left the preparation phase with no valid providers and produced no analysis.
+// Providers whose client applies its own default for an empty model (OpenAI,
+// Zhipu, etc.) are deliberately left empty so their existing behaviour — and the
+// client's model-validation contract — is preserved (§11.4.1: do not break a
+// working path). Returned model ids MUST be members of the client's allow-list
+// (pkg/translator/llm ValidModels). An unmapped provider returns "".
+func providerDefaultModel(provider string) string {
+	modelMap := map[string]string{
+		"deepseek": "deepseek-chat", // required by NewDeepSeekClient; valid per ValidModels[ProviderDeepSeek]
+	}
+	return modelMap[provider]
+}
 
 // PreparationCoordinator orchestrates multi-pass content analysis
 type PreparationCoordinator struct {
@@ -28,12 +72,26 @@ func NewPreparationCoordinator(config PreparationConfig) (*PreparationCoordinato
 	// Initialize LLM providers
 	var providers []translator.Translator
 	for _, providerName := range config.Providers {
-		// Create translator config
+		// Resolve the per-provider API key. A shared config.APIKey (when set)
+		// applies to all providers; when it is empty, fall back to the
+		// provider's own well-known environment variable (e.g. DEEPSEEK_API_KEY,
+		// ZHIPU_API_KEY) so a multi-provider list each picks up its own key
+		// rather than every client failing "<provider> API key is required".
+		apiKey := config.APIKey
+		if apiKey == "" {
+			apiKey = providerEnvAPIKey(providerName)
+		}
+
+		// Create translator config. A default model is supplied per provider
+		// when none is configured — some clients (e.g. DeepSeek) reject an empty
+		// model with "<provider> model is required", which previously left the
+		// preparation phase with no valid providers and produced no analysis.
 		tConfig := translator.TranslationConfig{
 			SourceLang: config.SourceLanguage,
 			TargetLang: config.TargetLanguage,
 			Provider:   providerName,
-			APIKey:     config.APIKey,
+			APIKey:     apiKey,
+			Model:      providerDefaultModel(providerName),
 		}
 
 		// Create LLM translator

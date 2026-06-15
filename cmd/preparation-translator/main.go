@@ -40,6 +40,40 @@ func resolveLanguageCodes(source, target string) (language.Language, language.La
 	return resolve(source, source), resolve(target, target)
 }
 
+// resolveAPIKey returns the API key for the given provider, mirroring
+// cmd/unified-translator's resolveProviderAPIKey behaviour: an explicitly
+// supplied -api-key flag value wins, otherwise the provider's well-known
+// environment variable (e.g. DEEPSEEK_API_KEY) is used. Previously this binary
+// built a TranslationConfig with NO APIKey, exposed no -api-key flag, and never
+// read any *_API_KEY env var, so llm.NewLLMTranslator → NewDeepSeekClient always
+// failed with "DeepSeek API key is required" and the pre-translation analysis
+// CLI produced no analysis JSON for any provider — a dead-feature defect (§11.4).
+// An empty return (unknown provider or no key anywhere) is honest (§11.4.6): the
+// downstream client surfaces the precise "<provider> API key is required" error
+// rather than this function guessing a value.
+func resolveAPIKey(provider, flagVal string) string {
+	if strings.TrimSpace(flagVal) != "" {
+		return flagVal
+	}
+	envMap := map[string]string{
+		"openai":     "OPENAI_API_KEY",
+		"anthropic":  "ANTHROPIC_API_KEY",
+		"deepseek":   "DEEPSEEK_API_KEY",
+		"zhipu":      "ZHIPU_API_KEY",
+		"qwen":       "QWEN_API_KEY",
+		"gemini":     "GEMINI_API_KEY",
+		"groq":       "GROQ_API_KEY",
+		"mistral":    "MISTRAL_API_KEY",
+		"xai":        "XAI_API_KEY",
+		"cohere":     "COHERE_API_KEY",
+		"togetherai": "TOGETHER_API_KEY",
+	}
+	if envVar, ok := envMap[provider]; ok {
+		return os.Getenv(envVar)
+	}
+	return ""
+}
+
 // parseProviders splits a comma-separated providers flag into a clean slice.
 // It trims surrounding whitespace from each entry and drops empty entries
 // (so "deepseek, ,zhipu" -> ["deepseek","zhipu"]). When the result is empty
@@ -67,6 +101,7 @@ func main() {
 	targetLang := flag.String("target", "Spanish", "Target language")
 	passCount := flag.Int("passes", 2, "Number of preparation passes")
 	providers := flag.String("providers", "deepseek,zhipu", "Comma-separated list of LLM providers")
+	apiKey := flag.String("api-key", "", "API key for the translation provider (falls back to the provider's *_API_KEY env var, e.g. DEEPSEEK_API_KEY)")
 	flag.Parse()
 
 	// Honor the -providers flag instead of silently ignoring it.
@@ -115,15 +150,26 @@ func main() {
 		DetailLevel:        "comprehensive",
 		SourceLanguage:     *sourceLang,
 		TargetLanguage:     *targetLang,
+		// Without an API key the preparation coordinator's per-provider LLM
+		// clients fail ("<provider> API key is required") and no analysis JSON
+		// is produced. Resolve from -api-key, falling back to the first listed
+		// provider's *_API_KEY env var; the coordinator additionally falls back
+		// to each provider's own env var when this shared key is empty.
+		APIKey: resolveAPIKey(providerList[0], *apiKey),
 	}
 
 	// Create base translator (for translation phase)
 	log.Printf("\n3. Creating translator...")
+	const translationProvider = "deepseek"
 	translatorConfig := translator.TranslationConfig{
 		SourceLang: sourceLanguage.Code,
 		TargetLang: targetLanguage.Code,
-		Provider:   "deepseek",
+		Provider:   translationProvider,
 		Model:      "deepseek-chat",
+		// Resolve the API key from the -api-key flag, falling back to the
+		// provider's well-known env var (DEEPSEEK_API_KEY). Without this the
+		// DeepSeek client always failed with "DeepSeek API key is required".
+		APIKey: resolveAPIKey(translationProvider, *apiKey),
 	}
 
 	baseTranslator, err := llm.NewLLMTranslator(translatorConfig)

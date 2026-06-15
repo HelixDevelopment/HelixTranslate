@@ -173,11 +173,13 @@ func (h *Handler) apiInfo(c *gin.Context) {
 // translateText handles text translation requests
 func (h *Handler) translateText(c *gin.Context) {
 	var req struct {
-		Text     string `json:"text" binding:"required"`
-		Provider string `json:"provider"`
-		Model    string `json:"model"`
-		Context  string `json:"context"`
-		Script   string `json:"script"`
+		Text       string `json:"text" binding:"required"`
+		Provider   string `json:"provider"`
+		Model      string `json:"model"`
+		Context    string `json:"context"`
+		Script     string `json:"script"`
+		SourceLang string `json:"source_lang"`
+		TargetLang string `json:"target_lang"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -198,8 +200,8 @@ func (h *Handler) translateText(c *gin.Context) {
 		return
 	}
 
-	// Create translator
-	trans, err := h.createTranslator(req.Provider, req.Model)
+	// Create translator for the requested language pair.
+	trans, err := h.createTranslator(req.Provider, req.Model, req.SourceLang, req.TargetLang)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -328,7 +330,7 @@ func (h *Handler) translateFB2(c *gin.Context) {
 	}
 
 	// Create translator
-	baseTrans, err := h.createTranslator(provider, model)
+	baseTrans, err := h.createTranslator(provider, model, "", "")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -447,10 +449,12 @@ func (h *Handler) translateFB2(c *gin.Context) {
 // batchTranslate handles batch translation requests
 func (h *Handler) batchTranslate(c *gin.Context) {
 	var req struct {
-		Texts    []string `json:"texts" binding:"required"`
-		Provider string   `json:"provider"`
-		Model    string   `json:"model"`
-		Context  string   `json:"context"`
+		Texts      []string `json:"texts" binding:"required"`
+		Provider   string   `json:"provider"`
+		Model      string   `json:"model"`
+		Context    string   `json:"context"`
+		SourceLang string   `json:"source_lang"`
+		TargetLang string   `json:"target_lang"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -458,8 +462,8 @@ func (h *Handler) batchTranslate(c *gin.Context) {
 		return
 	}
 
-	// Create translator
-	trans, err := h.createTranslator(req.Provider, req.Model)
+	// Create translator for the requested language pair.
+	trans, err := h.createTranslator(req.Provider, req.Model, req.SourceLang, req.TargetLang)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -708,7 +712,14 @@ func (h *Handler) websocketHandler(c *gin.Context) {
 
 // Helper methods
 
-func (h *Handler) createTranslator(providerName, model string) (translator.Translator, error) {
+// createTranslator builds a translator for the given provider/model and
+// source/target language pair. When sourceLang/targetLang are both empty the
+// historical Russian→Serbian default is preserved (backward compatibility):
+// existing callers that pass "" keep their prior behaviour, while the
+// translateText handler now threads the request's source_lang/target_lang so a
+// caller asking for e.g. Spanish actually gets a Spanish translator instead of
+// the hardcoded Serbian one.
+func (h *Handler) createTranslator(providerName, model, sourceLang, targetLang string) (translator.Translator, error) {
 	if providerName == "" {
 		providerName = h.config.Translation.DefaultProvider
 	}
@@ -722,9 +733,17 @@ func (h *Handler) createTranslator(providerName, model string) (translator.Trans
 		return &distributedTranslator{dm: h.distributedManager.(*distributed.DistributedManager)}, nil
 	}
 
+	// Default to the legacy Russian→Serbian pair only when neither side is
+	// specified, so omitting the fields preserves the previous default while an
+	// explicit pair is honoured.
+	if sourceLang == "" && targetLang == "" {
+		sourceLang = "ru"
+		targetLang = "sr"
+	}
+
 	config := translator.TranslationConfig{
-		SourceLang: "ru",
-		TargetLang: "sr",
+		SourceLang: sourceLang,
+		TargetLang: targetLang,
 		Provider:   providerName,
 		Model:      model,
 		Options:    make(map[string]interface{}),

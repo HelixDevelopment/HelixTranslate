@@ -209,10 +209,37 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, fmt.Errorf("failed to parse config: %w", err)
 	}
 
+	// Backfill defaults for fields a hand-written config.json may omit. Without
+	// this, a config that omits "server.tls_cert_file"/"server.tls_key_file"
+	// leaves them as the empty string, and the TLS-only server then calls
+	// tls.LoadX509KeyPair("", "") which fails with the opaque
+	// "open : no such file" error — the shipped server cannot start
+	// out-of-the-box. DefaultConfig() already carries the correct paths, but
+	// LoadConfig never consulted them. Apply them post-unmarshal so an explicit
+	// value in the file always wins and an omitted one falls back to the default.
+	config.applyDefaults()
+
 	// Load API keys from environment variables
 	config.loadAPIKeysFromEnv()
 
 	return &config, nil
+}
+
+// applyDefaults backfills empty fields with their DefaultConfig() values so a
+// hand-written config.json that omits a field still produces a runnable server.
+// Only fields whose zero value is an invalid/unusable runtime value are
+// backfilled here; an explicit value in the file is never overwritten.
+func (c *Config) applyDefaults() {
+	defaults := DefaultConfig()
+
+	// TLS certificate/key paths — the server is TLS-only, so an empty path is a
+	// startup-fatal value. Backfill to the standard certs/ location.
+	if c.Server.TLSCertFile == "" {
+		c.Server.TLSCertFile = defaults.Server.TLSCertFile
+	}
+	if c.Server.TLSKeyFile == "" {
+		c.Server.TLSKeyFile = defaults.Server.TLSKeyFile
+	}
 }
 
 // SaveConfig saves configuration to file
@@ -242,32 +269,32 @@ func (c *Config) loadAPIKeysFromEnv() {
 	}
 
 	envMappings := map[string]string{
-		"openai":       "OPENAI_API_KEY",
-		"anthropic":    "ANTHROPIC_API_KEY",
-		"zhipu":        "ZHIPU_API_KEY",
-		"deepseek":     "DEEPSEEK_API_KEY",
-		"qwen":         "QWEN_API_KEY",
-		"gemini":       "GEMINI_API_KEY",
-		"groq":         "GROQ_API_KEY",
-		"cohere":       "COHERE_API_KEY",
-		"mistral":      "MISTRAL_API_KEY",
-		"xai":          "XAI_API_KEY",
-		"replicate":    "REPLICATE_API_KEY",
-		"cerebras":     "CEREBRAS_API_KEY",
-		"cloudflare":   "CLOUDFLARE_API_KEY",
-		"siliconflow":  "SILICONFLOW_API_KEY",
-		"hyperbolic":   "HYPERBOLIC_API_KEY",
-		"togetherai":   "TOGETHER_API_KEY",
-		"sambanova":    "SAMBANOVA_API_KEY",
-		"kimi":         "KIMI_API_KEY",
-		"novita":       "NOVITA_API_KEY",
-		"nlpcloud":     "NLP_CLOUD_API_KEY",
-		"upstage":      "UPSTAGE_API_KEY",
-		"sarvam":       "SARVAM_API_KEY",
-		"modal":        "MODAL_API_KEY",
-		"publicai":     "PUBLICAI_API_KEY",
-		"nia":          "NIA_API_KEY",
-		"vulavula":     "VULAVULA_API_KEY",
+		"openai":      "OPENAI_API_KEY",
+		"anthropic":   "ANTHROPIC_API_KEY",
+		"zhipu":       "ZHIPU_API_KEY",
+		"deepseek":    "DEEPSEEK_API_KEY",
+		"qwen":        "QWEN_API_KEY",
+		"gemini":      "GEMINI_API_KEY",
+		"groq":        "GROQ_API_KEY",
+		"cohere":      "COHERE_API_KEY",
+		"mistral":     "MISTRAL_API_KEY",
+		"xai":         "XAI_API_KEY",
+		"replicate":   "REPLICATE_API_KEY",
+		"cerebras":    "CEREBRAS_API_KEY",
+		"cloudflare":  "CLOUDFLARE_API_KEY",
+		"siliconflow": "SILICONFLOW_API_KEY",
+		"hyperbolic":  "HYPERBOLIC_API_KEY",
+		"togetherai":  "TOGETHER_API_KEY",
+		"sambanova":   "SAMBANOVA_API_KEY",
+		"kimi":        "KIMI_API_KEY",
+		"novita":      "NOVITA_API_KEY",
+		"nlpcloud":    "NLP_CLOUD_API_KEY",
+		"upstage":     "UPSTAGE_API_KEY",
+		"sarvam":      "SARVAM_API_KEY",
+		"modal":       "MODAL_API_KEY",
+		"publicai":    "PUBLICAI_API_KEY",
+		"nia":         "NIA_API_KEY",
+		"vulavula":    "VULAVULA_API_KEY",
 	}
 
 	for provider, envVar := range envMappings {
