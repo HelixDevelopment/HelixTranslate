@@ -620,6 +620,24 @@ func (bp *BookPolisher) buildConsensus(
 		Suggestions:    make([]Suggestion, 0),
 	}
 
+	// Drop non-responses. polishSection pre-sizes the verifications slice to the
+	// provider count and leaves a zero-value llmVerification{} in any slot whose
+	// provider errored (verifyWithLLM failed). A real verification ALWAYS has its
+	// Provider set (parseVerificationResponse stamps it), so an empty Provider
+	// uniquely identifies a provider that never responded. Counting those phantom
+	// entries (a) dilutes every score average toward 0 and (b) — critically —
+	// registers their empty PolishedText ("") as a polished-version candidate that
+	// can win consensus and WIPE the section's translated content. Exclude them so
+	// consensus is computed only over providers that actually answered.
+	responded := make([]llmVerification, 0, len(verifications))
+	for _, v := range verifications {
+		if v.Provider == "" {
+			continue
+		}
+		responded = append(responded, v)
+	}
+	verifications = responded
+
 	// Calculate average scores
 	totalSpirit := 0.0
 	totalLanguage := 0.0
