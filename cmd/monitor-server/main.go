@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 
 	"digital.vasic.translator/pkg/events"
 	"digital.vasic.translator/pkg/websocket"
@@ -11,6 +12,33 @@ import (
 	"github.com/gin-gonic/gin"
 	gorillaws "github.com/gorilla/websocket"
 )
+
+// defaultMonitorPort is the documented default monitoring port (.env.example,
+// README.md, docs/WebSocket_Monitoring_Guide.md).
+const defaultMonitorPort = 8090
+
+// resolvePort returns the port the monitoring server should bind, honoring the
+// MONITOR_SERVER_PORT environment variable documented across .env.example,
+// CLAUDE.md, README.md (incl. the docker-compose `environment:` block) and
+// docs/WebSocket_Monitoring_Guide.md. Previously main() hardcoded 8090 and
+// never read the env var, so the documented configuration knob did nothing — a
+// user (or a docker-compose deployment running two instances on different
+// ports) was silently pinned to :8090. A malformed or out-of-range value falls
+// back to the documented default rather than binding port 0 (a random ephemeral
+// port) or crashing.
+func resolvePort() int {
+	raw := os.Getenv("MONITOR_SERVER_PORT")
+	if raw == "" {
+		return defaultMonitorPort
+	}
+	p, err := strconv.Atoi(raw)
+	if err != nil || p < 1 || p > 65535 {
+		fmt.Fprintf(os.Stderr,
+			"⚠️  invalid MONITOR_SERVER_PORT=%q; falling back to default %d\n", raw, defaultMonitorPort)
+		return defaultMonitorPort
+	}
+	return p
+}
 
 // serverRunner abstracts the blocking server-start call so it can be injected
 // in tests. *gin.Engine.Run satisfies this signature.
@@ -94,7 +122,7 @@ func main() {
 	})
 
 	// Start server
-	port := 8090
+	port := resolvePort()
 
 	fmt.Printf("🚀 SSH Translation Monitoring Server Started\n")
 	fmt.Printf("📊 Monitoring Dashboard: http://localhost:%d/monitor\n", port)
