@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>BRIDGE_PHASE2_EXECUTION_PLAN</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="bridge-phase-2-no-local-runtime-execution-plan-verified-against-current-tree">Bridge
+Phase-2 (No-Local-Runtime) — Execution Plan, Verified Against Current
+Tree</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-15T00:00:00Z <strong>Status:</strong> DESIGN /
+READY-FOR-EXECUTION (read-only survey produced this; no production
+source edited). FACT-cited per §11.4.6. <strong>Authority:</strong>
+Operator mandate 2026-06-15 — “Do not use any local running models using
+llama.cpp, only LLMsVerifier obtained strongest models and created
+bridge … for direct access to model capabilities!” Locked decisions:
+<strong>D1</strong> remove local runtimes entirely · <strong>D2</strong>
+forbid ALL local runtimes (llama.cpp + Ollama) · <strong>R1</strong>
+Obsolete the SSH/distributed worker path (§11.4.90) ·
+<strong>R2</strong> require API keys everywhere (no offline/local
+fallback) · <strong>D4/D5</strong> top-1 + in-process fallback chain.
+Bridge facade = <code>pkg/bridge</code>
+(<code>BestTranslator</code>/<code>Invoke</code>/<code>BestModel</code>/<code>ListVerified</code>).
+<strong>Supersedes the estimates in:</strong>
+<code>docs/design/LOCAL_RUNTIME_REMOVAL.md</code> (Rev 1) — this doc
+carries the verified-against-current-tree counts/paths. The companion
+<code>docs/design/LLMSVERIFIER_BRIDGE.md</code> covers the bridge build
+itself. <strong>Verified against tree at:</strong> HEAD
+<code>a5860b2</code> (2026-06-15). Every file:line below was confirmed
+in this read-only pass.</p>
+<hr />
+<h2 id="tldr-for-the-conductor">0. TL;DR for the conductor</h2>
+<ul>
+<li><strong>Bridge EXISTS and builds:</strong>
+<code>pkg/bridge/bridge.go</code> (+ <code>bridge_test.go</code>,
+<code>export_test.go</code>, <code>util.go</code>, <code>data/</code>).
+<code>BestTranslator</code>/<code>Invoke</code>/<code>BestModel</code>/<code>ListVerified</code>
+are implemented. <code>cmd/model-bridge</code> already imports it.
+<strong>The Phase-0 prerequisite (bridge present) is MET.</strong></li>
+<li><strong>Drop-in verdict: GO, with ONE tracked prerequisite gap (P-1,
+below).</strong> <code>bridge.BestTranslator</code> returns
+<code>translator.Translator</code> backed by the SAME
+<code>*llm.LLMTranslator</code> that <code>llm.NewLLMTranslator</code>
+returns today — so the 14 high-level <code>NewLLMTranslator</code> call
+sites redirect cleanly. The gap: two consumers depend on the narrower
+<code>llm.LLMClient</code> interface (which has
+<code>GetProviderName()</code>); <code>translator.Translator</code> does
+NOT expose <code>GetProviderName()</code>. Those two need an adapter
+(P-1).</li>
+<li><strong>Verified site counts (vs the draft’s estimates):</strong> |
+Class | Draft estimate | <strong>Verified (this pass)</strong> | |—|—|—|
+| <code>NewLLMTranslator</code> non-test call sites | 9 components |
+<strong>14 call sites</strong> across 12 files | | llama.cpp non-test
+source files | ≈25 sites | <strong>16 files</strong> (≈25 lines) | |
+Ollama non-test source files | ≈13 sites | <strong>~12 files</strong>
+(token spread; O1–O13 hold, see §1.2) | | local-runtime worker configs |
+5 | <strong>8 configs</strong> | | local-runtime helper scripts | 4 |
+<strong>15 scripts</strong> in <code>internal/scripts/</code> | | SSH
+binaries with API path | “llama-only” | <strong>CONFIRMED
+llama-only</strong> (grep for
+<code>NewLLMTranslator</code>/<code>VerifiedFactory</code>/<code>bridge.</code>
+returned EMPTY) |</li>
+<li><strong>8-angle verdict: GO with conditions</strong> (R1
+operator-confirm distributed/SSH removal = already granted via R1; R2
+no-key → honest SKIP, no silent fallback — the bridge already
+hard-errors with no keys, §1.4 below).</li>
+</ul>
+<hr />
+<h2 id="verified-current-inventory-fact-fileline">1. Verified current
+inventory (FACT, file:line)</h2>
+<h3
+id="the-14-newllmtranslator-redirect-call-sites-the-primary-redirect-surface">1.1
+The 14 <code>NewLLMTranslator</code> redirect call sites (THE primary
+redirect surface)</h3>
+<p><code>llm.NewLLMTranslator(config) (*LLMTranslator, error)</code> is
+defined <code>pkg/translator/llm/llm.go:217</code>. Non-test callers
+(verified this pass):</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Site</th>
+<th>Component</th>
+<th>Current default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>cmd/cli/main.go:350</code></td>
+<td>cmd/cli</td>
+<td>provider flag (incl. ollama/llamacpp)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>cmd/markdown-translator/main.go:314</code></td>
+<td>markdown-translator</td>
+<td><code>deepseek</code> (API)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>cmd/preparation-translator/main.go:175</code></td>
+<td>preparation-translator</td>
+<td>resolves <code>*_API_KEY</code> (API-only already)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>cmd/unified-translator/main.go:469</code></td>
+<td>unified-translator</td>
+<td>API path</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>cmd/unified-translator/main.go:513</code></td>
+<td>unified-translator</td>
+<td>second provisioning site</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>pkg/api/batch_handlers.go:123</code></td>
+<td>api batch</td>
+<td>provider switch</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>pkg/api/batch_handlers.go:235</code></td>
+<td>api batch</td>
+<td>provider switch</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>pkg/api/handler.go:778</code></td>
+<td>api <code>createTranslator</code></td>
+<td>provider list</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>pkg/coordination/multi_llm.go:171</code></td>
+<td>coordination</td>
+<td>per-provider</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>pkg/distributed/coordinator.go:297</code></td>
+<td>distributed</td>
+<td>local translator (R1)</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>pkg/distributed/coordinator.go:302</code></td>
+<td>distributed</td>
+<td>local translator fallback (R1)</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>pkg/grpc/core_translator.go:320</code></td>
+<td>grpc</td>
+<td>provider routing</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>pkg/grpc/core_translator.go:361</code></td>
+<td>grpc</td>
+<td>provider routing (2nd)</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>pkg/preparation/coordinator.go:98</code></td>
+<td>preparation pkg</td>
+<td>per-provider</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>pkg/verification/polisher.go:124</code></td>
+<td>verification</td>
+<td>per-provider</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Draft missed #3, #5, #11, #13, #14, #15. (15 rows; #4/#5 same binary,
+#6/#7 same file, #10/#11 same file, #12/#13 same file → 12 files, 15
+call sites.) <code>pkg/challenge_runner/provider_challenges.go:51</code>
+references the STRING <code>TestNewLLMTranslator</code> in a
+<code>go test -run</code> — NOT a call site; leave or update test name
+only.</p>
+</blockquote>
+<h3 id="llama.cpp-16-non-test-files-fact">1.2 llama.cpp — 16 non-test
+files (FACT)</h3>
+<p><code>cmd/cli/main.go</code>,
+<code>cmd/ebook-translator/ebook_translator.go</code>,
+<code>cmd/markdown-translator/main.go</code>,
+<code>cmd/ssh-translation/main.go</code>,
+<code>cmd/translate-ssh/main.go</code>,
+<code>cmd/unified-translator/main.go</code>,
+<code>pkg/api/batch_handlers.go</code>, <code>pkg/api/handler.go</code>,
+<code>pkg/challenge_runner/provider_challenges.go</code>,
+<code>pkg/distributed/coordinator.go</code>,
+<code>pkg/distributed/pairing.go</code>,
+<code>pkg/grpc/core_translator.go</code>,
+<code>pkg/grpc/proto/translator.pb.go</code> (regen, do NOT hand-edit),
+<code>pkg/translator/llm/llamacpp_provider.go</code>,
+<code>pkg/translator/llm/llamacpp.go</code>,
+<code>pkg/translator/llm/llm.go</code>.</p>
+<p>unified-translator local flag/branch lines (FACT):
+<code>case "ssh"</code> <code>:304</code>, <code>case "llamacpp"</code>
+<code>:306</code>, <code>executeSSHTranslation</code> <code>:314</code>,
+<code>executeLlamaCppTranslation</code> <code>:447</code>, hardcoded
+gguf <code>:391</code>,
+<code>-ssh-host/-ssh-user/-ssh-password/-ssh-port</code>
+<code>:627-630</code>, <code>-llama-binary/-llama-model</code>
+<code>:634-635</code>, <code>case "ssh"</code> key-check
+<code>:692</code>, <code>case "llamacpp"</code> key-check
+<code>:697-699</code>, help text <code>:764-772</code>.</p>
+<h3 id="ollama-o1o13-fact-verified">1.3 Ollama — O1–O13 (FACT,
+verified)</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>ID</th>
+<th>Site (file:line)</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>O1</td>
+<td><code>pkg/translator/llm/ollama.go</code> (whole file,
+<code>OllamaClient</code>, <code>:11434</code>
+<code>/api/generate</code>)</td>
+<td>DELETE (§11.4.124 git-history first)</td>
+</tr>
+<tr>
+<td>O2</td>
+<td><code>pkg/translator/llm/llm.go:34</code>
+<code>ProviderOllama</code> const</td>
+<td>REMOVE</td>
+</tr>
+<tr>
+<td>O3</td>
+<td><code>pkg/translator/llm/llm.go:70</code>
+<code>ValidModels[ProviderOllama]</code></td>
+<td>REMOVE</td>
+</tr>
+<tr>
+<td>O4</td>
+<td><code>pkg/translator/llm/llm.go</code> “Ollama/LlamaCpp custom-model
+warn” arm</td>
+<td>REMOVE (both gone)</td>
+</tr>
+<tr>
+<td>O5</td>
+<td><code>pkg/translator/llm/llm.go</code>
+<code>case ProviderOllama:</code> factory branch
+(<code>NewLLMTranslatorWithConfig</code>, ~<code>:251-312</code>)</td>
+<td>REMOVE; unknown → error</td>
+</tr>
+<tr>
+<td>O6</td>
+<td><code>cmd/unified-translator/main.go:702</code>
+<code>case "mock", "ollama":</code> no-key arm</td>
+<td>REMOVE <code>ollama</code>; <code>case "ollama"</code> →
+error/redirect</td>
+</tr>
+<tr>
+<td>O7</td>
+<td><code>cmd/cli/main.go</code> <code>ollama</code> help +
+<code>-disable-local-llms</code> flag</td>
+<td>REMOVE refs; flag removed</td>
+</tr>
+<tr>
+<td>O8</td>
+<td><code>pkg/api/handler.go</code> <code>"name":"ollama"</code>
+models-list entry</td>
+<td>REMOVE</td>
+</tr>
+<tr>
+<td>O9</td>
+<td><code>pkg/api/handler.go</code> <code>validProviders</code>
+array</td>
+<td>REMOVE <code>ollama</code> (and <code>llamacpp</code>)</td>
+</tr>
+<tr>
+<td>O10</td>
+<td><code>pkg/api/batch_handlers.go</code> valid-provider switch</td>
+<td>REMOVE <code>ollama</code>/<code>llamacpp</code> arms</td>
+</tr>
+<tr>
+<td>O11</td>
+<td><code>pkg/coordination/multi_llm.go:280-283</code> Ollama discovery
+(<code>OLLAMA_ENABLED</code>/<code>OLLAMA_MODEL</code>) +
+<code>disableLocalLLMs</code> gate
+(<code>:62,94,111,139,152</code>)</td>
+<td>REMOVE the whole Ollama block + the <code>disableLocalLLMs</code>
+field+gates</td>
+</tr>
+<tr>
+<td>O12</td>
+<td><code>pkg/challenge_runner/provider_challenges.go</code>
+<code>ollama</code>/<code>llamacpp</code> in challenge set</td>
+<td>REMOVE both</td>
+</tr>
+<tr>
+<td>O13</td>
+<td><code>pkg/distributed/coordinator.go:231</code>
+<code>case "ollama","llamacpp":</code> priority arm</td>
+<td>REMOVE/redirect per R1</td>
+</tr>
+</tbody>
+</table>
+<p>Honest-boundary FACT (§11.4.6 — NOT a removal site):
+<code>pkg/storage/redis.go</code> Ollama reference is a COMMENT
+documenting the <code>:</code>-in-model-id cache-key fix; the fix code
+is provider-agnostic — KEEP it; reword the comment only.</p>
+<h3 id="ssh-remote-distributed-r1-fact">1.4 SSH-remote + distributed
+(R1) — FACT</h3>
+<ul>
+<li><strong><code>cmd/translate-ssh/main.go</code> +
+<code>cmd/ssh-translation/main.go</code> are llama-ONLY</strong> — grep
+for
+<code>NewLLMTranslator</code>/<code>VerifiedFactory</code>/<code>executeAPI</code>/<code>bridge.</code>
+in both returned EMPTY (verified). <code>ssh-translation</code>
+hardwires <code>Type:"llamacpp"</code>,
+<code>BinaryPath:"/usr/local/bin/llama.cpp"</code>. → Obsolete
+(R1).</li>
+<li><code>pkg/distributed/coordinator.go</code> — local arms:
+<code>getPriorityForProvider</code>
+<code>case "ollama","llamacpp"</code> <code>:231</code>; local
+translator provisioning <code>:297</code> + fallback <code>:302</code>;
+worker-provider parse comments <code>:206,215</code>. Redirect or remove
+per R1.</li>
+<li><code>pkg/distributed/pairing.go:37</code> —
+<code>LocalLLMs []string</code> (“ollama, llamacpp models”) worker
+field. REMOVE per R1.</li>
+<li><code>pkg/grpc/proto/translator.pb.go</code> provider enum comment
+lists ssh/ollama/llamacpp → REGENERATE proto (never hand-edit
+<code>.pb.go</code>).</li>
+<li><code>version_manager.go</code> / <code>ssh_pool.go</code> are
+GENERIC (no llama/ollama/gguf refs) — survive if R1=redirect; Obsolete
+only if R1=wholesale-remove distributed mode.</li>
+</ul>
+<h3 id="worker-configs-8-fact-draft-listed-5">1.5 Worker configs — 8
+(FACT, draft listed 5)</h3>
+<p><code>config_ollama.json</code>,
+<code>config.distributed.json</code>,
+<code>config.distributed.thinker.json</code>,
+<code>config.distributed.test.json</code>,
+<code>config.worker.json</code>,
+<code>config.production.template.json</code>,
+<code>config.worker.llamacpp.json</code>,
+<code>config.worker.ollama.json</code> — all under
+<code>internal/working/</code>, all carry a
+local-provider/<code>gguf</code>/<code>model_path</code>/<code>11434</code>/<code>ollama</code>
+marker. Audit each: DELETE the worker/distributed local fixtures; for
+shared templates (e.g. <code>config.production.template.json</code>)
+STRIP the local arm rather than delete.</p>
+<h3 id="helper-scripts-15-fact-draft-listed-4">1.6 Helper scripts — 15
+(FACT, draft listed 4)</h3>
+<p><code>internal/scripts/</code>:
+<code>batch_translate_llamacpp.sh</code>,
+<code>batch_translate_markdown_llamacpp.sh</code>,
+<code>check_llamacpp.sh</code>, <code>install_llamacpp.sh</code>,
+<code>llm_translation.sh</code>,
+<code>monitor_llamacpp_translation.sh</code>,
+<code>setup_llama.py</code>, <code>test_distributed_llamacpp.sh</code>,
+<code>test_llama.py</code>, <code>translate_llm_only.py</code>,
+<code>translate_markdown_llamacpp_production.sh</code>,
+<code>translate_markdown_llamacpp.sh</code>,
+<code>translate_markdown_multillm.sh</code>,
+<code>translate_with_llama.py</code>, <code>translator-ssh-llama</code>.
+All <code>feature-removed</code> (R1 — local-only tooling).</p>
+<h3 id="test-cluster-rewriteremove-under-11.4.4311.4.115">1.7 Test
+cluster (rewrite/remove under §11.4.43/§11.4.115)</h3>
+<p>llama: <code>llamacpp_test.go</code>,
+<code>llamacpp_provider_test.go</code>,
+<code>llamacpp_buildargs_defect_test.go</code> + arms in
+<code>llm_test.go</code>, <code>provider_clients_test.go</code>,
+<code>integration_test.go</code>,
+<code>cmd/unified-translator/ssh_command_test.go</code>,
+<code>cmd/cli/main_test.go</code>,
+<code>cmd/markdown-translator/main_test.go</code>. ollama:
+<code>ollama_test.go</code>, <code>ollama_options_defect_test.go</code>
++ arms in the above + <code>cmd/translate-ssh/main_test.go</code>,
+<code>pkg/coordination/multi_llm_test.go</code>/<code>multi_llm_fault_test.go</code>,
+<code>pkg/distributed/*_test.go</code>,
+<code>pkg/translator/universal_test.go</code>,
+<code>test/unit/coordination_test.go</code>. KEEP
+<code>pkg/storage/*_cachekey_*_test.go</code> (cache-key tests — reword
+ollama example only).</p>
+<hr />
+<h2 id="drop-in-confirmation-the-one-prerequisite-gap">2. Drop-in
+confirmation + the ONE prerequisite gap</h2>
+<p><strong>Interfaces (FACT):</strong> - <code>llm.LLMClient</code>
+(<code>pkg/translator/llm/llm.go:211</code>):
+<code>Translate(ctx,text,prompt)(string,error)</code> +
+<code>GetProviderName() string</code>. -
+<code>translator.Translator</code>
+(<code>pkg/translator/translator.go:36</code>):
+<code>Translate(ctx,text,context)(string,error)</code> +
+<code>TranslateWithProgress(...)</code> + <code>GetStats()</code> +
+<code>GetName()</code>. <strong>No
+<code>GetProviderName()</code>.</strong> -
+<code>bridge.BestTranslator(ctx, task) (translator.Translator, []string, error)</code>
+— backed by
+<code>VerifiedFactory.CreateTranslatorWithFallback → *llm.LLMTranslator</code>
+(<code>pkg/translator/llm/verified_factory.go:108</code>).
+<code>*LLMTranslator</code> is the SAME concrete type
+<code>NewLLMTranslator</code> returns (<code>llm.go:217</code>).</p>
+<p><strong>Verdict — the 15 <code>NewLLMTranslator</code> call sites:
+clean drop-in.</strong> They consume the high-level
+<code>Translate</code>/<code>TranslateWithProgress</code> surface (the
+<code>Translator</code> contract), which
+<code>bridge.BestTranslator</code> satisfies via the identical
+<code>*LLMTranslator</code>. Replace
+<code>llm.NewLLMTranslator(config)</code> with
+<code>bridge.BestTranslator(ctx, task)</code> (default provider becomes
+the strongest verified model, not a hardcoded string).</p>
+<p><strong>Prerequisite gap P-1 (the ONLY hand-wave-free blocker) — two
+<code>llm.LLMClient</code> consumers:</strong> -
+<code>pkg/markdown/simple_workflow.go:22</code> — field
+<code>LLMProvider llm.LLMClient</code>. -
+<code>pkg/modelsbridge/bridge.go:29,35</code> — wraps
+<code>llm.LLMClient</code>, calls <code>GetProviderName()</code>
+(<code>:43,103</code>).</p>
+<p><code>bridge.BestTranslator</code> returns
+<code>translator.Translator</code>, which lacks
+<code>GetProviderName()</code> — so it is NOT assignable to an
+<code>llm.LLMClient</code> field. <strong>Resolution (tracked work item
+before R-1 touches these two):</strong> add a tiny adapter exposing
+<code>Translate(ctx,text,prompt)</code> + <code>GetProviderName()</code>
+over the bridge — source the provider name from
+<code>bridge.BestModel(ctx,task).ProviderID</code>. Either (a)
+<code>bridge</code> exposes a
+<code>BestClient(ctx,task) (llm.LLMClient, error)</code> helper, or (b)
+a thin local adapter in each consumer wraps
+<code>BestTranslator</code>+<code>BestModel</code>. Recommended:
+<strong>(a)</strong> one <code>bridge.BestClient</code> helper (single,
+tested, reused) — keeps the two consumers a clean drop-in and avoids
+duplicate adapters. This is a small additive bridge method; it is a
+PREREQUISITE for redirecting those two files, not a blocker for the
+other 13 sites.</p>
+<hr />
+<h2 id="contention-map-parallelization">3. Contention map +
+parallelization</h2>
+<p>Removal/redirect steps and the files each touches, ordered so they
+don’t collide (§11.4.58/§11.4.119 — one owner per file). Disjoint-file
+steps parallelize; same-file steps serialize.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Step</th>
+<th>Files (exclusive owner)</th>
+<th>Parallel-safe with</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P-1 (bridge <code>BestClient</code> adapter)</td>
+<td><code>pkg/bridge/bridge.go</code> (+ test)</td>
+<td>everything (additive, no removal)</td>
+</tr>
+<tr>
+<td>R-1a redirect cmd binaries</td>
+<td><code>cmd/cli/main.go</code>,
+<code>cmd/markdown-translator/main.go</code>,
+<code>cmd/preparation-translator/main.go</code>,
+<code>cmd/unified-translator/main.go</code>,
+<code>cmd/ebook-translator/ebook_translator.go</code></td>
+<td>R-1b, R-1c (disjoint files)</td>
+</tr>
+<tr>
+<td>R-1b redirect api/grpc</td>
+<td><code>pkg/api/handler.go</code>,
+<code>pkg/api/batch_handlers.go</code>,
+<code>pkg/grpc/core_translator.go</code></td>
+<td>R-1a, R-1c</td>
+</tr>
+<tr>
+<td>R-1c redirect pkg coordinators</td>
+<td><code>pkg/coordination/multi_llm.go</code>,
+<code>pkg/preparation/coordinator.go</code>,
+<code>pkg/verification/polisher.go</code></td>
+<td>R-1a, R-1b</td>
+</tr>
+<tr>
+<td>R-1d redirect LLMClient consumers (needs P-1)</td>
+<td><code>pkg/markdown/simple_workflow.go</code>,
+<code>pkg/modelsbridge/bridge.go</code></td>
+<td>after P-1; disjoint from R-1a/b/c</td>
+</tr>
+<tr>
+<td>R-2 remove Ollama</td>
+<td><code>pkg/translator/llm/{ollama.go,llm.go}</code>, lists in
+handler/batch (SHARED with R-1b → SERIALIZE after R-1b),
+<code>provider_challenges.go</code>, <code>multi_llm.go</code> (SHARED
+with R-1c → SERIALIZE after R-1c)</td>
+<td>NOT parallel with R-1b/R-1c on shared files</td>
+</tr>
+<tr>
+<td>R-3 remove llama.cpp</td>
+<td><code>llamacpp.go</code>, <code>llamacpp_provider.go</code>,
+<code>llm.go</code> (SHARED with R-2 → SERIALIZE), proto regen,
+<code>pkg/hardware</code> (§11.4.124 investigate-first, separate
+commit)</td>
+<td>serialize with R-2 on <code>llm.go</code></td>
+</tr>
+<tr>
+<td>R-4 SSH/distributed (R1)</td>
+<td><code>cmd/translate-ssh</code>, <code>cmd/ssh-translation</code>,
+<code>pkg/distributed/{coordinator.go,pairing.go}</code>, worker
+configs, scripts</td>
+<td>distributed files disjoint from R-2/R-3 except
+<code>coordinator.go</code> (already touched in R-1c/R-2 —
+serialize)</td>
+</tr>
+<tr>
+<td>R-5 gate + retest</td>
+<td>new gate script, docs, <code>.golangci.yml</code>,
+session-resumption file</td>
+<td>last</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Serialization hot files (MUST be single-owner across
+steps):</strong> <code>pkg/translator/llm/llm.go</code> (R-2 + R-3),
+<code>pkg/api/handler.go</code> (R-1b + R-2 lists),
+<code>pkg/coordination/multi_llm.go</code> (R-1c + R-2/O11),
+<code>pkg/distributed/coordinator.go</code> (R-1c + R-2/O13 + R-4).
+Assign each to ONE agent across its steps, or sequence them.</p>
+<p><strong>What each removal BREAKS</strong> (must be edited in
+lockstep): the factory switch
+<code>case ProviderOllama/ProviderLlamaCpp</code> (<code>llm.go</code>),
+<code>validProviders</code> arrays (<code>handler.go</code>,
+<code>batch_handlers.go</code>), proto enum
+(<code>translator.pb.go</code> → regen),
+<code>LlamaCppProviderConfig</code> type (referenced by
+<code>cmd/translate-ssh</code>, <code>cmd/translator</code>
+<code>:36</code> — both removed/redirected in R-4), the §11.4.153
+feature-ledger rows for llama.cpp/Ollama/SSH (→ §11.4.90 Obsolete, §5),
+and the test cluster (§1.7).</p>
+<hr />
+<h2 id="cm-no-local-runtime-gate-paired-1.1-mutation">4.
+<code>CM-NO-LOCAL-RUNTIME</code> gate + paired §1.1 mutation</h2>
+<p><strong>Pre-build gate <code>CM-NO-LOCAL-RUNTIME</code></strong>
+(generalises bridge-doc <code>CM-NO-LLAMACPP</code>): -
+<strong>Scans</strong> <code>cmd/ + pkg/ + internal/</code>
+<code>*.go</code> and <code>internal/working/*.json</code>,
+<strong>EXCLUDING</strong> submodule trees (<code>llms_verifier/</code>,
+<code>helix_qa/</code>, <code>vision_engine/</code>), the
+removal-history test files, and the
+<code>pkg/translator/llm/mock.go</code> unit seam (mocks permitted in
+unit tests only, §11.4.27). - <strong>FAILs</strong> on any occurrence
+of the forbidden set: <code>llama.cpp</code> · <code>llamacpp</code> ·
+<code>llama-cli</code> · <code>ProviderLlamaCpp</code> ·
+<code>ProviderOllama</code> · <code>OllamaClient</code> ·
+<code>LlamaCppProviderConfig</code> · <code>:11434</code> /
+<code>11434</code> · <code>OLLAMA_ENABLED</code> ·
+<code>OLLAMA_MODEL</code> · <code>-disable-local-llms</code> · (R1=A)
+<code>executeSSHTranslation</code> / <code>translate-ssh</code> /
+<code>ssh-translation</code> / <code>LocalLLMs</code>. - <strong>JSON
+config sub-assert:</strong> no tracked
+<code>internal/working/*.json</code> carries
+<code>"default_provider":"llamacpp"</code> | <code>"ollama"</code> |
+<code>gguf</code> | <code>model_path</code> | <code>n_gpu_layers</code>
+| <code>11434</code>. - <strong>Paired §1.1 mutation:</strong>
+re-introduce one forbidden token (e.g. re-add the
+<code>ProviderOllama</code> const in <code>llm.go</code>) → assert gate
+FAILs; restore → assert PASS. (gate-code = separate work item.)</p>
+<p><strong>No-key SKIP guard (R2, §11.4.3):</strong> a test asserting
+that with NO <code>*_API_KEY</code> set, every translate entry point
+returns an honest hard error / SKIP-with-reason — NEVER a local
+fallback. The bridge ALREADY enforces this
+(<code>bootstrapInProcess</code> returns “no provider API keys set …
+(local llama.cpp fallback is not permitted)”,
+<code>bridge.go:158-163</code>) — the guard pins that behaviour. Paired
+mutation: re-add a local fallback in any redirected entry point → guard
+FAILs.</p>
+<p><strong>Per-component §11.4.115 RED-first redirect tests:</strong>
+per redirected component, <code>RED_MODE=1</code> reproduces “component
+still provisions a local client” on the pre-fix artifact; flipped
+<code>RED_MODE=0</code> is the standing guard asserting it provisions
+via <code>bridge.BestTranslator</code>. Register into the §11.4.135
+regression suite.</p>
+<hr />
+<h2 id="r2-require-keys-everywhere-map-honest-hard-fail-11.4.69">5. R2 —
+require-keys-everywhere map (honest hard-fail, §11.4.69)</h2>
+<p>Every entry point that must hard-fail (no silent local fallback) when
+no API key + no verified model is available:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Entry point</th>
+<th>Current no-key behaviour</th>
+<th>Post-R2 behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pkg/bridge</code>
+<code>Open</code>/<code>bootstrapInProcess</code></td>
+<td>already hard-errors (<code>bridge.go:158-163</code>)</td>
+<td>unchanged — this IS the canonical honest path</td>
+</tr>
+<tr>
+<td><code>cmd/unified-translator/main.go:702</code>
+<code>case "mock","ollama"</code></td>
+<td>falls back to mock/ollama no-key arm</td>
+<td>drop <code>ollama</code>; redirect default to bridge → bridge
+hard-errors if no key</td>
+</tr>
+<tr>
+<td><code>cmd/cli/main.go:350</code></td>
+<td>provider+<code>-disable-local-llms</code></td>
+<td>bridge path → hard-error if no key; remove local flags</td>
+</tr>
+<tr>
+<td><code>cmd/markdown-translator/main.go:314</code></td>
+<td><code>deepseek</code> default needs key</td>
+<td>bridge path → hard-error if no key</td>
+</tr>
+<tr>
+<td><code>cmd/preparation-translator/main.go:175</code></td>
+<td>resolves <code>*_API_KEY</code>, empty = honest</td>
+<td>bridge path → hard-error if no key (already honest)</td>
+</tr>
+<tr>
+<td><code>cmd/ebook-translator/ebook_translator.go</code></td>
+<td><code>PROVIDER:llamacpp</code> detection</td>
+<td>bridge path; remove llamacpp detection</td>
+</tr>
+<tr>
+<td><code>pkg/api/handler.go:778</code>
+<code>createTranslator</code></td>
+<td>provider list</td>
+<td>bridge path → 4xx/honest error if no key</td>
+</tr>
+<tr>
+<td><code>pkg/api/batch_handlers.go:123,235</code></td>
+<td>provider switch</td>
+<td>bridge path → honest error</td>
+</tr>
+<tr>
+<td><code>pkg/grpc/core_translator.go:320,361</code></td>
+<td>provider routing</td>
+<td>bridge path → gRPC error status if no key</td>
+</tr>
+<tr>
+<td><code>pkg/coordination/multi_llm.go:171</code></td>
+<td>per-provider + Ollama discovery</td>
+<td>bridge path; remove Ollama discovery +
+<code>disableLocalLLMs</code></td>
+</tr>
+<tr>
+<td><code>pkg/preparation/coordinator.go:98</code>,
+<code>pkg/verification/polisher.go:124</code></td>
+<td>per-provider</td>
+<td>bridge path → honest error</td>
+</tr>
+<tr>
+<td><code>pkg/distributed/coordinator.go:297,302</code></td>
+<td>local translator provisioning</td>
+<td>R1: remove (A) or redirect worker body to verified API (B)</td>
+</tr>
+</tbody>
+</table>
+<p>CI with no keys ⇒ integration/e2e/Challenge suites SKIP-with-reason
+(§11.4.3); unit tests use <code>mock.go</code> (§11.4.27). No
+re-introduced silent local fallback (would re-violate the mandate).</p>
+<hr />
+<h2 id="obsolete-entries-to-create-operator-authorized-via-d1d2r1">6.
+§11.4.122 / §11.4.90 — Obsolete entries to create (operator-authorized
+via D1/D2/R1)</h2>
+<p>Each removal is an operator-authorized capability drop (D1 remove
+local runtimes; D2 forbid both; R1 Obsolete SSH/distributed). Create
+these §11.4.90 Obsolete tracker entries (status
+<code>Obsolete (→ Fixed.md)</code>), each with
+<code>Obsolete-Details</code> (Since / Reason /
+Superseding-item=<code>pkg/bridge</code> / Triple-check evidence = this
+doc’s §1):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Reason</th>
+<th>Gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cmd/translate-ssh</code> (llama-only, grep-empty for API
+path)</td>
+<td><code>superseded-by-design-change</code></td>
+<td>R1</td>
+</tr>
+<tr>
+<td><code>cmd/ssh-translation</code> (<code>Type:"llamacpp"</code>
+hardwired)</td>
+<td><code>superseded-by-design-change</code></td>
+<td>R1</td>
+</tr>
+<tr>
+<td><code>pkg/translator/llm/llamacpp.go</code>,
+<code>llamacpp_provider.go</code></td>
+<td><code>superseded-by-design-change</code></td>
+<td>always (after §11.4.124 git-history)</td>
+</tr>
+<tr>
+<td><code>pkg/translator/llm/ollama.go</code></td>
+<td><code>superseded-by-design-change</code></td>
+<td>always (after §11.4.124 git-history)</td>
+</tr>
+<tr>
+<td>8 worker/distributed configs (§1.5)</td>
+<td><code>feature-removed</code></td>
+<td>worker/distributed = always; templates = strip-local-arm</td>
+</tr>
+<tr>
+<td>15
+<code>internal/scripts/*llama*</code>/<code>*llm*</code>/<code>multillm</code>/<code>translator-ssh-llama</code>
+(§1.6)</td>
+<td><code>feature-removed</code></td>
+<td>R1</td>
+</tr>
+<tr>
+<td><code>pkg/hardware</code> (imported only by
+<code>llamacpp.go</code>)</td>
+<td>dead-code candidate</td>
+<td>§11.4.124 investigate-FIRST, separate removal-only commit citing
+git-history</td>
+</tr>
+<tr>
+<td>feature-ledger rows (§11.4.153) for llama.cpp / Ollama /
+SSH-worker</td>
+<td><code>feature-removed</code></td>
+<td>with their removal commits</td>
+</tr>
+</tbody>
+</table>
+<p><strong>NOT Obsolete (live non-local consumers — KEEP):</strong>
+<code>pkg/models</code> (imported by <code>cmd/server</code>,
+<code>handler.go</code>, <code>user_auth.go</code>),
+<code>pkg/distributed/version_manager.go</code> +
+<code>ssh_pool.go</code> (generic; Obsolete only if R1=wholesale
+distributed removal), <code>pkg/storage/redis.go</code> cache-key fix
+(provider-agnostic), <code>cmd/model-bridge</code> (the bridge CLI).</p>
+<hr />
+<h2
+id="ordered-execution-checklist-the-implementation-stream-runs-this">7.
+Ordered execution checklist (the implementation stream runs this)</h2>
+<p><strong>Pre-req MET:</strong> <code>pkg/bridge</code> exists with
+<code>BestTranslator</code>/<code>Invoke</code>/<code>BestModel</code>/<code>ListVerified</code>
+(verified).</p>
+<ul>
+<li><strong>P-0 — Operator gate.</strong> R1 (distributed/SSH remove vs
+redirect-worker-to-API) + R2 confirm (no-key → SKIP, no silent fallback)
+— both already granted via D1/D2/R1; confirm R1=A (remove) vs R1=B
+(redirect) before R-4. (§11.4.66/§11.4.101/§11.4.122.)</li>
+<li><strong>P-1 — Add
+<code>bridge.BestClient(ctx,task) (llm.LLMClient, error)</code>
+adapter</strong> (additive, no removal). Tested. Unblocks R-1d. (Closes
+the only drop-in gap.)</li>
+<li><strong>R-1 — Redirect (additive; locals still present; builds stay
+green).</strong> R-1a cmd binaries · R-1b api/grpc · R-1c pkg
+coordinators (parallel — disjoint files) → then R-1d the two
+<code>LLMClient</code> consumers (after P-1). Each component: §11.4.115
+RED-first redirect test.</li>
+<li><strong>R-2 — Remove Ollama</strong> (§11.4.124 git-history first;
+separate commit). O1–O13; reword <code>redis.go</code> comment;
+rewrite/remove ollama tests. Serialize on
+<code>llm.go</code>/<code>handler.go</code>/<code>multi_llm.go</code>/<code>coordinator.go</code>.</li>
+<li><strong>R-3 — Remove llama.cpp</strong> (§11.4.124 + §11.4.122). 16
+files; regenerate proto; delete <code>LlamaCppProviderConfig</code>;
+investigate <code>pkg/hardware</code> orphaning (separate removal-only
+commit with git-history evidence).</li>
+<li><strong>R-4 — SSH/distributed per R1.</strong> (A) Obsolete the 2
+SSH binaries + distributed local arms + 8 configs + 15 scripts +
+<code>-provider ssh</code>; OR (B) keep distributed, redirect worker
+body to verified API (build the API-worker body — does not exist today).
+Track each as §11.4.90 Obsolete.</li>
+<li><strong>R-5 — Gate + full retest.</strong> Add
+<code>CM-NO-LOCAL-RUNTIME</code> + paired mutation + no-key SKIP guard +
+worker-config JSON gate. Update <code>Documentation/AGENTS.md</code>,
+README, <code>.golangci.yml</code>, the §11.4.131 session-resumption
+file. Full-suite retest (§11.4.40). <code>docs/qa/&lt;run-id&gt;/</code>
+transcript for the bridge-backed translate path (§11.4.83).</li>
+</ul>
+<hr />
+<h2 id="angle-impact-gono-go-re-confirmed">8. §11.4.145 8-angle impact
+GO/NO-GO (re-confirmed)</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Angle</th>
+<th>Finding (FACT)</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 Correctness</td>
+<td>Bridge returns the same <code>*LLMTranslator</code>; deleted factory
+branches → unknown-provider errors via existing default arm.</td>
+<td>GO</td>
+</tr>
+<tr>
+<td>2 Regression-defaults</td>
+<td><code>config.json default_provider:"openai"</code> unaffected; 8
+worker/distributed configs default local → delete/strip (§1.5).</td>
+<td>GO (with config delete)</td>
+</tr>
+<tr>
+<td>3 Latent/contract</td>
+<td>factory switch, <code>validProviders</code>, proto enum,
+<code>LlamaCppProviderConfig</code> consumers all need lockstep edit
+(§3).</td>
+<td>GO (lockstep)</td>
+</tr>
+<tr>
+<td>4 Security</td>
+<td>removes <code>exec</code> of llama-cli + SSH remote-binary
+install/upload — net RCE/supply-chain reduction.</td>
+<td>GO (improves)</td>
+</tr>
+<tr>
+<td>5 Performance</td>
+<td>all inference → network API; bridge fallback chain mitigates.</td>
+<td>GO</td>
+</tr>
+<tr>
+<td>6 Host/data safety</td>
+<td>removes host subprocess + remote install (§11.4.133-adjacent).</td>
+<td>GO (improves)</td>
+</tr>
+<tr>
+<td>7 Cross-feature</td>
+<td>version_manager generic (survives R1=B); redis cache-key fix kept;
+<code>OLLAMA_ENABLED</code> contract removed.</td>
+<td>GO</td>
+</tr>
+<tr>
+<td>8 Business-logic</td>
+<td>tests assume locals (§1.7); no-key CI → SKIP (R2, bridge already
+hard-errors).</td>
+<td>GO (R2 honest)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Overall: GO.</strong> R1 choice (A vs B) is the only operator
+gate before R-4; both pre-authorized in principle.</p>
+<h2
+id="sources-verified-2026-06-15-11.4.150-carried-from-the-companion-draft">Sources
+verified 2026-06-15 (§11.4.150 — carried from the companion draft)</h2>
+<ul>
+<li>https://www.sitepoint.com/hybrid-cloudlocal-llm-the-complete-architecture-guide-2026/</li>
+<li>https://www.getmaxim.ai/articles/top-5-llm-gateways-in-2025-the-definitive-guide-for-production-ai-applications/</li>
+<li>https://dev.to/akarshc/how-to-test-llm-integrations-in-ci-without-burning-tokens-1ibh</li>
+<li>https://developers.redhat.com/articles/2026/05/27/how-we-built-integration-testing-fast-moving-ai-backend</li>
+</ul>
+</body>
+</html>
