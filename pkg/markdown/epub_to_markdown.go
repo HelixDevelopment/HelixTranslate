@@ -18,6 +18,11 @@ import (
 type EPUBToMarkdownConverter struct {
 	preserveImages bool
 	imagesDir      string
+	// inCode is >0 while converting the descendants of a <code> element, where
+	// the text is literal-by-fence (wrapped in backticks) and MUST NOT have its
+	// markdown metacharacters backslash-escaped — escaping them would corrupt the
+	// code content (`file_name` would ship as `file\_name`).
+	inCode int
 }
 
 // NewEPUBToMarkdownConverter creates a new converter
@@ -433,6 +438,17 @@ func (c *EPUBToMarkdownConverter) convertNode(n *html.Node, md *strings.Builder,
 		// convertHTMLToMarkdown, so this does not reintroduce block-edge bugs.
 		text := collapseInlineWhitespace(n.Data)
 		if text != "" {
+			// Outside a <code> span, the EPUB source text is plain prose whose
+			// markdown metacharacters (`*`, `_`, `[`, etc.) are LITERAL. They must
+			// be backslash-escaped so the markdown->EPUB return trip (which honours
+			// CommonMark backslash escapes via protectEscapes/restoreEscapes) does
+			// NOT reinterpret them as emphasis/links and permanently corrupt the
+			// user-visible text (e.g. "C_3 and C_4" -> "C<em>3 and C</em>4").
+			// Inside <code> the content is literal-by-fence (backtick-wrapped) and
+			// must be emitted verbatim.
+			if c.inCode == 0 {
+				text = escapeMarkdownText(text)
+			}
 			md.WriteString(text)
 		}
 		return
@@ -480,7 +496,9 @@ func (c *EPUBToMarkdownConverter) convertNode(n *html.Node, md *strings.Builder,
 			md.WriteString("*")
 		case "code":
 			md.WriteString("`")
+			c.inCode++
 			c.convertChildren(n, md, depth)
+			c.inCode--
 			md.WriteString("`")
 		case "pre":
 			// A <pre> holds preformatted text whose newlines and indentation are
@@ -680,6 +698,30 @@ func collapseInlineWhitespace(s string) string {
 		collapsed += " "
 	}
 	return collapsed
+}
+
+// markdownInlineMeta is the set of inline markdown metacharacters that the
+// markdown->EPUB direction interprets (emphasis `*`/`_`, inline code backtick,
+// link/image brackets and parens) and that its protectEscapes/restoreEscapes
+// pair will faithfully restore from a leading backslash. Escaping these in the
+// EPUB->markdown plain-text output keeps literal prose ("C_3", "a*b", "[x](y)")
+// from being re-interpreted as formatting on the return trip.
+const markdownInlineMeta = "`*_[]()"
+
+// escapeMarkdownText backslash-escapes the inline markdown metacharacters in a
+// plain-text run so a markdown->EPUB re-parse treats them as literals. The
+// backslash itself is escaped first so an already-present "\" is preserved
+// rather than being consumed as an escape of the following character.
+func escapeMarkdownText(s string) string {
+	var b strings.Builder
+	b.Grow(len(s) + 8)
+	for _, r := range s {
+		if r == '\\' || strings.ContainsRune(markdownInlineMeta, r) {
+			b.WriteByte('\\')
+		}
+		b.WriteRune(r)
+	}
+	return b.String()
 }
 
 // isASCIISpace reports whether b is one of the HTML whitespace bytes.
