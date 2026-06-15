@@ -644,7 +644,7 @@ func parseFlags() *UnifiedConfig {
 
 	// Auto-detect output file if not specified
 	if config.OutputFile == "" {
-		config.OutputFile = generateOutputFilename(config.InputFile)
+		config.OutputFile = generateOutputFilename(config.InputFile, config.TargetLang)
 	}
 
 	// Provider-specific validation
@@ -789,7 +789,13 @@ func generateSessionID() string {
 	return fmt.Sprintf("tx-%d", time.Now().UnixNano())
 }
 
-func generateOutputFilename(inputFile string) string {
+// generateOutputFilename derives the auto-generated output path from the input
+// file AND the requested target language. The language tag MUST reflect
+// targetLang — hardcoding "_sr" silently mislabelled non-Serbian translations
+// (e.g. a French translation written to book_sr.epub), a §11.4 wrong-output
+// defect. An empty targetLang falls back to "sr" (the CLI's default) so the
+// behaviour is deterministic (§11.4.6, no guessing).
+func generateOutputFilename(inputFile, targetLang string) string {
 	base := filepath.Base(inputFile)
 	// Trim the actual extension (case-preserving) so UPPERCASE/mixed-case
 	// extensions (e.g. "Story.EPUB", "Tale.Fb2") are stripped just like
@@ -797,7 +803,12 @@ func generateOutputFilename(inputFile string) string {
 	// the original-case basename and leave the extension embedded in the name.
 	baseName := strings.TrimSuffix(base, filepath.Ext(base))
 
-	return filepath.Join(filepath.Dir(inputFile), baseName+"_sr.epub")
+	lang := strings.TrimSpace(targetLang)
+	if lang == "" {
+		lang = "sr"
+	}
+
+	return filepath.Join(filepath.Dir(inputFile), baseName+"_"+lang+".epub")
 }
 
 func generateOriginalMDPath(inputFile string) string {

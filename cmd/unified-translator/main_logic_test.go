@@ -38,7 +38,10 @@ func TestGenerateOutputFilename(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := generateOutputFilename(tt.input); got != tt.want {
+			// Existing cases pin the default target lang (sr), so the suffix
+			// stays "_sr.epub"; the lang-honouring behaviour is asserted in
+			// TestGenerateOutputFilename_HonorsTargetLang.
+			if got := generateOutputFilename(tt.input, "sr"); got != tt.want {
 				t.Fatalf("generateOutputFilename(%q) = %q, want %q", tt.input, got, tt.want)
 			}
 		})
@@ -64,7 +67,7 @@ func TestGenerateTranslatedMDPath(t *testing.T) {
 // pipeline does not overwrite original with translated, etc.
 func TestPathHelpersDistinct(t *testing.T) {
 	in := "/d/book.fb2"
-	out := generateOutputFilename(in)
+	out := generateOutputFilename(in, "sr")
 	orig := generateOriginalMDPath(in)
 	tr := generateTranslatedMDPath(in)
 	if out == orig || out == tr || orig == tr {

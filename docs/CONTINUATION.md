@@ -1,9 +1,9 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 54
-**Last modified:** 2026-06-15T06:15:00Z
+**Revision:** 55
+**Last modified:** 2026-06-15T07:00:00Z
 
-<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 45 real bugs (20 submodule + 25 main) -->
+<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 48 real bugs (21 submodule + 27 main) -->
 <!-- OPERATOR AWAY until morning 2026-06-15: autonomous; priority = most-stable build; release tag DEFERRED (zero-risk, needs full §11.4.40). Full ./... sweep GREEN at c56363c. -->
 
 ### Session 2026-06-14v — cross-submodule bug-hunt campaign (§11.4.28 equal-codebase)
@@ -47,7 +47,10 @@ parallel session (64b7d08) so it was integrated, NOT double-fixed.** Host API ra
 | **MAIN** pkg/sshworker | ProgressTracker.GetProgress leaked the live Details map into the snapshot → concurrent map read+write race (event subscribers); deep-copy under RLock | 3065029 |
 | **MAIN** pkg/models | FindBestModel tie-break iterated a map (random order) → different "best" model selected run-to-run on identical inputs (§11.4.50, translation-critical); sort candidates by ID | (wave 14) |
 | **MAIN** pkg/deployment | UpdateAllServices double-tagged pinned images (`repo:v1.2.3:latest` invalid) corrupting every pinned service + SSHDeployConfig.Validate mutated a shared config (data race); tag-aware helper + pure-validator/withDefaults-copy + §11.4.120 reconcile | (wave 14) |
-| **MAIN** pkg/challenge_runner | 6 mutation challenge scripts had NO trap → an interrupted `go test` left REAL project source mutated with a `.bak` (§11.4.84 residue corruption in the anti-bluff harness itself); restore-trap armed before each sed | (wave 14) |
+| **MAIN** pkg/challenge_runner | 6 mutation challenge scripts had NO trap → an interrupted `go test` left REAL project source mutated with a `.bak` (§11.4.84 residue corruption in the anti-bluff harness itself); restore-trap armed before each sed | 9539233 |
+| **security submodule** | SSRF guard octal/hex IP-encoding bypass (`0177.0.0.1`→127.0.0.1, `012.0.0.1`→10.0.0.1 reach INTERNAL via cgo/libc inet_aton) — a real SSRF vuln; ParseInetAtonIP added (verified vs compiled C inet_aton) | 1ef9f4e |
+| **MAIN** cmd/unified-translator | auto output filename hardcoded `_sr.epub` ignoring -target-lang → a French/German/… translation silently labelled Serbian (output + session-report filenames); honors targetLang + §11.4.120 reconcile | (wave 15) |
+| **MAIN** pkg/version | codebase hasher used strings.Contains for excludes → over-excluded `vendored/`/`prod.env.json` + dead globs (`*.log` never matched) → corrupted the distributed worker version-sync hash (false match/spurious resync); proper component + glob match | (wave 15) |
 
 **Flagged not-hermetically-testable (honest §11.4.6, NOT fabricated):** pkg/sshworker UploadFile/DownloadFile/UploadData build unquoted shell commands (`mkdir -p %s`, `cat %s`, `> %s`) — a remote path with spaces/metacharacters breaks/injects; no executor seam to test hermetically (dials real *ssh.Client). Worth a command-runner-interface refactor → P-list. Also ExecuteCommand hardcodes ExitCode:1 (loses *ssh.ExitError fidelity) — same live-SSH-only constraint.
 

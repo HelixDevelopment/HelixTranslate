@@ -85,6 +85,42 @@ func (h *CodebaseHasher) CalculateHash() (string, error) {
 	return hex.EncodeToString(hasher.Sum(nil)), nil
 }
 
+// matchesExclude reports whether the given path matches a single exclude
+// pattern. Glob patterns (containing '*' or '?') are matched against the path's
+// base name via filepath.Match so e.g. "*.log" / "coverage*.out" actually work.
+// Plain tokens (e.g. "vendor", ".git", ".env") are matched against whole path
+// COMPONENTS, never arbitrary substrings — so "vendored" is NOT excluded by the
+// "vendor" token and "prod.env.json" is NOT excluded by the ".env" token, while
+// a real "vendor" directory or a real ".env" file still are.
+func matchesExclude(path, pattern string) bool {
+	base := filepath.Base(path)
+	if strings.ContainsAny(pattern, "*?[") {
+		if ok, err := filepath.Match(pattern, base); err == nil && ok {
+			return true
+		}
+		return false
+	}
+	// Plain token: match against any full path component (handles both '/'
+	// and OS-native separators).
+	normalized := filepath.ToSlash(path)
+	for _, comp := range strings.Split(normalized, "/") {
+		if comp == pattern {
+			return true
+		}
+	}
+	return false
+}
+
+// isExcluded reports whether path matches any configured exclude pattern.
+func (h *CodebaseHasher) isExcluded(path string) bool {
+	for _, pattern := range h.ExcludePatterns {
+		if matchesExclude(path, pattern) {
+			return true
+		}
+	}
+	return false
+}
+
 // processDirectory recursively processes a directory
 func (h *CodebaseHasher) processDirectory(hasher io.Writer, dir string) error {
 	return filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
@@ -95,10 +131,8 @@ func (h *CodebaseHasher) processDirectory(hasher io.Writer, dir string) error {
 		// Skip directories
 		if info.IsDir() {
 			// Check if directory should be excluded
-			for _, pattern := range h.ExcludePatterns {
-				if strings.Contains(path, pattern) {
-					return filepath.SkipDir
-				}
+			if h.isExcluded(path) {
+				return filepath.SkipDir
 			}
 			return nil
 		}
@@ -141,11 +175,9 @@ func (h *CodebaseHasher) processRootFiles(hasher io.Writer) error {
 
 // shouldIncludeFile determines if a file should be included in the hash
 func (h *CodebaseHasher) shouldIncludeFile(path string) bool {
-	// Check exclude patterns first
-	for _, pattern := range h.ExcludePatterns {
-		if strings.Contains(path, pattern) {
-			return false
-		}
+	// Check exclude patterns first (component/glob match, not substring).
+	if h.isExcluded(path) {
+		return false
 	}
 
 	// Check if file has relevant extension

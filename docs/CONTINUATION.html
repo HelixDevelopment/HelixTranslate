@@ -175,9 +175,9 @@
 <h1
 id="continuation--helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 54 <strong>Last modified:</strong>
-2026-06-15T06:15:00Z</p>
-<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 45 real bugs (20 submodule + 25 main) -->
+<p><strong>Revision:</strong> 55 <strong>Last modified:</strong>
+2026-06-15T07:00:00Z</p>
+<!-- session 2026-06-14v: cross-submodule bug-hunt campaign — 48 real bugs (21 submodule + 27 main) -->
 
 <!-- OPERATOR AWAY until morning 2026-06-15: autonomous; priority = most-stable build; release tag DEFERRED (zero-risk, needs full §11.4.40). Full ./... sweep GREEN at c56363c. -->
 
@@ -403,7 +403,32 @@ reconcile</td>
 <code>go test</code> left REAL project source mutated with a
 <code>.bak</code> (§11.4.84 residue corruption in the anti-bluff harness
 itself); restore-trap armed before each sed</td>
-<td>(wave 14)</td>
+<td>9539233</td>
+</tr>
+<tr>
+<td><strong>security submodule</strong></td>
+<td>SSRF guard octal/hex IP-encoding bypass
+(<code>0177.0.0.1</code>→127.0.0.1, <code>012.0.0.1</code>→10.0.0.1
+reach INTERNAL via cgo/libc inet_aton) — a real SSRF vuln;
+ParseInetAtonIP added (verified vs compiled C inet_aton)</td>
+<td>1ef9f4e</td>
+</tr>
+<tr>
+<td><strong>MAIN</strong> cmd/unified-translator</td>
+<td>auto output filename hardcoded <code>_sr.epub</code> ignoring
+-target-lang → a French/German/… translation silently labelled Serbian
+(output + session-report filenames); honors targetLang + §11.4.120
+reconcile</td>
+<td>(wave 15)</td>
+</tr>
+<tr>
+<td><strong>MAIN</strong> pkg/version</td>
+<td>codebase hasher used strings.Contains for excludes → over-excluded
+<code>vendored/</code>/<code>prod.env.json</code> + dead globs
+(<code>*.log</code> never matched) → corrupted the distributed worker
+version-sync hash (false match/spurious resync); proper component + glob
+match</td>
+<td>(wave 15)</td>
 </tr>
 </tbody>
 </table>
