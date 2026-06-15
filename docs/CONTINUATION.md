@@ -1,11 +1,12 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 58
-**Last modified:** 2026-06-15T12:20:00Z
+**Revision:** 59
+**Last modified:** 2026-06-15T12:32:00Z
 
 ## ✅ FULL VALIDATION RUN (2026-06-15, operator-requested "run all tests, challenges, helix qa")
 **360 packages GREEN, ZERO failures project-wide** (real captured evidence, no bluff):
 - **Main module:** 59 ok / 0 FAIL (`go test ./... -p 1`, clean baseline).
+- **§11.4.27 additional test types (build-tagged) — ALL GREEN after 2 fixes:** integration 1/0, e2e PASS, security PASS, stress 1/0, performance 10 benchmarks/0 FAIL (`go test -tags=<type> ./test/<type>/... -p 1`). Two test-layer §11.4.1 FAIL-bluffs found by running them + FIXED (mutation-proven, `b3381237`): (a) `test/security` `TestAPIKeys_NoHardcodedKeys` flagged a submodule MOCK fixture `sk-mock-key-1` → scan now skips tests/testdata/mocks/fixtures/test dirs + mock/fake/example/dummy/placeholder lines; mutation-proven a real `sk-` in PRODUCTION `internal/config/*.go` is STILL caught. (b) `test/e2e` `TestCLIBypassIssue/APIReturnsValidEPUB` parsed a stale gitignored 29-byte placeholder → now generates a real EPUB in-test via EPUBWriter→t.TempDir()→parse-back (directly verifies a valid parseable EPUB, the test's actual intent).
 - **9 Go submodules:** 176 ok / 0 FAIL (challenges 18, containers 38, doc_processor 10, docs_chain 8, llm_orchestrator 9, llm_provider 52, llms_verifier 15, security 18, vision_engine 8; constitution = non-Go).
 - **HelixQA tool (digital.vasic.helixqa):** 125 ok / 0 FAIL (own core suite; build clean).
 - **Challenge suite:** all PASS or honest §11.4.3 SKIP — cache_invalidation, degraded_mode, model_verification_gate, helixqa_wiring, provider_sync, anti_bluff_execution, api_key_provisioning, no_suspend_calls PASS; llmsverifier_connectivity PASS (runtime SKIP, no API key); host_no_auto_suspend N/A on macOS (Linux `/etc/systemd/` host check).
