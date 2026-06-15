@@ -230,12 +230,19 @@ func (s *SQLiteStorage) backfillCacheLookupHashes() error {
 
 // CreateSession creates a new translation session
 func (s *SQLiteStorage) CreateSession(ctx context.Context, session *TranslationSession) error {
+	// end_time + error_message MUST be in the INSERT: a session can be created
+	// already-completed (EndTime set), e.g. when a finished run is persisted in one
+	// shot rather than created-then-updated. Omitting end_time silently dropped it
+	// to NULL, which (a) loses the EndTime on GetSession/ListSessions and (b) made
+	// GetStatistics.AverageDuration compute over zero rows (WHERE end_time IS NOT
+	// NULL) and report 0 while sessions actually took real wall-clock time.
 	query := `
 		INSERT INTO translation_sessions (
 			id, book_title, input_file, output_file, source_language, target_language,
 			provider, model, status, percent_complete, current_chapter, total_chapters,
-			items_completed, items_failed, items_total, start_time, created_at, updated_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			items_completed, items_failed, items_total, start_time, end_time, error_message,
+			created_at, updated_at
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
 	_, err := s.db.ExecContext(ctx, query,
@@ -243,7 +250,7 @@ func (s *SQLiteStorage) CreateSession(ctx context.Context, session *TranslationS
 		session.SourceLanguage, session.TargetLanguage, session.Provider, session.Model,
 		session.Status, session.PercentComplete, session.CurrentChapter, session.TotalChapters,
 		session.ItemsCompleted, session.ItemsFailed, session.ItemsTotal,
-		session.StartTime, session.CreatedAt, session.UpdatedAt,
+		session.StartTime, session.EndTime, session.ErrorMessage, session.CreatedAt, session.UpdatedAt,
 	)
 
 	return err

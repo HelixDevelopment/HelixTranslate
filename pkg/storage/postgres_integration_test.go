@@ -190,7 +190,7 @@ func TestPostgresIntegration_PoolBoundedNoClientExhaustion(t *testing.T) {
 				SourceText:     fmt.Sprintf("src-%d", i),
 				TargetText:     fmt.Sprintf("tgt-%d", i),
 				SourceLanguage: "en", TargetLanguage: "sr", Provider: "p", Model: "m",
-				CreatedAt:      time.Now(), LastAccessedAt: time.Now(),
+				CreatedAt: time.Now(), LastAccessedAt: time.Now(),
 			}); e != nil {
 				errs <- e
 			}
@@ -203,4 +203,55 @@ func TestPostgresIntegration_PoolBoundedNoClientExhaustion(t *testing.T) {
 		got = append(got, e)
 	}
 	require.Empty(t, got, "%d concurrent writers complete without connection-exhaustion (bounded pool); got: %v", n, got)
+}
+
+// TestPostgresIntegration_CreateAlreadyCompletedPersistsEndTime is the regression
+// guard for the CreateSession end_time-omission defect: a session created
+// already-completed (EndTime set in one shot, not created-then-updated) MUST
+// round-trip its EndTime AND contribute its real elapsed time to
+// GetStatistics.AverageDuration. Before the fix CreateSession's INSERT omitted
+// the end_time column, so end_time persisted as NULL — GetSession returned a nil
+// EndTime and AverageDuration (AVG ... WHERE end_time IS NOT NULL) computed over
+// zero rows and reported 0. Mutation: drop end_time from the CreateSession INSERT
+// → EndTime comes back nil and AverageDuration is 0 → this FAILs.
+func TestPostgresIntegration_CreateAlreadyCompletedPersistsEndTime(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
+	dsn, stop, err := brokertest.StartPostgres(ctx, brokertest.WithMemoryLimit("256m"))
+	if err != nil {
+		t.Skipf("SKIP-OK: container runtime unavailable for real Postgres — %v (§11.4.3 topology absent)", err)
+	}
+	defer stop()
+
+	st, err := NewPostgreSQLStorage(configFromDSN(t, dsn))
+	require.NoError(t, err)
+	defer func() { _ = st.Close() }()
+
+	start := time.Now().UTC().Truncate(time.Second).Add(-2 * time.Hour)
+	end := start.Add(3600 * time.Second)
+	sess := &TranslationSession{
+		ID:             "pg-complete-1",
+		BookTitle:      "B",
+		InputFile:      "in.fb2",
+		SourceLanguage: "en",
+		TargetLanguage: "sr",
+		Provider:       "deepseek",
+		Model:          "deepseek-chat",
+		Status:         "completed",
+		StartTime:      start,
+		EndTime:        &end,
+		CreatedAt:      start,
+		UpdatedAt:      end,
+	}
+	require.NoError(t, st.CreateSession(ctx, sess), "CreateSession (already completed)")
+
+	got, err := st.GetSession(ctx, "pg-complete-1")
+	require.NoError(t, err)
+	require.NotNil(t, got.EndTime, "EndTime lost: CreateSession dropped end_time")
+	assert.WithinDuration(t, end, *got.EndTime, time.Second, "EndTime round-trips")
+
+	stats, err := st.GetStatistics(ctx)
+	require.NoError(t, err)
+	assert.InDelta(t, 3600.0, stats.AverageDuration, 2.0,
+		"AverageDuration must reflect the real 1h elapsed, not 0 (end_time was persisted)")
 }
