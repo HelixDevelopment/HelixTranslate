@@ -182,8 +182,15 @@ func (ct *CoreTranslatorImpl) executeTranslationPipeline(job *TranslationJob, ev
 		map[bool]string{true: "Valid EPUB format", false: "Invalid EPUB format"}[epubVerified])
 	ct.completeStep(step)
 
-	// Generate session report
-	if req.Options.EnableMonitoring {
+	// Generate session report. req.Options is a proto3 message field and may be
+	// nil on the wire (StartTranslation only validates ProviderConfig + session_id,
+	// not Options). A direct req.Options.EnableMonitoring deref panics on a
+	// well-formed request whose Options is unset — and by this point the EPUB has
+	// already been written, so the panic crashes the translation goroutine after
+	// the real work completed, leaving the session stuck "running" and the output
+	// silently unreported. GetOptions() is the nil-safe proto accessor (returns a
+	// zero-value *TranslationOptions when unset, whose EnableMonitoring is false).
+	if req.GetOptions().GetEnableMonitoring() {
 		ct.generateSessionReport(job)
 	}
 
