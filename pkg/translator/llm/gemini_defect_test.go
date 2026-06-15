@@ -2,6 +2,8 @@ package llm
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -96,4 +98,59 @@ func TestGeminiTranslate_Non200IsError(t *testing.T) {
 	require.Error(t, err)
 	assert.Empty(t, out)
 	assert.Contains(t, err.Error(), "403")
+}
+
+// TestGeminiTranslate_TypedConfigFieldsHonored is the reproduce-first (§11.4.146)
+// RED for the Gemini config-plumbing defect: the Gemini client hardcodes
+// generationConfig.temperature=0.3 and maxOutputTokens=4000, ignoring the
+// operator's -temperature / -max-tokens CLI flags (TranslationConfig.Temperature
+// / .MaxTokens) AND the Options[...] override entirely. Every sibling client
+// (openai/anthropic/zhipu/qwen) honors them per config_field_plumbing_test.go;
+// Gemini silently caps large book sections at 4000 tokens and forces temp 0.3.
+func TestGeminiTranslate_TypedConfigFieldsHonored(t *testing.T) {
+	got := &GeminiRequest{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, _ := io.ReadAll(r.Body)
+		_ = json.Unmarshal(raw, got)
+		_, _ = w.Write([]byte(`{"candidates":[{"content":{"parts":[{"text":"ok"}]},"finishReason":"STOP"}]}`))
+	}))
+	defer srv.Close()
+
+	config := TranslationConfig{
+		Provider: "gemini", APIKey: "k", Model: "gemini-pro", BaseURL: srv.URL,
+		Temperature: 0.7, MaxTokens: 8000,
+	}
+	client, err := NewGeminiClient(config)
+	require.NoError(t, err)
+	_, err = client.Translate(context.Background(), "hi", "p")
+	require.NoError(t, err)
+	require.NotNil(t, got.GenerationConfig, "generationConfig must be present")
+	assert.InDelta(t, 0.7, got.GenerationConfig.Temperature, 1e-9,
+		"gemini must honor typed -temperature, not hardcode 0.3")
+	assert.Equal(t, 8000, got.GenerationConfig.MaxOutputTokens,
+		"gemini must honor typed -max-tokens, not hardcode 4000")
+}
+
+// TestGeminiTranslate_OptionsOverrideTypedFields proves Options still wins.
+func TestGeminiTranslate_OptionsOverrideTypedFields(t *testing.T) {
+	got := &GeminiRequest{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, _ := io.ReadAll(r.Body)
+		_ = json.Unmarshal(raw, got)
+		_, _ = w.Write([]byte(`{"candidates":[{"content":{"parts":[{"text":"ok"}]},"finishReason":"STOP"}]}`))
+	}))
+	defer srv.Close()
+
+	config := TranslationConfig{
+		Provider: "gemini", APIKey: "k", Model: "gemini-pro", BaseURL: srv.URL,
+		Temperature: 0.7, MaxTokens: 8000,
+		Options: map[string]interface{}{"temperature": 0.1, "max_tokens": 123},
+	}
+	client, err := NewGeminiClient(config)
+	require.NoError(t, err)
+	_, err = client.Translate(context.Background(), "hi", "p")
+	require.NoError(t, err)
+	require.NotNil(t, got.GenerationConfig)
+	assert.InDelta(t, 0.1, got.GenerationConfig.Temperature, 1e-9, "Options temperature overrides typed field")
+	assert.Equal(t, 123, got.GenerationConfig.MaxOutputTokens, "Options max_tokens overrides typed field")
 }

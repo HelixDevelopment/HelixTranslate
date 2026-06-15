@@ -107,6 +107,27 @@ func (g *GeminiClient) Translate(ctx context.Context, text string, prompt string
 	// Build the full prompt
 	fullPrompt := g.buildPrompt(text, prompt)
 
+	// Precedence: Options[...] (explicit per-call override) > typed config field
+	// (the -temperature / -max-tokens CLI flags) > hardcoded default. Sibling
+	// clients (openai/anthropic/zhipu/qwen) already plumb these through; Gemini
+	// previously hardcoded 0.3 / 4000, silently dropping the operator's flags and
+	// capping large book sections at 4000 output tokens.
+	temperature := 0.3
+	if g.config.Temperature > 0 { // typed CLI/config field (0 == unset)
+		temperature = g.config.Temperature
+	}
+	if v, ok := toFloat64(g.config.Options["temperature"]); ok {
+		temperature = v
+	}
+
+	maxTokens := 4000
+	if g.config.MaxTokens > 0 { // typed CLI/config field (0 == unset)
+		maxTokens = g.config.MaxTokens
+	}
+	if v, ok := toInt(g.config.Options["max_tokens"]); ok {
+		maxTokens = v
+	}
+
 	// Create the request
 	geminiReq := GeminiRequest{
 		Contents: []GeminiContent{
@@ -118,10 +139,10 @@ func (g *GeminiClient) Translate(ctx context.Context, text string, prompt string
 			},
 		},
 		GenerationConfig: &GeminiGenerationConfig{
-			Temperature:     0.3,
+			Temperature:     temperature,
 			TopK:            40,
 			TopP:            0.95,
-			MaxOutputTokens: 4000,
+			MaxOutputTokens: maxTokens,
 		},
 		SafetySettings: []GeminiSafetySetting{
 			{

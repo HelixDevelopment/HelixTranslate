@@ -161,30 +161,7 @@ func (c *LlamaCppClient) Translate(ctx context.Context, text string, prompt stri
 	}
 
 	// Build command with optimized parameters for translation
-	args := []string{
-		"-m", c.modelPath,
-		"-p", prompt,
-		"-n", "4096", // max tokens to generate (increased for book translation)
-		"-t", fmt.Sprintf("%d", c.threads),
-		"-c", fmt.Sprintf("%d", c.contextSize),
-		"--temp", "0.3", // low temperature for consistent, accurate translation
-		"--top-p", "0.9", // nucleus sampling
-		"--top-k", "40", // top-k sampling
-		"--repeat-penalty", "1.1", // prevent repetition
-		"--no-display-prompt", // don't echo the prompt in output
-	}
-
-	// Enable GPU acceleration if available
-	if c.hardwareCaps.HasGPU {
-		switch c.hardwareCaps.GPUType {
-		case "metal":
-			args = append(args, "-ngl", "99") // offload all layers to Metal GPU
-		case "cuda":
-			args = append(args, "-ngl", "99") // offload all layers to CUDA
-		case "rocm":
-			args = append(args, "-ngl", "99") // offload all layers to ROCm
-		}
-	}
+	args := c.buildArgs(prompt)
 
 	// Create command with context for cancellation
 	cmd := exec.CommandContext(ctx, c.executable, args...)
@@ -228,6 +205,61 @@ func (c *LlamaCppClient) Translate(ctx context.Context, text string, prompt stri
 	}
 
 	return result, nil
+}
+
+// buildArgs assembles the llama-cli argument vector for a translation run.
+// Extracted from Translate so the operator's configured sampling/length budget
+// can be unit-tested deterministically (no real llama-cli binary needed).
+//
+// Precedence mirrors the API clients (openai/anthropic/qwen/zhipu/gemini):
+// Options[...] override > typed config field (the -temperature / -max-tokens CLI
+// flags) > hardcoded default. Previously -n and --temp were hardcoded to
+// 4096 / 0.3, silently dropping the operator's flags on the factory's llamacpp
+// path (NewLLMTranslator -> NewLlamaCppClient), so a configured budget for large
+// book sections never reached the inference call.
+func (c *LlamaCppClient) buildArgs(prompt string) []string {
+	temperature := 0.3
+	if c.config.Temperature > 0 { // typed CLI/config field (0 == unset)
+		temperature = c.config.Temperature
+	}
+	if t, ok := toFloat64(c.config.Options["temperature"]); ok {
+		temperature = t
+	}
+
+	maxTokens := 4096
+	if c.config.MaxTokens > 0 { // typed CLI/config field (0 == unset)
+		maxTokens = c.config.MaxTokens
+	}
+	if mt, ok := toInt(c.config.Options["max_tokens"]); ok {
+		maxTokens = mt
+	}
+
+	args := []string{
+		"-m", c.modelPath,
+		"-p", prompt,
+		"-n", fmt.Sprintf("%d", maxTokens), // max tokens to generate
+		"-t", fmt.Sprintf("%d", c.threads),
+		"-c", fmt.Sprintf("%d", c.contextSize),
+		"--temp", fmt.Sprintf("%g", temperature), // sampling temperature
+		"--top-p", "0.9", // nucleus sampling
+		"--top-k", "40", // top-k sampling
+		"--repeat-penalty", "1.1", // prevent repetition
+		"--no-display-prompt", // don't echo the prompt in output
+	}
+
+	// Enable GPU acceleration if available
+	if c.hardwareCaps.HasGPU {
+		switch c.hardwareCaps.GPUType {
+		case "metal":
+			args = append(args, "-ngl", "99") // offload all layers to Metal GPU
+		case "cuda":
+			args = append(args, "-ngl", "99") // offload all layers to CUDA
+		case "rocm":
+			args = append(args, "-ngl", "99") // offload all layers to ROCm
+		}
+	}
+
+	return args
 }
 
 // GetModelInfo returns information about the currently loaded model
