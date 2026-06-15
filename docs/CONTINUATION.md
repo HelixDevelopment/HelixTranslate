@@ -1,16 +1,31 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 68
-**Last modified:** 2026-06-15T14:38:00Z
+**Revision:** 69
+**Last modified:** 2026-06-15T14:48:00Z
 
-## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 26 parallel subagents over 9 waves, all verified+pushed)
-After the green validation run, dispatched 9 successive worktree-isolated subagent
-waves (3-wide, last throttled to 2-wide for FD safety) on the highest-remaining-yield
-autonomous surfaces. **27 genuine, conductor-verified, independently mutation-proven
-fixes (campaign 63→90) + 1 teeth-proven regression guard; honest clean non-findings +
-documented honest gaps on the rest (§11.4.118/§11.4.6). HEAD `c5ce9ae`; build/vet/test
-green after the git-pointer repair (see ENV FORENSIC below). NOTE: recurring host FD
-pressure (`ENFILE`) under 3 concurrent -race agents — wave 9 throttled to 2-wide (§12).**
+## 🔬 POST-VALIDATION BUG-HUNT WAVES (2026-06-15, 28 parallel subagents over 10 waves, all verified+pushed)
+After the green validation run, dispatched 10 successive worktree-isolated subagent
+waves (3-wide, last two throttled to 2-wide for FD safety) sweeping essentially the
+ENTIRE main-module Go surface. **29 genuine, conductor-verified, independently
+mutation-proven fixes (campaign 63→92) + 1 teeth-proven regression guard; honest clean
+non-findings + documented honest gaps on the rest (§11.4.118/§11.4.6). HEAD `a7cdce4`;
+build/vet/test green after the git-pointer repair (see ENV FORENSIC below). NOTE:
+recurring host FD pressure (`ENFILE`) under 3 concurrent -race agents — waves 9–10
+throttled to 2-wide (§12).**
+
+MAIN-MODULE SURFACE NOW FULLY SWEPT (10 waves): storage, ebook(all formats incl FB2),
+distributed, verification, preparation, batch, security, events, websocket, coordination,
+grpc, markdown, format, report, progress, translator-core, api, all 6 CLIs,
+monitor-server, internal/verifier+services+config, hardware, version, logger, deployment,
+cmd/server, cmd/api-server, cmd/grpc-server, cmd/translate-ssh, cmd/deployment. Remaining
+un-hunted = root demo-*.go scripts (NOT source-of-truth) + the 9 owned submodules (had a
+dedicated pass in the prior 2026-06-14v session; higher git-corruption risk via worktrees).
+**Dominant finding class = error-swallowing PASS-bluffs at every entry point** (batch/grpc/
+api-server/server/deployment/translate-ssh all reported success while the op failed).
+
+WAVE 10 (`cmd/translate-ssh`, `cmd/grpc-server`+`cmd/deployment`):
+- **translate-ssh final-report false-negative** (`78c7b45`): printFinalReport filepath.Join(inputDir, absolutePath) doubled paths → real artifacts shown not-found, contradicting the success summary. Fix = expectedReportFiles helper. RED+mutation-proven.
+- **deployment generate-plan undeployable** (`a7cdce4`): emitted plan had nil Main → the tool s own deploy action rejects it + nil-derefs. Fix = generateMainConfig. RED+mutation-proven. (cmd/grpc-server clean.)
 
 WAVE 9 (`cmd/server`, `cmd/api-server` — completeness-confirmation; STILL found 3 real bugs):
 - **server TLS private-key world-readable** (`3bc1ede`, HIGH §11.4.10): certs/server.key written 0644 via os.Create → any local user could read it. Fix = 0600 + dir 0700. RED+mutation-proven.
@@ -99,7 +114,7 @@ Clean non-findings (audited, no RED reproducible): SQLite concurrent-writer cont
 
 **The build is at its best, most-stable, verified-green, fully-pushed state.**
 - **Main HEAD `fc86064`** on BOTH upstreams (origin milos85vasic/Translator + HelixDevelopment/HelixTranslate). `go build ./...` = exit 0, `go vet ./...` = exit 0, `go test ./... -p 1` = **zero FAIL** (full quiescent sweep).
-- **90 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 9 waves = 27 fixes + 1 regression guard, newest `3bc1ede`/`c5ce9ae`, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak + deployment Docker-health PASS-bluff + server TLS-key leak + api-server backend-error PASS-bluffs). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
+- **92 genuine, reproduce-first, mutation-proven bug fixes** this session across the whole main module + 9 owned submodules (full table below; latest 10 waves = 29 fixes + 1 regression guard, newest `78c7b45`/`a7cdce4`, see POST-VALIDATION BUG-HUNT WAVES block at top; highest-severity = batch processFile + verification content-wipe + grpc nil-Options + cli cross-provider key-leak + deployment Docker-health PASS-bluff + server TLS-key leak + api-server backend-error PASS-bluffs). Each RED-on-broken → fix → GREEN → mutation-proven, conductor-verified, committed + pushed; submodule gitlink pointers all synced. (Latest: a systemic EOF-last-chunk streamed-content data-loss across 14 llm_provider adapters + ollama error-body, `0f21fb0` — merged cleanly with a parallel session's HealthCheck-baseURL fixes.)
 - **Whole codebase hunted** — every main `pkg/*` + `cmd/*` user-facing CLI + 9 submodules. Recent waves return clean non-findings (§11.4.118 completeness on the high-yield surface).
 - **Nothing half-done:** zero uncommitted source/test work anywhere; working tree holds only pre-existing build-artifact binaries (§11.4.30, not committed) + `helix_qa` other-session state (§11.4.119).
 
