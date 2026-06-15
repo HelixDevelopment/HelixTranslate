@@ -236,6 +236,118 @@ func TestBridge_Invoke_RoutesToBestModel(t *testing.T) {
 	}
 }
 
+// TestBridge_BestClient_ReturnsLLMClientForBestModel is the §1.1 paired-mutation
+// guard for the P-1 BestClient adapter. It proves that BestClient(ctx, task)
+// returns an llm.LLMClient whose:
+//
+//	(a) GetProviderName() == the ProviderID of the BestModel-selected model
+//	    (the plan's prescription: GetProviderName sourced from BestModel.ProviderID,
+//	    NOT the bare *OpenAIClient literal "openai"); and
+//	(b) is built for EXACTLY that model — proven by intercepting the SAME
+//	    client-construction seam BestClient uses (clientBuild) and capturing the
+//	    (providerMarker, modelID) it routes the build to. NO network call.
+//
+// Polarity switch (§11.4.115): RED_MODE=1 forces a deliberate MIS-BUILD inside the
+// seam (the client is built for a DIFFERENT verified model than BestModel selected),
+// proving the guard FAILs on a broken adapter. RED_MODE=0 (default) is the standing
+// GREEN regression guard.
+func TestBridge_BestClient_ReturnsLLMClientForBestModel(t *testing.T) {
+	redMode := os.Getenv("RED_MODE") == "1"
+
+	const (
+		bestModelID    = "gpt-4o"
+		bestProviderID = "openai"
+		wrongModelID   = "deepseek-chat"
+		wrongProvider  = "deepseek"
+	)
+	b := newTestBridge(keyForAll(),
+		verifiedModel(bestModelID, bestProviderID, "GPT-4o", 0.93),
+		verifiedModel(wrongModelID, wrongProvider, "DeepSeek Chat", 0.71),
+	)
+
+	// Oracle: what BestModel independently selects for the same bridge.
+	best, err := b.BestModel(context.Background(), selection.TaskRequirements{})
+	if err != nil {
+		t.Fatalf("BestModel error: %v", err)
+	}
+	if best.ModelID != bestModelID {
+		t.Fatalf("test setup: BestModel = %q, want %q", best.ModelID, bestModelID)
+	}
+
+	// Intercept the client-construction seam: capture the (marker, model) the build
+	// is asked for. NO network call.
+	var gotMarker, gotModel string
+	orig := clientBuild
+	t.Cleanup(func() { clientBuild = orig })
+	clientBuild = func(marker, modelID string, rp *verifier.ResolvedProvider) (llmClient, error) {
+		if redMode {
+			// §1.1 MUTATION: simulate a broken adapter — build for the WRONG model.
+			modelID = wrongModelID
+			marker = wrongProvider
+		}
+		gotMarker = marker
+		gotModel = modelID
+		return orig(marker, modelID, rp)
+	}
+
+	client, err := b.BestClient(context.Background(), selection.TaskRequirements{})
+	if err != nil {
+		t.Fatalf("BestClient error: %v", err)
+	}
+	if client == nil {
+		t.Fatal("BestClient returned a nil client")
+	}
+
+	// (b) Built for EXACTLY the BestModel-selected model + provider marker.
+	if gotModel != best.ModelID {
+		t.Errorf("BestClient built for model %q, want BestModel-selected %q", gotModel, best.ModelID)
+	}
+	if gotMarker != bestProviderID {
+		t.Errorf("BestClient built via provider marker %q, want %q", gotMarker, bestProviderID)
+	}
+
+	// (a) GetProviderName() == BestModel.ProviderID (NOT the bare *OpenAIClient
+	// literal "openai" — which would happen to match here for openai, so use a
+	// SECOND bridge whose strongest model is a non-openai provider to make the
+	// distinction load-bearing).
+	if got := client.GetProviderName(); got != best.ProviderID {
+		t.Errorf("BestClient GetProviderName() = %q, want BestModel.ProviderID %q", got, best.ProviderID)
+	}
+}
+
+// TestBridge_BestClient_ProviderNameIsModelProvider proves clause (a) is genuinely
+// sourced from BestModel.ProviderID and not the *OpenAIClient hardcoded "openai":
+// the strongest model is a DeepSeek model, so GetProviderName() must be "deepseek",
+// which the bare client would NEVER return.
+func TestBridge_BestClient_ProviderNameIsModelProvider(t *testing.T) {
+	b := newTestBridge(keyForAll(),
+		verifiedModel("deepseek-chat", "deepseek", "DeepSeek Chat", 0.95),
+		verifiedModel("gpt-4o", "openai", "GPT-4o", 0.60),
+	)
+	client, err := b.BestClient(context.Background(), selection.TaskRequirements{})
+	if err != nil {
+		t.Fatalf("BestClient error: %v", err)
+	}
+	if got := client.GetProviderName(); got != "deepseek" {
+		t.Errorf("GetProviderName() = %q, want deepseek (the strongest model's provider, "+
+			"NOT the bare *OpenAIClient \"openai\")", got)
+	}
+}
+
+// TestBridge_BestClient_EmptyRegistryHonestError proves BestClient returns an
+// honest error (never a nil client + nil err, never a silent local fallback) when
+// no verified model is available.
+func TestBridge_BestClient_EmptyRegistryHonestError(t *testing.T) {
+	b := newTestBridge(keyForAll()) // no models
+	c, err := b.BestClient(context.Background(), selection.TaskRequirements{})
+	if err == nil {
+		t.Fatal("BestClient with no verified models should error, got nil")
+	}
+	if c != nil {
+		t.Errorf("BestClient on error should return nil client, got %#v", c)
+	}
+}
+
 // TestOpen_NoKeys_HonestHardError proves the OOTB in-process path returns an
 // honest hard error (NOT a silent fallback) when no provider key is present —
 // the R2 require-keys mandate.

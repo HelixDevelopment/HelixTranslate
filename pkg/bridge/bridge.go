@@ -289,21 +289,27 @@ func (b *Bridge) ListVerified(ctx context.Context) ([]ModelInfo, error) {
 	return models, nil
 }
 
-// invokeDispatch is the seam that turns the strongest-model selection into a real
-// completion. Production assigns it realInvokeDispatch (below) — building the raw
-// OpenAI-compatible client and calling Translate. It is a package var (not a
-// method) ONLY so an in-package test can intercept the (providerMarker, modelID)
-// the dispatch is actually asked to route to WITHOUT a live network call, proving
-// the routing guard catches a mis-route (§1.1 paired mutation). Production
-// behaviour is unchanged: realInvokeDispatch is the exact prior inline code.
-var invokeDispatch = realInvokeDispatch
+// llmClient is the bridge's alias for the llm.LLMClient interface — the contract
+// BestClient returns (Translate + GetProviderName). Aliased so the in-package
+// test (and the clientBuild seam) can name it without re-importing.
+type llmClient = llm.LLMClient
 
-// realInvokeDispatch builds the raw OpenAI-compatible chat client and calls it.
-// providerMarker is the delegation marker (concrete provider id, or "openai" for
-// the genuine OpenAI provider); modelID is the strongest verified model's id. The
-// resolved provider rp carries the concrete key/base_url. No API key is logged.
-func realInvokeDispatch(ctx context.Context, providerMarker, modelID string, rp *verifier.ResolvedProvider, full string) (string, error) {
-	client, err := llm.NewOpenAIClient(translator.TranslationConfig{
+// clientBuild is the SINGLE raw-client construction seam: it builds the
+// OpenAI-compatible chat client (wrapped so GetProviderName reflects the selected
+// provider, see markedClient) from (providerMarker, modelID, rp). BOTH BestClient
+// and realInvokeDispatch route through it, so there is exactly ONE construction
+// path. It is a package var (not a method) ONLY so an in-package test can
+// intercept the (providerMarker, modelID) a build is actually asked for WITHOUT a
+// live network call, proving the adapter/route guards catch a mis-build (§1.1
+// paired mutation). Production behaviour is unchanged.
+var clientBuild = realClientBuild
+
+// realClientBuild constructs the raw OpenAI-compatible chat client for the given
+// (providerMarker, modelID) and resolved provider, then wraps it so its
+// GetProviderName() reports the selected provider id rather than the underlying
+// *OpenAIClient hardcoded "openai". No API key is logged (§11.4.10).
+func realClientBuild(providerMarker, modelID string, rp *verifier.ResolvedProvider) (llmClient, error) {
+	oc, err := llm.NewOpenAIClient(translator.TranslationConfig{
 		Provider: providerMarker,
 		Model:    modelID,
 		APIKey:   rp.APIKey,
@@ -317,11 +323,97 @@ func realInvokeDispatch(ctx context.Context, providerMarker, modelID string, rp 
 		MaxTokens: invokeMaxTokens,
 	})
 	if err != nil {
-		return "", fmt.Errorf("bridge: build raw client for %s: %w", modelID, err)
+		return nil, fmt.Errorf("bridge: build raw client for %s: %w", modelID, err)
+	}
+	// Report the SELECTED model's provider id (rp.ProviderID) from GetProviderName,
+	// per the plan's prescription, instead of the bare *OpenAIClient literal
+	// "openai" — so a consumer depending on llm.LLMClient.GetProviderName() sees
+	// the genuine provider of the strongest verified model.
+	return &markedClient{LLMClient: oc, provider: rp.ProviderID}, nil
+}
+
+// markedClient wraps an llm.LLMClient (the raw *OpenAIClient) delegating Translate
+// verbatim while overriding GetProviderName to report the selected provider id.
+type markedClient struct {
+	llm.LLMClient
+	provider string
+}
+
+// GetProviderName reports the selected verified model's provider id (e.g.
+// "deepseek", "groq", "openai"), not the underlying client's hardcoded "openai".
+func (m *markedClient) GetProviderName() string { return m.provider }
+
+// invokeDispatch is the seam that turns the strongest-model selection into a real
+// completion. Production assigns it realInvokeDispatch (below) — building the raw
+// client via clientBuild and calling Translate. It is a package var (not a method)
+// ONLY so an in-package test can intercept the (providerMarker, modelID) the
+// dispatch is actually asked to route to WITHOUT a live network call, proving the
+// routing guard catches a mis-route (§1.1 paired mutation). Production behaviour
+// is unchanged.
+var invokeDispatch = realInvokeDispatch
+
+// realInvokeDispatch builds the raw OpenAI-compatible chat client (via the shared
+// clientBuild seam — ONE construction path) and calls it. providerMarker is the
+// delegation marker (concrete provider id, or "openai" for the genuine OpenAI
+// provider); modelID is the strongest verified model's id. The resolved provider
+// rp carries the concrete key/base_url. No API key is logged.
+func realInvokeDispatch(ctx context.Context, providerMarker, modelID string, rp *verifier.ResolvedProvider, full string) (string, error) {
+	client, err := clientBuild(providerMarker, modelID, rp)
+	if err != nil {
+		return "", err
 	}
 	// OpenAIClient.Translate sends `prompt` (2nd arg) as the single user message
 	// and ignores `text` (1st arg); pass the composed prompt there.
 	return client.Translate(ctx, "", full)
+}
+
+// resolveBest selects the strongest verified model for the task, resolves its
+// provider, and computes the delegation provider marker. It is the SINGLE
+// selection→resolution→marker path shared by Invoke and BestClient.
+//
+// Provider marker MUST be the concrete provider id (e.g. "groq"), NOT the literal
+// "openai": NewOpenAIClient only SKIPS its hardcoded OpenAI model-name whitelist
+// when Provider is non-empty AND != "openai" (its "delegated" branch). A verified
+// non-OpenAI model (allam-2-7b, deepseek-chat, …) is not in that whitelist, so
+// passing "openai" would reject it. The provider id is purely a delegation marker
+// here; the actual endpoint comes from BaseURL.
+func (b *Bridge) resolveBest(ctx context.Context, task selection.TaskRequirements) (ModelInfo, verifier.ResolvedProvider, string, error) {
+	best, err := b.BestModel(ctx, task)
+	if err != nil {
+		return ModelInfo{}, verifier.ResolvedProvider{}, "", err
+	}
+	rp, err := b.resolver.Resolve(best.ProviderID)
+	if err != nil {
+		return ModelInfo{}, verifier.ResolvedProvider{}, "",
+			fmt.Errorf("bridge: cannot materialize strongest model %s/%s: %w", best.ProviderID, best.ModelID, err)
+	}
+	providerMarker := rp.ProviderID
+	if providerMarker == "" || providerMarker == "openai" {
+		// Genuine OpenAI provider (or empty): keep "openai" so its real model
+		// whitelist applies; for every other provider the concrete id delegates.
+		providerMarker = rp.FactoryProvider
+	}
+	return best, rp, providerMarker, nil
+}
+
+// BestClient returns the strongest verified model for the task as an
+// llm.LLMClient — the no-local-runtime redirect target for consumers that depend
+// on the llm.LLMClient contract (Translate + GetProviderName). The returned
+// client is the IDENTICALLY-configured raw OpenAI-compatible client Invoke builds
+// (same Model + provider delegation marker + key + base_url), wrapped so its
+// GetProviderName() reports the selected model's provider id (BestModel.ProviderID)
+// rather than the underlying *OpenAIClient hardcoded "openai".
+//
+// It honours the no-key hard error (Open already refuses to construct a bridge
+// without provider keys) — BestClient NEVER silently falls back to a local
+// runtime; an empty registry / unresolvable provider yields an honest error.
+// No API key is ever returned or logged (§11.4.10).
+func (b *Bridge) BestClient(ctx context.Context, task selection.TaskRequirements) (llmClient, error) {
+	best, rp, providerMarker, err := b.resolveBest(ctx, task)
+	if err != nil {
+		return nil, err
+	}
+	return clientBuild(providerMarker, best.ModelID, &rp)
 }
 
 // Invoke calls the strongest verified model with a raw prompt — the direct
@@ -329,30 +421,9 @@ func realInvokeDispatch(ctx context.Context, providerMarker, modelID string, rp 
 // compatible client sends a single user message, so we compose them). Returns
 // the model's raw completion. No API key is ever returned or logged.
 func (b *Bridge) Invoke(ctx context.Context, system, prompt string) (string, error) {
-	best, err := b.BestModel(ctx, selection.TaskRequirements{})
+	best, rp, providerMarker, err := b.resolveBest(ctx, selection.TaskRequirements{})
 	if err != nil {
 		return "", err
-	}
-	rp, err := b.resolver.Resolve(best.ProviderID)
-	if err != nil {
-		return "", fmt.Errorf("bridge: cannot materialize strongest model %s/%s: %w", best.ProviderID, best.ModelID, err)
-	}
-
-	// Build the raw OpenAI-compatible chat client directly (the generic client
-	// honours BaseURL, so every verified OpenAI-compatible provider works). This
-	// is the raw capability seam — NOT the translation wrapper.
-	//
-	// Provider MUST be the concrete provider id (e.g. "groq"), NOT the literal
-	// "openai": NewOpenAIClient only SKIPS its hardcoded OpenAI model-name
-	// whitelist when Provider is non-empty AND != "openai" (its "delegated"
-	// branch). A verified non-OpenAI model (allam-2-7b, deepseek-chat, …) is not
-	// in that whitelist, so passing "openai" would reject it. The provider id is
-	// purely a delegation marker here; the actual endpoint comes from BaseURL.
-	providerMarker := rp.ProviderID
-	if providerMarker == "" || providerMarker == "openai" {
-		// Genuine OpenAI provider (or empty): keep "openai" so its real model
-		// whitelist applies; for every other provider the concrete id delegates.
-		providerMarker = rp.FactoryProvider
 	}
 
 	full := strings.TrimSpace(prompt)
