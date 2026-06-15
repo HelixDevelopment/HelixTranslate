@@ -217,11 +217,14 @@ func executeTranslation(session *TranslationSession) error {
 		return stepError(step, fmt.Sprintf("Translation failed: %v", err))
 	}
 
-	// Normalize to the requested target script (W10). The LLM output may be in
-	// the wrong script (e.g. Cyrillic when -script latin was requested); this
-	// deterministically converts it so the saved markdown, the EPUB, and the
-	// verification all see the script the user asked for.
-	translatedMarkdown = normalizeScript(translatedMarkdown, config.Script)
+	// Normalize to the requested target script (W10) — but ONLY when the target
+	// language is Serbian. The script converter is Serbian Cyrillic<->Latin
+	// specific; applying it to any other target (e.g. Spanish) transliterates the
+	// already-correct translation into the wrong alphabet (Latin "Hola mundo" ->
+	// Cyrillic "Хола мундо" = garbage). For non-Serbian targets the LLM output is
+	// already in the correct script, so the conversion MUST be skipped (§11.4.6:
+	// the -script flag is a Serbian-context control, not a universal transliterator).
+	translatedMarkdown = applyTargetScript(translatedMarkdown, config.TargetLang, config.Script)
 
 	// Save translated markdown
 	translatedMDPath := generateTranslatedMDPath(config.InputFile)
@@ -916,6 +919,31 @@ func normalizeScript(text, targetScript string) string {
 	default:
 		return text
 	}
+}
+
+// isSerbianTarget reports whether the target language is Serbian — the only
+// language for which the Serbian Cyrillic<->Latin script conversion is
+// meaningful. Handles the common flag forms (code/name, either script,
+// Cyrillic spelling). §11.4.6: explicit closed-set, no guessing.
+func isSerbianTarget(targetLang string) bool {
+	t := strings.ToLower(strings.TrimSpace(targetLang))
+	switch t {
+	case "sr", "srp", "serbian", "srpski", "српски", "serbian cyrillic", "serbian latin":
+		return true
+	}
+	return strings.Contains(t, "serb")
+}
+
+// applyTargetScript runs the Serbian script normalization ONLY for a Serbian
+// target language; for every other target it returns the text unchanged. This
+// prevents the Serbian Cyrillic<->Latin converter from mangling a correct
+// translation in another language (e.g. transliterating Latin Spanish into
+// Serbian Cyrillic).
+func applyTargetScript(text, targetLang, targetScript string) string {
+	if !isSerbianTarget(targetLang) {
+		return text
+	}
+	return normalizeScript(text, targetScript)
 }
 
 func verifyTranslation(text, targetLang, script string) bool {
