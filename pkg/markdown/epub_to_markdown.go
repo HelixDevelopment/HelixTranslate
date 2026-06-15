@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -481,8 +482,20 @@ func (c *EPUBToMarkdownConverter) convertNode(n *html.Node, md *strings.Builder,
 			c.convertChildren(n, md, depth)
 			md.WriteString("\n\n")
 		case "p":
+			// Emit the paragraph's inline content into a sub-builder first so a
+			// LINE-LEADING markdown block marker (a prose paragraph whose text
+			// legitimately begins with "1. ", "- ", "> ", "#") can be backslash-
+			// escaped before it reaches the markdown. Without this, the MD->EPUB
+			// block scanner (convertMarkdownToXHTML) sees the leading marker and
+			// silently converts the prose paragraph into an <ol>/<ul>/<blockquote>/
+			// heading, dropping the marker chars ("<p>1. text</p>" -> "<ol><li>text
+			// </li></ol>", the "1." lost). Block-level partner of the inline
+			// escapeMarkdownText; the MD->EPUB protectEscapes/restoreEscapes restores
+			// the literal marker so the round-trip yields the exact original text.
+			var pb strings.Builder
+			c.convertChildren(n, &pb, depth)
 			md.WriteString("\n\n")
-			c.convertChildren(n, md, depth)
+			md.WriteString(escapeLeadingBlockMarker(pb.String()))
 			md.WriteString("\n\n")
 		case "br":
 			md.WriteString("  \n")
@@ -722,6 +735,53 @@ func escapeMarkdownText(s string) string {
 		b.WriteRune(r)
 	}
 	return b.String()
+}
+
+// leadingBlockMarkerRegex matches a LINE-LEADING markdown block marker on the
+// first line of a paragraph's emitted inline content: an unordered bullet
+// ("-"/"*"/"+"), an ordered marker ("N." / "N)"), a blockquote (">"), or an ATX
+// heading ("#".."######"). Group 1 = leading whitespace (preserved), group 2 =
+// the marker token to backslash-escape, group 3 = the required trailing
+// whitespace + rest (preserved). The trailing-whitespace requirement (\s, or
+// end-of-line for a bare ">") mirrors exactly what the MD->EPUB block scanner
+// (convertMarkdownToXHTML / parseListItemLine) treats as a block marker, so a
+// mid-word "."/"-"/">" or a marker with no following space is NOT matched and
+// therefore NOT over-escaped.
+var leadingBlockMarkerRegex = regexp.MustCompile(`^(\s*)([-*+]|\d+[.)]|>|#{1,6})(\s.*|>?$)`)
+
+// escapeLeadingBlockMarker backslash-escapes a LINE-LEADING markdown block marker
+// in a paragraph's emitted content so the MD->EPUB block scanner treats it as
+// literal prose rather than a list/heading/blockquote. Only the first line is
+// considered (a paragraph emits a single logical block); the MD->EPUB
+// protectEscapes/restoreEscapes pair restores the exact literal on the return trip.
+func escapeLeadingBlockMarker(content string) string {
+	nl := strings.IndexByte(content, '\n')
+	first := content
+	rest := ""
+	if nl >= 0 {
+		first = content[:nl]
+		rest = content[nl:]
+	}
+
+	m := leadingBlockMarkerRegex.FindStringSubmatch(first)
+	if m == nil {
+		return content
+	}
+	lead := m[1]
+	marker := m[2]
+	tail := m[3]
+
+	// Insert the backslash before the first metacharacter of the marker. For
+	// ordered markers ("N." / "N)") the metacharacter is the final "."/")"; for
+	// the single-char markers it is the whole marker.
+	var escaped string
+	last := marker[len(marker)-1]
+	if last == '.' || last == ')' {
+		escaped = marker[:len(marker)-1] + `\` + string(last)
+	} else {
+		escaped = `\` + marker
+	}
+	return lead + escaped + tail + rest
 }
 
 // isASCIISpace reports whether b is one of the HTML whitespace bytes.
