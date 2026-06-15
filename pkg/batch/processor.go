@@ -423,10 +423,18 @@ func (bp *BatchProcessor) processFile(ctx context.Context, inputPath, outputPath
 		return nil, fmt.Errorf("failed to parse file: %w", err)
 	}
 
-	// Translate the book using the provided translator
-	// NOTE: Actual translation integration is handled by the ProcessorWithTranslator method
-	// This method currently serves as a template for batch processing structure
-	// For production use, instantiate BatchProcessor with a translator in options.Translator
+	// Translate the book using the provided translator. Previously this method
+	// parsed the input and wrote it straight to the output WITHOUT translating —
+	// so a directory/file batch (incl. the /translate/directory API endpoint,
+	// which supplies a real translator) reported Success:true while shipping an
+	// untranslated copy of the input (a §11.4 / CONST-035 PASS-bluff). Translate
+	// every chapter title + every section (recursively) so the output genuinely
+	// carries the target-language text the caller asked for.
+	if bp.options.Translator != nil {
+		if err := bp.translateBook(ctx, book); err != nil {
+			return nil, fmt.Errorf("failed to translate file: %w", err)
+		}
+	}
 
 	// Write output
 	writer := ebook.NewEPUBWriter()
@@ -441,6 +449,68 @@ func (bp *BatchProcessor) processFile(ctx context.Context, inputPath, outputPath
 		Success:    true,
 		Error:      nil,
 	}, nil
+}
+
+// translateBook translates every chapter title and every section (recursively,
+// including subsections) of the parsed book in place using the configured
+// translator. Context cancellation is honored between units so a cancelled batch
+// stops promptly instead of completing a long translation.
+func (bp *BatchProcessor) translateBook(ctx context.Context, book *ebook.Book) error {
+	for i := range book.Chapters {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		if translated, err := bp.translateText(ctx, book.Chapters[i].Title); err != nil {
+			return err
+		} else {
+			book.Chapters[i].Title = translated
+		}
+
+		for j := range book.Chapters[i].Sections {
+			if err := bp.translateSection(ctx, &book.Chapters[i].Sections[j]); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// translateSection translates a section's title and content, then recurses into
+// its subsections, mutating the section in place.
+func (bp *BatchProcessor) translateSection(ctx context.Context, section *ebook.Section) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
+	if translated, err := bp.translateText(ctx, section.Title); err != nil {
+		return err
+	} else {
+		section.Title = translated
+	}
+
+	if translated, err := bp.translateText(ctx, section.Content); err != nil {
+		return err
+	} else {
+		section.Content = translated
+	}
+
+	for k := range section.Subsections {
+		if err := bp.translateSection(ctx, &section.Subsections[k]); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// translateText translates a single string, skipping empty/whitespace-only input
+// (no point spending an LLM call on it) and returning the original on a
+// whitespace-only string.
+func (bp *BatchProcessor) translateText(ctx context.Context, text string) (string, error) {
+	if strings.TrimSpace(text) == "" {
+		return text, nil
+	}
+	return bp.options.Translator.Translate(ctx, text, "")
 }
 
 // autoOutputName builds a deterministic, collision-free output file name for the
