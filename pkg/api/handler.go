@@ -25,6 +25,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -634,38 +635,109 @@ func (h *Handler) getStatus(c *gin.Context) {
 	})
 }
 
-// listProviders lists available translation providers
+// localProviders are providers that run against a local runtime and therefore
+// do NOT require an upstream API key.
+var localProviders = map[string]bool{"ollama": true, "llamacpp": true, "mock": true}
+
+// supportedProviderCatalogue is the complete set of providers the translator
+// factory (pkg/translator/llm) supports, used as the honest fallback capability
+// catalogue when nothing is configured. Kept aligned with the factory's
+// Provider constants; a stale 4-provider list mis-represented capability
+// (docs/qa/deadcode_providers_investigation_20260616_160012/FINDING.md TASK 2).
+var supportedProviderCatalogue = []string{
+	"openai", "anthropic", "zhipu", "deepseek", "qwen", "gemini", "groq",
+	"cohere", "mistral", "xai", "replicate", "cerebras", "cloudflare",
+	"siliconflow", "hyperbolic", "togetherai", "sambanova", "kimi", "novita",
+	"nlpcloud", "upstage", "sarvam", "modal", "publicai", "nia", "vulavula",
+	"ollama", "llamacpp",
+}
+
+// listProviders reports the REAL providers the server can use. When providers
+// are configured (config.Translation.Providers) it reports the configured set
+// with honest per-provider configured/available/requires_api_key derived from
+// actual config + key presence (config key OR <PROVIDER>_API_KEY env). When
+// nothing is configured it falls back to the complete supported-provider
+// CATALOGUE flagged configured:false — never the old stale 4-provider static
+// list that claimed unconfigured providers were available and omitted 16+
+// supported providers (§11.4.6: serve what is actually configured/available,
+// not a hardcoded lie).
 func (h *Handler) listProviders(c *gin.Context) {
-	providers := []gin.H{
-		{
-			"name":             "openai",
-			"description":      "OpenAI GPT models",
-			"requires_api_key": true,
-			"models":           []string{"gpt-4", "gpt-3.5-turbo"},
-		},
-		{
-			"name":             "anthropic",
-			"description":      "Anthropic Claude models",
-			"requires_api_key": true,
-			"models":           []string{"claude-3-sonnet-20240229", "claude-3-opus-20240229"},
-		},
-		{
-			"name":             "zhipu",
-			"description":      "Zhipu AI GLM models",
-			"requires_api_key": true,
-			"models":           []string{"glm-4"},
-		},
-		{
-			"name":             "deepseek",
-			"description":      "DeepSeek Chat models",
-			"requires_api_key": true,
-			"models":           []string{"deepseek-chat"},
-		},
+	var providers []gin.H
+
+	if h.config != nil && len(h.config.Translation.Providers) > 0 {
+		// Deterministic ordering for a stable contract.
+		names := make([]string, 0, len(h.config.Translation.Providers))
+		for name := range h.config.Translation.Providers {
+			names = append(names, name)
+		}
+		sort.Strings(names)
+
+		for _, name := range names {
+			pc := h.config.Translation.Providers[name]
+			requiresKey := !localProviders[name]
+			available := !requiresKey || pc.APIKey != "" || providerKeyInEnv(name)
+
+			models := []string{}
+			if pc.Model != "" {
+				models = append(models, pc.Model)
+			}
+			providers = append(providers, gin.H{
+				"name":             name,
+				"description":      providerDescription(name),
+				"configured":       true,
+				"available":        available,
+				"requires_api_key": requiresKey,
+				"models":           models,
+			})
+		}
+	} else {
+		// No providers configured: honest, COMPLETE capability catalogue.
+		for _, name := range supportedProviderCatalogue {
+			requiresKey := !localProviders[name]
+			providers = append(providers, gin.H{
+				"name":             name,
+				"description":      providerDescription(name),
+				"configured":       false,
+				"available":        !requiresKey || providerKeyInEnv(name),
+				"requires_api_key": requiresKey,
+				"models":           []string{},
+			})
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"providers": providers,
 	})
+}
+
+// providerKeyInEnv reports whether the conventional <PROVIDER>_API_KEY env var
+// is set (the runtime key source for key-requiring providers).
+func providerKeyInEnv(name string) bool {
+	return os.Getenv(strings.ToUpper(name)+"_API_KEY") != ""
+}
+
+// providerDescription returns a short human label for a provider name.
+func providerDescription(name string) string {
+	switch name {
+	case "openai":
+		return "OpenAI GPT models"
+	case "anthropic":
+		return "Anthropic Claude models"
+	case "zhipu":
+		return "Zhipu AI GLM models"
+	case "deepseek":
+		return "DeepSeek Chat models"
+	case "gemini":
+		return "Google Gemini models"
+	case "qwen":
+		return "Alibaba Qwen models"
+	case "ollama":
+		return "Local Ollama runtime (no API key)"
+	case "llamacpp":
+		return "Local llama.cpp runtime (no API key)"
+	default:
+		return name + " models"
+	}
 }
 
 // getVersion returns version information

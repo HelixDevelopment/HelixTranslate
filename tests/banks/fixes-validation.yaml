@@ -63,3 +63,18 @@ test_cases:
         expected: "Test passes"
     tags: [llmsverifier, gate, regression]
     expected_result: "FilterVerified only returns models passing all three criteria"
+
+  - id: HTQ-FIX-006
+    name: "GET /api/v1/providers serves real configured providers, not a static lie"
+    category: regression
+    priority: critical
+    platforms: [api]
+    steps:
+      - name: "Configured-set + complete-catalogue fallback contract"
+        action: "go test -run 'TestListProviders_ServesConfiguredProviders|TestListProviders_NilConfigFallbackIsCompleteCatalogue' -count=1 ./pkg/api/"
+        expected: "Test passes — endpoint reflects config.Translation.Providers; unconfigured providers never reported available; fallback catalogue is complete"
+      - name: "RED reproducer fails on fixed artifact (proves guard is real)"
+        action: "! RED_MODE=1 go test -run TestListProviders_ServesConfiguredProviders -count=1 ./pkg/api/"
+        expected: "RED_MODE=1 (pre-fix behaviour assertion) FAILS on the fixed artifact"
+    tags: [api, providers, anti-bluff, regression]
+    expected_result: "pkg/api listProviders reports the actually-configured/available provider set (handler.go), never the stale hardcoded 4-provider list (FINDING docs/qa/deadcode_providers_investigation_20260616_160012)"
