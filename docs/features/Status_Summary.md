@@ -1,7 +1,7 @@
 # HelixTranslate — Feature Status Summary
 
-**Revision:** 17
-**Last modified:** 2026-06-16T19:30:00Z
+**Revision:** 18
+**Last modified:** 2026-06-16T20:05:00Z
 **Authority:** Two-audience companion to `docs/features/Status.md` (§11.4.56). Derived from the same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync), §11.4.6 (no-guessing).
 
 ---

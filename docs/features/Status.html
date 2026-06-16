@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 17 <strong>Last modified:</strong>
-2026-06-16T19:30:00Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 18 <strong>Last modified:</strong>
+2026-06-16T20:05:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -283,6 +283,17 @@ runnable binary (did NOT fabricate a runner); and
 <code>GET /api/v1/providers</code> returns a <strong>static hardcoded
 list</strong> (openai/anthropic/zhipu/deepseek), NOT substantive real
 upstream data, so NOT confirmed as substantive per the Wave-9 criterion.
+<strong>[Both addressed post-Wave-9, this session:** the
+<code>pkg/api/server.go</code> alt <code>Server</code> is now documented
+as honest §11.4.124 NEVER-WIRED test-only-scaffolding
+<strong>N/A</strong> (see the dedicated section header note below,
+kept-not-deleted per operator review); and the
+<code>/api/v1/providers</code> static-list was <strong>FIXED in commit
+<code>388a2eb</code></strong> — it now serves the real
+configured/available provider set (§11.4.115 RED→GREEN + §11.4.135 guard
+<code>HTQ-FIX-006</code>), with a live re-record of
+<code>/api/v1/providers</code> against the rebuilt nezha image owed
+before flipping that aspect to a fresh Confirmed.]</strong>
 <strong>Running tally (§11.4.6 honest arithmetic): 54 (prior
 authoritative total) + 4 (Wave 7) + 5 (Wave 8) + 3 (Wave 9) =
 66.</strong> Of the 12 net-new, <strong>3 are genuine row-flips</strong>
@@ -5675,8 +5686,40 @@ backend). NOT a faked confirmation</td>
 </tr>
 </tbody>
 </table>
-<h2 id="rest-api-pkgapiserver.go-standalone-server-gin">REST API —
-pkg/api/server.go (standalone <code>Server</code>, gin)</h2>
+<h2
+id="rest-api-pkgapiserver.go-standalone-server-gin-unwired-test-only-scaffolding">REST
+API — pkg/api/server.go (standalone <code>Server</code>, gin) —
+<strong>UNWIRED test-only scaffolding</strong></h2>
+<blockquote>
+<p><strong>§11.4.124 honest N/A — NEVER-WIRED test-only scaffolding (do
+NOT delete; operator-review item).</strong> The
+<code>pkg/api.Server</code> type (<code>pkg/api/server.go</code>) is a
+parallel, simpler gin server that is <strong>NEVER instantiated by any
+<code>cmd/</code> entry point</strong> — git-history
+(<code>git log --follow</code>, pickaxe across all history) confirms
+<code>api.NewServer(</code> was never present in any <code>cmd/</code>
+file; it was born as test-targeted scaffolding alongside
+<code>*_comprehensive_test.go</code> and is exercised today ONLY by its
+own test suites (<code>server_test.go</code>,
+<code>server_lifecycle_test.go</code>,
+<code>server_realhttp_integration_test.go</code>,
+<code>test/security/input_validation_new_test.go</code>). The two
+production HTTP servers are wired through <strong>different</strong>
+types: <code>cmd/server</code> → <code>pkg/api.Handler</code> (the rich
+<code>/api/v1/*</code> surface below) and <code>cmd/api-server</code> →
+its own <code>APIServer</code>. Per §11.4.124 it is NOT blind-deleted (a
+§11.4.115 bug-fix commit <code>85d9849</code> + live
+security/integration tests depend on it); the correct closure if it is
+to be removed is the §11.4.90 tracked-Obsolete path
+(<code>superseded-by-design-change</code>) WITH prior migration of the
+dependent security tests onto <code>Handler</code> — an operator-review
+decision, not an autonomous removal (§11.4.122). Until then it is
+documented here as honest <strong>N/A</strong> (no user-visible binary
+ships it, so no real-use video applies) rather than silently presented
+as a shipping API surface. Evidence:
+<code>docs/qa/deadcode_providers_investigation_20260616_160012/FINDING.md</code>
+TASK 1.</p>
+</blockquote>
 <table style="width:100%;">
 <colgroup>
 <col style="width: 11%" />
@@ -5708,67 +5751,67 @@ pkg/api/server.go (standalone <code>Server</code>, gin)</h2>
 <td>GET /health</td>
 <td>API</td>
 <td>Implemented</td>
-<td>Wired</td>
-<td>Status + translator name</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>UNWIRED (test-only)</strong></td>
+<td>Status + translator name (no cmd ships it)</td>
+<td>Test-only callers</td>
+<td>Source-confirmed; never-wired (§11.4.124)</td>
+<td>N/A</td>
 </tr>
 <tr>
 <td>api/server.go</td>
 <td>POST /api/translate</td>
 <td>API</td>
 <td>Implemented</td>
-<td>Wired</td>
-<td><code>translator.Translate(...)</code></td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>UNWIRED (test-only)</strong></td>
+<td><code>translator.Translate(...)</code> (no cmd ships it)</td>
+<td>Test-only callers</td>
+<td>Source-confirmed; never-wired (§11.4.124)</td>
+<td>N/A</td>
 </tr>
 <tr>
 <td>api/server.go</td>
 <td>GET /api/languages</td>
 <td>API</td>
 <td>Implemented</td>
-<td>Wired</td>
-<td>Static language list</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed; static return</td>
-<td>PENDING</td>
+<td><strong>UNWIRED (test-only)</strong></td>
+<td>Static language list (no cmd ships it)</td>
+<td>Test-only callers</td>
+<td>Source-confirmed; never-wired (§11.4.124)</td>
+<td>N/A</td>
 </tr>
 <tr>
 <td>api/server.go</td>
 <td>GET /api/stats</td>
 <td>API</td>
 <td>Implemented</td>
-<td>Wired</td>
-<td>Returns hardcoded zeros (not live metrics)</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed; hardcoded</td>
-<td>PENDING</td>
+<td><strong>UNWIRED (test-only)</strong></td>
+<td>Returns hardcoded zeros (no cmd ships it)</td>
+<td>Test-only callers</td>
+<td>Source-confirmed; never-wired (§11.4.124)</td>
+<td>N/A</td>
 </tr>
 <tr>
 <td>api/server.go</td>
 <td>POST /api/upload</td>
 <td>API</td>
 <td>Implemented</td>
-<td>Wired</td>
-<td>Save uploaded file, detect format</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>UNWIRED (test-only)</strong></td>
+<td>Save uploaded file, detect format (no cmd ships it)</td>
+<td>Test-only callers</td>
+<td>Source-confirmed; never-wired (§11.4.124)</td>
+<td>N/A</td>
 </tr>
 <tr>
 <td>api/server.go</td>
 <td>POST /api/batch</td>
 <td>API</td>
 <td><strong>Partial</strong></td>
-<td>Wired</td>
-<td>Returns batch_id <code>queued</code> only; performs NO
-translation</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed; no real work</td>
-<td>PENDING</td>
+<td><strong>UNWIRED (test-only)</strong></td>
+<td>Returns batch_id <code>queued</code> only; performs NO translation;
+no cmd ships it</td>
+<td>Test-only callers</td>
+<td>Source-confirmed; never-wired (§11.4.124)</td>
+<td>N/A</td>
 </tr>
 </tbody>
 </table>
@@ -5823,12 +5866,22 @@ re-confirmed <code>GET /api/v1/version</code> against live
 codebase_version 2.3.0, git_commit
 c2aa7c841c90df2ac1519c147f61bb82a9614963, go_version go1.26.2,
 build_time + components map (NOT a bare status); same clip as the Wave-9
-batch row (re-confirmation, no double-count). §11.4.6 honest gap:
-<code>GET /api/v1/providers</code> was found by Wave 9 to return a
-<strong>static hardcoded</strong> list
-(openai/anthropic/zhipu/deepseek), NOT substantive real upstream data —
-confirmed only as a static-return route, never as live provider
-discovery.</td>
+batch row (re-confirmation, no double-count). §11.4.6 gap FIXED (commit
+<code>388a2eb</code>): <code>GET /api/v1/providers</code> previously
+returned a <strong>static hardcoded</strong> list
+(openai/anthropic/zhipu/deepseek), ignoring
+<code>config.Translation.Providers</code> — mis-representing capability
++ availability (FINDING
+<code>docs/qa/deadcode_providers_investigation_20260616_160012</code>
+TASK 2). It now serves the REAL configured provider set (per-provider
+<code>configured</code>/<code>available</code>/<code>requires_api_key</code>/model
+from config + <code>&lt;PROVIDER&gt;_API_KEY</code> env), with a
+complete supported-provider catalogue fallback
+(<code>configured:false</code>) when nothing is configured; §11.4.115
+RED→GREEN polarity test + §11.4.135 guard <code>HTQ-FIX-006</code>. A
+re-record of the live <code>/api/v1/providers</code> against the rebuilt
+nezha image is owed before flipping the provider-discovery aspect of
+this row to a fresh Confirmed.</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-api-endpoints_20260615-170755.mp4
 ;
 Re-confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-rest-endpoints-wave3c-20260616.mp4
