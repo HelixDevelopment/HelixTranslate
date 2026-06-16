@@ -1,12 +1,12 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 80
-**Last modified:** 2026-06-16T00:00:00Z
+**Revision:** 81
+**Last modified:** 2026-06-16T03:35:00Z
 
-## ▶️ RESUME HERE (2026-06-16) — bridge phase-2 R-2..R-5 DONE; phase-2 NEAR-COMPLETE (full §11.4.40 retest pending)
+## ▶️ RESUME HERE (2026-06-16 ~03:35) — bridge phase-2 COMPLETE + §11.4.40 RETEST PASS → build PRISTINE + TAG-READY (only the first-ever release TAG remains, needs 2 operator decisions)
 
 ### §11.4.127 SHORT resumption (paste this first sentence into a fresh session)
-Read `docs/CONTINUATION.md` (this file) + `.remember/remember.md` FIRST, then `git fetch --all --prune`; **bridge phase-2 is near-complete** — local llama.cpp + Ollama + SSH-local runtimes are REMOVED (default path sources the LLMsVerifier bridge; explicit local selection → honest error), the distributed/API path is KEPT, the `CM-NO-LOCAL-RUNTIME` pre-build gate + paired mutation are LANDED, and the §11.4.153 feature ledger is reconciled — the only remaining phase-2 step is the **full §11.4.40 retest on a clean baseline** (the conductor runs it next); continue the endless autonomous loop (§11.4.126), no force-push (§11.4.113), require API keys (no local runtime).
+Read `docs/CONTINUATION.md` (this file) + `.remember/remember.md` + `docs/qa/bridge_phase2_retest_20260616/SUMMARY.md` FIRST, then `git fetch --all --prune`; **bridge phase-2 (no-local-runtime) is COMPLETE and the full §11.4.40 retest PASSED — the build is PRISTINE + TAG-READY** (sweep all-9-gates green, build clean, functional 55 pkgs OK, -race only pre-existing test/distributed, meta-tests bite, determinism stable; every change P-1→R-5 + format/verifier reviewed GO); the ONE remaining step is the **first-ever release TAG**, which needs 2 operator decisions (version `helix_translate-2.3.0` vs bump `2.4.0` §11.4.73; the §11.4.151-every-submodule vs §11.4.119-`helix_qa`-off-limits set) — do NOT guess these (§11.4.6); continue the endless autonomous loop (§11.4.126), no force-push (§11.4.113), require API keys (no local runtime).
 
 ### §11.4.127 FULL resumption (live-state anchors — verified this session against git)
 - **Parent HEAD `3ce413e`** on `main`, local == `origin/main` (verified `git fetch --all` this session; pushed FF to both upstreams github+HelixDevelopment). Untracked `build/*` + root binaries are EXTERNAL build-artifact churn (a gemini-cli/data-agent session rebuilds them) — NOT committed (§11.4.30).
@@ -24,7 +24,11 @@ Operator-CRITICAL: NO local runtime — only LLMsVerifier strongest models via `
 - **R-2** Ollama removed · **R-3** llama.cpp removed · **R-4** SSH-local binaries + pkg/sshworker + pkg/modelsbridge + local worker configs/scripts removed (operator-confirmed).
 - **R-5 (this session):** `CM-NO-LOCAL-RUNTIME` pre-build gate (3 arms, default-path-only) + paired §1.1 `meta_test_no_local_runtime.sh` (baseline PASS / Mut1 Arm1 FAIL / Mut2 Arm3 FAIL / Neg PASS); Part-B NITs; config.worker.json fixed; §11.4.153 ledger 39 rows Obsolete (docs_chain features re-synced HTML/PDF/DOCX); AGENTS.md + README.md + this CONTINUATION updated.
 
-**REMAINING:** the **full §11.4.40 retest on a clean baseline** (conductor runs next) → then phase-2 closed. Out-of-scope observation: `internal/working/config.distributed.{json,test,thinker}.json` still carry legacy `llamacpp`/`gguf` tokens (KEPT distributed path, excluded from CM-NO-LOCAL-RUNTIME's documented exceptions) — flag for a future R-cycle if the distributed worker body is API-migrated.
+- **§11.4.40 FULL RETEST: PASS** (authoritative main-checkout, HEAD `f9c52a2`; evidence `docs/qa/bridge_phase2_retest_20260616/SUMMARY.md`, commit `d1bed61`): sweep all-9-gates green · build clean · functional 55 pkgs OK · -race only pre-existing `test/distributed` (§11.4.7) · meta-tests all bite (incl. `meta_test_no_local_runtime.sh`) · determinism stable · product challenges pass. Two prior worktree-retest FAILs proven ENVIRONMENT artifacts (worktree missing submodules; worktree checkout mtime) — same gate PASSES on the real main checkout; NOT regressions.
+
+**PHASE-2 CLOSED. BUILD PRISTINE + TAG-READY.** The ONLY remaining step is the **first-ever release TAG** — DEFERRED to operator (2 genuine release-policy decisions, NOT guessed §11.4.6/§11.4.101): (1) version `helix_translate-2.3.0` vs bump `2.4.0` (§11.4.73); (2) §11.4.151 "every owned submodule" vs §11.4.119 `helix_qa`-off-limits — bless the submodule set. Prefix `helix_translate` (.env HELIX_RELEASE_PREFIX); zero existing tags. Then: tag main + owned submodules (except helix_qa) + push FF all remotes (NO force).
+
+**Non-blocking follow-ups (not product defects):** (a) `host_no_auto_suspend` challenge FAILs = HOST not hardened against auto-suspend — environment (§11.4.3), host power config NOT changed autonomously (CONST-033), operator action if desired; (b) `internal/working/config.distributed.{json,test,thinker}.json` legacy `llamacpp`/`gguf` tokens (KEPT distributed path) — future R-cycle if distributed worker API-migrated; (c) `codebase_hash_report.json` generator needs a submodule-exclusion before faithful refresh (not a gate dep); (d) format-detector XHTML-branch advisory (conservative, zero real-tree impact) — optional future hardening.
 
 ### Standing constraints (binding every session)
 - **No force-push EVER** (§11.4.113 — merge-onto-latest-main, FF-only); **never `git add -A`** (§11.4.30); **never touch the `helix_qa` submodule** — another session owns it (§11.4.119 single-resource-owner); **never touch owned submodules** in this R-5 scope.
