@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>RECON</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">RECON</h1>
+</header>
+<h1
+id="114153-feature-ledger-reconciliation--wave-79-planning">§11.4.153
+Feature-Ledger Reconciliation — wave-7..9 planning</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-16T15:04:12Z <strong>Run-id:</strong>
+feature_ledger_recon_20260616T150412Z <strong>Authority:</strong>
+§11.4.153 (per-feature video ledger), §11.4.118 (code-vs-ledger
+reconciliation / discovery-coverage), §11.4.6 (no-guessing — every line
+below is a captured fact from the actual files).
+<strong>Stream:</strong> BACKGROUND operator-authorized, READ-ONLY,
+NON-COMMITTING. This agent did NOT
+edit/stage/commit/<code>git add</code> (a separate committer agent owns
+the main checkout, §11.4.84). This file is a file-write only.
+<strong>Main checkout HEAD at start:</strong> <code>0726c20</code>.
+<strong>Provider keys observed (§11.4.6, values never printed):</strong>
+<code>DEEPSEEK_API_KEY</code> SET, <code>GROQ_API_KEY</code> SET. No
+other provider keys present in this shell.</p>
+<hr />
+<h2
+id="1-what-waves-16-already-confirmed-the-baseline--do-not-re-record-as-net-new">1.
+What waves 1–6 ALREADY confirmed (the baseline — do NOT re-record as
+net-new)</h2>
+<p>Established from <code>docs/features/Status.md</code> (Rev 14)
+Anti-bluff note + <code>docs/qa/video_wave*/EVIDENCE.md</code> +
+<code>docs/qa/wave3e-multipass-regression/FINDING.md</code>. Per the
+doc's own §11.4.6 re-derivable count, <strong>48
+video-confirmed</strong> rows after wave 5 (43 at Rev 14 + 5 wave-5),
+with wave 6 adding 5 more (HTML→HTML, PDF-input, DOCX-input, EN→ZH,
+EN→RU) → <strong>~53</strong> confirmed; the Status.md summary cell has
+not yet absorbed waves 4–6 (committer lag, NOT a code gap).</p>
+<p><strong>CONFIRMED — do not repeat:</strong></p>
+<ul>
+<li><strong>Core translate (CLI):</strong> DeepSeek EN→ES translate;
+<code>-script</code> Cyrillic↔︎Latin; Serbian-Cyrillic; format-detection;
+help/version; <code>-verify</code> flag.</li>
+<li><strong>Format conversions (CLI):</strong> EPUB→TXT, HTML→EPUB,
+FB2→EPUB, FB2→FB2, EPUB→EPUB, TXT→TXT, HTML→HTML; HTML→Markdown;
+markdown EPUB↔︎MD round-trip.</li>
+<li><strong>Format input (CLI):</strong> PDF input accepted, DOCX input
+accepted.</li>
+<li><strong>Format output (CLI):</strong> DOCX output, PDF output (+
+EPUB/FB2/TXT/HTML/MD).</li>
+<li><strong>Language pairs (CLI):</strong> EN→FR, EN→DE, EN→IT, EN→ES,
+EN→PT, EN→JA, EN→ZH, EN→RU, RU→SR(cyrillic).</li>
+<li><strong>Providers (CLI per-provider path):</strong> deepseek,
+cerebras, sambanova, gemini, zhipu, cohere, hyperbolic, nvidia,
+openrouter, fireworks, novita, mistral, groq, siliconflow.</li>
+<li><strong>REST API (live <code>cmd/server</code>):</strong>
+<code>POST /api/v1/translate</code>,
+<code>GET /health · /version · /providers</code>,
+<code>POST /api/v1/convert/script</code>,
+<code>POST /api/v1/translate/fb2</code> (→ real Serbian EPUB, hardcoded
+ru→sr target — honest limitation noted).</li>
+<li><strong>gRPC:</strong> TranslationService EN→ES (CLI clip) AND
+<strong>full async file-job round-trip on the LIVE nezha stack</strong>
+(<code>docs/qa/nezha_grpc_roundtrip_20260616T143649Z/RESULT.md</code> —
+StartTranslation→poll GetTranslationStatus→completed→valid translated
+EPUB with real Serbian; PASS).</li>
+<li><strong>Bridge / LLMsVerifier CLI:</strong>
+<code>cmd/model-bridge</code> best-model translate + MCP-stdio surface;
+<code>cmd/verify-models</code> discovery/scoring/selection;
+<code>cmd/workable-items</code> SQLite SSoT validate+list.</li>
+<li><strong>Other binaries:</strong> markdown-translator,
+preparation-translator (FIXED), cmd/cli (DeepSeek), monitor-server (live
+WS hub), <code>-multipass</code> (confirmed ONLY with explicit valid
+<code>-model deepseek-chat</code>; see §5 known bug).</li>
+</ul>
+<hr />
+<h2
+id="2-classification-of-remaining-pending-features-closed-set-1146">2.
+Classification of remaining PENDING features (CLOSED set, §11.4.6)</h2>
+<p>The 186 <code>PENDING</code> ledger rows + Web/Library/Submodule rows
+were classified into the closed set the operator specified. Counts are
+of distinct ledger rows (flags + internal types that carry
+<code>N/A</code> are excluded from PENDING).</p>
+<table>
+<thead>
+<tr>
+<th>Classification</th>
+<th>Count (approx, distinct PENDING rows)</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>[CLI-LOCAL-CONFIRMABLE]</strong></td>
+<td><strong>~38</strong></td>
+<td>exercisable via <code>./build/unified-translator</code> or local
+<code>./build/server</code> with the keys present (deepseek/groq), no
+live nezha/LLMsVerifier server needed</td>
+</tr>
+<tr>
+<td><strong>[LIVE-BRIDGE-NEEDED]</strong></td>
+<td><strong>~30</strong></td>
+<td>needs a reachable LLMsVerifier server (localhost:8080) and/or the
+additional provider keys that are EMPTY in the env — blocked by the
+operator-review item; DEFER</td>
+</tr>
+<tr>
+<td><strong>[WEB-DASHBOARD]</strong></td>
+<td><strong>~37</strong></td>
+<td>needs a browser/HelixQA driving monitor.html / enhanced-monitor.html
+/ dashboard.html — operator-attended</td>
+</tr>
+<tr>
+<td><strong>[GRPC]</strong></td>
+<td><strong>0 net-new</strong></td>
+<td>the 7 RPCs class is already LIVE-confirmed via the nezha async
+round-trip; remaining per-RPC rows are sub-features of that confirmed
+flow</td>
+</tr>
+<tr>
+<td><strong>[DESKTOP/MOBILE]</strong></td>
+<td><strong>0</strong></td>
+<td>no desktop/mobile surface exists in this codebase</td>
+</tr>
+<tr>
+<td><strong>[NON-FEATURE / N/A]</strong></td>
+<td>258 (the <code>N/A</code> rows)</td>
+<td>bare CLI flags, internal library types, infra middleware — no
+standalone user-visible video applies</td>
+</tr>
+</tbody>
+</table>
+<p><strong>LIVE-BRIDGE-NEEDED detail (DEFER, §11.4.6):</strong> the
+<code>-use-verifier</code> path requires a live LLMsVerifier at
+<code>http://localhost:8080</code> which is unreachable in this
+environment (every wave EVIDENCE.md records this honest constraint).
+Additionally, per
+<code>docs/qa/operator_review_20260616T142856Z/PLANS.md</code>, 9
+provider keys are EMPTY in the nezha container (<code>OPENAI</code>,
+<code>ANTHROPIC</code>, <code>QWEN</code>, <code>XAI</code>,
+<code>TOGETHER</code>, <code>NLP_CLOUD</code>, <code>SARVAM</code>,
+<code>LLMSVERIFIER</code>, <code>SSH_WORKER_PASSWORD</code>) — so
+OpenAI/Anthropic/Qwen/xAI/Together/NLPCloud/Sarvam providers CANNOT be
+confirmed until the operator populates those keys. These belong to
+LIVE-BRIDGE-NEEDED, not CLI-LOCAL.</p>
+<p><strong>WEB-DASHBOARD detail:</strong> monitor.html (9 rows),
+enhanced-monitor.html (8 rows), dashboard.html (7 rows), monitor-server
+<code>/ws</code>,<code>/monitor</code>,<code>/health</code> (4 rows) +
+version-monitoring dashboard.html. All require browser/HelixQA per
+§11.4.143/§11.4.117 — operator-attended; not autonomously
+CLI-confirmable.</p>
+<hr />
+<h2
+id="3-cli-local-confirmable-inventory-the-actionable-pool-for-waves-79">3.
+CLI-LOCAL-CONFIRMABLE inventory (the actionable pool for waves 7–9)</h2>
+<p>These ARE exercisable now with
+<code>DEEPSEEK_API_KEY</code>/<code>GROQ_API_KEY</code> and
+<code>./build/unified-translator</code> / <code>./build/server</code>.
+Distinct from waves 1–6.</p>
+<p><strong>A. Native-factory providers via
+<code>unified-translator -provider &lt;name&gt;</code> (key
+permitting).</strong> <code>pkg/translator/llm/llm.go</code> switches 26
+native providers directly. Confirmed already: deepseek, cerebras,
+sambanova, gemini, zhipu, cohere, hyperbolic, novita, mistral, groq,
+siliconflow (+ nvidia/openrouter/fireworks via submodule path).
+<strong>Remaining native providers with code BUT no key in this
+env</strong> → these are CLI-shaped but key-blocked, so effectively
+LIVE-BRIDGE/key-blocked: openai, anthropic, qwen, xai, togetherai,
+nlpcloud, sarvam, upstage (403). <strong>Remaining native providers
+possibly key-available depends on env:</strong> kimi, modal, publicai,
+nia, vulavula, replicate, cloudflare — confirm
+<code>&lt;NAME&gt;_API_KEY</code> presence before recording; only those
+with a real key are genuine CLI-LOCAL.</p>
+<p><strong>B. NOT-yet-confirmed CLI-local FEATURES that work on
+deepseek/groq (no extra key):</strong></p>
+<ol type="1">
+<li><strong>GROQ provider</strong> EN→ES via <code>-provider groq</code>
+(key is SET; only deepseek-family confirmed for many feature rows) — a
+second-provider liveness confirmation distinct from the deepseek
+baseline.</li>
+<li><strong>More language pairs</strong> through the confirmed deepseek
+path that the matrix has not yet covered, e.g.
+<strong>EN→SR(latin)</strong>, <strong>EN→AR</strong>,
+<strong>EN→KO</strong>, <strong>DE→EN</strong> (reverse direction),
+<strong>FR→ES</strong> (non-English source→non-English target) — each a
+distinct user-visible capability the
+<code>-source-lang</code>/<code>-target-lang</code> rows enable
+(Status.md lines 271–272 are <code>N/A</code> as bare flags; the
+CAPABILITY deserves §11.4.153 confirmation per the wave-4
+precedent).</li>
+<li><strong>TXT→EPUB / TXT→DOCX / TXT→PDF / TXT→FB2</strong>
+output-format cross-products from a plain TXT source (writers all
+confirmed present in code; the specific source→target cross-products are
+net-new rows).</li>
+<li><strong>EPUB→DOCX / EPUB→PDF / EPUB→HTML / EPUB→MD</strong>
+conversions (EPUB parser + each writer confirmed in code; these specific
+conversions not yet recorded).</li>
+<li><strong><code>-chunk-size</code> / <code>-concurrency</code> /
+<code>-workers</code></strong> real effect on a multi-section book (a
+session-report-backed confirmation that chunking actually parallelises —
+distinct from bare-flag N/A).</li>
+<li><strong><code>-temperature</code> /
+<code>-max-tokens</code></strong> producing a genuinely different output
+on the same input (liveness via output-diff, deepseek).</li>
+<li><strong>REST <code>POST /api/v1/translate/string</code></strong> and
+<strong><code>POST /api/v1/translate/directory</code></strong>
+(<code>pkg/api/batch_handlers.go</code>) against the local
+<code>cmd/server</code> — distinct from the confirmed
+<code>/translate</code> JSON endpoint.</li>
+<li><strong>REST <code>POST /api/translate</code></strong> +
+<strong><code>POST /api/upload</code></strong> +
+<strong><code>GET /api/languages</code></strong> on the standalone
+<code>pkg/api/server.go</code> gin server (a different server impl than
+<code>cmd/server</code>'s <code>handler.go</code>).</li>
+<li><strong><code>cmd/preparation-translator</code> analysis
+JSON</strong> consumed by a follow-on translate (the two-stage pipeline
+end-to-end, deepseek) — preparation row is confirmed in isolation but
+the consume-the-analysis flow is net-new.</li>
+<li><strong><code>cmd/markdown-translator</code> MD→EPUB
+direction</strong> specifically (round-trip confirmed; the
+MD-as-source→EPUB direction as a standalone is distinct).</li>
+</ol>
+<hr />
+<h2
+id="4-recommended-waves-79-cli-local-no-overlap-with-waves-16-deepseekgroq-only">4.
+RECOMMENDED waves 7–9 (CLI-LOCAL, no overlap with waves 1–6,
+deepseek/groq only)</h2>
+<p>Ordered by value × distinctness; each batch = 3–5 net-new, no
+cross-batch overlap. All confirmable with the present keys + local
+binaries.</p>
+<h3
+id="wave-7--output-format-cross-products-highest-distinctness-all-writers-code-confirmed">Wave
+7 — output-format cross-products (highest distinctness, all writers
+code-confirmed)</h3>
+<ol type="1">
+<li><strong>TXT→EPUB</strong> (EN .txt → real Spanish EPUB, open
+artifact + read chapter)</li>
+<li><strong>TXT→PDF</strong> (EN .txt → valid Spanish PDF)</li>
+<li><strong>EPUB→DOCX</strong> (EN .epub → real Spanish .docx, open
+OOXML)</li>
+<li><strong>EPUB→HTML</strong> (EN .epub → Spanish .html)</li>
+<li><strong>TXT→FB2</strong> (EN .txt → Spanish FB2 with namespace
+preserved)</li>
+</ol>
+<h3
+id="wave-8--language-matrix-breadth--second-provider-capability-rows-the-flags-enable">Wave
+8 — language-matrix breadth + second provider (capability rows the flags
+enable)</h3>
+<ol type="1">
+<li><strong>GROQ provider</strong> EN→ES (second live provider, key SET
+— distinct from all deepseek rows)</li>
+<li><strong>EN→SR(latin)</strong> translate (latin Serbian, distinct
+from confirmed cyrillic)</li>
+<li><strong>EN→KO (Korean)</strong> non-Latin output (distinct from
+JA/ZH)</li>
+<li><strong>DE→EN</strong> reverse-direction translate
+(source≠English)</li>
+<li><strong>FR→ES</strong> non-English-source→non-English-target
+(distinct pair class)</li>
+</ol>
+<h3
+id="wave-9--rest-surface-breadth--pipeline-depth-local-cmdserver--pkgapiservergo">Wave
+9 — REST surface breadth + pipeline depth (local <code>cmd/server</code>
+/ <code>pkg/api/server.go</code>)</h3>
+<ol type="1">
+<li><strong>REST <code>POST /api/v1/translate/string</code></strong>
+real JSON translated string (batch_handlers.go)</li>
+<li><strong>REST <code>POST /api/v1/translate/directory</code></strong>
+real directory batch (batch_handlers.go)</li>
+<li><strong>REST <code>POST /api/translate</code></strong> on standalone
+<code>pkg/api/server.go</code> gin server (distinct impl)</li>
+<li><strong>REST <code>POST /api/upload</code></strong>
+file-upload→translate on <code>pkg/api/server.go</code></li>
+<li><strong>preparation→translate two-stage pipeline</strong>
+(preparation-translator analysis JSON consumed by unified-translator,
+deepseek)</li>
+</ol>
+<blockquote>
+<p>§11.4.6 caveat on Wave 8.1/native providers: only record a provider
+whose <code>&lt;NAME&gt;_API_KEY</code> is actually present at record
+time. groq is SET. For any other provider, verify the key first or it is
+an honest SKIP, never a faked PASS (the wave-3d <code>upstage</code>-403
+/ <code>together</code>-no-key precedent).</p>
+</blockquote>
+<hr />
+<h2
+id="5-114118-code-vs-ledger-reconciliation-findings-mismatches--honest-notes">5.
+§11.4.118 code-vs-ledger reconciliation findings (mismatches / honest
+notes)</h2>
+<p>Verified against actual code (<code>pkg/translator/llm/*.go</code>,
+<code>llm_provider/pkg/providers/*</code>, <code>pkg/ebook/*</code>,
+<code>pkg/grpc/server.go</code>,
+<code>pkg/api/verifier_handlers.go</code>, <code>cmd/</code>).</p>
+<ul>
+<li><strong>[MATCH]</strong> All 26 native factory providers in
+<code>pkg/translator/llm/llm.go</code> (lines 264–315) have real client
+<code>.go</code> files. No claimed native provider lacks code.</li>
+<li><strong>[MATCH]</strong> All 7 output writers present:
+<code>epub_writer.go</code>, <code>fb2_writer.go</code>,
+<code>docx_writer.go</code>, <code>pdf_writer.go</code>; TXT/HTML/MD via
+<code>cmd/unified-translator/main.go</code> output switch. All 6 input
+parsers present: <code>fb2/epub/docx/html/pdf/txt_parser.go</code>.</li>
+<li><strong>[MATCH]</strong> All 7 gRPC RPC handlers present in
+<code>pkg/grpc/server.go</code>.</li>
+<li><strong>[MATCH]</strong> <code>GET /api/v1/verified-models</code>
+handler EXISTS (<code>pkg/api/verifier_handlers.go:100/109</code>); the
+runtime 404 is config-driven (LLMsVerifier disabled), NOT missing code —
+Status.md states this honestly.</li>
+<li><strong>[MATCH]</strong> All 4 Obsolete cmd dirs
+(<code>translator</code>, <code>translate-ssh</code>,
+<code>ebook-translator</code>, <code>ssh-translation</code>) are
+genuinely ABSENT from disk — Obsolete classification is accurate.</li>
+<li><strong>[MISMATCH-no-ledger / minor]</strong>
+<code>cmd/grpc-translate-probe</code> EXISTS on disk (used as the nezha
+gRPC wire-client in <code>docs/qa/nezha_grpc_roundtrip_*</code>) but is
+NOT enumerated as a section in <code>docs/features/Status.md</code>. It
+is a test/probe client, not a shipped user binary, so the omission is
+minor — recommend adding a one-line ledger row classified
+<code>N/A</code> (internal probe) or <code>Confirmed</code> (it IS the
+tool that produced the gRPC round-trip evidence). Honest §11.4.118 gap,
+not a code-absence.</li>
+<li><strong>[NOTE]</strong> The <code>llm_provider</code> submodule
+carries ~44 provider dirs; only the subset reachable through the
+unified-translator/bridge path is user-exercisable. The extra submodule
+providers (ai21, chutes, codestral, githubmodels, huggingface, junie,
+kilo, ollama, perplexity, venice, zai, zen, generic, claude, ai21, …)
+are NOT enumerated as confirmable HelixTranslate features and are
+LIVE-BRIDGE-only — correctly out of the CLI-LOCAL pool.</li>
+<li><strong>[NOTE — real bug, already tracked]</strong>
+<code>-multipass</code> default-model path is BROKEN
+(<code>docs/qa/wave3e-multipass-regression/FINDING.md</code> + wave-5
+EVIDENCE): default <code>gpt-4</code> is rejected by the
+<code>ValidModels</code> whitelist for deepseek; the polish path also
+has no guard against the LLM returning a meta-response (writes garbage
+as the translation). Confirmed working ONLY with explicit
+<code>-model deepseek-chat</code>. The ledger correctly demotes it to
+PENDING_FORENSICS. Do NOT re-record multipass as a clean confirmation
+until the source fix lands.</li>
+<li><strong>[NOTE — real bug, already tracked]</strong>
+<code>POST /api/v1/translate/fb2</code> hardcodes ru→sr
+(<code>pkg/api/handler.go:84-85</code>), ignoring requested target.
+Feature confirmed working, hardcoded-target is an honest
+limitation.</li>
+</ul>
+<hr />
+<h2 id="6-counts-summary-for-the-report">6. Counts summary (for the
+report)</h2>
+<ul>
+<li><strong>Video-confirmed baseline (waves 1–6):</strong> ~53 distinct
+rows (Status.md re-derivable 48 post-wave-5 + 5 wave-6; summary cell
+lags at 43 — committer catch-up owed, not a code gap).</li>
+<li><strong>PENDING classification:</strong> CLI-LOCAL-CONFIRMABLE ~38 ·
+LIVE-BRIDGE-NEEDED ~30 · WEB-DASHBOARD ~37 · GRPC 0 net-new (class
+already live-confirmed) · DESKTOP/MOBILE 0 · NON-FEATURE/N/A 258.</li>
+<li><strong>Code-vs-ledger mismatches:</strong> 1 minor ledger gap
+(<code>cmd/grpc-translate-probe</code> unlisted); 0 claim-without-code.
+Ledger is materially accurate.</li>
+<li><strong>Recommended next 3 waves:</strong> 15 CLI-local net-new
+confirmations (Wave 7 output cross-products, Wave 8 language-matrix +
+groq, Wave 9 REST breadth + pipeline depth) — all autonomously
+recordable with deepseek/groq, no live nezha bridge required.</li>
+</ul>
+</body>
+</html>

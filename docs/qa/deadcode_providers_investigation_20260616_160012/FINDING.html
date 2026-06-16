@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>FINDING</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">FINDING</h1>
+</header>
+<h1
+id="114124-dead-code-investigation--1146-classification--finding">§11.4.124
+dead-code investigation + §11.4.6 classification — FINDING</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-16T16:00:12Z <strong>Mode:</strong> READ-ONLY, NON-COMMITTING
+investigation (separate committer agent is sole committer per §11.4.84).
+No edits/stages/commits made by this agent. <strong>HEAD at
+investigation:</strong> <code>c2aa7c8</code>
+<strong>Discipline:</strong> superpowers:systematic-debugging Phase-1
+forensic + §11.4.124 investigate-before-remove + §11.4.6
+no-guessing.</p>
+<hr />
+<h2
+id="task-1--pkgapiservergo-server-type--verdict-never-wired-scaffolding-do-not-delete-on-sight-recommend-leave--document-or-tracked-obsolete">TASK
+1 — <code>pkg/api/server.go</code> <code>Server</code> type — VERDICT:
+<strong>NEVER-WIRED scaffolding (do NOT delete on sight; recommend leave
++ document, or tracked-Obsolete)</strong></h2>
+<h3 id="git-history-fact-chain">Git-history FACT chain</h3>
+<ul>
+<li><code>git log --follow pkg/api/server.go</code> → only 3 commits
+touch it: <code>76b94dc</code> (Auto-commit — <strong>first
+appearance</strong>, <code>--diff-filter=A</code> confirms it is the add
+commit), <code>e57fe22</code> (Comprehensive test/lint fixes),
+<code>85d9849</code> (§11.4.115 fix: <code>Server.Stop()</code> was a
+no-op placeholder — a real bug-fix landed against this type).</li>
+<li><code>git grep -l 'api.NewServer(' &lt;commit&gt; -- 'cmd/*'</code>
+for <code>76b94dc</code>, <code>96e780e</code>, <code>e57fe22</code>,
+<code>7a59eff</code> → <strong>EMPTY in every commit.</strong>
+<code>api.NewServer(</code> was <strong>never present in any
+<code>cmd/</code> entry across the entire history.</strong></li>
+<li>The first-appearance commit <code>76b94dc</code> added
+<code>pkg/api/server.go</code> (214 lines) <strong>alongside
+<code>*_comprehensive_test.go</code> files only</strong> (cmd/cli,
+cmd/deployment, cmd/markdown-translator, cmd/server, cmd/translate-ssh
+test scaffolds). It was born as test-targeted scaffolding, never with a
+production call-site.</li>
+</ul>
+<h3 id="no-references--real-or-hidden-fact">"No references" — real or
+hidden? (FACT)</h3>
+<ul>
+<li>Non-test callers of <code>api.NewServer</code> /
+<code>api.Server</code> / <code>SetTranslator</code> in
+<code>cmd/</code> + <code>pkg/</code>: <strong>ZERO.</strong> (The two
+<code>NewServer</code> grep hits are unrelated:
+<code>translatorgrpc.NewServer</code> in <code>pkg/grpc</code> and
+stdlib <code>grpc.NewServer</code> — different package, different
+type.)</li>
+<li>Literal <code>api.NewServer(</code> hits in the tree are NOT our
+type:
+<ul>
+<li><code>llms_verifier/llm-verifier/...</code> → the LLMsVerifier
+<strong>submodule's own</strong> <code>api</code> package, 2-arg
+signature <code>api.NewServer(cfg, db)</code> — NOT
+<code>digital.vasic.translator/pkg/api.NewServer(config ServerConfig)</code>.</li>
+<li><code>test/security/input_validation_new_test.go</code> →
+<strong>test-only</strong> caller of OUR
+<code>api.NewServer(api.ServerConfig{...})</code>.</li>
+</ul></li>
+<li>No hidden wiring: no reflection / build-tags / DI / plugin-registry
+/ codegen reaches <code>api.Server</code>. The two production HTTP
+servers are wired through <strong>entirely different</strong> types (see
+below). UNCONFIRMED on nothing material here — the static + history
+evidence is conclusive that no production path constructs
+<code>api.Server</code>.</li>
+</ul>
+<h3
+id="what-actually-serves-http-in-production-fact--proves-apiserver-is-superseded-scaffolding">What
+actually serves HTTP in production (FACT — proves
+<code>api.Server</code> is superseded scaffolding)</h3>
+<ul>
+<li><code>cmd/server/main.go</code> →
+<code>api.NewHandler(cfg, eventBus, cache, authService, wsHub, distributedManager)</code>
+(<code>pkg/api/handler.go</code>, the rich <code>Handler</code>) +
+<code>api.InitVerifierFromConfig</code> + its own
+<code>http.Server</code> + HTTP/3. <strong>Does not touch
+<code>api.Server</code>.</strong></li>
+<li><code>cmd/api-server/main.go</code> → <code>APIServer</code> struct
+with its own <code>*http.Server</code>, gRPC client,
+<code>api.NewVerifierHandler</code>. <strong>Does not touch
+<code>api.Server</code>.</strong></li>
+<li><code>api.Server</code> is a parallel, simpler gin server
+(<code>/health</code>, <code>/api/translate</code>,
+<code>/api/languages</code>, <code>/api/stats</code>,
+<code>/api/upload</code>, <code>/api/batch</code>) with placeholder
+handlers (<code>statsHandler</code> returns <code>translations:0</code>;
+<code>languagesHandler</code> static). It is functionally
+<strong>superseded</strong> by <code>Handler</code> (richer
+<code>/api/v1/*</code>) — but was never a wired predecessor that got
+orphaned; it was scaffolded in parallel and never wired.</li>
+</ul>
+<h3 id="classification-1146-fact-not-guess">Classification (§11.4.6
+FACT, not guess)</h3>
+<p><strong>NEVER-WIRED.</strong> It was born as test-targeted
+scaffolding (first commit added it with comprehensive test files, never
+a <code>cmd/</code> call-site), it has only test callers today, and the
+two production servers were always built on different types
+(<code>Handler</code> / <code>APIServer</code>). It is NOT ORPHANED (no
+evidence a production call-site ever existed and was removed) and NOT a
+from-wired-to-dead regression.</p>
+<h3 id="recommendation-114124--not-blind-deletion">Recommendation
+(§11.4.124 — NOT blind deletion)</h3>
+<ol type="1">
+<li><strong>Do NOT blind-delete.</strong> It carries a §11.4.115 bug-fix
+commit (<code>85d9849</code> Stop()) + a live test suite
+(<code>server_test.go</code>, <code>server_lifecycle_test.go</code>,
+<code>server_realhttp_integration_test.go</code>,
+<code>test/security/input_validation_new_test.go</code>) that genuinely
+exercise it — deletion would also remove that real test coverage and the
+security input-validation tests that depend on it.</li>
+<li><strong>Preferred: LEAVE + DOCUMENT</strong> as an
+intentionally-test-only HTTP surface (a lightweight in-process gin
+server used by the security/integration test suites), OR — if the
+project wants it gone — route it through the §11.4.90 tracked
+<strong>Obsolete (→ Fixed.md)</strong> path with reason
+<code>superseded-by-design-change</code> (superseded by
+<code>pkg/api.Handler</code>), its <strong>own separate descriptive
+commit</strong> citing this git-history evidence (§11.4.124), AND
+migrate the dependent security tests onto <code>Handler</code> first so
+coverage is not lost.</li>
+<li><strong>§11.4.122:</strong> <code>api.Server</code> is not an
+end-user-facing shipped capability (no <code>cmd/</code> ships it), so
+operator keep-or-remove confirmation is advisory, not mandatory — but
+the Obsolete route still requires the §11.4.124
+separate-commit-with-proof discipline.</li>
+<li><strong>Reject</strong> the two streams' "UNWIRED dead-code ⇒
+delete" framing: correct on "unwired", but deletion-on-sight is
+forbidden here because (a) test coverage depends on it, (b) the correct
+closure is tracked-Obsolete-with-test-migration, not silent
+removal.</li>
+</ol>
+<hr />
+<h2
+id="task-2--get-apiv1providers-static-list--verdict-real-bug-mis-represents-capability-and-availability">TASK
+2 — <code>GET /api/v1/providers</code> static list — VERDICT:
+<strong>REAL BUG (mis-represents capability AND
+availability)</strong></h2>
+<h3 id="fact--there-are-two-distinct-providers-endpoints">FACT — there
+are TWO distinct <code>/providers</code> endpoints</h3>
+<ol type="1">
+<li><strong><code>cmd/api-server/main.go:540 getProviders</code></strong>
+→ proxies the <strong>real gRPC</strong> <code>GetProviders</code> RPC →
+<code>pkg/grpc/server.go:399</code> returns
+<code>s.providers.GetAll()</code> — a genuine dynamic registry source.
+<strong>Not the finding.</strong></li>
+<li><strong><code>pkg/api/handler.go:638 listProviders</code></strong>
+(the <code>/api/v1/providers</code> route registered at
+<code>handler.go:144</code>, served by <code>cmd/server</code>) →
+returns a <strong>hardcoded static list</strong> of exactly 4 providers:
+<code>openai</code> (<code>gpt-4</code>, <code>gpt-3.5-turbo</code>),
+<code>anthropic</code> (<code>claude-3-sonnet-20240229</code>,
+<code>claude-3-opus-20240229</code>), <code>zhipu</code>
+(<code>glm-4</code>), <code>deepseek</code>
+(<code>deepseek-chat</code>). <strong>This is the wave9
+finding.</strong></li>
+</ol>
+<h3 id="why-it-is-a-real-bug-fact">Why it is a real bug (FACT)</h3>
+<ul>
+<li><strong>Mis-represents capability.</strong> The real provider
+factory <code>NewLLMTranslator</code>
+(<code>pkg/translator/llm/llm.go:264+</code>) supports
+<strong>20+</strong> providers: openai, anthropic, zhipu, deepseek,
+<strong>qwen, gemini, groq, cohere, mistral, xai, replicate, cerebras,
+cloudflare, siliconflow, hyperbolic, togetherai, sambanova, kimi,
+novita, nlpcloud, …</strong> The static list omits 16+ supported
+providers and ships stale model ids (<code>claude-3-opus-20240229</code>
+etc.).</li>
+<li><strong>Mis-represents availability.</strong> The
+<code>Handler</code> already holds <code>config *config.Config</code>
+(<code>handler.go:41</code>), whose
+<code>Translation.Providers map[string]ProviderConfig</code> and
+<code>Verification.Providers []string</code>
+(<code>internal/config/config.go:50,95,159</code>) are the real
+configured/enabled source — but <code>listProviders</code> ignores them
+and returns the same 4 regardless of what is actually configured. A
+client calling <code>/api/v1/providers</code> is told
+<code>openai</code> is available even with no key configured, and is NOT
+told <code>gemini</code>/<code>qwen</code> (configured + supported)
+exist. A client cannot drive a provider-selection UI from this.</li>
+<li><strong>A dynamic real source exists</strong> and is the contrast
+oracle: <code>GET /api/v1/verified-models</code> +
+<code>GET /api/v1/providers/verified</code>
+(<code>pkg/api/verifier_handlers.go:100,104,248</code>) derive providers
+from <code>client.GetVerifiedModels(ctx)</code> (LLMsVerifier — the
+project's SSoT per CLAUDE.md). The static <code>listProviders</code> is
+the only providers endpoint on <code>cmd/server</code> that lies.</li>
+<li>§11.4.6: this is FACT (hardcoded slice literal
+<code>handler.go:639-664</code>, no config read), not a guess.
+UNCONFIRMED: whether any current dashboard/client actually consumes
+<code>/api/v1/providers</code> for availability decisions vs the
+verified endpoints — needs a consumer grep at fix time, but the
+endpoint's contract ("list available providers" per its doc comment) is
+violated regardless of current consumers.</li>
+</ul>
+<h3
+id="bug-or-intentional-bug-not-an-acceptable-capability-catalogue">Bug-or-intentional:
+<strong>BUG</strong> (not an acceptable capability catalogue)</h3>
+<p>Its own doc comment says "lists <strong>available</strong>
+translation providers" — an availability claim, not a static catalogue
+claim — and it ships a partial, stale, config-blind list. Even read
+charitably as a catalogue, it is wrong (16+ providers missing). Not
+intentional/acceptable.</p>
+<h3 id="fix-recommendation-draft">Fix recommendation (draft)</h3>
+<p>Serve real configured/available providers instead of a hardcoded
+slice:</p>
+<ul>
+<li>Derive the provider set from
+<code>h.config.Translation.Providers</code> (configured) and/or the
+verified-models source (<code>verifier_handlers</code> already does this
+via <code>GetVerifiedModels</code>), reporting per-provider
+<code>configured</code>/<code>available</code>/<code>requires_api_key</code>
+from actual config + key presence — not literals.</li>
+<li>Reconcile model lists against the real factory/verifier, not frozen
+string literals.</li>
+<li>Consider folding <code>/api/v1/providers</code> to delegate to the
+same source as <code>/api/v1/providers/verified</code>, or clearly
+document it as a static capability catalogue AND complete it to the full
+<code>llm.go</code> provider set (the lesser fix).</li>
+</ul>
+<h3
+id="red-test-shape-114115-reproduce-first-for-the-committerfix-agent">RED-test
+shape (§11.4.115 reproduce-first, for the committer/fix agent)</h3>
+<p><code>RED_MODE=1</code> on current artifact MUST FAIL, proving the
+lie:</p>
+<ul>
+<li>Configure config with providers <code>{gemini, qwen}</code> and NO
+<code>openai</code> key → <code>GET /api/v1/providers</code> → assert
+response <strong>does NOT</strong> contain
+<code>gemini</code>/<code>qwen</code> and <strong>does</strong> contain
+<code>openai</code> (current static behaviour) → that
+assertion-of-the-bug passes on the broken artifact (RED present).</li>
+<li>Flip <code>RED_MODE=0</code> after fix: assert response reflects the
+configured set (<code>gemini</code>,<code>qwen</code> present;
+unconfigured <code>openai</code> absent or flagged
+<code>configured:false</code>). Register as a permanent §11.4.135
+regression guard.</li>
+</ul>
+<hr />
+<h2 id="summary">Summary</h2>
+<ul>
+<li><strong>TASK 1:</strong> <code>api.Server</code> is
+<strong>NEVER-WIRED</strong> scaffolding (git-history FACT: no
+<code>cmd/</code> call-site ever; only test callers; superseded by
+<code>Handler</code>/<code>APIServer</code>). Recommend <strong>leave +
+document</strong> OR <strong>tracked-Obsolete with test migration in its
+own §11.4.124 commit</strong> — NOT blind deletion (real test coverage
+depends on it).</li>
+<li><strong>TASK 2:</strong> <code>/api/v1/providers</code> static list
+(<code>handler.go:listProviders</code>) is a <strong>REAL BUG</strong> —
+mis-represents both capability (4 of 20+ providers, stale models) and
+availability (ignores <code>config.Translation.Providers</code> it
+already holds). Fix: serve real configured/available providers; RED-test
+shape provided.</li>
+</ul>
+<p>No bluff. FACTs sourced from git history + code reads at HEAD
+<code>c2aa7c8</code>. UNCONFIRMED items marked.</p>
+</body>
+</html>

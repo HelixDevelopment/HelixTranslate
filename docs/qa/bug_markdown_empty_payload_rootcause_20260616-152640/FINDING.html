@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>FINDING</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">FINDING</h1>
+</header>
+<h1
+id="bug-markdown-empty-payload--root-cause-finding">BUG-MARKDOWN-EMPTY-PAYLOAD
+— Root-Cause Finding</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-16T15:26:40Z <strong>Investigation:</strong> READ-ONLY
+systematic-debugging (superpowers Iron Law + §11.4.6 + §11.4.102)
+<strong>Status:</strong> ROOT CAUSE PROVEN (FACT, wire-level
+reproduction, no API key)</p>
+<hr />
+<h2 id="1-fact-root-cause">1. FACT root cause</h2>
+<p>The defect is an <strong>LLM-client parameter-contract mismatch at
+the send site</strong>, NOT a block-splitter, whitespace-filter,
+wrong-field, or structure-mismatch defect, and NOT a Step-1 (EPUB→MD)
+defect.</p>
+<h3 id="the-contract-fact">The contract (FACT)</h3>
+<p><code>pkg/translator/llm/openai.go:152-159</code> builds the chat
+request with the user message content taken <strong>only from the 2nd
+parameter (<code>prompt</code>)</strong> and <strong>ignores the 1st
+parameter (<code>text</code>)</strong>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// openai.go:121  func (c *OpenAIClient) Translate(ctx, text string, prompt string)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>request <span class="op">:=</span> OpenAIRequest<span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    Model<span class="op">:</span> model<span class="op">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    Messages<span class="op">:</span> <span class="op">[]</span>Message<span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Role<span class="op">:</span> <span class="st">&quot;user&quot;</span><span class="op">,</span> Content<span class="op">:</span> prompt<span class="op">},</span>   <span class="co">// openai.go:155 — uses prompt, ignores text</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>DeepSeekClient</code> embeds <code>*OpenAIClient</code>
+(<code>pkg/translator/llm/deepseek.go:9-11</code>) and inherits this
+<code>Translate</code> verbatim. The bridge's <code>BestClient</code>
+returns a <code>markedClient{*OpenAIClient}</code>
+(<code>pkg/bridge/bridge.go:339-346, 413-419</code>) that delegates
+<code>Translate</code> verbatim (no arg swap). So <strong>content must
+be passed in the 2nd arg</strong>. The bridge's own internal path
+already knows this — see the explicit comment + correct call at
+<code>pkg/bridge/bridge.go:367-369</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// OpenAIClient.Translate sends `prompt` (2nd arg) as the single user message</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">// and ignores `text` (1st arg); pass the composed prompt there.</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> client<span class="op">.</span>Translate<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> full<span class="op">)</span></span></code></pre></div>
+<h3 id="the-bug-site-fact--fileline">The bug site (FACT —
+file:line)</h3>
+<p><strong><code>cmd/markdown-translator/main.go:243-245</code></strong>
+— Step 3's translate callback calls the client the WRONG way: real block
+content in the 1st arg, <strong>empty string in the 2nd
+arg</strong>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mdTranslator <span class="op">:=</span> markdown<span class="op">.</span>NewMarkdownTranslator<span class="op">(</span><span class="kw">func</span><span class="op">(</span>text <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> workflowCfg<span class="op">.</span>LLMProvider<span class="op">.</span>Translate<span class="op">(</span>ctx<span class="op">,</span> text<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span>   <span class="co">// &lt;-- prompt = &quot;&quot; → empty user message</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span></code></pre></div>
+<p><code>workflowCfg.LLMProvider</code> is
+<code>bridge.BestClient(...)</code> (<code>main.go:312</code>,
+<code>bridgeWorkflowConfig</code>), i.e. the raw OpenAI-compatible
+client. With <code>prompt=""</code> the API receives a <strong>user
+message whose content is empty</strong>. DeepSeek replies with its real
+"It seems you may have accidentally sent an empty message…" boilerplate,
+which <code>MarkdownTranslator</code> writes into the output AS the
+translation → real chapter text lost, output garbage. The markdown
+markers (<code>#</code>, <code>---</code>, frontmatter) are preserved
+because <code>MarkdownTranslator</code> only routes the <em>inner
+text</em> to the LLM — hence the wave7 output kept structure but
+replaced every translatable line's text with boilerplate.</p>
+<h3
+id="classification-of-the-three-hypotheses-in-the-dispatch">Classification
+of the three hypotheses in the dispatch</h3>
+<ul>
+<li>block-splitter yielding empty segments → <strong>NO</strong> (proven
+below: 0 empty segments sent).</li>
+<li>wrong field read (header/whitespace instead of body) →
+<strong>NO</strong> (the markdown layer extracts the correct body text
+and passes it as <code>text</code>).</li>
+<li>structure mismatch → <strong>NO</strong>.</li>
+<li><strong>Actual: caller↔︎client argument-contract mismatch — content
+placed in the ignored <code>text</code> arg; the consumed
+<code>prompt</code> arg left empty.</strong></li>
+</ul>
+<hr />
+<h2 id="2-reproduction-deterministic-read-only-no-api-key">2.
+Reproduction (deterministic, READ-ONLY, no API key)</h2>
+<p>Two temporary probe tests were written, run, and then DELETED (never
+staged/committed).</p>
+<h3
+id="probe-a--markdown-layer-sends-no-empties-rules-out-splitwhitespacestep-1">Probe
+A — markdown layer sends NO empties (rules out
+split/whitespace/Step-1)</h3>
+<p>Fed the verbatim wave7 source MD (and, separately, a real EPUB
+through the real
+<code>EPUBToMarkdownConverter.ConvertEPUBToMarkdown</code>) into the
+real <code>MarkdownTranslator</code> with a recording stub. Result:</p>
+<pre><code>=== STEP 1 OUTPUT (converter sourceMD), byte-quoted ===
+&quot;---\ntitle: Wave7 Test Book\nlanguage: en\n---\n\n# Wave7 Test Book\n\n---\n\n# The Lighthouse\n\n\n\nThe old man walked along the shore at dawn...\n\n\n\nHe remembered his youth and smiled quietly.\n\n---\n\n&quot;
+=== PAYLOADS SENT TO LLM (4) ===
+payload[0] = &quot;Wave7 Test Book&quot;
+payload[1] = &quot;The Lighthouse&quot;
+payload[2] = &quot;The old man walked along the shore at dawn. The sea was calm and the sky turned orange.&quot;
+payload[3] = &quot;He remembered his youth and smiled quietly.&quot;
+=== EMPTY PAYLOADS: 0 ===</code></pre>
+<p>Step-1 converter output is byte-identical to the committed evidence
+<code>BUG_markdown_translator_source_was_correct.md</code>. The markdown
+layer extracts the correct text and sends it as the 1st arg with NO
+empties. The garbage is NOT produced when the stub reads the 1st arg (as
+<code>MockLLMClient</code> does) — which is why existing mock-based
+tests never caught it.</p>
+<h3
+id="probe-b--wire-level-proof-against-a-deepseek-simulator-the-smoking-gun">Probe
+B — wire-level proof against a DeepSeek simulator (the SMOKING GUN)</h3>
+<p>A real <code>DeepSeekClient</code> (via embedded
+<code>OpenAIClient</code>) pointed at an <code>httptest</code> server
+that simulates DeepSeek (reads the user message; returns "empty message"
+boilerplate iff the user content is empty, else echoes):</p>
+<pre><code>(A) Translate(text=&quot;The Lighthouse&quot;, prompt=&quot;&quot;) -&gt; &quot;It seems you may have accidentally sent an empty message. ...&quot;
+(B) Translate(text=&quot;&quot;,              prompt=&quot;The Lighthouse&quot;) -&gt; &quot;ES::The Lighthouse&quot;
+&gt;&gt;&gt; REPRODUCED at wire: content-in-text/empty-prompt -&gt; empty user message -&gt; boilerplate</code></pre>
+<p>Call (A) is exactly <code>cmd/markdown-translator/main.go:244</code>.
+It produces the wave7 boilerplate. Call (B) (the bridge.go:369
+convention) translates correctly. This proves the root cause at the
+wire, with no live API call.</p>
+<hr />
+<h2 id="3-precise-fix-recommendation">3. Precise fix recommendation</h2>
+<p><strong>Primary fix (the bug site).</strong> In
+<code>cmd/markdown-translator/main.go:243-245</code>, pass the block
+content in the <strong>2nd arg</strong> (the consumed
+<code>prompt</code>), matching the <code>bridge.go:369</code>
+convention:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>mdTranslator <span class="op">:=</span> markdown<span class="op">.</span>NewMarkdownTranslator<span class="op">(</span><span class="kw">func</span><span class="op">(</span>text <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// OpenAI/DeepSeek client (bridge.BestClient) uses the 2nd arg as the user</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// message and ignores the 1st. Build a real translation instruction that</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// embeds the block text, and pass it as `prompt`.</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">:=</span> buildTranslationPrompt<span class="op">(</span>text<span class="op">,</span> <span class="op">*</span>targetLang<span class="op">)</span> <span class="co">// e.g. &quot;Translate to &lt;lang&gt;...\n\n&lt;text&gt;\n\nTranslation:&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> workflowCfg<span class="op">.</span>LLMProvider<span class="op">.</span>Translate<span class="op">(</span>ctx<span class="op">,</span> text<span class="op">,</span> prompt<span class="op">)</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span></code></pre></div>
+<p>Mirror the existing, working prompt builder in
+<code>pkg/markdown/simple_workflow.go:82-92</code> (which already
+composes a real <code>prompt</code> containing the text and passes
+<code>Translate(ctx, text, prompt)</code> — that path is NOT broken
+precisely because its 2nd arg is non-empty). The cmd binary should use
+the same pattern instead of <code>""</code>.</p>
+<p><strong>Guard at the client boundary (defence-in-depth,
+recommended).</strong> The deeper smell is the silent ignore of the
+<code>text</code> arg and the absence of an empty-user-message guard.
+Recommend ONE of:</p>
+<ul>
+<li>In <code>OpenAIClient.Translate</code>, when
+<code>prompt == ""</code> fall back to using <code>text</code> as the
+user content (so the documented <code>(text, context)</code> convention
+some callers use — e.g. <code>pkg/api/batch_handlers.go:146</code>,
+<code>pkg/api/handler.go:833</code> — also works); AND</li>
+<li>Refuse to send an empty/whitespace-only user message: return an
+explicit error rather than letting the model emit boilerplate that gets
+stored as a translation (§11.4.69 — never write provider boilerplate as
+if it were real output).</li>
+</ul>
+<p>Note the <strong>systemic contract inconsistency</strong> (worth a
+follow-up item, do NOT fix blindly here): call sites disagree on which
+arg carries content. Content-in-1st-arg:
+<code>batch_handlers.go:146</code>, <code>handler.go:833</code>,
+<code>coordinator.go:308</code>,
+<code>coordination/multi_llm.go:445/529</code>,
+<code>cmd/markdown-translator/main.go:244</code>. Content-in-2nd-arg:
+<code>bridge.go:369</code>,
+<code>preparation/coordinator.go:290/361/424</code>,
+<code>verification/notes.go:166</code>,
+<code>verification/polisher.go:563</code>. Several of the
+content-in-1st-arg sites (those reaching a bare OpenAI/DeepSeek client
+with an empty 2nd arg) carry the SAME latent bug — they should be
+audited under §11.4.118 discovery-pressure. The empty-user-message guard
+above would convert any such latent occurrence from silent
+boilerplate-garbage into a loud error.</p>
+<hr />
+<h2
+id="4-red-test-shape-114115-reproduce-first--114135-standing-guard">4.
+RED-test shape (§11.4.115 reproduce-first + §11.4.135 standing
+guard)</h2>
+<p>Two complementary RED guards, polarity-switchable
+(<code>RED_MODE=1</code> reproduces on the pre-fix artifact,
+<code>RED_MODE=0</code> is the standing GREEN regression guard):</p>
+<ol type="1">
+<li><p><strong>Wire-level client-contract guard</strong>
+(<code>pkg/translator/llm</code>): real <code>DeepSeekClient</code>
+(embedded <code>OpenAIClient</code>) against an <code>httptest</code>
+DeepSeek simulator that returns "empty message" boilerplate iff the
+received user message is empty. Assert that calling
+<code>Translate</code> with the real block content produces a real
+(non-boilerplate) translation and that NO empty user message is ever
+sent. RED on pre-fix: <code>Translate(ctx, "The Lighthouse", "")</code>
+yields the boilerplate.</p></li>
+<li><p><strong>End-to-end EPUB→MD→translate round-trip guard</strong>
+(<code>cmd/markdown-translator</code> or <code>pkg/markdown</code>):
+build a real minimal EPUB ("# The Lighthouse" + 2 paragraphs), run the
+actual Step-1 converter, then drive Step-3 through a client wired
+exactly as the cmd binary wires it
+(<code>bridge.BestClient</code>-shaped, OpenAI/DeepSeek-compatible
+user-message-from-2nd-arg semantics) against the httptest simulator.
+Assert the translated MD/EPUB <strong>contains the translated chapter
+text</strong> and <strong>contains NO</strong>
+<code>"accidentally sent an empty message"</code> boilerplate and
+<strong>no empty payload</strong> was sent. This guards the real
+caller↔︎client seam, not the <code>MockLLMClient</code> (which reads the
+1st arg and masks the bug).</p></li>
+</ol>
+<p>Both must FAIL on the current pre-fix
+<code>cmd/markdown-translator/main.go:244</code> and PASS after the fix.
+Register guard #2 into the standing regression suite per §11.4.135 /
+§11.4.146 STEP 3 (extend across header + paragraph + list + blockquote
+blocks).</p>
+<hr />
+<h2 id="5-1146-honesty-boundary">5. §11.4.6 honesty boundary</h2>
+<ul>
+<li>PROVEN as FACT (wire reproduction): the
+empty-<code>prompt</code>/ignored-<code>text</code> contract mismatch at
+<code>cmd/markdown-translator/main.go:244</code> is the root cause of
+the wave7 empty-payload garbage.</li>
+<li>UNCONFIRMED: that every other content-in-1st-arg call site is
+currently broken — some wrap the raw client in
+<code>LLMTranslator</code>/other layers that may compose a prompt. They
+share the latent pattern and MUST be audited (§11.4.118), but each needs
+its own per-site confirmation before being called broken.</li>
+<li>No files were committed or staged by this investigation; both probe
+tests were deleted after capturing the evidence above.</li>
+</ul>
+</body>
+</html>

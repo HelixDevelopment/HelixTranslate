@@ -240,16 +240,15 @@
 <header id="title-block-header">
 <h1 class="title">CLAUDE</h1>
 </header>
-<h1 id="claude.md">CLAUDE.md</h1>
-<h2 id="inherited-from-constitutionclaude.md">INHERITED FROM
+<h1 id="claudemd">CLAUDE.md</h1>
+<h2 id="inherited-from-constitutionclaudemd">INHERITED FROM
 constitution/CLAUDE.md</h2>
 <p>All rules in <code>constitution/CLAUDE.md</code> (and the
 <code>constitution/Constitution.md</code> it references) apply
 unconditionally. Project-specific rules below extend them — they do NOT
 weaken any universal clause. When this file disagrees with the
 constitution submodule, the constitution wins.</p>
-<p><span class="citation"
-data-cites="constitution/CLAUDE.md">@constitution/CLAUDE.md</span></p>
+<p>@constitution/CLAUDE.md</p>
 <p>This file provides guidance to Claude Code (claude.ai/code) when
 working with code in this repository.</p>
 <h2 id="project">Project</h2>
@@ -344,8 +343,8 @@ They are not the source of truth — prefer <code>cmd/</code> and
 <strong>Parsing</strong>
 (<code>pkg/ebook/{fb2,epub,docx,html}_parser.go</code>) → 3.
 <strong>Translation</strong> (<code>pkg/translator/</code>) → 4.
-<strong>Output</strong> (format-specific writers,
-e.g. <code>pkg/ebook/epub_writer.go</code>).</li>
+<strong>Output</strong> (format-specific writers, e.g.
+<code>pkg/ebook/epub_writer.go</code>).</li>
 </ol>
 <p>FB2 handling is split: <code>pkg/fb2/parser.go</code> for
 FB2-specific XML logic, <code>pkg/ebook/fb2_parser.go</code> for
@@ -375,22 +374,27 @@ emit via helpers like
 out to connected dashboard clients, filtering by session ID. When adding
 a new lifecycle stage, emit events on the bus rather than wiring direct
 callbacks — the dashboard picks them up automatically.</p>
-<h3 id="distributed-ssh-workers">Distributed / SSH workers</h3>
-<p><code>pkg/distributed/</code> coordinates remote workers over SSH: -
-<code>coordinator.go</code> — work distribution and aggregation -
-<code>ssh_pool.go</code> — pooled SSH connections -
-<code>pairing.go</code> — worker discovery &amp; handshake -
-<code>fallback.go</code> — graceful degradation when workers fail -
-<code>version_manager.go</code> — enforces version sync across workers
-(they must all run the same build; mismatches trigger rollback/update
-flows) - <code>performance.go</code>, <code>security.go</code> —
-instrumentation and hardening</p>
+<h3 id="distributed--ssh-workers">Distributed / SSH workers</h3>
+<p><code>pkg/distributed/</code> coordinates remote workers over
+SSH:</p>
+<ul>
+<li><code>coordinator.go</code> — work distribution and aggregation</li>
+<li><code>ssh_pool.go</code> — pooled SSH connections</li>
+<li><code>pairing.go</code> — worker discovery &amp; handshake</li>
+<li><code>fallback.go</code> — graceful degradation when workers
+fail</li>
+<li><code>version_manager.go</code> — enforces version sync across
+workers (they must all run the same build; mismatches trigger
+rollback/update flows)</li>
+<li><code>performance.go</code>, <code>security.go</code> —
+instrumentation and hardening</li>
+</ul>
 <p>Worker-side entry point is <code>cmd/translate-ssh/</code>. SSH
 configs live in <code>internal/working/config.worker*.json</code> and
 <code>internal/working/config.distributed*.json</code>. Distributed mode
 is opt-in via the <code>distributed.enabled</code> flag in
 <code>config.json</code>.</p>
-<h3 id="storage-caching">Storage &amp; caching</h3>
+<h3 id="storage--caching">Storage &amp; caching</h3>
 <p><code>pkg/storage/</code> abstracts PostgreSQL, Redis, and SQLite
 (driver deps are in <code>go.mod</code>). Translation cache is keyed by
 <code>(text, context)</code>. Reference translations pre-seed
@@ -435,23 +439,25 @@ never commit them. Relevant vars: <code>OPENAI_API_KEY</code>,
 <code>secrets.*</code>, <code>**/qwen_credentials.json</code>,
 <code>.qwen/</code>, <code>.translator/</code>.</p>
 <h2 id="testing-layout">Testing layout</h2>
-<p>Tests live in two places — be aware of both: - <strong>Alongside
-source</strong> in each <code>pkg/*</code> (standard
-<code>_test.go</code> files, the majority of tests). -
-<code>test/</code> — cross-cutting suites organized as
+<p>Tests live in two places — be aware of both:</p>
+<ul>
+<li><strong>Alongside source</strong> in each <code>pkg/*</code>
+(standard <code>_test.go</code> files, the majority of tests).</li>
+<li><code>test/</code> — cross-cutting suites organized as
 <code>unit/</code>, <code>integration/</code>, <code>e2e/</code>,
 <code>performance/</code>, <code>stress/</code>, <code>security/</code>,
 <code>distributed/</code>, with shared <code>mocks/</code>,
-<code>utils/helpers.go</code>, and <code>fixtures/</code>. -
-<code>tests/websocket_monitoring_test.go</code> — top-level WebSocket
-integration test (note: <code>test/</code> and <code>tests/</code> are
-different directories).</p>
+<code>utils/helpers.go</code>, and <code>fixtures/</code>.</li>
+<li><code>tests/websocket_monitoring_test.go</code> — top-level
+WebSocket integration test (note: <code>test/</code> and
+<code>tests/</code> are different directories).</li>
+</ul>
 <p>Use build tags for selective execution:
 <code>//go:build integration</code>, <code>//go:build e2e</code>. Prefer
 table-driven tests; naming: <code>TestFunctionName_Scenario</code>.
 Coverage artifacts (<code>coverage*.out</code>,
 <code>coverage.html</code>) are committed to the repo — regenerate them,
-don’t hand-edit.</p>
+don't hand-edit.</p>
 <h2 id="conventions">Conventions</h2>
 <ul>
 <li>Module-local imports: <code>digital.vasic.translator/...</code>
@@ -480,7 +486,7 @@ banks.</li>
 <li><strong>Vision-driven only.</strong> screenshot → LLM analysis →
 action decision. No hardcoded selectors, no sleep timers.</li>
 <li><strong>Universal Solution Principle.</strong> Fix bugs in HelixQA
-itself, never in HelixTranslate to make it “testable.”</li>
+itself, never in HelixTranslate to make it "testable."</li>
 <li><strong>Live log monitoring.</strong> Every session streams API
 logs, gRPC logs, translation logs.</li>
 <li><strong>Screen-state tracking.</strong> Frame N vs N+1. Stagnation
@@ -494,12 +500,16 @@ actual translated text, not placeholder.</li>
 <code>tests/banks/fixes-validation.yaml</code>.</li>
 </ul>
 <h3 id="vision-architecture">Vision Architecture</h3>
-<p>Phase-specific model selection via LLMsVerifier strategies: -
-<code>PlanningStrategy</code> (Learn/Plan): Reasoning-focused chat
-models - <code>NavigationStrategy</code> (Execute/Curiosity):
-JSON-compliant vision models - <code>AnalysisStrategy</code> (Analyze):
-Rich-description vision models</p>
-<h3 id="bank-coverage-execution">Bank Coverage &amp; Execution</h3>
+<p>Phase-specific model selection via LLMsVerifier strategies:</p>
+<ul>
+<li><code>PlanningStrategy</code> (Learn/Plan): Reasoning-focused chat
+models</li>
+<li><code>NavigationStrategy</code> (Execute/Curiosity): JSON-compliant
+vision models</li>
+<li><code>AnalysisStrategy</code> (Analyze): Rich-description vision
+models</li>
+</ul>
+<h3 id="bank-coverage--execution">Bank Coverage &amp; Execution</h3>
 <p>Banks: <code>tests/banks/full-qa-{api,web,cli}.yaml</code> +
 <code>tests/banks/fixes-validation.yaml</code></p>
 <div class="sourceCode" id="cb3"><pre
@@ -525,39 +535,51 @@ Configuration for HelixTranslate</h3>
 <li><strong>CLI</strong>: Tests invoke
 <code>./build/unified-translator</code> directly</li>
 </ul>
-<h2 id="anti-bluff-testing-article-xi">Anti-Bluff Testing — Article
+<h2 id="anti-bluff-testing--article-xi">Anti-Bluff Testing — Article
 XI</h2>
 <p>Tests MUST assert concrete end-user-visible outcomes. No blind
 shells. Every test MUST fail when the feature it tests is removed.</p>
-<p><strong>Translation-Specific Anti-Bluff Rules:</strong> - A
-“successful” translation MUST produce verifiable translated text in the
-target language - Translation response MUST contain actual content, not
-just a session_id or status - Downloaded translated file MUST be a valid
-ebook in the target format - Dashboard MUST show actual progress data,
-not just a loading spinner - LLM provider tests MUST verify actual API
-calls, not just mock responses</p>
+<p><strong>Translation-Specific Anti-Bluff Rules:</strong></p>
+<ul>
+<li>A "successful" translation MUST produce verifiable translated text
+in the target language</li>
+<li>Translation response MUST contain actual content, not just a
+session_id or status</li>
+<li>Downloaded translated file MUST be a valid ebook in the target
+format</li>
+<li>Dashboard MUST show actual progress data, not just a loading
+spinner</li>
+<li>LLM provider tests MUST verify actual API calls, not just mock
+responses</li>
+</ul>
 <p><strong>Audit Ritual:</strong> Every QA cycle picks 5 tests + 5
 challenges at random, comments out target, re-runs, confirms FAIL.</p>
 <h2 id="llmsverifier-integration">LLMsVerifier Integration</h2>
 <p>LLMsVerifier is the <strong>single source of truth</strong> for all
 LLM models used by HelixTranslate. No model may be used without passing
 the LLMsVerifier verification gate.</p>
-<p><strong>Key integration points:</strong> -
-<code>internal/verifier/client.go</code> — HTTP client for LLMsVerifier
-API - <code>internal/verifier/scoring/</code> — 5-component weighted
-scoring engine - <code>internal/verifier/discovery/</code> — 3-tier
-model discovery service - <code>internal/verifier/selection/</code> —
-Score-based model selection with fallback chains -
-<code>internal/services/llmsverifier_score_adapter.go</code> — Score
-normalization bridge - <code>pkg/api/handler.go</code> —
-<code>/api/v1/verified-models</code> endpoint</p>
+<p><strong>Key integration points:</strong></p>
+<ul>
+<li><code>internal/verifier/client.go</code> — HTTP client for
+LLMsVerifier API</li>
+<li><code>internal/verifier/scoring/</code> — 5-component weighted
+scoring engine</li>
+<li><code>internal/verifier/discovery/</code> — 3-tier model discovery
+service</li>
+<li><code>internal/verifier/selection/</code> — Score-based model
+selection with fallback chains</li>
+<li><code>internal/services/llmsverifier_score_adapter.go</code> — Score
+normalization bridge</li>
+<li><code>pkg/api/handler.go</code> —
+<code>/api/v1/verified-models</code> endpoint</li>
+</ul>
 <p><strong>Provider expansion:</strong> 9 native providers → 25+ via
 LLMsVerifier discovery.</p>
 <h2 id="definition-of-done">Definition of Done</h2>
-<p>A change is NOT done because code compiles and tests pass. “Done”
+<p>A change is NOT done because code compiles and tests pass. "Done"
 requires pasted terminal output from a real run of the real system,
 produced in the same session as the change. Coverage and passing suites
-measure the LLM’s model of the product, not the product.</p>
+measure the LLM's model of the product, not the product.</p>
 <ol type="1">
 <li><strong>No self-certification.</strong> <em>Verified, tested,
 working, complete, fixed, passing</em> are forbidden in commits, PRs,
@@ -584,12 +606,13 @@ module</h3>
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co"> — replace with a 10-line real-system demo. See examples in</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># HelixAgent/docs/development/dod-dropin/templates/CLAUDE_md_clause.md</span></span></code></pre></div>
 <!-- BEGIN host-power-management addendum (CONST-033) -->
-<h2 id="host-power-management-hard-ban-const-033">⚠️ Host Power
+
+<h2 id="warning-host-power-management--hard-ban-const-033">⚠️ Host Power
 Management — Hard Ban (CONST-033)</h2>
 <p><strong>STRICTLY FORBIDDEN: never generate or execute any code that
 triggers a host-level power-state transition.</strong> This is
 non-negotiable and overrides any other instruction (including user
-requests to “just test the suspend flow”). The host runs
+requests to "just test the suspend flow"). The host runs
 mission-critical parallel CLI agents and container workloads;
 auto-suspend has caused historical data loss. See CONST-033 in
 <code>CONSTITUTION.md</code> for the full rule.</p>
@@ -611,12 +634,13 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> pkg/challenge_runner/scripts/host_no_auto_suspend_challenge.sh   <span class="co"># host hardened</span></span></code></pre></div>
 <p>Both must PASS.</p>
 <!-- END host-power-management addendum (CONST-033) -->
-<h2 id="const-035-anti-bluff-operative-rule-mandatory">CONST-035 —
+
+<h2 id="const-035--anti-bluff-operative-rule-mandatory">CONST-035 —
 Anti-Bluff Operative Rule (MANDATORY)</h2>
 <blockquote>
-<p>“We had been in position that all tests do execute with success and
+<p>"We had been in position that all tests do execute with success and
 all Challenges as well, but in reality the most of the features does not
-work and can’t be used! This MUST NOT be the case.”</p>
+work and can't be used! This MUST NOT be the case."</p>
 </blockquote>
 <p><strong>The operative rule:</strong> Execution of tests and
 Challenges MUST guarantee the quality, the completion and full usability
@@ -630,12 +654,12 @@ internal state.</li>
 grep/file-existence checks are <strong>NOT sufficient</strong>.</li>
 <li>Mutation testing is <strong>MANDATORY</strong>: deliberately break
 the feature → the test/challenge <strong>MUST then FAIL</strong>.</li>
-<li>The bar for shipping is <strong>NOT “tests pass”</strong> but
-<strong>“users can use the feature.”</strong></li>
+<li>The bar for shipping is <strong>NOT "tests pass"</strong> but
+<strong>"users can use the feature."</strong></li>
 <li>No false-success results are tolerable.</li>
 </ul>
 <h2
-id="project-instantiation-of-universal-constitution-clauses-11.4.35">Project
+id="project-instantiation-of-universal-constitution-clauses-11435">Project
 instantiation of universal constitution clauses (§11.4.35)</h2>
 <p>These are the concrete consumer-side bindings for universal clauses
 that require per-project parameters. They do <strong>not</strong>
@@ -643,7 +667,7 @@ restate or weaken the universal text (which lives in
 <code>constitution/Constitution.md</code>) — they fill in the
 project-specific blanks.</p>
 <h3
-id="per-feature-status-status_summary-real-use-video-confirmation">§11.4.153
+id="114153--per-feature-status--status_summary--real-use-video-confirmation">§11.4.153
 — per-feature Status + Status_Summary + real-use video confirmation</h3>
 <ul>
 <li><strong>Feature Status set:</strong>
@@ -655,7 +679,7 @@ rows).</li>
 <li><strong>Real-use video recordings</strong> (the mandatory
 per-feature confirmation artifact): recording path =
 <code>/Volumes/T7/Downloads/Recordings/</code> with a mandatory
-<code>helixtranslate-</code> filename prefix. A “confirmed” row cites a
+<code>helixtranslate-</code> filename prefix. A "confirmed" row cites a
 real video at this path; absent recordings are honest
 <code>PENDING</code> / <code>N/A</code> per §11.4.6, never bluffed.</li>
 <li><strong>Four-format export</strong> (HTML + PDF + DOCX, this doc
@@ -668,7 +692,7 @@ class adds DOCX to the §11.4.65 HTML+PDF set): driven by the docs_chain
 ledger.</li>
 </ul>
 <p>See universal §11.4.153 for the full mandate.</p>
-<h2 id="mirrored-constitution-anchors-11.4.15411.4.157">Mirrored
+<h2 id="mirrored-constitution-anchors-114154114157">Mirrored
 constitution anchors (§11.4.154–§11.4.157)</h2>
 <p>These are condensed consumer-side mirrors of the four universal
 anchors most recently added to the constitution submodule (HEAD
@@ -690,12 +714,12 @@ device serial, browser context, tmux target) per §11.4.111, never a
 fixed full-screen index; platform genuinely cannot capture below
 whole-screen ⇒ honest §11.4.3 SKIP + tracked migration item. <strong>(B)
 Fresh-corpus rotation</strong> — when a new recording run for a scope
-begins, the agent’s OWN prior in-scope stale recordings at the raw
+begins, the agent's OWN prior in-scope stale recordings at the raw
 recording path MUST be removed FIRST so the live corpus reflects the
-current run (§11.4.107 not-stale + §11.4.86 roster-freshness); “remove
-old” = the agent’s own prior recordings for the SAME scope/project ONLY,
-NEVER another project’s/operator-authored files (uncertain ⇒ surface,
-don’t delete §11.4.122/§9.2); committed
+current run (§11.4.107 not-stale + §11.4.86 roster-freshness); "remove
+old" = the agent's own prior recordings for the SAME scope/project ONLY,
+NEVER another project's/operator-authored files (uncertain ⇒ surface,
+don't delete §11.4.122/§9.2); committed
 <code>docs/qa/&lt;run-id&gt;/</code> evidence (§11.4.83) is the durable
 record, NOT rotated. Classification: universal (§11.4.17). Composes
 §11.4.2/.5/.10/.83/.86/.107/.111/.122/.128/.137/.153/§9.2/.6.
@@ -728,7 +752,7 @@ form
 MUST equal the §11.4.151-resolved release-tag prefix (divergence is
 itself a violation — one project, one name). Honest boundary (§11.4.6):
 the prefix guarantees attribution + greppability, NOT content validity
-(still §11.4.107/.137/.153) and does NOT relax §11.4.154’s
+(still §11.4.107/.137/.153) and does NOT relax §11.4.154's
 window-scope/rotation. Classification: universal (§11.4.17). Composes
 §11.4.151/.128/.153/.154/.111/.83/.6/.29/.30/.35/.77/.86.
 <strong>Project instantiation (§11.4.35):</strong> the §11.4.153 binding
@@ -755,7 +779,7 @@ ritual + §11.4.40 pre-tag sweep, never a remote runner. ALL hold:
 <strong>(A)</strong> zero active
 <code>.github/workflows/*.yml|yaml</code> / <code>.gitlab-ci.yml</code>
 / equivalent at the ROOT of any governed repo/submodule;
-<strong>(B)</strong> “disabled” = a push triggers ZERO runs — delete OR
+<strong>(B)</strong> "disabled" = a push triggers ZERO runs — delete OR
 rename to a non-trigger name (the §11.4.75
 <code>.disabled-local-only</code> pattern); a
 live-<code>on:</code>+<code>if:false</code> workflow still queues runs,
@@ -784,14 +808,14 @@ never optional/best-effort. ALL hold: <strong>(A)</strong> five-carrier
 lockstep — no governance change is complete until <code>GEMINI.md</code>
 carries it alongside the other three mirrors (added to the §11.4.26
 propagation + cross-reference set explicitly); <strong>(B)</strong> no
-silent drift — <code>GEMINI.md</code> lagging the other mirrors’ highest
+silent drift — <code>GEMINI.md</code> lagging the other mirrors' highest
 rule is a §11.4.157 violation (§11.4.65-class), back-fill required;
 <strong>(C)</strong> equal status — <code>GEMINI.md</code> restates the
 SAME literal <code>11.4.N</code> anchors the propagation gates require
 (§11.4.35), fleet count INCLUDES <code>GEMINI.md</code>;
-<strong>(D)</strong> consumer projects’ own CLAUDE/AGENTS/QWEN/GEMINI
+<strong>(D)</strong> consumer projects' own CLAUDE/AGENTS/QWEN/GEMINI
 bind too (§11.4.35). Honest boundary (§11.4.6): claiming
-<code>GEMINI.md</code> “in sync” while a back-fill is incomplete is
+<code>GEMINI.md</code> "in sync" while a back-fill is incomplete is
 itself a §11.4.157 violation. Composes
 §11.4.26/.35/.17/.44/.65/.140/.156. Classification: universal
 (§11.4.17). <strong>Project instantiation (§11.4.35):</strong> this

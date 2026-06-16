@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>TRANSCRIPT</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">TRANSCRIPT</h1>
+</header>
+<h1 id="heavy-real-service-testing--nezhalocal--iteration-1">Heavy
+real-service testing — nezha.local — iteration 1</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-16T13:10:00Z <strong>Run id:</strong>
+nezha_heavy_20260616T123646Z <strong>Scope:</strong> §11.4.69 sink-side
+real-service testing against the LIVE nezha stack (server-TLS <a
+href="https://nezha.local:18443">https://nezha.local:18443</a>, api <a
+href="http://nezha.local:18080">http://nezha.local:18080</a>, grpc
+nezha.local:50061, monitor :18090). No mocks — real LLMsVerifier bridge,
+real provider keys (provider <code>llm-novita</code>), real
+translations.</p>
+<h2 id="endpoint-wiring-fact-phase-1">Endpoint-wiring FACT (Phase
+1)</h2>
+<p>The Go heavy suites (<code>test/integration</code>,
+<code>test/e2e</code>, <code>test/stress</code>,
+<code>test/distributed</code>) are <strong>self-contained by
+design</strong> (§11.4.27): they use <code>httptest.NewServer</code>
+mock LLMsVerifier/OpenAI, <code>MockTranslator</code>, in-process gin
+engines, and dynamic ports (<code>test/utils/ports.go</code>,
+<code>localhost:0</code>). They read NO
+<code>HELIX_*_URL</code>/external endpoint env var and cannot target
+nezha without rewriting their contract. The real-service surface is the
+HelixQA banks (<code>tests/banks/full-qa-{api,web,cli}.yaml</code>,
+hardcoded <code>localhost:8443</code> / <code>:50051</code> /
+<code>:8090</code>) which map 1:1 to the nezha ports. Heavy real testing
+was therefore done as direct sink-side probes against the live endpoints
++ running the Go suites at their own (deterministic) layer.</p>
+<h2
+id="bug-1-fixed--llm-commentary-contamination-of-translated-text">Bug #1
+(FIXED) — LLM commentary contamination of translated text</h2>
+<p><strong>Severity:</strong> Bug / release-critical (every translated
+paragraph polluted).</p>
+<p><strong>Discovery (sink-side, pre-fix):</strong>
+<code>POST :18443/api/v1/translate</code> returned the correct
+translation PLUS appended English meta-commentary, on EVERY provider
+response:</p>
+<ul>
+<li>en→es:
+<code>El anciano y el mar eran uno.\n\nThis translation aims to preserve the poetic, almost mystical tone...</code>
+(4 sentences of commentary)</li>
+<li>en→sr:
+<code>Dobar dan, moj prijatelj.\n\n(Note: I've translated "Good morning"...)</code></li>
+<li>en→ru:
+<code>Быть или не быть, это вопрос.\n\n[Note: ...Shakespeare's Hamlet...]</code></li>
+<li>en→fr:
+<code>Le savoir est le pouvoir.\n\nThis translation maintains the concise, aphoristic style...</code></li>
+</ul>
+<p><strong>Root cause (FACT, systematic-debugging Phase 1):</strong> the
+live translate path is handler → <code>createTranslator</code> → bridge
+<code>BestTranslator</code> → <code>LLMTranslator.Translate</code> →
+<code>createTranslationPrompt</code>
+(<code>pkg/translator/llm/llm.go</code>). The prompt builders end with
+<code>"&lt;Lang&gt; translation:"</code> and NEVER instruct the model to
+output only the translation; <code>enhanceTranslation</code> did no
+commentary stripping. A capable instruct model (llm-novita) helpfully
+appends an explanation, passed through verbatim. (The dead
+<code>CreatePromptForLanguages</code> in
+<code>pkg/translator/universal.go</code> had the same gap.)</p>
+<p><strong>Fix (defense-in-depth):</strong></p>
+<ol type="1">
+<li>Prompt: added
+<code>Output ONLY the translated text itself. Do NOT add any notes, explanations, commentary...</code>
+to both <code>createTranslationPrompt</code> branches (R→S + generic)
+and <code>CreatePromptForLanguages</code>.</li>
+<li>Response sanitization: new <code>stripTranslationCommentary</code> /
+<code>isCommentaryBlock</code> called from
+<code>enhanceTranslation</code> — drops trailing blank-line-separated
+blocks that are clearly commentary
+(<code>(Note:)</code>/<code>[Note:]</code> enclosures or English
+meta-phrase leads), conservatively (genuine multi-paragraph translations
+pass through untouched).</li>
+</ol>
+<p><strong>RED→GREEN proof:</strong>
+<code>pkg/translator/llm/strip_commentary_test.go</code> (§11.4.115
+polarity, §11.4.135 standing guard) — fixtures are the LITERAL captured
+nezha responses. RED FAILed pre-fix (commentary leaked); GREEN post-fix;
+the <code>*_DoesNotEatRealParagraphs</code> guard proves no
+over-stripping.</p>
+<p><strong>Sink-side re-validation (post-fix, §11.4.130, new image
+<code>07e8a75614e6</code>):</strong></p>
+<ul>
+<li>en→es: <code>"El viejo y el mar eran uno."</code></li>
+<li>en→fr: <code>"Le savoir est le pouvoir."</code></li>
+<li>en→ru: <code>"Быть или не быть – вот вопрос."</code></li>
+<li>en→de:
+<code>"Der schnelle braune Fuchs springt über den faulen Hund."</code></li>
+<li>en→sr: <code>"Dobra utra, moj prijatelj."</code> All HTTP 200, ZERO
+commentary. Concurrent load: 12/12 parallel real translations HTTP 200,
+0 commentary leaks, ~2s wall, no deadlock/error.</li>
+</ul>
+<h2
+id="bug-2-fixed--create-default-config-skips-env-overrides-server-crash-loop">Bug
+#2 (FIXED) — create-default config skips env overrides (server
+crash-loop)</h2>
+<p><strong>Severity:</strong> Bug / release-critical (fresh server
+deployment cannot start).</p>
+<p><strong>Discovery:</strong> after rebuilding the <code>server</code>
+image with Bug-#1 fix and recreating the container (fresh, no
+<code>/app/config/config.json</code>), the server crash-looped:
+<code>Invalid configuration: JWT secret is required when authentication is enabled</code>
+— despite <code>JWT_SECRET</code> correctly set in the container
+env.</p>
+<p><strong>Root cause (FACT, podman logs):</strong>
+<code>cmd/server/main.go loadOrCreateConfig</code>, when no config.json
+exists, returned a bare <code>config.DefaultConfig()</code>
+(<code>EnableAuth=true</code>, <code>JWTSecret=""</code>) WITHOUT
+applying environment overrides. The env-loader
+(<code>loadAPIKeysFromEnv</code>, which also loads
+<code>JWT_SECRET</code> + LLMsVerifier,
+<code>internal/config/config.go:314</code>) only ran on the
+<code>LoadConfig</code> (existing-file) path. The prior working run had
+a pre-existing config.json so it took the LoadConfig branch; a clean
+container hit the broken create-default branch.</p>
+<p><strong>Fix:</strong> added exported
+<code>(*Config).ApplyEnvOverrides()</code> (wraps
+<code>loadAPIKeysFromEnv</code>) and call it in
+<code>loadOrCreateConfig</code>'s create-default branch before
+save/return.</p>
+<p><strong>RED→GREEN proof:</strong>
+<code>internal/config/env_override_default_test.go</code> — RED FAILed
+(method undefined / JWT not applied to DefaultConfig); GREEN
+post-fix.</p>
+<p><strong>Sink-side re-validation:</strong> server reached
+<code>Server started successfully!</code> on the new image with the real
+64-char JWT and bound :18443 (TLS /health 200 external).</p>
+<h2 id="deploy-path-114108--fix-reached-the-running-artifact">Deploy
+path (§11.4.108 — fix reached the running artifact)</h2>
+<p>The nezha stack image (<code>helixtranslate:nezha</code>) builds on
+nezha from <code>Containerfile.nezha</code> (<code>COPY . .</code>).
+deploy-stack ships only compose+artifacts, NOT source, so fixed source
+was rsynced to <code>/home/milosvasic/helixtranslate/</code> (additive,
+no --delete; 9 go.mod replace targets present), then
+<code>podman-compose -f compose.nezha.yml up -d --build --no-deps server</code>
+with <code>.env.nezha</code> exported into the shell so
+<code>${SERVER_HOST_PORT}</code>/<code>${JWT_SECRET}</code> interpolate
+to the real values (host port 18443, 64-char JWT). New image digest
+<code>07e8a75614e6</code>; server.Image verified = new digest.</p>
+<h2 id="tracked-for-iteration-2-real-findings-not-yet-fixed">Tracked for
+iteration 2 (real findings, NOT yet fixed)</h2>
+<ol type="1">
+<li><strong>Verifier REST endpoints 404 on live server</strong> —
+<code>/api/v1/verified-models</code>,
+<code>/api/v1/verification-status</code>,
+<code>/api/v1/translate-with-verification</code> return 404
+(HTQ-API-003/004/006 document them as critical). Cause: routes
+registered only <code>if cfg.LLMsVerifier.Enabled</code>
+(<code>cmd/server/main.go:140</code>); the create-default config has it
+disabled and no <code>LLMSVERIFIER_ENABLED</code> env set. Wiring gap —
+verifier routes dead on the default-config deployment.</li>
+<li><strong>api-server <code>/api/v1/health</code> 503 "gRPC backend not
+ready" (grpc_connected: IDLE)</strong> while
+<code>/api/v1/providers</code> (same backend) returns 200 — health check
+reports unhealthy on a lazily-IDLE gRPC conn that actually works.
+Health-check correctness bug.</li>
+<li><strong>compose <code>${VAR}</code> interpolation source</strong> —
+<code>environment:</code> block defaults win over <code>env_file</code>
+and read from shell/compose-<code>.env</code>, not
+<code>.env.nezha</code>; deploy must export <code>.env.nezha</code> into
+the shell (or move these to <code>env_file</code>-only) so ports/JWT
+resolve. Deployment-robustness improvement.</li>
+<li>gRPC real translate round-trip via grpcurl deferred (grpcurl absent
+on nezha
+<ul>
+<li>local; gRPC is async/file-job model). TCP :50061 reachable;
+api-server <code>/api/v1/providers</code> exercises the gRPC
+<code>GetProviders</code> path (200, real list).</li>
+</ul></li>
+</ol>
+<h2 id="files">Files</h2>
+<ul>
+<li><code>01_prefix_en_es_CONTAMINATED.json</code> — pre-fix sink-side
+evidence (commentary).</li>
+<li><code>02_postfix_en_es_CLEAN.json</code>,
+<code>03_postfix_en_ru_CLEAN.json</code> — post-fix clean.</li>
+<li>Full probe set:
+<code>qa-results/nezha_heavy_test_20260616T123646Z/</code>.</li>
+</ul>
+</body>
+</html>

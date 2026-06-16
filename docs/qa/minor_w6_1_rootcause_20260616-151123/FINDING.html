@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>FINDING</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">FINDING</h1>
+</header>
+<h1
+id="minor-w6-1--htmlepub-chapter-title-duplication-root-cause-finding">MINOR-W6-1
+— HTML/EPUB chapter-title duplication: ROOT-CAUSE FINDING</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-16T15:11:23Z</p>
+<p>Investigation type: BACKGROUND, READ-ONLY, NON-COMMITTING
+(superpowers:systematic-debugging Iron Law — root cause FIRST; §11.4.6
+no-guessing; §11.4.102). NO source edited / staged / committed. Probe
+binaries built to /tmp (gitignored, not staged); a temporary probe
+<code>.go</code> was created at repo root and DELETED in the same step
+(working tree verified clean).</p>
+<hr />
+<h2 id="1-verdict-fact">1. Verdict (FACT)</h2>
+<p>The duplication is in the <strong>PARSERS</strong> (HTML and EPUB),
+NOT in <code>bookToString</code> and NOT in the writers.
+<code>bookToString</code> and the writers behave correctly given the
+data they receive — the parsers populate <code>Section.Content</code>
+with text that ALREADY contains the chapter title.</p>
+<p>The suspected-cause hypothesis from the wave6 recorder
+("<code>bookToString</code> concatenates Title into Content") is
+<strong>PARTIALLY correct but mis-located</strong>:
+<code>bookToString</code> DOES emit <code>chapter.Title</code> then
+<code>section.Content</code> (that part is true and is the SECOND copy),
+but the title text is duplicated <em>inside</em>
+<code>section.Content</code> by the parser BEFORE
+<code>bookToString</code> runs. So the real defect is parser-side
+leakage of title text into content.</p>
+<hr />
+<h2
+id="2-exact-double-emission-sites-fileline-proven-by-isolated-probe">2.
+Exact double-emission sites (file:line, proven by isolated probe)</h2>
+<h3 id="a-html-parser--pkgebookhtml_parsergo">A. HTML parser —
+<code>pkg/ebook/html_parser.go</code></h3>
+<ul>
+<li><strong>L47</strong>: <code>content := p.extractText(doc)</code> —
+<code>extractText</code> starts from the document ROOT and in
+<code>extractTextWithContext</code> (L101-128) only skips
+<code>&lt;script&gt;</code>/<code>&lt;style&gt;</code>. It does
+<strong>NOT skip <code>&lt;head&gt;</code> or
+<code>&lt;title&gt;</code></strong>, so the <code>&lt;title&gt;</code>
+element text is harvested into <code>content</code>.</li>
+<li><strong>L51</strong>: <code>Title: book.Metadata.Title</code> —
+chapter Title is set to the <code>&lt;title&gt;</code> text (via
+<code>findTitle</code>, L41-44).</li>
+<li>Result: the <code>&lt;title&gt;</code> text leaks into Content, AND
+any <code>&lt;h1&gt;</code> in <code>&lt;body&gt;</code> is also
+harvested into Content. With the common pattern
+<code>&lt;title&gt;X&lt;/title&gt;</code> +
+<code>&lt;h1&gt;X&lt;/h1&gt;</code>, Content begins
+<code>"X\nX\n\n..."</code> — <strong>title appears TWICE inside
+Content</strong>.</li>
+<li>Then <code>cmd/unified-translator/main.go:bookToString</code>
+(L790-801) writes <code>chapter.Title</code> (a THIRD "X") then
+<code>section.Content</code>.</li>
+</ul>
+<h3 id="b-epub-parser--pkgebookepub_parsergo">B. EPUB parser —
+<code>pkg/ebook/epub_parser.go</code></h3>
+<ul>
+<li><strong>L398-399</strong>: the <code>&lt;head&gt;</code> (incl.
+<code>&lt;title&gt;</code>) IS stripped, so the
+<code>&lt;title&gt;</code> text does NOT leak (this protection exists
+from a prior fix — see
+<code>epub_head_multiline_bughunt_test.go</code>).</li>
+<li><strong>L388 + L422-428</strong>:
+<code>chapterTitle = extractChapterTitle(content)</code> prefers
+<code>&lt;title&gt;</code> else <code>&lt;h1&gt;</code> (L448-449). The
+<code>&lt;h1&gt;</code> lives in <code>&lt;body&gt;</code>, which is NOT
+stripped — so the <code>&lt;h1&gt;</code> text remains in
+<code>Content</code> (L402 <code>removeHTMLTags</code> strips only the
+TAGS, keeps the text).</li>
+<li>Result: <code>Title="X"</code> AND <code>Content="X ..."</code> —
+<strong>title appears ONCE inside Content</strong>, plus the copy
+<code>bookToString</code> adds from <code>chapter.Title</code>.</li>
+</ul>
+<h3 id="c-booktostring--cmdunified-translatormaingo790-801">C.
+bookToString — <code>cmd/unified-translator/main.go:790-801</code></h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _<span class="op">,</span> chapter <span class="op">:=</span> <span class="kw">range</span> book<span class="op">.</span>Chapters <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    result<span class="op">.</span>WriteString<span class="op">(</span>chapter<span class="op">.</span>Title<span class="op">)</span>   <span class="co">// L793 — copy #1</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    result<span class="op">.</span>WriteString<span class="op">(</span><span class="st">&quot;</span><span class="ch">\n\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> section <span class="op">:=</span> <span class="kw">range</span> chapter<span class="op">.</span>Sections <span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        result<span class="op">.</span>WriteString<span class="op">(</span>section<span class="op">.</span>Content<span class="op">)</span>  <span class="co">// L796 — already contains the title (parser leak)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        result<span class="op">.</span>WriteString<span class="op">(</span><span class="st">&quot;</span><span class="ch">\n\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Correct given clean input; it is NOT the defect origin.</p>
+<hr />
+<h2 id="3-reproduction-deterministic-real-system">3. Reproduction
+(deterministic, real system)</h2>
+<p>Built <code>./cmd/unified-translator</code> →
+<code>/tmp/ut_minor_w6</code> (mock provider, no API key).</p>
+<p>Input <code>/tmp/minor_w6_in.html</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;!DOCTYPE</span> html<span class="dt">&gt;&lt;</span><span class="kw">html</span><span class="dt">&gt;&lt;</span><span class="kw">head</span><span class="dt">&gt;&lt;</span><span class="kw">title</span><span class="dt">&gt;</span>La Farola<span class="dt">&lt;/</span><span class="kw">title</span><span class="dt">&gt;&lt;/</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">body</span><span class="dt">&gt;&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>La Farola<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>The lighthouse guided the ships.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;&lt;/</span><span class="kw">body</span><span class="dt">&gt;&lt;/</span><span class="kw">html</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>Command:
+<code>ut -i in.html -o out.html -source-lang en -target-lang es -provider mock -model mock</code>
+Output <code>&lt;body&gt;</code> (mock translates only the first chunk,
+but the dup is unmistakable):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Translated: La Farola<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>La Farola La Farola<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span>          <span class="er">&lt;</span>-- DUPLICATED TITLE</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>The lighthouse guided the ships.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>Isolated HTML-parser probe (proves the leak is parser-side,
+pre-translate, pre-bookToString):</p>
+<pre><code>CHAPTER[0].Title=&quot;La Farola&quot;
+  SECTION[0].Content=&quot;La Farola\nLa Farola\n\nThe lighthouse guided the ships.&quot;</code></pre>
+<p>→ "La Farola" appears TWICE inside Content (title leak + h1).</p>
+<p>Isolated EPUB-parser probe (same xhtml shape inside a real
+.epub):</p>
+<pre><code>CHAPTER[0].Title=&quot;La Farola&quot;
+  SECTION[0].Content=&quot;La Farola The lighthouse guided the ships.&quot;</code></pre>
+<p>→ "La Farola" appears ONCE inside Content (h1 only; head
+stripped).</p>
+<p>Both reproduce 100% deterministically. The matches the wave6 frame
+<code>La FarolaLa Farola</code>.</p>
+<hr />
+<h2 id="4-precise-fix-recommendation">4. Precise fix recommendation</h2>
+<p><strong>Fix at the PARSER layer (root cause), NOT in
+<code>bookToString</code> or the writers.</strong> Two independent
+edits; the HTML one is primary (double leak), the EPUB one secondary
+(single leak).</p>
+<h3 id="fix-a-html--primary--pkgebookhtml_parsergo">Fix A (HTML —
+primary) — <code>pkg/ebook/html_parser.go</code></h3>
+<p>Stop harvesting <code>&lt;head&gt;</code>/<code>&lt;title&gt;</code>
+into content. Cleanest, lowest-risk option: in
+<code>extractTextWithContext</code> (L101-113) skip
+<code>&lt;head&gt;</code> exactly as
+<code>&lt;script&gt;</code>/<code>&lt;style&gt;</code> are skipped:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> c<span class="op">.</span>Type <span class="op">==</span> html<span class="op">.</span>ElementNode <span class="op">&amp;&amp;</span> <span class="op">(</span>c<span class="op">.</span>Data <span class="op">==</span> <span class="st">&quot;script&quot;</span> <span class="op">||</span> c<span class="op">.</span>Data <span class="op">==</span> <span class="st">&quot;style&quot;</span> <span class="op">||</span> c<span class="op">.</span>Data <span class="op">==</span> <span class="st">&quot;head&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">continue</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>This removes the <code>&lt;title&gt;</code>-leak copy. (It does NOT
+remove the <code>&lt;h1&gt;</code> body copy — see the "title-vs-h1
+duplication" note below for the second-order decision.)</p>
+<h3 id="fix-b-epub--secondary--pkgebookepub_parsergo">Fix B (EPUB —
+secondary) — <code>pkg/ebook/epub_parser.go</code></h3>
+<p>The <code>&lt;head&gt;</code> strip already prevents the
+<code>&lt;title&gt;</code> leak. The residual leak is the
+<code>&lt;h1&gt;</code> body text. Two viable approaches (recommend the
+first):</p>
+<ol type="1">
+<li><strong>Do not double-render the title in
+<code>bookToString</code></strong> by leaving Content intact and instead
+NOT prepending <code>chapter.Title</code> when Content already begins
+with it — BUT that is a <code>bookToString</code>-side band-aid
+(rejected; the parser is the right layer and §11.4.6 says fix at
+source). Prefer: leave the <code>&lt;h1&gt;</code> in Content as the
+in-body heading and <strong>stop having <code>bookToString</code> emit
+<code>chapter.Title</code> separately</strong> ONLY IF the title is
+already the first line of Content. This is fragile.</li>
+<li><strong>Cleaner / recommended:</strong> treat
+<code>chapter.Title</code> as metadata only and have
+<code>bookToString</code> NOT emit it into the translatable text at all
+— OR have the parser NOT leave the <code>&lt;h1&gt;</code> text in
+Content when it was promoted to <code>chapter.Title</code>. Because the
+EPUB body legitimately needs an <code>&lt;h1&gt;</code> on round-trip
+(the EPUB writer re-emits <code>&lt;h1&gt;%s</code> from
+<code>chapter.Title</code> at <code>epub_writer.go:276</code>), the
+SAFEST fix is: <strong>the EPUB writer renders the title from
+<code>chapter.Title</code> AND the parser should strip the leading
+<code>&lt;h1&gt;</code> from Content</strong> so the title is carried
+exactly once (in <code>chapter.Title</code>) and re-materialised once by
+the writer.</li>
+</ol>
+<h3 id="the-broader-correct-design-recommended-for-the-committer">The
+broader correct design (recommended for the committer)</h3>
+<p>Title should be carried in EXACTLY ONE place —
+<code>chapter.Title</code> (metadata) — and <code>Section.Content</code>
+should hold body text WITHOUT the title. Then:</p>
+<ul>
+<li><code>bookToString</code> emitting <code>Title</code> +
+<code>Content</code> yields the title once (correct).</li>
+<li>The HTML/EPUB writers re-emit the title once from
+<code>chapter.Title</code> (correct round-trip).</li>
+</ul>
+<p>Concretely: (1) HTML parser — skip <code>&lt;head&gt;</code> (Fix A)
+AND drop the leading <code>&lt;h1&gt;</code> that equals the title from
+Content; (2) EPUB parser — drop the leading <code>&lt;h1&gt;</code> that
+equals the title from Content (head already stripped). This makes both
+formats carry the title exactly once.</p>
+<h3 id="avoid-breaking-the-non-dup-path">Avoid breaking the non-dup
+path</h3>
+<ul>
+<li>Inputs with NO <code>&lt;title&gt;</code>/<code>&lt;h1&gt;</code>
+(e.g. plain <code>.txt</code>, HTML without head/h1): the title-strip
+must be a no-op — only strip an <code>&lt;h1&gt;</code>/title-line that
+ACTUALLY equals <code>chapter.Title</code>.</li>
+<li>Multi-<code>&lt;h1&gt;</code> documents / real chapters: only the
+LEADING title occurrence (matching the promoted
+<code>chapter.Title</code>) should be removed, never interior
+headings.</li>
+<li>DOCX/PDF/FB2 paths in <code>generateOutput</code> already build Book
+from <code>content</code> with <code>titleFromInput</code> — they are
+unaffected and must stay unaffected (no change there).</li>
+</ul>
+<hr />
+<h2 id="5-red-test-shape-114115--for-the-committer-to-implement">5. RED
+test shape (§11.4.115 — for the committer to implement)</h2>
+<p>Polarity-switch test asserting the title appears EXACTLY ONCE in the
+round-trip text.</p>
+<h3 id="layer-1--parser-unit-red-primary-deterministic-no-llm">Layer 1 —
+parser unit RED (primary, deterministic, no LLM)</h3>
+<p><code>pkg/ebook/html_parser_title_dup_bughunt_test.go</code> and an
+EPUB sibling:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// RED on pre-fix code, GREEN after.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>book<span class="op">,</span> _ <span class="op">:=</span> ebook<span class="op">.</span>NewHTMLParser<span class="op">().</span>Parse<span class="op">(</span>tmpHTML<span class="op">)</span> <span class="co">// &lt;title&gt;La Farola&lt;/title&gt; + &lt;h1&gt;La Farola&lt;/h1&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>content <span class="op">:=</span> book<span class="op">.</span>Chapters<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Sections<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Content</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> strings<span class="op">.</span>Count<span class="op">(</span>content<span class="op">,</span> <span class="st">&quot;La Farola&quot;</span><span class="op">)</span> <span class="op">!=</span> <span class="dv">0</span> <span class="op">{</span>   <span class="co">// body text must NOT contain the title</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;title leaked into Content %d times: %q&quot;</span><span class="op">,</span> strings<span class="op">.</span>Count<span class="op">(</span>content<span class="op">,</span><span class="st">&quot;La Farola&quot;</span><span class="op">),</span> content<span class="op">)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">// and Title carries it exactly once:</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> book<span class="op">.</span>Chapters<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Title <span class="op">!=</span> <span class="st">&quot;La Farola&quot;</span> <span class="op">{</span> t<span class="op">.</span>Fatalf<span class="op">(...)</span> <span class="op">}</span></span></code></pre></div>
+<p>(EPUB variant: same assertion via UniversalParser on a built .epub
+fixture; mirror the existing
+<code>epub_head_multiline_bughunt_test.go</code> zip-builder
+helper.)</p>
+<h3 id="layer-2--booktostring--round-trip-red-cmd">Layer 2 —
+bookToString / round-trip RED (cmd)</h3>
+<p><code>cmd/unified-translator/main_logic_test.go</code> style — assert
+the flattened/extracted text has the title once:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>got <span class="op">:=</span> bookToString<span class="op">(</span>book<span class="op">)</span> <span class="co">// from the title-dup HTML/EPUB fixture</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> strings<span class="op">.</span>Count<span class="op">(</span>got<span class="op">,</span> <span class="st">&quot;La Farola&quot;</span><span class="op">)</span> <span class="op">!=</span> <span class="dv">1</span> <span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;title appears %d times in bookToString output (want 1):</span><span class="ch">\n</span><span class="st">%s&quot;</span><span class="op">,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        strings<span class="op">.</span>Count<span class="op">(</span>got<span class="op">,</span> <span class="st">&quot;La Farola&quot;</span><span class="op">),</span> got<span class="op">)</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="polarity-switch-114115">Polarity switch (§11.4.115)</h3>
+<p>Gate the assertion on <code>RED_MODE</code> (default 1 = reproduce
+defect on pre-fix artifact → asserts count&gt;1; flip to 0 post-fix =
+GREEN guard asserting count==1) so the SAME source proves the defect
+present pre-fix and absent post-fix.</p>
+<hr />
+<h2 id="6-evidence-paths-this-run">6. Evidence paths (this run)</h2>
+<ul>
+<li>Repro binary: <code>/tmp/ut_minor_w6</code> (gitignored, not
+staged)</li>
+<li>Repro input/output: <code>/tmp/minor_w6_in.html</code>,
+<code>/tmp/minor_w6_out.html</code></li>
+<li>HTML-parser probe output (above, §3):
+<code>Content="La Farola\nLa Farola\n\n..."</code></li>
+<li>EPUB-parser probe output (above, §3):
+<code>Content="La Farola The lighthouse..."</code></li>
+<li>Wave6 frame evidence cross-ref:
+<code>docs/qa/video_wave6_20260616-175612/EVIDENCE.md</code></li>
+</ul>
+<h2 id="7-nothing-unconfirmed">7. Nothing UNCONFIRMED</h2>
+<p>All claims above are proven by isolated probes against the real
+parsers + a real unified-translator round-trip. No
+<code>LIKELY</code>/<code>probably</code>/<code>maybe</code>. The only
+design CHOICE left to the committer is which of the §4 fix variants to
+adopt (all converge on "title carried exactly once in chapter.Title");
+that is an implementation decision, not an unproven cause.</p>
+</body>
+</html>

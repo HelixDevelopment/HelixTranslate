@@ -1,0 +1,1 @@
+This is a sample text in Spanish to test translation functionality. It contains multiple sentences and should be suitable for translation tests. The text includes various punctuation marks and sentence structures.

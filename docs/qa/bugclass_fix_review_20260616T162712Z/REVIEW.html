@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>REVIEW</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">REVIEW</h1>
+</header>
+<h1
+id="independent-114142114125-code-review--bug-class--parser-fixes">Independent
+§11.4.142/§11.4.125 code-review — bug-class + parser fixes</h1>
+<p><strong>Reviewer role:</strong> BACKGROUND operator-authorized
+independent review, READ-ONLY NON-COMMITTING. <strong>Did NOT</strong>
+edit / stage / <code>git add</code> / commit anything. Ran only
+read-only <code>go test</code> / <code>go build</code> /
+<code>go vet</code> (artifacts gitignored, not staged).
+<strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-16T16:27:12Z <strong>Scope:</strong> <code>4fbe581</code>
+(Translate-arg data-loss, 6 sites) + <code>7cabe3f</code> (MINOR-W6-1
+parser title-dup). <strong>Discipline:</strong> §11.4.142 + §11.4.1 +
+§11.4.6 (FACT-only, evidence-backed) + §1.1 (mutation) + §11.4.69.</p>
+<hr />
+<h2 id="verdict">VERDICT</h2>
+<table>
+<thead>
+<tr>
+<th>Fix</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>4fbe581</code> Translate-arg data-loss (Seam A/B/C, 6
+sites)</td>
+<td><strong>GO</strong></td>
+</tr>
+<tr>
+<td><code>7cabe3f</code> MINOR-W6-1 parser title-dup</td>
+<td><strong>GO</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Both fixes are release-ready. No findings rise to BLOCKING. Two
+NON-BLOCKING observations (one nit, one accuracy note on the evidence
+doc's wording) recorded below — neither affects correctness or
+releasability.</p>
+<hr />
+<h2 id="fix-1--4fbe581-translate-arg-data-loss--go">FIX 1 —
+<code>4fbe581</code> Translate-arg data-loss — <strong>GO</strong></h2>
+<h3 id="11-the-choke-point-claim-is-true-independently-traced--1146">1.1
+The choke-point claim is TRUE (independently traced) — §11.4.6</h3>
+<p>The wire contract was independently re-verified, not taken on the
+commit's word:</p>
+<ul>
+<li><strong><code>OpenAIClient.Translate(ctx, text, prompt)</code> sends
+<code>prompt</code> (arg-2) as the single user message and ignores
+<code>text</code> (arg-1)</strong> — confirmed at
+<code>pkg/translator/llm/openai.go</code>
+(<code>Messages: [{Role:"user", Content: userMessage}]</code>,
+<code>userMessage</code> derived from <code>prompt</code> with the new
+fallback).</li>
+<li><strong><code>bridge.clientTranslator.client</code> is the raw
+OpenAI-compatible <code>llmClient</code></strong>
+(<code>pkg/bridge/bridge.go:546</code>), and the package's own
+convention <code>realInvokeDispatch</code> already calls
+<code>client.Translate(ctx, "", full)</code>
+(<code>bridge.go:369</code>). Seam B mirrors this exactly.</li>
+</ul>
+<p><strong>6-site trace to a choke-point (all reach one):</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>site</th>
+<th>actual content shape</th>
+<th>type at runtime</th>
+<th>reaches choke-point?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>cmd/markdown-translator/main.go:244</code></td>
+<td>content in arg-1, <code>""</code> arg-2 → raw
+<code>bridge.BestClient</code></td>
+<td>raw <code>OpenAIClient</code></td>
+<td><strong>Seam A fallback + Seam C real prompt</strong> ✓</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>pkg/preparation/coordinator.go:290</code></td>
+<td><code>Translate(ctx, prompt, "")</code></td>
+<td><code>*LLMTranslator</code> (built-in) OR
+<code>clientTranslator</code> (ensemble)</td>
+<td>see note ‡</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>pkg/preparation/coordinator.go:361</code></td>
+<td>same</td>
+<td>same</td>
+<td>see note ‡</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>pkg/preparation/coordinator.go:424</code></td>
+<td>same</td>
+<td>same</td>
+<td>see note ‡</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>pkg/verification/polisher.go:563</code></td>
+<td><code>Translate(ctx, prompt, location)</code></td>
+<td><code>*LLMTranslator</code> OR <code>clientTranslator</code></td>
+<td><strong>Seam B compose</strong> (ensemble path) ✓</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>pkg/coordination/multi_llm.go:445</code></td>
+<td><code>Translate(ctx, text, contextHint)</code></td>
+<td><code>*LLMTranslator</code> OR <code>clientTranslator</code></td>
+<td><strong>Seam B compose</strong> ✓</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>pkg/coordination/multi_llm.go:529</code></td>
+<td>same</td>
+<td>same</td>
+<td><strong>Seam B compose</strong> ✓</td>
+</tr>
+</tbody>
+</table>
+<p>‡ <strong>Accuracy note (NON-BLOCKING) on the evidence doc's
+"EMPTY-PAYLOAD" labelling of #2/#3/#4.</strong> Independently traced:
+<code>*LLMTranslator.Translate</code>
+(<code>pkg/translator/llm/llm.go</code>) does NOT forward the caller's
+args verbatim — it builds its own non-empty prompt via
+<code>createTranslationPrompt(text, contextStr)</code> and calls
+<code>lt.client.Translate(ctx, text, prompt)</code> with that
+<strong>always-non-empty</strong> prompt in arg-2. Therefore,
+<strong>when the preparation provider is the built-in
+<code>*LLMTranslator</code>, sites #2/#3/#4 were NOT broken</strong>
+(arg-2 was never empty; Seam A's fallback is inert there). They are only
+the "empty-payload" class <strong>when an ensemble factory injects a
+raw/bridge client</strong> — and in that case Seam A (raw
+<code>OpenAIClient</code>) or Seam B (<code>clientTranslator</code>,
+where <code>composeForClient</code> with empty context sends the prompt
+verbatim — proven by
+<code>TestClientTranslator_EmptyContextSendsContentVerbatim</code>)
+covers them. → The fix is correct for every routing of #2/#3/#4; the
+only imprecision is the evidence doc calling them unconditionally
+"broken/empty-payload." This is a documentation-wording nit,
+<strong>not</strong> a code defect.</p>
+<p><strong>"Leave callers unchanged" claim — TRUE and CORRECT.</strong>
+Rewriting the preparation/polisher callers to <code>("", prompt)</code>
+would (a) make <code>clientTranslator</code> refuse on empty content and
+(b) make <code>*LLMTranslator</code> early-return on empty
+<code>text</code> (<code>if text=="" ... return text,nil</code>) —
+breaking both paths. Leaving them as <code>(prompt, "")</code> /
+<code>(prompt, location)</code> and fixing at the choke-points is the
+right call.</p>
+<h3
+id="12-red-tests-are-httptest-real-and-catch-the-negation--11427--11--114115">1.2
+RED tests are httptest-real and catch the negation — §11.4.27 / §1.1 /
+§11.4.115</h3>
+<p>Neither test uses <code>MockLLMClient</code>. Both stand up an
+<code>httptest.Server</code> and a <strong>real
+<code>OpenAIClient</code></strong> / <strong>real
+<code>clientTranslator</code></strong>, asserting the actual wire
+user-message content.</p>
+<p>Mutation proof executed this session (RED_MODE=1 on the FIXED code
+MUST FAIL):</p>
+<pre><code>GREEN default:  ok pkg/translator/llm ; ok pkg/bridge
+RED_MODE=1 TestOpenAITranslate_EmptyPayloadGuard      -&gt; FAIL (&quot;OK::The old man...&quot; not boilerplate)  ✓ catches negation
+RED_MODE=1 TestClientTranslator_ComposesContentNotLabel -&gt; FAIL (compose sends real content)            ✓ catches negation</code></pre>
+<p>The assertions are load-bearing, not tautologies. §11.4.69
+refuse-empty paths covered by
+<code>TestOpenAITranslate_RefuseAllEmpty</code> +
+<code>TestClientTranslator_RefusesEmptyContent</code> (assert no request
+reaches the provider on empty content).</p>
+<h3
+id="13-seam-b-compose-is-correct--content--label-both-reach-the-model">1.3
+Seam B compose is correct — content + label both reach the model</h3>
+<p><code>composeForClient(text, contextStr)</code>:</p>
+<ul>
+<li>empty context → <code>text</code> verbatim (no double-wrap) ✓</li>
+<li>non-empty context → <code>text + "\n\nContext: " + contextStr</code>
+✓ (content first, label as labelled hint; never substituted, never
+dropped) No double-send / malformation. Verified on the wire by the
+GREEN assertions (<code>Contains(captured, realContent)</code> AND
+<code>Contains(captured, label)</code>).</li>
+</ul>
+<h3 id="14-no-safe-site-regressed">1.4 No SAFE site regressed</h3>
+<ul>
+<li><code>batch_handlers.go:146</code> <code>(req.Text, "")</code>: via
+<code>*LLMTranslator</code>, empty input early-returns before any client
+call; non-empty → content sent verbatim. No new error on a legitimate
+path.</li>
+<li><code>distributed/coordinator.go:308</code>
+<code>(text, contextHint)</code>: if <code>clientTranslator</code>, Seam
+B now composes correctly — an <strong>improvement</strong>, not a
+regression.</li>
+<li><code>markdown/simple_workflow.go:92</code>
+<code>(text, prompt)</code>: prompt non-empty → Seam A inert; content
+reaches via prompt.</li>
+<li><code>TestOpenAITranslate_RequestShapeAndAuth</code> (asserts
+non-empty arg-2 reaches the wire verbatim) — <strong>still
+green</strong> (re-run this session). The Seam-A fallback is provably
+inert for non-empty arg-2.</li>
+<li>The new refuse-empty (Seam A + Seam B) only fires on
+empty/whitespace <strong>content</strong>, which has no legitimate
+translation; multi_llm treats it as a failed attempt
+(<code>err==nil &amp;&amp; translated!=""</code> gate) and
+retries/exhausts — previously it would store provider boilerplate.
+Behaviour change is strictly an improvement.</li>
+</ul>
+<h3 id="15-validation-this-session-read-only">1.5 Validation (this
+session, read-only)</h3>
+<pre><code>go build ./...  -&gt; exit 0
+go vet ./pkg/translator/llm/ ./pkg/bridge/ ... -&gt; exit 0
+go test ./pkg/translator/llm/ ./pkg/bridge/ ./pkg/coordination/ \
+        ./pkg/verification/ ./pkg/preparation/ \
+        ./cmd/markdown-translator/ ./pkg/markdown/ -count=1 -&gt; ALL ok</code></pre>
+<hr />
+<h2 id="fix-2--7cabe3f-minor-w6-1-parser-title-dup--go">FIX 2 —
+<code>7cabe3f</code> MINOR-W6-1 parser title-dup —
+<strong>GO</strong></h2>
+<h3 id="21-root-cause--fix-correct">2.1 Root cause + fix correct</h3>
+<ul>
+<li><code>html_parser.go</code>: <code>extractTextWithContext</code> now
+skips <code>&lt;head&gt;</code> (was leaking <code>&lt;title&gt;</code>
+into Content) + <code>stripLeadingTitle</code> drops a leading body
+<code>&lt;h1&gt;</code>==title.</li>
+<li><code>epub_parser.go</code>: <code>stripLeadingTitle</code> drops
+the residual leading <code>&lt;h1&gt;</code>==title
+(<code>&lt;head&gt;</code> already stripped).</li>
+<li>Title now carried EXACTLY ONCE (in <code>chapter.Title</code>);
+<code>bookToString</code> prepends it once.</li>
+</ul>
+<h3 id="22-stripleadingtitle-is-a-guarded-no-op--no-over-strip">2.2
+<code>stripLeadingTitle</code> is a guarded no-op — no over-strip</h3>
+<ul>
+<li>empty/whitespace title → no-op ✓</li>
+<li>only acts on the START of left-trimmed content
+(<code>HasPrefix</code>); interior repeats preserved ✓</li>
+<li><strong>word-boundary guard</strong>: char after the title must be
+whitespace or EOC, so <code>"Cat"</code> does NOT strip
+<code>"Caterpillar"</code> ✓ (directly table-tested in
+<code>title_duplication_bughunt_test.go</code>).</li>
+<li>multibyte titles: a non-space continuation byte fails the
+<code>rest[0]</code> whitespace check → safe no-op.</li>
+<li>It does NOT strip a legitimate mid-content body line equal to a
+short title (leading-only). ✓ Minor: it collapses leading blank lines
+after the removed title line — acceptable (the title line itself is
+being removed).</li>
+</ul>
+<h3 id="23-tests-httptest-parser-real-and-catch-the-negation--11">2.3
+Tests httptest-/parser-real and catch the negation — §1.1</h3>
+<p>No mocks: <code>NewHTMLParser().Parse</code> /
+<code>NewEPUBParser().Parse</code> / <code>bookToString</code> driven
+directly; plus a <code>stripLeadingTitle</code> edge-case table.
+Mutation proof executed this session:</p>
+<pre><code>GREEN default: ok pkg/ebook ; ok cmd/unified-translator
+RED_MODE=1 TestBugHunt_HTMLTitleDuplication -&gt; FAIL (&quot;got 0&quot; leaks on fixed)  ✓ catches negation
+RED_MODE=1 TestBugHunt_EPUBTitleDuplication -&gt; FAIL                            ✓ catches negation</code></pre>
+<p>The roundtrip guard asserts body text survives AND title count ==
+1.</p>
+<h3 id="24-validation-this-session-read-only">2.4 Validation (this
+session, read-only)</h3>
+<pre><code>go test ./pkg/ebook/ ./cmd/unified-translator/ -count=1 -&gt; ok ok
+  (incl. the pre-existing epub_head_multiline_bughunt regression — green)
+go vet (pkg/ebook, cmd/unified-translator) -&gt; exit 0</code></pre>
+<hr />
+<h2 id="findings-summary">Findings summary</h2>
+<ul>
+<li><strong>NO BLOCKING findings.</strong> Both fixes are correct,
+evidence-backed, mutation-proven, and break no SAFE site.</li>
+<li><strong>NON-BLOCKING (doc-wording, §11.4.6 precision):</strong> the
+<code>4fbe581</code> evidence doc / commit calls preparation sites
+#2/#3/#4 unconditionally "EMPTY-PAYLOAD broken." Independently, they are
+broken ONLY when routed through a raw/bridge client; via the built-in
+<code>*LLMTranslator</code> they were already correct (arg-2 always
+non-empty). The CODE handles both routings correctly — this is purely an
+over-broad description, not a defect. No commit required for the GO;
+flagged for accuracy if the doc is later revised.</li>
+<li><strong>NON-BLOCKING (nit):</strong> <code>stripLeadingTitle</code>
+collapses leading blank lines following the removed title — cosmetically
+fine.</li>
+</ul>
+<h2 id="release-readiness">Release-readiness</h2>
+<p>Both <code>4fbe581</code> and <code>7cabe3f</code> are
+<strong>release-ready</strong>. The data-loss class is genuinely closed
+at the two choke-points (real-content reaches the model; empty content
+fails loudly per §11.4.69), and the title-dup class is closed at the
+parser layer with exactly-once title carriage. Standing §11.4.135 guards
+are real (httptest/parser-driven, negation-catching) and registered with
+RED_MODE polarity.</p>
+</body>
+</html>

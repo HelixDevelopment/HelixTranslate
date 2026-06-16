@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>REVIEW</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">REVIEW</h1>
+</header>
+<h1 id="nezha-arc-independent-code-review-114142--114125">Nezha-Arc
+Independent Code Review (§11.4.142 / §11.4.125)</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-16T18:14:10Z <strong>Reviewer:</strong> independent code-review
+agent (read-only, non-committing — NOT the author, NOT the committer)
+<strong>Mode:</strong> READ-ONLY. No edit / stage / commit /
+<code>git add</code> performed (§11.4.84 working-tree quiescence
+respected — committer agent is sole committer). <strong>Scope:</strong>
+the 4 STABLE landed nezha-arc fixes ONLY: <code>5227585</code> (iter1),
+<code>2f326cd</code> (iter2), <code>6a1aa8c</code> (iter3),
+<code>e198b17</code> (iter4). In-flight committer commits NOT reviewed.
+<strong>Discipline:</strong> systematic-debugging mindset, §11.4.1 (no
+PASS/FAIL bluff), §11.4.6 (evidence-backed, no rubber-stamp), §1.1 (a
+real gate's mutation must FAIL the test).</p>
+<h2 id="evidence-captured-this-review">Evidence captured this
+review</h2>
+<ul>
+<li><code>go test ./pkg/api/ ./pkg/translator/llm/ ./internal/config/ ./cmd/api-server/ -count=1</code>
+→ <strong>all GREEN</strong> (api 2.37s, llm 20.97s, config 0.94s,
+api-server 6.17s).</li>
+<li><code>go build ./...</code> → <strong>EXIT 0</strong> (clean).</li>
+<li>Source read: <code>internal/config/config.go</code> (LoadConfig /
+loadAPIKeysFromEnv / ApplyEnvOverrides / DefaultConfig),
+<code>pkg/translator/llm/llm.go</code> (strip + IsKnownProvider +
+ValidModels), <code>pkg/api/handler.go</code> (createTranslator),
+<code>pkg/api/verifier_handlers.go</code>,
+<code>cmd/api-server/main.go</code> (probeBackendState).</li>
+<li>§1.1 mutation proofs read:
+<code>docs/qa/nezha_heavy_iter2_20260616T133401Z/red_baseline_and_mutation_proofs.txt</code>
+(Finding#1 guard-removal FAILs, Finding#2 revert-to-one-shot FAILs,
+Finding#3 RED_MODE=1 FAILs).</li>
+<li>Lockstep audit: every <code>NewLLMTranslatorWithConfig</code>
+factory <code>case Provider*</code> has a <code>ValidModels</code> entry
+→ <code>IsKnownProvider</code> rejects nothing the factory can build (0
+mismatches).</li>
+</ul>
+<hr />
+<h2
+id="fix-1--5227585-iter1-commentary-strip--create-default-env-override">Fix
+1 — <code>5227585</code> iter1: commentary strip + create-default
+env-override</h2>
+<h3 id="1a-llm-commentary-contamination-strip--go">1a. LLM
+commentary-contamination strip — <strong>GO</strong></h3>
+<ul>
+<li><strong>Correct + robust.</strong>
+<code>stripTranslationCommentary</code> splits on <code>\n\n</code>,
+walks trailing blocks backward, stops at the first non-commentary block
+— it cannot eat mid-content, only trailing asides. Defense-in-depth
+(prompt instruction in both branches +
+<code>CreatePromptForLanguages</code> + <code>universal.go</code> +
+post-strip) is sound: even if a model ignores the prompt, the
+post-processor catches it.</li>
+<li><strong>Anti-bluff honesty (§11.4.6).</strong>
+<code>commentaryLeadMarkers</code> + <code>isCommentaryBlock</code> are
+deliberately specific (won't eat a paragraph that merely starts with a
+common word). Markers are real captured live-nezha responses, not
+invented.</li>
+<li><strong>Test genuinely exercises + catches negation.</strong>
+<code>TestEnhanceTranslation_StripsModelCommentary</code> uses LITERAL
+captured contaminated outputs and <code>mustNotHas</code> fragment
+asserts; reverting <code>enhanceTranslation</code> to
+<code>enhanced := translated</code> (the pre-fix line) makes every
+contaminated case FAIL. <code>..._DoesNotEatRealParagraphs</code> is the
+false-positive guard (real multi-paragraph passes untouched) — proven by
+the GREEN run. Not a bluff gate.</li>
+</ul>
+<h3 id="1b-create-default-config-env-override-skip--go">1b.
+create-default config env-override skip — <strong>GO</strong></h3>
+<ul>
+<li><strong>Correct root-cause fix.</strong> Confirmed
+<code>loadAPIKeysFromEnv</code> sets <code>c.Security.JWTSecret</code>
+from <code>JWT_SECRET</code>; <code>DefaultConfig()</code> ships
+<code>EnableAuth=true, JWTSecret=""</code>; the create-default branch
+previously skipped env-loading → <code>Validate()</code> "JWT secret is
+required" crash-loop. <code>cfg.ApplyEnvOverrides()</code> before
+<code>SaveConfig</code> closes it.</li>
+<li><strong>Test catches negation.</strong>
+<code>TestApplyEnvOverrides_JWTSecretReachesDefaultConfig</code> asserts
+the precondition (EnableAuth=true, empty JWTSecret) then that
+ApplyEnvOverrides makes Validate pass — removing the
+<code>ApplyEnvOverrides()</code> call (or the body) makes it FAIL.</li>
+<li><strong>MINOR (non-blocking, naming honesty).</strong>
+<code>ApplyEnvOverrides()</code> only calls
+<code>loadAPIKeysFromEnv()</code>, whereas <code>LoadConfig</code> does
+<code>applyDefaults()</code> <strong>+</strong>
+<code>loadAPIKeysFromEnv()</code>. For the create-default path this is
+harmless (DefaultConfig already IS the defaults, so applyDefaults is a
+no-op there). But the name implies broader scope than it has; a future
+caller could wrongly assume parity with LoadConfig. Suggest a committer
+follow-up: either rename to <code>applyEnvOverrides</code>/document the
+scope, or have it also call <code>applyDefaults()</code> for true
+LoadConfig-parity. Not release-blocking.</li>
+</ul>
+<hr />
+<h2
+id="fix-2--2f326cd-iter2-verifier-honest-503--active-grpc-health-probe--env-file-deploy">Fix
+2 — <code>2f326cd</code> iter2: verifier honest-503 + active gRPC health
+probe + env-file deploy</h2>
+<h3 id="2a-verifier-routes-always-register--honest-503--go">2a. Verifier
+routes always-register + honest 503 — <strong>GO</strong></h3>
+<ul>
+<li><strong>Correct + §11.4.69-aligned.</strong> Routes always
+registered; <code>requireEnabled</code> gin middleware returns honest
+<code>503 reason=llmsverifier_disabled</code> when off, real data when
+on. <code>InitVerifierFromConfig</code> wires
+<code>SetEnabled(cfg.LLMsVerifier.Enabled)</code>. Replacing a
+misleading 404 ("API doesn't exist") with a truthful 503 is the right
+contract.</li>
+<li><strong>Mutation-proven (§1.1).</strong> Evidence file: removing the
+<code>requireEnabled</code> guard makes
+<code>TestVerifier_DisabledRoutes_Return503NotFound</code> FAIL (served
+instead of 503). The enabled-path guard
+(<code>TestVerifier_EnabledRoutes_PassThroughGuard</code>) proves
+SetEnabled(true) does not short-circuit. Real gate.</li>
+</ul>
+<h3 id="2b-api-server-health-active-grpc-probe--go">2b. api-server
+<code>/health</code> active gRPC probe — <strong>GO</strong></h3>
+<ul>
+<li><strong>Correct.</strong> gRPC <code>NewClient</code> conns are
+lazy/IDLE until first RPC; the one-shot <code>GetState()</code> reported
+503 on a reachable backend. <code>probeBackendState</code> does
+<code>Connect()</code> + bounded <code>WaitForStateChange</code> (2s) —
+IDLE-reachable→READY (healthy), IDLE-down→TRANSIENT_FAILURE (unhealthy).
+Never blind-trusts IDLE (avoids false-positive on a genuinely down
+backend). Timeout uses the request context, bounded — won't hang
+<code>/health</code>.</li>
+<li><strong>Test catches negation.</strong>
+<code>TestHealthCheck_LazyIdleButReachableBackend_ReportsHealthy</code>
+boots a REAL in-process gRPC server (genuinely reachable, lazy-IDLE) and
+asserts 200/READY; mutation proof: reverting to one-shot
+<code>GetState()</code> FAILs it (503 IDLE). The <code>t.Skipf</code> on
+already-Ready precondition is honest (§11.4.3) — it does not falsely
+PASS. Real gate.</li>
+</ul>
+<h3 id="2c-compose---env-file-deploy--go-deploy-script-lower-risk">2c.
+compose <code>--env-file</code> deploy — <strong>GO (deploy script,
+lower risk)</strong></h3>
+<ul>
+<li><code>scripts/nezha-deploy.sh</code> always passes
+<code>--env-file .env.nezha</code>; guard test
+<code>nezha_deploy_envfile_guard_test.sh</code> RED_MODE=1 flags a
+no-env-file invocation (mutation-proven). Honest §11.4.108 note in the
+commit re: podman-compose 1.5.0 stale-image gap (build+stop+rm+up) —
+accurately disclosed, not bluffed.</li>
+</ul>
+<hr />
+<h2
+id="fix-3--6a1aa8c-iter3-reject-unsupported-provider-400--114120-reconciliation--go">Fix
+3 — <code>6a1aa8c</code> iter3: reject unsupported provider 400 +
+§11.4.120 reconciliation — <strong>GO</strong></h2>
+<ul>
+<li><strong>Correct + §11.4.69 no-silent-substitution.</strong>
+<code>createTranslator</code> rejects
+<code>!llm.IsKnownProvider(providerName)</code> with
+<code>400 "unsupported provider"</code> BEFORE the bridge, so a caller
+asking for a non-existent provider no longer silently gets a real
+translation from a DIFFERENT provider (response-correctness defect: ask
+X get Y).</li>
+<li><strong>Lockstep VERIFIED (independent audit, not taken on
+trust).</strong> <code>IsKnownProvider</code> derives from
+<code>ValidModels</code>; I diffed the factory switch cases against
+<code>ValidModels</code> keys — <strong>every factory-buildable provider
+has a ValidModels entry (0 in-factory-but-not-registry
+mismatches)</strong>. So the guard rejects nothing the system can
+actually build. <code>""</code> correctly excluded (means "default",
+handled above).</li>
+<li><strong>Default-fallback path safe.</strong>
+<code>DefaultConfig().Translation.DefaultProvider = "openai"</code> (a
+known provider) → provider-omitted requests do not trip the 400
+out-of-the-box. Confirmed.</li>
+<li><strong>§11.4.120 reconciliation is genuine, NOT
+fake-pass/revert.</strong> Stale pre-bridge
+<code>400 "Will fail at translator creation"</code> expectations in
+<code>handler_test</code>/<code>batch_translate_test</code> were
+rewritten to the corrected behaviour: valid known provider → 200
+(deterministic via <code>installMockBridge</code>, §11.4.98/§11.4.50),
+unsupported → 400 on BOTH translateText and batch paths. The new
+<code>unsupported-provider</code> cases assert
+<code>400 + "unsupported provider"</code> — removing the guard in
+handler.go makes them FAIL. Real gate.</li>
+<li><strong>BEHAVIORAL NOTE (non-blocking).</strong> If an operator
+misconfigures <code>default_provider</code> to empty/unknown, ALL
+provider-omitted requests now 400. This is fail-loud-on-misconfig
+(preferable to silent substitution) and
+<code>batch_handlers_test.go:735</code> already covers a
+<code>"nonexistent"</code> default. Acceptable; worth a one-line
+operator-doc note.</li>
+<li><strong>PENDING honestly disclosed (§11.4.6/§11.4.108).</strong>
+Commit states the nezha live-server rebuild+reboot+sink-side
+re-validation is NOT yet done (live image runs pre-fix binary). This is
+an honest pending, correctly flagged — <strong>the committer MUST close
+it before the arc is release-tagged</strong> (see release-readiness
+below). e198b17's commit body shows 443-port sink-side GREEN/RED
+fixtures for the unsupported-provider contract, partially covering
+this.</li>
+</ul>
+<hr />
+<h2
+id="fix-4--e198b17-iter4-parenthetical-styledialect-aside-escape--go-with-a-watch-item">Fix
+4 — <code>e198b17</code> iter4: parenthetical style/dialect aside escape
+— <strong>GO with a watch-item</strong></h2>
+<ul>
+<li><strong>Correct.</strong> iter1's <code>isCommentaryBlock</code>
+only treated a trailing <code>()</code>/<code>[]</code> block as
+commentary when its inner text started with "note" OR contained
+"translat". A live ru→sr
+<code>(Using Ekavica dialect ... as per guidelines)</code> had neither →
+English meta leaked into Serbian. Fix widens with
+<code>commentaryParenSignalWords</code>
+(dialect/vocabulary/guideline/register/using/as per/i used/i chose/...).
+This is a legitimate §11.4.4 test-interrupt → §11.4.146
+extend-to-all-cases follow-up, not a re-bug.</li>
+<li><strong>Test catches negation + false-positive guarded.</strong> Two
+live-captured RED fixtures (<code>sr_paren_dialect_aside</code>,
+<code>en_bracket_style_aside</code>) with <code>mustNotHas</code>;
+reverting the signal-word loop makes them FAIL.
+<code>..._KeepsBenignTrailingParenthetical</code> ("(I bio je veoma
+umoran.)" — real content, no signal word) proves no over-strip. Real
+gate.</li>
+<li><strong>WATCH-ITEM (§11.4.6 residual false-positive surface,
+non-blocking).</strong> The signal words <code>register</code>,
+<code>vocabulary</code>, <code>using </code>, <code>i kept</code> are
+ordinary words that COULD appear inside a genuine trailing parenthetical
+of real translated prose (e.g. a quote discussing language, or a
+sentence ending in a parenthetical containing "register"). The block
+must be FULLY enclosed in <code>()</code>/<code>[]</code> AND trailing
+AND <code>\n\n</code>-separated, which makes a real-content false strip
+unlikely but not impossible. Recommend the committer add one more
+benign-content guard fixture containing a signal word inside genuine
+prose (e.g. a trailing parenthetical that legitimately uses "register"
+as a noun) to pin the boundary, OR document the accepted residual risk.
+Current corpus does not yet prove this edge. Not release-blocking given
+the FULLY-enclosed+trailing constraint, but it is the one place the
+stripper could in principle eat real content.</li>
+</ul>
+<hr />
+<h2 id="cross-cutting-checks">Cross-cutting checks</h2>
+<ul>
+<li><strong>No solve-A-create-B (§11.4.1).</strong> Each fix is
+additive/guarded; no fix re-introduces another's defect. iter4 strictly
+widens iter1 (same function, more coverage) — verified iter1's fixtures
+still pass in the GREEN run.</li>
+<li><strong>No bluff gates (§11.4.1/§1.1).</strong> Every reviewed test
+is mutation-proven (iter2 via the captured proof file; iter1/iter3/iter4
+by reading the assertions + confirming the pre-fix line/guard removal
+forces FAIL). None pass on broken code.</li>
+<li><strong>§11.4.69 honesty.</strong> Honest 503 (not 404), honest 400
+(not silent substitution), honest IDLE-probe (not blind-trust) — all
+three are no-silent-substitution wins.</li>
+<li><strong>Tests are fully automated/re-runnable (§11.4.98).</strong>
+All use httptest / in-process gRPC / env-only; no manual intervention.
+GREEN at <code>-count=1</code>.</li>
+</ul>
+<h2 id="per-fix-verdict">Per-fix verdict</h2>
+<table>
+<thead>
+<tr>
+<th>Fix</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5227585 iter1 (commentary strip + env-override)</td>
+<td><strong>GO</strong> (1 MINOR naming follow-up)</td>
+</tr>
+<tr>
+<td>2f326cd iter2 (503 + health probe + env-file)</td>
+<td><strong>GO</strong></td>
+</tr>
+<tr>
+<td>6a1aa8c iter3 (400 unsupported provider)</td>
+<td><strong>GO</strong> (live re-validation PENDING — must close)</td>
+</tr>
+<tr>
+<td>e198b17 iter4 (paren aside escape)</td>
+<td><strong>GO</strong> (1 WATCH-ITEM false-positive fixture)</td>
+</tr>
+</tbody>
+</table>
+<h2
+id="overall-release-readiness--go-for-the-arc-with-two-non-blocking-committer-follow-ups--one-blocking-before-tag-item">Overall
+release-readiness — <strong>GO for the arc, with TWO non-blocking
+committer follow-ups + ONE blocking-before-TAG item</strong></h2>
+<p>The four fixes are correct, robust, anti-bluff, and their tests
+genuinely catch the negation (no bluff gates).
+<code>go build ./...</code> clean; the four affected test packages
+GREEN. The arc materially improves end-user correctness (clean
+translations, honest API error codes, accurate health).</p>
+<p><strong>Blocking BEFORE a release TAG (not blocking the commits
+themselves):</strong></p>
+<ol type="1">
+<li><strong>iter3 live nezha sink-side re-validation
+(§11.4.108).</strong> iter3 honestly states the live server still runs
+the pre-fix binary. Per §11.4.108 / §11.4.130, the committer must
+rebuild→reboot→sink-side re-validate the unsupported-provider 400
+contract on live nezha before the arc is tagged. (e198b17's 443-port
+RED/GREEN fixtures already partially evidence this — confirm they
+reflect the rebuilt image.)</li>
+</ol>
+<p><strong>Non-blocking committer follow-ups:</strong> 2.
+<strong>iter1</strong> — clarify <code>ApplyEnvOverrides()</code> scope
+vs <code>LoadConfig</code> (name implies more than it does); either
+rename/document or add <code>applyDefaults()</code> for true parity. 3.
+<strong>iter4</strong> — add one benign-content fixture with a signal
+word inside genuine trailing-parenthetical prose to pin the
+false-positive boundary, or document the accepted residual.</p>
+<p>No defects, no bluff-capable gates, no silent substitutions found.
+This is an evidence-backed GO, not a rubber-stamp.</p>
+</body>
+</html>

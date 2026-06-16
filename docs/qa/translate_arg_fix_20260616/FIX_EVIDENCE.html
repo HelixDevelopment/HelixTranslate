@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>FIX_EVIDENCE</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">FIX_EVIDENCE</h1>
+</header>
+<h1
+id="translate-arg-data-loss-bug-class--fix--redgreen-evidence-114115114135114146">Translate-arg
+DATA-LOSS bug class — FIX + RED→GREEN evidence
+(§11.4.115/§11.4.135/§11.4.146)</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-16T00:00:00Z <strong>Fix of:</strong> the 6 confirmed-broken
+<code>.Translate(ctx,text,prompt)</code> call sites in
+<code>docs/qa/translate_arg_audit_20260616-153353/AUDIT.md</code> +
+<code>docs/qa/translate_arg_audit_completion_20260616-154307/COMPLETION.md</code>
++
+<code>docs/qa/bug_markdown_empty_payload_rootcause_20260616-152640/FINDING.md</code>.
+<strong>Method:</strong> superpowers:systematic-debugging Phase 4 +
+§11.4.6 FACT-only + §11.4.69 + §11.4.115.</p>
+<hr />
+<h2 id="1-fix-design-two-choke-points-cover-all-6-sites">1. Fix design
+(two choke-points cover all 6 sites)</h2>
+<h3
+id="seam-a--pkgtranslatorllmopenaigo-openaiclienttranslate-defense-in-depth">Seam
+A — <code>pkg/translator/llm/openai.go</code>
+<code>OpenAIClient.Translate</code> (defense-in-depth)</h3>
+<p>Covers the 4 EMPTY-PAYLOAD sites (#1
+<code>cmd/markdown-translator/main.go:244</code>, #2/#3/#4
+<code>pkg/preparation/coordinator.go:290/361/424</code>) that reach a
+RAW OpenAI-compatible client with an empty 2nd arg.</p>
+<ul>
+<li>when <code>prompt</code> is empty/whitespace → fall back to the
+content-bearing 1st arg <code>text</code>;</li>
+<li>when BOTH are empty/whitespace → return an explicit error
+(§11.4.69), never send an empty user message that the model answers with
+boilerplate stored as a translation.</li>
+<li>Embedded by DeepSeek/Groq/etc., so the guard covers every
+OpenAI-compatible provider.</li>
+</ul>
+<h3
+id="seam-b--pkgbridgebridgego-clienttranslatortranslate-compose-choke-point">Seam
+B — <code>pkg/bridge/bridge.go</code>
+<code>clientTranslator.Translate</code> (compose choke-point)</h3>
+<p>Covers the 3 WRONG-CONTENT sites (#5
+<code>pkg/verification/polisher.go:563</code>, #8/#9
+<code>pkg/coordination/multi_llm.go:445/529</code>) that reach the
+verbatim-delegating <code>clientTranslator</code> via
+<code>Translate(ctx, REAL_CONTENT, LABEL)</code>.</p>
+<ul>
+<li>the content-bearing 1st arg <code>text</code> is always placed in
+the body the raw client actually sends (its 2nd arg), mirroring the
+<code>bridge.go:369</code> <code>Translate(ctx,"",full)</code>
+convention; a non-empty <code>contextStr</code> is appended as a
+labelled <code>Context:</code> hint, never substituted for the
+content;</li>
+<li>empty <code>contextStr</code> → the content is sent verbatim
+(preserves the preparation-ensemble <code>(prompt, "")</code> shape
+#2/#3/#4 reaching <code>clientTranslator</code> — no
+double-wrapping);</li>
+<li>empty/whitespace content → explicit error (§11.4.69).</li>
+</ul>
+<h3
+id="seam-c--cmdmarkdown-translatormaingo244-belt-and-suspenders-caller">Seam
+C — <code>cmd/markdown-translator/main.go:244</code>
+(belt-and-suspenders caller)</h3>
+<p>Build a real translation instruction embedding the block text and
+pass it as the 2nd arg (mirrors
+<code>pkg/markdown/simple_workflow.go</code>), so the cmd no longer
+relies solely on the Seam-A fallback.</p>
+<h3
+id="1146-correction-to-the-dispatchs-fix-the-4-empty-payload-callers-to-pass">§11.4.6
+correction to the dispatch's "fix the 4 empty-payload callers to
+pass</h3>
+<p>content in arg-2 too": the preparation callers #2/#3/#4 pass a
+COMPLETE analysis prompt in arg-1 with an empty arg-2. Rewriting them to
+<code>("", prompt)</code> would (a) make <code>clientTranslator</code>
+refuse empty content and (b) make <code>*LLMTranslator</code> return
+early on empty <code>text</code> — BREAKING both paths. They are FIXED
+by the two choke-points and correctly LEFT as <code>(prompt, "")</code>.
+Likewise #5 polisher is FIXED by Seam B (clientTranslator now composes
+the verification <code>prompt</code> + <code>location</code>), so
+polisher.go:563 is unchanged — editing it to <code>("", …)</code> would
+break the <code>*LLMTranslator</code> default path.</p>
+<h3 id="which-of-the-6-sites-is-fixed-by-what">Which of the 6 sites is
+fixed by what</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>site</th>
+<th>class</th>
+<th>fixed by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>markdown-translator/main.go:244</td>
+<td>empty-payload</td>
+<td>Seam A fallback + Seam C real prompt</td>
+</tr>
+<tr>
+<td>2</td>
+<td>preparation/coordinator.go:290</td>
+<td>empty-payload</td>
+<td>Seam A fallback (raw) / Seam B verbatim-prompt (ensemble)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>preparation/coordinator.go:361</td>
+<td>empty-payload</td>
+<td>same as #2</td>
+</tr>
+<tr>
+<td>4</td>
+<td>preparation/coordinator.go:424</td>
+<td>empty-payload</td>
+<td>same as #2</td>
+</tr>
+<tr>
+<td>5</td>
+<td>verification/polisher.go:563</td>
+<td>wrong-content</td>
+<td>Seam B compose (ensemble path)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>coordination/multi_llm.go:445</td>
+<td>wrong-content</td>
+<td>Seam B compose</td>
+</tr>
+<tr>
+<td>9</td>
+<td>coordination/multi_llm.go:529</td>
+<td>wrong-content</td>
+<td>Seam B compose</td>
+</tr>
+</tbody>
+</table>
+<p>(#11 server.go:196 DEAD-CODE, #22 notes.go:166 SAFE — per
+COMPLETION.md, untouched.)</p>
+<hr />
+<h2
+id="2-redgreen-evidence-captured-this-session-httptest-no-api-key">2.
+RED→GREEN evidence (captured this session, httptest, no API key)</h2>
+<h3
+id="seam-a--testopenaitranslate_emptypayloadguard--testopenaitranslate_refuseallempty">Seam
+A — <code>TestOpenAITranslate_EmptyPayloadGuard</code> (+
+<code>TestOpenAITranslate_RefuseAllEmpty</code>)</h3>
+<pre><code>GREEN (fixed, default):      ok   pkg/translator/llm
+RED_MODE=1 on PRE-FIX openai.go (stashed fix): ok  -&gt; defect reproduced (empty msg sent, boilerplate returned)
+RED_MODE=1 on FIXED openai.go:                 FAIL -&gt; content &quot;The old man walked along the shore at dawn.&quot; now reaches model</code></pre>
+<h3
+id="seam-b--testclienttranslator_composescontentnotlabel--emptycontext--refusesempty">Seam
+B — <code>TestClientTranslator_ComposesContentNotLabel</code> (+
+EmptyContext + RefusesEmpty)</h3>
+<pre><code>GREEN (fixed, default):      ok   pkg/bridge
+RED_MODE=1 on PRE-FIX bridge.go (stashed fix): ok  -&gt; defect reproduced (label &quot;Section content&quot; sent, real content dropped)
+RED_MODE=1 on FIXED bridge.go:                 FAIL -&gt; real content REAL_SECTION_CONTENT_THAT_MUST_BE_TRANSLATED now reaches model</code></pre>
+<p>The RED tests are registered as permanent §11.4.135 standing guards
+(default <code>RED_MODE=0</code>).</p>
+<hr />
+<h2 id="3-validation">3. Validation</h2>
+<pre><code>go build ./...                                   -&gt; exit 0
+go test ./pkg/translator/llm/ ./pkg/bridge/ \
+        ./pkg/coordination/ ./pkg/verification/ \
+        ./pkg/preparation/ ./cmd/markdown-translator/ \
+        ./pkg/markdown/ -count=1                  -&gt; all ok</code></pre>
+<p>No SAFE site broke:
+<code>TestOpenAITranslate_RequestShapeAndAuth</code> (asserts the
+non-empty 2nd-arg user message reaches the wire verbatim) still passes —
+the Seam-A fallback is inert for non-empty 2nd args, and the Seam-B
+compose only fires inside <code>clientTranslator</code>.</p>
+<h2 id="4-1146-honesty-boundary">4. §11.4.6 honesty boundary</h2>
+<ul>
+<li>PROVEN FACT (wire repro, both polarities, both seams): empty-payload
+fixed at the raw client; wrong-content fixed at the clientTranslator
+choke-point; no SAFE site regressed.</li>
+<li>The end-to-end #8/#9 production seam is the real
+<code>bridge.clientTranslator</code> (the exact type
+<code>instance.Translator</code> holds in the factory ensemble path per
+COMPLETION.md §1) — the Seam-B test drives that real type, not a
+stub.</li>
+</ul>
+</body>
+</html>

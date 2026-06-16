@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>PLAN</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">PLAN</h1>
+</header>
+<h1
+id="secret-scrub-plan--leaked-ssh-password-whitesnakeredacted-11410">Secret-Scrub
+PLAN — leaked SSH password
+<code>WhiteSnake&lt;REDACTED-§11.4.10&gt;</code></h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-16T14:37:48Z <strong>Authority:</strong> §11.4.10
+(credentials-handling) + §11.4.10.A (pre-store credential leak audit) +
+§11.4.6 (no-guessing — captured
+<code>git grep</code>/<code>git log</code> evidence only) + §11.4.30 (no
+versioned build artifacts) <strong>Stream:</strong> BACKGROUND read-only
+investigation. NON-COMMITTING. A separate committer agent is the sole
+main-checkout committer (§11.4.84). This file is the only write; nothing
+staged/committed by this stream. <strong>Repo HEAD at
+investigation:</strong>
+<code>6a1aa8c334cd38ee1dea2a59cb10aa188c0b387f</code></p>
+<hr />
+<h2 id="0-scope--status">0. Scope + status</h2>
+<ul>
+<li><strong>In scope:</strong> scrub the leaked SSH password literal
+<code>WhiteSnake&lt;REDACTED-§11.4.10&gt;</code> from every TRACKED file
+(tree-level scrub).</li>
+<li><strong>Out of scope (operator-confirmed):</strong> history scrub —
+operator confirmed the credential is already rotated/replaced; history
+count recorded for §11.4.10.A awareness only.</li>
+<li><strong>NOT secrets (kept):</strong> hostname
+<code>thinker.local</code> and username <code>milosvasic</code> are
+infrastructure identifiers, NOT credentials/secrets per §11.4.10 — they
+are NOT scrubbed. Documented for awareness (host+user pairing reduces
+blast radius if ever re-leaked, but neither is a secret).</li>
+</ul>
+<hr />
+<h2
+id="1-tracked-occurrences-of-whitesnakeredacted-11410-captured-git-grep--n">1.
+TRACKED occurrences of <code>WhiteSnake&lt;REDACTED-§11.4.10&gt;</code>
+(captured <code>git grep -n</code>)</h2>
+<h3 id="1a-textscriptdoc-occurrences-scrubbable-in-place">1a.
+Text/script/doc occurrences (scrubbable in-place)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>path:line</th>
+<th>content class</th>
+<th>fix classification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>Documentation/PRODUCTION_COMPLETION_REPORT.md:29</code></td>
+<td>doc — "Specified credentials" line</td>
+<td><code>&lt;redacted-per-§11.4.10&gt;</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>Documentation/PRODUCTION_COMPLETION_REPORT.md:64</code></td>
+<td>doc — example
+<code>--password WhiteSnake&lt;REDACTED-§11.4.10&gt; \</code></td>
+<td><code>&lt;redacted-per-§11.4.10&gt;</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>Documentation/PRODUCTION_DOCUMENTATION.md:71</code></td>
+<td>doc — example
+<code>--password WhiteSnake&lt;REDACTED-§11.4.10&gt; \</code></td>
+<td><code>&lt;redacted-per-§11.4.10&gt;</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>Documentation/PRODUCTION_DOCUMENTATION.md:139</code></td>
+<td>doc — Go struct literal
+<code>Password: "WhiteSnake&lt;REDACTED-§11.4.10&gt;"</code></td>
+<td><code>&lt;redacted-per-§11.4.10&gt;</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>SSH_TRANSLATION_PROGRESS.html:186</code></td>
+<td>doc (HTML export) —
+<code>(milosvasic/WhiteSnake&lt;REDACTED-§11.4.10&gt;)</code></td>
+<td><code>&lt;redacted-per-§11.4.10&gt;</code> (regen from .md per
+§11.4.65)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>SSH_TRANSLATION_PROGRESS.md:7</code></td>
+<td>doc —
+<code>(milosvasic/WhiteSnake&lt;REDACTED-§11.4.10&gt;)</code></td>
+<td><code>&lt;redacted-per-§11.4.10&gt;</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>demo_ssh_translation.sh:152</code></td>
+<td>script — echo of example command</td>
+<td><code>${SSH_WORKER_PASSWORD}</code> env-ref</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>demo_ssh_translation.sh:166</code></td>
+<td>script — actual
+<code>-password="WhiteSnake&lt;REDACTED-§11.4.10&gt;" \</code></td>
+<td><code>${SSH_WORKER_PASSWORD}</code> env-ref</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>docs/final_translation_report.html:263</code></td>
+<td>doc (HTML export) —
+<code>(milosvasic/WhiteSnake&lt;REDACTED-§11.4.10&gt;)</code></td>
+<td><code>&lt;redacted-per-§11.4.10&gt;</code> (regen from .md)</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>docs/final_translation_report.html:356</code></td>
+<td>doc (HTML export) — full example cmd line</td>
+<td><code>&lt;redacted-per-§11.4.10&gt;</code> (regen from .md)</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>docs/final_translation_report.md:15</code></td>
+<td>doc —
+<code>(milosvasic/WhiteSnake&lt;REDACTED-§11.4.10&gt;)</code></td>
+<td><code>&lt;redacted-per-§11.4.10&gt;</code></td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>docs/final_translation_report.md:78</code></td>
+<td>doc — full example cmd line</td>
+<td><code>&lt;redacted-per-§11.4.10&gt;</code></td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>internal/scripts/final_test.sh:32</code></td>
+<td>script —
+<code>-password WhiteSnake&lt;REDACTED-§11.4.10&gt;</code></td>
+<td><code>${SSH_WORKER_PASSWORD}</code> env-ref</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>internal/scripts/translate_final_clean.sh:32</code></td>
+<td>script —
+<code>-password WhiteSnake&lt;REDACTED-§11.4.10&gt;</code></td>
+<td><code>${SSH_WORKER_PASSWORD}</code> env-ref</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>internal/working/test_ssh.sh:5</code></td>
+<td>script — expect
+<code>send "WhiteSnake&lt;REDACTED-§11.4.10&gt;\r"</code></td>
+<td><code>${SSH_WORKER_PASSWORD}</code> env-ref (expect:
+<code>send "$env(SSH_WORKER_PASSWORD)\r"</code>)</td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>internal/working/test_translation_new.sh:17</code></td>
+<td>script —
+<code>-password WhiteSnake&lt;REDACTED-§11.4.10&gt;</code></td>
+<td><code>${SSH_WORKER_PASSWORD}</code> env-ref</td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>run_translation_demo.sh:9</code></td>
+<td>script —
+<code>-password="WhiteSnake&lt;REDACTED-§11.4.10&gt;" \</code></td>
+<td><code>${SSH_WORKER_PASSWORD}</code> env-ref</td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>scripts/ebook_translation_workflow.sh:13</code></td>
+<td>script —
+<code>REMOTE_PASS="WhiteSnake&lt;REDACTED-§11.4.10&gt;"</code></td>
+<td><code>REMOTE_PASS="${SSH_WORKER_PASSWORD}"</code> env-ref</td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>scripts/ebook_translation_workflow.sh:76</code></td>
+<td>script — help text
+<code>(default: WhiteSnake&lt;REDACTED-§11.4.10&gt;)</code></td>
+<td><code>&lt;redacted-per-§11.4.10&gt;</code> (drop the leaked default
+from help)</td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>scripts/ebook_translation_workflow.sh:83</code></td>
+<td>script — usage example
+<code>--password WhiteSnake&lt;REDACTED-§11.4.10&gt;</code></td>
+<td><code>&lt;redacted-per-§11.4.10&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h3
+id="1b-tracked-binary-occurrences-secret-baked-into-compiled-artifacts--dual-violation">1b.
+TRACKED BINARY occurrences (secret BAKED INTO compiled artifacts) — DUAL
+violation</h3>
+<p><code>git grep</code> reported <code>Binary file ... matches</code>
+for the embedded literal. Confirmed tracked via
+<code>git ls-files</code>:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>path</th>
+<th>violation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B1</td>
+<td><code>build/ebook-translator</code></td>
+<td>§11.4.10 embedded secret + §11.4.30 tracked build artifact</td>
+</tr>
+<tr>
+<td>B2</td>
+<td><code>download-model</code></td>
+<td>§11.4.10 embedded secret + §11.4.30 tracked build artifact</td>
+</tr>
+<tr>
+<td>B3</td>
+<td><code>ebook-translator</code></td>
+<td>§11.4.10 embedded secret + §11.4.30 tracked build artifact</td>
+</tr>
+<tr>
+<td>B4</td>
+<td><code>test-enhanced-conversion</code></td>
+<td>§11.4.10 embedded secret + §11.4.30 tracked build artifact</td>
+</tr>
+<tr>
+<td>B5</td>
+<td><code>test-model</code></td>
+<td>§11.4.10 embedded secret + §11.4.30 tracked build artifact</td>
+</tr>
+<tr>
+<td>B6</td>
+<td><code>test-simple-translation</code></td>
+<td>§11.4.10 embedded secret + §11.4.30 tracked build artifact</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fix for B1–B6:</strong> <code>git rm --cached</code> the
+binaries (un-track) + add to <code>.gitignore</code> (they are §11.4.30
+build derivatives, regenerable via <code>make build</code> per
+§11.4.77). Editing the binaries in place is NOT viable — the secret is
+compiled in; the binaries MUST be un-tracked. Rebuilding from the
+(scrubbed) source then produces secret-free artifacts that stay
+gitignored.</p>
+<hr />
+<h2
+id="2-history-count-11410a-awareness-only--history-scrub-not-in-scope">2.
+History count (§11.4.10.A awareness only — history scrub NOT in
+scope)</h2>
+<p>Captured:
+<code>git log -S WhiteSnake&lt;REDACTED-§11.4.10&gt; --oneline --all | wc -l</code>
+→ <strong>17 commits</strong> carry the literal across history. Operator
+confirmed the credential is rotated/replaced, so per §11.4.10.A the
+action is documented-only (no <code>--allow-force-push</code> history
+rewrite, consistent with §11.4.113 absolute no-force-push). RECORD for
+awareness; rotation already done.</p>
+<hr />
+<h2 id="3-other-plausibly-leaked-literals-in-the-affected-files">3.
+OTHER plausibly-leaked literals in the affected files</h2>
+<p>Scanned all 20 text-file occurrences' parent files for
+<code>password|passwd|secret|token|api[_-]?key|-p &lt;literal&gt;</code>
+(excluding the known token). <strong>Findings:</strong></p>
+<ul>
+<li><strong>No other hardcoded secret VALUE found.</strong> Every other
+<code>password</code>-shaped hit is descriptive prose ("Password-based
+authentication", "SSH password transmission"), an
+<code>expect "password:"</code> prompt match, a CLI flag name
+(<code>--password|-p</code>), or <code>"max_tokens": 4096</code> (a
+model param, not a secret). None embeds a credential value.</li>
+<li><code>WhiteSnake&lt;REDACTED-§11.4.10&gt;</code> is the SOLE leaked
+secret literal in the tracked tree.</li>
+<li>The <code>WhiteSnake</code> matches in
+<code>docs/research/helix_qa/workspace-*/...json</code> are FALSE
+POSITIVES — those JSON files contain copies of THIS constitution's
+§11.4.10.A text mentioning the token NAME; confirmed
+<code>git grep -c "WhiteSnake&lt;REDACTED-§11.4.10&gt;"</code> returns
+ZERO <code>8587</code> in research JSON (only the prose token-name). NOT
+a leak, NOT scrubbed.</li>
+</ul>
+<hr />
+<h2 id="4-per-file-fix-classification-summary">4. Per-file fix
+classification summary</h2>
+<ul>
+<li><strong>Scripts (configs/runnable) →
+<code>${SSH_WORKER_PASSWORD}</code> env-ref:</strong> occurrences 7, 8,
+13, 14, 15, 16, 17, 18. Matches the canonical env var
+(<code>SSH_WORKER_PASSWORD</code>, per project CLAUDE.md /
+<code>config.distributed.*.json</code> scrub style). Tcl/expect variant
+(15): <code>send "$env(SSH_WORKER_PASSWORD)\r"</code>.</li>
+<li><strong>Docs / examples / help-text →
+<code>&lt;redacted-per-§11.4.10&gt;</code>:</strong> occurrences 1–6,
+9–12, 19, 20. HTML exports (5, 9, 10) MUST be regenerated from the
+scrubbed <code>.md</code> via the §11.4.65 export pipeline, not
+hand-edited, to keep md/html in sync.</li>
+<li><strong>Tracked binaries → un-track + gitignore + rebuild:</strong>
+B1–B6 (<code>git rm --cached</code> + <code>.gitignore</code> entries;
+regenerate via <code>make build</code>).</li>
+</ul>
+<hr />
+<h2 id="5-pre-push-credential-pattern-grep-coverage-11410a-clause-5">5.
+Pre-push credential-pattern grep coverage (§11.4.10.A clause 5)</h2>
+<p><strong>Captured evidence:</strong></p>
+<ul>
+<li><code>.gitignore</code> DOES cover the secret-FILE class:
+<code>.env</code>, <code>.env.*</code> (with <code>.example</code>
+allow), <code>secrets.*</code>, <code>keys.*</code>,
+<code>config_with_keys.json</code>, <code>api_keys.json</code>,
+<code>**/qwen_credentials.json</code>, <code>**/oauth_creds.json</code>.
+— adequate for files.</li>
+<li><strong>GAP (clause 5):</strong> NO active git hook is installed —
+<code>.git/hooks/</code> contains only the default <code>*.sample</code>
+files (no <code>pre-push</code>, <code>pre-commit</code>,
+<code>commit-msg</code>); <code>git ls-files</code> shows NO tracked
+<code>scripts/git_hooks/*</code>, NO <code>install_git_hooks.sh</code>.
+There is therefore <strong>NO mechanical credential-pattern grep on
+commit/push</strong>. A hardcoded literal like
+<code>WhiteSnake&lt;REDACTED-§11.4.10&gt;</code> (an inline VALUE, not a
+secret FILE) would NOT be caught by <code>.gitignore</code> and is NOT
+caught by any hook.</li>
+<li><strong><code>.gitignore</code> does NOT cover the tracked-binary
+class</strong> that carried the embedded secret (<code>/build/</code>,
+root <code>ebook-translator</code>, <code>download-model</code>,
+<code>test-*</code> are not ignored) — §11.4.30 gap that is the root
+cause of B1–B6.</li>
+</ul>
+<p><strong>Required remediation (for the committer window):</strong></p>
+<ol type="1">
+<li>Add a tracked pre-push (and pre-commit) hook +
+<code>install_git_hooks.sh</code> per §11.4.75 Layers 1+3, whose
+credential-pattern grep rejects inline secret-shaped literals (at
+minimum the known token class + generic
+<code>-password[ =]"?[^${]</code> inline-value pattern), so the escaped
+class (inline value, not a secret file) is caught in the SAME commit per
+§11.4.10.A clause 5.</li>
+<li>Add <code>.gitignore</code> entries for the build artifacts
+(<code>/build/</code>, <code>/ebook-translator</code>,
+<code>/download-model</code>, <code>/test-enhanced-conversion</code>,
+<code>/test-model</code>, <code>/test-simple-translation</code>) to
+close the §11.4.30 root cause.</li>
+</ol>
+<hr />
+<h2 id="6-evidence-appendix-commands-run-read-only">6. Evidence appendix
+(commands run, read-only)</h2>
+<ul>
+<li><code>git rev-parse HEAD</code> → <code>6a1aa8c…</code></li>
+<li><code>git grep -n WhiteSnake&lt;REDACTED-§11.4.10&gt;</code> → 20
+text occurrences + 6 <code>Binary file … matches</code> (table §1).</li>
+<li><code>git log -S WhiteSnake&lt;REDACTED-§11.4.10&gt; --oneline --all | wc -l</code>
+→ <code>17</code> (§2).</li>
+<li><code>git grep -c "WhiteSnake&lt;REDACTED-§11.4.10&gt;" -- 'docs/research/**'</code>
+→ no <code>8587</code> (research JSON clean, §3).</li>
+<li><code>git ls-files | grep -E '^build/ebook-translator$|…'</code> →
+all 6 binaries tracked (§1b).</li>
+<li><code>ls -la .git/hooks/</code> → only <code>*.sample</code>
+defaults; <code>git ls-files | grep git_hooks</code> → empty (§5
+gap).</li>
+<li>No secret VALUE printed anywhere beyond the already-known-in-context
+token.</li>
+</ul>
+</body>
+</html>

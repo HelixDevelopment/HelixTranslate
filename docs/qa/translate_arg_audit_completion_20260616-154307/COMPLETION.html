@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>COMPLETION</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">COMPLETION</h1>
+</header>
+<h1
+id="translatectxtextprompt-argument-contract-audit--completion-114118"><code>.Translate(ctx,text,prompt)</code>
+Argument-Contract Audit — COMPLETION (§11.4.118)</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-16T15:43:07Z <strong>Mode:</strong> READ-ONLY, NON-COMMITTING.
+Sole committer is a separate agent; this agent staged/committed nothing
+(§11.4.84). Two temporary <code>_test.go</code> wire probes written
+under <code>pkg/coordination/</code> + <code>pkg/verification/</code>,
+run, then DELETED — <code>git status</code> confirmed clean of probe
+residue. <strong>Method:</strong> superpowers:systematic-debugging +
+§11.4.6 (FACT-only) + §11.4.118 + §11.4.69.
+<strong>Predecessor:</strong>
+<code>docs/qa/translate_arg_audit_20260616-153353/AUDIT.md</code> (the 5
+confirmed-broken + 4 NEEDS-RUNTIME-CONFIRM baseline).</p>
+<hr />
+<h2 id="1-the-4-needs-runtime-confirm-sites--resolved-verdicts-fact">1.
+The 4 NEEDS-RUNTIME-CONFIRM sites — resolved verdicts (FACT)</h2>
+<h3
+id="8-pkgcoordinationmulti_llmgo445--broken-wrong-content--data-loss-in-the-ensemblefactory-path">#8
+<code>pkg/coordination/multi_llm.go:445</code> — <strong>BROKEN
+(wrong-content / data-loss)</strong> in the ensemble/factory path</h3>
+<p><strong>Evidence (static, FACT):</strong></p>
+<ul>
+<li><code>instance.Translator.Translate(ctx, text, contextHint)</code>
+(line 445). <code>instance.Translator</code> is
+<code>translator.Translator</code> built EITHER by
+<code>llm.NewLLMTranslator</code> (line 210, the per-provider discovery
+path → <code>*LLMTranslator</code>, <strong>SAFE</strong>, composes) OR
+by <code>c.translatorFactory(ctx)</code> (line 257,
+<code>initializeFromFactory</code>, the injected ensemble).</li>
+<li>The factory in production is <code>bridge.EnsembleFactory</code> →
+<code>ProviderDiverseTranslators</code>
+(<code>pkg/bridge/bridge.go:527/534</code>) which wraps each verified
+client in <code>&amp;clientTranslator{client: c}</code>, and the only
+client <code>realClientBuild</code> builds is
+<code>llm.NewOpenAIClient</code> (<code>bridge.go:313-314</code>).
+<code>clientTranslator.Translate</code> delegates
+<strong>VERBATIM</strong> (<code>bridge.go:554-555</code>).</li>
+<li><code>contextHint</code> originates from the ebook pipeline:
+<code>UniversalTranslator.translateChapter/ translateSection/translateMetadata</code>
+call
+<code>TranslateWithProgress(ctx, &lt;REAL CONTENT&gt;, &lt;LABEL&gt;, …)</code>
+where the LABEL is a non-empty constant: <code>"Book title"</code>,
+<code>"Book description"</code>, <code>"Chapter title"</code>,
+<code>"Section title"</code>,
+<strong><code>"Section content"</code></strong>
+(<code>pkg/translator/universal.go:158/173/199/231/246</code>). The
+<code>MultiLLMTranslatorWrapper</code> forwards that as
+<code>TranslateWithRetry(ctx, text, contextHint)</code>
+(<code>translator_wrapper.go:81</code>).</li>
+<li>Production wiring: <code>cmd/cli/main.go:361-364</code> builds
+<code>NewMultiLLMTranslatorWrapperWithFactory(..., b.EnsembleFactory(task))</code>
+and feeds it to <code>UniversalTranslator</code> → the factory ensemble
+path is LIVE for <code>cmd/cli</code> multi-llm.</li>
+</ul>
+<p><strong>Evidence (wire probe, FACT — captured this session):</strong>
+a probe drove the REAL <code>MultiLLMCoordinator</code>
+(<code>NewMultiLLMCoordinatorWithFactory</code>) with a faithful
+verbatim-delegating <code>clientTranslator</code>-equivalent over a real
+<code>OpenAIClient</code> pointed at an httptest server,
+<code>text="REAL_SECTION_CONTENT_THAT_MUST_BE_TRANSLATED"</code>,
+<code>contextHint="Section content"</code>:</p>
+<pre><code>#8 TranslateWithRetry: out=&quot;DUMMY_TRANSLATION&quot;
+server-side user message captured = &quot;Section content&quot;   -&gt; WRONG-CONTENT (real text DROPPED)</code></pre>
+<p>The real section content NEVER reaches the LLM; only the label
+<code>"Section content"</code> is sent → the model "translates" the
+literal words "Section content" → catastrophic silent data loss for
+every chapter/section/title in the <code>cmd/cli</code> multi-llm
+ensemble path.</p>
+<p><strong>Correction to the predecessor audit:</strong> the baseline
+marked #8 "BROKEN iff ensemble AND <code>contextHint</code> empty."
+FACT: <code>contextHint</code> is NEVER empty from the ebook pipeline —
+it is always a non-empty label — so the failure is the
+<strong>wrong-content</strong> class (label sent, content dropped), not
+empty-payload, and it fires on EVERY ebook translation in the ensemble
+path. More severe than the baseline implied. The non-factory discovery
+path (<code>*LLMTranslator</code>, line 210) remains
+<strong>SAFE</strong> (composes).</p>
+<h3
+id="9-pkgcoordinationmulti_llmgo529--broken-wrong-content--data-loss-in-the-ensemblefactory-path">#9
+<code>pkg/coordination/multi_llm.go:529</code> — <strong>BROKEN
+(wrong-content / data-loss)</strong> in the ensemble/factory path</h3>
+<p>Same receiver (<code>inst.Translator</code>), same
+<code>contextHint</code>, same factory wiring as #8; the consensus
+fan-out variant (<code>TranslateWithConsensus</code>). <strong>Wire
+probe (FACT):</strong></p>
+<pre><code>#9 TranslateWithConsensus: out=&quot;DUMMY_TRANSLATION&quot;
+server-side user message captured = &quot;Section content&quot;   -&gt; WRONG-CONTENT (real text DROPPED)</code></pre>
+<p>Identical verdict and severity to #8.</p>
+<h3
+id="11-pkgapiservergo196--dead-code-no-production-wiring-safe-by-deadness">#11
+<code>pkg/api/server.go:196</code> — <strong>DEAD-CODE (no production
+wiring); SAFE-by-deadness</strong></h3>
+<p><strong>Evidence (FACT, §11.4.124
+investigate-before-claiming):</strong></p>
+<ul>
+<li><code>s.translator</code> is populated ONLY by
+<code>Server.SetTranslator</code> (<code>server.go:119-120</code>).</li>
+<li><code>grep -rn 'SetTranslator(' cmd/ pkg/ internal/</code>
+(excluding the method def): the ONLY callers are
+<code>pkg/api/server_test.go</code> (7 sites, every one passing
+<code>mockTranslator</code>). <strong>Zero production
+callers.</strong></li>
+<li><code>pkg/api.Server</code> is built only by <code>NewServer</code>
+(<code>server.go:51</code>); <code>grep</code> for
+<code>api.NewServer</code> / <code>api.Server{</code> across
+<code>cmd/ pkg/ internal/</code> (excluding tests): <strong>empty — no
+production constructor.</strong></li>
+<li>The shipping servers use DIFFERENT types:
+<code>cmd/api-server/main.go</code> builds its own struct around
+<code>api.NewVerifierHandler</code> + a gin router (lines 212/219);
+<code>cmd/server/ main.go</code> uses <code>api.NewHandler</code> (line
+136). Neither constructs <code>pkg/api.Server</code> nor calls
+<code>SetTranslator</code>.</li>
+</ul>
+<p>Therefore <code>server.go:196</code>
+<code>s.translator.Translate(ctx, req.Text, "ru-&gt;sr")</code> is
+reachable ONLY from in-package tests, where <code>s.translator</code> is
+always a mock. It never reaches a real
+OpenAI/<code>clientTranslator</code> in any shipping path.
+<strong>Verdict: DEAD-CODE</strong> (latent wrong-content shape —
+non-empty <code>"src-&gt;tgt"</code> 2nd arg — but unreachable in
+production). Per §11.4.124 this is investigate-before-remove: do NOT
+delete on sight; if retained, it should be wired correctly OR removed in
+a separate, git-history-citing commit. <code>UNCONFIRMED:</code> nothing
+— the deadness is proven by exhaustive caller/constructor grep.</p>
+<h3
+id="22-pkgverificationnotesgo166--safe-composes-clienttranslator-type-unreachable">#22
+<code>pkg/verification/notes.go:166</code> — <strong>SAFE</strong>
+(composes; clientTranslator type-unreachable)</h3>
+<p><strong>Evidence (static, FACT):</strong></p>
+<ul>
+<li>The <code>NoteTaker.translator</code> field is the
+<strong>concrete</strong> type <code>*llm.LLMTranslator</code>
+(<code>notes.go:140</code>), NOT the <code>translator.Translator</code>
+interface. <code>NewNoteTaker</code> takes
+<code>*llm.LLMTranslator</code> (<code>notes.go:145</code>); its only
+production callers (<code>pkg/verification/multipass.go:502/544</code>)
+pass a <code>*llm.LLMTranslator</code>.</li>
+<li>A <code>clientTranslator</code> (interface value) is <strong>not
+assignable</strong> to a <code>*llm.LLMTranslator</code> field — the
+verbatim-delegate path is structurally unreachable at #22.
+<code>*LLMTranslator.Translate</code> COMPOSES (<code>llm.go:364</code>
+<code>createTranslationPrompt(text, contextStr)</code> →
+<code>llm.go:388</code> <code>client.Translate(ctx, text, prompt)</code>
+sends the composed prompt as the 2nd arg).</li>
+</ul>
+<p><strong>Evidence (wire probe, FACT — captured this session):</strong>
+drove the REAL <code>NewNoteTaker</code> →
+<code>GenerateNotes(... location="Chapter 3", originalText, translatedText ...)</code>
+through a real <code>*llm.LLMTranslator</code> over httptest:</p>
+<pre><code>#22 server-side user message captured = a 2353-char COMPOSED prompt
+    (contains the literary note-taking instruction AND the &quot;Chapter 3&quot; context),
+    != &quot;Chapter 3&quot; -&gt; the note instruction REACHES the LLM -&gt; SAFE</code></pre>
+<p><strong>Correction to the predecessor audit:</strong> the baseline
+marked #22 "BROKEN (wrong-content) in ensemble path — same as polisher,
+injector untraced." FACT: it is <strong>SAFE</strong> — notes.go has NO
+interface-typed ensemble field (unlike polisher's
+<code>ensemble map[string]translator. Translator</code>), so the
+verbatim clientTranslator is type-incompatible and never reached.</p>
+<p><strong>Honest §11.4.6 note (NOT the arg-contract bug
+class):</strong> the composed prompt embeds the note-taking instruction
+as the "Russian text:" to translate and appends "Serbian translation
+(Ekavica only):". The instruction is delivered (no data loss), but the
+note-taking use is structurally bolted onto the translation-prompt
+template — a SEMANTIC/quality oddity, separate from the data-loss
+arg-contract class this audit covers. Flagged for awareness, not counted
+as a wrong-content break.</p>
+<hr />
+<h2 id="2-final-complete-confirmed-broken-site-list-fact-wire-proven">2.
+FINAL COMPLETE confirmed-broken site list (FACT, wire-proven)</h2>
+<p><strong>6 sites broken</strong> (was 5 in the baseline; #8+#9
+promoted from NEEDS-CONFIRM to BROKEN; #22 demoted to SAFE; #11 resolved
+DEAD-CODE).</p>
+<h3 id="empty-payload-empty-user-message--4-sites">Empty-payload (empty
+user message) — 4 sites</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>site</th>
+<th>wiring</th>
+<th>proof</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>cmd/markdown-translator/main.go:244</code></td>
+<td>I1 raw <code>BestClient</code>→OpenAIClient, 2nd arg
+<code>""</code></td>
+<td>baseline probe (A)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>pkg/preparation/coordinator.go:290</code></td>
+<td>clientTranslator ensemble path, 2nd arg <code>""</code></td>
+<td>baseline probe (A)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>pkg/preparation/coordinator.go:361</code></td>
+<td>same as #2</td>
+<td>baseline probe (A)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>pkg/preparation/coordinator.go:424</code></td>
+<td>same as #2</td>
+<td>baseline probe (A)</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="wrong-content-1st-arg-real-content-dropped-non-empty-wrong-label-sent--3-sites">Wrong-content
+(1st-arg real content dropped, non-empty wrong label sent) — 3
+sites</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>site</th>
+<th>wiring</th>
+<th>proof</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5</td>
+<td><code>pkg/verification/polisher.go:563</code></td>
+<td><code>ensemble</code> interface map → clientTranslator; 2nd arg
+<code>location</code>="Chapter N"</td>
+<td>this session: userMsg=="Chapter 3", verification prompt dropped</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>pkg/coordination/multi_llm.go:445</code></td>
+<td>factory ensemble → clientTranslator; 2nd arg
+<code>contextHint</code>="Section content"</td>
+<td>this session: userMsg=="Section content", real content dropped</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>pkg/coordination/multi_llm.go:529</code></td>
+<td>same as #8 (consensus variant)</td>
+<td>this session: userMsg=="Section content", real content dropped</td>
+</tr>
+</tbody>
+</table>
+<h3 id="resolved-non-broken">Resolved NON-broken</h3>
+<ul>
+<li><strong>#11 <code>pkg/api/server.go:196</code> — DEAD-CODE</strong>
+(no production constructor/caller; mock-only in tests).</li>
+<li><strong>#22 <code>pkg/verification/notes.go:166</code> —
+SAFE</strong> (concrete <code>*llm.LLMTranslator</code> field,
+composes).</li>
+</ul>
+<p><strong>Defense-in-depth <code>OpenAIClient.Translate</code> fix
+coverage (unchanged from baseline + this session):</strong> the
+prompt==""→text fallback + empty-message refusal covers the 4
+EMPTY-PAYLOAD sites (#1-#4). It does <strong>NOT</strong> cover the 3
+WRONG-CONTENT sites (#5,#8,#9): their 2nd arg is NON-EMPTY ("Chapter N"
+/ "Section content"), so the <code>prompt==""</code> fallback never
+fires and the empty-guard never triggers — the raw client still sends
+the label and drops the real content. The wrong-content class needs a
+separate fix.</p>
+<hr />
+<h2
+id="3-wrong-content-fix-design-5-polisher-89-multi_llm--red-test-shape">3.
+Wrong-content fix design (#5 polisher, #8/#9 multi_llm) + RED-test
+shape</h2>
+<h3 id="root-cause-fact">Root cause (FACT)</h3>
+<p>The three wrong-content sites all call a
+<strong>verbatim-delegating</strong> <code>clientTranslator</code>
+(<code>bridge.go:554</code>) via the <code>translator.Translator</code>
+interface, passing real content in arg-1 and a label in arg-2.
+<code>clientTranslator.Translate</code> forwards arg-2 to
+<code>OpenAIClient.Translate</code> which sends ONLY arg-2 as the user
+message (<code>openai.go:155</code> <code>Content: prompt</code>). The
+label becomes the user message; the real content is dropped.</p>
+<p>The canonical correct convention already exists in the same package:
+<code>bridge.go:369</code> <code>realInvokeDispatch</code> does
+<code>client.Translate(ctx, "", full)</code> — content in arg-2, arg-1
+empty. The <code>clientTranslator</code> violates this by passing the
+caller's (text, contextStr) straight through without composing.</p>
+<h3
+id="recommended-fix--make-clienttranslator-compose-single-choke-point-fixes-all-3">Recommended
+fix — make <code>clientTranslator</code> compose (single choke-point,
+fixes all 3)</h3>
+<p><code>clientTranslator</code> is the SINGLE verbatim delegate that
+ALL three wrong-content sites reach (polisher ensemble, multi_llm
+factory retry, multi_llm factory consensus). Fixing it there fixes
+#5/#8/#9 at once and any future ensemble caller, without touching three
+call sites.</p>
+<p>Change <code>pkg/bridge/bridge.go</code>
+<code>clientTranslator.Translate</code> (and its
+<code>TranslateWithProgress</code>) to COMPOSE a single prompt embedding
+BOTH the content (arg-1 <code>text</code>) and the context/label (arg-2
+<code>contextStr</code>) into the 2nd arg per the bridge.go:369
+convention, e.g.:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>clientTranslator<span class="op">)</span> Translate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> text<span class="op">,</span> contextStr <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Compose: real content (text) MUST reach the model; contextStr is a label/hint,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// never the payload. Mirrors *LLMTranslator.createTranslationPrompt + bridge.go:369.</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    full <span class="op">:=</span> composeTranslationPrompt<span class="op">(</span>text<span class="op">,</span> contextStr<span class="op">)</span> <span class="co">// content-bearing, contextStr as Context:</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> c<span class="op">.</span>client<span class="op">.</span>Translate<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> full<span class="op">)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>where <code>composeTranslationPrompt</code> builds a real
+translation/verification instruction that INCLUDES <code>text</code> as
+the body and <code>contextStr</code> as a labelled hint (NOT as the
+body). This makes <code>clientTranslator</code> behave like
+<code>*LLMTranslator</code> (the already-SAFE path), so the ensemble
+path stops dropping content.</p>
+<p><strong>Caveat / alternative (honest §11.4.6):</strong> #5's caller
+(polisher <code>verifyWithLLM</code>) passes a <em>verification</em>
+prompt as arg-1 (<code>createVerificationPrompt</code>), not raw text —
+so a generic "translate this" composition is semantically wrong for
+polisher. The robust fix is therefore the <strong>caller-side</strong>
+convention fix: have the polisher (and any verification caller that
+already holds a complete instruction) pass the full instruction in arg-2
+and <code>""</code> in arg-1 (the bridge.go:369 convention), while #8/#9
+(which pass raw ebook content) get the compose-in-clientTranslator fix.
+Concretely:</p>
+<ul>
+<li><strong>#8/#9 (raw content + label):</strong> compose in
+<code>clientTranslator</code> (content into the prompt body, label as
+Context:) — OR route the multi_llm ensemble through a
+<code>*LLMTranslator</code>-style composing wrapper instead of the
+verbatim <code>clientTranslator</code>.</li>
+<li><strong>#5 (already-composed verification prompt +
+location):</strong> change polisher.go:563 to
+<code>translator.Translate(ctx, "", prompt+"\n\nLocation: "+location)</code>
+(content in arg-2), matching bridge.go:369 — the location becomes a
+labelled hint inside the single user message, and the verification
+instruction is no longer dropped.</li>
+</ul>
+<p>Both directions converge on the invariant: <strong>the
+content-bearing string MUST land in the arg the raw client actually
+sends (arg-2); a label/location/hint must be embedded, never substituted
+for the content.</strong></p>
+<h3
+id="red-test-shape-114115-reproduce-on-broken-artifact--polarity-switch">RED-test
+shape (§11.4.115 reproduce-on-broken-artifact + polarity switch)</h3>
+<p>One test source per fixed seam, <code>RED_MODE=1</code> reproduces
+the defect on the CURRENT (pre-fix) code, <code>RED_MODE=0</code>
+becomes the standing GREEN regression guard (§11.4.135). Use the
+httptest-capture pattern proven this session (no API key,
+deterministic):</p>
+<pre><code>Setup: httptest server records the user message; build the REAL production wiring
+       (NewMultiLLMCoordinatorWithFactory with a clientTranslator-equivalent over an
+       OpenAIClient at the test server, for #8/#9; NewBookPolisherWithFactory for #5).
+
+Drive: #8  coord.TranslateWithRetry(ctx, REAL_CONTENT, &quot;Section content&quot;)
+       #9  coord.TranslateWithConsensus(ctx, REAL_CONTENT, &quot;Section content&quot;, 1)
+       #5  bp.verifyWithLLM(ctx, &quot;openai&quot;, ORIGINAL, TRANSLATED, &quot;Chapter 3&quot;)
+
+Assert (RED_MODE=1, pre-fix -&gt; MUST FAIL the GREEN assertion = reproduce the defect):
+   capturedUserMsg == &quot;Section content&quot; / &quot;Chapter 3&quot;   (the label/location)
+   AND capturedUserMsg does NOT contain REAL_CONTENT / the verification instruction.
+
+Assert (RED_MODE=0, post-fix -&gt; GREEN guard):
+   capturedUserMsg CONTAINS REAL_CONTENT (for #8/#9) or the verification instruction
+   (for #5)   — i.e. the content-bearing string actually reached the model;
+   AND for the empty-content negative: an all-whitespace text yields an explicit error
+   (composes the §11.4.69 empty-message refusal), never a silent label-only send.</code></pre>
+<p>The assertion the RED test must make — "the polish/notes/translation
+request actually sends the verification/translation instruction AND the
+real content, not just the label" — is exactly what the two probes
+captured this session, so the RED reproduction is already demonstrated
+end-to-end (userMsg=="Chapter 3" / "Section content" on the pre-fix
+tree). Register each as a permanent guard (§11.4.135) in the same commit
+as the fix.</p>
+<hr />
+<h2 id="4-1146-honesty-boundary">4. §11.4.6 honesty boundary</h2>
+<ul>
+<li><strong>PROVEN FACT (wire repro this session):</strong> #8 + #9 send
+the label "Section content" and drop the real ebook content in the
+factory ensemble path (<code>cmd/cli</code> multi-llm); #5 sends
+"Chapter 3" and drops the verification prompt; #22 sends the COMPOSED
+2353-char note prompt (SAFE); #11 has zero production constructor/caller
+(DEAD-CODE). Probes built the REAL coordinator/polisher/note-taker over
+httptest — not stubs of the units under test.</li>
+<li><strong>Static FACT:</strong> receiver-type analysis (#22 concrete
+<code>*llm.LLMTranslator</code> vs #5 interface <code>ensemble</code>);
+factory→clientTranslator→OpenAIClient-only chain;
+<code>contextHint</code> label origin from
+<code>universal.go</code>.</li>
+<li><strong>No UNCONFIRMED items remain</strong> — all 4
+NEEDS-RUNTIME-CONFIRM sites are settled with FACT. (The #22
+semantic-oddity note is flagged as a separate quality concern,
+explicitly NOT the arg-contract data-loss bug class.)</li>
+<li><strong>Non-committing:</strong> two probe <code>_test.go</code>
+files written, run, DELETED; <code>git status</code> verified clean of
+probe residue; packages rebuild green after removal. Nothing staged or
+committed by this agent.</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>PLANS</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">PLANS</h1>
+</header>
+<h1
+id="operator-review-remediation-plans--nezha-llm-provider-keys--live-llmsverifier-wiring">Operator-Review
+Remediation Plans — nezha LLM provider keys + live LLMsVerifier
+wiring</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-16T14:28:56Z <strong>Author:</strong> background investigation
+agent (READ-ONLY, non-committing parallel stream)
+<strong>Scope:</strong> evidence-backed plans for operator to apply when
+back. NOTHING was applied. No secret VALUE is printed anywhere in this
+document (NAMES + lengths/states only, §11.4.10).
+<strong>Discipline:</strong> superpowers:systematic-debugging
+(root-cause-first) + §11.4.6 (no-guessing — every claim below is
+captured FACT) + §11.4.99 (latest-source research, cited).</p>
+<hr />
+<h2 id="item-1--envnezha-line-48-malformed--9-provider-keys-empty">ITEM
+1 — <code>.env.nezha</code> line 48 malformed + 9 provider keys
+empty</h2>
+<h3 id="root-cause-fact--two-distinct-problems-not-one">Root cause (FACT
+— two distinct problems, not one)</h3>
+<p>The original hypothesis ("line 48 malformed → OPENAI/ANTHROPIC keys
+not injected") is <strong>partially correct but the causal chain is
+different</strong>. Systematic-debugging isolated TWO independent
+facts:</p>
+<p><strong>Fact 1A — line 48 is an unparseable statement (the warning
+source).</strong> Line 48 is a single physical line containing 31
+space-separated bare provider-key NAMES, with exactly ONE trailing
+<code>=value</code> on the last token only:</p>
+<pre><code>OPENAI_API_KEY ANTHROPIC_API_KEY DEEPSEEK_API_KEY ... LLMSVERIFIER_API_KEY SSH_WORKER_PASSWORD=&lt;value&gt;</code></pre>
+<p>python-dotenv <strong>1.2.1</strong> (the installed version,
+<code>/opt/homebrew/lib/python3.9/site-packages/dotenv/</code>) emits,
+reproduced verbatim:</p>
+<pre><code>python-dotenv could not parse statement starting at line 48
+python-dotenv could not parse statement starting at line 48</code></pre>
+<p>When line 48 is parsed <strong>in isolation</strong>, dotenv extracts
+<strong>ZERO</strong> keys (<code>count: 0</code>). So line 48 is pure
+garbage — it does NOT itself set/override any key. It is a
+redundant/leftover line: every one of its 31 names ALSO has its own
+proper <code>NAME=value</code> line elsewhere in the file (lines 17–47).
+<strong>Line 48 should simply be deleted.</strong></p>
+<p><strong>Fact 1B — 9 keys are EMPTY because their OWN-LINE values are
+blank (the actual injection failure).</strong> The reason
+OPENAI/ANTHROPIC/etc. are not usable is NOT line 48 — it is that their
+own-line values are genuinely empty (<code>KEY=</code> with nothing
+after). Measured own-line value lengths (chars after first
+<code>=</code>, value never printed):</p>
+<table>
+<thead>
+<tr>
+<th>Key (own-line #)</th>
+<th>own-line value length</th>
+<th>container-injected state</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OPENAI_API_KEY</code> (17)</td>
+<td><strong>0</strong></td>
+<td>EMPTY</td>
+</tr>
+<tr>
+<td><code>ANTHROPIC_API_KEY</code> (18)</td>
+<td><strong>0</strong></td>
+<td>EMPTY</td>
+</tr>
+<tr>
+<td><code>QWEN_API_KEY</code> (21)</td>
+<td><strong>0</strong></td>
+<td>EMPTY</td>
+</tr>
+<tr>
+<td><code>XAI_API_KEY</code> (27)</td>
+<td><strong>0</strong></td>
+<td>EMPTY</td>
+</tr>
+<tr>
+<td><code>TOGETHER_API_KEY</code> (29)</td>
+<td><strong>0</strong></td>
+<td>EMPTY</td>
+</tr>
+<tr>
+<td><code>NLP_CLOUD_API_KEY</code> (40)</td>
+<td><strong>0</strong></td>
+<td>EMPTY</td>
+</tr>
+<tr>
+<td><code>SARVAM_API_KEY</code> (42)</td>
+<td><strong>0</strong></td>
+<td>EMPTY</td>
+</tr>
+<tr>
+<td><code>LLMSVERIFIER_API_KEY</code> (46)</td>
+<td><strong>0</strong></td>
+<td>EMPTY</td>
+</tr>
+<tr>
+<td><code>SSH_WORKER_PASSWORD</code> (47)</td>
+<td><strong>0</strong></td>
+<td>EMPTY</td>
+</tr>
+</tbody>
+</table>
+<p>The other 22 provider keys have nonempty own-line values and ARE
+injected SET into the running container (DEEPSEEK len35, ZHIPU len49,
+GEMINI len39, GROQ len56, CEREBRAS len52, KIMI len72, OPENROUTER len73,
+NVIDIA len70, etc.).</p>
+<h3
+id="sink-side-evidence-11413--podman-exec-helixtranslate-monitor-env-names--state-only">Sink-side
+evidence (§11.4.13 —
+<code>podman exec helixtranslate-monitor env</code>, NAMES + state
+only)</h3>
+<p>The 9 keys reporting EMPTY in the running container are EXACTLY the 9
+keys with empty own-lines:
+<code>ANTHROPIC_API_KEY=EMPTY, LLMSVERIFIER_API_KEY=EMPTY, NLP_CLOUD_API_KEY=EMPTY, OPENAI_API_KEY=EMPTY, QWEN_API_KEY=EMPTY, SARVAM_API_KEY=EMPTY, SSH_WORKER_PASSWORD=EMPTY, TOGETHER_API_KEY=EMPTY, XAI_API_KEY=EMPTY</code>.
+All 22 others = SET(len=N). Local file analysis and container reality
+agree exactly.</p>
+<h3 id="remediation-plan-operator-to-apply--not-applied">Remediation
+plan (operator to apply — NOT applied)</h3>
+<ol type="1">
+<li><p><strong>Delete line 48 entirely.</strong> It is unparseable
+garbage and a duplicate of lines 17–47. Removing it eliminates the
+<code>could not parse statement starting at line 48</code> warning with
+zero functional loss (every name it lists already has its own line).</p>
+<ul>
+<li>After deletion, re-verify:
+<code>python3 -c "from dotenv import dotenv_values; dotenv_values('.env.nezha')"</code>
+must emit <strong>no</strong> parse warning.</li>
+</ul></li>
+<li><p><strong>Populate the 9 empty own-lines</strong> so each is a
+proper standalone <code>NAME=value</code>. The canonical, dotenv-correct
+form is one key per line:</p>
+<pre><code>OPENAI_API_KEY=&lt;real-openai-key&gt;
+ANTHROPIC_API_KEY=&lt;real-anthropic-key&gt;
+QWEN_API_KEY=&lt;real-qwen-key&gt;
+XAI_API_KEY=&lt;real-xai-key&gt;
+TOGETHER_API_KEY=&lt;real-together-key&gt;
+NLP_CLOUD_API_KEY=&lt;real-nlpcloud-key&gt;
+SARVAM_API_KEY=&lt;real-sarvam-key&gt;
+LLMSVERIFIER_API_KEY=&lt;real-llmsverifier-key&gt;      # required for ITEM 2
+SSH_WORKER_PASSWORD=&lt;real-ssh-worker-password&gt;</code></pre>
+<ul>
+<li>Values with spaces/special chars MUST be wrapped in double quotes
+(<code>KEY="value with spaces"</code>) — none of the 9 currently have
+values to inspect, so this is a forward rule.</li>
+<li>Operator decides which of the 9 actually need real credentials (some
+may be intentionally blank). At minimum, <code>OPENAI_API_KEY</code> +
+<code>ANTHROPIC_API_KEY</code> are needed for those providers, and
+<code>LLMSVERIFIER_API_KEY</code> is needed for ITEM 2's authenticated
+path.</li>
+</ul></li>
+<li><p><strong>Re-deploy</strong> so the corrected env_file is re-read:
+the helixtranslate services use <code>env_file: ./.env.nezha</code>
+(confirmed in <code>compose.nezha.yml</code>), which is read only at
+container (re)creation — a running container will NOT pick up edits
+live.</p></li>
+<li><p><strong>Validate (sink-side, NAMES only):</strong></p>
+<pre><code>podman exec helixtranslate-monitor env | grep -E &#39;^(OPENAI|ANTHROPIC|QWEN)_API_KEY=&#39; | sed &#39;s/=.*/=&lt;set?&gt;/&#39;</code></pre>
+<p>Each populated key should now report nonempty. (Use the redacting
+<code>${#val}</code> length pattern from this investigation; never print
+the value.)</p></li>
+</ol>
+<h3 id="evidence-index-item-1">Evidence index (ITEM 1)</h3>
+<ul>
+<li>Parse error reproduced: python-dotenv 1.2.1, warning fired ×2 at
+line 48.</li>
+<li>Line 48 in isolation → 0 keys extracted (it sets nothing).</li>
+<li>9 own-line value lengths = 0; 22 own-line value lengths &gt; 0.</li>
+<li>Container <code>env</code> confirms 9 EMPTY / 22 SET, matching the
+file exactly.</li>
+</ul>
+<hr />
+<h2 id="item-2--enable-the-live-nezha-llmsverifier-upstream">ITEM 2 —
+enable the live nezha LLMsVerifier upstream</h2>
+<h3 id="topology-fact--podman-network-inspect">Topology (FACT —
+<code>podman network inspect</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Network</th>
+<th>Subnet</th>
+<th>Members</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helixtranslate_translator-network</code></td>
+<td><strong>10.89.11.0/24</strong> (gw .1)</td>
+<td>helixtranslate-{postgres,redis,grpc,server,monitor,api}</td>
+</tr>
+<tr>
+<td><code>llmsverifier_default</code></td>
+<td><strong>10.89.9.0/24</strong> (gw .1)</td>
+<td>llmsverifier_{postgres,redis,prometheus,grafana,llm-verifier}_1</td>
+</tr>
+</tbody>
+</table>
+<p><code>llmsverifier_llm-verifier_1</code>: IP
+<strong>10.89.9.76</strong>, network alias
+<strong><code>llm-verifier</code></strong>, port <strong>8080/tcp
+published to host 127.0.0.1:8080 only</strong>
+(<code>map[8080/tcp:[{127.0.0.1 8080}]]</code>).</p>
+<h3
+id="reachability-gap--corrected-by-live-probe-fact-read-only-wget-from-inside-helixtranslate-monitor">Reachability
+gap — corrected by live probe (FACT, read-only <code>wget</code> from
+inside helixtranslate-monitor)</h3>
+<p>The "different network → unreachable" hypothesis is <strong>only
+partly true</strong>. Three probes from the helixtranslate
+container:</p>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>http://localhost:8080/api/health</code> (current code
+default)</td>
+<td><strong>Connection refused</strong> — nothing listens on the
+helixtranslate container's own loopback</td>
+</tr>
+<tr>
+<td><code>http://llm-verifier:8080/api/health</code> (verifier DNS
+alias)</td>
+<td><strong>bad address</strong> — alias only resolves inside
+<code>llmsverifier_default</code>; helixtranslate is not joined</td>
+</tr>
+<tr>
+<td><code>http://10.89.9.76:8080/api/health</code> (verifier IP)</td>
+<td><strong>HTTP 200
+<code>{"status":"healthy","database":"connected",...}</code></strong>
+✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>So IP-level routing between the two podman bridges ALREADY
+works on this host</strong> (default inter-bridge routing). The real
+gaps are: <strong>(a)</strong> helixtranslate has NO verifier endpoint
+configured at all, and <strong>(b)</strong> the convenient DNS alias
+<code>llm-verifier</code> does not resolve cross-network.</p>
+<p>Confirmed: <code>LLMSVERIFIER_ENABLED</code> and
+<code>LLMSVERIFIER_API_URL</code> are <strong>both unset</strong> in the
+helixtranslate container.</p>
+<h3
+id="how-helixtranslate-reads-the-verifier-endpoint-fact--code-trace">How
+helixtranslate reads the verifier endpoint (FACT — code trace)</h3>
+<ul>
+<li><code>internal/verifier/client.go:35</code> →
+<code>baseURL: cfg.APIURL</code>; client hits
+<code>&lt;APIURL&gt;/api/health</code> and
+<code>&lt;APIURL&gt;/api/models</code>.</li>
+<li><code>internal/config/config.go:339</code> → env var
+<strong><code>LLMSVERIFIER_API_URL</code></strong> overrides
+<code>c.LLMsVerifier.APIURL</code>.</li>
+<li><code>internal/config/config.go:336</code> → env var
+<strong><code>LLMSVERIFIER_ENABLED=true</code></strong> enables it;
+validateLLMsVerifierConfig (config.go:402) requires APIURL non-empty
+when enabled.</li>
+<li>config.json key: <code>llms_verifier.api_url</code>, default
+<strong><code>http://localhost:8080</code></strong> (wrong for
+containerized deploy — that's the container's own loopback).</li>
+<li><code>pkg/bridge/bridge.go:107-137</code> → when
+<code>LLMSVERIFIER_API_URL</code> is set, the bridge switches to
+<strong>HTTP mode</strong> against the running service; if
+set-but-unreachable it errors loudly (good — no silent fallback).</li>
+</ul>
+<h3 id="-dependency-fact--verifier-currently-has-zero-verified-models">⚠
+DEPENDENCY (FACT) — verifier currently has ZERO verified models</h3>
+<p><code>http://10.89.9.76:8080/api/models</code> returns
+<strong><code>{"count":0,"models":[]}</code></strong> (both from inside
+the helixtranslate container and host-side). So even after wiring,
+<code>/api/v1/verified-models</code> will return empty until the
+verifier actually verifies models — and the verifier needs provider API
+keys to do so. <strong>ITEM 1 must be fixed first</strong>, then a
+verifier verification run must populate models, before ITEM 2's
+validation probe can return real data. This is the load-bearing ordering
+constraint.</p>
+<h3 id="remediation-plan-operator-to-apply--not-applied-1">Remediation
+plan (operator to apply — NOT applied)</h3>
+<p>Two layers: a <strong>runtime</strong> fix (immediate,
+non-persistent) and a <strong>persistent</strong> compose fix.</p>
+<p><strong>Wiring option A (RECOMMENDED) — join helixtranslate to the
+verifier network + use the DNS alias.</strong></p>
+<ol type="1">
+<li><p>Live (no restart — <code>podman network connect</code> attaches a
+network to a <em>running</em> container immediately under podman
+v4+/netavark; it does NOT survive <code>podman rm</code>/recreate):</p>
+<pre><code>podman network connect llmsverifier_default helixtranslate-server
+podman network connect llmsverifier_default helixtranslate-monitor
+podman network connect llmsverifier_default helixtranslate-api</code></pre>
+<p>After connect, <code>llm-verifier:8080</code> resolves from those
+containers.</p></li>
+<li><p>Persistent (survives recreate) — in
+<code>compose.nezha.yml</code>:</p>
+<ul>
+<li>Declare the verifier network as external and attach the relevant
+services:
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">networks</span><span class="kw">:</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">translator-network</span><span class="kw">:</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">driver</span><span class="kw">:</span><span class="at"> bridge</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">llmsverifier_default</span><span class="kw">:</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">external</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span><span class="co">        # created by the LLMsVerifier compose project</span></span></code></pre></div>
+and add <code>- llmsverifier_default</code> to the
+<code>networks:</code> list of <code>helixtranslate-server</code>,
+<code>-monitor</code>, <code>-api</code>.</li>
+<li>Set the endpoint env (use the alias once joined):
+<pre><code>LLMSVERIFIER_ENABLED=true
+LLMSVERIFIER_API_URL=http://llm-verifier:8080</code></pre>
+(in <code>.env.nezha</code>, or a compose <code>environment:</code>
+block).</li>
+</ul></li>
+</ol>
+<p><strong>Wiring option B (simplest, works NOW without any network
+change) — point at the verifier IP, since inter-bridge routing already
+works.</strong></p>
+<ul>
+<li>Set in <code>.env.nezha</code>:
+<pre><code>LLMSVERIFIER_ENABLED=true
+LLMSVERIFIER_API_URL=http://10.89.9.76:8080</code></pre></li>
+<li>Trade-off: <code>10.89.9.76</code> is the verifier's current dynamic
+IP — it can change if the verifier container is recreated (§11.4.111
+resolve-by-name-not-by-ordinal favours Option A's stable alias). Use
+Option B only as a stopgap; Option A is the durable choice.</li>
+</ul>
+<blockquote>
+<p>NOTE: <code>LLMSVERIFIER_API_URL</code> is read at container
+(re)creation via <code>env_file</code>; setting it in
+<code>.env.nezha</code> requires a re-deploy. Option A's
+<code>podman network connect</code> is the only live (no-recreate)
+part.</p>
+</blockquote>
+<ol start="3" type="1">
+<li><strong>Re-deploy</strong> helixtranslate after the
+<code>.env.nezha</code> / compose edits so the new env + network
+attachment take effect persistently.</li>
+</ol>
+<h3
+id="validation-probe-operator--proves-real-data-end-to-end">Validation
+probe (operator — proves real data end-to-end)</h3>
+<p>Order matters (ITEM 1 first → verifier populated → then this):</p>
+<ol type="1">
+<li>From inside the container, confirm the configured endpoint is
+healthy + has models:
+<pre><code>podman exec helixtranslate-server sh -c &#39;wget -qO- http://llm-verifier:8080/api/health&#39;   # Option A
+podman exec helixtranslate-server sh -c &#39;wget -qO- http://llm-verifier:8080/api/models&#39;    # expect count&gt;0 after a verify run</code></pre></li>
+<li>Hit helixtranslate's own endpoint (named in CLAUDE.md):
+<pre><code>curl -s http://&lt;helixtranslate-api-host:port&gt;/api/v1/verified-models   # expect real model list, not []</code></pre>
+PASS = <code>/api/v1/verified-models</code> returns a non-empty, real
+model array sourced from the live verifier.</li>
+</ol>
+<h3 id="evidence-index-item-2">Evidence index (ITEM 2)</h3>
+<ul>
+<li><code>podman network ls</code> + <code>inspect</code>: two distinct
+subnets (10.89.11 vs 10.89.9), member lists captured.</li>
+<li>verifier: IP 10.89.9.76, alias <code>llm-verifier</code>, port
+published 127.0.0.1:8080 only.</li>
+<li>live probes from helixtranslate-monitor: localhost→refused,
+alias→bad address, IP→HTTP 200 healthy.</li>
+<li><code>/api/models</code> → <code>{"count":0,"models":[]}</code>
+(verify-run dependency).</li>
+<li>code trace: <code>client.go:35</code> APIURL →
+<code>config.go:339</code> <code>LLMSVERIFIER_API_URL</code> env →
+config.json <code>llms_verifier.api_url</code> default
+<code>http://localhost:8080</code>; <code>bridge.go:107-137</code>
+HTTP-mode switch.</li>
+</ul>
+<h3
+id="11499-research-citations-latest-source-accessed-2026-06-16">§11.4.99
+research citations (latest-source, accessed 2026-06-16)</h3>
+<ul>
+<li>podman-network-connect man page (synopsis
+<code>podman network connect [options] network container</code>;
+<code>--alias</code> adds DNS-resolvable network-scoped aliases): <a
+href="https://docs.podman.io/en/latest/markdown/podman-network-connect.1.html">https://docs.podman.io/en/latest/markdown/podman-network-connect.1.html</a>
+and <a
+href="https://docs.podman.io/en/v5.2.5/markdown/podman-network-connect.1.html">https://docs.podman.io/en/v5.2.5/markdown/podman-network-connect.1.html</a></li>
+<li>netavark/aardvark multi-network DNS (a container connected to
+multiple networks resolves containers on each joined network; one known
+fqdn-resolution caveat across networks): <a
+href="https://github.com/containers/aardvark-dns/issues/403">https://github.com/containers/aardvark-dns/issues/403</a>
+; Red Hat podman new network stack: <a
+href="https://www.redhat.com/en/blog/podman-new-network-stack">https://www.redhat.com/en/blog/podman-new-network-stack</a>
+; podman networking guide: <a
+href="https://oneuptime.com/blog/post/2026-02-02-podman-networking-guide/view">https://oneuptime.com/blog/post/2026-02-02-podman-networking-guide/view</a></li>
+<li>HONEST GAP (§11.4.6): the official man pages do NOT explicitly state
+runtime-live vs restart-persistence for <code>network connect</code>.
+The runtime-live behavior under podman v4+/netavark is established
+practice; the non-persistence across <code>podman rm</code>/recreate is
+why Option A also requires the compose <code>external: true</code>
+change. This distinction is flagged, not glossed.</li>
+</ul>
+<hr />
+<h2 id="anti-bluff-statement">Anti-bluff statement</h2>
+<p>Both plans are evidence-backed (captured parse errors, file-structure
+facts, live container probes, code traces, cited research). No fix was
+applied; no <code>.env.nezha</code> edit; no container mutation; no
+commit. No secret value appears in this document. Validation steps are
+specified for the operator to confirm real working state (§11.4.69
+sink-side proof) after applying.</p>
+</body>
+</html>

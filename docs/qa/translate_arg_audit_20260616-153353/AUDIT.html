@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>AUDIT</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">AUDIT</h1>
+</header>
+<h1
+id="translate-call-site-argument-contract-audit-114118-discovery-pressure"><code>.Translate(</code>
+Call-Site Argument-Contract Audit (§11.4.118 discovery-pressure)</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-16T15:33:53Z <strong>Mode:</strong> READ-ONLY, NON-COMMITTING
+(per dispatch; sole committer is a separate agent).
+<strong>Method:</strong> superpowers:systematic-debugging + §11.4.6
+(FACT-only) + §11.4.118. <strong>Probe:</strong> one temporary
+<code>_test.go</code> written under <code>pkg/translator/llm/</code>,
+run, then DELETED (confirmed no residue, nothing staged/committed).</p>
+<hr />
+<h2 id="0-the-three-distinct-translate-interfaces-fact">0. The three
+distinct <code>Translate</code> interfaces (FACT)</h2>
+<p>The bug class is interface-specific. There are THREE unrelated
+<code>Translate</code> signatures; only ONE carries the bug class.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Interface</th>
+<th>Signature</th>
+<th>Semantics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I1</td>
+<td><code>LLMClient</code>
+(<code>pkg/translator/llm/llm.go:225</code>)</td>
+<td><code>Translate(ctx, text, prompt)</code></td>
+<td>RAW provider client.
+<strong>OpenAI/DeepSeek/Cloudflare/Anthropic/Qwen/Zhipu/Replicate send
+ONLY the 2nd arg <code>prompt</code> as the user message and IGNORE
+<code>text</code>.</strong> Gemini is the exception (uses BOTH via
+<code>buildPrompt(text,prompt)</code>).</td>
+</tr>
+<tr>
+<td>I2</td>
+<td><code>Translator</code>
+(<code>pkg/translator/translator.go:38</code>)</td>
+<td><code>Translate(ctx, text, context)</code></td>
+<td>HIGH-LEVEL. <code>*LLMTranslator</code> (llm.go:352)
+<strong>composes a real prompt</strong> from
+<code>text</code>+<code>context</code> and passes it as the 2nd arg to
+the raw client (llm.go:388). <code>clientTranslator</code>
+(bridge.go:554) delegates <strong>VERBATIM</strong> to the raw client —
+NO composition.</td>
+</tr>
+<tr>
+<td>I3</td>
+<td>gRPC <code>Translator</code>
+(<code>pkg/grpc/server.go:78</code>)</td>
+<td><code>Translate(ctx, *proto.TranslationRequest, *EventBus)</code></td>
+<td>Unrelated signature. N/A.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisive distinction (FACT):</strong> an I2 call reaching a
+<code>*LLMTranslator</code> is SAFE even with an empty 2nd arg (the
+prompt is composed from the text). An I2 call reaching a
+<code>clientTranslator</code> is EXACTLY equivalent to a raw I1 call —
+so empty/whitespace 2nd arg → empty user message (empty-payload bug),
+and content-in-1st + non-empty-but-wrong 2nd arg → wrong-content bug
+(the 1st arg is dropped).</p>
+<p><code>clientTranslator</code> is produced ONLY by
+<code>Bridge.ProviderDiverseTranslators</code> /
+<code>EnsembleFactory</code> (bridge.go:534) and is <strong>wired in
+production</strong> at <code>cmd/server/main.go:96</code>,
+<code>cmd/cli/main.go:362</code>, and
+<code>cmd/markdown-translator/main.go:195</code>
+(preparation/verification ensemble seams).
+<code>bridge.clientBuild</code> builds ONLY <code>NewOpenAIClient</code>
+(bridge.go:314), so every clientTranslator's underlying client is an
+OpenAI-compatible (2nd-arg-only) client.</p>
+<h2 id="1-wire-level-probe-results-fact--captured-no-api-key">1.
+Wire-level probe results (FACT — captured, no API key)</h2>
+<p>Raw <code>OpenAIClient</code>/DeepSeek (== the verbatim
+clientTranslator) against an httptest server that records the
+user-message content:</p>
+<pre><code>(A) Translate(text=&quot;REAL CHAPTER TEXT&quot;, prompt=&quot;&quot;)        -&gt; userMsg=&quot;&quot;            (EMPTY → empty-payload bug)
+(B) Translate(text=&quot;VERIFICATION PROMPT&quot;, prompt=&quot;Chapter 3&quot;) -&gt; userMsg=&quot;Chapter 3&quot;   (1st arg dropped → wrong-content bug)
+(C) Translate(text=&quot;&quot;, prompt=&quot;Translate: REAL CHAPTER TEXT&quot;) -&gt; userMsg=&quot;Translate: REAL CHAPTER TEXT&quot; (correct)
+LLMTranslator.Translate(text=&quot;REAL CHAPTER TEXT&quot;, ctx=&quot;&quot;)  -&gt; userMsg(len=762)=&quot;You are a professional literary translator...&quot; (SAFE — composed, contains the text)</code></pre>
+<p>(A) is <code>cmd/markdown-translator/main.go:244</code> &amp;
+<code>preparation/coordinator.go:290</code>-class. (B) is
+<code>verification/polisher.go:563</code> (ensemble path). (C) is the
+correct convention.</p>
+<hr />
+<h2 id="2-full-call-site-table">2. Full call-site table</h2>
+<p>Receiver-reached column states the CONCRETE type the call lands on in
+the production wiring. Verdict is w.r.t. the empty/wrong user-message
+bug class.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>file:line</th>
+<th>call (args)</th>
+<th>receiver reached</th>
+<th>verdict</th>
+<th>evidence (FACT)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>cmd/markdown-translator/main.go:244</code></td>
+<td><code>LLMProvider.Translate(ctx, text, "")</code></td>
+<td>I1 raw client (<code>bridge.BestClient</code> → OpenAIClient)</td>
+<td><strong>BROKEN (empty-payload)</strong></td>
+<td>FINDING.md wire repro; LLMProvider=<code>bridge.BestClient</code>
+(main.go:312); 2nd arg empty → probe (A). The original confirmed
+bug.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>pkg/preparation/coordinator.go:290</code></td>
+<td><code>provider.Translate(ctx, prompt, "")</code></td>
+<td><code>clientTranslator</code> (ensemble path,
+markdown-translator:195)</td>
+<td><strong>BROKEN (empty-payload)</strong> <em>in ensemble
+path</em></td>
+<td><code>provider</code> is I2 <code>translator.Translator</code>
+(coordinator.go:265); when built from <code>factory(ctx)</code>
+(coordinator.go:122-124) it is <code>clientTranslator</code> → verbatim
+→ 2nd arg <code>""</code> → probe (A). Default (built-in
+<code>NewLLMTranslator</code>, coordinator.go:152) path is SAFE
+(composes; sends the built prompt as the text-to-translate —
+semantically odd but non-empty).</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>pkg/preparation/coordinator.go:361</code></td>
+<td><code>provider.Translate(ctx, prompt, "")</code></td>
+<td>same as #2</td>
+<td><strong>BROKEN (empty-payload)</strong> <em>in ensemble
+path</em></td>
+<td>identical receiver/args to #2.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>pkg/preparation/coordinator.go:424</code></td>
+<td><code>provider.Translate(ctx, prompt, "")</code></td>
+<td>same as #2</td>
+<td><strong>BROKEN (empty-payload)</strong> <em>in ensemble
+path</em></td>
+<td>identical receiver/args to #2.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>pkg/verification/polisher.go:563</code></td>
+<td><code>translator.Translate(ctx, prompt, location)</code></td>
+<td><code>clientTranslator</code> (ensemble path) OR
+<code>*LLMTranslator</code> (default)</td>
+<td><strong>BROKEN (wrong-content)</strong> <em>in ensemble
+path</em></td>
+<td><code>bp.ensemble</code> holds factory-injected
+<code>clientTranslator</code> (polisher.go:169-179);
+<code>location</code> is always non-empty ("Chapter N…",
+polisher.go:273/359) → verbatim sends <code>location</code> as the user
+message, DROPS the verification <code>prompt</code> → probe (B). Default
+<code>bp.translators</code> is <code>*LLMTranslator</code>
+(polisher.go:195) → SAFE. <strong>NOTE: the empty-message error guard
+does NOT catch this (message is non-empty).</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>pkg/api/batch_handlers.go:146</code></td>
+<td><code>trans.Translate(ctx, req.Text, "")</code></td>
+<td><code>*LLMTranslator</code></td>
+<td><strong>SAFE</strong></td>
+<td><code>trans = h.bridgeFor()(…)</code> (batch_handlers.go:117) →
+<code>BestTranslatorFunc</code> (handler.go:95) →
+<code>BestTranslator</code> →
+<code>factory.CreateTranslatorWithFallback</code> returns
+<code>*LLMTranslator</code> (verified_factory.go:258); composes prompt →
+probe LLMTranslator row. Empty 2nd arg harmless.</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>pkg/api/handler.go:833</code></td>
+<td><code>dt.Translate(ctx, text, contextHint)</code></td>
+<td><code>distributedTranslator</code> →
+<code>dm.TranslateDistributed</code></td>
+<td><strong>SAFE (not this bug class)</strong></td>
+<td><code>distributedTranslator.Translate</code> (handler.go:827)
+forwards to the distributed manager, NOT a raw OpenAI client; no
+empty-2nd-arg send. (Distributed worker-side contract is out of scope of
+this empty-payload class.)</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>pkg/coordination/multi_llm.go:445</code></td>
+<td><code>instance.Translator.Translate(ctx, text, contextHint)</code></td>
+<td><code>*LLMTranslator</code> (default, multi_llm.go:210) OR
+<code>clientTranslator</code> (ensemble, cli/server)</td>
+<td><strong>NEEDS-RUNTIME-CONFIRM</strong> (BROKEN iff ensemble AND
+<code>contextHint</code> empty)</td>
+<td><code>instance.Translator</code> is I2; built from
+<code>NewLLMTranslator</code> (SAFE) at line 210 or
+<code>translatorFactory</code> → <code>clientTranslator</code> at line
+257. <code>contextHint</code> flows from
+<code>MultiLLMTranslatorWrapper.Translate(ctx, text, context)</code>
+(translator_wrapper.go:70). <strong>Probe needed:</strong> what context
+does the ebook pipeline pass to the wrapper? If empty → empty-payload
+(A); if a non-empty label → wrong-content (B). Could not trace a
+non-test caller passing a definite value statically.</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>pkg/coordination/multi_llm.go:529</code></td>
+<td><code>inst.Translator.Translate(ctx, text, contextHint)</code></td>
+<td>same as #8</td>
+<td><strong>NEEDS-RUNTIME-CONFIRM</strong></td>
+<td>consensus variant, identical receiver/contextHint as #8.</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>pkg/distributed/coordinator.go:308</code></td>
+<td><code>localTranslator.Translate(ctx, text, contextHint)</code></td>
+<td><code>*LLMTranslator</code> (<code>llm.NewLLMTranslator</code>,
+coordinator.go:297/302)</td>
+<td><strong>SAFE</strong></td>
+<td>local fallback explicitly constructs <code>*LLMTranslator</code> →
+composes prompt; empty/any contextHint harmless.</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>pkg/api/server.go:196</code></td>
+<td><code>s.translator.Translate(ctx, req.Text, "ru-&gt;sr")</code></td>
+<td>unconfirmed (<code>SetTranslator</code>, server.go:120)</td>
+<td><strong>NEEDS-RUNTIME-CONFIRM</strong></td>
+<td>2nd arg is non-empty ("<code>src-&gt;tgt</code>"); if
+<code>s.translator</code> is <code>clientTranslator</code> → user
+message = "ru-&gt;sr" (wrong-content (B)); if
+<code>*LLMTranslator</code> → SAFE. No production cmd caller of
+<code>SetTranslator</code> found (only test/internal) — receiver type
+unproven. <strong>Probe:</strong> identify the cmd that calls
+<code>Server.SetTranslator</code>.</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>pkg/batch/processor.go:110</code></td>
+<td><code>Translator.Translate(ctx, InputString, "")</code></td>
+<td><code>*LLMTranslator</code> (API path, batch_handlers.go:248)</td>
+<td><strong>SAFE</strong> (API path); NEEDS-CONFIRM if other injectors
+exist</td>
+<td><code>bp.options.Translator</code> injected at
+<code>batch_handlers.go:248</code> from <code>trans=h.bridgeFor()</code>
+→ <code>*LLMTranslator</code>. Only injector found is the API path. No
+other production injector located.</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>pkg/batch/processor.go:163</code></td>
+<td><code>Translator.Translate(ctx, string(data), "")</code></td>
+<td>same as #12</td>
+<td><strong>SAFE</strong> (API path)</td>
+<td>same injector as #12.</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>pkg/batch/processor.go:513</code></td>
+<td><code>Translator.Translate(ctx, text, "")</code></td>
+<td>same as #12</td>
+<td><strong>SAFE</strong> (API path)</td>
+<td>same injector as #12.</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>pkg/api/server.go:196</code></td>
+<td>(covered as #11)</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>pkg/grpc/server.go:500</code></td>
+<td><code>s.translator.Translate(session.Ctx, session.Request, session.EventBus)</code></td>
+<td>I3 gRPC core translator</td>
+<td><strong>N/A</strong> (different interface)</td>
+<td>signature is
+<code>(ctx, *proto.TranslationRequest, *EventBus)</code> — not the I1/I2
+bug class.</td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>pkg/markdown/simple_workflow.go:92</code></td>
+<td><code>LLMProvider.Translate(ctx, text, prompt)</code></td>
+<td>I1 raw client</td>
+<td><strong>SAFE</strong></td>
+<td>builds a real non-empty <code>prompt</code>
+(simple_workflow.go:82-92) and passes it as the 2nd arg → probe (C)
+convention. This is the CORRECT pattern markdown-translator main.go:244
+should mirror.</td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>pkg/translator/llm/llm.go:388</code></td>
+<td><code>lt.client.Translate(ctx, text, prompt)</code></td>
+<td>I1 raw client</td>
+<td><strong>SAFE</strong></td>
+<td>internal <code>LLMTranslator</code> call; <code>prompt</code> is the
+composed translation prompt (llm.go:364) → never empty for non-empty
+text.</td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>pkg/translator/llm/llm.go:414</code></td>
+<td><code>lt.client.Translate(ctx, chunk, chunkPrompt)</code></td>
+<td>I1 raw client</td>
+<td><strong>SAFE</strong></td>
+<td>chunk-retry; <code>chunkPrompt</code> composed (llm.go:412) →
+non-empty.</td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>pkg/translator/llm/llm.go:566</code></td>
+<td><code>lt.Translate(ctx, text, contextStr)</code></td>
+<td>self (<code>*LLMTranslator</code>)</td>
+<td><strong>SAFE</strong></td>
+<td>recurses into composing <code>Translate</code>.</td>
+</tr>
+<tr>
+<td>21</td>
+<td><code>pkg/translator/llm/qwen.go:363</code></td>
+<td><code>c.Translate(ctx, text, prompt)</code></td>
+<td>self (QwenClient)</td>
+<td><strong>N/A (pass-through)</strong></td>
+<td>token-refresh retry re-passing the SAME <code>(text, prompt)</code>
+it received → inherits caller correctness; introduces no new
+contract.</td>
+</tr>
+<tr>
+<td>22</td>
+<td><code>pkg/verification/notes.go:166</code></td>
+<td><code>nt.translator.Translate(ctx, prompt, location)</code></td>
+<td>same class as #5 (polisher)</td>
+<td><strong>BROKEN (wrong-content)</strong> <em>in ensemble path</em> —
+NEEDS-RUNTIME-CONFIRM</td>
+<td>symmetric to polisher.go:563: content-in-1st (<code>prompt</code>),
+<code>location</code> in 2nd. If <code>nt.translator</code> is a
+<code>clientTranslator</code> → drops the prompt, sends
+<code>location</code>. Receiver-construction of <code>notes</code>
+translator not fully traced — same pattern, confirm injector.</td>
+</tr>
+<tr>
+<td>23</td>
+<td><code>pkg/bridge/bridge.go:369</code></td>
+<td><code>client.Translate(ctx, "", full)</code></td>
+<td>I1 raw client</td>
+<td><strong>SAFE</strong></td>
+<td>content correctly in 2nd arg (<code>full</code>), 1st empty — the
+canonical correct convention (probe (C)).</td>
+</tr>
+<tr>
+<td>24</td>
+<td><code>pkg/bridge/bridge.go:555</code></td>
+<td><code>c.client.Translate(ctx, text, contextStr)</code></td>
+<td>I1 raw client (inside <code>clientTranslator</code>)</td>
+<td><strong>conduit (not itself a bug)</strong></td>
+<td>this IS the verbatim delegate; its (broken/safe) outcome is decided
+by its CALLERS (#1-5,#8-9,#11,#22). Listed for completeness.</td>
+</tr>
+<tr>
+<td>25</td>
+<td><code>pkg/bridge/bridge.go:571</code></td>
+<td><code>c.Translate(ctx, text, contextStr)</code></td>
+<td>self (clientTranslator)</td>
+<td>conduit</td>
+<td>TranslateWithProgress → Translate; same as #24.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-counts">3. Counts</h2>
+<ul>
+<li><strong>Confirmed BROKEN (FACT, wire-proven bug class, reachable in
+a real production wiring):</strong> <strong>5 sites</strong>
+<ul>
+<li>empty-payload (empty user message): #1
+<code>markdown-translator/main.go:244</code>, #2/#3/#4
+<code>preparation/coordinator.go:290/361/424</code> (ensemble
+path).</li>
+<li>wrong-content (1st-arg dropped, prompt replaced by location): #5
+<code>verification/polisher.go:563</code> (ensemble path).</li>
+</ul></li>
+<li><strong>NEEDS-RUNTIME-CONFIRM:</strong> <strong>4 sites</strong> —
+#8/#9 <code>coordination/multi_llm.go:445/529</code> (broken iff
+ensemble + empty/garbage contextHint), #11
+<code>api/server.go:196</code> (receiver type unproven), #22
+<code>verification/notes.go:166</code> (same wrong-content pattern as
+polisher, injector untraced).</li>
+<li><strong>SAFE:</strong> #6, #7, #10, #12-14, #17-21, #23 (and
+conduits #24/#25).</li>
+<li><strong>N/A:</strong> #16 (gRPC I3), #21 (pass-through retry).</li>
+</ul>
+<p>Probes that would settle the NEEDS-RUNTIME items (§11.4.6):</p>
+<ul>
+<li>#8/#9: instrument the
+ebook→<code>MultiLLMTranslatorWrapper.Translate</code> call and capture
+the <code>context</code> arg actually passed during a real chapter
+translation.</li>
+<li>#11: <code>grep</code> the running binary's wiring for
+<code>Server.SetTranslator(...)</code>; if no production caller, the
+path is dead (investigate per §11.4.124 before claiming).</li>
+<li>#22: trace the constructor that populates <code>notes</code>
+translator (built-in <code>NewLLMTranslator</code> ⇒ SAFE; ensemble
+factory ⇒ wrong-content).</li>
+</ul>
+<hr />
+<h2 id="4-defense-in-depth-fix-coverage-fact">4. Defense-in-depth fix
+coverage (FACT)</h2>
+<p>Proposed fix in <code>OpenAIClient.Translate</code> (covers DeepSeek
+via embedding, and the entire
+<code>clientTranslator</code>/<code>BestClient</code> path since
+<code>bridge.clientBuild</code> builds ONLY
+<code>NewOpenAIClient</code>):</p>
+<ol type="1">
+<li>when <code>prompt == ""</code> → use <code>text</code> as the user
+message;</li>
+<li>refuse an empty/whitespace user message → return an explicit error
+(§11.4.69).</li>
+</ol>
+<p><strong>Trigger set (the ONLY sites where clause 1 changes behavior)
+= the 8 calls with a literal <code>""</code> 2nd arg</strong>
+(grep-proven): markdown-translator:244; preparation 290/361/424; batch
+processor 110/163/513; batch_handlers:146.</p>
+<ul>
+<li><strong>#1 markdown-translator:244</strong> — fallback sends the
+real chapter text → <strong>FIXED</strong> (probe: empty→text).</li>
+<li><strong>#2/#3/#4 preparation ensemble</strong> — <code>prompt</code>
+(built analysis prompt) in 1st arg, fallback sends it →
+<strong>FIXED</strong> (the analysis prompt becomes the user message —
+the intended behavior).</li>
+<li><strong>batch #12-14 &amp; #6 batch_handlers</strong> — reach
+<code>*LLMTranslator</code>, which NEVER calls the raw client with an
+empty 2nd arg (it composes), so clause 1 never fires there →
+<strong>UNCHANGED / still SAFE</strong>. No SAFE site relies on the
+current ignore-1st-arg behavior to be broken — verified: every
+content-in-2nd-arg SAFE site (#17, #18, #19, #23) passes a NON-empty 2nd
+arg, so clause 1 (<code>prompt==""</code>) is inert for them, and clause
+2's empty-message guard never fires (their messages are non-empty).</li>
+</ul>
+<p><strong>Coverage verdict:</strong></p>
+<ul>
+<li>The fix <strong>FULLY covers all 4 EMPTY-PAYLOAD broken sites
+(#1-#4)</strong> without breaking any SAFE site.
+<strong>FACT.</strong></li>
+<li>The fix <strong>does NOT cover the WRONG-CONTENT sites (#5 polisher,
+#22 notes)</strong>: their 2nd arg (<code>location</code>) is NON-EMPTY
+("Chapter N"), so clause 1's <code>prompt==""</code> fallback never
+fires and clause 2's empty-guard never triggers — the raw client still
+sends <code>location</code> and silently drops the verification prompt.
+Probe (B) proves this. These need a SEPARATE fix (either route the
+polisher/notes calls through a prompt-composing translator, or have the
+verification path pass content in the 2nd arg per the bridge.go:369
+convention).</li>
+</ul>
+<p><strong>Recommendation:</strong> ship the
+<code>OpenAIClient.Translate</code> defense-in-depth fix (it converts
+every latent empty-payload occurrence into either a correct translation
+or a loud error — covers #1-#4 and any future empty-2nd-arg caller), AND
+open a separate item for the wrong-content class at the verification
+seam (#5/#22) — the empty-guard cannot catch a non-empty-but-wrong user
+message.</p>
+<hr />
+<h2 id="5-1146-honesty-boundary">5. §11.4.6 honesty boundary</h2>
+<ul>
+<li>PROVEN as FACT (wire repro): the I1 raw / verbatim-clientTranslator
+contract; the empty-payload bug at #1 (also FINDING.md) and #2-#4; the
+wrong-content bug at #5; the <code>*LLMTranslator</code>
+composes-and-is-SAFE behavior; and that the proposed fix covers #1-#4
+without breaking SAFE sites but does NOT cover #5/#22.</li>
+<li>UNCONFIRMED (NEEDS-RUNTIME-CONFIRM, listed in §3): #8/#9 contextHint
+value at runtime; #11 server.translator concrete type / whether the path
+is live; #22 notes translator injector. Each marked, not guessed.</li>
+<li>The ensemble-path verdicts (#2-#5) are FACT for the ensemble wiring
+(markdown-translator/cli/server use <code>b.EnsembleFactory</code>); the
+built-in default path for those same sites is independently SAFE.</li>
+<li>No files staged or committed. The probe <code>_test.go</code> was
+deleted; <code>git status</code> clean of any probe residue.</li>
+</ul>
+</body>
+</html>

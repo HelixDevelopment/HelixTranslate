@@ -1,0 +1,3 @@
+Contenu
+
+Voici un exemple de texte anglais pour tester la fonctionnalité de traduction. Il contient plusieurs phrases et devrait être adapté pour les tests de traduction. Le texte inclut diverses ponctuations et structures de phrases pour vérifier la traduction exhaustive.

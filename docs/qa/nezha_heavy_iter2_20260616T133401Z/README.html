@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">README</h1>
+</header>
+<h1 id="nezha-heavy-testing-iteration-2--qa-evidence">Nezha
+heavy-testing iteration 2 — QA evidence</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-16T13:34:01Z</p>
+<p>Live stack: server-TLS <a
+href="https://nezha.local:18443">https://nezha.local:18443</a>,
+api-server <a
+href="http://nezha.local:18080">http://nezha.local:18080</a>, grpc
+nezha.local:50061, monitor :18090. Image rebuilt to
+<code>f3904ccd71c2</code>.</p>
+<h2 id="finding-1--verifier-rest-routes-404-on-live-server">Finding #1 —
+verifier REST routes 404 on live server</h2>
+<p><strong>Root cause (FACT):</strong>
+<code>cmd/server/main.go:140</code> registered the verifier routes only
+inside <code>if cfg.LLMsVerifier.Enabled</code>. The default-config
+nezha deploy has <code>Enabled=false</code>, so
+<code>/api/v1/verified-models</code>, <code>/verification-status</code>,
+<code>/translate-with-verification</code> (HTQ-API-003/004/006) were
+never added to the router → 404 (falsely "API does not exist").</p>
+<p><strong>RED baseline on live stack (pre-fix):</strong></p>
+<pre><code>verified-models: 404
+verification-status: 404
+translate-with-verification: 404</code></pre>
+<p><strong>Fix (safe, reversible — §11.4.101):</strong> ALWAYS register
+the routes; a <code>requireEnabled</code> gin guard returns an honest
+<code>503 {"reason":"llmsverifier_disabled"}</code> when off (never
+404), real upstream data when on.
+<code>pkg/api/verifier_handlers.go</code> (<code>enabled</code> flag +
+<code>SetEnabled</code> + <code>requireEnabled</code>) +
+<code>cmd/server/main.go</code> (unconditional registration).</p>
+<p><strong>Operator-policy note (iteration-3):</strong> a LIVE
+LLMsVerifier runs on nezha (<code>llmsverifier_llm-verifier_1</code>,
+127.0.0.1:8080, <code>/api/models</code> 200) but on a DIFFERENT podman
+network (10.89.9.x) than helixtranslate <code>translator-network</code>.
+Fully enabling the real upstream needs an operator network-wiring +
+APIURL decision (blast radius). Safe choice taken: ship honest-503
+always-on routes now.</p>
+<p><strong>Guard:</strong>
+<code>pkg/api/verifier_disabled_routes_test.go</code> — disabled routes
+503-not-404 (mutation-proven: removing the guard → test FAILs).</p>
+<h2
+id="finding-2--api-server-apiv1health-503-idle-false-negative">Finding
+#2 — api-server /api/v1/health 503 IDLE false-negative</h2>
+<p><strong>Root cause (FACT):</strong> gRPC <code>grpc.NewClient</code>
+conns are LAZY (start IDLE, dial on first RPC). <code>healthCheck</code>
+read <code>conn.GetState()</code> once → on a fresh boot saw IDLE → 503
+"gRPC backend not ready" even though the backend was fully reachable
+(<code>/providers</code> 200 against the same backend, which had
+triggered an RPC).</p>
+<p><strong>Fix:</strong> <code>probeBackendState</code> actively kicks
+the lazy dial (<code>conn.Connect()</code>) and waits (bounded
+<code>healthProbeTimeout=2s</code>, <code>WaitForStateChange</code>) for
+READY before deciding. IDLE-against-reachable → READY (healthy);
+IDLE-against-unreachable → TRANSIENT_FAILURE (still unhealthy — never
+blindly trusts IDLE). <code>cmd/api-server/main.go</code>.</p>
+<p><strong>Guard:</strong>
+<code>cmd/api-server/health_test.go::TestHealthCheck_LazyIdleButReachableBackend_ReportsHealthy</code>
+(real in-process gRPC backend; mutation-proven: reverting to one-shot
+GetState → 503 IDLE → test FAILs). Existing not-Ready→503 guards
+retained.</p>
+<h2
+id="finding-3--compose-var-interpolation-reads-env-not-envnezha">Finding
+#3 — compose ${VAR} interpolation reads .env not .env.nezha</h2>
+<p><strong>Root cause (FACT):</strong> podman-compose resolves
+<code>${VAR:-default}</code> from its DEFAULT dotenv (<code>.env</code>)
++ shell env, NOT from <code>env_file:</code> (which only injects INTO
+the container). nezha <code>.env</code> holds only
+<code>HELIX_RELEASE_PREFIX</code>; <code>*_HOST_PORT</code> +
+<code>JWT_SECRET</code> live in <code>.env.nezha</code> → fell back to
+defaults (50051/8080/8443/8090, <code>change-me-in-env-nezha</code>)
+unless the operator manually <code>set -a; . .env.nezha</code>.</p>
+<p><strong>Fix (durable):</strong> <code>scripts/nezha-deploy.sh</code>
+always invokes <code>podman-compose --env-file .env.nezha</code>. Proven
+in a CLEAN shell (no export):
+<code>bash scripts/nezha-deploy.sh config</code> resolves real
+<code>18080/18443/50061/18090</code> + real JWT (no
+<code>change-me</code> fallback).</p>
+<p><strong>Also fixed:</strong> <code>reboot</code> action does explicit
+<code>build</code> → <code>stop</code> → <code>rm -f</code> →
+<code>up</code> because podman-compose 1.5.0 <code>up --build</code>
+(and even <code>--force-recreate</code>) does NOT replace a running
+container when the image tag is unchanged (§11.4.108 gap — the rebuilt
+image existed but live containers kept the old binary).</p>
+<p><strong>Guard:</strong>
+<code>scripts/nezha_deploy_envfile_guard_test.sh</code> (RED_MODE
+polarity: a no-<code>--env-file</code> invocation is flagged).</p>
+<p><strong>Operator note:</strong> <code>.env.nezha</code> line 48 is
+malformed (a space-separated list of provider-key NAMES with one
+<code>=value</code> at the end); python-dotenv cannot parse it, so those
+provider keys are not injected. Operator-owned secrets file — flagged,
+not edited (§11.4.10).</p>
+<h2 id="finding-4--grpc-real-translate-round-trip">Finding #4 — gRPC
+real translate round-trip</h2>
+<p>Deferred to iteration-3: gRPC translate is an async FILE-job model
+(<code>StartTranslation(input_file,output_file,...)</code> → poll
+<code>GetTranslationStatus</code> → read generated files). A real
+round-trip needs an input file staged into the grpc-server container + a
+working provider key (blocked by the #3 line-48 key defect). Scoped for
+iter-3 with a small Go client.</p>
+</body>
+</html>

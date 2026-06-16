@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>FINDING</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">FINDING</h1>
+</header>
+<h1
+id="fb2-bug-fb2-hardcoded-lang--live-re-validation-on-nezha-114108-runtime-signature">FB2
+BUG-FB2-HARDCODED-LANG — live re-validation on nezha (§11.4.108 runtime
+signature)</h1>
+<p><strong>Run:</strong> 2026-06-16T16:38:12Z · <strong>Image:</strong>
+<code>2bb4de5df2c7</code> (helixtranslate-api, confirmed via
+<code>podman inspect</code>) <strong>Endpoint:</strong>
+<code>POST https://nezha.local:18443/api/v1/translate/fb2</code>
+(cmd/server, pkg/api Handler.translateFB2) <strong>Fix under
+test:</strong> commit <code>c2aa7c8</code> — handler parses+validates
+<code>source_lang</code>/<code>target_lang</code>, threads resolved
+codes (legacy ru→sr kept ONLY when both omitted), unknown → 400.
+<strong>Fixture:</strong> <code>test/fixtures/ebooks/sample.fb2</code>
+(English <code>&lt;lang&gt;en&lt;/lang&gt;</code> source).</p>
+<h2 id="result-pass-3-probes-real-captured-evidence--114123">Result:
+PASS (3 probes, real captured evidence — §11.4.123)</h2>
+<table>
+<thead>
+<tr>
+<th>Probe</th>
+<th>Request</th>
+<th>Expected</th>
+<th>Observed</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A (positive)</td>
+<td><code>target_lang=es</code></td>
+<td>Spanish output, NOT Serbian</td>
+<td>EPUB w/ "Capítulo de Prueba" · "Este es un documento de prueba FB2
+para la validación de la traducción." · "Sección 1.1"</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr>
+<td>C (cross-check)</td>
+<td><code>target_lang=de</code></td>
+<td>German, distinct from A</td>
+<td>EPUB w/ "Testkapitel" · "Dies ist ein Test-FB2-Dokument zur Prüfung
+der Übersetzung." · "Abschnitt 1.1"</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr>
+<td>B (negative)</td>
+<td><code>target_lang=klingon</code></td>
+<td>HTTP 400, no translation</td>
+<td><code>{"error":"unknown target_lang: klingon"}</code> HTTP 400</td>
+<td><strong>PASS</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="why-this-proves-the-fix-1146-no-guessing">Why this proves the
+fix (§11.4.6 no-guessing)</h2>
+<ul>
+<li>Source is <strong>English</strong>. Pre-fix, the handler hardcoded
+ru→sr and ignored <code>target_lang</code>, so EVERY FB2 request
+produced <strong>Serbian</strong>. Probe A produced
+<strong>Spanish</strong>, Probe C produced <strong>German</strong>
+(distinct outputs) — only possible if <code>target_lang</code> is
+honored.</li>
+<li>Probe B's 400 with the exact
+<code>unknown target_lang: klingon</code> message proves the
+validate-BEFORE-translate path is live on the deployed image (pre-fix
+would silently fall back).</li>
+<li>Output is a real <code>application/epub+zip</code> artifact (EPUB
+document, ffile-verified), with translated chapter prose — not a
+session_id/status (§11.4 anti-bluff).</li>
+</ul>
+<h2 id="artifacts">Artifacts</h2>
+<ul>
+<li><code>probe_a_es_output.epub</code> +
+<code>epub_extracted/OEBPS/chapter1.xhtml</code> (Spanish)</li>
+<li><code>probe_c_de_output.epub</code> +
+<code>epub_de_extracted/OEBPS/chapter1.xhtml</code> (German)</li>
+<li><code>probe_b_klingon_400.txt</code> (400 response)</li>
+<li><code>probe_a_es_meta.txt</code> / <code>probe_c_de_meta.txt</code>
+(HTTP status + content-type + size)</li>
+<li><code>run_meta.txt</code> (run context)</li>
+</ul>
+</body>
+</html>

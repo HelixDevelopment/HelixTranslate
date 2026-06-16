@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>EVIDENCE</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">EVIDENCE</h1>
+</header>
+<h1 id="114153-real-use-video-confirmation--wave-8">§11.4.153 Real-Use
+Video Confirmation — Wave 8</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-16T18:22:00Z</p>
+<p>Run-id: <code>video_wave8_20260616_182203</code>. Binary:
+<code>build/unified-translator</code>
+(<code>go build -o build/unified-translator ./cmd/unified-translator</code>,
+exit 0, 2026-06-16). Path: real input → real LLM (default in-process API
+path, NOT <code>-use-verifier</code>) → real output. Recordings:
+window-scoped (asciinema <code>--window-size 100x30</code>, §11.4.154),
+<code>helix_translate-</code> prefixed (§11.4.155), wave8-suffixed (no
+collision with prior 48 helix_translate-* recordings; none deleted).
+§11.4.107: source frame ≠ output frame verified (first frame = source
+only + in-progress; last frame = real translated output). Each video
+ffprobe-verified advancing frames.</p>
+<h2 id="features-confirmed-5">Features confirmed (5)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Feature</th>
+<th>Provider</th>
+<th>Model</th>
+<th>Source→Target</th>
+<th>Real output (read from last video frame)</th>
+<th>Video (mp4)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>GROQ provider path (distinct from deepseek)</td>
+<td>groq</td>
+<td>llama-3.3-70b-versatile</td>
+<td>EN→ES</td>
+<td>"La vieja farola se erguía sola sobre el acantilado rocoso. Cada
+noche su haz barría el mar oscuro, guiando a las naves perdidas de
+vuelta a puerto."</td>
+<td>helix_translate-groq-en-es-wave8-20260616_182021.mp4 (115 frames,
+3.83s)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>EN→KO (Korean / Hangul) new pair</td>
+<td>deepseek</td>
+<td>deepseek-chat</td>
+<td>EN→KO</td>
+<td>"새벽에 용이 잠든 숨겨진 성을 찾기 위해 용감한 기사가 고대 숲을
+가로질렀다."</td>
+<td>helix_translate-en-ko-korean-wave8-20260616_182059.mp4 (106 frames,
+3.53s)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>DE→EN reverse direction (non-EN source)</td>
+<td>deepseek</td>
+<td>deepseek-chat</td>
+<td>DE→EN</td>
+<td>"The scientist worked all night in his lab. In the morning, he
+finally discovered the solution to the problem."</td>
+<td>helix_translate-de-en-reverse-wave8-20260616_182101.mp4 (114 frames,
+3.80s)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>FR→ES (non-English↔︎non-English)</td>
+<td>deepseek</td>
+<td>deepseek-chat</td>
+<td>FR→ES</td>
+<td>"El anciano marinero contaba historias de tormentas y tesoros
+ocultos en el fondo del mar."</td>
+<td>helix_translate-fr-es-pair-wave8-20260616_182111.mp4 (107 frames,
+3.57s)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>EN→SR Latin script (distinct from RU→SR Cyrillic)</td>
+<td>deepseek</td>
+<td>deepseek-chat</td>
+<td>EN→SR (-script latin)</td>
+<td>"U srcu planina živela je mudra stara žena koja je znala tajne svake
+lekovite biljke." (all-Latin, no Cyrillic)</td>
+<td>helix_translate-en-sr-latin-wave8-20260616_182113.mp4 (109 frames,
+3.63s)</td>
+</tr>
+</tbody>
+</table>
+<p>Recordings live at <code>/Volumes/T7/Downloads/Recordings/</code>
+(raw, gitignored). Frame stills committed here as durable in-repo
+evidence (§11.4.83): <code>groq_en_es_first.png</code> (source-only, LLM
+in-flight), <code>groq_en_es_last.png</code>,
+<code>en_ko_last.png</code>, <code>de_en_last.png</code>,
+<code>fr_es_last.png</code>, <code>en_sr_latin_last.png</code>.</p>
+<h2 id="1146-finding-not-a-bug">§11.4.6 finding (not a bug)</h2>
+<p><code>unified-translator -h</code> provider help text lists only
+<code>openai, anthropic, zhipu, deepseek, qwen, gemini</code> — GROQ is
+omitted from the help string, BUT groq IS fully wired
+(<code>pkg/translator/llm/groq.go</code>, factory
+<code>llm.go:276-277</code>, env-var map <code>main.go:444</code>,
+whitelist <code>llm.go:69</code>) and works end-to-end (feature #1
+confirmed). The stale <code>-h</code> string is a minor doc-accuracy
+nit, NOT a functional defect. Valid Groq models (whitelist):
+llama-3.1-70b-versatile, llama-3.1-8b-instant, mixtral-8x7b-32768,
+llama-3.3-70b-versatile, gemma2-9b-it.</p>
+<h2 id="no-bluff-attestation">NO-bluff attestation</h2>
+<p>All 5 verdicts rest on a real video whose last frame shows a
+"Translation completed successfully" line with the real provider AND
+real target-language output text distinct from the source. No frozen
+frame, no LLM error, no empty output, no mocked response.</p>
+</body>
+</html>
