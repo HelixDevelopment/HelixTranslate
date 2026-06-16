@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 8 <strong>Last modified:</strong>
-2026-06-16T00:00:00Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 9 <strong>Last modified:</strong>
+2026-06-16T12:00:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -195,19 +195,25 @@ genuinely demonstrates the feature working (each cited <code>.mp4</code>
 was ffprobe-verified for non-zero duration+frames and content-verified
 against its claimed behaviour — e.g. real DeepSeek output in the target
 language, real gRPC translated text, live WebSocket count change).
-<strong>25 feature rows are video-confirmed</strong> (Wave 1 of
-2026-06-16 added 2 — bridge-ensemble best-model selection + bridge
-provider-diverse catalogue) across unified-translator (DeepSeek
-translate, EPUB→TXT / HTML→EPUB / FB2→EPUB / FB2→FB2 conversions,
-Serbian-Cyrillic, <code>-script</code> Cyrillic↔︎Latin, format-detection,
-help/version, <code>-verify</code>, <strong><code>-multipass</code>
-multi-pass polishing engine</strong>), the REST API server (POST
-/api/v1/translate real DeepSeek + target_lang FIXED, TLS startup FIXED,
-/health · /api/v1/version · /api/v1/providers), the gRPC server (real
-EN→ES), markdown-translator (EPUB↔︎MD round-trip), preparation-translator
-(FIXED real analysis), cmd/cli (real DeepSeek), monitor-server (live WS
-hub), the DeepSeek library client, and the <strong>LLMsVerifier→agent
-bridge CLI</strong> (<code>cmd/model-bridge</code> —
+<strong>30 feature rows are video-confirmed</strong> (Wave 2 of
+2026-06-16 added 5 net-new — DOCX output, PDF output, HTML→Markdown
+conversion, <code>ProviderDiverseTranslators</code>,
+<code>EnsembleFactory</code> — each backed by a real-use Wave-2
+<code>.mp4</code> independently validator-verified ffprobe+frame; Wave 2
+also re-confirmed the already-confirmed gRPC TranslationService row with
+an additional clip, no double-count; Wave 1 added 2 — bridge-ensemble
+best-model selection + bridge provider-diverse catalogue) across
+unified-translator (DeepSeek translate, EPUB→TXT / HTML→EPUB / FB2→EPUB
+/ FB2→FB2 conversions, Serbian-Cyrillic, <code>-script</code>
+Cyrillic↔︎Latin, format-detection, help/version, <code>-verify</code>,
+<strong><code>-multipass</code> multi-pass polishing engine</strong>),
+the REST API server (POST /api/v1/translate real DeepSeek + target_lang
+FIXED, TLS startup FIXED, /health · /api/v1/version ·
+/api/v1/providers), the gRPC server (real EN→ES), markdown-translator
+(EPUB↔︎MD round-trip), preparation-translator (FIXED real analysis),
+cmd/cli (real DeepSeek), monitor-server (live WS hub), the DeepSeek
+library client, and the <strong>LLMsVerifier→agent bridge CLI</strong>
+(<code>cmd/model-bridge</code> —
 <code>helixtranslate-bridge-bestmodel-translate-20260615.mp4</code>:
 in-process verify→SQLite store→select strongest
 <code>novita/Sao10K/L3-8B-Stheno-v3.2</code> score 0.919 → live
@@ -220,27 +226,32 @@ JSON-RPC MCP session over stdio —
 initialize→tools/list→<code>bridge_best_model</code>→<code>bridge_invoke</code>
 — where tool <code>bridge_invoke</code> returned a live verified-model
 translation “Le pont relie deux rives.” (isError:None); ffprobe
-11.88s/10 frames, ≥6 frames content-verified).
-<strong>Real-artifact-confirmed (not video):</strong> <strong>DOCX
-output</strong> is now Implemented — a real DeepSeek run produced
-<code>garden_es.docx</code> = <code>Microsoft Word 2007+</code>
-(well-formed WordprocessingML, real translation; pure-Go OOXML writer
-<code>pkg/ebook/docx_writer.go</code>, commit 87cd2be) — confirmed by
-the produced artifact’s file type, no <code>.mp4</code> exists yet
-(video PENDING). <strong>Real-artifact / unit-confirmed (not
-video):</strong> <strong>PDF output</strong> is now Implemented (commit
-fb265e7) — <code>pkg/ebook/pdf_writer.go</code> renders the
-Book→HTML5→<code>weasyprint</code>→valid Cyrillic-faithful PDF, wired
-into unified-translator (<code>.pdf</code> output; main.go:1160);
-<code>pkg/ebook</code> PDF tests green this session (no
-<code>.mp4</code> yet, video PENDING). <strong>Honest gaps recorded, NOT
-confirmed:</strong> <code>cmd/translator</code> +
-<code>translate-ssh</code> + <code>ebook-translator</code> are
-<strong>Obsolete (→ Fixed.md), Rev 7</strong>
-(<code>feature-removed</code> — the local-runtime + SSH-local paths were
-removed in bridge phase-2 R-2..R-4; the default path now sources the
-LLMsVerifier <code>pkg/bridge</code>; the earlier STUB/OPERATOR-BLOCKED
-wording is stale and corrected);
+11.88s/10 frames, ≥6 frames content-verified). <strong>Now
+video-confirmed (Wave 2):</strong> <strong>DOCX output</strong>
+(Implemented; pure-Go OOXML writer
+<code>pkg/ebook/docx_writer.go</code>, commit 87cd2be) — Wave-2 real-use
+video <code>helix_translate-docx-output-20260616-112943.mp4</code>
+(unified-translator DOCX output, openai/gpt-4, the produced
+<code>.docx</code> carries real Spanish text; validator
+ffprobe+frame-verified). <strong>PDF output</strong> (Implemented,
+commit fb265e7; <code>pkg/ebook/pdf_writer.go</code>
+Book→HTML5→<code>weasyprint</code>→Cyrillic-faithful PDF, wired into
+unified-translator <code>.pdf</code> output, main.go:1160) — Wave-2
+real-use video
+<code>helix_translate-pdf-output-20260616-113057.mp4</code> (valid PDF
+with real Spanish; validator ffprobe+frame-verified). <strong>Wave-1
+bridge-translator-path blocker RESOLVED (caveat 8):</strong> the
+<code>ValidModels</code>-whitelist runtime failure that blocked the
+DOCX/PDF/gRPC/per-provider videos in Wave 1 is fixed — the
+verified-bridge translator path now produces real per-provider
+translations (Wave-2 provider clips: novita/mistral/groq/siliconflow).
+<strong>Honest gaps recorded, NOT confirmed:</strong>
+<code>cmd/translator</code> + <code>translate-ssh</code> +
+<code>ebook-translator</code> are <strong>Obsolete (→ Fixed.md), Rev
+7</strong> (<code>feature-removed</code> — the local-runtime + SSH-local
+paths were removed in bridge phase-2 R-2..R-4; the default path now
+sources the LLMsVerifier <code>pkg/bridge</code>; the earlier
+STUB/OPERATOR-BLOCKED wording is stale and corrected);
 <code>GET /api/v1/verified-models</code> returns 404 because
 LLMsVerifier is disabled in config. Everything else is
 <code>PENDING</code> (a recording is owed) or <code>N/A</code> (no
@@ -287,24 +298,23 @@ tally)</td>
 </tr>
 <tr>
 <td>Enumerated feature rows in this doc</td>
-<td><strong>493</strong> (Rev 8 — RE-DERIVED MECHANICALLY from the live
-tables, §11.4.6: count of 9-column feature data rows across the 60
-per-category tables; <code>awk</code> counting rows with exactly 9
-columns, excluding the 60 header rows + separators. The earlier “478”
-was NOT re-derivable from the live table — it was a hand-tracked running
-tally that had drifted (the actual live count was 486 before Rev 8 added
-the 7 missing <code>pkg/bridge</code> ensemble-seam rows:
-<code>BestTranslator</code>, <code>BestTranslatorFunc</code>,
+<td><strong>494</strong> (Rev 9 = 493 Rev 8 + 1 new unified-translator
+<code>HTML→Markdown conversion</code> row added this wave for the Wave-2
+html-to-md video; §11.4.6 — re-derive with <code>awk</code> over
+<code>^\|</code> 9-column rows. The earlier “478” was NOT re-derivable
+from the live table — it was a hand-tracked running tally that had
+drifted; Rev 8 added the 7 missing <code>pkg/bridge</code> ensemble-seam
+rows: <code>BestTranslator</code>, <code>BestTranslatorFunc</code>,
 <code>EnsembleFactory</code>, <code>ProviderDiverseTranslators</code>,
 <code>ProviderDiverseClients</code>, <code>ProviderDiverseModels</code>,
-<code>BestClient</code>). 493 is the FACT; re-derive with
-<code>awk</code> over <code>^\|</code> 9-column rows)</td>
+<code>BestClient</code>)</td>
 </tr>
 <tr>
 <td>Implemented</td>
-<td>442 (Rev 8: 435 Rev 7 + 7 new pkg/bridge ensemble-seam rows; was 471
-Rev 6, −36 flipped to Obsolete Rev 7 — local-runtime + SSH-local
-features removed in bridge phase-2 R-2..R-4)</td>
+<td>443 (Rev 9: 442 Rev 8 + 1 new unified-translator HTML→Markdown
+conversion row; Rev 8 was 435 Rev 7 + 7 new pkg/bridge ensemble-seam
+rows; was 471 Rev 6, −36 flipped to Obsolete Rev 7 — local-runtime +
+SSH-local features removed in bridge phase-2 R-2..R-4)</td>
 </tr>
 <tr>
 <td><strong>Obsolete (→ Fixed.md)</strong></td>
@@ -345,25 +355,33 @@ host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td><strong>25</strong> (real, content-verified recordings — see
-Anti-bluff note; Wave 1 added 2: bridge-ensemble best-model selection +
-bridge provider-diverse catalogue, each ffprobe+content-verified
-§11.4.107) — ≈ 5.1% of 493 enumerated rows (≈ 6.0% of the 417 headline).
-Plus <strong>2 real-artifact/unit-confirmed</strong> (DOCX output —
-produced <code>.docx</code> = Microsoft Word 2007+; PDF output —
-<code>pkg/ebook</code> tests green + weasyprint present; both video
-PENDING). Rev-6 (this run) flips the <strong>LLMsVerifier→agent bridge
-MCP-stdio server</strong> row video PENDING→CONFIRMED
-(<code>helixtranslate-bridge-mcp-stdio-20260615.mp4</code> — a real
-JSON-RPC MCP-stdio session:
-initialize→tools/list→<code>bridge_best_model</code>→<code>bridge_invoke</code>,
-tool <code>bridge_invoke</code> returned live verified-model translation
-“Le pont relie deux rives.” isError:None, ffprobe 11.88s/10 frames, ≥6
-frames content-verified). Rev-5 had flipped the bridge CLI row
-(<code>helixtranslate-bridge-bestmodel-translate-20260615.mp4</code>).
-Other Rev-4 additions (pkg/bridge, internal/verifier gate,
-pkg/api/dashboard.go) are PASS at unit/integration/live-run level with
-video PENDING / SKIP / N/A — none claim a video that doesn’t exist</td>
+<td><strong>30</strong> (real, content-verified recordings — see
+Anti-bluff note; Rev-9 / Wave 2 of 2026-06-16 added <strong>5
+net-new</strong> video confirmations, each backed by a real-use Wave-2
+<code>.mp4</code> independently validator-verified ffprobe+frame
+§11.4.107: <strong>DOCX output</strong>
+(<code>helix_translate-docx-output-20260616-112943.mp4</code>),
+<strong>PDF output</strong>
+(<code>helix_translate-pdf-output-20260616-113057.mp4</code>),
+<strong>HTML→Markdown conversion</strong>
+(<code>helix_translate-html-to-md-20260616-114228.mp4</code>),
+<strong><code>ProviderDiverseTranslators</code></strong> +
+<strong><code>EnsembleFactory</code></strong> (the 4 per-provider clips
+novita/mistral/groq/siliconflow —
+<code>helix_translate-provider-{novita,mistral,groq,siliconflow}-translate-20260616-114*.mp4</code>).
+Wave 2 also re-confirmed the already-confirmed <strong>gRPC
+TranslationService</strong> row with an additional clip
+<code>helix_translate-grpc-translate-20260616-113415.mp4</code> (NOT
+double-counted — that row was already video-confirmed). <strong>DOCX
+output and PDF output are no longer “real-artifact-only” — they are now
+video-confirmed.</strong> §11.4.108 note: the Wave-1
+bridge-translator-path runtime blocker (caveat 8) is RESOLVED, which is
+what made the DOCX/PDF/gRPC/per-provider Wave-2 recordings genuinely
+demonstrate working features (recording them in Wave 1 would have been a
+§11.4.107 bluff; they were honest SKIPs then). Wave 1 added 2:
+bridge-ensemble best-model selection + bridge provider-diverse
+catalogue. ≈ 6.1% of 494 enumerated rows (≈ 7.2% of the 417
+headline)</td>
 </tr>
 <tr>
 <td>Video-confirmation PENDING</td>
@@ -1135,8 +1153,12 @@ Verifies MD/EPUB exist, non-degenerate, target-language (Cyrillic) check
 Start/Status/List/Cancel/Stream/GetProviders/SubscribeEvents</td>
 <td>Not-inventoried</td>
 <td><strong>PASS — real EN→ES translation over gRPC captured</strong>
-(StartTranslation → real Spanish DeepSeek output)</td>
-<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-grpc-deepseek-20260615-171206-v2.mp4</td>
+(StartTranslation → real Spanish DeepSeek output). Wave 2 re-confirms
+via the verified-bridge path (EN→ES “Hola, mundo. Este es un pequeño
+test.”)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-grpc-deepseek-20260615-171206-v2.mp4
+(additional Wave-2:
+/Volumes/T7/Downloads/Recordings/helix_translate-grpc-translate-20260616-113415.mp4)</td>
 </tr>
 <tr>
 <td>grpc-server</td>
@@ -1903,6 +1925,20 @@ output)</td>
 <td>Not-inventoried</td>
 <td><strong>PASS — captured</strong></td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-html-to-epub-deepseek_20260615-171805.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td>HTML→Markdown conversion</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>HTML parse → translate (openai/gpt-4 via verified bridge) → Markdown
+(<code>.md</code>) writer; real Spanish md output</td>
+<td>Not-inventoried</td>
+<td><strong>PASS — captured</strong> (Wave 2; real-use video, validator
+ffprobe+frame-verified — unified-translator HTML→Markdown, openai/gpt-4,
+real Spanish markdown produced)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-html-to-md-20260616-114228.mp4</td>
 </tr>
 <tr>
 <td>unified-translator</td>
@@ -3051,11 +3087,13 @@ DeepSeek EN→ES → <code>garden_es.docx</code> =
 real translation. Guards: pkg/ebook/docx_writer_test.go + .docx subtest
 in cmd/unified-translator/output_format_test.go (mutation-proven)</td>
 <td>Covered</td>
-<td><strong>PASS — real artifact verified</strong> (produced .docx =
-<code>Microsoft Word 2007+</code>, 4 OOXML parts, real translated
-content + correct XML escaping; commit 87cd2be)</td>
-<td>real-artifact verified (file=Microsoft Word 2007+); video
-PENDING</td>
+<td><strong>PASS — real artifact verified + Wave-2 video</strong>
+(produced .docx = <code>Microsoft Word 2007+</code>, 4 OOXML parts, real
+translated content + correct XML escaping; commit 87cd2be; Wave-2
+real-use video: unified-translator DOCX output, openai/gpt-4, the
+<code>.docx</code> carries real Spanish text — validator
+ffprobe+frame-verified)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-docx-output-20260616-112943.mp4</td>
 </tr>
 <tr>
 <td>ebook</td>
@@ -3080,9 +3118,10 @@ typed <code>ErrWeasyPrintUnavailable</code> when weasyprint absent
 session
 (<code>TestPDFWriter_ProducesValidPDFCarryingTranslatedText</code>
 asserts a valid PDF carrying the translated text; weasyprint present at
-/opt/homebrew/bin/weasyprint)</td>
-<td>PENDING (translate→weasyprint→.pdf run is recordable; no
-<code>.mp4</code> yet — recording owed)</td>
+/opt/homebrew/bin/weasyprint); Wave-2 real-use video: unified-translator
+PDF output, openai/gpt-4, valid PDF with real Spanish (validator
+ffprobe+frame-verified)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-pdf-output-20260616-113057.mp4</td>
 </tr>
 </tbody>
 </table>
@@ -4443,14 +4482,21 @@ strongest-first); structural shape of the per-component
 <code>NewPreparationCoordinatorWithFactory</code> /
 <code>NewBookPolisherWithFactory</code> WITHOUT those packages importing
 the bridge (§11.4.28); no API key captured/logged (§11.4.10)</td>
-<td>Unit-covered (<code>pkg/bridge/ensemble_test.go</code>, -race green)
-— masks the runtime bug</td>
-<td><strong>PARTIAL — UNIT PASS, RUNTIME BLOCKED (§11.4.108):</strong>
-backed by
-<code>ProviderDiverseTranslators</code>→<code>NewLLMTranslatorWithConfig</code>;
-same <code>ValidModels</code>-whitelist runtime failure (see Wave-1
-discovered blocker)</td>
-<td>PENDING — NOT recordable until the blocker is fixed</td>
+<td>Unit-covered (<code>pkg/bridge/ensemble_test.go</code>, -race
+green)</td>
+<td><strong>PASS — Wave-1 blocker FIXED, runtime confirmed
+(§11.4.108):</strong> backed by <code>ProviderDiverseTranslators</code>;
+the <code>ValidModels</code>-whitelist blocker (caveat 8) is resolved —
+verified non-whitelisted models now translate. Wave-2 provider clips
+show real per-provider translations through this ensemble seam</td>
+<td>Confirmed (via ProviderDiverseTranslators provider
+clips):/Volumes/T7/Downloads/Recordings/helix_translate-provider-novita-translate-20260616-114032.mp4
+·
+/Volumes/T7/Downloads/Recordings/helix_translate-provider-mistral-translate-20260616-114039.mp4
+·
+/Volumes/T7/Downloads/Recordings/helix_translate-provider-groq-translate-20260616-114045.mp4
+·
+/Volumes/T7/Downloads/Recordings/helix_translate-provider-siliconflow-translate-20260616-114051.mp4</td>
 </tr>
 <tr>
 <td>bridge</td>
@@ -4461,14 +4507,24 @@ discovered blocker)</td>
 <td><code>bridge.go:527</code> — returns provider-diverse verified
 <code>translator.Translator</code> set (one per distinct provider,
 strongest-first); the ensemble translator source</td>
-<td>Unit-covered (<code>pkg/bridge/bridge_test.go</code>,
-<code>pkg/bridge/ensemble_test.go</code>, -race green) — masks the
-runtime bug</td>
-<td><strong>PARTIAL — UNIT PASS, RUNTIME BLOCKED (§11.4.108):</strong>
-builds each translator via <code>NewLLMTranslatorWithConfig</code>,
-which rejects verified non-whitelisted models (see Wave-1 discovered
-blocker)</td>
-<td>PENDING — NOT recordable until the blocker is fixed</td>
+<td>Covered (<code>pkg/bridge/bridge_test.go</code>,
+<code>pkg/bridge/ensemble_test.go</code>, -race green)</td>
+<td><strong>PASS — Wave-1 blocker FIXED, runtime confirmed
+(§11.4.108):</strong> the <code>ValidModels</code>-whitelist blocker
+(caveat 8) is resolved — <code>ProviderDiverseTranslators</code> now
+yields working verified translators per provider. Wave-2 provider clips
+show real EN→ES translations through each provider’s verified translator
+(novita “Hola, mundo. Esta es una pequeña prueba.” · mistral “Hola,
+mundo. Este es un pequeño test.” · groq “Hola, mundo. Este es un pequeño
+prueba.” · siliconflow “Hola, mundo. Esta es una pequeña prueba.”) —
+validator ffprobe+frame-verified</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-provider-novita-translate-20260616-114032.mp4
+·
+/Volumes/T7/Downloads/Recordings/helix_translate-provider-mistral-translate-20260616-114039.mp4
+·
+/Volumes/T7/Downloads/Recordings/helix_translate-provider-groq-translate-20260616-114045.mp4
+·
+/Volumes/T7/Downloads/Recordings/helix_translate-provider-siliconflow-translate-20260616-114051.mp4</td>
 </tr>
 <tr>
 <td>bridge</td>
@@ -7384,26 +7440,33 @@ distributed llama.cpp RPC</td>
 <h2 id="honest-gaps-caveats-11.4.6">Honest gaps &amp; caveats
 (§11.4.6)</h2>
 <ol type="1">
-<li><strong>Video coverage is 25 feature rows</strong> (+ 2
-real-artifact/unit-confirmed). 25 features are confirmed by real,
-ffprobe- and content-verified recordings (Wave 1 of 2026-06-16 added 2 —
-bridge-ensemble best-model selection + bridge provider-diverse
-catalogue; see the Anti-bluff note + the Coverage-summary
-<code>Video-confirmed</code> row for the authoritative count and full
-list — reconciled with both, §11.4.60); DOCX output and PDF output are
-real-artifact/unit-confirmed (DOCX = produced <code>.docx</code> =
-Microsoft Word 2007+; PDF = <code>pkg/ebook</code> tests green +
-weasyprint present) with their videos still PENDING and now BLOCKED (see
-caveat 8 — the bridge-translator-path runtime blocker). Every other
-runtime/user-visible feature is <code>PENDING</code> a recording or
-<code>N/A</code>. This is stated, not hidden. 1a. <strong>DOCX output is
-Implemented (Rev 3, commit 87cd2be)</strong> — pure-Go OOXML writer; a
-real DeepSeek run produced <code>garden_es.docx</code> =
-<code>Microsoft Word 2007+</code>. <strong>PDF output is now Implemented
-(Rev 4, commit fb265e7)</strong> — <code>pkg/ebook/pdf_writer.go</code>
+<li><strong>Video coverage is 30 feature rows.</strong> 30 features are
+confirmed by real, ffprobe- and content-verified recordings (Wave 2 of
+2026-06-16 added 5 net-new — DOCX output, PDF output, HTML→Markdown
+conversion, <code>ProviderDiverseTranslators</code>,
+<code>EnsembleFactory</code> — plus an additional re-confirming clip on
+the already-confirmed gRPC TranslationService row, no double-count; Wave
+1 added 2 — bridge-ensemble best-model selection + bridge
+provider-diverse catalogue; see the Anti-bluff note + the
+Coverage-summary <code>Video-confirmed</code> row for the authoritative
+count and full list — reconciled with both, §11.4.60). DOCX output and
+PDF output, formerly real-artifact-only, are now video-confirmed by
+Wave-2 recordings. Every other runtime/user-visible feature is
+<code>PENDING</code> a recording or <code>N/A</code>. This is stated,
+not hidden. 1a. <strong>DOCX output is Implemented (Rev 3, commit
+87cd2be)</strong> — pure-Go OOXML writer; a real run produced a
+<code>Microsoft Word 2007+</code> <code>.docx</code>; <strong>now
+video-confirmed (Wave 2)</strong> by
+<code>helix_translate-docx-output-20260616-112943.mp4</code>
+(openai/gpt-4, real Spanish in the <code>.docx</code>). <strong>PDF
+output is Implemented (Rev 4, commit fb265e7)</strong> —
+<code>pkg/ebook/pdf_writer.go</code>
 (Book→HTML5→weasyprint→Cyrillic-faithful PDF), wired into
 unified-translator (<code>.pdf</code> output, main.go:1160);
-<code>pkg/ebook</code> PDF tests green. Output formats are now
+<code>pkg/ebook</code> PDF tests green; <strong>now video-confirmed
+(Wave 2)</strong> by
+<code>helix_translate-pdf-output-20260616-113057.mp4</code>
+(openai/gpt-4, valid PDF with real Spanish). Output formats are
 EPUB/FB2/TXT/HTML/MD/DOCX/PDF. 1b. <strong><code>-multipass</code> ≠
 <code>-verify</code>.</strong> The unified-translator
 <code>-verify</code> flag runs the CLI’s own per-step output check; the
@@ -7454,10 +7517,19 @@ from the inventory for thin OpenAI-compatible providers, several
 <code>llms_verifier</code> packages, <code>challenges/userflow</code>
 evaluators, and <code>doc_processor/archdoc</code> — noted inline rather
 than asserted.</li>
-<li><strong>🔴 Wave-1 DISCOVERED BLOCKER (§11.4.4 / §11.4.107 /
-§11.4.108 / §11.4.138) — the default bridge TRANSLATOR path is
-RUNTIME-BROKEN.</strong> While recording Wave 1 (DOCX/PDF/gRPC), a real
-run of <code>unified-translator</code> (and, by source, the gRPC backend
+<li><strong>✅ Wave-1 DISCOVERED BLOCKER — RESOLVED (Wave 2, §11.4.4 /
+§11.4.107 / §11.4.108 / §11.4.138).</strong> The default bridge
+TRANSLATOR-path runtime failure described below is FIXED: the Wave-2
+recordings (DOCX output, PDF output, gRPC translate, and the 4
+per-provider unified clips novita/mistral/groq/siliconflow) are real-use
+videos validator-verified (ffprobe+frame) showing the verified-bridge
+translator path producing real target-language output — the exact path
+that failed in Wave 1 now works, which is why those rows flip to
+CONFIRMED this wave. The historical forensic record of the blocker is
+preserved below for §11.4.6 / §11.4.138 traceability.
+<strong>[HISTORICAL — Wave-1 finding, now fixed]</strong> While
+recording Wave 1 (DOCX/PDF/gRPC), a real run of
+<code>unified-translator</code> (and, by source, the gRPC backend
 <code>pkg/grpc/core_translator.go</code> which uses
 <code>BestTranslatorFunc</code>) FAILS at translate time with:
 <code>bridge: no verified translator available: model 'Sao10K/L3-8B-Stheno-v3.2' is not valid for provider 'novita'. Valid models: [meta-llama/llama-3.1-70b-instruct mistralai/mixtral-8x7b-instruct]</code>.
