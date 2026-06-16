@@ -178,32 +178,84 @@
 <h1
 id="continuation--helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 88 <strong>Last modified:</strong>
-2026-06-16T19:00:00Z</p>
+<p><strong>Revision:</strong> 89 <strong>Last modified:</strong>
+2026-06-16T20:40:00Z</p>
 <h2
-id="arrow_forward-resume-here-2026-06-16-1900--label-released-helix_translate-231--llmsverifier-populate-then-wire--honest-blocked-operator-decision--nezha-non-degraded-on-working-direct-path">▶️
-RESUME HERE (2026-06-16 ~19:00) — 🏷️ RELEASED
-<code>helix_translate-2.3.1</code> · LLMsVerifier populate-then-wire =
-HONEST-BLOCKED (operator decision) · nezha NON-degraded on working
-direct path</h2>
+id="arrow_forward-resume-here-2026-06-16-2040--green_circle-overnight-stability-batch-committedpushed-99bb7a8--2-real-bugs-fixed--11440-green--llmsverifier-wiring-honest-blocked-operator--nezha-non-degraded">▶️
+RESUME HERE (2026-06-16 ~20:40) — 🟢 OVERNIGHT STABILITY BATCH
+committed+pushed (<code>99bb7a8</code>) · 2 real bugs fixed + §11.4.40
+GREEN · LLMsVerifier wiring HONEST-BLOCKED (operator) · nezha
+NON-degraded</h2>
 <p><strong>SHORT:</strong> Read this file +
 <code>.remember/remember.md</code> FIRST, then
 <code>git fetch --all --prune</code>. HEAD
-<strong><code>236bac8</code></strong> (VERSION 2.3.1), all 4 remotes
-synced. Annotated tag <code>helix_translate-2.3.1</code> published on
-main + 10 owned submodules (FF-only, §11.4.113). Release evidence
-<code>docs/qa/release_helix_translate-2.3.1_20260616T182714Z/</code>.
-<strong>LLMsVerifier populate-then-wire (operator-approved post-tag
-work) = HONEST-BLOCKED</strong> — the deployed
-<code>llm-verifier:nezha</code> image's <code>server</code> mode is
-read-only-by-design (no create/seed/v1/auth routes), so the empty-DB
-cannot be populated autonomously; per §11.4.6/§11.4.101 it was
-<strong>NOT enabled</strong> (enabling an empty verifier degrades
-translation), helixtranslate left on the working direct path
-(DeepSeek/Groq/mistral/novita), nezha NON-degraded. Evidence
-<code>docs/qa/llmsverifier_wire_20260616T185131Z/live_probes.txt</code>.
-<strong>NEXT = operator decision on the verifier image (Option A
-rebuild-to-seed, recommended).</strong></p>
+<strong><code>99bb7a8</code></strong> (all 4 remotes synced:
+origin/github/upstream/githubhelixdevelopment). 🏷️
+<code>helix_translate-2.3.1</code> still the release tag (main+10
+submodules). <strong>This overnight loop fixed 2 REAL bugs + a scanner
+false-positive, all reviewed GO + proven, committed <code>99bb7a8</code>
+(FF-pushed):</strong> (1) <code>pkg/version/app.go</code> AppVersion
+2.3.0→2.3.1 (was RED — VERSION bumped at 236bac8 without the const); (2)
+<code>pkg/storage/sqlite.go</code> SQLITE_BUSY concurrency (unbounded
+pool + no busy_timeout → 110/640 concurrent writes failed; fix
+<code>_busy_timeout=5000</code> + default
+<code>SetMaxOpenConns(1)</code>, RED→GREEN 5x §11.4.85); (3)
+<code>credential_scan.sh</code> HTML-escaped-redaction false-positive +
+ignore-list its own regression test + new
+<code>scripts/testing/test_credential_scan.sh</code> §11.4.135 guard.
+<strong>§11.4.40 full retest GREEN at the batch</strong> (sweep 9/9 +
+build + <code>go test ./...</code> all pass; evidence
+<code>/Volumes/T7/helix-build/qa/overnight_retest4_*.log</code>).
+<strong>LLMsVerifier wiring = HONEST-BLOCKED (operator)</strong> — live
+verifier image (built 15:46Z) PREDATES the seed commit 6e6b0309
+(19:26Z); no reproducible on-nezha rebuild context;
+<code>config.yaml</code> is operator-owned + secret-bearing +
+Permission-denied (can't populate <code>llms:</code> without handling
+secrets blind §11.4.10). NOT enabled, nezha NON-degraded. Operator
+options in
+<code>docs/qa/llmsverifier_wire_attempt_20260616T203122Z/STATE.md</code>.
+<strong>NEXT = operator decision on verifier (rebuild-with-seed +
+populate config + verify-pass) + the version-display-hygiene follow-ups
+below.</strong></p>
+<h3 id="warning-environment-this-session-fact">⚠️ ENVIRONMENT (this
+session, FACT)</h3>
+<ul>
+<li><strong>Root/Data volume was ~100% full</strong> (operator data + a
+concurrent helix_code session) — broke the build harness with ENOSPC
+repeatedly. Worked around by routing ALL Go temp/cache to T7:
+<code>export TMPDIR=/Volumes/T7/tmp GOTMPDIR=/Volumes/T7/tmp GOCACHE=/Volumes/T7/helix-build/go-cache XDG_CACHE_HOME=/Volumes/T7/.cache</code>.
+Reclaimed Homebrew+SwiftPM caches (regenerable). Did NOT delete operator
+data / the stopped 41G podman machine (§11.4.122). If ENOSPC recurs:
+<code>find /private/tmp/claude-501 -path '*/tasks/*.output' -mmin +4 -delete</code>
+(NEVER without <code>-mmin +4</code> — deletes the in-flight
+output).</li>
+</ul>
+<h3
+id="large_orange_diamond-version-display-hygiene-follow-ups-audit-found-not-fixed--operator-judgment-tracked">🔶
+VERSION-DISPLAY-HYGIENE FOLLOW-UPS (audit-found, NOT fixed —
+operator-judgment, tracked)</h3>
+<p>Same defect class as the version-const bug, but display-only + touch
+the build-version question CLAUDE.md flags as deliberate ("Makefile
+references 3.0.0 — treat VERSION as authoritative"):</p>
+<ul>
+<li><code>Makefile:5,20</code> <code>VERSION=3.0.0</code> +
+<code>-ldflags -X main.appVersion=$(VERSION)</code> → shipped
+grpc-server/unified-translator binaries report <strong>3.0.0</strong>
+not 2.3.1 (§11.4.108 SOURCE→ARTIFACT gap; no test catches the ldflags
+path).</li>
+<li><code>cmd/api-server/main.go:582</code> <code>/health</code>
+hardcodes <code>"version":"3.0.0"</code>;
+<code>pkg/api/handler.go:214,223</code> serve
+<code>"version":"1.0.0"</code>.</li>
+<li>The version gate (app_test.go + bash CM-VERSION-SINGLE-SOURCE) only
+matches the <code>=</code> form in cmd/ — blind to ldflags,
+<code>:</code> map form, pkg/. Broaden + add a post-build
+<code>&lt;bin&gt; -version</code>==VERSION regression guard. (Design
+notes were to land in
+<code>/Volumes/T7/helix-build/qa/design_version_hygiene.md</code> but
+that subagent was rate-limited; re-run or do main-loop.) Evidence:
+<code>/Volumes/T7/helix-build/qa/audit_hygiene.md</code>.</li>
+</ul>
 <h3
 id="green_circle-release--llmsverifier-arc-this-session-post-rev87">🟢
 RELEASE + LLMsVERIFIER ARC (this session, post-rev87)</h3>
