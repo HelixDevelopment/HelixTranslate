@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 16 <strong>Last modified:</strong>
-2026-06-16T19:05:00Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 17 <strong>Last modified:</strong>
+2026-06-16T19:30:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -8138,18 +8138,21 @@ distributed llama.cpp RPC</td>
 <h2 id="honest-gaps-caveats-11.4.6">Honest gaps &amp; caveats
 (§11.4.6)</h2>
 <ol type="1">
-<li><strong>Video coverage is 30 feature rows.</strong> 30 features are
-confirmed by real, ffprobe- and content-verified recordings (Wave 2 of
-2026-06-16 added 5 net-new — DOCX output, PDF output, HTML→Markdown
-conversion, <code>ProviderDiverseTranslators</code>,
-<code>EnsembleFactory</code> — plus an additional re-confirming clip on
-the already-confirmed gRPC TranslationService row, no double-count; Wave
-1 added 2 — bridge-ensemble best-model selection + bridge
-provider-diverse catalogue; see the Anti-bluff note + the
-Coverage-summary <code>Video-confirmed</code> row for the authoritative
-count and full list — reconciled with both, §11.4.60). DOCX output and
-PDF output, formerly real-artifact-only, are now video-confirmed by
-Wave-2 recordings. Every other runtime/user-visible feature is
+<li><strong>Video coverage is 66 feature rows.</strong> 66 features are
+confirmed by real, ffprobe- and content-verified recordings.
+<strong>§11.4.6 cell reconciliation:</strong> this caveat previously
+read <strong>30</strong> — a sync lag behind the authoritative running
+total carried in the Anti-bluff note (top of file) and the
+Coverage-summary <code>Video-confirmed</code> row (both
+<strong>66</strong>); it is corrected here to the true running total
+<strong>66</strong> (54 prior-authoritative + 4 Wave 7 + 5 Wave 8 + 3
+Wave 9 = 66). For the full per-wave / per-feature mapping (Waves 1–9 of
+2026-06-16, the genuine row-flips vs headline-only re-confirmations, the
+§11.4.138 multipass demotion, and the honest non-confirmable gaps) see
+the authoritative Anti-bluff note + the Coverage-summary
+<code>Video-confirmed</code> row — this caveat is reconciled with both
+per §11.4.60. DOCX output and PDF output, formerly real-artifact-only,
+are now video-confirmed. Every other runtime/user-visible feature is
 <code>PENDING</code> a recording or <code>N/A</code>. This is stated,
 not hidden. 1a. <strong>DOCX output is Implemented (Rev 3, commit
 87cd2be)</strong> — pure-Go OOXML writer; a real run produced a

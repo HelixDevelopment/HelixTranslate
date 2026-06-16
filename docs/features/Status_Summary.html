@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status-summary">HelixTranslate — Feature
 Status Summary</h1>
-<p><strong>Revision:</strong> 16 <strong>Last modified:</strong>
-2026-06-16T19:05:00Z <strong>Authority:</strong> Two-audience companion
+<p><strong>Revision:</strong> 17 <strong>Last modified:</strong>
+2026-06-16T19:30:00Z <strong>Authority:</strong> Two-audience companion
 to <code>docs/features/Status.md</code> (§11.4.56). Derived from the
 same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync),
 §11.4.6 (no-guessing).</p>
@@ -309,11 +309,14 @@ default-translation-path blocker is resolved.)</li>
 </ul>
 <h2 id="what-is-pending-or-limited">What is pending or limited</h2>
 <ul>
-<li><strong>Video proof is still the main gap:</strong> <strong>30 of
-494</strong> features have a recorded, watch-it-yourself demonstration
-(≈ 6.1%). Everything else is built and present in the code, but a
+<li><strong>Video proof is still the main gap:</strong> <strong>66 of
+497</strong> features have a recorded, watch-it-yourself demonstration
+(≈ 13.3%). Everything else is built and present in the code, but a
 recording is still owed. Nothing is claimed proven just because the code
-exists.</li>
+exists. (This bullet previously read <strong>30</strong> — a sync lag;
+it is reconciled here to the authoritative running total
+<strong>66</strong>, matching the headline + the Page-2 Video-confirmed
+cell, per §11.4.6 / §11.4.60.)</li>
 <li><strong>PDF <em>output</em> is now built</strong> (this round). The
 product can <em>read</em> DOCX and PDF, and can now <em>write</em> DOCX
 <strong>and PDF</strong>. Output is now EPUB, FB2, TXT, HTML, Markdown,
@@ -706,135 +709,19 @@ local provider was removed in bridge phase-2 R-4).</li>
 </ul>
 <h2 id="top-gaps-engineering">Top gaps (engineering)</h2>
 <ol type="1">
-<li><strong>Video-confirmation 43/496.</strong> 43 rows carry real,
-ffprobe- and content-verified recordings. <strong>Wave 3f (2026-06-16)
-added 2 net-new</strong> prioritising feature-type diversity (real-use,
-ffprobe non-zero dur+frames / 790×560 even-dims yuv420p, ≥6 frames
-extracted at fps=4 + content-verified per §11.4.107): <strong>EPUB→EPUB
-conversion</strong>
-(<code>helix_translate-epub-output-wave3e-20260616.mp4</code>, EN .epub
-→ real deepseek run → OUTPUT EPUB carries real Spanish “La Antigua
-Farola la vieja farola se alzaba sola en la rocosa costa…”, start-frame
-English-only ≠ output-frame Spanish) and <strong>TXT→TXT
-translation</strong>
-(<code>helix_translate-txt-translation-wave3f-20260616.mp4</code>, EN
-.txt “The river flowed quietly…” → real deepseek run → ES .txt “El río
-fluía tranquilamente a través del valle verde. Los pájaros cantaban bajo
-la luz de la mañana.”). <strong>Wave 3f also re-confirmed</strong> (not
-double-counted) FB2→FB2
-(<code>helix_translate-fb2-convert-wave3e-20260616.mp4</code>, namespace
-preserved + real Spanish), format-detection
-(<code>helix_translate-format-detect-wave3e-20260616.mp4</code>,
-extensionless <code>.dat</code> detected-by-content),
-<code>-script</code> Cyrillic↔︎Latin
-(<code>helix_translate-script-conversion-wave3e-20260616.mp4</code>, RUN
-A latin ≠ RUN B cyrillic), markdown EPUB↔︎MD round-trip
-(<code>helix_translate-markdown-roundtrip-wave3f-20260616.mp4</code>, “#
-El Faro Viejo / El viejo faro se alzaba solitario en la costa rocosa.”).
-<strong>Wave 3d (2026-06-16) added 4 net-new</strong> prioritising
-feature-type diversity (real-use, ffprobe non-zero dur+frames / 790×560
-even-dims yuv420p, ≥6 frames extracted at fps=2 + content-verified per
-§11.4.107): the <strong><code>cmd/verify-models</code> CLI</strong>
-(<code>helix_translate-verify-models-wave3d-20260616.mp4</code>, real
-LLMsVerifier discovery/scoring/selection — 14 env-keyed providers with
-real per-provider reachable/auth/HTTP-status/candidate/verified counts
-incl. <code>nvidia status=200</code>,
-<code>openrouter status=200</code>, <code>upstage auth=false 403</code>,
-summary <code>total verified: 4</code>, then
-<code>model-bridge list</code> ranking
-<code>#1 novita/Sao10K/L3-8B-Stheno-v3.2 score=0.91875 … #4 siliconflow score=0.88125</code>),
-the <strong><code>cmd/workable-items</code> CLI</strong>
-(<code>helix_translate-workable-items-wave3d-20260616.mp4</code>, real
-§11.4.93 SQLite SSoT — <code>validate</code> →
-<code>OK: DB … matches markdown (81 items)</code>, <code>list</code> →
-real ATM-NNN rows + descriptions, early validate-OK frame ≠ late list
-frame proving live/advancing), and <strong>2 more providers</strong> —
-<strong>nvidia</strong>
-(<code>helix_translate-provider-nvidia-translate-wave3d-20260616.mp4</code>,
-via
-<code>-provider openai -base-url https://integrate.api.nvidia.com/v1 -model meta/llama-3.1-8b-instruct</code>,
-“Al amanecer, el sol se alzó… Un anciano pescador
-<strong>caminaba</strong> a lo largo de la orilla.”) +
-<strong>openrouter</strong>
-(<code>helix_translate-provider-openrouter-translate-wave3d-20260616.mp4</code>,
-via
-<code>-base-url https://openrouter.ai/api/v1 -model meta-llama/llama-3.1-8b-instruct</code>,
-“…Un anciano pescador <strong>paseaba</strong> a lo largo de la
-orilla.”), the two provider outputs distinct (caminaba/paseaba) —
-genuine per-provider models, each start-frame English-only ≠
-output-frame Spanish liveness; <code>upstage</code> tested but honest
-SKIP (auth=false HTTP 403), <code>together</code> SKIP (no key), never
-faked. <strong>Wave 3c (2026-06-16) added 2 net-new</strong> (real-use,
-ffprobe non-zero dur+frames / 790×560 even-dims yuv420p, ≥6 frames
-extracted at fps=2 + content-verified per §11.4.107): the
-<strong>Hyperbolic</strong> library client
-(<code>helix_translate-provider-hyperbolic-translate-wave3c-20260616.mp4</code>,
-via
-<code>-provider openai -base-url https://api.hyperbolic.xyz/v1 -model meta-llama/Meta-Llama-3.1-70B-Instruct</code>,
-“Al amanecer, el sol salía sobre el tranquilo pueblo. Un anciano
-pescador caminaba por la orilla…”) and the <strong>Fireworks</strong>
-<code>llm_provider</code> submodule client
-(<code>helix_translate-provider-fireworks-translate-wave3c-20260616.mp4</code>,
-via
-<code>-base-url https://api.fireworks.ai/inference/v1 -model accounts/fireworks/models/llama-v3p1-70b-instruct</code>,
-“Al amanecer, el sol ascendió sobre el tranquilo pueblo. Un anciano
-pescador paseaba por la orilla…”), the two outputs distinct
-(salía/caminaba vs ascendió/paseaba) — genuine per-provider models,
-start-frame (input only) ≠ output-frame (Spanish) liveness. <strong>Wave
-3c also re-confirmed</strong> (not double-counted) the REST
-<code>POST /api/v1/translate</code>
-(<code>helix_translate-rest-translate-wave3c-20260616.mp4</code>, live
-<code>cmd/server</code> TLS port 9443, real JSON
-<code>{"translated":"El sol de la mañana se alzó sobre el tranquilo pueblo.","provider":"llm-deepseek",…}</code>)
-and the
-<code>/health</code>+<code>/api/v1/version</code>+<code>/api/v1/providers</code>
-endpoints
-(<code>helix_translate-rest-endpoints-wave3c-20260616.mp4</code>, real
-health/version/providers JSON). <strong>Wave 3b (2026-06-16) added 3
-net-new</strong> (real-use, ffprobe non-zero dur+frames / 790×560
-even-dims yuv420p, ≥6 frames extracted + one content-verified per
-§11.4.107): the <strong>Gemini</strong> client
-(<code>helix_translate-provider-gemini-translate-wave3b-20260616.mp4</code>,
-gemini-2.0-flash, “Staro svjetiljko stajalo je samotočno na kamenitoj
-obali…”), the <strong>Zhipu (GLM)</strong> client
-(<code>helix_translate-provider-zhipu-translate-wave3b-20260616.mp4</code>,
-glm-4-flash, “Stara svjetiljka stojeća samostalno na kamenitoj obali…”)
-and the <strong>Cohere</strong> client
-(<code>helix_translate-provider-cohere-translate-wave3b-20260616.mp4</code>,
-command-r-08-2024 via
-<code>-base-url https://api.cohere.ai/compatibility/v1</code>,
-provider=cohere, “Stari svjetionik stojeo je sam na kamenitoj obali…
-svijeća njegova vodila brodove…”), all four EN→SR-latin outputs distinct
-from one another (incl. the re-confirming deepseek clip
-<code>helix_translate-provider-deepseek-translate-wave3b-20260616.mp4</code>,
-not double-counted) — genuine per-provider models. <strong>Wave 3a
-(2026-06-16) added 2 net-new</strong> (validator-style ffprobe+frame,
-§11.4.107): the <strong>Cerebras</strong> client
-(<code>helix_translate-provider-cerebras-translate-wave3a-20260616.mp4</code>,
-“El sol de la mañana se alzó sobre el tranquilo pueblo.”) and the
-<strong>SambaNova</strong> client
-(<code>helix_translate-provider-sambanova-translate-wave3a-20260616.mp4</code>,
-“El sol matutino se alzó sobre el tranquilo pueblo.”), both via
-<code>unified-translator -provider &lt;name&gt;</code>, the two outputs
-distinct from each other (genuine per-provider models), start-frame ≠
-output-frame liveness. <strong>Wave 2 (2026-06-16) added 5
-net-new</strong> (validator-verified ffprobe+frame, §11.4.107): DOCX
-output (<code>helix_translate-docx-output-20260616-112943.mp4</code>),
-PDF output
-(<code>helix_translate-pdf-output-20260616-113057.mp4</code>),
-HTML→Markdown conversion
-(<code>helix_translate-html-to-md-20260616-114228.mp4</code>), and
-<code>ProviderDiverseTranslators</code> + <code>EnsembleFactory</code>
-(the 4 per-provider clips
-<code>helix_translate-provider-{novita,mistral,groq,siliconflow}-translate-20260616-114*.mp4</code>);
-plus an additional re-confirming clip on the already-confirmed gRPC
-TranslationService row
-(<code>helix_translate-grpc-translate-20260616-113415.mp4</code>, not
-double-counted). Wave 1 added 2 (bridge ensemble + provider-diverse
-catalogue). Prior recordings: <code>-multipass</code>, bridge CLI,
-bridge MCP-stdio, the 3 video-surfaced bug fixes in commit
-<code>a5e8866</code>. Per §11.4.2/§11.4.107 nothing may be marked
-video-confirmed without a real, content-verified file.
+<li><strong>Video-confirmation 66/497.</strong> 66 rows carry real,
+ffprobe- and content-verified recordings. <strong>§11.4.6 cell
+reconciliation:</strong> this caveat previously read <strong>43</strong>
+with a Wave-3f-anchored narrative — a sync lag behind the authoritative
+running total (66) carried in the Page-1 + Page-2 Video-confirmed cells
+and the <code>Status.md</code> Anti-bluff note. It is corrected here to
+<strong>66</strong> (54 prior-authoritative + 4 Wave 7 + 5 Wave 8 + 3
+Wave 9). For the full Waves 1–9 per-feature mapping, the genuine
+PENDING→Confirmed row-flips vs headline-only re-confirmations, the
+§11.4.138 multipass demotion, and the honest non-confirmable gaps, see
+the authoritative <code>Status.md</code> Anti-bluff note — this caveat
+is reconciled with it per §11.4.60. Per §11.4.2/§11.4.107 nothing may be
+marked video-confirmed without a real, content-verified file.
 <ul>
 <li><strong>✅ Wave-1 DISCOVERED BLOCKER — RESOLVED (Wave 2,
 §11.4.108/§11.4.138):</strong> the default bridge
