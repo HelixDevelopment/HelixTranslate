@@ -187,13 +187,22 @@ quiescence_check() {
   # Scan ONLY the files we are about to stage (plus already-staged content),
   # so unrelated working-tree noise never blocks an explicit, scoped commit.
   _hits=""
+  # §11.4.120: mutation residue is a SOURCE/CODE concern. Rendered docs, captured
+  # evidence, asciinema casts, test logs and JSON legitimately QUOTE the marker
+  # strings (e.g. a review report describing the mutation it verified, or this
+  # wrapper's own companion doc). Exempt those doc/data/rendered extensions so they
+  # never false-abort; CODE files (.go .sh .py .yaml etc.) stay fully scanned, so
+  # real residue is still caught. No literal marker appears in this comment.
+  _doc_exempt_re='\.(md|markdown|html?|pdf|txt|rst|cast|log|json|csv|png|jpe?g|gif|mp4|webp|svg|docx|epub|odt)$'
   for _ps in "${PATHSPECS[@]}"; do
     # -I (ignore-binary): mutation markers are a TEXT/source concern. Without it a
     # committed binary artifact (e.g. the .pdf/.html exports §11.4.65 produces) whose
     # bytes happen to contain a marker like "=======" would false-positive-abort
     # (W14b review finding — the text-only self-test missed this).
     if [ -f "$_ps" ]; then
-      if LC_ALL=C grep -InE "$MUTATION_MARKERS" "$_ps" >/dev/null 2>&1; then
+      if printf '%s' "$_ps" | grep -qiE "$_doc_exempt_re"; then
+        : # doc/evidence/rendered file — exempt (§11.4.120: markers are quoted content)
+      elif LC_ALL=C grep -InE "$MUTATION_MARKERS" "$_ps" >/dev/null 2>&1; then
         _hits="$_hits $_ps"
       fi
     elif [ -d "$_ps" ]; then
@@ -209,10 +218,8 @@ quiescence_check() {
       if [ "$_nlines" = "1" ] && [ "$_mode1" = "160000" ]; then
         continue
       fi
-      if LC_ALL=C grep -rInE "$MUTATION_MARKERS" "$_ps" >/dev/null 2>&1; then
-        _found="$(LC_ALL=C grep -rIlE "$MUTATION_MARKERS" "$_ps" 2>/dev/null | tr '\n' ' ')"
-        _hits="$_hits $_found"
-      fi
+      _found="$(LC_ALL=C grep -rIlE "$MUTATION_MARKERS" "$_ps" 2>/dev/null | grep -ivE "$_doc_exempt_re" | tr '\n' ' ')"
+      [ -n "${_found// /}" ] && _hits="$_hits $_found"
     fi
   done
   if [ -n "${_hits// /}" ]; then
