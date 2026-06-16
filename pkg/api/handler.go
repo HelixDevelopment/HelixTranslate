@@ -352,6 +352,14 @@ func (h *Handler) translateFB2(c *gin.Context) {
 	}
 
 	model := c.PostForm("model")
+
+	// BUG-FB2-HARDCODED-LANG fix: honor the requested source_lang/target_lang form
+	// fields instead of always translating ru→sr. The legacy ru→sr pair is
+	// preserved ONLY when BOTH are unspecified (matching createTranslator's
+	// documented default), so existing callers that send no langs are unchanged.
+	reqSourceLang := strings.TrimSpace(c.PostForm("source_lang"))
+	reqTargetLang := strings.TrimSpace(c.PostForm("target_lang"))
+
 	// Generate session ID
 	sessionID := uuid.New().String()
 
@@ -391,8 +399,35 @@ func (h *Handler) translateFB2(c *gin.Context) {
 		return
 	}
 
-	// Create translator
-	baseTrans, err := h.createTranslator(provider, model, "", "")
+	// Resolve + VALIDATE the effective source/target BEFORE building the
+	// translator. When the caller specified nothing, this is the historical ru→sr
+	// pair; an explicit value is parsed and honored; an unknown code returns 400
+	// (never a silent fallback, never builds a translator). Resolving first means
+	// the resolved codes — not the raw (possibly-empty) form fields — are threaded
+	// into createTranslator, so "target only" requests keep the default source.
+	effSource := language.Russian
+	effTarget := language.Serbian
+	if reqSourceLang != "" {
+		if l, perr := language.ParseLanguage(reqSourceLang); perr == nil {
+			effSource = l
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("unknown source_lang: %s", reqSourceLang)})
+			return
+		}
+	}
+	if reqTargetLang != "" {
+		if l, perr := language.ParseLanguage(reqTargetLang); perr == nil {
+			effTarget = l
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("unknown target_lang: %s", reqTargetLang)})
+			return
+		}
+	}
+
+	// Create translator with the RESOLVED langs (createTranslator applies the
+	// legacy ru→sr default only when both are empty; passing the resolved codes
+	// means a "target only" request keeps the default source instead of "").
+	baseTrans, err := h.createTranslator(provider, model, effSource.Code, effTarget.Code)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -419,14 +454,15 @@ func (h *Handler) translateFB2(c *gin.Context) {
 			TargetLanguage:     "en",   // Default target language (configurable)
 		}
 
-		// Create preparation-aware translator
-		sourceLang := language.Language{Code: "ru", Name: "Russian"}
-		targetLang := language.Language{Code: "sr", Name: "Serbian"}
+		// Create preparation-aware translator with the resolved langs (honors
+		// requested source_lang/target_lang; ru→sr only when both unspecified).
+		prepConfig.SourceLanguage = effSource.Code
+		prepConfig.TargetLanguage = effTarget.Code
 		prepTrans := preparation.NewPreparationAwareTranslator(
 			baseTrans,
 			langDetector,
-			sourceLang,
-			targetLang,
+			effSource,
+			effTarget,
 			&prepConfig,
 		)
 
@@ -457,8 +493,8 @@ func (h *Handler) translateFB2(c *gin.Context) {
 	// 	h.convertBookToLatin(book, converter)
 	// }
 
-	// Update metadata
-	book.Language = "sr"
+	// Update metadata to the effective target language (was hardcoded "sr").
+	book.Language = effTarget.Code
 
 	// Generate output filename
 	outputFilename := generateOutputFilename(header.Filename, provider)

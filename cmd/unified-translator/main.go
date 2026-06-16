@@ -232,9 +232,14 @@ func executeTranslation(session *TranslationSession) error {
 		polished, polishErr := runMultiPass(ctx, config, session, originalMarkdown, translatedMarkdown)
 		if polishErr != nil {
 			// A multipass failure must not destroy the already-good base
-			// translation: log it, keep the pre-polish text, mark the step.
-			mpStep.Details = fmt.Sprintf("Multi-pass polishing failed, keeping base translation: %v", polishErr)
-			stepComplete(mpStep)
+			// translation (§11.4.1 no solve-A-create-B): keep the pre-polish text.
+			// But the step is marked FAILED (❌), NOT completed (✅) — reporting a
+			// green step for a polish that did not run is a §11.4 / §11.4.138
+			// PASS-bluff. Honest failure, base preserved, run continues.
+			mpStep.EndTime = time.Now()
+			mpStep.Success = false
+			mpStep.Error = polishErr.Error()
+			mpStep.Details = fmt.Sprintf("Multi-pass polishing failed, base translation preserved: %v", polishErr)
 		} else {
 			translatedMarkdown = polished
 			mpStep.Details = fmt.Sprintf("Polished over %d pass(es) with %s", config.MultiPassCount, config.Provider)
@@ -873,12 +878,26 @@ func runMultiPass(
 		passes = 1
 	}
 
+	// BUG-MULTIPASS-DEFAULT-MODEL fix: the polisher builds a per-provider LLM
+	// client that validates the model against the provider's ValidModels
+	// whitelist. The global -model default ("gpt-4") is valid ONLY for openai, so
+	// with any other provider the polish path used to fail at client construction
+	// ("model 'gpt-4' is not valid for provider '<p>'") and silently no-op,
+	// keeping the base translation while the report showed a green polish step —
+	// a §11.4 PASS-bluff. The MAIN translate path avoids this by sourcing a
+	// verified, provider-valid model via the bridge (it never uses config.Model).
+	// Mirror that here: resolve a provider-valid model before building the
+	// polisher's TranslationConfig so the default -model invocation genuinely
+	// polishes. The resolution is honest — it never invents a model the provider
+	// rejects, and it leaves a provider-valid explicit -model untouched.
+	polishModel := resolvePolisherModel(config.Provider, config.Model)
+
 	// Per-provider TranslationConfig the polisher uses to build its LLM clients.
 	tc := translator.TranslationConfig{
 		SourceLang:  config.SourceLang,
 		TargetLang:  config.TargetLang,
 		Provider:    config.Provider,
-		Model:       config.Model,
+		Model:       polishModel,
 		Temperature: config.Temperature,
 		MaxTokens:   config.MaxTokens,
 		Timeout:     config.Timeout,
@@ -924,6 +943,31 @@ func runMultiPass(
 		return translatedMarkdown, nil
 	}
 	return polished, nil
+}
+
+// resolvePolisherModel returns a model that is valid for the given provider's
+// ValidModels whitelist. If the requested model is already valid (or the provider
+// has no whitelist), it is returned unchanged. Otherwise the provider's canonical
+// first valid model is substituted — the same effect the main translate path gets
+// from the bridge's verified-model selection. This is the BUG-MULTIPASS-DEFAULT-
+// MODEL fix: it prevents the polish path from constructing an LLM client with the
+// global "gpt-4" default for a non-openai provider (which the whitelist rejects,
+// causing a silent polish no-op). It never invents an out-of-whitelist model.
+func resolvePolisherModel(provider, requested string) string {
+	valid, hasWhitelist := llm.ValidModels[llm.Provider(provider)]
+	if !hasWhitelist || len(valid) == 0 {
+		// No whitelist for this provider — the per-provider client handles its own
+		// default; pass the requested model through unchanged.
+		return requested
+	}
+	for _, m := range valid {
+		if requested == m {
+			return requested // already provider-valid; keep the operator's choice
+		}
+	}
+	// Requested model is invalid for this provider (e.g. the default "gpt-4" on
+	// deepseek) — substitute the provider's canonical first valid model.
+	return valid[0]
 }
 
 // markdownToSingleSectionBook wraps a markdown document as a minimal one-chapter,

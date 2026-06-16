@@ -158,6 +158,106 @@ func TestRunMultiPass_PreservesBaseOnProviderFailure(t *testing.T) {
 	}
 }
 
+// TestRunMultiPass_DefaultModelStillPolishes is the §11.4.115 RED-baseline for
+// BUG-MULTIPASS-DEFAULT-MODEL. The unified-translator global -model default is
+// "gpt-4" (valid ONLY for the openai provider). With any other provider (here
+// deepseek), the multipass polish path historically built its LLM client with
+// Model="gpt-4", which the ValidModels whitelist rejects ("model 'gpt-4' is not
+// valid for provider 'deepseek'"), so the polish silently no-ops and the base
+// translation is kept — a §11.4 PASS-bluff (the green "Multi-pass Polishing"
+// step ran nothing).
+//
+// RED on the pre-fix artifact: the LLM is NEVER hit (whitelist reject happens at
+// client construction before any request) AND the polished text is NOT applied —
+// both assertions FAIL.
+// GREEN after the fix: runMultiPass resolves a provider-valid model (DeepSeek's
+// own default) when the configured model is invalid for the provider, so the
+// engine genuinely runs and applies the polish even with the default -model.
+func TestRunMultiPass_DefaultModelStillPolishes(t *testing.T) {
+	const inputTranslation = "Ovo je osnovni prevod sa podrazumevanim modelom."
+	const polished = "Ovo je doteran prevod iako je model podrazumevan."
+
+	var hits int64
+	var lastPrompt atomicString
+	srv := httptest.NewServer(openAICompatHandler(t, &hits, polished, &lastPrompt))
+	defer srv.Close()
+
+	cfg := &UnifiedConfig{
+		SourceLang:     "ru",
+		TargetLang:     "sr",
+		Provider:       "deepseek",
+		Model:          "gpt-4", // the global -model DEFAULT, invalid for deepseek
+		APIKey:         "test-key",
+		BaseURL:        srv.URL,
+		Temperature:    0.3,
+		MaxTokens:      512,
+		Timeout:        10 * time.Second,
+		MultiPass:      true,
+		MultiPassCount: 1,
+	}
+	session := &TranslationSession{
+		ID:       "multipass-default-model-session",
+		EventBus: events.NewEventBus(),
+	}
+
+	out, err := runMultiPass(context.Background(), cfg, session, "original english", inputTranslation)
+	if err != nil {
+		t.Fatalf("runMultiPass returned error with default model (should resolve a provider-valid model): %v", err)
+	}
+
+	// The engine MUST have actually called the LLM — proves the default-model
+	// path was resolved to a valid model and the polish genuinely ran (not a
+	// silent no-op).
+	if atomic.LoadInt64(&hits) == 0 {
+		t.Fatalf("BUG-MULTIPASS-DEFAULT-MODEL: engine never called the LLM with default -model gpt-4 on provider deepseek — silent no-op")
+	}
+	// The polished text MUST be applied — proves the default-model run produced
+	// a genuinely polished output, not the kept-base bluff.
+	if !strings.Contains(out, polished) {
+		t.Fatalf("BUG-MULTIPASS-DEFAULT-MODEL: polished text not applied with default model. got=%q want contains=%q", out, polished)
+	}
+	if out == inputTranslation {
+		t.Fatalf("BUG-MULTIPASS-DEFAULT-MODEL: output unchanged — default-model multipass silently no-opped")
+	}
+}
+
+// TestResolvePolisherModel covers the full case-space of the BUG-MULTIPASS-DEFAULT-
+// MODEL fix helper (§11.4.146 extend-to-all-cases).
+func TestResolvePolisherModel(t *testing.T) {
+	cases := []struct {
+		name     string
+		provider string
+		model    string
+		// want is checked as: exact match if non-empty, else "must be valid for provider"
+		want string
+	}{
+		{"deepseek + default gpt-4 -> deepseek default", "deepseek", "gpt-4", "deepseek-chat"},
+		{"deepseek + valid explicit kept", "deepseek", "deepseek-coder", "deepseek-coder"},
+		{"openai + gpt-4 kept (valid)", "openai", "gpt-4", "gpt-4"},
+		{"deepseek + empty -> deepseek default", "deepseek", "", "deepseek-chat"},
+		{"gemini + default gpt-4 -> gemini default", "gemini", "gpt-4", ""}, // any gemini-valid
+		{"unknown provider passthrough", "no-such-provider", "gpt-4", "gpt-4"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := resolvePolisherModel(c.provider, c.model)
+			if c.want != "" {
+				if got != c.want {
+					t.Fatalf("resolvePolisherModel(%q,%q)=%q want %q", c.provider, c.model, got, c.want)
+				}
+				return
+			}
+			// want=="" means: got must be a provider-valid model (never the rejected input).
+			if got == c.model {
+				t.Fatalf("resolvePolisherModel(%q,%q) returned the invalid input unchanged", c.provider, c.model)
+			}
+			if got == "" {
+				t.Fatalf("resolvePolisherModel(%q,%q) returned empty", c.provider, c.model)
+			}
+		})
+	}
+}
+
 // atomicString is a tiny lock-free string holder for capturing the last prompt.
 type atomicString struct{ v atomic.Value }
 
