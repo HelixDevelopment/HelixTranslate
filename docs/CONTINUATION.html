@@ -178,11 +178,80 @@
 <h1
 id="continuation--helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 89 <strong>Last modified:</strong>
-2026-06-16T20:40:00Z</p>
+<p><strong>Revision:</strong> 90 <strong>Last modified:</strong>
+2026-06-17T00:05:00Z</p>
 <h2
-id="arrow_forward-resume-here-2026-06-16-2040--green_circle-overnight-stability-batch-committedpushed-99bb7a8--2-real-bugs-fixed--11440-green--llmsverifier-wiring-honest-blocked-operator--nezha-non-degraded">▶️
-RESUME HERE (2026-06-16 ~20:40) — 🟢 OVERNIGHT STABILITY BATCH
+id="arrow_forward-resume-here-2026-06-17-0005--green_circle-overnight-stability--hygiene-4-commits-pushed-62cbb28--3-real-bugs-fixed--11440-green--llmsverifier-honest-blocked-operator--nezha-non-degraded">▶️
+RESUME HERE (2026-06-17 ~00:05) — 🟢 OVERNIGHT STABILITY + HYGIENE: 4
+commits pushed (<code>62cbb28</code>) · 3 real bugs fixed + §11.4.40
+GREEN · LLMsVerifier HONEST-BLOCKED (operator) · nezha NON-degraded</h2>
+<p><strong>SHORT (rev90):</strong> HEAD
+<strong><code>62cbb28</code></strong> (all 4 remotes synced). Since
+rev89, added a 4th commit <code>62cbb28</code> — <strong>api-server
+<code>/health</code> + <code>/api</code> info now report
+<code>version.AppVersion</code></strong> (were hardcoded
+"3.0.0"/"1.0.0"; §11.4.108 lie-class) + §11.4.135 deterministic guard
+<code>TestHealthCheckReportsAuthoritativeVersion</code> (RED-on-revert
+proven). Independent design review
+(<code>/Volumes/T7/helix-build/qa/design_version_hygiene2.md</code>)
+corrected the audit: grpc-server/unified-translator/server ALREADY
+report 2.3.1 via <code>const appVersion=version.AppVersion</code> (Go
+<code>-ldflags -X</code> can't set a const → Makefile ldflag is a
+harmless no-op; Makefile cosmetic VERSION=3.0.0 left for operator). 4
+session commits: <code>99bb7a8</code> (version-const+SQLite+scanner) →
+<code>a99327b</code> (CONTINUATION+verifier-block) →
+<code>989f5d1</code> (SQLite deterministic guard) → <code>62cbb28</code>
+(api-server version). -race sweep CLEAN on 6 concurrency pkgs.
+<strong>LLMsVerifier wiring still HONEST-BLOCKED (operator)</strong> —
+see
+<code>docs/qa/llmsverifier_wire_attempt_20260616T203122Z/STATE.md</code>.
+NEXT = operator items below.</p>
+<h3
+id="large_orange_diamond-robustness-follow-ups-audit-found-this-session-not-fixed--need-investigate-before-fix-evidence-volumest7helix-buildqaaudit_robustness2md">🔶
+ROBUSTNESS FOLLOW-UPS (audit-found this session, NOT fixed — need
+investigate-before-fix; evidence
+<code>/Volumes/T7/helix-build/qa/audit_robustness2.md</code>)</h3>
+<ul>
+<li><strong>HIGH — handler request-context misuse:</strong>
+<code>pkg/api/handler.go:277/438/575/924</code> +
+<code>batch_handlers.go:145/275</code> use
+<code>context.Background()</code> (no client-disconnect cancellation, no
+timeout → a stuck provider hangs the handler). <strong>DO NOT
+blind-fix:</strong> must FIRST determine per-site whether the translate
+path is ASYNC (returns session_id, translation must OUTLIVE the request
+→ Background() is CORRECT) vs SYNC (§11.4.102). If sync, propagate
+<code>c.Request.Context()</code> + bounded timeout (the sites at
+handler.go:1166/1251/1429/1609 already do WithTimeout(5min)). If async,
+leave Background() but consider a generous standalone timeout. Wrong fix
+= cancels in-flight book translations on disconnect = regression.</li>
+<li><strong>MED:</strong> <code>pkg/distributed/fallback.go:215</code>
+abandoned goroutine runs to completion after waiter times out (load
+amplification); <code>pkg/storage/redis.go:111/117</code>
+<code>ListSessions</code> silently <code>continue</code>s on errors
+(anti-bluff observability gap).</li>
+<li><strong>LOW:</strong> unchecked map type-assertions
+(multi_llm.go:173/200/206/207/220, handler.go:1564,
+verifier_handlers.go:271/272 — safe-by-construction today,
+panic-on-drift); models/downloader.go:109 uncancellable download;
+library panics (security/auth.go:31, models/registry.go:47/70,
+logger.go:220 os.Exit) — return-error candidates.</li>
+<li><strong>Verified CLEAN:</strong> postgres pool bounded 25/5 + ctx
+queries; all LLM providers propagate ctx + close bodies; ssh_pool
+ctx-cancellation OK; no stray sql.Open/http.DefaultClient.</li>
+</ul>
+<h3 id="untracked-test-fixtures-114124--resolved-leave">Untracked test
+fixtures (§11.4.124 — RESOLVED: LEAVE)</h3>
+<p><code>test/assets/crow_original.md</code> +
+<code>test/fixtures/ebooks/{sample,spanish_sample}_original.md</code>:
+NOT referenced by any test (no fresh-clone failure), never tracked, with
+gitignored <code>*_translated</code> output siblings → transient
+round-trip inputs (possibly another stream's live input). LEFT untouched
+(not committed, not deleted). Evidence
+<code>/Volumes/T7/helix-build/qa/fixture_provenance.md</code>.</p>
+<hr />
+<h2
+id="arrow_forward-rev89-resume-here-2026-06-16-2040--green_circle-overnight-stability-batch-committedpushed-99bb7a8--2-real-bugs-fixed--11440-green--llmsverifier-wiring-honest-blocked-operator--nezha-non-degraded">▶️
+(rev89) RESUME HERE (2026-06-16 ~20:40) — 🟢 OVERNIGHT STABILITY BATCH
 committed+pushed (<code>99bb7a8</code>) · 2 real bugs fixed + §11.4.40
 GREEN · LLMsVerifier wiring HONEST-BLOCKED (operator) · nezha
 NON-degraded</h2>

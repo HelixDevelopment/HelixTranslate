@@ -1,9 +1,24 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 89
-**Last modified:** 2026-06-16T20:40:00Z
+**Revision:** 90
+**Last modified:** 2026-06-17T00:05:00Z
 
-## ▶️ RESUME HERE (2026-06-16 ~20:40) — 🟢 OVERNIGHT STABILITY BATCH committed+pushed (`99bb7a8`) · 2 real bugs fixed + §11.4.40 GREEN · LLMsVerifier wiring HONEST-BLOCKED (operator) · nezha NON-degraded
+## ▶️ RESUME HERE (2026-06-17 ~00:05) — 🟢 OVERNIGHT STABILITY + HYGIENE: 4 commits pushed (`62cbb28`) · 3 real bugs fixed + §11.4.40 GREEN · LLMsVerifier HONEST-BLOCKED (operator) · nezha NON-degraded
+
+**SHORT (rev90):** HEAD **`62cbb28`** (all 4 remotes synced). Since rev89, added a 4th commit `62cbb28` — **api-server `/health` + `/api` info now report `version.AppVersion`** (were hardcoded "3.0.0"/"1.0.0"; §11.4.108 lie-class) + §11.4.135 deterministic guard `TestHealthCheckReportsAuthoritativeVersion` (RED-on-revert proven). Independent design review (`/Volumes/T7/helix-build/qa/design_version_hygiene2.md`) corrected the audit: grpc-server/unified-translator/server ALREADY report 2.3.1 via `const appVersion=version.AppVersion` (Go `-ldflags -X` can't set a const → Makefile ldflag is a harmless no-op; Makefile cosmetic VERSION=3.0.0 left for operator). 4 session commits: `99bb7a8` (version-const+SQLite+scanner) → `a99327b` (CONTINUATION+verifier-block) → `989f5d1` (SQLite deterministic guard) → `62cbb28` (api-server version). -race sweep CLEAN on 6 concurrency pkgs. **LLMsVerifier wiring still HONEST-BLOCKED (operator)** — see `docs/qa/llmsverifier_wire_attempt_20260616T203122Z/STATE.md`. NEXT = operator items below.
+
+### 🔶 ROBUSTNESS FOLLOW-UPS (audit-found this session, NOT fixed — need investigate-before-fix; evidence `/Volumes/T7/helix-build/qa/audit_robustness2.md`)
+- **HIGH — handler request-context misuse:** `pkg/api/handler.go:277/438/575/924` + `batch_handlers.go:145/275` use `context.Background()` (no client-disconnect cancellation, no timeout → a stuck provider hangs the handler). **DO NOT blind-fix:** must FIRST determine per-site whether the translate path is ASYNC (returns session_id, translation must OUTLIVE the request → Background() is CORRECT) vs SYNC (§11.4.102). If sync, propagate `c.Request.Context()` + bounded timeout (the sites at handler.go:1166/1251/1429/1609 already do WithTimeout(5min)). If async, leave Background() but consider a generous standalone timeout. Wrong fix = cancels in-flight book translations on disconnect = regression.
+- **MED:** `pkg/distributed/fallback.go:215` abandoned goroutine runs to completion after waiter times out (load amplification); `pkg/storage/redis.go:111/117` `ListSessions` silently `continue`s on errors (anti-bluff observability gap).
+- **LOW:** unchecked map type-assertions (multi_llm.go:173/200/206/207/220, handler.go:1564, verifier_handlers.go:271/272 — safe-by-construction today, panic-on-drift); models/downloader.go:109 uncancellable download; library panics (security/auth.go:31, models/registry.go:47/70, logger.go:220 os.Exit) — return-error candidates.
+- **Verified CLEAN:** postgres pool bounded 25/5 + ctx queries; all LLM providers propagate ctx + close bodies; ssh_pool ctx-cancellation OK; no stray sql.Open/http.DefaultClient.
+
+### Untracked test fixtures (§11.4.124 — RESOLVED: LEAVE)
+`test/assets/crow_original.md` + `test/fixtures/ebooks/{sample,spanish_sample}_original.md`: NOT referenced by any test (no fresh-clone failure), never tracked, with gitignored `*_translated` output siblings → transient round-trip inputs (possibly another stream's live input). LEFT untouched (not committed, not deleted). Evidence `/Volumes/T7/helix-build/qa/fixture_provenance.md`.
+
+---
+
+## ▶️ (rev89) RESUME HERE (2026-06-16 ~20:40) — 🟢 OVERNIGHT STABILITY BATCH committed+pushed (`99bb7a8`) · 2 real bugs fixed + §11.4.40 GREEN · LLMsVerifier wiring HONEST-BLOCKED (operator) · nezha NON-degraded
 
 **SHORT:** Read this file + `.remember/remember.md` FIRST, then `git fetch --all --prune`. HEAD **`99bb7a8`** (all 4 remotes synced: origin/github/upstream/githubhelixdevelopment). 🏷️ `helix_translate-2.3.1` still the release tag (main+10 submodules). **This overnight loop fixed 2 REAL bugs + a scanner false-positive, all reviewed GO + proven, committed `99bb7a8` (FF-pushed):** (1) `pkg/version/app.go` AppVersion 2.3.0→2.3.1 (was RED — VERSION bumped at 236bac8 without the const); (2) `pkg/storage/sqlite.go` SQLITE_BUSY concurrency (unbounded pool + no busy_timeout → 110/640 concurrent writes failed; fix `_busy_timeout=5000` + default `SetMaxOpenConns(1)`, RED→GREEN 5x §11.4.85); (3) `credential_scan.sh` HTML-escaped-redaction false-positive + ignore-list its own regression test + new `scripts/testing/test_credential_scan.sh` §11.4.135 guard. **§11.4.40 full retest GREEN at the batch** (sweep 9/9 + build + `go test ./...` all pass; evidence `/Volumes/T7/helix-build/qa/overnight_retest4_*.log`). **LLMsVerifier wiring = HONEST-BLOCKED (operator)** — live verifier image (built 15:46Z) PREDATES the seed commit 6e6b0309 (19:26Z); no reproducible on-nezha rebuild context; `config.yaml` is operator-owned + secret-bearing + Permission-denied (can't populate `llms:` without handling secrets blind §11.4.10). NOT enabled, nezha NON-degraded. Operator options in `docs/qa/llmsverifier_wire_attempt_20260616T203122Z/STATE.md`. **NEXT = operator decision on verifier (rebuild-with-seed + populate config + verify-pass) + the version-display-hygiene follow-ups below.**
 
