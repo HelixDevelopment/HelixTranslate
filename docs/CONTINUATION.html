@@ -178,15 +178,85 @@
 <h1
 id="continuation--helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 91 <strong>Last modified:</strong>
-2026-06-17T01:30:00Z</p>
+<p><strong>Revision:</strong> 92 <strong>Last modified:</strong>
+2026-06-17T02:45:00Z</p>
 <h2
-id="arrow_forward-resume-here-2026-06-17-0130--green_circle-7-commits-pushed-98e0450--5-real-fixes--11440-green--llmsverifier-seed-at-boot-working-on-nezha-count-02--verify-completion-being-implemented--helixtranslate-non-degraded-never-degrade-guard-holds-0-verified-yet">▶️
-RESUME HERE (2026-06-17 ~01:30) — 🟢 7 commits pushed
-(<code>98e0450</code>) · 5 real fixes + §11.4.40 GREEN · LLMsVerifier
-seed-at-boot WORKING on nezha (count 0→2) · verify-completion being
-implemented · helixtranslate NON-degraded (never-degrade guard holds: 0
-VERIFIED yet)</h2>
+id="arrow_forward-resume-here-2026-06-17-0245--green_circle-9-commits-pushed-9aa8d2d--6-real-fixes--11440-green---race-clean--llmsverifier-verifier-side-shipped-verified-count2--helixtranslate-enable-not-viable--auto-rolled-back--non-degraded--working">▶️
+RESUME HERE (2026-06-17 ~02:45) — 🟢 9 commits pushed
+(<code>9aa8d2d</code>) · 6 real fixes + §11.4.40 GREEN + -race CLEAN ·
+LLMsVerifier verifier-side SHIPPED (verified-count=2) · helixtranslate
+enable NOT-VIABLE → auto-rolled-back → NON-degraded + working</h2>
+<p><strong>SHORT (rev92):</strong> HEAD
+<strong><code>9aa8d2d</code></strong> (all 4 remotes synced). retest_v4
+(parent build + <code>go test ./...</code>) GREEN at HEAD with verifier
+gitlink <code>ed03a98c</code>. <strong>9 session commits</strong>
+(99bb7a8→a99327b→989f5d1→62cbb28→4223e7c→2a36a57→98e0450→<code>2a36a57</code>-era
+… →<code>ed03a98c</code>(submodule)→<code>9aa8d2d</code>(gitlink bump)).
+6 real fixes shipped: version-const, SQLite SQLITE_BUSY, api-server
+version-lie, handler request-context, redis observability, + the
+verifier verify-completion feature.</p>
+<h3
+id="llmsverifier-arc--honest-conclusion-operator-authorized-wire-it-all">LLMsVerifier
+arc — HONEST CONCLUSION (operator-authorized "wire it all")</h3>
+<ul>
+<li>✅ <strong>Verifier source SHIPPED</strong> — submodule
+<code>ed03a98c</code> (verify-completion:
+<code>VerifyModelHandler</code> runs real
+<code>ModelVerificationService.VerifyModel</code> + persists honest
+status/score; + <code>code_verification.go</code> auth-header fix)
+pushed FF github+gitlab; parent gitlink bumped (<code>9aa8d2d</code>).
+Live nezha <code>/api/models</code> <strong>count(verified)=2</strong>
+(deepseek-chat 0.80, llama-3.3-70b 1.0, real scores). Reviewed GO;
+build+test GREEN.</li>
+<li>⛔ <strong>helixtranslate enable = NOT VIABLE →
+AUTO-ROLLED-BACK.</strong> Enabling rerouted translation through the
+bridge HTTP-mode which selects verified models, but those models have
+<strong>NO usable translator binding</strong> on this deployment →
+translation FAILED
+(<code>bridge: no verified translator available</code>). The subagent's
+mechanical never-degrade guard auto-rolled-back: restored
+<code>.env.nezha</code> (gitignored, net-zero change, NOT tracked →
+nothing to commit), disconnected the verifier net, redeployed →
+<strong>baseline translation RE-CONFIRMED working</strong>
+(<code>Добро јутро</code> via llm-novita, 0 errors, all 6 containers
+healthy, verified-models back to "disabled"). helixtranslate
+<strong>NON-degraded</strong>. Evidence <code>docs/qa/</code> +
+<code>/Volumes/T7/helix-build/qa/helixtranslate_enable_20260616T222048Z/</code>.</li>
+<li>📋 <strong>§11.4.150 finding (verify-score is NOT a quality
+measure):</strong> the verifier score (groq 1.0 vs deepseek 0.80) is a
+liveness/availability gate — keyword-density over a trivial "do you see
+my code?" probe with a 0.70 floor; ZERO translation-quality signal;
+<code>MinScoreThreshold</code> default 0.0. So enabling would be a
+liveness-gated lateral move, NOT a quality upgrade. Evidence
+<code>/Volumes/T7/helix-build/qa/research_verify_completion.md</code>.</li>
+</ul>
+<h3
+id="red_circle-operator-actions--tracked-follow-ups-none-block-the-working-build">🔴
+OPERATOR ACTIONS / tracked follow-ups (none block the working
+build)</h3>
+<ol type="1">
+<li><strong>SECURITY (§11.4.10/CONST-042):</strong> rotate verifier
+<code>JWT_SECRET</code> in nezha
+<code>/home/milosvasic/helix-system/llmsverifier/.env</code> — a
+subagent transcript inadvertently surfaced its value (transcript
+DELETED; never reached git; precautionary).</li>
+<li><strong>LLMsVerifier full enablement (future cycle):</strong> wire
+usable provider translators for verified models (or bridge fallback to
+the direct path when a verified model has no translator) — a tracked
+CODE change in the repo, NOT just env; AND add real translation-quality
+scoring (chrF/COMET-class) + raise <code>MinScoreThreshold</code> &gt;0
+before relying on the ranking (per the §11.4.150 finding). Until then
+helixtranslate stays on the proven working direct path.</li>
+<li><strong>auth.go:31 short-JWT-secret panic (LOW→MED, OPERATOR-DECIDE
+A vs B):</strong> <code>config.Validate()</code> doesn't enforce
+<code>len(JWTSecret)&gt;=16</code> so a misconfigured short/empty secret
+panics at startup instead of a clean error. Ready diffs (Option A
+return-error / Option B Validate-len-check) in
+<code>/Volumes/T7/helix-build/qa/design_low_robustness.md</code>. 6
+other LOW items = LEAVE (safe-by-construction).</li>
+<li>Version-display Makefile cosmetic (rev90) + untracked test fixtures
+(rev90) unchanged.</li>
+</ol>
 <p><strong>SHORT (rev91):</strong> HEAD
 <strong><code>98e0450</code></strong> (all 4 remotes synced). Operator
 authorized "wire it all + do it all". Since rev90, 3 more commits via
