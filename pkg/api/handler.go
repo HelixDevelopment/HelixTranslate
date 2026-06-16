@@ -274,8 +274,13 @@ func (h *Handler) translateText(c *gin.Context) {
 	// Generate session ID
 	sessionID := uuid.New().String()
 
-	// Translate - use distributed coordinator if available
-	ctx := context.Background()
+	// Translate - use distributed coordinator if available.
+	// Derive from the request context so a client disconnect cancels the
+	// in-flight translation, bounded by the same 5-minute deadline the
+	// distributed handlers use so a stuck provider cannot hang the handler
+	// forever (audit: request-path context misuse).
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Minute)
+	defer cancel()
 	var translated string
 
 	if h.distributedManager != nil {
@@ -435,8 +440,12 @@ func (h *Handler) translateFB2(c *gin.Context) {
 		return
 	}
 
-	// Translate
-	ctx := context.Background()
+	// Translate. Derive from the request context so a client disconnect cancels
+	// the in-flight book translation, bounded by the same 5-minute deadline the
+	// distributed handlers use so a stuck provider cannot hang the handler
+	// forever (audit: request-path context misuse).
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Minute)
+	defer cancel()
 
 	if h.config.Preparation.Enabled {
 		// Use preparation-aware translation
@@ -572,8 +581,12 @@ func (h *Handler) batchTranslate(c *gin.Context) {
 	// Generate session ID
 	sessionID := uuid.New().String()
 
-	// Translate all texts
-	ctx := context.Background()
+	// Translate all texts. Derive from the request context so a client
+	// disconnect cancels the in-flight batch, bounded by the same 5-minute
+	// deadline the distributed handlers use so a stuck provider cannot hang the
+	// handler forever (audit: request-path context misuse).
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Minute)
+	defer cancel()
 	results := make([]string, len(req.Texts))
 
 	for i, text := range req.Texts {
@@ -922,7 +935,14 @@ func (h *Handler) createTranslator(providerName, _, sourceLang, targetLang strin
 		targetLang = "sr"
 	}
 
-	return h.bridgeFor()(context.Background(), selection.TaskRequirements{
+	// createTranslator is a helper with no *gin.Context, so it cannot derive
+	// from a request context. Bound the bridge open + model-selection call with
+	// the same 5-minute deadline the distributed handlers use so a stuck
+	// provider cannot hang it forever (audit: request-path context misuse).
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	return h.bridgeFor()(ctx, selection.TaskRequirements{
 		SourceLang: sourceLang,
 		TargetLang: targetLang,
 	})

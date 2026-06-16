@@ -140,9 +140,13 @@ func (h *Handler) HandleTranslateString(c *gin.Context) {
 		},
 	})
 
-	// Translate
+	// Translate. Derive from the request context (consistent with the bridge
+	// call above) so a client disconnect cancels the in-flight translation,
+	// bounded by a 5-minute deadline so a stuck provider cannot hang the handler
+	// forever (audit: request-path context misuse).
 	startTime := time.Now()
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Minute)
+	defer cancel()
 	translatedText, err := trans.Translate(ctx, req.Text, "")
 	duration := time.Since(startTime).Seconds()
 
@@ -270,9 +274,13 @@ func (h *Handler) HandleTranslateDirectory(c *gin.Context) {
 		},
 	})
 
-	// Process directory
+	// Process directory. Derive from the request context (consistent with the
+	// bridge call above) so a client disconnect cancels the in-flight batch,
+	// bounded by a 5-minute deadline so a stuck provider cannot hang the handler
+	// forever (audit: request-path context misuse).
 	startTime := time.Now()
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Minute)
+	defer cancel()
 	results, err := processor.Process(ctx)
 	duration := time.Since(startTime).Seconds()
 
