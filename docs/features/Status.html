@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 13 <strong>Last modified:</strong>
-2026-06-16T13:45:00Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 14 <strong>Last modified:</strong>
+2026-06-16T14:30:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -195,12 +195,37 @@ genuinely demonstrates the feature working (each cited <code>.mp4</code>
 was ffprobe-verified for non-zero duration+frames and content-verified
 against its claimed behaviour — e.g. real DeepSeek output in the target
 language, real gRPC translated text, live WebSocket count change).
-<strong>41 feature rows are video-confirmed</strong> (Wave 3d of
-2026-06-16 added <strong>4 net-new</strong>, prioritising feature-type
-diversity — the <strong><code>cmd/verify-models</code> CLI</strong>
-(real LLMsVerifier discovery/scoring/selection: 14 env-keyed providers
-with real per-provider reachable/auth/HTTP-status/candidate/verified
-counts, summary <code>total verified: 4</code>, then
+<strong>43 feature rows are video-confirmed</strong> (Wave 3f of
+2026-06-16 added <strong>2 net-new</strong> — <strong>EPUB→EPUB
+conversion</strong>
+(<code>helix_translate-epub-output-wave3e-20260616.mp4</code>: EN .epub
+→ real deepseek run → OUTPUT EPUB carries real Spanish “La Antigua
+Farola la vieja farola se alzaba sola en la rocosa costa…”) and
+<strong>TXT→TXT translation</strong>
+(<code>helix_translate-txt-translation-wave3f-20260616.mp4</code>: EN
+.txt → real deepseek run → ES .txt “El río fluía tranquilamente a través
+del valle verde. Los pájaros cantaban bajo la luz de la mañana.”), each
+ffprobe+frame-verified per §11.4.107 (790×560 yuv420p, ≥6 frames,
+start-frame English-only ≠ output-frame Spanish); Wave 3f also
+<strong>re-confirmed</strong> (NOT double-counted) the already-confirmed
+<strong>FB2→FB2</strong>
+(<code>helix_translate-fb2-convert-wave3e-20260616.mp4</code>, namespace
+preserved + real Spanish), <strong>format-detection</strong>
+(<code>helix_translate-format-detect-wave3e-20260616.mp4</code>,
+extensionless <code>.dat</code> detected-by-content),
+<strong><code>-script</code> Cyrillic↔︎Latin</strong>
+(<code>helix_translate-script-conversion-wave3e-20260616.mp4</code>, RUN
+A latin “Ovo je testni…” ≠ RUN B cyrillic “Систем треба…”) and
+<strong>markdown-translator EPUB↔︎MD round-trip</strong>
+(<code>helix_translate-markdown-roundtrip-wave3f-20260616.mp4</code>, “#
+El Faro Viejo / El viejo faro se alzaba solitario en la costa rocosa.”)
+rows with fresh frame-verified clips; running total 41 (Rev 13) + 2 =
+<strong>43</strong>. Wave 3d of 2026-06-16 added <strong>4
+net-new</strong>, prioritising feature-type diversity — the
+<strong><code>cmd/verify-models</code> CLI</strong> (real LLMsVerifier
+discovery/scoring/selection: 14 env-keyed providers with real
+per-provider reachable/auth/HTTP-status/candidate/verified counts,
+summary <code>total verified: 4</code>, then
 <code>model-bridge list</code> selection ranking
 <code>#1 novita/Sao10K/L3-8B-Stheno-v3.2 score=0.91875 … #4 siliconflow score=0.88125</code>
 — <code>helix_translate-verify-models-wave3d-20260616.mp4</code>), the
@@ -384,8 +409,11 @@ tally)</td>
 </tr>
 <tr>
 <td>Enumerated feature rows in this doc</td>
-<td><strong>494</strong> (Rev 9 = 493 Rev 8 + 1 new unified-translator
-<code>HTML→Markdown conversion</code> row added this wave for the Wave-2
+<td><strong>496</strong> (Rev 14 = 494 Rev 13 + 2 new unified-translator
+rows added Wave 3f for the net-new videos:
+<code>EPUB→EPUB conversion</code> + <code>TXT→TXT translation</code>;
+Rev 9 = 493 Rev 8 + 1 new unified-translator
+<code>HTML→Markdown conversion</code> row added that wave for the Wave-2
 html-to-md video; §11.4.6 — re-derive with <code>awk</code> over
 <code>^\|</code> 9-column rows. The earlier “478” was NOT re-derivable
 from the live table — it was a hand-tracked running tally that had
@@ -397,10 +425,13 @@ rows: <code>BestTranslator</code>, <code>BestTranslatorFunc</code>,
 </tr>
 <tr>
 <td>Implemented</td>
-<td>443 (Rev 9: 442 Rev 8 + 1 new unified-translator HTML→Markdown
-conversion row; Rev 8 was 435 Rev 7 + 7 new pkg/bridge ensemble-seam
-rows; was 471 Rev 6, −36 flipped to Obsolete Rev 7 — local-runtime +
-SSH-local features removed in bridge phase-2 R-2..R-4)</td>
+<td>445 (Rev 14: 443 Rev 13 + 2 new unified-translator rows EPUB→EPUB
+conversion + TXT→TXT translation, both Implemented + Wired + Wave-3f
+video-confirmed; Rev 9: 442 Rev 8 + 1 new unified-translator
+HTML→Markdown conversion row; Rev 8 was 435 Rev 7 + 7 new pkg/bridge
+ensemble-seam rows; was 471 Rev 6, −36 flipped to Obsolete Rev 7 —
+local-runtime + SSH-local features removed in bridge phase-2
+R-2..R-4)</td>
 </tr>
 <tr>
 <td><strong>Obsolete (→ Fixed.md)</strong></td>
@@ -441,10 +472,20 @@ host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td><strong>41</strong> (real, content-verified recordings — see
-Anti-bluff note; Rev-13 / Wave 3d of 2026-06-16 added <strong>4
+<td><strong>43</strong> (real, content-verified recordings — see
+Anti-bluff note; Rev-14 / Wave 3f of 2026-06-16 added <strong>2
 net-new</strong> video confirmations prioritising feature-type diversity
-— the <strong><code>cmd/verify-models</code> CLI</strong>
+— <strong>EPUB→EPUB conversion</strong>
+(<code>helix_translate-epub-output-wave3e-20260616.mp4</code>, EN .epub
+→ real Spanish EPUB) and <strong>TXT→TXT translation</strong>
+(<code>helix_translate-txt-translation-wave3f-20260616.mp4</code>, EN
+.txt → real Spanish .txt), each ffprobe+frame-verified per §11.4.107;
+Wave 3f also re-confirmed (NOT double-counted) FB2→FB2 /
+format-detection / <code>-script</code> Cyrillic↔︎Latin / markdown
+EPUB↔︎MD round-trip with fresh frame-verified clips; running total 41
+(Rev 13) + 2 = <strong>43</strong>. Rev-13 / Wave 3d of 2026-06-16 added
+<strong>4 net-new</strong> video confirmations prioritising feature-type
+diversity — the <strong><code>cmd/verify-models</code> CLI</strong>
 (<code>helix_translate-verify-models-wave3d-20260616.mp4</code>, real
 LLMsVerifier discovery/scoring/selection + ranking), the
 <strong><code>cmd/workable-items</code> CLI</strong>
@@ -1425,8 +1466,14 @@ test.”)</td>
 <td>EPUB/MD → markdown → translate → EPUB/MD; optional preparation
 phase</td>
 <td>Not-inventoried</td>
-<td><strong>PASS — EPUB↔︎MD round-trip captured</strong></td>
-<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-markdown-roundtrip-20260615.mp4</td>
+<td><strong>PASS — EPUB↔︎MD round-trip captured</strong> (Wave 3f
+re-confirm: EPUB→source MD “# The Old Lighthouse / The old lighthouse
+stood alone…” → translated MD “# El Faro Viejo / El viejo faro se alzaba
+solitario en la costa rocosa.”, real deepseek round-trip, frame-verified
+§11.4.107)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-markdown-roundtrip-20260615.mp4
+(Wave-3f re-confirm:
+/Volumes/T7/Downloads/Recordings/helix_translate-markdown-roundtrip-wave3f-20260616.mp4)</td>
 </tr>
 <tr>
 <td>markdown-translator</td>
@@ -2099,8 +2146,12 @@ real Spanish markdown produced)</td>
 <td>FB2 parse → DeepSeek translate → FB2 writer (namespaces
 preserved)</td>
 <td>Not-inventoried</td>
-<td><strong>PASS — captured</strong></td>
-<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-fb2-to-fb2-deepseek_20260615-172006.mp4</td>
+<td><strong>PASS — captured</strong> (Wave 3f re-confirm: FB2 namespace
+<code>http://www.gribuser.ru/xml/fictionbook/2.0</code> PRESERVED + real
+Spanish “Este es un párrafo de prueba…”, frame-verified §11.4.107)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-fb2-to-fb2-deepseek_20260615-172006.mp4
+(Wave-3f re-confirm:
+/Volumes/T7/Downloads/Recordings/helix_translate-fb2-convert-wave3e-20260616.mp4)</td>
 </tr>
 <tr>
 <td>unified-translator</td>
@@ -2115,14 +2166,48 @@ preserved)</td>
 </tr>
 <tr>
 <td>unified-translator</td>
+<td>EPUB→EPUB conversion</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>EPUB parse → DeepSeek translate → EPUB writer (round-trip, real
+translated text in produced .epub)</td>
+<td>Not-inventoried</td>
+<td><strong>PASS — captured</strong> (Wave 3f net-new: EN .epub input →
+real deepseek run → OUTPUT EPUB carries real Spanish “La Antigua Farola
+la vieja farola se alzaba sola en la rocosa costa…”, frame-verified
+§11.4.107 — start frame English-only ≠ output frame Spanish)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-epub-output-wave3e-20260616.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td>TXT→TXT translation</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Plain-text parse → DeepSeek translate → TXT writer (real translated
+text, no format conversion)</td>
+<td>Not-inventoried</td>
+<td><strong>PASS — captured</strong> (Wave 3f net-new: EN .txt “The
+river flowed quietly through the green valley…” → real deepseek run → ES
+.txt “El río fluía tranquilamente a través del valle verde. Los pájaros
+cantaban bajo la luz de la mañana.”, frame-verified §11.4.107)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-txt-translation-wave3f-20260616.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
 <td>Format detection</td>
 <td>CLI</td>
 <td>Implemented</td>
 <td>Wired</td>
 <td>Input-format auto-detection on real input</td>
 <td>Not-inventoried</td>
-<td><strong>PASS — captured</strong></td>
-<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-format-detection_20260615-164729.mp4</td>
+<td><strong>PASS — captured</strong> (Wave 3f re-confirm: extensionless
+<code>mystery_input.dat</code> with FB2 XML inside → detected-by-content
+→ real Spanish output, frame-verified §11.4.107)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-format-detection_20260615-164729.mp4
+(Wave-3f re-confirm:
+/Volumes/T7/Downloads/Recordings/helix_translate-format-detect-wave3e-20260616.mp4)</td>
 </tr>
 <tr>
 <td>unified-translator</td>
@@ -2187,8 +2272,13 @@ preserved)</td>
 <td>Wired</td>
 <td>Target script (cyrillic/latin) script normalization on real run</td>
 <td>Not-inventoried</td>
-<td><strong>PASS — captured</strong></td>
-<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-serbian-script-cyrillic-latin_20260615-171843.mp4</td>
+<td><strong>PASS — captured</strong> (Wave 3f re-confirm: RUN A
+<code>-script latin</code> “Ovo je testni paragraf…” ≠ RUN B
+<code>-script cyrillic</code> “Систем треба да преводи…” — same text,
+genuinely different script, frame-verified §11.4.107)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-serbian-script-cyrillic-latin_20260615-171843.mp4
+(Wave-3f re-confirm:
+/Volumes/T7/Downloads/Recordings/helix_translate-script-conversion-wave3e-20260616.mp4)</td>
 </tr>
 <tr>
 <td>unified-translator</td>

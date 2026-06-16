@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status-summary">HelixTranslate — Feature
 Status Summary</h1>
-<p><strong>Revision:</strong> 13 <strong>Last modified:</strong>
-2026-06-16T13:45:00Z <strong>Authority:</strong> Two-audience companion
+<p><strong>Revision:</strong> 14 <strong>Last modified:</strong>
+2026-06-16T14:30:00Z <strong>Authority:</strong> Two-audience companion
 to <code>docs/features/Status.md</code> (§11.4.56). Derived from the
 same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync),
 §11.4.6 (no-guessing).</p>
@@ -191,24 +191,32 @@ catalogued and how much we have proven works on camera.</p>
 <h2 id="what-works">What works</h2>
 <ul>
 <li>We have a complete catalogue of <strong>every feature</strong> in
-the product and its 8 owned add-on modules — <strong>494 individual
-capabilities</strong> catalogued (Rev 9 added 1 new unified-translator
-HTML→Markdown conversion row for the Wave-2 video; Rev 8 re-counted the
-live tables directly and added the 7 missing agent-bridge ensemble rows
-to reach 493; the headline “417” is the same list with closely-related
+the product and its 8 owned add-on modules — <strong>496 individual
+capabilities</strong> catalogued (Rev 14 added 2 new unified-translator
+rows for the Wave-3f net-new videos: EPUB→EPUB conversion + TXT→TXT
+translation; Rev 9 added 1 new unified-translator HTML→Markdown
+conversion row for the Wave-2 video; Rev 8 re-counted the live tables
+directly and added the 7 missing agent-bridge ensemble rows to reach
+493; the headline “417” is the same list with closely-related
 sub-options counted once).</li>
 <li>The majority are fully built and reachable: the command-line
 translators, the web dashboards, the REST and gRPC servers, ~32 built-in
 AI providers, ebook format readers (FB2, EPUB, DOCX, HTML, TXT, PDF) and
 writers (EPUB, FB2, TXT, HTML, Markdown, <strong>DOCX and now
 PDF</strong>), caching, security, and all 8 add-on modules.</li>
-<li><strong>41 features are proven on real recordings</strong> — each
+<li><strong>43 features are proven on real recordings</strong> — each
 checked frame-by-frame to confirm it genuinely shows the feature working
 (real translated text in the right language, a live connection count
 changing, a real CLI database/pipeline output, etc.), not just “a
-screen”. These include: the primary command-line translator doing real
-DeepSeek translations and converting between ebook formats (EPUB→TXT,
-HTML→EPUB, FB2→EPUB, FB2→FB2, <strong>and now HTML→Markdown</strong>),
+screen”. <strong>New this round (Wave 3f):</strong> the translator
+producing a fully-translated <strong>EPUB→EPUB</strong> book (real
+Spanish inside the produced .epub) and a plain <strong>TXT→TXT</strong>
+translation (real Spanish text out), plus fresh re-confirmations of
+FB2→FB2, format auto-detection, Serbian Cyrillic↔︎Latin scripting, and
+the EPUB↔︎Markdown round-trip. These include: the primary command-line
+translator doing real DeepSeek translations and converting between ebook
+formats (EPUB→TXT, <strong>EPUB→EPUB</strong>, HTML→EPUB, FB2→EPUB,
+FB2→FB2, <strong>TXT→TXT</strong>, <strong>and HTML→Markdown</strong>),
 Serbian Cyrillic/Latin handling, the <strong>multi-pass polishing engine
 (<code>-multipass</code>)</strong>, the REST API server translating for
 real, the gRPC server translating English→Spanish, the markdown
@@ -305,22 +313,28 @@ stats endpoint that always shows zeros). These are flagged in the
 detailed document.</li>
 </ul>
 <h2 id="video-confirmation-coverage">Video-confirmation coverage</h2>
-<p><strong>41 / 494 ≈ 8.3%</strong> (Wave 3d added 4 net-new video
-confirmations prioritising feature-type diversity: the
-<code>verify-models</code> CLI [real LLMsVerifier
-discovery/scoring/selection + ranking], the <code>workable-items</code>
-CLI [real §11.4.93 SQLite validate+list], and 2 more providers nvidia +
-openrouter [distinct real EN→ES translations]; <code>upstage</code>
-HTTP-403 SKIP + <code>together</code> no-key SKIP, never faked; Wave 3c
-added 2: the Hyperbolic library client and the Fireworks
-<code>llm_provider</code> submodule client, each a distinct real EN→ES
-translation via the OpenAI-compat per-provider path [+ re-confirming the
-REST translate + endpoints rows against a live TLS server, not
-double-counted]; Wave 3b added 3: Gemini, Zhipu (GLM) and Cohere library
-clients; Wave 3a added 2: Cerebras and SambaNova; Wave 2 added 5: DOCX
-output, PDF output, HTML→Markdown conversion,
-ProviderDiverseTranslators, EnsembleFactory). This is the headline
-number to keep improving: each new genuine recording raises it.</p>
+<p><strong>43 / 496 ≈ 8.7%</strong> (Wave 3f added 2 net-new video
+confirmations prioritising feature-type diversity: EPUB→EPUB conversion
+[real Spanish EPUB produced] + TXT→TXT translation [real Spanish .txt
+produced], each ffprobe+frame-verified per §11.4.107; Wave 3f also
+re-confirmed FB2→FB2 / format-detection / <code>-script</code>
+Cyrillic↔︎Latin / markdown EPUB↔︎MD round-trip with fresh frame-verified
+clips, not double-counted; Wave 3d added 4 net-new video confirmations
+prioritising feature-type diversity: the <code>verify-models</code> CLI
+[real LLMsVerifier discovery/scoring/selection + ranking], the
+<code>workable-items</code> CLI [real §11.4.93 SQLite validate+list],
+and 2 more providers nvidia + openrouter [distinct real EN→ES
+translations]; <code>upstage</code> HTTP-403 SKIP +
+<code>together</code> no-key SKIP, never faked; Wave 3c added 2: the
+Hyperbolic library client and the Fireworks <code>llm_provider</code>
+submodule client, each a distinct real EN→ES translation via the
+OpenAI-compat per-provider path [+ re-confirming the REST translate +
+endpoints rows against a live TLS server, not double-counted]; Wave 3b
+added 3: Gemini, Zhipu (GLM) and Cohere library clients; Wave 3a added
+2: Cerebras and SambaNova; Wave 2 added 5: DOCX output, PDF output,
+HTML→Markdown conversion, ProviderDiverseTranslators, EnsembleFactory).
+This is the headline number to keep improving: each new genuine
+recording raises it.</p>
 <h2 id="team-actions">Team actions</h2>
 <ul>
 <li><strong>No operator decision owed for the former SSH/local
@@ -359,19 +373,23 @@ honest unknown, never guessed).</p>
 </tr>
 <tr>
 <td>Enumerated detailed rows (this doc + Status.md)</td>
-<td>494 (Rev 9 = 493 Rev 8 + 1 new unified-translator HTML→Markdown
-conversion row added for the Wave-2 html-to-md video; Rev 8 added the 7
-missing <code>pkg/bridge</code> ensemble-seam rows
-[<code>BestTranslator</code>, <code>BestTranslatorFunc</code>,
-<code>EnsembleFactory</code>, <code>ProviderDiverseTranslators</code>,
+<td>496 (Rev 14 = 494 Rev 13 + 2 new unified-translator rows EPUB→EPUB
+conversion + TXT→TXT translation added for the Wave-3f net-new videos;
+Rev 9 = 493 Rev 8 + 1 new unified-translator HTML→Markdown conversion
+row added for the Wave-2 html-to-md video; Rev 8 added the 7 missing
+<code>pkg/bridge</code> ensemble-seam rows [<code>BestTranslator</code>,
+<code>BestTranslatorFunc</code>, <code>EnsembleFactory</code>,
+<code>ProviderDiverseTranslators</code>,
 <code>ProviderDiverseClients</code>, <code>ProviderDiverseModels</code>,
 <code>BestClient</code>] → 493)</td>
 </tr>
 <tr>
 <td>Implemented</td>
-<td>443 (Rev 9: 442 Rev 8 + 1 new unified-translator HTML→Markdown
-conversion row; Rev 8: 435 Rev 7 + 7 new pkg/bridge ensemble-seam rows;
-was 471 Rev 6, −36 flipped to Obsolete Rev 7)</td>
+<td>445 (Rev 14: 443 Rev 13 + 2 new unified-translator rows EPUB→EPUB
+conversion + TXT→TXT translation, both Wave-3f video-confirmed; Rev 9:
+442 Rev 8 + 1 new unified-translator HTML→Markdown conversion row; Rev
+8: 435 Rev 7 + 7 new pkg/bridge ensemble-seam rows; was 471 Rev 6, −36
+flipped to Obsolete Rev 7)</td>
 </tr>
 <tr>
 <td><strong>Obsolete (→ Fixed.md)</strong></td>
@@ -401,10 +419,14 @@ host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td>41 (Wave 3d added 4 net-new prioritising feature-type diversity:
-<code>verify-models</code> CLI [real LLMsVerifier pipeline + ranking] +
-<code>workable-items</code> CLI [real SQLite validate+list] + 2
-providers nvidia + openrouter [distinct real EN→ES];
+<td>43 (Wave 3f added 2 net-new prioritising feature-type diversity:
+EPUB→EPUB conversion + TXT→TXT translation, each ffprobe+frame-verified
+§11.4.107; Wave 3f also re-confirmed FB2→FB2 / format-detection /
+<code>-script</code> Cyrillic↔︎Latin / markdown EPUB↔︎MD round-trip, not
+double-counted; Wave 3d added 4 net-new prioritising feature-type
+diversity: <code>verify-models</code> CLI [real LLMsVerifier pipeline +
+ranking] + <code>workable-items</code> CLI [real SQLite validate+list] +
+2 providers nvidia + openrouter [distinct real EN→ES];
 <code>upstage</code> HTTP-403 SKIP + <code>together</code> no-key SKIP;
 Wave 3c added 2: Hyperbolic library client + Fireworks
 <code>llm_provider</code> submodule client, distinct real EN→ES
@@ -601,12 +623,35 @@ local provider was removed in bridge phase-2 R-4).</li>
 </ul>
 <h2 id="top-gaps-engineering">Top gaps (engineering)</h2>
 <ol type="1">
-<li><strong>Video-confirmation 41/494.</strong> 41 rows carry real,
-ffprobe- and content-verified recordings. <strong>Wave 3d (2026-06-16)
-added 4 net-new</strong> prioritising feature-type diversity (real-use,
+<li><strong>Video-confirmation 43/496.</strong> 43 rows carry real,
+ffprobe- and content-verified recordings. <strong>Wave 3f (2026-06-16)
+added 2 net-new</strong> prioritising feature-type diversity (real-use,
 ffprobe non-zero dur+frames / 790×560 even-dims yuv420p, ≥6 frames
-extracted at fps=2 + content-verified per §11.4.107): the
-<strong><code>cmd/verify-models</code> CLI</strong>
+extracted at fps=4 + content-verified per §11.4.107): <strong>EPUB→EPUB
+conversion</strong>
+(<code>helix_translate-epub-output-wave3e-20260616.mp4</code>, EN .epub
+→ real deepseek run → OUTPUT EPUB carries real Spanish “La Antigua
+Farola la vieja farola se alzaba sola en la rocosa costa…”, start-frame
+English-only ≠ output-frame Spanish) and <strong>TXT→TXT
+translation</strong>
+(<code>helix_translate-txt-translation-wave3f-20260616.mp4</code>, EN
+.txt “The river flowed quietly…” → real deepseek run → ES .txt “El río
+fluía tranquilamente a través del valle verde. Los pájaros cantaban bajo
+la luz de la mañana.”). <strong>Wave 3f also re-confirmed</strong> (not
+double-counted) FB2→FB2
+(<code>helix_translate-fb2-convert-wave3e-20260616.mp4</code>, namespace
+preserved + real Spanish), format-detection
+(<code>helix_translate-format-detect-wave3e-20260616.mp4</code>,
+extensionless <code>.dat</code> detected-by-content),
+<code>-script</code> Cyrillic↔︎Latin
+(<code>helix_translate-script-conversion-wave3e-20260616.mp4</code>, RUN
+A latin ≠ RUN B cyrillic), markdown EPUB↔︎MD round-trip
+(<code>helix_translate-markdown-roundtrip-wave3f-20260616.mp4</code>, “#
+El Faro Viejo / El viejo faro se alzaba solitario en la costa rocosa.”).
+<strong>Wave 3d (2026-06-16) added 4 net-new</strong> prioritising
+feature-type diversity (real-use, ffprobe non-zero dur+frames / 790×560
+even-dims yuv420p, ≥6 frames extracted at fps=2 + content-verified per
+§11.4.107): the <strong><code>cmd/verify-models</code> CLI</strong>
 (<code>helix_translate-verify-models-wave3d-20260616.mp4</code>, real
 LLMsVerifier discovery/scoring/selection — 14 env-keyed providers with
 real per-provider reachable/auth/HTTP-status/candidate/verified counts
@@ -756,16 +801,21 @@ several <code>llms_verifier</code> packages
 <code>doc_processor/archdoc</code>.</li>
 </ol>
 <h2 id="video-coverage-ratio">Video-coverage ratio</h2>
-<p><code>41 / 494</code> enumerated rows = <strong>8.3%</strong> (≈ 9.8%
-against the 417 headline). Wave 3d added 4 net-new video confirmations
-prioritising feature-type diversity (<code>verify-models</code> CLI +
-<code>workable-items</code> CLI + 2 providers nvidia/openrouter;
-<code>upstage</code> HTTP-403 SKIP + <code>together</code> no-key SKIP,
-never faked); Wave 3c added 2 net-new video confirmations (Hyperbolic
-library client + Fireworks <code>llm_provider</code> submodule client,
-distinct real EN→ES translations via OpenAI-compat per-provider path; +
-re-confirmed REST translate + endpoints rows against a live TLS server,
-not double-counted); Wave 3b added 3 (Gemini + Zhipu + Cohere library
+<p><code>43 / 496</code> enumerated rows = <strong>8.7%</strong> (≈
+10.3% against the 417 headline). Wave 3f added 2 net-new video
+confirmations prioritising feature-type diversity (EPUB→EPUB conversion
++ TXT→TXT translation, each ffprobe+frame-verified §11.4.107; +
+re-confirmed FB2→FB2 / format-detection / <code>-script</code>
+Cyrillic↔︎Latin / markdown EPUB↔︎MD round-trip, not double-counted); Wave
+3d added 4 net-new video confirmations prioritising feature-type
+diversity (<code>verify-models</code> CLI + <code>workable-items</code>
+CLI + 2 providers nvidia/openrouter; <code>upstage</code> HTTP-403 SKIP
++ <code>together</code> no-key SKIP, never faked); Wave 3c added 2
+net-new video confirmations (Hyperbolic library client + Fireworks
+<code>llm_provider</code> submodule client, distinct real EN→ES
+translations via OpenAI-compat per-provider path; + re-confirmed REST
+translate + endpoints rows against a live TLS server, not
+double-counted); Wave 3b added 3 (Gemini + Zhipu + Cohere library
 clients); Wave 3a added 2 (Cerebras + SambaNova); Wave 2 added 5
 (DOCX/PDF/HTML→MD/ProviderDiverseTranslators/EnsembleFactory). This is
 the primary metric to drive upward; each anti-bluff §11.4.107 recording
