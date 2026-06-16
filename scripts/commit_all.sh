@@ -219,7 +219,9 @@ quiescence_check() {
         continue
       fi
       _found="$(LC_ALL=C grep -rIlE "$MUTATION_MARKERS" "$_ps" 2>/dev/null | grep -ivE "$_doc_exempt_re" | tr '\n' ' ')"
-      [ -n "${_found// /}" ] && _hits="$_hits $_found"
+      if [ -n "${_found// /}" ]; then
+        _hits="$_hits $_found"
+      fi
     fi
   done
   if [ -n "${_hits// /}" ]; then
