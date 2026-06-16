@@ -22,24 +22,35 @@
 # ---- build stage ----
 FROM docker.io/library/golang:1.26-alpine AS builder
 
-RUN apk add --no-cache git ca-certificates
+# gcc + musl-dev are required because the LLMsVerifier bridge (used by the
+# translation path AND the cmd/server startup) opens a go-sqlite3 store, and
+# go-sqlite3 requires cgo. Without cgo the binary ships a stub that fatals at
+# runtime ("Binary was compiled with 'CGO_ENABLED=0', go-sqlite3 requires cgo").
+RUN apk add --no-cache git ca-certificates gcc musl-dev
 
 WORKDIR /build
 
-# Dependency layer (cached unless go.mod/go.sum change).
-COPY go.mod go.sum ./
-RUN go mod download
-
-# Source.
+# Full source FIRST. This module uses local `replace` directives pointing at
+# in-tree directories (./challenges, ./containers, ./llms_verifier/llm-verifier,
+# etc.), so `go mod download` cannot run against only the root go.mod — it needs
+# every replaced module's go.mod present on disk. Copying the whole context
+# before resolving modules is the correct ordering for local-replace modules
+# (the dependency-only cache layer that copies just go.mod/go.sum BREAKS here:
+# `reading challenges/go.mod: no such file or directory`).
 COPY . .
 
+# Resolve modules now that all replace targets are present.
+RUN go mod download
+
 # Build the four runtime services with real, existing cmd targets.
-# CGO disabled for a static, portable binary (alpine final stage).
-ENV CGO_ENABLED=0 GOOS=linux
-RUN go build -ldflags "-X main.appVersion=2.3.0" -o /out/grpc-server    ./cmd/grpc-server \
- && go build -ldflags "-X main.appVersion=2.3.0" -o /out/api-server     ./cmd/api-server \
- && go build -ldflags "-X main.appVersion=2.3.0" -o /out/server         ./cmd/server \
- && go build -ldflags "-X main.appVersion=2.3.0" -o /out/monitor-server ./cmd/monitor-server
+# CGO enabled (go-sqlite3 needs it); static-linked against musl via the external
+# linker so the binaries still run on the plain alpine final stage with no
+# dynamic-lib dependency. -X sets the app version.
+ENV CGO_ENABLED=1 GOOS=linux
+RUN go build -tags "sqlite_omit_load_extension" -ldflags '-X main.appVersion=2.3.0 -linkmode external -extldflags "-static"' -o /out/grpc-server    ./cmd/grpc-server \
+ && go build -tags "sqlite_omit_load_extension" -ldflags '-X main.appVersion=2.3.0 -linkmode external -extldflags "-static"' -o /out/api-server     ./cmd/api-server \
+ && go build -tags "sqlite_omit_load_extension" -ldflags '-X main.appVersion=2.3.0 -linkmode external -extldflags "-static"' -o /out/server         ./cmd/server \
+ && go build -tags "sqlite_omit_load_extension" -ldflags '-X main.appVersion=2.3.0 -linkmode external -extldflags "-static"' -o /out/monitor-server ./cmd/monitor-server
 
 # ---- final stage ----
 FROM docker.io/library/alpine:3.20
@@ -58,6 +69,11 @@ COPY --from=builder /out/grpc-server    /app/grpc-server
 COPY --from=builder /out/api-server     /app/api-server
 COPY --from=builder /out/server         /app/server
 COPY --from=builder /out/monitor-server /app/monitor-server
+
+# Web assets: the api-server calls gin LoadHTMLGlob("web/templates/*") +
+# Static("/static", "./web/static") relative to its WORKDIR (/app), and panics
+# at startup if web/templates/* matches no files. Ship them into /app/web.
+COPY web/ /app/web/
 
 # Per-service dispatch entrypoint.
 COPY scripts/nezha-entrypoint.sh /app/nezha-entrypoint.sh

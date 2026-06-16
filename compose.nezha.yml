@@ -88,7 +88,7 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_secure_password}
     ports:
-      - "50051:50051"
+      - "${GRPC_HOST_PORT:-50051}:50051"
     depends_on:
       postgres:
         condition: service_healthy
@@ -119,7 +119,7 @@ services:
       GRPC_ADDRESS: grpc-server:50051
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
-      - "8080:8080"
+      - "${API_HOST_PORT:-8080}:8080"
     depends_on:
       grpc-server:
         condition: service_healthy
@@ -146,7 +146,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change-me-in-env-nezha}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
-      - "8443:8443"
+      - "${SERVER_HOST_PORT:-8443}:8443"
     volumes:
       - ./certs:/app/certs:ro
     depends_on:
@@ -179,7 +179,7 @@ services:
       MONITOR_SERVER_PORT: 8090
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
-      - "8090:8090"
+      - "${MONITOR_HOST_PORT:-8090}:8090"
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8090/health"]
       interval: 30s
