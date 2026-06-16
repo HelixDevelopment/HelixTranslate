@@ -1,0 +1,30 @@
+### verifier container
+llmsverifier_llm-verifier_1 Up 3 hours localhost/llm-verifier:nezha
+### verifier IP (NOTE: .77 now, prompt said .76 — §11.4.111 enum-index drift)
+"IPAddress":"10.89.9.77"
+"Aliases":["llm-verifier"
+### port binding
+8080/tcp -> 127.0.0.1:8080
+### health (loopback)
+{"database":"connected","database_status":"ok","status":"healthy","timestamp":1781635950}
+
+### models BEFORE
+{"count":0,"models":[]}
+
+### providers BEFORE
+{"count":0,"providers":[]}
+
+### route probes
+/api/models -> 200
+/api/v1/models -> 404
+/api/providers -> 200
+/api/v1/providers -> 404
+/api/verify -> 404
+/api/v1/verify -> 404
+/auth/login -> 404
+### CLI models list (hits v1 -> 404)
+2026/06/16 18:52:30 Failed to fetch models: API error: 404 Not Found - 404 page not found
+### helixtranslate verified-models (disabled = safe)
+{"error":"LLMsVerifier integration is disabled on this deployment","hint":"set llmsverifier.enabled=true (config.json) or LLMSVERIFIER_ENABLED=true to activate","reason":"llmsverifier_disabled"}
+### working translation (deepseek direct, non-degraded)
+{"original":"Good morning, how are you?","provider":"llm-mistral","session_id":"b4ea4dd3-f27d-4f65-8ec4-9dce97579239","stats":{"Total":1,"Translated":1,"Cached":0,"Errors":0},"translated":"Добро јутро, како сте?"}

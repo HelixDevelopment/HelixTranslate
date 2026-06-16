@@ -1,9 +1,26 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 87
-**Last modified:** 2026-06-16T20:20:00Z
+**Revision:** 88
+**Last modified:** 2026-06-16T19:00:00Z
 
-## ▶️ RESUME HERE (2026-06-16 ~20:20) — 🟢 BUG-CLASS FIXES + VIDEO 54→66 + 4-ITEM OPERATOR-REVIEW QUEUE ALL CLEARED (live-validated) · NEXT = bug-class review + full §11.4.40 retest → release-readiness
+## ▶️ RESUME HERE (2026-06-16 ~19:00) — 🏷️ RELEASED `helix_translate-2.3.1` · LLMsVerifier populate-then-wire = HONEST-BLOCKED (operator decision) · nezha NON-degraded on working direct path
+
+**SHORT:** Read this file + `.remember/remember.md` FIRST, then `git fetch --all --prune`. HEAD **`236bac8`** (VERSION 2.3.1), all 4 remotes synced. Annotated tag `helix_translate-2.3.1` published on main + 10 owned submodules (FF-only, §11.4.113). Release evidence `docs/qa/release_helix_translate-2.3.1_20260616T182714Z/`. **LLMsVerifier populate-then-wire (operator-approved post-tag work) = HONEST-BLOCKED** — the deployed `llm-verifier:nezha` image's `server` mode is read-only-by-design (no create/seed/v1/auth routes), so the empty-DB cannot be populated autonomously; per §11.4.6/§11.4.101 it was **NOT enabled** (enabling an empty verifier degrades translation), helixtranslate left on the working direct path (DeepSeek/Groq/mistral/novita), nezha NON-degraded. Evidence `docs/qa/llmsverifier_wire_20260616T185131Z/live_probes.txt`. **NEXT = operator decision on the verifier image (Option A rebuild-to-seed, recommended).**
+
+### 🟢 RELEASE + LLMsVERIFIER ARC (this session, post-rev87)
+- **🏷️ `helix_translate-2.3.1` RELEASED** — patch fix-cycle tag on main (VERSION 2.3.1) + 10 owned submodules (containers, challenges, doc_processor, llm_orchestrator, llm_provider, vision_engine, llms_verifier, constitution, docs_chain, security), pushed FF to every remote (NO force §11.4.113). EXCLUDED: helix_qa (§11.4.119) + helix_agent (incorporated-not-integrated). Pre-tag §11.4.40 GREEN (sweep 9/9 + build + go test 55 pkgs). Evidence `docs/qa/release_helix_translate-2.3.1_20260616T182714Z/`. Shipped: nezha 6-svc boot + 6 product defects fixed (commentary-contamination, create-default env-override, verifier 404→503, /health IDLE, unsupported-provider→400); 6-site Translate-arg DATA-LOSS bug-class (4fbe581); multipass+FB2 (c2aa7c8); MINOR-W6-1 (7cabe3f); /providers static-list bug (388a2eb, 19 real providers); secret-hygiene (04f71e9); video 43→66.
+- **⛔ LLMsVerifier populate-then-wire — HONEST-BLOCKED (no bluff, no degrade):**
+  - Separate nezha stack `llmsverifier` (compose dir `/home/milosvasic/helix-system/llmsverifier`, container `llmsverifier_llm-verifier_1`, image `llm-verifier:nezha`). IP drifted **.76→.77** but irrelevant — port bound **loopback-only** `127.0.0.1:8080`. `/api/health` 200 healthy; `/api/models` & `/api/providers` both **count:0**. Provider keys (GROQ/DEEPSEEK/GOOGLE) ALREADY present in the container env → keys are NOT the blocker.
+  - **Root cause (FACT, `llm-verifier/api/server.go` `Start()`):** the deployed `server` mounts EXACTLY 5 hardcoded read routes — `GET /api/health`, `GET /api/models` (reads DB, not config), `GET /api/models/`, `POST /api/models/{id}/verify` (needs model already in DB), `GET /api/providers`. NO create/seed route, NO `/api/v1/*`, NO `/auth/login` (all → 404, proven). `runServer()` does NOT seed `config.yaml` `llms:` (which is `[]`) into the DB. CLI `models create`/`import` POST to `/api/v1/models` → 404 on this build. `batch run` is a STUB. The only populate path = direct write to the encrypted SQLite DB (`DATABASE_ENCRYPTION_KEY` operator-owned, 600-perm `.env`) → operator-owned config I must NOT autonomously mutate (§11.4.122/§11.4.10/§9.2).
+  - **Decision:** DID NOT `network connect`, DID NOT set `LLMSVERIFIER_ENABLED`, NO helixtranslate compose/env change. Confirmed safe: `GET /api/v1/verified-models` → "integration is disabled"; working translation healthy en→sr `Добро јутро, како сте?` (bridge `llm-mistral`).
+
+### ⏭️ NEXT (priority order)
+1. **Operator decision on the verifier image** (§11.4.66) — Option A (recommended): rebuild `llm-verifier:nezha` so `runServer()` seeds `config.yaml` `llms:` into the DB at boot (or add a `seed`/`verify-all` subcommand writing via `database.CreateModel`, NOT the HTTP client), populate `config.yaml` `llms:` (deepseek+groq), rebuild+restart, `POST /api/models/{id}/verify` → real score → count>0; THEN run the verified helixtranslate wiring (network connect + `LLMSVERIFIER_ENABLED=true` + `LLMSVERIFIER_API_URL=http://llm-verifier:8080` — note verifier must publish on `llmsverifier_default`, not loopback-only — + `scripts/nezha-deploy.sh reboot` + sink-side re-validate `/api/v1/verified-models` real data). Option B: operator seeds the encrypted DB directly.
+2. Known non-blocking (post-2.3.1, recorded not in tag): see `.remember/remember.md`.
+
+---
+
+## ▶️ (prior) RESUME HERE (2026-06-16 ~20:20) — 🟢 BUG-CLASS FIXES + VIDEO 54→66 + 4-ITEM OPERATOR-REVIEW QUEUE ALL CLEARED (live-validated) · NEXT = bug-class review + full §11.4.40 retest → release-readiness
 
 **SHORT:** Read this file + `.remember/remember.md` FIRST, then `git fetch --all --prune`. HEAD `d7b4407` (all 4 remotes synced). Live nezha stack rebuilt onto image **08900424e481** (all 6 services healthy incl. monitor — the stranded-monitor bug is fixed). The 4-item operator-review queue is **CLEARED**. NEXT: independent review of the §11.4.69/§11.4.115 bug-class fixes (4fbe581 6-site Translate-arg data-loss + 7cabe3f MINOR-W6-1) → full §11.4.40 retest from last tag → release-readiness (operator tag decision per §11.4.151).
 
