@@ -218,7 +218,11 @@ quiescence_check() {
       if [ "$_nlines" = "1" ] && [ "$_mode1" = "160000" ]; then
         continue
       fi
-      _found="$(LC_ALL=C grep -rIlE "$MUTATION_MARKERS" "$_ps" 2>/dev/null | grep -ivE "$_doc_exempt_re" | tr '\n' ' ')"
+      # '|| true': when grep -ivE filters every hit (all doc-exempt) it exits 1, and
+      # under set -e+pipefail a failing command-substitution ASSIGNMENT would exit the
+      # whole script. The trailing '|| true' keeps the substitution status 0 (empty
+      # _found is the correct "no code residue" result).
+      _found="$(LC_ALL=C grep -rIlE "$MUTATION_MARKERS" "$_ps" 2>/dev/null | grep -ivE "$_doc_exempt_re" | tr '\n' ' ' || true)"
       if [ -n "${_found// /}" ]; then
         _hits="$_hits $_found"
       fi
