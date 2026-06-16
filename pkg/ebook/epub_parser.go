@@ -415,6 +415,14 @@ func (p *EPUBParser) parseContentFile(f *zip.File) (*Chapter, error) {
 
 	content = strings.TrimSpace(content)
 
+	// Drop the leading body heading (<h1>) when it equals the promoted chapter
+	// title, so the title is carried EXACTLY ONCE (in chapter.Title) and not also
+	// repeated as the start of Content (MINOR-W6-1,
+	// docs/qa/minor_w6_1_rootcause_20260616-151123/FINDING.md). The EPUB <head>
+	// is already stripped above; this removes the residual <h1> body copy. No-op
+	// when Content does not start with the title.
+	content = stripLeadingTitle(content, chapterTitle)
+
 	if content == "" {
 		return nil, nil
 	}

@@ -46,6 +46,12 @@ func (p *HTMLParser) Parse(filename string) (*Book, error) {
 	// Extract content
 	content := p.extractText(doc)
 
+	// Drop the leading body heading (<h1>) when it equals the promoted chapter
+	// title, so the title is carried EXACTLY ONCE (in chapter.Title) and not also
+	// repeated as the first line of Content (MINOR-W6-1). No-op when the first
+	// line differs from the title, so non-duplicating inputs are untouched.
+	content = stripLeadingTitle(content, book.Metadata.Title)
+
 	// Create single chapter
 	chapter := Chapter{
 		Title: book.Metadata.Title,
@@ -59,6 +65,41 @@ func (p *HTMLParser) Parse(filename string) (*Book, error) {
 	book.Chapters = append(book.Chapters, chapter)
 
 	return book, nil
+}
+
+// stripLeadingTitle removes a single leading occurrence of title from the start
+// of content when content begins with it, so a chapter title promoted into
+// chapter.Title is not ALSO carried as the first line/prefix of Section.Content
+// (the MINOR-W6-1 duplication). It is a strict no-op when:
+//   - title is empty/whitespace, or
+//   - content's leading text does NOT equal title (different first line/prefix).
+//
+// Only the leading occurrence is removed — interior repetitions of the title
+// text inside the body are preserved. Both the HTML ("Title\n\nbody") and EPUB
+// ("Title body") leading-title shapes are handled.
+func stripLeadingTitle(content, title string) string {
+	t := strings.TrimSpace(title)
+	if t == "" {
+		return content
+	}
+	// Work against a left-trimmed copy so leading whitespace before the title
+	// does not defeat the prefix check; only strip when the FIRST visible token
+	// run equals the title.
+	lead := strings.TrimLeft(content, " \t\r\n")
+	if !strings.HasPrefix(lead, t) {
+		return content
+	}
+	rest := lead[len(t):]
+	// The title must be a complete leading unit, i.e. followed by whitespace or
+	// end-of-content — never a prefix of a longer word (e.g. title "Cat" must not
+	// strip "Caterpillar").
+	if rest != "" {
+		r := rest[0]
+		if r != ' ' && r != '\t' && r != '\r' && r != '\n' {
+			return content
+		}
+	}
+	return strings.TrimLeft(rest, " \t\r\n")
 }
 
 // findTitle finds the title in HTML
@@ -99,8 +140,11 @@ func (p *HTMLParser) extractTextWithContext(n *html.Node, inPre bool) string {
 	newInPre := inPre || (n.Type == html.ElementNode && n.Data == "pre")
 
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		// Skip script and style tags
-		if c.Type == html.ElementNode && (c.Data == "script" || c.Data == "style") {
+		// Skip script, style and head tags. <head> (incl. its <title>) is metadata,
+		// not body content — harvesting it leaked the <title> text into Content,
+		// duplicating the chapter title (MINOR-W6-1,
+		// docs/qa/minor_w6_1_rootcause_20260616-151123/FINDING.md).
+		if c.Type == html.ElementNode && (c.Data == "script" || c.Data == "style" || c.Data == "head") {
 			continue
 		}
 
