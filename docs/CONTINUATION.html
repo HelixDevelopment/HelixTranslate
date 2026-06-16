@@ -1,31 +1,29 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 81 <strong>Last modified:</strong>
-2026-06-16T03:35:00Z</p>
+<p><strong>Revision:</strong> 82 <strong>Last modified:</strong>
+2026-06-16T09:45:00Z</p>
 <h2
-id="resume-here-2026-06-16-0335-bridge-phase-2-complete-11.4.40-retest-pass-build-pristine-tag-ready-only-the-first-ever-release-tag-remains-needs-2-operator-decisions">▶️
-RESUME HERE (2026-06-16 ~03:35) — bridge phase-2 COMPLETE + §11.4.40
-RETEST PASS → build PRISTINE + TAG-READY (only the first-ever release
-TAG remains, needs 2 operator decisions)</h2>
+id="resume-here-2026-06-16-0945-released-helix_translate-2.3.0-bridge-phase-2-complete-retest-pass-tag-published-across-main-10-owned-submodules">▶️
+RESUME HERE (2026-06-16 ~09:45) — 🏷️ RELEASED
+<code>helix_translate-2.3.0</code> — bridge phase-2 COMPLETE + retest
+PASS + TAG PUBLISHED across main + 10 owned submodules</h2>
 <h3
 id="short-resumption-paste-this-first-sentence-into-a-fresh-session">§11.4.127
 SHORT resumption (paste this first sentence into a fresh session)</h3>
 <p>Read <code>docs/CONTINUATION.md</code> (this file) +
 <code>.remember/remember.md</code> +
 <code>docs/qa/bridge_phase2_retest_20260616/SUMMARY.md</code> FIRST,
-then <code>git fetch --all --prune</code>; <strong>bridge phase-2
-(no-local-runtime) is COMPLETE and the full §11.4.40 retest PASSED — the
-build is PRISTINE + TAG-READY</strong> (sweep all-9-gates green, build
-clean, functional 55 pkgs OK, -race only pre-existing test/distributed,
-meta-tests bite, determinism stable; every change P-1→R-5 +
-format/verifier reviewed GO); the ONE remaining step is the
-<strong>first-ever release TAG</strong>, which needs 2 operator
-decisions (version <code>helix_translate-2.3.0</code> vs bump
-<code>2.4.0</code> §11.4.73; the §11.4.151-every-submodule vs
-§11.4.119-<code>helix_qa</code>-off-limits set) — do NOT guess these
-(§11.4.6); continue the endless autonomous loop (§11.4.126), no
-force-push (§11.4.113), require API keys (no local runtime).</p>
+then <code>git fetch --all --prune</code>; <strong>the no-local-runtime
+release <code>helix_translate-2.3.0</code> is PUBLISHED</strong> —
+annotated tag on main (<code>6b81a10</code>) + all 10 owned submodules
+(each at its gitlink-pinned commit), pushed to every remote;
+<code>helix_qa</code> tag is OWED (skipped per §11.4.119 —
+operator/other-session to tag it). Bridge phase-2 (LLMsVerifier-only,
+llama.cpp/Ollama/SSH-local removed, distributed API kept) is COMPLETE,
+all-reviewed-GO, §11.4.40 retest PASS. Continue the endless autonomous
+loop (§11.4.126), no force-push (§11.4.113). Remaining = only
+non-blocking future-cycle follow-ups (see below).</p>
 <h3
 id="full-resumption-live-state-anchors-verified-this-session-against-git">§11.4.127
 FULL resumption (live-state anchors — verified this session against
@@ -101,15 +99,17 @@ ENVIRONMENT artifacts (worktree missing submodules; worktree checkout
 mtime) — same gate PASSES on the real main checkout; NOT
 regressions.</li>
 </ul>
-<p><strong>PHASE-2 CLOSED. BUILD PRISTINE + TAG-READY.</strong> The ONLY
-remaining step is the <strong>first-ever release TAG</strong> — DEFERRED
-to operator (2 genuine release-policy decisions, NOT guessed
-§11.4.6/§11.4.101): (1) version <code>helix_translate-2.3.0</code> vs
-bump <code>2.4.0</code> (§11.4.73); (2) §11.4.151 “every owned
-submodule” vs §11.4.119 <code>helix_qa</code>-off-limits — bless the
-submodule set. Prefix <code>helix_translate</code> (.env
-HELIX_RELEASE_PREFIX); zero existing tags. Then: tag main + owned
-submodules (except helix_qa) + push FF all remotes (NO force).</p>
+<p><strong>PHASE-2 CLOSED + RELEASED.</strong> 🏷️
+<strong><code>helix_translate-2.3.0</code></strong> (operator “do tag
+now” 2026-06-16; safest zero-churn calls: version = current VERSION
+2.3.0 no bump; set = main + 10 owned submodules, helix_qa excluded
+§11.4.119). Annotated tag created + pushed to ALL remotes across
+<strong>main (<code>6b81a10</code>) +
+containers/challenges/doc_processor/llm_orchestrator/llm_provider/vision_engine/llms_verifier/constitution/docs_chain/security</strong>
+(each at its gitlink-pinned commit), verified via ls-remote (main
+<code>^{}</code>→6b81a10). <strong>OWED:</strong> <code>helix_qa</code>
+tag (off-limits to this session §11.4.119 — operator/its session to
+apply <code>helix_translate-2.3.0</code>).</p>
 <p><strong>Non-blocking follow-ups (not product defects):</strong> (a)
 <code>host_no_auto_suspend</code> challenge FAILs = HOST not hardened
 against auto-suspend — environment (§11.4.3), host power config NOT
