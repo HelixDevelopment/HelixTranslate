@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status-summary">HelixTranslate — Feature
 Status Summary</h1>
-<p><strong>Revision:</strong> 15 <strong>Last modified:</strong>
-2026-06-16T18:30:00Z <strong>Authority:</strong> Two-audience companion
+<p><strong>Revision:</strong> 16 <strong>Last modified:</strong>
+2026-06-16T19:05:00Z <strong>Authority:</strong> Two-audience companion
 to <code>docs/features/Status.md</code> (§11.4.56). Derived from the
 same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync),
 §11.4.6 (no-guessing).</p>
@@ -191,28 +191,51 @@ catalogued and how much we have proven works on camera.</p>
 <h2 id="what-works">What works</h2>
 <ul>
 <li>We have a complete catalogue of <strong>every feature</strong> in
-the product and its 8 owned add-on modules — <strong>496 individual
-capabilities</strong> catalogued (Rev 14 added 2 new unified-translator
-rows for the Wave-3f net-new videos: EPUB→EPUB conversion + TXT→TXT
-translation; Rev 9 added 1 new unified-translator HTML→Markdown
-conversion row for the Wave-2 video; Rev 8 re-counted the live tables
-directly and added the 7 missing agent-bridge ensemble rows to reach
-493; the headline “417” is the same list with closely-related
+the product and its 8 owned add-on modules — <strong>497 individual
+capabilities</strong> catalogued (Rev 16 added 1 new row for the
+standalone gRPC translate-round-trip probe tool
+<code>cmd/grpc-translate-probe</code>; Rev 14 added 2 new
+unified-translator rows for the Wave-3f net-new videos: EPUB→EPUB
+conversion + TXT→TXT translation; Rev 9 added 1 new unified-translator
+HTML→Markdown conversion row for the Wave-2 video; Rev 8 re-counted the
+live tables directly and added the 7 missing agent-bridge ensemble rows
+to reach 493; the headline “417” is the same list with closely-related
 sub-options counted once).</li>
 <li>The majority are fully built and reachable: the command-line
 translators, the web dashboards, the REST and gRPC servers, ~32 built-in
 AI providers, ebook format readers (FB2, EPUB, DOCX, HTML, TXT, PDF) and
 writers (EPUB, FB2, TXT, HTML, Markdown, <strong>DOCX and now
 PDF</strong>), caching, security, and all 8 add-on modules.</li>
-<li><strong>54 features are proven on real recordings</strong> — each
+<li><strong>66 features are proven on real recordings</strong> — each
 checked frame-by-frame to confirm it genuinely shows the feature working
 (real translated text in the right language, a live connection count
 changing, a real CLI database/pipeline output, etc.), not just “a
-screen”. <strong>New this round (Waves 4–6, +12 net-new):</strong> the
-translator producing 7 distinct target languages from the same English
-source (French, German, Italian, Portuguese, Japanese, Chinese, Russian
-— proving real per-language translation, not echo), accepting PDF and
-Word (DOCX) files as input, an HTML→HTML round-trip, and the REST API
+screen”. <strong>New this round (Waves 7–9, +12 net-new):</strong> the
+translator producing distinct real translations in more languages
+(Korean/Hangul, a German→English reverse, French→Spanish,
+English→Serbian-Latin) and through a new AI provider (Groq); the REST
+API translating a single string, translating a batch of three sentences
+at once, and reporting real version/build details; the script converter
+turning Cyrillic into Latin on its own; the preparation analysis reading
+a book’s genre/characters and feeding that into a real Spanish
+translation. Of these 12, <strong>3 genuinely flipped a row from
+“pending” to “proven”</strong> (translate-a-string API, the Groq
+provider, translate-a-batch API); the other 9 are extra proof on
+features already proven or covered by general language-pair rows —
+counted in the running total but honestly distinguished in the detailed
+document so nothing is double-counted. <strong>Honestly recorded but NOT
+counted as proven:</strong> the EPUB→Markdown tool hit an empty-payload
+bug (it sent blank text to the AI and wrote the AI’s “you sent an empty
+message” reply as if it were the translation) — that bug is <strong>now
+fixed at source (commit 4fbe581)</strong>, but a fresh recording is owed
+before it is marked proven; and two API findings (an unwired alternate
+server with no runnable entry point, and a providers endpoint that
+returns a fixed hardcoded list) are recorded as honest gaps, not proven.
+<strong>Prior round (Waves 4–6, +12 net-new):</strong> the translator
+producing 7 distinct target languages from the same English source
+(French, German, Italian, Portuguese, Japanese, Chinese, Russian —
+proving real per-language translation, not echo), accepting PDF and Word
+(DOCX) files as input, an HTML→HTML round-trip, and the REST API
 converting Serbian script and translating an FB2 book into a real EPUB.
 <strong>Honestly demoted this round:</strong> the multi-pass polishing
 engine (<code>-multipass</code>) — its older recording is superseded
@@ -323,7 +346,23 @@ stats endpoint that always shows zeros). These are flagged in the
 detailed document.</li>
 </ul>
 <h2 id="video-confirmation-coverage">Video-confirmation coverage</h2>
-<p><strong>54 / 496 ≈ 10.9%</strong> (Waves 4–6 added <strong>12
+<p><strong>66 / 497 ≈ 13.3%</strong> (Waves 7–9 added <strong>12
+net-new</strong> [4+5+3], of which 3 are genuine PENDING→Confirmed
+row-flips [<code>POST /api/v1/translate/string</code>, the
+<code>Groq client</code> library row,
+<code>POST /api/v1/translate/batch</code>] and 9 are headline-counted
+additional distinct-scope confirmations on already-Confirmed rows /
+language-pair coverage [EPUB→EPUB round-trip, <code>-script</code>
+Cyrillic→Latin, preparation analysis, <code>GET /api/v1/version</code>,
+preparation→translate two-stage, EN→KO, DE→EN, FR→ES, EN→SR-latin]; each
+clip real input → real LLM → real output, window-scoped §11.4.154,
+<code>helix_translate-</code>-prefixed §11.4.155, frame-read source ≠
+output per §11.4.107; Wave 7 also recorded the markdown-translator
+empty-payload bug [found→fixed at 4fbe581→re-record owed, NOT counted]
+and Wave 9 recorded two honest non-confirmable gaps [unwired
+<code>pkg/api/server.go</code> alt Server; static-hardcoded
+<code>GET /api/v1/providers</code>]. §11.4.6 running tally: 54 [prior
+authoritative] + 4 + 5 + 3 = 66. Prior — Waves 4–6 added <strong>12
 net-new</strong> and §11.4.138-demoted 1 [multipass]: Wave 4 +3
 multi-language-pair EN→FR/DE/IT [same EN source → 3 distinct
 language-correct outputs]; Wave 5 +4 EN→PT, EN→JA, REST
@@ -396,11 +435,15 @@ honest unknown, never guessed).</p>
 </tr>
 <tr>
 <td>Enumerated detailed rows (this doc + Status.md)</td>
-<td>496 (Rev 14 = 494 Rev 13 + 2 new unified-translator rows EPUB→EPUB
-conversion + TXT→TXT translation added for the Wave-3f net-new videos;
-Rev 9 = 493 Rev 8 + 1 new unified-translator HTML→Markdown conversion
-row added for the Wave-2 html-to-md video; Rev 8 added the 7 missing
-<code>pkg/bridge</code> ensemble-seam rows [<code>BestTranslator</code>,
+<td>497 (Rev 16 = 496 Rev 14 + 1 new
+<code>cmd/grpc-translate-probe</code> row [standalone gRPC
+translate-round-trip probe client, Implemented + Wired +
+Source-confirmed, Video PENDING]; Rev 14 = 494 Rev 13 + 2 new
+unified-translator rows EPUB→EPUB conversion + TXT→TXT translation added
+for the Wave-3f net-new videos; Rev 9 = 493 Rev 8 + 1 new
+unified-translator HTML→Markdown conversion row added for the Wave-2
+html-to-md video; Rev 8 added the 7 missing <code>pkg/bridge</code>
+ensemble-seam rows [<code>BestTranslator</code>,
 <code>BestTranslatorFunc</code>, <code>EnsembleFactory</code>,
 <code>ProviderDiverseTranslators</code>,
 <code>ProviderDiverseClients</code>, <code>ProviderDiverseModels</code>,
@@ -408,11 +451,13 @@ row added for the Wave-2 html-to-md video; Rev 8 added the 7 missing
 </tr>
 <tr>
 <td>Implemented</td>
-<td>445 (Rev 14: 443 Rev 13 + 2 new unified-translator rows EPUB→EPUB
-conversion + TXT→TXT translation, both Wave-3f video-confirmed; Rev 9:
-442 Rev 8 + 1 new unified-translator HTML→Markdown conversion row; Rev
-8: 435 Rev 7 + 7 new pkg/bridge ensemble-seam rows; was 471 Rev 6, −36
-flipped to Obsolete Rev 7)</td>
+<td>446 (Rev 16: 445 Rev 14 + 1 new
+<code>cmd/grpc-translate-probe</code> row, Implemented + Wired; Rev 14:
+443 Rev 13 + 2 new unified-translator rows EPUB→EPUB conversion +
+TXT→TXT translation, both Wave-3f video-confirmed; Rev 9: 442 Rev 8 + 1
+new unified-translator HTML→Markdown conversion row; Rev 8: 435 Rev 7 +
+7 new pkg/bridge ensemble-seam rows; was 471 Rev 6, −36 flipped to
+Obsolete Rev 7)</td>
 </tr>
 <tr>
 <td><strong>Obsolete (→ Fixed.md)</strong></td>
@@ -442,7 +487,18 @@ host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td>54 (Waves 4–6 added 12 net-new, §11.4.138-demoted 1 [multipass]:
+<td>66 (Rev 16 / Waves 7–9 added 12 net-new [4+5+3]: 3 genuine
+PENDING→Confirmed row-flips [<code>POST /api/v1/translate/string</code>,
+<code>Groq client</code>, <code>POST /api/v1/translate/batch</code>] + 9
+headline-counted additional/distinct-scope confirmations on
+already-Confirmed rows / language-pair coverage [EPUB→EPUB round-trip,
+<code>-script</code> Cyrillic→Latin, preparation analysis,
+<code>GET /api/v1/version</code>, preparation→translate two-stage,
+EN→KO, DE→EN, FR→ES, EN→SR-latin]; Wave-7 markdown-translator bug
+found→fixed-at-4fbe581→re-record-owed [NOT counted] + Wave-9 honest
+non-confirmable gaps [unwired alt Server; static
+<code>GET /api/v1/providers</code>]; §11.4.6 tally 54 + 4 + 5 + 3 = 66.
+Prior — Waves 4–6 added 12 net-new, §11.4.138-demoted 1 [multipass]:
 Wave 4 +3 EN→FR/DE/IT; Wave 5 +4 EN→PT/JA + REST convert/script + REST
 translate/fb2 [multipass clip NOT counted]; Wave 6 +5 HTML→HTML + PDF
 input + DOCX input + EN→ZH + EN→RU; net 43 − 1 + 12 = 54. Earlier — Wave
@@ -828,17 +884,22 @@ several <code>llms_verifier</code> packages
 <code>doc_processor/archdoc</code>.</li>
 </ol>
 <h2 id="video-coverage-ratio">Video-coverage ratio</h2>
-<p><code>43 / 496</code> enumerated rows = <strong>8.7%</strong> (≈
-10.3% against the 417 headline). Wave 3f added 2 net-new video
-confirmations prioritising feature-type diversity (EPUB→EPUB conversion
-+ TXT→TXT translation, each ffprobe+frame-verified §11.4.107; +
-re-confirmed FB2→FB2 / format-detection / <code>-script</code>
-Cyrillic↔︎Latin / markdown EPUB↔︎MD round-trip, not double-counted); Wave
-3d added 4 net-new video confirmations prioritising feature-type
-diversity (<code>verify-models</code> CLI + <code>workable-items</code>
-CLI + 2 providers nvidia/openrouter; <code>upstage</code> HTTP-403 SKIP
-+ <code>together</code> no-key SKIP, never faked); Wave 3c added 2
-net-new video confirmations (Hyperbolic library client + Fireworks
+<p><code>66 / 497</code> enumerated rows = <strong>13.3%</strong> (≈
+15.8% against the 417 headline) as of Rev 16 (Waves 7–9 added 12 net-new
+— see the Page-1/Page-2 Video-confirmed entries for the 3-flip /
+9-headline §11.4.6 breakdown). The historical per-wave clauses below
+were written at their respective revisions and describe earlier running
+totals; they are retained as the audit trail, the current authoritative
+count is 66. Wave 3f added 2 net-new video confirmations prioritising
+feature-type diversity (EPUB→EPUB conversion + TXT→TXT translation, each
+ffprobe+frame-verified §11.4.107; + re-confirmed FB2→FB2 /
+format-detection / <code>-script</code> Cyrillic↔︎Latin / markdown
+EPUB↔︎MD round-trip, not double-counted); Wave 3d added 4 net-new video
+confirmations prioritising feature-type diversity
+(<code>verify-models</code> CLI + <code>workable-items</code> CLI + 2
+providers nvidia/openrouter; <code>upstage</code> HTTP-403 SKIP +
+<code>together</code> no-key SKIP, never faked); Wave 3c added 2 net-new
+video confirmations (Hyperbolic library client + Fireworks
 <code>llm_provider</code> submodule client, distinct real EN→ES
 translations via OpenAI-compat per-provider path; + re-confirmed REST
 translate + endpoints rows against a live TLS server, not

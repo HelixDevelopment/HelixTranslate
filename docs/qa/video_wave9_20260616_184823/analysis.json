@@ -1,0 +1,322 @@
+{
+  "source_language": "English",
+  "target_language": "Spanish",
+  "passes": [
+    {
+      "pass_number": 1,
+      "provider": "llm-deepseek",
+      "model": "",
+      "analysis": {
+        "content_type": "short story",
+        "genre": "literary fiction",
+        "subgenres": [
+          "sea story",
+          "character-driven narrative"
+        ],
+        "tone": "poetic, reflective, somber with moments of warmth",
+        "language_style": "simple yet evocative, with maritime imagery, direct dialogue, and a folkloric cadence",
+        "target_audience": "general adult readers, lovers of literary and coastal tales",
+        "untranslatable_terms": [
+          {
+            "term": "Stormcrag Point",
+            "original_script": "Stormcrag Point",
+            "reason": "Proper place name; translation would lose the evocative compound meaning ('storm' + 'crag') and the geographic specificity",
+            "context": [
+              "the lighthouse on Stormcrag Point"
+            ],
+            "transliteration": "Stormcrag Point"
+          },
+          {
+            "term": "Captain Marlowe",
+            "original_script": "Captain Marlowe",
+            "reason": "Proper name; 'Marlowe' has literary resonance (Christopher Marlowe) and should remain unchanged",
+            "context": [
+              "Old Captain Marlowe",
+              "Captain Marlowe"
+            ],
+            "transliteration": "Capitán Marlowe"
+          },
+          {
+            "term": "Eli",
+            "original_script": "Eli",
+            "reason": "Proper name; common English name with biblical roots, no standard Spanish equivalent",
+            "context": [
+              "young Eli",
+              "Eli took the keeper's oath"
+            ],
+            "transliteration": "Eli"
+          }
+        ],
+        "footnote_guidance": [
+          {
+            "term": "keeper's oath",
+            "explanation": "A ceremonial promise taken by lighthouse keepers to maintain the light; no direct equivalent in Spanish culture, but context makes it clear",
+            "locations": [
+              "Eli took the keeper's oath"
+            ],
+            "priority": "low"
+          },
+          {
+            "term": "the brass key",
+            "explanation": "Symbolic object representing the transfer of responsibility; culturally understood, no footnote needed",
+            "locations": [
+              "handed him the brass key"
+            ],
+            "priority": "low"
+          }
+        ],
+        "characters": [
+          {
+            "name": "Captain Marlowe",
+            "alternate_names": [
+              "Old Captain Marlowe",
+              "the old captain"
+            ],
+            "role": "protagonist/mentor",
+            "speech_pattern": "terse, philosophical, with a maritime dialect ('the sea takes what it wants')",
+            "key_traits": [
+              "wise",
+              "resilient",
+              "humble",
+              "devoted to duty"
+            ],
+            "name_translation": {
+              "sr": "Capitán Marlowe"
+            }
+          },
+          {
+            "name": "Eli",
+            "alternate_names": [
+              "young Eli"
+            ],
+            "role": "apprentice/successor",
+            "speech_pattern": "not directly quoted; described as young and learning",
+            "key_traits": [
+              "dutiful",
+              "respectful",
+              "inheritor of the legacy"
+            ],
+            "name_translation": {
+              "sr": "Eli"
+            }
+          }
+        ],
+        "key_themes": [
+          "duty and sacrifice",
+          "the struggle between nature and human will",
+          "legacy and passing of knowledge",
+          "light as a symbol of hope and responsibility",
+          "the sea as an indifferent force"
+        ],
+        "cultural_references": [
+          {
+            "reference": "lighthouse keeper",
+            "origin": "Western maritime tradition (19th-20th century)",
+            "explanation": "A person responsible for maintaining a lighthouse; a romanticized but real occupation in coastal communities",
+            "handling": "translate as 'farero' or 'guardián del faro'; 'farero' is standard in Spanish"
+          },
+          {
+            "reference": "the Atlantic",
+            "origin": "Geographic reference",
+            "explanation": "The Atlantic Ocean; universally recognized",
+            "handling": "translate as 'el Atlántico'"
+          },
+          {
+            "reference": "the town called it a miracle",
+            "origin": "Biblical/folkloric trope",
+            "explanation": "Common expression of awe; no specific cultural reference needed",
+            "handling": "translate idiomatically as 'el pueblo lo llamó un milagro'"
+          }
+        ],
+        "chapter_analyses": [
+          {
+            "chapter_id": "chapter_1",
+            "chapter_num": 1,
+            "title": "Content",
+            "summary": "El viejo capitán Marlowe ha cuidado el faro de Punta Tormenta durante cuarenta años, transmitiendo su sabiduría a su joven aprendiz, Eli. Tras rescatar a tres marineros durante una tormenta invernal, Eli jura como farero y recibe la llave de latón del capitán.",
+            "key_points": [
+              "El capitán Marlowe ha sido farero en Punta Tormenta durante cuarenta años.",
+              "Marlowe entrena a un joven aprendiz llamado Eli.",
+              "Durante una tormenta invernal, un barco naufraga y ambos rescatan a tres marineros.",
+              "El pueblo considera el rescate un milagro, pero Marlowe lo atribuye a mantener la luz encendida.",
+              "En primavera, Eli toma el juramento de farero.",
+              "El capitán Marlowe le entrega la llave de latón a Eli, simbolizando la transferencia de la responsabilidad."
+            ],
+            "caveats": [
+              "El nombre 'Stormcrag Point' debe traducirse de forma evocadora pero natural; 'Punta Tormenta' captura el sentido sin ser literal.",
+              "La frase 'The sea takes what it wants' tiene un tono sentencioso y fatalista; en español debe sonar igual de rotunda, como 'El mar se lleva lo que quiere'.",
+              "El diálogo de Marlowe es lacónico y sabio; hay que mantener esa brevedad y peso en español.",
+              "El término 'keeper's oath' no tiene un equivalente directo; 'juramento de farero' es claro y mantiene la solemnidad.",
+              "La entrega de la 'brass key' es un símbolo de legado; 'llave de latón' conserva el matiz material y simbólico."
+            ],
+            "tone": "El tono es sereno y melancólico, con un trasfondo de respeto por el mar y el deber. La narrativa es pausada y reflexiva, con momentos de tensión durante la tormenta. El registro emocional es sobrio pero cálido, especialmente en la transferencia del legado.",
+            "complexity": "simple",
+            "special_notes": "El capítulo tiene un estilo literario sencillo pero cargado de simbolismo. La traducción debe priorizar la naturalidad y la fluidez, evitando calcos del inglés. Los nombres propios (Marlowe, Eli) se mantienen sin cambios."
+          }
+        ],
+        "analysis_version": 1,
+        "analyzed_at": "2026-06-16T18:51:18.944237+03:00",
+        "analyzed_by": "llm-deepseek"
+      },
+      "duration": 9447377875,
+      "tokens_used": 1997
+    }
+  ],
+  "final_analysis": {
+    "content_type": "short story",
+    "genre": "literary fiction",
+    "subgenres": [
+      "sea story",
+      "character-driven narrative"
+    ],
+    "tone": "poetic, reflective, somber with moments of warmth",
+    "language_style": "simple yet evocative, with maritime imagery, direct dialogue, and a folkloric cadence",
+    "target_audience": "general adult readers, lovers of literary and coastal tales",
+    "untranslatable_terms": [
+      {
+        "term": "Stormcrag Point",
+        "original_script": "Stormcrag Point",
+        "reason": "Proper place name; translation would lose the evocative compound meaning ('storm' + 'crag') and the geographic specificity",
+        "context": [
+          "the lighthouse on Stormcrag Point"
+        ],
+        "transliteration": "Stormcrag Point"
+      },
+      {
+        "term": "Captain Marlowe",
+        "original_script": "Captain Marlowe",
+        "reason": "Proper name; 'Marlowe' has literary resonance (Christopher Marlowe) and should remain unchanged",
+        "context": [
+          "Old Captain Marlowe",
+          "Captain Marlowe"
+        ],
+        "transliteration": "Capitán Marlowe"
+      },
+      {
+        "term": "Eli",
+        "original_script": "Eli",
+        "reason": "Proper name; common English name with biblical roots, no standard Spanish equivalent",
+        "context": [
+          "young Eli",
+          "Eli took the keeper's oath"
+        ],
+        "transliteration": "Eli"
+      }
+    ],
+    "footnote_guidance": [
+      {
+        "term": "keeper's oath",
+        "explanation": "A ceremonial promise taken by lighthouse keepers to maintain the light; no direct equivalent in Spanish culture, but context makes it clear",
+        "locations": [
+          "Eli took the keeper's oath"
+        ],
+        "priority": "low"
+      },
+      {
+        "term": "the brass key",
+        "explanation": "Symbolic object representing the transfer of responsibility; culturally understood, no footnote needed",
+        "locations": [
+          "handed him the brass key"
+        ],
+        "priority": "low"
+      }
+    ],
+    "characters": [
+      {
+        "name": "Captain Marlowe",
+        "alternate_names": [
+          "Old Captain Marlowe",
+          "the old captain"
+        ],
+        "role": "protagonist/mentor",
+        "speech_pattern": "terse, philosophical, with a maritime dialect ('the sea takes what it wants')",
+        "key_traits": [
+          "wise",
+          "resilient",
+          "humble",
+          "devoted to duty"
+        ],
+        "name_translation": {
+          "sr": "Capitán Marlowe"
+        }
+      },
+      {
+        "name": "Eli",
+        "alternate_names": [
+          "young Eli"
+        ],
+        "role": "apprentice/successor",
+        "speech_pattern": "not directly quoted; described as young and learning",
+        "key_traits": [
+          "dutiful",
+          "respectful",
+          "inheritor of the legacy"
+        ],
+        "name_translation": {
+          "sr": "Eli"
+        }
+      }
+    ],
+    "key_themes": [
+      "duty and sacrifice",
+      "the struggle between nature and human will",
+      "legacy and passing of knowledge",
+      "light as a symbol of hope and responsibility",
+      "the sea as an indifferent force"
+    ],
+    "cultural_references": [
+      {
+        "reference": "lighthouse keeper",
+        "origin": "Western maritime tradition (19th-20th century)",
+        "explanation": "A person responsible for maintaining a lighthouse; a romanticized but real occupation in coastal communities",
+        "handling": "translate as 'farero' or 'guardián del faro'; 'farero' is standard in Spanish"
+      },
+      {
+        "reference": "the Atlantic",
+        "origin": "Geographic reference",
+        "explanation": "The Atlantic Ocean; universally recognized",
+        "handling": "translate as 'el Atlántico'"
+      },
+      {
+        "reference": "the town called it a miracle",
+        "origin": "Biblical/folkloric trope",
+        "explanation": "Common expression of awe; no specific cultural reference needed",
+        "handling": "translate idiomatically as 'el pueblo lo llamó un milagro'"
+      }
+    ],
+    "chapter_analyses": [
+      {
+        "chapter_id": "chapter_1",
+        "chapter_num": 1,
+        "title": "Content",
+        "summary": "El viejo capitán Marlowe ha cuidado el faro de Punta Tormenta durante cuarenta años, transmitiendo su sabiduría a su joven aprendiz, Eli. Tras rescatar a tres marineros durante una tormenta invernal, Eli jura como farero y recibe la llave de latón del capitán.",
+        "key_points": [
+          "El capitán Marlowe ha sido farero en Punta Tormenta durante cuarenta años.",
+          "Marlowe entrena a un joven aprendiz llamado Eli.",
+          "Durante una tormenta invernal, un barco naufraga y ambos rescatan a tres marineros.",
+          "El pueblo considera el rescate un milagro, pero Marlowe lo atribuye a mantener la luz encendida.",
+          "En primavera, Eli toma el juramento de farero.",
+          "El capitán Marlowe le entrega la llave de latón a Eli, simbolizando la transferencia de la responsabilidad."
+        ],
+        "caveats": [
+          "El nombre 'Stormcrag Point' debe traducirse de forma evocadora pero natural; 'Punta Tormenta' captura el sentido sin ser literal.",
+          "La frase 'The sea takes what it wants' tiene un tono sentencioso y fatalista; en español debe sonar igual de rotunda, como 'El mar se lleva lo que quiere'.",
+          "El diálogo de Marlowe es lacónico y sabio; hay que mantener esa brevedad y peso en español.",
+          "El término 'keeper's oath' no tiene un equivalente directo; 'juramento de farero' es claro y mantiene la solemnidad.",
+          "La entrega de la 'brass key' es un símbolo de legado; 'llave de latón' conserva el matiz material y simbólico."
+        ],
+        "tone": "El tono es sereno y melancólico, con un trasfondo de respeto por el mar y el deber. La narrativa es pausada y reflexiva, con momentos de tensión durante la tormenta. El registro emocional es sobrio pero cálido, especialmente en la transferencia del legado.",
+        "complexity": "simple",
+        "special_notes": "El capítulo tiene un estilo literario sencillo pero cargado de simbolismo. La traducción debe priorizar la naturalidad y la fluidez, evitando calcos del inglés. Los nombres propios (Marlowe, Eli) se mantienen sin cambios."
+      }
+    ],
+    "analysis_version": 1,
+    "analyzed_at": "2026-06-16T18:51:18.944237+03:00",
+    "analyzed_by": "llm-deepseek"
+  },
+  "total_duration": 16645200125,
+  "total_tokens": 1997,
+  "pass_count": 1,
+  "started_at": "2026-06-16T18:51:09.513557+03:00",
+  "completed_at": "2026-06-16T18:51:26.1341+03:00"
+}

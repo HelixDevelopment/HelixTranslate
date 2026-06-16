@@ -1,0 +1,348 @@
+{
+  "source_language": "English",
+  "target_language": "Spanish",
+  "passes": [
+    {
+      "pass_number": 1,
+      "provider": "llm-deepseek",
+      "model": "",
+      "analysis": {
+        "content_type": "short story excerpt",
+        "genre": "science fiction",
+        "subgenres": [
+          "space opera",
+          "military science fiction"
+        ],
+        "tone": "formal, descriptive, slightly dramatic",
+        "language_style": "third-person narrative, concise sentences, technical terms mixed with narrative prose",
+        "target_audience": "adult readers, science fiction enthusiasts, general literary audience",
+        "untranslatable_terms": [
+          {
+            "term": "Captain Sarah Mills",
+            "original_script": "Captain Sarah Mills",
+            "reason": "Proper name and military rank; rank translated but name kept",
+            "context": [
+              "Captain Sarah Mills commanded the starship Aurora."
+            ],
+            "transliteration": "Capitán Sarah Mills"
+          },
+          {
+            "term": "Admiral Chen",
+            "original_script": "Admiral Chen",
+            "reason": "Proper name and military rank; rank translated but name kept",
+            "context": [
+              "Her rival, Admiral Chen, plotted in the shadows of New Geneva."
+            ],
+            "transliteration": "Almirante Chen"
+          },
+          {
+            "term": "Aurora",
+            "original_script": "Aurora",
+            "reason": "Name of a starship; kept as proper noun",
+            "context": [
+              "Captain Sarah Mills commanded the starship Aurora."
+            ],
+            "transliteration": "Aurora"
+          },
+          {
+            "term": "New Geneva",
+            "original_script": "New Geneva",
+            "reason": "Place name; kept as proper noun",
+            "context": [
+              "Her rival, Admiral Chen, plotted in the shadows of New Geneva."
+            ],
+            "transliteration": "Nueva Ginebra"
+          },
+          {
+            "term": "crystal drive technology",
+            "original_script": "crystal drive technology",
+            "reason": "Fictional technical term; translated conceptually but kept as a recognizable sci-fi term",
+            "context": [
+              "The crystal drive technology powered their faster-than-light travel."
+            ],
+            "transliteration": "tecnología de propulsión de cristal"
+          }
+        ],
+        "footnote_guidance": [
+          {
+            "term": "New Geneva",
+            "explanation": "Fictional location; name evokes Geneva, Switzerland, suggesting a political or diplomatic hub in space",
+            "locations": [
+              "Chapter 1"
+            ],
+            "priority": "low"
+          },
+          {
+            "term": "crystal drive technology",
+            "explanation": "Fictional faster-than-light propulsion system; no real-world equivalent, but 'crystal' may imply energy storage or exotic matter",
+            "locations": [
+              "Chapter 1"
+            ],
+            "priority": "low"
+          }
+        ],
+        "characters": [
+          {
+            "name": "Sarah Mills",
+            "alternate_names": [
+              "Captain Sarah Mills"
+            ],
+            "role": "protagonist",
+            "speech_pattern": "Not yet established; likely authoritative and professional",
+            "key_traits": [
+              "commander",
+              "starship captain",
+              "likely determined and competent"
+            ],
+            "name_translation": {
+              "sr": "Sarah Mills"
+            }
+          },
+          {
+            "name": "Chen",
+            "alternate_names": [
+              "Admiral Chen"
+            ],
+            "role": "antagonist",
+            "speech_pattern": "Not yet established; likely calculating and strategic",
+            "key_traits": [
+              "rival",
+              "admiral",
+              "plotting",
+              "shadowy"
+            ],
+            "name_translation": {
+              "sr": "Chen"
+            }
+          }
+        ],
+        "key_themes": [
+          "rivalry",
+          "power struggle",
+          "space exploration",
+          "advanced technology",
+          "military hierarchy"
+        ],
+        "cultural_references": [
+          {
+            "reference": "New Geneva",
+            "origin": "Fictional; evokes Geneva, Switzerland, known for diplomacy and international organizations",
+            "explanation": "A space colony or station named after Geneva, suggesting a center of political intrigue",
+            "handling": "Keep as 'Nueva Ginebra' in Spanish, maintaining the cultural allusion"
+          },
+          {
+            "reference": "starship",
+            "origin": "Science fiction convention",
+            "explanation": "A spacecraft capable of interstellar travel",
+            "handling": "Translate as 'nave estelar' or 'astronave'"
+          },
+          {
+            "reference": "faster-than-light travel",
+            "origin": "Science fiction concept",
+            "explanation": "Travel exceeding the speed of light, a common trope in sci-fi",
+            "handling": "Translate as 'viaje más rápido que la luz'"
+          }
+        ],
+        "chapter_analyses": [
+          {
+            "chapter_id": "chapter_1",
+            "chapter_num": 1,
+            "title": "Content",
+            "summary": "Se presenta a la capitana Sarah Mills al mando de la nave estelar Aurora. Su rival, el almirante Chen, conspira desde las sombras de Nueva Ginebra. Se introduce la tecnología de propulsión por cristal, que permite viajes más rápidos que la luz.",
+            "key_points": [
+              "La capitana Sarah Mills comanda la nave estelar Aurora.",
+              "El almirante Chen es presentado como su rival.",
+              "Chen opera desde Nueva Ginebra.",
+              "Se menciona la tecnología de propulsión por cristal.",
+              "Esta tecnología permite viajes interestelares superlumínicos."
+            ],
+            "caveats": [
+              "Traducción de 'starship' como 'nave estelar' en lugar de 'astronave' para mantener un tono más literario.",
+              "Mantener 'New Geneva' como 'Nueva Ginebra', pues es un topónimo con equivalente en español.",
+              "El término 'crystal drive technology' requiere una traducción precisa y natural: 'tecnología de propulsión por cristal'.",
+              "El nombre 'Aurora' se mantiene sin cambios por ser nombre propio de la nave."
+            ],
+            "tone": "Tenso y de presentación. La narración es directa y concisa, con un ritmo pausado pero cargado de implicaciones de conflicto. El registro emocional es neutral, aunque se insinúa rivalidad y misterio.",
+            "complexity": "simple",
+            "special_notes": "El capítulo es breve y funciona como introducción de personajes y tecnología. No hay diálogos ni cambios de escena complejos. La traducción debe preservar la claridad expositiva y el tono de ciencia ficción clásica."
+          }
+        ],
+        "analysis_version": 1,
+        "analyzed_at": "2026-06-16T18:11:34.391115+03:00",
+        "analyzed_by": "llm-deepseek"
+      },
+      "duration": 9918701833,
+      "tokens_used": 1961
+    }
+  ],
+  "final_analysis": {
+    "content_type": "short story excerpt",
+    "genre": "science fiction",
+    "subgenres": [
+      "space opera",
+      "military science fiction"
+    ],
+    "tone": "formal, descriptive, slightly dramatic",
+    "language_style": "third-person narrative, concise sentences, technical terms mixed with narrative prose",
+    "target_audience": "adult readers, science fiction enthusiasts, general literary audience",
+    "untranslatable_terms": [
+      {
+        "term": "Captain Sarah Mills",
+        "original_script": "Captain Sarah Mills",
+        "reason": "Proper name and military rank; rank translated but name kept",
+        "context": [
+          "Captain Sarah Mills commanded the starship Aurora."
+        ],
+        "transliteration": "Capitán Sarah Mills"
+      },
+      {
+        "term": "Admiral Chen",
+        "original_script": "Admiral Chen",
+        "reason": "Proper name and military rank; rank translated but name kept",
+        "context": [
+          "Her rival, Admiral Chen, plotted in the shadows of New Geneva."
+        ],
+        "transliteration": "Almirante Chen"
+      },
+      {
+        "term": "Aurora",
+        "original_script": "Aurora",
+        "reason": "Name of a starship; kept as proper noun",
+        "context": [
+          "Captain Sarah Mills commanded the starship Aurora."
+        ],
+        "transliteration": "Aurora"
+      },
+      {
+        "term": "New Geneva",
+        "original_script": "New Geneva",
+        "reason": "Place name; kept as proper noun",
+        "context": [
+          "Her rival, Admiral Chen, plotted in the shadows of New Geneva."
+        ],
+        "transliteration": "Nueva Ginebra"
+      },
+      {
+        "term": "crystal drive technology",
+        "original_script": "crystal drive technology",
+        "reason": "Fictional technical term; translated conceptually but kept as a recognizable sci-fi term",
+        "context": [
+          "The crystal drive technology powered their faster-than-light travel."
+        ],
+        "transliteration": "tecnología de propulsión de cristal"
+      }
+    ],
+    "footnote_guidance": [
+      {
+        "term": "New Geneva",
+        "explanation": "Fictional location; name evokes Geneva, Switzerland, suggesting a political or diplomatic hub in space",
+        "locations": [
+          "Chapter 1"
+        ],
+        "priority": "low"
+      },
+      {
+        "term": "crystal drive technology",
+        "explanation": "Fictional faster-than-light propulsion system; no real-world equivalent, but 'crystal' may imply energy storage or exotic matter",
+        "locations": [
+          "Chapter 1"
+        ],
+        "priority": "low"
+      }
+    ],
+    "characters": [
+      {
+        "name": "Sarah Mills",
+        "alternate_names": [
+          "Captain Sarah Mills"
+        ],
+        "role": "protagonist",
+        "speech_pattern": "Not yet established; likely authoritative and professional",
+        "key_traits": [
+          "commander",
+          "starship captain",
+          "likely determined and competent"
+        ],
+        "name_translation": {
+          "sr": "Sarah Mills"
+        }
+      },
+      {
+        "name": "Chen",
+        "alternate_names": [
+          "Admiral Chen"
+        ],
+        "role": "antagonist",
+        "speech_pattern": "Not yet established; likely calculating and strategic",
+        "key_traits": [
+          "rival",
+          "admiral",
+          "plotting",
+          "shadowy"
+        ],
+        "name_translation": {
+          "sr": "Chen"
+        }
+      }
+    ],
+    "key_themes": [
+      "rivalry",
+      "power struggle",
+      "space exploration",
+      "advanced technology",
+      "military hierarchy"
+    ],
+    "cultural_references": [
+      {
+        "reference": "New Geneva",
+        "origin": "Fictional; evokes Geneva, Switzerland, known for diplomacy and international organizations",
+        "explanation": "A space colony or station named after Geneva, suggesting a center of political intrigue",
+        "handling": "Keep as 'Nueva Ginebra' in Spanish, maintaining the cultural allusion"
+      },
+      {
+        "reference": "starship",
+        "origin": "Science fiction convention",
+        "explanation": "A spacecraft capable of interstellar travel",
+        "handling": "Translate as 'nave estelar' or 'astronave'"
+      },
+      {
+        "reference": "faster-than-light travel",
+        "origin": "Science fiction concept",
+        "explanation": "Travel exceeding the speed of light, a common trope in sci-fi",
+        "handling": "Translate as 'viaje más rápido que la luz'"
+      }
+    ],
+    "chapter_analyses": [
+      {
+        "chapter_id": "chapter_1",
+        "chapter_num": 1,
+        "title": "Content",
+        "summary": "Se presenta a la capitana Sarah Mills al mando de la nave estelar Aurora. Su rival, el almirante Chen, conspira desde las sombras de Nueva Ginebra. Se introduce la tecnología de propulsión por cristal, que permite viajes más rápidos que la luz.",
+        "key_points": [
+          "La capitana Sarah Mills comanda la nave estelar Aurora.",
+          "El almirante Chen es presentado como su rival.",
+          "Chen opera desde Nueva Ginebra.",
+          "Se menciona la tecnología de propulsión por cristal.",
+          "Esta tecnología permite viajes interestelares superlumínicos."
+        ],
+        "caveats": [
+          "Traducción de 'starship' como 'nave estelar' en lugar de 'astronave' para mantener un tono más literario.",
+          "Mantener 'New Geneva' como 'Nueva Ginebra', pues es un topónimo con equivalente en español.",
+          "El término 'crystal drive technology' requiere una traducción precisa y natural: 'tecnología de propulsión por cristal'.",
+          "El nombre 'Aurora' se mantiene sin cambios por ser nombre propio de la nave."
+        ],
+        "tone": "Tenso y de presentación. La narración es directa y concisa, con un ritmo pausado pero cargado de implicaciones de conflicto. El registro emocional es neutral, aunque se insinúa rivalidad y misterio.",
+        "complexity": "simple",
+        "special_notes": "El capítulo es breve y funciona como introducción de personajes y tecnología. No hay diálogos ni cambios de escena complejos. La traducción debe preservar la claridad expositiva y el tono de ciencia ficción clásica."
+      }
+    ],
+    "analysis_version": 1,
+    "analyzed_at": "2026-06-16T18:11:34.391115+03:00",
+    "analyzed_by": "llm-deepseek"
+  },
+  "total_duration": 15316404750,
+  "total_tokens": 1961,
+  "pass_count": 1,
+  "started_at": "2026-06-16T18:11:24.471948+03:00",
+  "completed_at": "2026-06-16T18:11:39.788619+03:00"
+}

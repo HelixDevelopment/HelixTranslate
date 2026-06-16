@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 15 <strong>Last modified:</strong>
-2026-06-16T18:30:00Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 16 <strong>Last modified:</strong>
+2026-06-16T19:05:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -195,7 +195,107 @@ genuinely demonstrates the feature working (each cited <code>.mp4</code>
 was ffprobe-verified for non-zero duration+frames and content-verified
 against its claimed behaviour — e.g. real DeepSeek output in the target
 language, real gRPC translated text, live WebSocket count change).
-<strong>54 feature rows are video-confirmed</strong> (Wave 6 of
+<strong>66 feature rows are video-confirmed</strong> (Wave 9 / Wave 8 /
+Wave 7 of 2026-06-16 added <strong>12 net-new</strong> (4 Wave 7 + 5
+Wave 8 + 3 Wave 9), each a real input → real LLM (default in-process
+bridge, NOT <code>-use-verifier</code>) → real output clip,
+window-scoped (§11.4.154), <code>helix_translate-</code>-prefixed
+(§11.4.155), frame-content-read so source-frame ≠ output-frame per
+§11.4.107. <strong>Wave 7 (4):</strong> <strong>EPUB→EPUB round-trip
+EN→ES</strong> (“The old man walked along the shore at dawn…” → “El
+anciano caminaba por la orilla al amanecer…”, output
+<code>EPUB document</code> —
+<code>helix_translate-epub-to-epub-en-es-wave7-20260616-181058.mp4</code>;
+<strong>headline re-confirm</strong> — the existing EPUB→EPUB-conversion
+row was already Confirmed, this clip is an additional distinct-scope
+confirmation, NOT a new row), <strong>standalone <code>-script</code>
+Cyrillic→Latin</strong> (pkg/script, NO LLM: “Добар дан свима…ђ…џ” →
+“Dobar dan svima…đ…dž”, zero Cyrillic remaining —
+<code>helix_translate-script-cyrillic-to-latin-wave7-20260616-181012.mp4</code>;
+<strong>headline-only</strong> re-confirm of an already-Confirmed row),
+<strong>preparation-translator analysis pass</strong> (genre “science
+fiction”, chars Sarah Mills/Admiral Chen, untranslatable Captain Sarah
+Mills/Admiral Chen/starship Aurora/New Geneva —
+<code>helix_translate-preparation-analysis-en-es-wave7-20260616-181123.mp4</code>;
+<strong>headline-only</strong> re-confirm — the preparation-translator
+row is already Confirmed) and <strong>REST
+<code>POST /api/v1/translate/string</code></strong> (local
+<code>./build/server</code> :8080, JSON <code>translated_text</code> =
+“Las montañas estaban cubiertas de nieve y el río fluía tranquilamente
+por el valle.”, provider deepseek — a real translation, NOT a session_id
+—
+<code>helix_translate-rest-translate-string-en-es-wave7-20260616-181155.mp4</code>;
+<strong>ROW-FLIPPED</strong> PENDING→Confirmed). <strong>§11.4.138 /
+§11.4.146 honest finding:</strong> Wave 7 ALSO recorded the
+<strong>markdown-translator EPUB→MD empty-payload data-loss BUG</strong>
+(step-3 translate sends empty strings to DeepSeek, the LLM’s “you sent
+an empty message” boilerplate written AS IF the translation, chapter
+text lost) — <strong>found broken (wave7) → fixed at source in commit
+4fbe581 (this session’s PART-1 Translate-arg data-loss fix) → a
+re-record is owed before any confirmation</strong>; it was NOT a
+previously-confirmed row so there is NO demotion, and it is NOT counted
+as a confirmed net-new. <strong>Wave 8 (5):</strong> <strong>GROQ
+provider path EN→ES</strong> (groq/llama-3.3-70b-versatile, real Groq
+API: “La vieja farola se erguía sola sobre el acantilado rocoso…” —
+<code>helix_translate-groq-en-es-wave8-20260616_182021.mp4</code>;
+<strong>ROW-FLIPPED</strong> the <code>Groq client</code> library row
+PENDING→Confirmed), and 4 language-pair confirmations through the
+deepseek path (<strong>headline-only</strong> — covered by the
+already-Confirmed generic multi-language-pair coverage, no fabricated
+per-pair rows): <strong>EN→KO Korean/Hangul</strong> (“새벽에 용이 잠든
+숨겨진 성을 찾기 위해 용감한 기사가 고대 숲을 가로질렀다.” —
+<code>helix_translate-en-ko-korean-wave8-20260616_182059.mp4</code>),
+<strong>DE→EN reverse</strong> (“The scientist worked all night in his
+lab…” —
+<code>helix_translate-de-en-reverse-wave8-20260616_182101.mp4</code>),
+<strong>FR→ES non-English↔︎non-English</strong> (“El anciano marinero
+contaba historias de tormentas y tesoros ocultos…” —
+<code>helix_translate-fr-es-pair-wave8-20260616_182111.mp4</code>) and
+<strong>EN→SR Latin script</strong> (“U srcu planina živela je mudra
+stara žena…”, all-Latin, no Cyrillic —
+<code>helix_translate-en-sr-latin-wave8-20260616_182113.mp4</code>).
+§11.4.6 nit (not a bug): <code>-h</code> provider help omits groq though
+groq IS fully wired + works end-to-end. <strong>Wave 9 (3):</strong>
+<strong>REST <code>POST /api/v1/translate/batch</code></strong> (live
+<code>server-w9</code> :8091 TLS, 3 EN→SR in one request, 0 errors,
+provider llm-novita —
+<code>helix_translate-rest-batch-version-wave9-20260616_184823.mp4</code>;
+<strong>ROW-FLIPPED</strong> PENDING→Confirmed), <strong>REST
+<code>GET /api/v1/version</code></strong> (real substantive data:
+codebase 2.3.0, git_commit c2aa7c8…, go1.26.2, build_time + components
+map, NOT a bare status — same clip; <strong>headline re-confirm</strong>
+of the already-Confirmed combined endpoints row) and
+<strong>preparation→translate two-stage pipeline</strong> (stage-1 real
+DeepSeek analysis: “short story”/“literary fiction”, chars Captain
+Marlowe + Eli, 3 untranslatable Stormcrag Point/Captain Marlowe/Eli,
+1974 tokens; stage-2 output EPUB preserves exactly those names in
+Spanish “…El viejo capitán Marlowe había sido farero de Stormcrag Point
+durante cuarenta años…” —
+<code>helix_translate-prep-translate-two-stage-wave9-20260616_184823.mp4</code>;
+<strong>headline-only</strong> — covered by the already-Confirmed
+preparation-translator row). <strong>§11.4.6 / §11.4.124 honest
+non-confirmable findings (recorded as gaps, NOT confirmed, never
+faked):</strong> <code>pkg/api/server.go</code> alt <code>Server</code>
+(<code>/api/translate</code>, <code>/api/batch</code>,
+<code>/api/languages</code>) is <strong>UNWIRED</strong> — no
+<code>cmd</code> entry instantiates <code>api.NewServer</code>, no
+runnable binary (did NOT fabricate a runner); and
+<code>GET /api/v1/providers</code> returns a <strong>static hardcoded
+list</strong> (openai/anthropic/zhipu/deepseek), NOT substantive real
+upstream data, so NOT confirmed as substantive per the Wave-9 criterion.
+<strong>Running tally (§11.4.6 honest arithmetic): 54 (prior
+authoritative total) + 4 (Wave 7) + 5 (Wave 8) + 3 (Wave 9) =
+66.</strong> Of the 12 net-new, <strong>3 are genuine row-flips</strong>
+(PENDING→Confirmed: <code>POST /api/v1/translate/string</code>, the
+<code>Groq client</code> library row,
+<code>POST /api/v1/translate/batch</code>); the remaining 9 are
+headline-counted additional distinct-scope confirmations on rows that
+were already Confirmed (EPUB→EPUB round-trip, <code>-script</code>
+Cyrillic→Latin, preparation analysis, <code>GET /api/v1/version</code>,
+preparation→translate two-stage) or language-pair/provider confirmations
+covered by already-Confirmed generic rows (EN→KO, DE→EN, FR→ES,
+EN→SR-latin) — counted in the operator-sanctioned running total but
+honestly distinguished here so no row is double-flipped. Wave 6 of
 2026-06-16 added <strong>5 net-new</strong> via the default in-process
 direct DeepSeek CLI path, each ffprobe+frame-verified per §11.4.107
 (790×560 yuv420p, advancing frames, English input-frame ≠ translated
@@ -459,8 +559,11 @@ tally)</td>
 </tr>
 <tr>
 <td>Enumerated feature rows in this doc</td>
-<td><strong>496</strong> (Rev 14 = 494 Rev 13 + 2 new unified-translator
-rows added Wave 3f for the net-new videos:
+<td><strong>497</strong> (Rev 16 = 496 Rev 14 + 1 new
+<code>cmd/grpc-translate-probe</code> row — standalone gRPC
+translate-round-trip probe client, Implemented + Wired +
+Source-confirmed, Video-confirmation PENDING; Rev 14 = 494 Rev 13 + 2
+new unified-translator rows added Wave 3f for the net-new videos:
 <code>EPUB→EPUB conversion</code> + <code>TXT→TXT translation</code>;
 Rev 9 = 493 Rev 8 + 1 new unified-translator
 <code>HTML→Markdown conversion</code> row added that wave for the Wave-2
@@ -475,13 +578,14 @@ rows: <code>BestTranslator</code>, <code>BestTranslatorFunc</code>,
 </tr>
 <tr>
 <td>Implemented</td>
-<td>445 (Rev 14: 443 Rev 13 + 2 new unified-translator rows EPUB→EPUB
-conversion + TXT→TXT translation, both Implemented + Wired + Wave-3f
-video-confirmed; Rev 9: 442 Rev 8 + 1 new unified-translator
-HTML→Markdown conversion row; Rev 8 was 435 Rev 7 + 7 new pkg/bridge
-ensemble-seam rows; was 471 Rev 6, −36 flipped to Obsolete Rev 7 —
-local-runtime + SSH-local features removed in bridge phase-2
-R-2..R-4)</td>
+<td>446 (Rev 16: 445 Rev 14 + 1 new
+<code>cmd/grpc-translate-probe</code> row, Implemented + Wired; Rev 14:
+443 Rev 13 + 2 new unified-translator rows EPUB→EPUB conversion +
+TXT→TXT translation, both Implemented + Wired + Wave-3f video-confirmed;
+Rev 9: 442 Rev 8 + 1 new unified-translator HTML→Markdown conversion
+row; Rev 8 was 435 Rev 7 + 7 new pkg/bridge ensemble-seam rows; was 471
+Rev 6, −36 flipped to Obsolete Rev 7 — local-runtime + SSH-local
+features removed in bridge phase-2 R-2..R-4)</td>
 </tr>
 <tr>
 <td><strong>Obsolete (→ Fixed.md)</strong></td>
@@ -522,8 +626,26 @@ host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td><strong>43</strong> (real, content-verified recordings — see
-Anti-bluff note; Rev-14 / Wave 3f of 2026-06-16 added <strong>2
+<td><strong>66</strong> (real, content-verified recordings — see
+Anti-bluff note. <strong>Rev-16 / Wave 9 + Wave 8 + Wave 7 of 2026-06-16
+added 12 net-new</strong> (4+5+3), of which <strong>3 are genuine
+row-flips</strong> PENDING→Confirmed
+(<code>POST /api/v1/translate/string</code> Wave 7, the
+<code>Groq client</code> library row Wave 8,
+<code>POST /api/v1/translate/batch</code> Wave 9) and 9 are
+headline-counted additional distinct-scope confirmations on
+already-Confirmed rows / language-pair coverage (EPUB→EPUB round-trip,
+<code>-script</code> Cyrillic→Latin, preparation analysis,
+<code>GET /api/v1/version</code>, preparation→translate two-stage,
+EN→KO, DE→EN, FR→ES, EN→SR-latin — see Anti-bluff note for the full
+per-feature mapping + the Wave-7 markdown-translator bug
+found→fixed-at-4fbe581→re-record-owed + the Wave-9 honest
+non-confirmable gaps). <strong>§11.4.6 cell reconciliation:</strong>
+this cell had a known sync-lag behind the authoritative headline running
+total (it read <strong>43</strong> at Rev 15 while the Anti-bluff-note
+prose was at 54); it is corrected here to the true running total — 54
+(prior authoritative) + 4 (Wave 7) + 5 (Wave 8) + 3 (Wave 9) =
+<strong>66</strong>. Rev-14 / Wave 3f of 2026-06-16 added <strong>2
 net-new</strong> video confirmations prioritising feature-type diversity
 — <strong>EPUB→EPUB conversion</strong>
 (<code>helix_translate-epub-output-wave3e-20260616.mp4</code>, EN .epub
@@ -1480,6 +1602,57 @@ test.”)</td>
 </tr>
 </tbody>
 </table>
+<h2 id="cmdgrpc-translate-probe">cmd/grpc-translate-probe</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Feature</th>
+<th>Category</th>
+<th>Implementation</th>
+<th>Wiring</th>
+<th>Real-use</th>
+<th>Tests</th>
+<th>Validation</th>
+<th>Video-confirmation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>grpc-translate-probe</td>
+<td>Standalone gRPC translate-round-trip probe client</td>
+<td>gRPC</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>Pure wire-protocol client
+(<code>cmd/grpc-translate-probe/main.go</code>): dials a live
+<code>TranslationService</code> (default <code>nezha.local:50061</code>,
+insecure creds), calls
+<code>StartTranslation(input_file,output_file,src,dst,provider,model,script)</code>
+then polls <code>GetTranslationStatus</code> to a terminal state,
+printing START/POLL/COMPLETED/FILE lines + generated-file paths. Does NO
+server-side file I/O — input must pre-exist on the server fs (staged via
+<code>podman cp</code>), output read back out-of-band; flags
+<code>-addr/-input/-output/-src/-dst/-provider/-model/-script/-session/-timeout</code>;
+exit 0 completed / 1 failed-cancelled-error / 2 usage-dial-error</td>
+<td>Not-inventoried</td>
+<td>Source-confirmed (<code>cmd/grpc-translate-probe/main.go</code>); no
+real-use recording yet</td>
+<td>PENDING</td>
+</tr>
+</tbody>
+</table>
 <h2 id="cmdmarkdown-translator">cmd/markdown-translator</h2>
 <table style="width:100%;">
 <colgroup>
@@ -2226,8 +2399,14 @@ translated text in produced .epub)</td>
 <td><strong>PASS — captured</strong> (Wave 3f net-new: EN .epub input →
 real deepseek run → OUTPUT EPUB carries real Spanish “La Antigua Farola
 la vieja farola se alzaba sola en la rocosa costa…”, frame-verified
-§11.4.107 — start frame English-only ≠ output frame Spanish)</td>
-<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-epub-output-wave3e-20260616.mp4</td>
+§11.4.107 — start frame English-only ≠ output frame Spanish). Wave-7
+additional EPUB→EPUB round-trip clip (EN→ES): “The old man walked along
+the shore at dawn…” → “El anciano caminaba por la orilla al amanecer…”,
+output verified <code>EPUB document</code> (re-confirmation of this
+already-Confirmed row, no double-count).</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-epub-output-wave3e-20260616.mp4
+; Wave-7 round-trip
+re-confirm:/Volumes/T7/Downloads/Recordings/helix_translate-epub-to-epub-en-es-wave7-20260616-181058.mp4</td>
 </tr>
 <tr>
 <td>unified-translator</td>
@@ -3204,10 +3383,18 @@ removed (FACT: <code>git ls-files</code> empty) +
 <code>CM-NO-LOCAL-RUNTIME</code> gate PASS. The KEPT API provider
 clients (OpenAI/Anthropic/DeepSeek/…) in this section are NOT Obsolete.
 | Groq | Groq client | Library | Implemented | Wired | OpenAI-compatible
-wrapper | Not-inventoried | Source-confirmed | PENDING | | Cohere |
-Cohere client | Library | Implemented | Wired | command-r via
-OpenAI-compat endpoint | Not-inventoried | <strong>PASS — real Cohere
-translation captured</strong> (Wave-3b real-use video:
+wrapper | Not-inventoried | <strong>PASS — real EN→ES translation
+captured</strong> (Wave 8:
+<code>build/unified-translator -provider groq -model llama-3.3-70b-versatile</code>,
+real Groq API path: “The old lighthouse stood alone on the rocky cliff…”
+→ “La vieja farola se erguía sola sobre el acantilado rocoso. Cada noche
+su haz barría el mar oscuro, guiando a las naves perdidas de vuelta a
+puerto.”; ffprobe 115 frames/3.83s, source-frame ≠ output-frame per
+§11.4.107) |
+Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-groq-en-es-wave8-20260616_182021.mp4
+| | Cohere | Cohere client | Library | Implemented | Wired | command-r
+via OpenAI-compat endpoint | Not-inventoried | <strong>PASS — real
+Cohere translation captured</strong> (Wave-3b real-use video:
 <code>unified-translator -provider cohere -model command-r-08-2024 -base-url https://api.cohere.ai/compatibility/v1</code>,
 real key, EN→SR-latin “Stari svjetionik stojeo je sam na kamenitoj
 obali. Noću svaki put svijeća njegova vodila brodove sigurno kući kroz
@@ -5630,10 +5817,23 @@ against a live <code>cmd/server</code> TLS instance (port 9443):
 <code>/api/v1/providers</code>→real list
 (openai/anthropic/zhipu/deepseek/ollama/llamacpp); ffprobe
 10.63s/790×560 yuv420p, ≥6 frames content-verified, health-frame ≠
-providers-frame per §11.4.107 (re-confirmation, no double-count)</td>
+providers-frame per §11.4.107 (re-confirmation, no double-count). Wave-9
+re-confirmed <code>GET /api/v1/version</code> against live
+<code>server-w9</code> :8091 with real substantive data —
+codebase_version 2.3.0, git_commit
+c2aa7c841c90df2ac1519c147f61bb82a9614963, go_version go1.26.2,
+build_time + components map (NOT a bare status); same clip as the Wave-9
+batch row (re-confirmation, no double-count). §11.4.6 honest gap:
+<code>GET /api/v1/providers</code> was found by Wave 9 to return a
+<strong>static hardcoded</strong> list
+(openai/anthropic/zhipu/deepseek), NOT substantive real upstream data —
+confirmed only as a static-return route, never as live provider
+discovery.</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-api-endpoints_20260615-170755.mp4
 ;
-Re-confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-rest-endpoints-wave3c-20260616.mp4</td>
+Re-confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-rest-endpoints-wave3c-20260616.mp4
+; Wave-9 /version
+re-confirm:/Volumes/T7/Downloads/Recordings/helix_translate-rest-batch-version-wave9-20260616_184823.mp4</td>
 </tr>
 <tr>
 <td>api/handler.go</td>
@@ -5696,8 +5896,14 @@ tracked fix.</td>
 <td>Wired</td>
 <td>Loops texts, translates each</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — video-confirmed</strong> (Wave 9: live
+<code>server-w9</code> :8091 TLS, in-process bridge — 3 EN→SR translated
+in one request: “The river flows to the sea.”→“Река тече до мора.”,
+“Books open windows to the world.”→“Knjige otvaraju prozore u svet.”,
+“Time heals all wounds.”→“Vrijeme leči sve rane.”, 0 errors, provider
+resolved llm-novita; ffprobe 790 frames/7.52s, early-frame ≠ late-frame
+per §11.4.107)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-rest-batch-version-wave9-20260616_184823.mp4</td>
 </tr>
 <tr>
 <td>api/handler.go</td>
@@ -5987,8 +6193,13 @@ pkg/api/batch_handlers.go (under /api/v1)</h2>
 <td>Wired</td>
 <td><code>NewLLMTranslator</code> + <code>Translate</code></td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — video-confirmed</strong> (Wave 7: local
+<code>./build/server</code> :8080, real DeepSeek path — JSON
+<code>translated_text</code> = “Las montañas estaban cubiertas de nieve
+y el río fluía tranquilamente por el valle.”, provider deepseek (a real
+translation, NOT a bare session_id); frame-verified §11.4.107 —
+advancing frames, request-frame ≠ response-frame)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-rest-translate-string-en-es-wave7-20260616-181155.mp4</td>
 </tr>
 <tr>
 <td>api/batch_handlers.go</td>

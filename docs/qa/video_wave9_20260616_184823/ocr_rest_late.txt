@@ -1,0 +1,24 @@
+"translated": [
+"\u0420\u0435\u043a\u0430 \Uuo442\u0435\U0447\U0435 \U0434\Ue43e \Ue43C\U
+043e\u0440\u0430.",
+"Knjige otvaraju prozore u svet.",
+"Vrijeme le\u@1@di sve rane."
+
+=== REST GET /api/v1/version (real codebase/git data) =
+
+“codebase_version": "2.3.0",
+“build_time": "2026-06-16T15:54:352",
+“git_commit": "c2aa7c841c90df2ac1519c147f61bb82a9614963",
+
+"go_version": "go1.26.2",
+"components": {
+"api": "1.0.0",
+
+"deployment": "1.0.0",
+"distributed": "1.0.0",
+"translator": "2.3.0"
+
+},
+
+"last_updated": "2026-06-16T18: 54: 36. 065551+03: 00"
+

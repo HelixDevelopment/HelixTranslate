@@ -1,0 +1,73 @@
+2026/06/16 18:51:26
+2026/06/16 18:51:26
+
+main
+main
+
+Genre: literary fiction
+Untranslatable Terms: 3
+
+Characters: 2
+Key Themes: 5
+2026/06/16 18:54:20
+2026/06/16 18:54:20
+2026/06/16 18:54:20
+2026/06/16 18:54:20
+2026/06/16 18:54:20
+Key Themes:
+
+main
+main
+main
+main
+main
+
+-go:
+go:
+
+90:
+90:
+90:
+90:
+go:
+
+206:
+209:
+
+246:
+247:
+250:
+252:
+254:
+
+Untranslatable Terms (sample) :
+
+Characters:
+
+2026/06/16 18:54:20 main.go:301
+84823/translated_rec.epub
+
+2026/06/16 18:54:20 main.go:308:
+
+_rec. json
+
+Content Type: short story
+Genre: literary fiction
+
+Content Type: short story
+Genre: literary fiction
+Untranslatable Terms: 3
+Characters: 2
+
+Key Themes: 5
+
+: @ Translated book saved to: /tmp/w9_20260616_1
+
+Analysis File: /tmp/w9_20260616_184823/analysis
+
+2026/06/16 18:54:20 main.go:312: Output Size: 3578 bytes
+2026/06/16 18:54:20 main.go:315: Analysis Size: 14178 bytes
+@ TEST COMPLETE - Preparation + Translation pipeline successful!
+
+=== EPUB Spanish output (real translated text)
+
