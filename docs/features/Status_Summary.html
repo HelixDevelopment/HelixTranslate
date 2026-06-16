@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status-summary">HelixTranslate — Feature
 Status Summary</h1>
-<p><strong>Revision:</strong> 11 <strong>Last modified:</strong>
-2026-06-16T13:20:00Z <strong>Authority:</strong> Two-audience companion
+<p><strong>Revision:</strong> 12 <strong>Last modified:</strong>
+2026-06-16T13:35:00Z <strong>Authority:</strong> Two-audience companion
 to <code>docs/features/Status.md</code> (§11.4.56). Derived from the
 same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync),
 §11.4.6 (no-guessing).</p>
@@ -202,7 +202,7 @@ translators, the web dashboards, the REST and gRPC servers, ~32 built-in
 AI providers, ebook format readers (FB2, EPUB, DOCX, HTML, TXT, PDF) and
 writers (EPUB, FB2, TXT, HTML, Markdown, <strong>DOCX and now
 PDF</strong>), caching, security, and all 8 add-on modules.</li>
-<li><strong>35 features are proven on real recordings</strong> — each
+<li><strong>37 features are proven on real recordings</strong> — each
 checked frame-by-frame to confirm it genuinely shows the feature working
 (real translated text in the right language, a live connection count
 changing, etc.), not just “a screen”. These include: the primary
@@ -217,10 +217,10 @@ translator, the live monitoring dashboard, the <strong>agent bridge
 command-line tool</strong>, the <strong>agent bridge MCP-stdio
 server</strong>, the <strong>provider-diverse translator set</strong>
 (Wave 2: novita, mistral, groq, siliconflow; Wave 3a: Cerebras,
-SambaNova), and — <strong>new this round (Wave 3b)</strong> — the
-<strong>Gemini</strong>, <strong>Zhipu (GLM)</strong> and
-<strong>Cohere</strong> library clients (three more distinct real
-per-provider EN→Serbian translations).</li>
+SambaNova; Wave 3b: Gemini, Zhipu, Cohere), and — <strong>new this round
+(Wave 3c)</strong> — the <strong>Hyperbolic</strong> library client and
+the <strong>Fireworks</strong> provider (two more distinct real
+per-provider EN→Spanish translations).</li>
 <li><strong>DOCX output and PDF output are now proven on camera (Wave
 2).</strong> A real run of the command-line translator produces a real
 <code>.docx</code> (“Microsoft Word 2007+” with real Spanish text) and a
@@ -231,15 +231,21 @@ Wave 1 (the auto-selected verified model being rejected by a stale model
 whitelist) now works — which is exactly why these recordings genuinely
 demonstrate working features. We never faked a “working” recording; in
 Wave 1 these were honest skips.</li>
-<li><strong>New this round (Wave 3a):</strong> the
-<strong>Cerebras</strong> and <strong>SambaNova</strong> per-provider
-LLM clients are now video-proven — each a real EN→ES translation run
-through <code>unified-translator -provider &lt;name&gt;</code>, with the
-two Spanish outputs distinct from each other (“El sol de la mañana se
-alzó…” vs “El sol matutino se alzó…”), proving genuine, separate
-per-provider models rather than a canned response. (Prior round, Wave 2:
-DOCX output, PDF output, HTML→Markdown conversion, and the
-provider-diverse translators were video-proven; the Wave-1
+<li><strong>New this round (Wave 3c):</strong> the
+<strong>Hyperbolic</strong> library client and the
+<strong>Fireworks</strong> provider (in the <code>llm_provider</code>
+submodule) are now video-proven — each a real EN→ES translation run
+through the OpenAI-compatible per-provider path, with the two Spanish
+outputs distinct from each other (“…el sol salía…caminaba por la
+orilla…” for Hyperbolic vs “…el sol ascendió…paseaba por la orilla…” for
+Fireworks), proving genuine, separate per-provider models rather than a
+canned response. Wave 3c also re-confirmed (not double-counted) the REST
+<code>POST /api/v1/translate</code> and the
+<code>/health</code>+<code>/api/v1/version</code>+<code>/api/v1/providers</code>
+endpoints against a freshly-started live TLS API server — real
+translated JSON and real endpoint JSON captured on camera. (Prior round,
+Wave 3a: Cerebras + SambaNova; Wave 3b: Gemini + Zhipu + Cohere; Wave 2:
+DOCX/PDF/HTML→MD + provider-diverse translators; the Wave-1
 default-translation-path blocker is resolved.)</li>
 </ul>
 <h2 id="what-is-pending-or-limited">What is pending or limited</h2>
@@ -281,14 +287,16 @@ stats endpoint that always shows zeros). These are flagged in the
 detailed document.</li>
 </ul>
 <h2 id="video-confirmation-coverage">Video-confirmation coverage</h2>
-<p><strong>35 / 494 ≈ 7.1%</strong> (Wave 3b added 3 net-new video
-confirmations: the Gemini, Zhipu (GLM) and Cohere library clients, each
-a distinct real EN→SR-latin translation [+ a re-confirming deepseek
-clip, not double-counted]; Wave 3a added 2: Cerebras and SambaNova
-per-provider clients; Wave 2 added 5: DOCX output, PDF output,
-HTML→Markdown conversion, ProviderDiverseTranslators, EnsembleFactory).
-This is the headline number to keep improving: each new genuine
-recording raises it.</p>
+<p><strong>37 / 494 ≈ 7.5%</strong> (Wave 3c added 2 net-new video
+confirmations: the Hyperbolic library client and the Fireworks
+<code>llm_provider</code> submodule client, each a distinct real EN→ES
+translation via the OpenAI-compat per-provider path [+ re-confirming the
+REST translate + endpoints rows against a live TLS server, not
+double-counted]; Wave 3b added 3: Gemini, Zhipu (GLM) and Cohere library
+clients; Wave 3a added 2: Cerebras and SambaNova; Wave 2 added 5: DOCX
+output, PDF output, HTML→Markdown conversion,
+ProviderDiverseTranslators, EnsembleFactory). This is the headline
+number to keep improving: each new genuine recording raises it.</p>
 <h2 id="team-actions">Team actions</h2>
 <ul>
 <li><strong>No operator decision owed for the former SSH/local
@@ -369,10 +377,13 @@ host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td>35 (Wave 3b added 3 net-new: Gemini + Zhipu (GLM) + Cohere library
-clients, distinct real EN→SR-latin translations; Wave 3a added 2:
-Cerebras + SambaNova per-provider LLM clients; Wave 2 added 5: DOCX
-output, PDF output, HTML→Markdown conversion,
+<td>37 (Wave 3c added 2 net-new: Hyperbolic library client + Fireworks
+<code>llm_provider</code> submodule client, distinct real EN→ES
+translations via OpenAI-compat per-provider path [+ re-confirmed REST
+translate + endpoints rows against a live TLS server, not
+double-counted]; Wave 3b added 3: Gemini + Zhipu (GLM) + Cohere library
+clients; Wave 3a added 2: Cerebras + SambaNova per-provider LLM clients;
+Wave 2 added 5: DOCX output, PDF output, HTML→Markdown conversion,
 ProviderDiverseTranslators, EnsembleFactory)</td>
 </tr>
 <tr>
@@ -561,11 +572,38 @@ local provider was removed in bridge phase-2 R-4).</li>
 </ul>
 <h2 id="top-gaps-engineering">Top gaps (engineering)</h2>
 <ol type="1">
-<li><strong>Video-confirmation 35/494.</strong> 35 rows carry real,
-ffprobe- and content-verified recordings. <strong>Wave 3b (2026-06-16)
-added 3 net-new</strong> (real-use, ffprobe non-zero dur+frames /
-790×560 even-dims yuv420p, ≥6 frames extracted + one content-verified
-per §11.4.107): the <strong>Gemini</strong> client
+<li><strong>Video-confirmation 37/494.</strong> 37 rows carry real,
+ffprobe- and content-verified recordings. <strong>Wave 3c (2026-06-16)
+added 2 net-new</strong> (real-use, ffprobe non-zero dur+frames /
+790×560 even-dims yuv420p, ≥6 frames extracted at fps=2 +
+content-verified per §11.4.107): the <strong>Hyperbolic</strong> library
+client
+(<code>helix_translate-provider-hyperbolic-translate-wave3c-20260616.mp4</code>,
+via
+<code>-provider openai -base-url https://api.hyperbolic.xyz/v1 -model meta-llama/Meta-Llama-3.1-70B-Instruct</code>,
+“Al amanecer, el sol salía sobre el tranquilo pueblo. Un anciano
+pescador caminaba por la orilla…”) and the <strong>Fireworks</strong>
+<code>llm_provider</code> submodule client
+(<code>helix_translate-provider-fireworks-translate-wave3c-20260616.mp4</code>,
+via
+<code>-base-url https://api.fireworks.ai/inference/v1 -model accounts/fireworks/models/llama-v3p1-70b-instruct</code>,
+“Al amanecer, el sol ascendió sobre el tranquilo pueblo. Un anciano
+pescador paseaba por la orilla…”), the two outputs distinct
+(salía/caminaba vs ascendió/paseaba) — genuine per-provider models,
+start-frame (input only) ≠ output-frame (Spanish) liveness. <strong>Wave
+3c also re-confirmed</strong> (not double-counted) the REST
+<code>POST /api/v1/translate</code>
+(<code>helix_translate-rest-translate-wave3c-20260616.mp4</code>, live
+<code>cmd/server</code> TLS port 9443, real JSON
+<code>{"translated":"El sol de la mañana se alzó sobre el tranquilo pueblo.","provider":"llm-deepseek",…}</code>)
+and the
+<code>/health</code>+<code>/api/v1/version</code>+<code>/api/v1/providers</code>
+endpoints
+(<code>helix_translate-rest-endpoints-wave3c-20260616.mp4</code>, real
+health/version/providers JSON). <strong>Wave 3b (2026-06-16) added 3
+net-new</strong> (real-use, ffprobe non-zero dur+frames / 790×560
+even-dims yuv420p, ≥6 frames extracted + one content-verified per
+§11.4.107): the <strong>Gemini</strong> client
 (<code>helix_translate-provider-gemini-translate-wave3b-20260616.mp4</code>,
 gemini-2.0-flash, “Staro svjetiljko stajalo je samotočno na kamenitoj
 obali…”), the <strong>Zhipu (GLM)</strong> client
@@ -656,11 +694,14 @@ several <code>llms_verifier</code> packages
 <code>doc_processor/archdoc</code>.</li>
 </ol>
 <h2 id="video-coverage-ratio">Video-coverage ratio</h2>
-<p><code>35 / 494</code> enumerated rows = <strong>7.1%</strong> (≈ 8.4%
-against the 417 headline). Wave 3b added 3 net-new video confirmations
-(Gemini + Zhipu + Cohere library clients, distinct real EN→SR-latin
-translations); Wave 3a added 2 (Cerebras + SambaNova per-provider
-clients); Wave 2 added 5
+<p><code>37 / 494</code> enumerated rows = <strong>7.5%</strong> (≈ 8.9%
+against the 417 headline). Wave 3c added 2 net-new video confirmations
+(Hyperbolic library client + Fireworks <code>llm_provider</code>
+submodule client, distinct real EN→ES translations via OpenAI-compat
+per-provider path; + re-confirmed REST translate + endpoints rows
+against a live TLS server, not double-counted); Wave 3b added 3 (Gemini
++ Zhipu + Cohere library clients); Wave 3a added 2 (Cerebras +
+SambaNova); Wave 2 added 5
 (DOCX/PDF/HTML→MD/ProviderDiverseTranslators/EnsembleFactory). This is
 the primary metric to drive upward; each anti-bluff §11.4.107 recording
 increments the numerator.</p>

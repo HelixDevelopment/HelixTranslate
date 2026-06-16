@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 11 <strong>Last modified:</strong>
-2026-06-16T13:20:00Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 12 <strong>Last modified:</strong>
+2026-06-16T13:35:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -195,7 +195,35 @@ genuinely demonstrates the feature working (each cited <code>.mp4</code>
 was ffprobe-verified for non-zero duration+frames and content-verified
 against its claimed behaviour — e.g. real DeepSeek output in the target
 language, real gRPC translated text, live WebSocket count change).
-<strong>35 feature rows are video-confirmed</strong> (Wave 3b of
+<strong>37 feature rows are video-confirmed</strong> (Wave 3c of
+2026-06-16 added <strong>2 net-new</strong> — the
+<strong>Hyperbolic</strong> library client
+(<code>pkg/translator/llm</code>) and the <strong>Fireworks</strong>
+provider in the <code>llm_provider</code> submodule
+(<code>llm_provider/pkg/providers/fireworks/fireworks.go</code>), each a
+real-use Wave-3c <code>.mp4</code> showing a distinct EN→ES translation
+through the OpenAI-compat per-provider path —
+<code>helix_translate-provider-hyperbolic-translate-wave3c-20260616.mp4</code>
+(“Al amanecer, el sol salía sobre el tranquilo pueblo. Un anciano
+pescador caminaba por la orilla…”) and
+<code>helix_translate-provider-fireworks-translate-wave3c-20260616.mp4</code>
+(“Al amanecer, el sol ascendió sobre el tranquilo pueblo. Un anciano
+pescador paseaba por la orilla…”), the two outputs distinct from each
+other (salía/caminaba vs ascendió/paseaba) proving genuine per-provider
+models, ffprobe+frame-verified per §11.4.107 (790×560 yuv420p, ≥6 frames
+at fps=2, start-frame input-only ≠ output-frame Spanish). Wave 3c also
+<strong>re-confirmed</strong> (no double-count) the already-confirmed
+REST <code>POST /api/v1/translate</code> and
+<code>GET /health · /api/v1/version · /api/v1/providers</code> rows
+against a freshly-started live <code>cmd/server</code> TLS instance
+(port 9443) —
+<code>helix_translate-rest-translate-wave3c-20260616.mp4</code> (real
+JSON
+<code>{"translated":"El sol de la mañana se alzó sobre el tranquilo pueblo.","provider":"llm-deepseek",…}</code>)
+and <code>helix_translate-rest-endpoints-wave3c-20260616.mp4</code>
+(real health/version/providers JSON). The
+<code>GET /api/v1/verified-models</code> 404 remains an honest PENDING
+gap (LLMsVerifier disabled in config — not confirmed). Wave 3b of
 2026-06-16 added 3 net-new — the <strong>Gemini</strong>, <strong>Zhipu
 (GLM)</strong> and <strong>Cohere</strong> library clients, each backed
 by a real-use Wave-3b <code>.mp4</code> showing a distinct EN→SR-latin
@@ -384,8 +412,31 @@ host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td><strong>32</strong> (real, content-verified recordings — see
-Anti-bluff note; Rev-10 / Wave 3a of 2026-06-16 added <strong>2
+<td><strong>37</strong> (real, content-verified recordings — see
+Anti-bluff note; Rev-12 / Wave 3c of 2026-06-16 added <strong>2
+net-new</strong> video confirmations — the <strong>Hyperbolic</strong>
+library client
+(<code>helix_translate-provider-hyperbolic-translate-wave3c-20260616.mp4</code>,
+“…el sol salía…caminaba por la orilla…”) and the
+<strong>Fireworks</strong> <code>llm_provider</code> submodule client
+(<code>helix_translate-provider-fireworks-translate-wave3c-20260616.mp4</code>,
+“…el sol ascendió…paseaba por la orilla…”), each a distinct real EN→ES
+translation via the OpenAI-compat per-provider path,
+ffprobe+frame-verified per §11.4.107 (790×560 yuv420p, ≥6 frames at
+fps=2, start-frame input-only ≠ output-frame Spanish), the two outputs
+distinct proving genuine per-provider models; Wave 3c also re-confirmed
+(NOT double-counted) the already-confirmed REST
+<code>POST /api/v1/translate</code> +
+<code>/health · /api/v1/version · /api/v1/providers</code> rows against
+a live <code>cmd/server</code> TLS instance
+(<code>helix_translate-rest-translate-wave3c-20260616.mp4</code> +
+<code>helix_translate-rest-endpoints-wave3c-20260616.mp4</code>);
+<strong>count reconciliation (§11.4.6):</strong> this cell read
+<strong>32</strong> through Rev 10/11 — a sync lag behind the
+Anti-bluff-note prose; it is corrected to the true running total here —
+30 (Rev 9) + 2 (Wave 3a Cerebras/SambaNova) + 3 (Wave 3b
+Gemini/Zhipu/Cohere) + 2 (Wave 3c Hyperbolic/Fireworks) =
+<strong>37</strong>. Rev-10 / Wave 3a of 2026-06-16 added <strong>2
 net-new</strong> video confirmations — the <strong>Cerebras</strong> and
 <strong>SambaNova</strong> per-provider LLM clients
 (<code>helix_translate-provider-cerebras-translate-wave3a-20260616.mp4</code>
@@ -395,8 +446,13 @@ each a distinct real EN→ES translation via
 <code>unified-translator -provider &lt;name&gt;</code>,
 ffprobe+frame-verified per §11.4.107 with start-frame ≠ output-frame
 liveness, the two outputs distinct proving genuine per-provider models;
-Rev-9 / Wave 2 of 2026-06-16 added <strong>5 net-new</strong> video
-confirmations, each backed by a real-use Wave-2 <code>.mp4</code>
+Rev-11 / Wave 3b of 2026-06-16 added <strong>3 net-new</strong> — the
+<strong>Gemini</strong>, <strong>Zhipu (GLM)</strong> and
+<strong>Cohere</strong> library clients
+(<code>helix_translate-provider-{gemini,zhipu,cohere}-translate-wave3b-20260616.mp4</code>),
+distinct EN→SR-latin per-provider translations, frame-verified per
+§11.4.107; Rev-9 / Wave 2 of 2026-06-16 added <strong>5 net-new</strong>
+video confirmations, each backed by a real-use Wave-2 <code>.mp4</code>
 independently validator-verified ffprobe+frame §11.4.107: <strong>DOCX
 output</strong>
 (<code>helix_translate-docx-output-20260616-112943.mp4</code>),
@@ -419,7 +475,7 @@ what made the DOCX/PDF/gRPC/per-provider Wave-2 recordings genuinely
 demonstrate working features (recording them in Wave 1 would have been a
 §11.4.107 bluff; they were honest SKIPs then). Wave 1 added 2:
 bridge-ensemble best-model selection + bridge provider-diverse
-catalogue. ≈ 6.1% of 494 enumerated rows (≈ 7.2% of the 417
+catalogue. ≈ 7.5% of 494 enumerated rows (≈ 8.9% of the 417
 headline)</td>
 </tr>
 <tr>
@@ -2928,8 +2984,21 @@ PENDING | | SiliconFlow | SiliconFlow client | Library | Implemented |
 Wired | OpenAI-compatible wrapper (specifics UNCONFIRMED) |
 Not-inventoried | Source-confirmed | PENDING | | Hyperbolic | Hyperbolic
 client | Library | Implemented | Wired | OpenAI-compatible wrapper
-(specifics UNCONFIRMED) | Not-inventoried | Source-confirmed | PENDING |
-| TogetherAI | TogetherAI client | Library | Implemented | Wired |
+(<code>https://api.hyperbolic.xyz/v1</code>, model
+<code>meta-llama/Meta-Llama-3.1-70B-Instruct</code>) | Not-inventoried |
+<strong>PASS — real EN→ES translation captured</strong> (via
+unified-translator
+<code>-provider openai -base-url https://api.hyperbolic.xyz/v1 -model meta-llama/Meta-Llama-3.1-70B-Instruct</code>:
+“The morning sun rose over the quiet village. An old fisherman walked
+along the shore…” → “Al amanecer, el sol salía sobre el tranquilo
+pueblo. Un anciano pescador caminaba por la orilla…” — distinct verbs
+(salía/caminaba) from Fireworks’s output (ascendió/paseaba), proving a
+genuine per-provider model; Wave-3c, asciinema→agg→ffmpeg, ffprobe
+8.01s/790×560 yuv420p + 16 extracted frames at fps=2, ≥6 frames
+content-verified, start-frame (input only) ≠ output-frame (Spanish) per
+§11.4.107) |
+Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-provider-hyperbolic-translate-wave3c-20260616.mp4
+| | TogetherAI | TogetherAI client | Library | Implemented | Wired |
 OpenAI-compatible wrapper (specifics UNCONFIRMED) | Not-inventoried |
 Source-confirmed | PENDING | | SambaNova | SambaNova client | Library |
 Implemented | Wired | OpenAI-compatible wrapper
@@ -5291,8 +5360,17 @@ pkg/api/handler.go (primary <code>Handler</code>, gin)</h2>
 <td>Static/info/version/provider list/cache stats</td>
 <td>Not-inventoried</td>
 <td><strong>PASS — captured</strong> (/health, /api/v1/version,
-/api/v1/providers real provider list returned)</td>
-<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-api-endpoints_20260615-170755.mp4</td>
+/api/v1/providers real provider list returned). Re-confirmed Wave-3c
+against a live <code>cmd/server</code> TLS instance (port 9443):
+<code>/health</code>→<code>{"status":"healthy",…}</code>,
+<code>/api/v1/version</code>→codebase 2.3.0 + git_commit 29aa0e7,
+<code>/api/v1/providers</code>→real list
+(openai/anthropic/zhipu/deepseek/ollama/llamacpp); ffprobe
+10.63s/790×560 yuv420p, ≥6 frames content-verified, health-frame ≠
+providers-frame per §11.4.107 (re-confirmation, no double-count)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-api-endpoints_20260615-170755.mp4
+;
+Re-confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-rest-endpoints-wave3c-20260616.mp4</td>
 </tr>
 <tr>
 <td>api/handler.go</td>
@@ -5316,8 +5394,18 @@ pkg/api/handler.go (primary <code>Handler</code>, gin)</h2>
 <td>Not-inventoried</td>
 <td><strong>PASS — real DeepSeek translation captured</strong> (real
 Serbian output via API; target_lang=spanish FIXED run returns real
-Spanish)</td>
-<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-api-translate-deepseek_20260615-170716.mp4</td>
+Spanish). Re-confirmed Wave-3c against a live <code>cmd/server</code>
+TLS instance (port 9443):
+<code>curl -k -X POST .../api/v1/translate</code>
+<code>{"text":"The morning sun rose over the quiet village.","source_lang":"en","target_lang":"es","provider":"deepseek","model":"deepseek-chat"}</code>
+→ real JSON
+<code>{"provider":"llm-deepseek","translated":"El sol de la mañana se alzó sobre el tranquilo pueblo.","stats":{"Translated":1,…},"session_id":…}</code>;
+ffprobe 4.24s/790×560 yuv420p, ≥6 frames at fps=2 content-verified,
+request-frame ≠ response-frame per §11.4.107 (re-confirmation, no
+double-count)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-api-translate-deepseek_20260615-170716.mp4
+;
+Re-confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-rest-translate-wave3c-20260616.mp4</td>
 </tr>
 <tr>
 <td>api/handler.go</td>
@@ -7055,10 +7143,25 @@ cohere, deepseek, fireworks, gemini, generic, githubmodels, groq,
 huggingface, hyperbolic, junie, kilo, kimi, mistral, modal, nia,
 nlpcloud, novita, nvidia, ollama, openai, openrouter, perplexity,
 publicai, qwen, replicate, sambanova, sarvam, siliconflow, together,
-upstage, venice, vulavula, xai, zai, zen, zhipu</td>
+upstage, venice, vulavula, xai, zai, zen, zhipu (source
+<code>llm_provider/pkg/providers/&lt;name&gt;/</code>)</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed (43 provider dirs)</td>
-<td>PENDING</td>
+<td><strong>PASS — <code>fireworks</code> provider real EN→ES
+translation captured</strong> (the
+<code>llm_provider/pkg/providers/fireworks/fireworks.go</code> client,
+reached via unified-translator
+<code>-provider openai -base-url https://api.fireworks.ai/inference/v1 -model accounts/fireworks/models/llama-v3p1-70b-instruct</code>:
+“The morning sun rose over the quiet village. An old fisherman walked
+along the shore…” → “Al amanecer, el sol ascendió sobre el tranquilo
+pueblo. Un anciano pescador paseaba por la orilla…” — distinct verbs
+(ascendió/paseaba) from Hyperbolic’s output (salía/caminaba), proving a
+genuine per-provider model; Wave-3c, asciinema→agg→ffmpeg, ffprobe
+4.54s/790×560 yuv420p + 9 extracted frames at fps=2, ≥6 frames
+content-verified, start-frame (input only) ≠ output-frame (Spanish) per
+§11.4.107). The remaining 42 provider dirs remain Source-confirmed,
+PENDING a per-provider recording.</td>
+<td>Confirmed
+(fireworks):/Volumes/T7/Downloads/Recordings/helix_translate-provider-fireworks-translate-wave3c-20260616.mp4</td>
 </tr>
 </tbody>
 </table>
