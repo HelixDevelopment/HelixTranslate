@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -107,13 +108,23 @@ func (r *RedisStorage) ListSessions(ctx context.Context, limit, offset int) ([]*
 				return sessions, nil
 			}
 
+			// A per-key fetch/decode failure must be OBSERVABLE, not silently
+			// swallowed: skipping it without a signal makes a corrupt or
+			// transiently-unreadable session vanish from the listing, returning a
+			// SHORT list that looks complete (anti-bluff §11.4 observability gap).
+			// The happy path is unchanged — a bad key is still skipped so one
+			// unreadable session never fails the whole listing — but the error is
+			// now logged with its key so an operator can see that M sessions were
+			// dropped from the returned N.
 			data, err := r.client.Get(ctx, key).Bytes()
 			if err != nil {
+				log.Printf("storage/redis: ListSessions skipping key %q: get failed: %v", key, err)
 				continue
 			}
 
 			session := &TranslationSession{}
 			if err := json.Unmarshal(data, session); err != nil {
+				log.Printf("storage/redis: ListSessions skipping key %q: unmarshal failed: %v", key, err)
 				continue
 			}
 

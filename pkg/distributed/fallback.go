@@ -208,9 +208,27 @@ func (fm *FallbackManager) executeWithRetries(ctx context.Context, operation fun
 		default:
 		}
 
-		// Execute operation with timeout
+		// Execute operation with timeout.
 		opCtx, cancel := context.WithTimeout(ctx, fm.config.RequestTimeout)
 
+		// The done channel is buffered (size 1) so this goroutine can ALWAYS
+		// send and exit even after the select below has moved on — i.e. there is
+		// no goroutine leak.
+		//
+		// RESIDUAL LIMITATION (audit robustness2 finding #3): `operation` is a
+		// `func() error` with no context parameter, so when `opCtx` expires (the
+		// per-attempt RequestTimeout fires while the parent `ctx` is still alive)
+		// we stop WAITING on the operation but cannot INTERRUPT it — the abandoned
+		// call runs to completion, holding a worker/connection/LLM call the caller
+		// has already discarded. We deliberately do NOT fabricate a cancellation
+		// that wouldn't actually stop the work (anti-bluff §11.4.6). The only real
+		// fix is to thread a context INTO the operation (`operation
+		// func(context.Context) error` + pass `opCtx`) so the underlying HTTP/SSH
+		// call is cancelled on deadline — that is a public-API change to
+		// ExecuteWithFallback + FallbackStrategy.Function and is tracked as a
+		// follow-up. Note the production caller's closure (coordinator.go) already
+		// captures the OUTER `ctx`, so parent-context cancellation/shutdown DOES
+		// propagate; only the per-attempt timeout case leaves work running.
 		done := make(chan error, 1)
 		go func() {
 			done <- operation()
