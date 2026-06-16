@@ -1,25 +1,52 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 84 <strong>Last modified:</strong>
-2026-06-16T13:05:00Z</p>
+<p><strong>Revision:</strong> 85 <strong>Last modified:</strong>
+2026-06-16T15:35:00Z</p>
 <h2
-id="resume-here-2026-06-16-1305-11.4.153-video-confirmation-program-in-progress-32-confirmed-release-helix_translate-2.3.0-published-default-path-defect-foundfixedre-reviewed-go-recording-root-cause-corrected-slow-not-hung-be-patient">▶️
-RESUME HERE (2026-06-16 ~13:05) — §11.4.153 VIDEO-CONFIRMATION PROGRAM
-in progress (32 confirmed); release <code>helix_translate-2.3.0</code>
-published; default-path defect found+FIXED+re-reviewed GO; recording
-root-cause corrected (slow-not-hung — BE PATIENT)</h2>
+id="resume-here-2026-06-16-1535-nezha-distributed-boot-complete-full-stack-live-real-translation-verified-11.4.153-video-program-43-confirmed-release-2.3.0-published">▶️
+RESUME HERE (2026-06-16 ~15:35) — 🟢 NEZHA DISTRIBUTED BOOT COMPLETE
+(full stack live + real translation verified) · §11.4.153 video program
+43 confirmed · release 2.3.0 published</h2>
+<h3
+id="nezha-distributed-boot-done-sink-side-verified-operator-critical-task-complete">🟢
+NEZHA DISTRIBUTED BOOT — DONE + SINK-SIDE VERIFIED (operator-CRITICAL
+task, COMPLETE)</h3>
+<p>The whole HelixTranslate System is DEPLOYED + RUNNING on
+<strong>nezha.local</strong> (Linux 6.12, 8c/62GB, podman 5.7.1, SSH
+milosvasic keyed) via the <strong>containers submodule</strong>
+(§11.4.76: launcher <code>containers/cmd/deploy-stack</code> commit
+<code>20173e8</code>, parent gitlink <code>6296c03</code>; Phase A defs
+<code>2166d2c</code>; JWT fix <code>1b29668</code>). <strong>All 6
+services Up HEALTHY:</strong>
+helixtranslate-{postgres,redis,monitor[:18090],grpc[:50061],api[:18080],server-TLS[:18443]}
+(ports remapped to avoid host conflicts). <strong>REAL translation
+round-trip VERIFIED sink-side (§11.4.69):</strong>
+<code>POST https://nezha.local:18443/api/v1/translate</code> en→es →
+HTTP 200, provider llm-novita → “El viejo faro se alzaba solitario en la
+rocosa orilla.” Secrets in gitignored <code>.env.nezha</code> on nezha
+(real JWT_SECRET + all provider keys, chmod-safe, NEVER committed
+§11.4.10). Stack left RUNNING for heavy testing. NEXT: run the
+heavy/real-production-service test suites against the live nezha
+endpoints; any bug → systematic-debugging → fix → rebuild → reboot →
+re-validate (NO bluff). ⚠️ I premature-stopped progressing agents TWICE
+during the boot — remote ops are 30-60+min; BE PATIENT, trust
+completion, suspect hang ONLY if no completion + no ssh/podman/curl
+subprocess + zero nezha state-change after 60+min.</p>
 <h3
 id="short-resumption-paste-this-first-sentence-into-a-fresh-session">§11.4.127
 SHORT resumption (paste this first sentence into a fresh session)</h3>
 <p>Read <code>docs/CONTINUATION.md</code> (this file) +
 <code>.remember/remember.md</code> FIRST, then
-<code>git fetch --all --prune</code>; the no-local-runtime release
+<code>git fetch --all --prune</code>; <strong>NEZHA BOOT
+COMPLETE</strong> (full stack live on nezha.local via containers
+submodule, real translation verified — see green block above; run heavy
+testing against it next); the no-local-runtime release
 <strong><code>helix_translate-2.3.0</code> is PUBLISHED</strong> (tag on
 main + 10 owned submodules; <code>helix_qa</code> tag OWED §11.4.119);
-the <strong>§11.4.153 per-feature video-confirmation program</strong> is
-the active operator-CRITICAL work — <code>docs/features/Status.md</code>
-Rev 9+, <strong>32/494 features video-confirmed</strong> (waves 1+2+3a:
+the <strong>§11.4.153 per-feature video-confirmation program</strong>
+continues — <code>docs/features/Status.md</code> Rev 14, <strong>43/496
+features video-confirmed</strong> (waves 1+2+3a:
 bridge-ensemble/catalogue, DOCX/PDF/gRPC/HTML-MD, providers
 novita/mistral/groq/siliconflow/cerebras/sambanova — real bridge
 responses, ffprobe+content-verified, NO bluff), model source =
