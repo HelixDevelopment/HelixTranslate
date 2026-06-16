@@ -789,6 +789,27 @@ var commentaryLeadMarkers = []string{
 	"please note",
 }
 
+// commentaryParenSignalWords are meta-commentary signal words the model uses
+// INSIDE a trailing fully-enclosed parenthetical/bracketed aside to explain its
+// translation choices (dialect, register, vocabulary, style, guidelines, etc.).
+// A trailing ()/[] block containing any of these is a model aside, not real
+// translated content. Kept narrow + English-meta-specific so a genuine
+// in-content trailing parenthetical (real translated prose) is NOT stripped.
+var commentaryParenSignalWords = []string{
+	"using ",
+	"dialect",
+	"vocabulary",
+	"guideline",
+	"register",
+	"as per",
+	"as requested",
+	"per the instruction",
+	"i used",
+	"i have used",
+	"i chose",
+	"i kept",
+}
+
 // stripTranslationCommentary removes a trailing model-commentary block. An
 // instruct model that ignores the "translation only" instruction appends an
 // explanation after a blank line, prefixed either by an enclosing marker
@@ -822,12 +843,25 @@ func isCommentaryBlock(block string) bool {
 	if t == "" {
 		return false
 	}
-	// Fully enclosed parenthetical / bracketed note, e.g. "(Note: ...)" / "[Note: ...]".
+	// Fully enclosed parenthetical / bracketed note, e.g. "(Note: ...)" /
+	// "[Note: ...]" / "(Using Ekavica dialect and pure Serbian vocabulary as per
+	// guidelines)". A trailing \n\n-separated block fully wrapped in ()/[] whose
+	// inner text carries any meta-commentary signal word is the model explaining
+	// its translation choices (dialect/register/vocabulary/style/guidelines), NOT
+	// real translated content — strip it. The signal-word set is required (rather
+	// than blanket-stripping every trailing parenthetical) so a genuine in-content
+	// trailing parenthetical is preserved (see
+	// TestEnhanceTranslation_StripCommentary_KeepsBenignTrailingParenthetical).
 	if (strings.HasPrefix(t, "(") && strings.HasSuffix(t, ")")) ||
 		(strings.HasPrefix(t, "[") && strings.HasSuffix(t, "]")) {
 		inner := strings.ToLower(strings.TrimLeft(t, "(["))
 		if strings.HasPrefix(inner, "note") || strings.Contains(inner, "translat") {
 			return true
+		}
+		for _, w := range commentaryParenSignalWords {
+			if strings.Contains(inner, w) {
+				return true
+			}
 		}
 	}
 	lower := strings.ToLower(t)

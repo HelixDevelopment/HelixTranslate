@@ -65,6 +65,23 @@ func TestEnhanceTranslation_StripsModelCommentary(t *testing.T) {
 			mustNotHas: []string{"This translation maintains", "aphoristic"},
 		},
 		{
+			// Live-captured on nezha 2026-06-16 (docs/qa/nezha_coverage_*): the
+			// model appended a parenthetical *style/dialect* aside that the
+			// original keyword filter (only "note"/"translat") missed, leaking
+			// English meta-commentary into a Serbian translation. §11.4.115 RED
+			// fixture / §11.4.135 standing guard.
+			name:      "sr_paren_dialect_aside",
+			raw:       "Ја пијем кафу јутро.\n\n(Using Ekavica dialect and pure Serbian vocabulary as per guidelines)",
+			wantClean: "Ја пијем кафу јутро.",
+			mustNotHas: []string{"Using Ekavica", "dialect", "vocabulary", "guidelines"},
+		},
+		{
+			name:      "en_bracket_style_aside",
+			raw:       "The book is on the table.\n\n[Using formal register and standard vocabulary]",
+			wantClean: "The book is on the table.",
+			mustNotHas: []string{"Using formal", "register", "vocabulary"},
+		},
+		{
 			name:      "clean_unchanged_no_commentary",
 			raw:       "El anciano y el mar eran uno.",
 			wantClean: "El anciano y el mar eran uno.",
@@ -102,6 +119,19 @@ func TestEnhanceTranslation_StripCommentary_DoesNotEatRealParagraphs(t *testing.
 	got := strings.TrimSpace(lt.enhanceTranslation(in, in))
 	if got != in {
 		t.Errorf("real multi-paragraph translation was mutated:\n got  = %q\n want = %q", got, in)
+	}
+}
+
+// TestEnhanceTranslation_StripCommentary_KeepsBenignTrailingParenthetical proves
+// the widened parenthetical-aside detector does NOT over-strip a genuine trailing
+// parenthetical that is real translated content (no meta-commentary signal words).
+// Anti-bluff false-positive guard for the sr_paren_dialect_aside fix.
+func TestEnhanceTranslation_StripCommentary_KeepsBenignTrailingParenthetical(t *testing.T) {
+	lt := &LLMTranslator{}
+	in := "Stigao je u grad.\n\n(I bio je veoma umoran.)"
+	got := strings.TrimSpace(lt.enhanceTranslation(in, in))
+	if got != in {
+		t.Errorf("benign trailing parenthetical content was wrongly stripped:\n got  = %q\n want = %q", got, in)
 	}
 }
 

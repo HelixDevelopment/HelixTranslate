@@ -1,0 +1,5 @@
+QADIR=docs/qa/nezha_revalidate_6a1aa8c_20260616T142656Z
+Run TS (UTC): 20260616T142656Z
+Main checkout HEAD: 6a1aa8c334cd38ee1dea2a59cb10aa188c0b387f
+Live image BEFORE reboot: f3904ccd71c2 (pre-6a1aa8c)
+Target: server-TLS https://nezha.local:18443/api/v1/translate
