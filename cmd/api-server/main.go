@@ -21,6 +21,7 @@ import (
 	"digital.vasic.translator/pkg/api"
 	"digital.vasic.translator/pkg/grpc/proto"
 	"digital.vasic.translator/pkg/logger"
+	"digital.vasic.translator/pkg/version"
 	"digital.vasic.translator/pkg/websocket"
 
 	"github.com/gin-gonic/gin"
@@ -129,10 +130,10 @@ type ErrorResponse struct {
 func main() {
 	// CLI flags override environment variables
 	var (
-		httpPortFlag    = flag.Int("http-port", 0, "HTTP server port (overrides HTTP_PORT env var)")
-		httpAddrFlag    = flag.String("http-address", "", "HTTP server address (overrides HTTP_ADDRESS env var)")
-		grpcAddrFlag    = flag.String("grpc-address", "", "gRPC server address (overrides GRPC_ADDRESS env var)")
-		debugFlag       = flag.Bool("debug", false, "Enable debug mode")
+		httpPortFlag = flag.Int("http-port", 0, "HTTP server port (overrides HTTP_PORT env var)")
+		httpAddrFlag = flag.String("http-address", "", "HTTP server address (overrides HTTP_ADDRESS env var)")
+		grpcAddrFlag = flag.String("grpc-address", "", "gRPC server address (overrides GRPC_ADDRESS env var)")
+		debugFlag    = flag.Bool("debug", false, "Enable debug mode")
 	)
 	flag.Parse()
 
@@ -579,7 +580,7 @@ func (s *APIServer) healthCheck(c *gin.Context) {
 	payload := map[string]interface{}{
 		"status":         "healthy",
 		"timestamp":      time.Now().Unix(),
-		"version":        "3.0.0",
+		"version":        version.AppVersion,
 		"grpc_connected": state.String(),
 	}
 

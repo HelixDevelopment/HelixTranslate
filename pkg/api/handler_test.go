@@ -20,6 +20,7 @@ import (
 	"digital.vasic.translator/pkg/models"
 	"digital.vasic.translator/pkg/security"
 	"digital.vasic.translator/pkg/translator"
+	"digital.vasic.translator/pkg/version"
 	"digital.vasic.translator/pkg/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -135,9 +136,32 @@ func TestAPIInfo(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.Equal(t, "Universal Multi-Format Multi-Language Ebook Translation API", response["name"])
-	assert.Equal(t, "1.0.0", response["version"])
+	assert.Equal(t, version.AppVersion, response["version"])
 	assert.Contains(t, response, "endpoints")
 	assert.Contains(t, response, "documentation")
+}
+
+// TestHealthCheckReportsAuthoritativeVersion is the §11.4.135 deterministic
+// regression guard for the version-single-sourcing of the /health endpoint:
+// healthCheck MUST report version.AppVersion (the authoritative VERSION-bound
+// constant), never a hardcoded literal. Revert handler.go's healthCheck "version"
+// back to a literal → this FAILs (literal != version.AppVersion once VERSION moves).
+func TestHealthCheckReportsAuthoritativeVersion(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	h := &Handler{}
+	router := gin.New()
+	router.GET("/test", h.healthCheck)
+
+	req, _ := http.NewRequest("GET", "/test", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, version.AppVersion, response["version"],
+		"/health must report version.AppVersion (single-sourced from VERSION), not a hardcoded literal")
 }
 
 // TestTranslateText tests the translateText handler

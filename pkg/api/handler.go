@@ -14,6 +14,7 @@ import (
 	"digital.vasic.translator/pkg/security"
 	"digital.vasic.translator/pkg/translator"
 	"digital.vasic.translator/pkg/translator/llm"
+	"digital.vasic.translator/pkg/version"
 	"digital.vasic.translator/pkg/websocket"
 
 	"digital.vasic.translator/internal/verifier/selection"
@@ -211,7 +212,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 func (h *Handler) healthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "healthy",
-		"version": "1.0.0",
+		"version": version.AppVersion,
 		"time":    time.Now().UTC(),
 	})
 }
@@ -220,7 +221,7 @@ func (h *Handler) healthCheck(c *gin.Context) {
 func (h *Handler) apiInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"name":        "Universal Multi-Format Multi-Language Ebook Translation API",
-		"version":     "1.0.0",
+		"version":     version.AppVersion,
 		"description": "High-quality universal ebook translation service supporting 100+ languages and multiple formats",
 		"endpoints": gin.H{
 			"health":       "GET /health",
