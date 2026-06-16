@@ -88,6 +88,23 @@ var ValidModels = map[Provider][]string{
 	ProviderVulavula:    {"vulavula-llama-3-1-70b"},
 }
 
+// IsKnownProvider reports whether name is a recognised LLM provider — i.e. one
+// the NewLLMTranslatorWithConfig factory switch can build a client for. The set
+// is derived from the ValidModels registry (every supported provider has a
+// ValidModels entry), so this stays in lockstep with the factory without a
+// second hand-maintained list. An explicitly client-supplied provider name that
+// is NOT known is a client error: the caller asked for a provider the system
+// does not offer, which MUST be rejected (HTTP 400) rather than silently routed
+// to a different provider — a response-correctness defect. The empty string is
+// NOT a known provider (it means "use the default", handled by the caller).
+func IsKnownProvider(name string) bool {
+	if name == "" {
+		return false
+	}
+	_, ok := ValidModels[Provider(name)]
+	return ok
+}
+
 // LLMTranslator implements LLM-based translation
 type LLMTranslator struct {
 	*BaseTranslator

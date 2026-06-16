@@ -1087,6 +1087,16 @@ func TestBatchTranslate(t *testing.T) {
 		},
 	}
 	h := &Handler{config: config}
+	// Deterministic bridge seam — without this the handler lazily opens a REAL
+	// bridge (bridge.Open with env keys), making the test env-dependent and
+	// non-reproducible (§11.4.98/§11.4.50). With the mock bridge installed, a
+	// well-formed batch request succeeds (200) deterministically and only
+	// structurally-invalid requests fail (400). The prior assertions expected
+	// valid requests to return 400 "Will fail at translator creation" — that was
+	// a stale expectation from the pre-bridge era (createTranslator no longer
+	// hard-fails for a valid known provider); reconciled to the corrected
+	// behaviour per §11.4.120.
+	installMockBridge(h)
 
 	router := gin.New()
 	router.POST("/batch", h.batchTranslate)
@@ -1104,22 +1114,33 @@ func TestBatchTranslate(t *testing.T) {
 			shouldContain:  "error",
 		},
 		{
+			// An empty (but present) texts array is well-formed: the handler runs
+			// zero translations and returns an empty result set with 200. This is
+			// a successful no-op, not a client error.
 			name:           "empty texts array",
 			requestBody:    `{"texts":[],"provider":"openai"}`,
-			expectedStatus: http.StatusBadRequest,
-			shouldContain:  "error",
+			expectedStatus: http.StatusOK,
+			shouldContain:  "translated",
 		},
 		{
 			name:           "valid request with single text",
 			requestBody:    `{"texts":["test"],"provider":"openai"}`,
-			expectedStatus: http.StatusBadRequest, // Will fail at translator creation
-			shouldContain:  "error",
+			expectedStatus: http.StatusOK,
+			shouldContain:  "translated",
 		},
 		{
 			name:           "valid request with multiple texts",
 			requestBody:    `{"texts":["test1","test2"],"provider":"openai"}`,
-			expectedStatus: http.StatusBadRequest, // Will fail at translator creation
-			shouldContain:  "error",
+			expectedStatus: http.StatusOK,
+			shouldContain:  "translated",
+		},
+		{
+			// An explicitly-named unsupported provider is a client error (400) —
+			// the Task-1 unsupported-provider contract, mirrored on the batch path.
+			name:           "unsupported provider rejected",
+			requestBody:    `{"texts":["test"],"provider":"unsupported-provider"}`,
+			expectedStatus: http.StatusBadRequest,
+			shouldContain:  "unsupported provider",
 		},
 	}
 

@@ -217,11 +217,22 @@ func TestBatchTranslateMoreCoverage(t *testing.T) {
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
-		// R-1b/R2: the "provider" field is now ADVISORY — the LLMsVerifier bridge
-		// selects the strongest VERIFIED model regardless of the requested provider
-		// name, so batchTranslate no longer rejects an unknown provider at the
-		// local-construction layer (the prior NewLLMTranslator allowlist is gone).
-		// The request is accepted and the bridge-sourced translator runs.
-		assert.Equal(t, http.StatusOK, w.Code)
+		// An explicitly-named provider the system does not support is a client
+		// error and MUST be rejected with 400 — never silently routed to a
+		// different provider by the bridge (a response-correctness defect: the
+		// caller asked for "invalid-provider" and would otherwise get a real
+		// translation from some OTHER provider with no error). createTranslator
+		// validates the requested provider against the canonical provider registry
+		// (llm.IsKnownProvider) before reaching the bridge, so batchTranslate
+		// returns 400 here. (§11.4.69 no-silent-substitution; §11.4.120 — this
+		// assertion was reconciled from a stale advisory-200 expectation to the
+		// corrected 400 behaviour, matching translateText's unsupported-provider
+		// contract.)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		var response map[string]interface{}
+		if err := json.Unmarshal(w.Body.Bytes(), &response); err == nil {
+			assert.Contains(t, response["error"], "unsupported provider")
+		}
 	})
 }

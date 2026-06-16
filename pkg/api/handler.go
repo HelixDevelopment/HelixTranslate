@@ -13,6 +13,7 @@ import (
 	"digital.vasic.translator/pkg/script"
 	"digital.vasic.translator/pkg/security"
 	"digital.vasic.translator/pkg/translator"
+	"digital.vasic.translator/pkg/translator/llm"
 	"digital.vasic.translator/pkg/websocket"
 
 	"digital.vasic.translator/internal/verifier/selection"
@@ -787,6 +788,21 @@ func (h *Handler) createTranslator(providerName, _, sourceLang, targetLang strin
 		}
 		// Return a special distributed translator wrapper
 		return &distributedTranslator{dm: h.distributedManager.(*distributed.DistributedManager)}, nil
+	}
+
+	// Reject a provider the system does not support. The bridge selects the
+	// strongest verified model regardless of the requested provider name, so
+	// without this guard a request for a non-existent provider (e.g.
+	// "unsupported-provider") would silently succeed against a different provider
+	// — a response-correctness defect (the client asked for X and got Y with no
+	// error). providerName is non-empty here (empty was defaulted above) and is
+	// not "distributed" (handled above). Validating it against the canonical
+	// provider registry keeps the API honest: an unsupported provider is a 400
+	// client error, never a silent substitution (§11.4.69). The resolved default
+	// provider is operator-configured from the same registry, so a well-formed
+	// deployment never trips this on the default-fallback path.
+	if !llm.IsKnownProvider(providerName) {
+		return nil, fmt.Errorf("unsupported provider: %s", providerName)
 	}
 
 	// Default to the legacy Russian→Serbian pair only when neither side is
