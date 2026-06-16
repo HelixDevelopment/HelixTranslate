@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 10 <strong>Last modified:</strong>
-2026-06-16T13:00:00Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 11 <strong>Last modified:</strong>
+2026-06-16T13:20:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -195,11 +195,30 @@ genuinely demonstrates the feature working (each cited <code>.mp4</code>
 was ffprobe-verified for non-zero duration+frames and content-verified
 against its claimed behaviour — e.g. real DeepSeek output in the target
 language, real gRPC translated text, live WebSocket count change).
-<strong>32 feature rows are video-confirmed</strong> (Wave 3a of
-2026-06-16 added 2 net-new — the <strong>Cerebras</strong> and
-<strong>SambaNova</strong> per-provider LLM clients, each backed by a
-real-use Wave-3a <code>.mp4</code> showing a distinct EN→ES translation
-through <code>unified-translator -provider &lt;name&gt;</code> —
+<strong>35 feature rows are video-confirmed</strong> (Wave 3b of
+2026-06-16 added 3 net-new — the <strong>Gemini</strong>, <strong>Zhipu
+(GLM)</strong> and <strong>Cohere</strong> library clients, each backed
+by a real-use Wave-3b <code>.mp4</code> showing a distinct EN→SR-latin
+translation through the per-provider path —
+<code>helix_translate-provider-gemini-translate-wave3b-20260616.mp4</code>
+(“Staro svjetiljko stajalo je samotočno na kamenitoj obali…”),
+<code>helix_translate-provider-zhipu-translate-wave3b-20260616.mp4</code>
+(“Stara svjetiljka stojeća samostalno na kamenitoj obali…”),
+<code>helix_translate-provider-cohere-translate-wave3b-20260616.mp4</code>
+(provider=cohere via
+<code>-base-url https://api.cohere.ai/compatibility/v1</code>, “Stari
+svjetionik stojeo je sam na kamenitoj obali… svijeća njegova vodila
+brodove…”), all four outputs (incl. the re-confirmed deepseek clip
+<code>helix_translate-provider-deepseek-translate-wave3b-20260616.mp4</code>
+“Stari svjetionik stajao je sam na kamenitoj obali…”) distinct from one
+another proving genuine per-provider models, ffprobe-verified (non-zero
+dur+frames, 790×560 even-dims yuv420p) + ≥6 frames extracted with one
+content-verified per §11.4.107; the deepseek clip is a re-confirmation,
+no double-count; Wave 3a of 2026-06-16 added 2 net-new — the
+<strong>Cerebras</strong> and <strong>SambaNova</strong> per-provider
+LLM clients, each backed by a real-use Wave-3a <code>.mp4</code> showing
+a distinct EN→ES translation through
+<code>unified-translator -provider &lt;name&gt;</code> —
 <code>helix_translate-provider-cerebras-translate-wave3a-20260616.mp4</code>
 (“El sol de la mañana se alzó sobre el tranquilo pueblo.”) and
 <code>helix_translate-provider-sambanova-translate-wave3a-20260616.mp4</code>
@@ -2766,8 +2785,16 @@ factory dispatching to ~32 providers</td>
 <td>Wired</td>
 <td>Google Gemini generativelanguage API</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — real Gemini translation captured</strong> (Wave-3b
+real-use video:
+<code>unified-translator -provider gemini -model gemini-2.0-flash</code>,
+real key, EN→SR-latin “Staro svjetiljko stajalo je samotočno na
+kamenitoj obali. Noću svakog dana njeno svjetlo vodilo brodove bezbedno
+kući kroz oluju.”; ffprobe 7.16s / 790×560 / non-zero frames; ≥6 frames
+extracted, f_05 content-verified showing provider+model+distinct SR
+output per §11.4.107; output distinct from deepseek/zhipu/cohere proving
+genuine per-provider model)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-provider-gemini-translate-wave3b-20260616.mp4</td>
 </tr>
 <tr>
 <td>DeepSeek</td>
@@ -2777,9 +2804,15 @@ factory dispatching to ~32 providers</td>
 <td>Wired</td>
 <td>DeepSeek OpenAI-compatible chat-completions</td>
 <td>Not-inventoried</td>
-<td><strong>Exercised in unified-translator real run</strong></td>
+<td><strong>Exercised in unified-translator real run</strong>
+(re-confirmed Wave-3b:
+<code>-provider deepseek -model deepseek-chat</code> EN→SR-latin “Stari
+svjetionik stajao je sam na kamenitoj obali…”; ffprobe 4.7s/790×560,
+f_03 content-verified — additional clip, no double-count)</td>
 <td>Confirmed (via
-unified-translator):/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek-translation-FIXED_20260615_163824.mp4</td>
+unified-translator):/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek-translation-FIXED_20260615_163824.mp4
+(additional Wave-3b:
+/Volumes/T7/Downloads/Recordings/helix_translate-provider-deepseek-translate-wave3b-20260616.mp4)</td>
 </tr>
 <tr>
 <td>Zhipu</td>
@@ -2789,8 +2822,15 @@ unified-translator):/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek
 <td>Wired</td>
 <td>Zhipu GLM /api/paas/v4</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — real Zhipu translation captured</strong> (Wave-3b
+real-use video:
+<code>unified-translator -provider zhipu -model glm-4-flash</code>, real
+key, EN→SR-latin “Stara svjetiljka stojeća samostalno na kamenitoj
+obali. Noću svaki put svjetlo vodi brodove bezbedno kući kroz oluju.”;
+ffprobe 5.05s / 790×560 / non-zero frames; ≥6 frames extracted, f_04
+content-verified per §11.4.107; output distinct from
+deepseek/gemini/cohere)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-provider-zhipu-translate-wave3b-20260616.mp4</td>
 </tr>
 <tr>
 <td>Alibaba</td>
@@ -2856,8 +2896,16 @@ clients (OpenAI/Anthropic/DeepSeek/…) in this section are NOT Obsolete.
 | Groq | Groq client | Library | Implemented | Wired | OpenAI-compatible
 wrapper | Not-inventoried | Source-confirmed | PENDING | | Cohere |
 Cohere client | Library | Implemented | Wired | command-r via
-OpenAI-compat endpoint | Not-inventoried | Source-confirmed | PENDING |
-| Mistral | Mistral client | Library | Implemented | Wired |
+OpenAI-compat endpoint | Not-inventoried | <strong>PASS — real Cohere
+translation captured</strong> (Wave-3b real-use video:
+<code>unified-translator -provider cohere -model command-r-08-2024 -base-url https://api.cohere.ai/compatibility/v1</code>,
+real key, EN→SR-latin “Stari svjetionik stojeo je sam na kamenitoj
+obali. Noću svaki put svijeća njegova vodila brodove sigurno kući kroz
+oluju.”; log shows provider=cohere; ffprobe 6.24s / 790×560 / non-zero
+frames; ≥6 frames extracted, f_04 content-verified per §11.4.107; output
+distinct from deepseek/gemini/zhipu) |
+Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-provider-cohere-translate-wave3b-20260616.mp4
+| | Mistral | Mistral client | Library | Implemented | Wired |
 OpenAI-compatible wrapper | Not-inventoried | Source-confirmed | PENDING
 | | xAI | xAI (Grok) client | Library | Implemented | Wired |
 OpenAI-compatible wrapper | Not-inventoried | Source-confirmed | PENDING
