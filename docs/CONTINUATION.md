@@ -1,9 +1,44 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 86
-**Last modified:** 2026-06-16T15:00:00Z
+**Revision:** 87
+**Last modified:** 2026-06-16T20:20:00Z
 
-## ▶️ RESUME HERE (2026-06-16 ~15:00) — 🟢 NEZHA HEAVY-TESTING ARC: api-400 fix + gRPC round-trip + coverage + commentary-escape fix (all live-validated)
+## ▶️ RESUME HERE (2026-06-16 ~20:20) — 🟢 BUG-CLASS FIXES + VIDEO 54→66 + 4-ITEM OPERATOR-REVIEW QUEUE ALL CLEARED (live-validated) · NEXT = bug-class review + full §11.4.40 retest → release-readiness
+
+**SHORT:** Read this file + `.remember/remember.md` FIRST, then `git fetch --all --prune`. HEAD `d7b4407` (all 4 remotes synced). Live nezha stack rebuilt onto image **08900424e481** (all 6 services healthy incl. monitor — the stranded-monitor bug is fixed). The 4-item operator-review queue is **CLEARED**. NEXT: independent review of the §11.4.69/§11.4.115 bug-class fixes (4fbe581 6-site Translate-arg data-loss + 7cabe3f MINOR-W6-1) → full §11.4.40 retest from last tag → release-readiness (operator tag decision per §11.4.151).
+
+### 🟢 THIS SESSION ARC (since the rev86 nezha heavy-testing arc — all §11.4.142-reviewed GO, live-validated, no bluff)
+Live image progression: 2bb4de5 (FB2-fix) → **08900424e481** (this session: /providers fix + all app services recreated). HEAD `d7b4407`.
+
+- **PART-A/B/C + bug-class fixes (pre-this-committer-stream, on HEAD before f6b1f1f):**
+  - `c2aa7c8` — **BUG-MULTIPASS-DEFAULT-MODEL** (resolvePolisherModel substitutes a provider-valid model so `-multipass` genuinely polishes; honest ❌ on real failure) + **BUG-FB2-HARDCODED-LANG** (FB2 handler honors source_lang/target_lang, validates→400 on unknown). RED→GREEN §11.4.115.
+  - `04f71e9` — security: scrubbed a leaked SSH password from the tracked tree (§11.4.10/§11.4.30/§11.4.124), closed GAP1/GAP2.
+  - `4fbe581` — **6-site Translate-arg data-loss bug-class** (empty-payload + wrong-content sent to the LLM across the ebook pipeline) §11.4.69/§11.4.115/§11.4.135.
+  - `7cabe3f` — **MINOR-W6-1** parser chapter-title duplication §11.4.115/§11.4.135.
+  - `af2ef7f` + `f6b1f1f` — §11.4.153 video waves 4–9: **video-confirmed 43→54→66** (+12 net-new waves 7–9, of which 3 genuine PENDING→Confirmed row-flips), §11.4.138 multipass demote, + the `cmd/grpc-translate-probe` row.
+
+- **THIS BACKGROUND-COMMITTER STREAM (HEAD f6b1f1f → d7b4407), all 4 operator-review items + drift cleared:**
+  - `e5051a5` — **#1 Status video-count drift reconcile → 66** (§11.4.6/§11.4.60/§11.4.91): the headline/Anti-bluff-note/Coverage cell were 66 but 3 caveat cells lagged (Status.md "30 feature rows"; Status_Summary Page-1 "30 of 494", Page-2 "43/496") — all reconciled to 66 with explicit §11.4.6 cell-reconciliation notes; docs_chain `features` verify=in-sync. (docs_chain CANNOT catch internal contradictions — this was a real release-gate blocker.)
+  - `0246851` — **#2 FB2 live re-validation evidence** (§11.4.108/§11.4.123/§11.4.83): on nezha 2bb4de5 image, `POST /api/v1/translate/fb2` target_lang=es→real Spanish EPUB ("Capítulo de Prueba"…), de→German (distinct), klingon→400. `docs/qa/fb2_revalidate_20260616T163552Z/`.
+  - `388a2eb` — **#3 /api/v1/providers REAL BUG fixed** (§11.4.115/§11.4.135/§11.4.6): listProviders served a hardcoded static {openai,anthropic,zhipu,deepseek} list ignoring config → now serves the REAL configured set (configured/available/requires_api_key/model + `<PROVIDER>_API_KEY` env), complete-catalogue fallback when unconfigured. RED→GREEN polarity test + guard `HTQ-FIX-006`. Independent review NO-GO→GO (§11.4.134). (cmd/api-server getProviders gRPC path untouched.)
+  - `af23440` — **#5b deploy-script dependency-ordering fix** (§11.4.108): no-arg `nezha-deploy.sh reboot` now stop+rm+recreates ALL app services (grpc/api/server/monitor) onto the fresh image (was gated on a named-service arg → left dependents, esp. monitor, on the stale image). Companion doc Rev 2 + exports.
+  - `702d907` — **#4 pkg/api/server.go honest §11.4.124 N/A** + record /providers fix in Status (the alt `api.Server` is NEVER-WIRED test-only scaffolding — kept-not-deleted per §11.4.122/§11.4.124, documented N/A, NOT silently shown as a shipping API). Status Rev 18.
+  - `d7b4407` — **#5a + #3 sink-side re-validation** (§11.4.108/§11.4.69): rebuilt nezha (image 08900424e481) via the fixed reboot → ALL services incl. **monitor** recreated + healthy; `GET /api/v1/providers` returns **19 config-driven providers** (NOT the old static 4; openai correctly absent — no key), new fields present. `docs/qa/providers_revalidate_20260616T170812Z/`.
+
+### LIVE STATE ANCHORS (§11.4.6, moment-valid)
+- **HEAD = `d7b4407`**, all 4 remotes (origin/github=milos85vasic/Translator.git + HelixDevelopment/HelixTranslate.git, upstream, githubhelixdevelopment) synced. NOTE: origin & github push to the SAME repo pair → push them SERIALIZED (parallel pushes race the ref lock; harmless "remote rejected: cannot lock ref" = the loser of the race, re-fetch confirms the tip).
+- **Nezha live stack** (`nezha.local`, ssh host alias `nezha.local`, repo synced at `/home/milosvasic/helixtranslate` — a NON-git copy, NOT a clone): image **08900424e481**, all 6 helixtranslate-* containers healthy (server-TLS :18443, api :18080, grpc :50061, monitor :18090). Deploy via `bash scripts/nezha-deploy.sh reboot` ON nezha (rsync changed source to nezha FIRST). cmd/server (:18443/:8443) has a TRANSIENT startup health-window (HTTP/3 QUIC binds slower than the first health probes) — SIGQUIT dump proved it starts clean; wait ~60s then it's healthy.
+- Build/vet/gofmt clean on the providers fix; full pkg/api suite GREEN; `HTQ-FIX-006` guard registered.
+
+### NEXT (priority order)
+1. **Independent §11.4.142 review of the bug-class fixes** (4fbe581 6-site Translate-arg data-loss + 7cabe3f MINOR-W6-1) if not already GO-reviewed in their own stream.
+2. **Full §11.4.40 retest from the last release tag to HEAD** (pre-build + post-build + nezha live re-validation of every fix's runtime signature + meta-test mutation sweep + Challenge bank incl. `HTQ-FIX-006`) → release-readiness.
+3. **Operator tag decision** (§11.4.151 prefix `helix_translate-`; §11.4.126 release-scope terminal condition; §11.4.113 FF-only no-force-push).
+- Owed/tracked: re-record live `/api/v1/providers` for a fresh §11.4.153 Confirmed; markdown-translator EPUB→MD re-record (bug fixed at 4fbe581); continue §11.4.153 video coverage toward the ~remaining eligible features.
+
+---
+
+## ▶️ (prior) RESUME HERE (2026-06-16 ~15:00) — 🟢 NEZHA HEAVY-TESTING ARC: api-400 fix + gRPC round-trip + coverage + commentary-escape fix (all live-validated)
 
 ### 🟢 NEZHA HEAVY REAL-SERVICE TESTING — iterations 1→4 (live stack, sink-side, no bluff)
 Heavy testing against the LIVE nezha stack (server-TLS :18443, api :18080, grpc :50061). Live image progression: f3904ccd (pre) → 2d0c925 (api-400 fix) → **ebb82df** (commentary-escape fix; server+grpc+api all on it now, HEALTHY).
