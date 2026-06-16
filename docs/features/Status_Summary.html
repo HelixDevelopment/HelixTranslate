@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status-summary">HelixTranslate — Feature
 Status Summary</h1>
-<p><strong>Revision:</strong> 12 <strong>Last modified:</strong>
-2026-06-16T13:35:00Z <strong>Authority:</strong> Two-audience companion
+<p><strong>Revision:</strong> 13 <strong>Last modified:</strong>
+2026-06-16T13:45:00Z <strong>Authority:</strong> Two-audience companion
 to <code>docs/features/Status.md</code> (§11.4.56). Derived from the
 same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync),
 §11.4.6 (no-guessing).</p>
@@ -202,14 +202,14 @@ translators, the web dashboards, the REST and gRPC servers, ~32 built-in
 AI providers, ebook format readers (FB2, EPUB, DOCX, HTML, TXT, PDF) and
 writers (EPUB, FB2, TXT, HTML, Markdown, <strong>DOCX and now
 PDF</strong>), caching, security, and all 8 add-on modules.</li>
-<li><strong>37 features are proven on real recordings</strong> — each
+<li><strong>41 features are proven on real recordings</strong> — each
 checked frame-by-frame to confirm it genuinely shows the feature working
 (real translated text in the right language, a live connection count
-changing, etc.), not just “a screen”. These include: the primary
-command-line translator doing real DeepSeek translations and converting
-between ebook formats (EPUB→TXT, HTML→EPUB, FB2→EPUB, FB2→FB2,
-<strong>and now HTML→Markdown</strong>), Serbian Cyrillic/Latin
-handling, the <strong>multi-pass polishing engine
+changing, a real CLI database/pipeline output, etc.), not just “a
+screen”. These include: the primary command-line translator doing real
+DeepSeek translations and converting between ebook formats (EPUB→TXT,
+HTML→EPUB, FB2→EPUB, FB2→FB2, <strong>and now HTML→Markdown</strong>),
+Serbian Cyrillic/Latin handling, the <strong>multi-pass polishing engine
 (<code>-multipass</code>)</strong>, the REST API server translating for
 real, the gRPC server translating English→Spanish, the markdown
 round-trip tool, the preparation/analysis runner (fixed), the simple CLI
@@ -217,10 +217,13 @@ translator, the live monitoring dashboard, the <strong>agent bridge
 command-line tool</strong>, the <strong>agent bridge MCP-stdio
 server</strong>, the <strong>provider-diverse translator set</strong>
 (Wave 2: novita, mistral, groq, siliconflow; Wave 3a: Cerebras,
-SambaNova; Wave 3b: Gemini, Zhipu, Cohere), and — <strong>new this round
-(Wave 3c)</strong> — the <strong>Hyperbolic</strong> library client and
-the <strong>Fireworks</strong> provider (two more distinct real
-per-provider EN→Spanish translations).</li>
+SambaNova; Wave 3b: Gemini, Zhipu, Cohere; Wave 3c: Hyperbolic,
+Fireworks; Wave 3d: nvidia, openrouter), and — <strong>new this round
+(Wave 3d)</strong> — the <strong><code>verify-models</code> command-line
+tool</strong> (real model-verification pipeline + ranking), the
+<strong><code>workable-items</code> command-line tool</strong> (real
+project-tracker database), and <strong>two more providers</strong>
+(nvidia + openrouter, distinct real Spanish translations).</li>
 <li><strong>DOCX output and PDF output are now proven on camera (Wave
 2).</strong> A real run of the command-line translator produces a real
 <code>.docx</code> (“Microsoft Word 2007+” with real Spanish text) and a
@@ -231,7 +234,22 @@ Wave 1 (the auto-selected verified model being rejected by a stale model
 whitelist) now works — which is exactly why these recordings genuinely
 demonstrate working features. We never faked a “working” recording; in
 Wave 1 these were honest skips.</li>
-<li><strong>New this round (Wave 3c):</strong> the
+<li><strong>New this round (Wave 3d):</strong> four feature-type-diverse
+confirmations — the <strong><code>verify-models</code> CLI</strong>
+(shows the real LLMsVerifier model-verification pipeline: 14 providers
+checked live with real reachable/auth/HTTP-status results, 4 models
+verified and persisted, then a selection ranking with real scores), the
+<strong><code>workable-items</code> CLI</strong> (the project’s real
+SQLite issue-tracker: <code>validate</code> reports “DB matches markdown
+(81 items)” and <code>list</code> prints real ticket rows), and
+<strong>two more providers</strong> — <strong>nvidia</strong> (“…el sol
+se alzó… Un anciano pescador <strong>caminaba</strong> a lo largo de la
+orilla.”) and <strong>openrouter</strong> (“…<strong>paseaba</strong> a
+lo largo de la orilla.”), the two outputs distinct (caminaba/paseaba)
+proving genuine separate per-provider models. <code>upstage</code> was
+tried but honestly skipped (its key was rejected, HTTP 403) and
+<code>together</code> skipped (no key) — never faked.</li>
+<li><strong>Prior round (Wave 3c):</strong> the
 <strong>Hyperbolic</strong> library client and the
 <strong>Fireworks</strong> provider (in the <code>llm_provider</code>
 submodule) are now video-proven — each a real EN→ES translation run
@@ -287,8 +305,14 @@ stats endpoint that always shows zeros). These are flagged in the
 detailed document.</li>
 </ul>
 <h2 id="video-confirmation-coverage">Video-confirmation coverage</h2>
-<p><strong>37 / 494 ≈ 7.5%</strong> (Wave 3c added 2 net-new video
-confirmations: the Hyperbolic library client and the Fireworks
+<p><strong>41 / 494 ≈ 8.3%</strong> (Wave 3d added 4 net-new video
+confirmations prioritising feature-type diversity: the
+<code>verify-models</code> CLI [real LLMsVerifier
+discovery/scoring/selection + ranking], the <code>workable-items</code>
+CLI [real §11.4.93 SQLite validate+list], and 2 more providers nvidia +
+openrouter [distinct real EN→ES translations]; <code>upstage</code>
+HTTP-403 SKIP + <code>together</code> no-key SKIP, never faked; Wave 3c
+added 2: the Hyperbolic library client and the Fireworks
 <code>llm_provider</code> submodule client, each a distinct real EN→ES
 translation via the OpenAI-compat per-provider path [+ re-confirming the
 REST translate + endpoints rows against a live TLS server, not
@@ -377,7 +401,12 @@ host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td>37 (Wave 3c added 2 net-new: Hyperbolic library client + Fireworks
+<td>41 (Wave 3d added 4 net-new prioritising feature-type diversity:
+<code>verify-models</code> CLI [real LLMsVerifier pipeline + ranking] +
+<code>workable-items</code> CLI [real SQLite validate+list] + 2
+providers nvidia + openrouter [distinct real EN→ES];
+<code>upstage</code> HTTP-403 SKIP + <code>together</code> no-key SKIP;
+Wave 3c added 2: Hyperbolic library client + Fireworks
 <code>llm_provider</code> submodule client, distinct real EN→ES
 translations via OpenAI-compat per-provider path [+ re-confirmed REST
 translate + endpoints rows against a live TLS server, not
@@ -572,12 +601,45 @@ local provider was removed in bridge phase-2 R-4).</li>
 </ul>
 <h2 id="top-gaps-engineering">Top gaps (engineering)</h2>
 <ol type="1">
-<li><strong>Video-confirmation 37/494.</strong> 37 rows carry real,
-ffprobe- and content-verified recordings. <strong>Wave 3c (2026-06-16)
-added 2 net-new</strong> (real-use, ffprobe non-zero dur+frames /
-790×560 even-dims yuv420p, ≥6 frames extracted at fps=2 +
-content-verified per §11.4.107): the <strong>Hyperbolic</strong> library
-client
+<li><strong>Video-confirmation 41/494.</strong> 41 rows carry real,
+ffprobe- and content-verified recordings. <strong>Wave 3d (2026-06-16)
+added 4 net-new</strong> prioritising feature-type diversity (real-use,
+ffprobe non-zero dur+frames / 790×560 even-dims yuv420p, ≥6 frames
+extracted at fps=2 + content-verified per §11.4.107): the
+<strong><code>cmd/verify-models</code> CLI</strong>
+(<code>helix_translate-verify-models-wave3d-20260616.mp4</code>, real
+LLMsVerifier discovery/scoring/selection — 14 env-keyed providers with
+real per-provider reachable/auth/HTTP-status/candidate/verified counts
+incl. <code>nvidia status=200</code>,
+<code>openrouter status=200</code>, <code>upstage auth=false 403</code>,
+summary <code>total verified: 4</code>, then
+<code>model-bridge list</code> ranking
+<code>#1 novita/Sao10K/L3-8B-Stheno-v3.2 score=0.91875 … #4 siliconflow score=0.88125</code>),
+the <strong><code>cmd/workable-items</code> CLI</strong>
+(<code>helix_translate-workable-items-wave3d-20260616.mp4</code>, real
+§11.4.93 SQLite SSoT — <code>validate</code> →
+<code>OK: DB … matches markdown (81 items)</code>, <code>list</code> →
+real ATM-NNN rows + descriptions, early validate-OK frame ≠ late list
+frame proving live/advancing), and <strong>2 more providers</strong> —
+<strong>nvidia</strong>
+(<code>helix_translate-provider-nvidia-translate-wave3d-20260616.mp4</code>,
+via
+<code>-provider openai -base-url https://integrate.api.nvidia.com/v1 -model meta/llama-3.1-8b-instruct</code>,
+“Al amanecer, el sol se alzó… Un anciano pescador
+<strong>caminaba</strong> a lo largo de la orilla.”) +
+<strong>openrouter</strong>
+(<code>helix_translate-provider-openrouter-translate-wave3d-20260616.mp4</code>,
+via
+<code>-base-url https://openrouter.ai/api/v1 -model meta-llama/llama-3.1-8b-instruct</code>,
+“…Un anciano pescador <strong>paseaba</strong> a lo largo de la
+orilla.”), the two provider outputs distinct (caminaba/paseaba) —
+genuine per-provider models, each start-frame English-only ≠
+output-frame Spanish liveness; <code>upstage</code> tested but honest
+SKIP (auth=false HTTP 403), <code>together</code> SKIP (no key), never
+faked. <strong>Wave 3c (2026-06-16) added 2 net-new</strong> (real-use,
+ffprobe non-zero dur+frames / 790×560 even-dims yuv420p, ≥6 frames
+extracted at fps=2 + content-verified per §11.4.107): the
+<strong>Hyperbolic</strong> library client
 (<code>helix_translate-provider-hyperbolic-translate-wave3c-20260616.mp4</code>,
 via
 <code>-provider openai -base-url https://api.hyperbolic.xyz/v1 -model meta-llama/Meta-Llama-3.1-70B-Instruct</code>,
@@ -694,14 +756,17 @@ several <code>llms_verifier</code> packages
 <code>doc_processor/archdoc</code>.</li>
 </ol>
 <h2 id="video-coverage-ratio">Video-coverage ratio</h2>
-<p><code>37 / 494</code> enumerated rows = <strong>7.5%</strong> (≈ 8.9%
-against the 417 headline). Wave 3c added 2 net-new video confirmations
-(Hyperbolic library client + Fireworks <code>llm_provider</code>
-submodule client, distinct real EN→ES translations via OpenAI-compat
-per-provider path; + re-confirmed REST translate + endpoints rows
-against a live TLS server, not double-counted); Wave 3b added 3 (Gemini
-+ Zhipu + Cohere library clients); Wave 3a added 2 (Cerebras +
-SambaNova); Wave 2 added 5
+<p><code>41 / 494</code> enumerated rows = <strong>8.3%</strong> (≈ 9.8%
+against the 417 headline). Wave 3d added 4 net-new video confirmations
+prioritising feature-type diversity (<code>verify-models</code> CLI +
+<code>workable-items</code> CLI + 2 providers nvidia/openrouter;
+<code>upstage</code> HTTP-403 SKIP + <code>together</code> no-key SKIP,
+never faked); Wave 3c added 2 net-new video confirmations (Hyperbolic
+library client + Fireworks <code>llm_provider</code> submodule client,
+distinct real EN→ES translations via OpenAI-compat per-provider path; +
+re-confirmed REST translate + endpoints rows against a live TLS server,
+not double-counted); Wave 3b added 3 (Gemini + Zhipu + Cohere library
+clients); Wave 3a added 2 (Cerebras + SambaNova); Wave 2 added 5
 (DOCX/PDF/HTML→MD/ProviderDiverseTranslators/EnsembleFactory). This is
 the primary metric to drive upward; each anti-bluff §11.4.107 recording
 increments the numerator.</p>

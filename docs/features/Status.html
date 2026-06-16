@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 12 <strong>Last modified:</strong>
-2026-06-16T13:35:00Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 13 <strong>Last modified:</strong>
+2026-06-16T13:45:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -195,7 +195,36 @@ genuinely demonstrates the feature working (each cited <code>.mp4</code>
 was ffprobe-verified for non-zero duration+frames and content-verified
 against its claimed behaviour — e.g. real DeepSeek output in the target
 language, real gRPC translated text, live WebSocket count change).
-<strong>37 feature rows are video-confirmed</strong> (Wave 3c of
+<strong>41 feature rows are video-confirmed</strong> (Wave 3d of
+2026-06-16 added <strong>4 net-new</strong>, prioritising feature-type
+diversity — the <strong><code>cmd/verify-models</code> CLI</strong>
+(real LLMsVerifier discovery/scoring/selection: 14 env-keyed providers
+with real per-provider reachable/auth/HTTP-status/candidate/verified
+counts, summary <code>total verified: 4</code>, then
+<code>model-bridge list</code> selection ranking
+<code>#1 novita/Sao10K/L3-8B-Stheno-v3.2 score=0.91875 … #4 siliconflow score=0.88125</code>
+— <code>helix_translate-verify-models-wave3d-20260616.mp4</code>), the
+<strong><code>cmd/workable-items</code> CLI</strong> (real §11.4.93
+SQLite SSoT: <code>validate</code> →
+<code>OK: DB … matches markdown (81 items)</code>, <code>list</code> →
+real ATM-NNN rows + descriptions —
+<code>helix_translate-workable-items-wave3d-20260616.mp4</code>), and
+<strong>2 more providers</strong> — <strong><code>nvidia</code></strong>
+(“…Un anciano pescador <strong>caminaba</strong> a lo largo de la
+orilla.” via <code>integrate.api.nvidia.com</code>,
+<code>helix_translate-provider-nvidia-translate-wave3d-20260616.mp4</code>)
+and <strong><code>openrouter</code></strong> (“…Un anciano pescador
+<strong>paseaba</strong> a lo largo de la orilla.” via
+<code>openrouter.ai/api</code>,
+<code>helix_translate-provider-openrouter-translate-wave3d-20260616.mp4</code>),
+the two provider outputs distinct (caminaba/paseaba) proving genuine
+per-provider models, all four Wave-3d clips ffprobe+frame-verified per
+§11.4.107 (790×560 yuv420p, ≥6 frames at fps=2, CLI clips show advancing
+distinct sections / provider clips show start-frame English-only ≠
+output-frame Spanish); the Wave-3d providers reach the
+<code>llm_provider</code>/OpenAI-compat per-provider path;
+<code>upstage</code> was tested but is an honest SKIP (auth=false HTTP
+403), <code>together</code> SKIPped (no key) — never faked. Wave 3c of
 2026-06-16 added <strong>2 net-new</strong> — the
 <strong>Hyperbolic</strong> library client
 (<code>pkg/translator/llm</code>) and the <strong>Fireworks</strong>
@@ -412,8 +441,23 @@ host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td><strong>37</strong> (real, content-verified recordings — see
-Anti-bluff note; Rev-12 / Wave 3c of 2026-06-16 added <strong>2
+<td><strong>41</strong> (real, content-verified recordings — see
+Anti-bluff note; Rev-13 / Wave 3d of 2026-06-16 added <strong>4
+net-new</strong> video confirmations prioritising feature-type diversity
+— the <strong><code>cmd/verify-models</code> CLI</strong>
+(<code>helix_translate-verify-models-wave3d-20260616.mp4</code>, real
+LLMsVerifier discovery/scoring/selection + ranking), the
+<strong><code>cmd/workable-items</code> CLI</strong>
+(<code>helix_translate-workable-items-wave3d-20260616.mp4</code>, real
+§11.4.93 SQLite validate+list), and <strong>2 more providers</strong>
+<strong>nvidia</strong>
+(<code>helix_translate-provider-nvidia-translate-wave3d-20260616.mp4</code>,
+“…caminaba a lo largo de la orilla.”) + <strong>openrouter</strong>
+(<code>helix_translate-provider-openrouter-translate-wave3d-20260616.mp4</code>,
+“…paseaba a lo largo de la orilla.”), each ffprobe+frame-verified per
+§11.4.107; running total 37 (Rev 12) + 4 = <strong>41</strong>.
+<code>upstage</code> HTTP-403 SKIP + <code>together</code> no-key SKIP,
+never faked. Rev-12 / Wave 3c of 2026-06-16 added <strong>2
 net-new</strong> video confirmations — the <strong>Hyperbolic</strong>
 library client
 (<code>helix_translate-provider-hyperbolic-translate-wave3c-20260616.mp4</code>,
@@ -475,7 +519,7 @@ what made the DOCX/PDF/gRPC/per-provider Wave-2 recordings genuinely
 demonstrate working features (recording them in Wave 1 would have been a
 §11.4.107 bluff; they were honest SKIPs then). Wave 1 added 2:
 bridge-ensemble best-model selection + bridge provider-diverse
-catalogue. ≈ 7.5% of 494 enumerated rows (≈ 8.9% of the 417
+catalogue. ≈ 8.3% of 494 enumerated rows (≈ 9.8% of the 417
 headline)</td>
 </tr>
 <tr>
@@ -2486,8 +2530,21 @@ into this CLI — see gap row below)</td>
 <td>Runs verification pipeline against env-keyed providers; persists
 verified models to SQLite</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — real LLMsVerifier discovery/scoring/selection
+captured</strong>
+(<code>./build/verify-models -db /tmp/vm_record.db -max 1</code> ran the
+in-process pipeline against 14 env-keyed providers and printed real
+per-provider reachability/auth/HTTP-status/candidate/verified counts —
+e.g. <code>nvidia reachable=true auth=true status=200 candidates=1</code>,
+<code>openrouter status=200</code>,
+<code>upstage auth=false status=403</code>,
+<code>siliconflow verified=1</code> — with summary
+<code>total verified: 4 · persisted rows: 4</code>, then
+<code>model-bridge list</code> showed the selection ranking
+<code>#1 novita/Sao10K/L3-8B-Stheno-v3.2 score=0.91875 … #4 siliconflow/…Seed-OSS-36B score=0.88125</code>;
+Wave-3d, asciinema→agg→ffmpeg, ffprobe 8.0s/790×560 yuv420p + 16 frames
+at fps=2, ≥6 frames content-verified per §11.4.107)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-verify-models-wave3d-20260616.mp4</td>
 </tr>
 <tr>
 <td>verify-models</td>
@@ -2652,8 +2709,19 @@ chain, and tool <code>bridge_invoke</code> real verified-model OUTPUT
 <td>Bidirectional sync between Issues/Fixed markdown and SQLite
 single-source-of-truth</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — real DB CLI output captured</strong>
+(<code>./build/workable-items validate -db docs/workable_items.db</code>
+→
+<code>OK: DB docs/workable_items.db matches markdown (81 items)</code>,
+then <code>list</code> printed real ATM-NNN rows with status +
+descriptions — ATM-001
+<code>splitText dropped paragraph separators…</code>, ATM-005
+<code>Distributed ResultCache spurious eviction…</code>, ATM-014
+<code>Preparation failed-chapter analysis misattribution…</code>;
+Wave-3d, asciinema→agg→ffmpeg, ffprobe 5.0s/790×560 yuv420p + 10 frames
+at fps=2, early validate-OK frame ≠ late list frame proving
+live/advancing per §11.4.107)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-workable-items-wave3d-20260616.mp4</td>
 </tr>
 <tr>
 <td>workable-items</td>
@@ -7158,10 +7226,32 @@ pueblo. Un anciano pescador paseaba por la orilla…” — distinct verbs
 genuine per-provider model; Wave-3c, asciinema→agg→ffmpeg, ffprobe
 4.54s/790×560 yuv420p + 9 extracted frames at fps=2, ≥6 frames
 content-verified, start-frame (input only) ≠ output-frame (Spanish) per
-§11.4.107). The remaining 42 provider dirs remain Source-confirmed,
-PENDING a per-provider recording.</td>
+§11.4.107). <strong>Wave-3d added 2 net-new: <code>nvidia</code> +
+<code>openrouter</code></strong> — <code>nvidia</code> (reached via
+unified-translator
+<code>-provider openai -base-url https://integrate.api.nvidia.com/v1 -model meta/llama-3.1-8b-instruct</code>):
+“At dawn, the sun rose over the quiet village. An old fisherman walked
+along the shore.” → “Al amanecer, el sol se alzó sobre el tranquilo
+pueblo. Un anciano pescador <strong>caminaba</strong> a lo largo de la
+orilla.”
+(<code>helix_translate-provider-nvidia-translate-wave3d-20260616.mp4</code>,
+ffprobe 6.5s/790×560 yuv420p + 13 frames at fps=2);
+<code>openrouter</code>
+(<code>-base-url https://openrouter.ai/api/v1 -model meta-llama/llama-3.1-8b-instruct</code>):
+same EN source → “Al amanecer, el sol se alzó sobre el tranquilo pueblo.
+Un anciano pescador <strong>paseaba</strong> a lo largo de la orilla.”
+(<code>helix_translate-provider-openrouter-translate-wave3d-20260616.mp4</code>,
+ffprobe 5.5s/790×560 yuv420p + 11 frames at fps=2) — distinct verbs
+(caminaba/paseaba) prove genuine per-provider models, each start-frame
+(English only) ≠ output-frame (Spanish) per §11.4.107, ≥6 frames
+content-verified. The remaining 40 provider dirs remain
+Source-confirmed, PENDING a per-provider recording.</td>
 <td>Confirmed
-(fireworks):/Volumes/T7/Downloads/Recordings/helix_translate-provider-fireworks-translate-wave3c-20260616.mp4</td>
+(fireworks/nvidia/openrouter):/Volumes/T7/Downloads/Recordings/helix_translate-provider-fireworks-translate-wave3c-20260616.mp4
+·
+/Volumes/T7/Downloads/Recordings/helix_translate-provider-nvidia-translate-wave3d-20260616.mp4
+·
+/Volumes/T7/Downloads/Recordings/helix_translate-provider-openrouter-translate-wave3d-20260616.mp4</td>
 </tr>
 </tbody>
 </table>
