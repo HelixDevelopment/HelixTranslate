@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3" // SQLite driver
@@ -16,21 +17,38 @@ type SQLiteStorage struct {
 
 // NewSQLiteStorage creates a new SQLite storage
 func NewSQLiteStorage(config *Config) (*SQLiteStorage, error) {
+	// Build the DSN with a busy_timeout so a writer waits out the single-file
+	// write lock instead of failing immediately with SQLITE_BUSY ("database is
+	// locked") under concurrency. Combined with the single-connection default
+	// below, concurrent writers serialize cleanly (§11.4.85 stress contract:
+	// "Single SQLite file connection must serialize writers cleanly").
 	dsn := config.Database
-
+	params := []string{"_busy_timeout=5000"}
 	// Add SQLCipher encryption key if provided
 	if config.EncryptionKey != "" {
-		dsn += fmt.Sprintf("?_pragma_key=%s&_pragma_cipher_page_size=4096", config.EncryptionKey)
+		params = append(params, "_pragma_key="+config.EncryptionKey, "_pragma_cipher_page_size=4096")
 	}
+	sep := "?"
+	if strings.Contains(dsn, "?") {
+		sep = "&"
+	}
+	dsn += sep + strings.Join(params, "&")
 
 	db, err := sql.Open("sqlite3", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	// Set connection pool settings
+	// Set connection pool settings. SQLite is a single-writer engine on one
+	// file: with an unbounded pool, database/sql opens multiple connections and
+	// concurrent writers collide (SQLITE_BUSY). Default to a single connection
+	// so all access serializes cleanly (sqlite.go has no nested transactions,
+	// so a 1-conn pool cannot self-deadlock). An explicit config value still
+	// wins; the busy_timeout above then absorbs any residual contention.
 	if config.MaxOpenConns > 0 {
 		db.SetMaxOpenConns(config.MaxOpenConns)
+	} else {
+		db.SetMaxOpenConns(1)
 	}
 	if config.MaxIdleConns > 0 {
 		db.SetMaxIdleConns(config.MaxIdleConns)

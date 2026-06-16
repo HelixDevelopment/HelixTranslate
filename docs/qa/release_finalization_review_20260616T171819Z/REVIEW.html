@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>REVIEW</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">REVIEW</h1>
+</header>
+<h1
+id="independent-114142-code-review--release-finalization-chain-f6b1f1ff2a7be9">Independent
+§11.4.142 Code Review — release-finalization chain f6b1f1f→f2a7be9</h1>
+<p><strong>Reviewer:</strong> independent background agent (structurally
+separate from author; §11.4.142/§11.4.70). <strong>Mode:</strong>
+READ-ONLY, non-committing. Zero tracked source/test files modified
+(§11.4.84 verified clean). <strong>HEAD reviewed:</strong> f2a7be9.
+<strong>Scope:</strong> 7 commits f6b1f1f..f2a7be9.
+<strong>Run-id:</strong> release_finalization_review_20260616T171819Z
+(2026-06-16Z). <strong>Verdict:</strong> GO — tree is
+RELEASE-RETEST-READY. No blocking findings. 1 minor §11.4.6 clarity nit
+(non-blocking).</p>
+<hr />
+<h2 id="per-commit-verdicts">Per-commit verdicts</h2>
+<h3
+id="388a2eb--fixapi-get-apiv1providers-serves-real-configured-providers--go-primary">388a2eb
+— fix(api): GET /api/v1/providers serves real configured providers —
+<strong>GO</strong> (PRIMARY)</h3>
+<ul>
+<li><strong>Correctness (FACT):</strong>
+<code>handler.go listProviders</code> now reads
+<code>h.config.Translation.Providers</code> (sorted, deterministic) and
+emits per-provider <code>configured:true</code> + honest
+<code>available</code> (=
+<code>!requiresKey || pc.APIKey!="" || providerKeyInEnv(name)</code>) +
+<code>requires_api_key</code> (false for local ollama/llamacpp/mock via
+<code>localProviders</code> map) + configured model (only when
+<code>pc.Model!=""</code>). Nil/empty-config path falls back to the
+COMPLETE <code>supportedProviderCatalogue</code> (28 providers) flagged
+<code>configured:false</code>. The old static
+{openai,anthropic,zhipu,deepseek} lie is gone.
+<code>ProviderConfig{APIKey,Model}</code> fields confirmed present
+(internal/config/config.go:54).</li>
+<li><strong>§11.4.69 honesty:</strong> No over-/under-report.
+<code>available</code> is derived from real key presence, never
+hardcoded true. Local providers honestly need no key. Unconfigured
+providers never claimed available unless their env key is set.</li>
+<li><strong>RED genuine (§11.4.115):</strong>
+<code>TestListProviders_ServesConfiguredProviders</code> config
+{gemini,qwen}, no openai. Verified live:
+<ul>
+<li>GREEN (RED_MODE=0):
+<code>go test ./pkg/api/ -run TestListProviders</code> → <strong>ok
+0.523s</strong>.</li>
+<li>RED_MODE=1 on the FIXED artifact → <strong>FAILS</strong> (asserts
+openai-present/gemini-absent/qwen-absent, all now false) — polarity
+flips correctly, defect genuinely absent.</li>
+</ul></li>
+<li><strong>§1.1 mutation PROVEN (definitive):</strong> detached
+worktree at 388a2eb~1 (pre-fix broken handler) + the committed GREEN
+test copied in → guard <strong>FAILS</strong> against the broken
+static-list handler
+(<code>provider deepseek must be flagged configured:true</code> → got
+<code>&lt;nil&gt;</code>; deepseek leaks from static list, config
+ignored). The §11.4.135 guard genuinely bites. Worktree removed; main
+tree clean.</li>
+<li><strong>Guard registration:</strong>
+<code>tests/banks/fixes-validation.yaml</code> HTQ-FIX-006 runs both
+GREEN tests + the <code>! RED_MODE=1 ...</code> RED-fails-on-fixed
+proof. Real, not a grep.</li>
+<li><strong>Blast radius:</strong>
+<code>cmd/api-server getProviders</code> (gRPC-backed dynamic path)
+untouched — confirmed by diff (only handler.go + test + yaml).
+<code>go build ./...</code> rc=0, <code>go vet ./pkg/api/</code> rc=0,
+gofmt clean, full <code>pkg/api</code> suite GREEN (1.181s).</li>
+<li><strong>Minor (non-blocking):</strong> env-var fallback
+(<code>providerKeyInEnv</code>) makes the <em>catalogue-fallback</em>
+path's <code>available</code> env-dependent, but the configured-path
+GREEN test sets explicit APIKey so its assertion is deterministic —
+acceptable.</li>
+</ul>
+<h3
+id="af23440--fixdeploy-no-arg-nezha-deploysh-reboot-recreates-all-app-services--go">af23440
+— fix(deploy): no-arg <code>nezha-deploy.sh reboot</code> recreates ALL
+app services — <strong>GO</strong></h3>
+<ul>
+<li><strong>Correctness (FACT):</strong> root cause stated correctly —
+no-arg reboot previously gated stop+<code>podman rm</code> on
+<code>$# -gt 0</code>, so <code>up -d</code> no-op'd same-tag running
+containers, stranding monitor on the stale image (§11.4.108
+SOURCE→ARTIFACT→RUNTIME gap). Fix defaults
+<code>recreate_svcs=(grpc-server api-server server monitor-server)</code>
+when no arg, stops+rm's the shared-image set, then
+<code>up -d "$@"</code> (empty → full stack incl. postgres/redis
+dependencies). Targeted <code>reboot &lt;svc&gt;</code> path unchanged.
+Logic recreates the correct dependent set.</li>
+<li><strong>§11.4.67 parseable:</strong> <code>bash -n</code> clean;
+shebang <code>#!/usr/bin/env bash</code> (arrays legitimate).</li>
+<li><strong>§12 safe:</strong> no host-power calls (<code>reboot</code>
+is the script's own container-recreate verb, NOT host reboot). No
+secrets. Companion doc Rev 2 + HTML/PDF siblings per the commit
+body.</li>
+</ul>
+<h3 id="0246851--qafb2-live-fb2-re-validation-evidence--go">0246851 —
+qa(fb2): live FB2 re-validation evidence — <strong>GO</strong></h3>
+<ul>
+<li><strong>Evidence is REAL:</strong>
+<code>docs/qa/fb2_revalidate_20260616T163552Z/</code> — live nezha TLS
+<code>POST /api/v1/translate/fb2</code>, image id
+<code>2bb4de5df2c7</code> confirmed via <code>podman inspect</code>.
+probe_a es→HTTP 200 <code>application/epub+zip</code> (1949B), probe_c
+de→200 (1947B, distinct size), probe_b klingon→<strong>400</strong>
+<code>{"error":"unknown target_lang: klingon"}</code> (honest
+rejection). §11.4.83 placement correct. No secrets in evidence.</li>
+</ul>
+<h3
+id="d7b4407--qaapi-live-providers-sink-side-re-validation-on-rebuilt-nezha--go">d7b4407
+— qa(api): live /providers sink-side re-validation on rebuilt nezha —
+<strong>GO</strong></h3>
+<ul>
+<li><strong>Evidence is REAL:</strong>
+<code>docs/qa/providers_revalidate_20260616T170812Z/providers_response.json</code>
+= live server JSON, <strong>19 config-driven providers</strong> (sorted;
+gemini/zhipu/deepseek/cohere/mistral/groq/... present), each with new
+<code>configured</code>/<code>available</code>/<code>requires_api_key</code>
+fields; openai correctly ABSENT (no key configured). analysis.txt
+confirms "strictly more than the old static 4? True". Demonstrates the
+388a2eb fix end-to-end on image 08900424e481 via the af23440-fixed
+reboot. No secrets (key VALUES never present; only the served capability
+list).</li>
+</ul>
+<h3
+id="e5051a5--docs-status-video-count-drift-reconcile-to-66--go-1146-honest">e5051a5
+— docs: Status video-count drift reconcile to 66 — <strong>GO (§11.4.6
+honest)</strong></h3>
+<ul>
+<li>Status.md reads <strong>66</strong> consistently (headline +
+Anti-bluff note + Coverage cell). The lagging caveat cells (Status.md
+"30 feature rows", Status_Summary Page-1 "30 of 494", Page-2 "43/496")
+were reconciled to 66 with explicit §11.4.6 cell-reconciliation notes.
+No residual <code>54</code> as a current total (only in the historical
+"54→66" narrative). The <code>43</code>/<code>30</code> greps land
+inside Wave-7 prose (4+5+3=12 net-new breakdown), not stray count cells.
+docs_chain <code>features</code> context present; Status.html/.pdf
+mtimes ≥ .md (§11.4.60 in-sync). The committer correctly notes
+docs_chain CANNOT catch internal contradictions — this was a genuine
+release-gate blocker, honestly fixed.</li>
+</ul>
+<h3 id="702d907--docs-pkgapiservergo-honest-114124-na-row--go">702d907 —
+docs: pkg/api/server.go honest §11.4.124 N/A row —
+<strong>GO</strong></h3>
+<ul>
+<li>The alt <code>api.Server</code> is documented as NEVER-WIRED
+test-only scaffolding, kept-not-deleted per §11.4.122/§11.4.124,
+recorded N/A (NOT silently shown as a shipping API). Consistent with the
+§11.4.124 investigate-before-remove discipline. Records the /providers
+fix in Status. No code touched.</li>
+</ul>
+<h3
+id="f2a7be9--docs-continuation-rev87--go-with-1-minor-1146-clarity-nit">f2a7be9
+— docs: CONTINUATION rev87 — <strong>GO with 1 minor §11.4.6 clarity
+nit</strong></h3>
+<ul>
+<li><strong>&lt;leaked-token-redacted-§11.4.10&gt; leak:</strong>
+<code>git grep</code> empty — no secret leak (clean).</li>
+<li><strong>Accurate claims:</strong> the per-commit mapping (#1 Status
+drift, #2 FB2, #3 /providers, #4 server.go N/A, #5a/#5b
+deploy+revalidation) matches the actual commits. Live-state anchors
+(HEAD d7b4407, image 08900424e481, 6 healthy services) consistent with
+the evidence. NEXT correctly lists the full §11.4.40 retest + operator
+tag decision (§11.4.151 prefix <code>helix_translate-</code>, §11.4.113
+FF-only).</li>
+<li><strong>MINOR NIT (non-blocking, §11.4.6):</strong> the headline
+"4-ITEM OPERATOR-REVIEW QUEUE ALL CLEARED" is scoped to rev87's OWN
+~20:20 set (Status/FB2/providers/server.go/deploy) — which it genuinely
+cleared autonomously. It does NOT falsely claim the genuinely
+OPERATOR-GATED items are resolved:
+<ul>
+<li>(a) <code>.env.nezha</code> line-48 malformed (operator reformats
+keys) — persists honestly at CONTINUATION line 54.</li>
+<li>(b) LLMsVerifier upstream cross-network wiring /
+<code>/api/v1/verified-models</code> 404 — persists honestly at line 55
++ honest-gaps line 140. These remain visibly documented as
+operator-pending; NO over-claim of resolution. The only imperfection is
+that the cheerful headline number ("4-item") could be misread as
+covering the older heavy-testing-arc operator queue too. Recommend
+(future, non-blocking) the headline disambiguate "this-session
+autonomous-review items" vs "operator-gated items still pending." This
+is a wording clarity nit, not a false claim.</li>
+<li>Operator's own mapping confirmed: (c) monitor/deploy + (d)
+dead-code-doc were AUTONOMOUSLY addressed (correct); (a) .env keys + (b)
+LLMsVerifier wiring are OPERATOR-gated and are NOT marked resolved
+(correct).</li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="cross-cutting-evidence-this-review">Cross-cutting evidence (this
+review)</h2>
+<ul>
+<li><code>go build ./...</code> → rc=0.</li>
+<li><code>go test ./pkg/api/ -count=1</code> → ok 1.181s (full suite
+GREEN).</li>
+<li><code>go test ./pkg/api/ -run TestListProviders</code> → ok
+0.523s.</li>
+<li><code>RED_MODE=1 go test -run TestListProviders_ServesConfiguredProviders</code>
+(fixed artifact) → FAIL (correct polarity).</li>
+<li>§1.1 mutation: GREEN guard vs pre-fix broken handler (worktree
+388a2eb~1) → FAIL (guard bites). Worktree removed.</li>
+<li><code>go vet ./pkg/api/</code> rc=0; <code>gofmt -l</code> on
+touched files → empty.</li>
+<li><code>bash -n scripts/nezha-deploy.sh</code> → clean.</li>
+<li><code>git grep &lt;leaked-token-redacted-§11.4.10&gt;</code> →
+empty.</li>
+<li>Status.md = 66 consistent; Status.html/.pdf mtime ≥ .md.</li>
+<li>HTQ-FIX-006 guard present in tests/banks/fixes-validation.yaml.</li>
+</ul>
+<h2 id="overall-verdict">Overall verdict</h2>
+<p><strong>GO — RELEASE-RETEST-READY.</strong> All 7 commits are
+correct, evidence-backed, and anti-bluff. The PRIMARY change (388a2eb)
+serves the real configured/available providers, its RED test is genuine,
+and its §11.4.135 guard provably FAILS against the broken artifact
+(definitive §1.1 proof). The deploy fix is correct + parseable +
+host-safe. QA evidence is real live-server data. Status count is
+consistently 66. CONTINUATION rev87 makes no §11.4.6 over-claim of
+operator-gated work (1 minor headline-wording nit only). NEXT step is
+correctly the full §11.4.40 retest from the last tag before the operator
+tag decision.</p>
+</body>
+</html>

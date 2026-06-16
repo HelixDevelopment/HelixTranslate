@@ -8,4 +8,4 @@ package version
 //
 // Do NOT hardcode per-binary version literals. Every cmd/*/main.go MUST report
 // version.AppVersion so all binaries agree with VERSION.
-const AppVersion = "2.3.0"
+const AppVersion = "2.3.1"

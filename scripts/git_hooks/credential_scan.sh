@@ -24,7 +24,7 @@ set -euo pipefail
 # Files this hook should never flag (they legitimately document the pattern class /
 # the historical token NAME by design). Matched against the path TAIL so it works
 # whether the path is repo-relative (pre-commit --staged) or absolute (pre-push).
-IGNORE_RE='(^|/)(constitution/|scripts/git_hooks/|docs/scripts/credential_scan\.md|docs/qa/secret_scrub_)'
+IGNORE_RE='(^|/)(constitution/|scripts/git_hooks/|scripts/testing/test_credential_scan\.sh|docs/scripts/credential_scan\.md|docs/qa/secret_scrub_)'
 
 # A value counts as a "literal secret" only if it is NOT a shell/expect var ref,
 # NOT an empty string, NOT a redaction marker, NOT an obvious placeholder.
@@ -33,6 +33,7 @@ is_env_or_placeholder() {
     '${'*|'$'*|'$env('*) return 0 ;;          # ${VAR} / $VAR / $env(VAR)
     ''|'""'|"''") return 0 ;;                  # empty
     '<redacted'*|'<'*'>'|'YOUR_'*|'CHANGEME'*|'xxx'*|'***'*) return 0 ;;
+    '&lt;redacted'*|'&lt;'*'&gt;') return 0 ;;  # HTML-escaped redaction/placeholder markers (.html exports); mirrors '<redacted…>'/'<…>'
     *) return 1 ;;
   esac
 }

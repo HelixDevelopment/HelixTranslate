@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>REVIEW</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">REVIEW</h1>
+</header>
+<h1
+id="independent-code-review--committers-3-stable-landed-parts">Independent
+Code Review — Committer's 3 stable landed PARTs</h1>
+<p><strong>Reviewer role:</strong> §11.4.142 / §11.4.125 independent
+code-review (author = big committer; reviewer = separate, READ-ONLY,
+non-committing per §11.4.84). <strong>Run:</strong>
+2026-06-16T16:07:54Z. <strong>Main checkout HEAD at review
+time:</strong> <code>4fbe581</code> (in-flight committer's bug-class
+work — OUT of scope). <strong>Scope reviewed:</strong>
+<code>af2ef7f</code> (PART A), <code>04f71e9</code> (PART B),
+<code>c2aa7c8</code> (PART C). nezha-arc iter1-4 + in-flight
+<code>4fbe581</code> bug-class work were NOT reviewed (per instruction).
+<strong>Method:</strong> <code>git show</code> each SHA → read changed
+source + tests → build/test the touched packages → §1.1 mutation-prove
+each new test in a throwaway worktree → exercise the credential hook
+with RED/GREEN inputs → docs_chain <code>verify features</code> +
+headline-math audit. No main-checkout tracked file was
+edited/staged/committed by the reviewer (mutations isolated to
+<code>/tmp</code> worktree, removed; zero residue confirmed).</p>
+<hr />
+<h2 id="verdicts">Verdicts</h2>
+<table>
+<thead>
+<tr>
+<th>PART</th>
+<th>SHA</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A — §11.4.153 video waves 4-6 (43→54)</td>
+<td><code>af2ef7f</code></td>
+<td><strong>GO with FINDING (non-blocking, doc-integrity)</strong></td>
+</tr>
+<tr>
+<td>B — secret-scrub + credential hook</td>
+<td><code>04f71e9</code></td>
+<td><strong>GO</strong></td>
+</tr>
+<tr>
+<td>C — BUG-MULTIPASS-DEFAULT-MODEL + BUG-FB2-HARDCODED-LANG</td>
+<td><code>c2aa7c8</code></td>
+<td><strong>GO</strong> (one owed item: nezha runtime re-validation,
+honestly deferred)</td>
+</tr>
+</tbody>
+</table>
+<p>No PASS-bluff, no FAIL-bluff, no bluff-gate found. Two genuine
+product bugs are correctly root-caused, fixed robustly, and covered by
+tests that provably catch the negation (§1.1 mutation-confirmed). The
+secret scrub is complete and the new credential hook genuinely blocks
+recurrence.</p>
+<hr />
+<h2 id="part-c--c2aa7c8--go-deepest-scrutiny">PART C —
+<code>c2aa7c8</code> — GO (deepest scrutiny)</h2>
+<h3
+id="bug-multipass-default-model-cmdunified-translatormaingo">BUG-MULTIPASS-DEFAULT-MODEL
+(<code>cmd/unified-translator/main.go</code>)</h3>
+<ul>
+<li><strong>Correctness:</strong> root cause is FACT-accurate — the
+polish path built its LLM client with <code>config.Model</code> (global
+<code>-model</code> default <code>gpt-4</code>), which
+<code>NewLLMTranslatorWithConfig</code>'s <code>ValidModels</code>
+whitelist rejects for any non-openai provider, so the polish silently
+no-opped while the step showed green (§11.4/§11.4.138 PASS-bluff).
+<code>resolvePolisherModel(provider, requested)</code> substitutes the
+provider's canonical first valid model ONLY when the requested model is
+invalid for that provider; keeps an explicit-valid model; passes through
+providers with no whitelist. <code>llm.ValidModels</code> /
+<code>llm.Provider</code> are exported and used identically by the
+per-provider clients — the substitution mirrors exactly what the main
+path gets from the bridge. No solve-A-create-B: a <em>genuine</em>
+polish failure now marks the step <code>Success=false</code> (❌)
+instead of ✅ while still preserving the base translation.
+<code>addStep</code> appends a pointer-stable
+<code>*TranslationStep</code> (Success defaults false), so the failed
+step still appears in the report. (Micro-nit, non-blocking: the failure
+branch inlines what the existing <code>stepError</code> helper already
+does — could call <code>stepError(mpStep, …)</code> for consistency;
+functionally identical.)</li>
+<li><strong>Test genuineness (§1.1 mutation-PROVEN):</strong>
+<ul>
+<li><code>TestRunMultiPass_DefaultModelStillPolishes</code> drives a
+real <code>httptest</code> OpenAI-compat server, provider=deepseek,
+model=<code>gpt-4</code> (the default), and asserts the LLM was actually
+hit (<code>hits != 0</code>) AND the polished text was applied AND
+output ≠ input. <strong>Mutation:</strong> neutered
+<code>resolvePolisherModel</code> to passthrough → test FAILed with the
+exact pre-fix error
+<code>model 'gpt-4' is not valid for provider 'deepseek'</code>. Not a
+bluff.</li>
+<li><code>TestResolvePolisherModel</code> covers the full case-space
+(valid kept / invalid→default / empty→default / gemini /
+openai-gpt4-kept / unknown-provider passthrough). All 6 sub-cases RUN
+(verbose-confirmed, not skipped).</li>
+</ul></li>
+</ul>
+<h3
+id="bug-fb2-hardcoded-lang-pkgapihandlergo-translatefb2">BUG-FB2-HARDCODED-LANG
+(<code>pkg/api/handler.go</code> <code>translateFB2</code>)</h3>
+<ul>
+<li><strong>Correctness:</strong> root cause FACT-accurate — handler
+called <code>createTranslator(provider, model, "", "")</code> +
+hardcoded <code>sourceLang=ru/targetLang=sr</code> for the prep path +
+<code>book.Language="sr"</code>, so every FB2 request produced Serbian.
+Fix parses <code>source_lang</code>/<code>target_lang</code>,
+<strong>validates via <code>language.ParseLanguage</code> BEFORE
+building the translator</strong> (unknown code → 400, no translator
+built — never a silent fallback), threads the RESOLVED codes (defaulting
+to ru/sr only when BOTH omitted) through <code>createTranslator</code>,
+the preparation-aware translator, and <code>book.Language</code>.
+<code>createTranslator</code>'s own ru→sr default only fires on
+both-empty and is now superseded by the handler always passing resolved
+non-empty codes — consistent, no double-default conflict.
+<code>language.Russian</code>/<code>Serbian</code>/<code>ParseLanguage</code>
+all exist. (Micro-nit, non-blocking: the <code>prepConfig</code> struct
+literal still sets
+<code>SourceLanguage:"auto"</code>/<code>TargetLanguage:"en"</code> then
+immediately overwrites both — dead initializer, harmless.)</li>
+<li><strong>Test genuineness (§1.1 mutation-PROVEN):</strong>
+<code>TestTranslateFB2_HonorsRequestedLangs</code> drives the real
+handler via gin + real multipart, recording the actual
+<code>task.SourceLang</code>/<code>task.TargetLang</code> the bridge
+factory was asked to build, across 5 cases (no-langs→ru/sr; en→es;
+en→de; target-only-fr keeps default ru source; klingon→400 + ZERO
+translator built). <strong>Mutation:</strong> reverted the call site to
+<code>createTranslator(provider, model, "", "")</code> → test FAILed
+with <code>source threaded as "ru", want "en"</code> (en→es, en→de) and
+<code>target threaded as "sr", want "fr"</code> (target-only). Catches
+the negation precisely. All 5 sub-cases RUN.</li>
+</ul>
+<h3 id="owed-honestly-deferred-not-a-defect-of-this-commit">Owed
+(honestly deferred, not a defect of this commit)</h3>
+<ul>
+<li>The FB2 fix is a server path; the commit message explicitly states
+"nezha rebuild+reboot+sink-side re-validation <strong>follows in this
+same stream</strong>." At <code>c2aa7c8</code> the live es→Spanish /
+de→German / klingon→400 nezha runtime evidence (<code>docs/qa/</code>)
+does <strong>not yet exist</strong> — it is the §11.4.108
+RUNTIME-on-clean-target layer, honestly owed to the in-flight stream.
+The unit-level contract test proves the SOURCE+ARTIFACT layers.
+<strong>Committer follow-up:</strong> land the live nezha FB2
+re-validation evidence before closing the FB2 row / tagging.</li>
+</ul>
+<h3 id="buildtest">Build/test</h3>
+<ul>
+<li><code>go build ./pkg/api/ ./pkg/translator/... ./pkg/verification/ ./cmd/unified-translator/</code>
+→ clean.</li>
+<li><code>go test ./pkg/api/ ./pkg/translator/llm/ ./pkg/verification/ ./cmd/unified-translator/ -count=1</code>
+→ all 4 GREEN.</li>
+<li>(NOTE — not a PART-C/B/A defect: <code>go build ./...</code> over
+the WHOLE tree fails with
+<code>pkg/ebook: undefined: stripLeadingTitle</code> — that is the
+in-flight committer's UNCOMMITTED working-tree edit to
+<code>pkg/ebook/{epub,html}_parser.go</code>, OUT of review scope. None
+of the 3 reviewed commits touch <code>pkg/ebook</code>.)</li>
+</ul>
+<hr />
+<h2 id="part-b--04f71e9--go">PART B — <code>04f71e9</code> — GO</h2>
+<h3 id="secret-scrub-11410--11430">Secret scrub (§11.4.10 /
+§11.4.30)</h3>
+<ul>
+<li><code>git grep &lt;leaked-token-redacted-§11.4.10&gt;</code> (live
+token) over all TRACKED files → <strong>EMPTY</strong> (value never
+printed in this report either).</li>
+<li>All 6 secret-bearing binaries (<code>build/ebook-translator</code>,
+<code>ebook-translator</code>, <code>download-model</code>,
+<code>test-model</code>, <code>test-enhanced-conversion</code>,
+<code>test-simple-translation</code>) confirmed
+<strong>untracked</strong> (<code>git ls-files --error-unmatch</code>
+fails for each).</li>
+<li><code>.gitignore</code> now ignores <code>/build/</code> +
+root-anchors the 6 binary names (GAP2 root cause fixed — was per-file
+only).</li>
+<li>Awareness docs (<code>docs/qa/secret_scrub_*/PLAN.md</code>,
+<code>docs/scripts/credential_scan.md</code>) carry only the MASKED form
+<code>WhiteSnake&lt;REDACTED-§11.4.10&gt;</code> — never the live
+<code>8587</code>.</li>
+</ul>
+<h3
+id="credential-hook-genuinely-prevents-recurrence-11410a-clause-5-11475-l1l3">Credential
+hook genuinely prevents recurrence (§11.4.10.A clause 5, §11.4.75
+L1/L3)</h3>
+<ul>
+<li>Read <code>scripts/git_hooks/credential_scan.sh</code> — closed
+pattern set: leaked-class <code>WhiteSnake[0-9]{2,}</code>, inline
+<code>--password</code> flag (digit/len≥8 guard, word-boundary so prose
+"SSH-password" doesn't match), <code>*_PASS/*_PASSWORD/Password</code>
+assignment, API-key shapes
+(<code>sk-</code>,<code>AKIA</code>,<code>ghp_</code>,<code>xox[baprs]-</code>).
+<code>is_env_or_placeholder</code> correctly exempts
+<code>${VAR}</code>/<code>$VAR</code>/empty/<code>&lt;redacted…&gt;</code>/<code>YOUR_</code>/<code>CHANGEME</code>.</li>
+<li><strong>Anti-bluff RED/GREEN proven by reviewer (independent of
+committer's claim):</strong>
+<ul>
+<li>RED (all → exit 1, value masked):
+<code>--password &lt;leaked-token-redacted-§11.4.10&gt;</code>
+(leaked-class), <code>--password &lt;example-pw-redacted&gt;</code>
+(inline literal), <code>REMOTE_PASS="&lt;example-redacted&gt;"</code>
+(assignment), <code>sk-…</code> (API-key shape).</li>
+<li>GREEN (all → exit 0, no output):
+<code>--password "${SSH_WORKER_PASSWORD}"</code>,
+<code>&lt;redacted-per-11.4.10&gt;</code>,
+<code>PASSWORD=""</code>.</li>
+</ul></li>
+<li><code>pre-commit</code> (staged-diff scan) + <code>pre-push</code>
+(per-range changed-file scan, catches <code>--no-verify</code> bypass) +
+idempotent <code>install_git_hooks.sh</code> all present; all 4 scripts
+pass <code>bash -n</code> (§11.4.67). The hook is genuinely
+effective.</li>
+<li><strong>Minor blast-radius note (non-blocking follow-up):</strong>
+<code>IGNORE_RE</code> self-exempts the <em>entire</em>
+<code>scripts/git_hooks/</code> dir and any
+<code>docs/qa/secret_scrub_*</code> path. Justified (hook-internal +
+masked-awareness paths) but means a future real secret committed INTO
+those paths would go unscanned. Consider narrowing the exemption to the
+specific doc files rather than whole directories.</li>
+</ul>
+<hr />
+<h2
+id="part-a--af2ef7f--go-with-finding-doc-integrity-non-blocking">PART A
+— <code>af2ef7f</code> — GO with FINDING (doc-integrity,
+non-blocking)</h2>
+<h3 id="what-is-correct">What is correct</h3>
+<ul>
+<li>Headline math is sound: Status.md Anti-bluff note
+<code>43 − 1 + 3 + 4 + 5 = 54</code>; Status_Summary
+<code>43 − 1 + 12 = 54</code> (3+4+5=12). <strong>No over/under-count in
+the headline.</strong> Status_Summary.md headline is internally
+consistent at 54 (lines 17, 34, 61).</li>
+<li><code>docs_chain verify features</code> →
+<strong><code>features  in-sync</code></strong> (built the docs_chain
+CLI from its submodule, ran against current HEAD). The 8-node chain
+(Status.md/html/pdf/docx + Status_Summary.{md,html,pdf,docx}) is
+export-synchronized; DOCX is present per §11.4.153.</li>
+<li>New PASS rows (multi-language-pair, fb2, convert/script) cite real
+<code>.mp4</code> artefacts at
+<code>/Volumes/T7/Downloads/Recordings/</code> with ffprobe/frame detail
+per §11.4.107; the §11.4.138 multipass demotion (−1) correctly matches
+PART-C's confirmed bug.</li>
+</ul>
+<h3
+id="finding-intra-document-numeric-drift--1146-precision--11460--11491">FINDING
+(intra-document numeric drift — §11.4.6 precision / §11.4.60 /
+§11.4.91)</h3>
+<p>The SAME document carries THREE different "video-confirmed" counts
+that must all agree but do not. Confirmed present in the committed
+<code>af2ef7f</code> blob (not the in-flight edit):</p>
+<ul>
+<li><strong>Status.md line 8 (Anti-bluff headline): 54</strong> ✅
+authoritative.</li>
+<li><strong>Status.md line 30 (Coverage-summary
+<code>| Video-confirmed |</code> cell): 43</strong> ❌ stale — never
+bumped this commit; its own prose math even terminates at 37/41/43
+(Rev-14).</li>
+<li><strong>Status.md line 898 (caveat narrative): "Video coverage is 30
+feature rows" / "30 features are confirmed"</strong> ❌ very stale
+(Wave-2 era).</li>
+<li><strong>Status_Summary.md carries the same drift:</strong> line 128
+"Video-confirmation 43/496", line 140 "43 / 496 = 8.7%" — contradicting
+its own 54 headline.</li>
+</ul>
+<p>This is NOT a feature-correctness PASS-bluff (the 54 rows + their
+evidence are genuine; the headline is right). It IS a real doc-integrity
+defect: a reader pulling the Coverage-summary cell gets 43, the caveat
+gets 30, the headline gets 54 — precisely the
+summary-must-agree-with-headline drift §11.4.91/§11.4.60 forbids.
+<code>docs_chain verify</code> cannot catch it (it only checks
+md→html/pdf/docx export sync, not intra-document numeric consistency),
+so "in-sync" passed while the doc self-contradicts.</p>
+<p><strong>Committer follow-up (non-blocking for these landed commits,
+but must reconcile before the release-gate sweep):</strong> update the
+Status.md Coverage-summary <code>Video-confirmed</code> cell (43→54) +
+the line-898 caveat (30→54), and the Status_Summary lines 128/140
+(43→54), then re-run docs_chain. Recommend a small intra-doc-consistency
+check (grep that all "video-confirmed N" tokens in a Status doc agree)
+since the export-sync gate structurally cannot.</p>
+<hr />
+<h2 id="11484-quiescence-statement">§11.4.84 quiescence statement</h2>
+<p>All mutation experiments ran in a detached <code>/tmp</code> git
+worktree (replace-dirs repointed to the main checkout, removed with
+<code>git worktree remove --force</code>). Post-run grep of the main
+checkout's <code>pkg/api/handler.go</code> +
+<code>cmd/unified-translator/main.go</code> for mutation markers
+(<code>// MUT</code>, <code>MUTATED for paired</code>,
+<code>_ = "unreachable"</code>) → EMPTY. The reviewer
+edited/staged/committed NO main-checkout tracked file. This REVIEW.md is
+the only file written, and is not committed by the reviewer.</p>
+</body>
+</html>
