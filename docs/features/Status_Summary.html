@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status-summary">HelixTranslate — Feature
 Status Summary</h1>
-<p><strong>Revision:</strong> 9 <strong>Last modified:</strong>
-2026-06-16T12:00:00Z <strong>Authority:</strong> Two-audience companion
+<p><strong>Revision:</strong> 10 <strong>Last modified:</strong>
+2026-06-16T13:00:00Z <strong>Authority:</strong> Two-audience companion
 to <code>docs/features/Status.md</code> (§11.4.56). Derived from the
 same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync),
 §11.4.6 (no-guessing).</p>
@@ -202,7 +202,7 @@ translators, the web dashboards, the REST and gRPC servers, ~32 built-in
 AI providers, ebook format readers (FB2, EPUB, DOCX, HTML, TXT, PDF) and
 writers (EPUB, FB2, TXT, HTML, Markdown, <strong>DOCX and now
 PDF</strong>), caching, security, and all 8 add-on modules.</li>
-<li><strong>30 features are proven on real recordings</strong> — each
+<li><strong>32 features are proven on real recordings</strong> — each
 checked frame-by-frame to confirm it genuinely shows the feature working
 (real translated text in the right language, a live connection count
 changing, etc.), not just “a screen”. These include: the primary
@@ -229,13 +229,16 @@ Wave 1 (the auto-selected verified model being rejected by a stale model
 whitelist) now works — which is exactly why these recordings genuinely
 demonstrate working features. We never faked a “working” recording; in
 Wave 1 these were honest skips.</li>
-<li><strong>New this round (Wave 2):</strong> <strong>DOCX
-output</strong>, <strong>PDF output</strong>, <strong>HTML→Markdown
-conversion</strong>, and the <strong>provider-diverse
-translators</strong> (<code>ProviderDiverseTranslators</code> +
-<code>EnsembleFactory</code>) are all now video-proven — and the gRPC
-server translation was re-confirmed with an additional clip. The Wave-1
-default-translation-path blocker is resolved.</li>
+<li><strong>New this round (Wave 3a):</strong> the
+<strong>Cerebras</strong> and <strong>SambaNova</strong> per-provider
+LLM clients are now video-proven — each a real EN→ES translation run
+through <code>unified-translator -provider &lt;name&gt;</code>, with the
+two Spanish outputs distinct from each other (“El sol de la mañana se
+alzó…” vs “El sol matutino se alzó…”), proving genuine, separate
+per-provider models rather than a canned response. (Prior round, Wave 2:
+DOCX output, PDF output, HTML→Markdown conversion, and the
+provider-diverse translators were video-proven; the Wave-1
+default-translation-path blocker is resolved.)</li>
 </ul>
 <h2 id="what-is-pending-or-limited">What is pending or limited</h2>
 <ul>
@@ -276,11 +279,12 @@ stats endpoint that always shows zeros). These are flagged in the
 detailed document.</li>
 </ul>
 <h2 id="video-confirmation-coverage">Video-confirmation coverage</h2>
-<p><strong>30 / 494 ≈ 6.1%</strong> (Wave 2 added 5 net-new video
-confirmations: DOCX output, PDF output, HTML→Markdown conversion,
-ProviderDiverseTranslators, EnsembleFactory; DOCX + PDF are no longer
-real-artifact-only — they are now video-confirmed). This is the headline
-number to keep improving: each new genuine recording raises it.</p>
+<p><strong>32 / 494 ≈ 6.5%</strong> (Wave 3a added 2 net-new video
+confirmations: the Cerebras and SambaNova per-provider LLM clients, each
+a distinct real EN→ES translation; Wave 2 added 5: DOCX output, PDF
+output, HTML→Markdown conversion, ProviderDiverseTranslators,
+EnsembleFactory). This is the headline number to keep improving: each
+new genuine recording raises it.</p>
 <h2 id="team-actions">Team actions</h2>
 <ul>
 <li><strong>No operator decision owed for the former SSH/local
@@ -361,9 +365,10 @@ host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td>30 (Wave 2 added 5 net-new: DOCX output, PDF output, HTML→Markdown
-conversion, ProviderDiverseTranslators, EnsembleFactory; DOCX + PDF now
-video-confirmed, no longer real-artifact-only)</td>
+<td>32 (Wave 3a added 2 net-new: Cerebras + SambaNova per-provider LLM
+clients, distinct real EN→ES translations; Wave 2 added 5: DOCX output,
+PDF output, HTML→Markdown conversion, ProviderDiverseTranslators,
+EnsembleFactory)</td>
 </tr>
 <tr>
 <td>Video PENDING</td>
@@ -551,12 +556,22 @@ local provider was removed in bridge phase-2 R-4).</li>
 </ul>
 <h2 id="top-gaps-engineering">Top gaps (engineering)</h2>
 <ol type="1">
-<li><strong>Video-confirmation 30/494.</strong> 30 rows carry real,
-ffprobe- and content-verified recordings. <strong>Wave 2 (2026-06-16)
-added 5 net-new</strong> (validator-verified ffprobe+frame, §11.4.107):
-DOCX output
-(<code>helix_translate-docx-output-20260616-112943.mp4</code>), PDF
-output (<code>helix_translate-pdf-output-20260616-113057.mp4</code>),
+<li><strong>Video-confirmation 32/494.</strong> 32 rows carry real,
+ffprobe- and content-verified recordings. <strong>Wave 3a (2026-06-16)
+added 2 net-new</strong> (validator-style ffprobe+frame, §11.4.107): the
+<strong>Cerebras</strong> client
+(<code>helix_translate-provider-cerebras-translate-wave3a-20260616.mp4</code>,
+“El sol de la mañana se alzó sobre el tranquilo pueblo.”) and the
+<strong>SambaNova</strong> client
+(<code>helix_translate-provider-sambanova-translate-wave3a-20260616.mp4</code>,
+“El sol matutino se alzó sobre el tranquilo pueblo.”), both via
+<code>unified-translator -provider &lt;name&gt;</code>, the two outputs
+distinct from each other (genuine per-provider models), start-frame ≠
+output-frame liveness. <strong>Wave 2 (2026-06-16) added 5
+net-new</strong> (validator-verified ffprobe+frame, §11.4.107): DOCX
+output (<code>helix_translate-docx-output-20260616-112943.mp4</code>),
+PDF output
+(<code>helix_translate-pdf-output-20260616-113057.mp4</code>),
 HTML→Markdown conversion
 (<code>helix_translate-html-to-md-20260616-114228.mp4</code>), and
 <code>ProviderDiverseTranslators</code> + <code>EnsembleFactory</code>
@@ -619,11 +634,12 @@ several <code>llms_verifier</code> packages
 <code>doc_processor/archdoc</code>.</li>
 </ol>
 <h2 id="video-coverage-ratio">Video-coverage ratio</h2>
-<p><code>30 / 494</code> enumerated rows = <strong>6.1%</strong> (≈ 7.2%
-against the 417 headline). Wave 2 added 5 net-new video confirmations
-(DOCX/PDF/HTML→MD/ProviderDiverseTranslators/EnsembleFactory); DOCX +
-PDF are now video-confirmed, no longer real-artifact-only. This is the
-primary metric to drive upward; each anti-bluff §11.4.107 recording
+<p><code>32 / 494</code> enumerated rows = <strong>6.5%</strong> (≈ 7.7%
+against the 417 headline). Wave 3a added 2 net-new video confirmations
+(Cerebras + SambaNova per-provider clients, distinct real EN→ES
+translations); Wave 2 added 5
+(DOCX/PDF/HTML→MD/ProviderDiverseTranslators/EnsembleFactory). This is
+the primary metric to drive upward; each anti-bluff §11.4.107 recording
 increments the numerator.</p>
 <h2 id="cross-references">Cross-references</h2>
 <ul>

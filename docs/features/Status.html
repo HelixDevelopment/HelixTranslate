@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 9 <strong>Last modified:</strong>
-2026-06-16T12:00:00Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 10 <strong>Last modified:</strong>
+2026-06-16T13:00:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -195,25 +195,35 @@ genuinely demonstrates the feature working (each cited <code>.mp4</code>
 was ffprobe-verified for non-zero duration+frames and content-verified
 against its claimed behaviour — e.g. real DeepSeek output in the target
 language, real gRPC translated text, live WebSocket count change).
-<strong>30 feature rows are video-confirmed</strong> (Wave 2 of
-2026-06-16 added 5 net-new — DOCX output, PDF output, HTML→Markdown
-conversion, <code>ProviderDiverseTranslators</code>,
-<code>EnsembleFactory</code> — each backed by a real-use Wave-2
-<code>.mp4</code> independently validator-verified ffprobe+frame; Wave 2
-also re-confirmed the already-confirmed gRPC TranslationService row with
-an additional clip, no double-count; Wave 1 added 2 — bridge-ensemble
-best-model selection + bridge provider-diverse catalogue) across
-unified-translator (DeepSeek translate, EPUB→TXT / HTML→EPUB / FB2→EPUB
-/ FB2→FB2 conversions, Serbian-Cyrillic, <code>-script</code>
-Cyrillic↔︎Latin, format-detection, help/version, <code>-verify</code>,
-<strong><code>-multipass</code> multi-pass polishing engine</strong>),
-the REST API server (POST /api/v1/translate real DeepSeek + target_lang
-FIXED, TLS startup FIXED, /health · /api/v1/version ·
-/api/v1/providers), the gRPC server (real EN→ES), markdown-translator
-(EPUB↔︎MD round-trip), preparation-translator (FIXED real analysis),
-cmd/cli (real DeepSeek), monitor-server (live WS hub), the DeepSeek
-library client, and the <strong>LLMsVerifier→agent bridge CLI</strong>
-(<code>cmd/model-bridge</code> —
+<strong>32 feature rows are video-confirmed</strong> (Wave 3a of
+2026-06-16 added 2 net-new — the <strong>Cerebras</strong> and
+<strong>SambaNova</strong> per-provider LLM clients, each backed by a
+real-use Wave-3a <code>.mp4</code> showing a distinct EN→ES translation
+through <code>unified-translator -provider &lt;name&gt;</code> —
+<code>helix_translate-provider-cerebras-translate-wave3a-20260616.mp4</code>
+(“El sol de la mañana se alzó sobre el tranquilo pueblo.”) and
+<code>helix_translate-provider-sambanova-translate-wave3a-20260616.mp4</code>
+(“El sol matutino se alzó sobre el tranquilo pueblo.”), the two outputs
+distinct from each other proving genuine per-provider models,
+ffprobe+frame-verified per §11.4.107 with start-frame ≠ output-frame
+liveness; Wave 2 of 2026-06-16 added 5 net-new — DOCX output, PDF
+output, HTML→Markdown conversion,
+<code>ProviderDiverseTranslators</code>, <code>EnsembleFactory</code> —
+each backed by a real-use Wave-2 <code>.mp4</code> independently
+validator-verified ffprobe+frame; Wave 2 also re-confirmed the
+already-confirmed gRPC TranslationService row with an additional clip,
+no double-count; Wave 1 added 2 — bridge-ensemble best-model selection +
+bridge provider-diverse catalogue) across unified-translator (DeepSeek
+translate, EPUB→TXT / HTML→EPUB / FB2→EPUB / FB2→FB2 conversions,
+Serbian-Cyrillic, <code>-script</code> Cyrillic↔︎Latin, format-detection,
+help/version, <code>-verify</code>, <strong><code>-multipass</code>
+multi-pass polishing engine</strong>), the REST API server (POST
+/api/v1/translate real DeepSeek + target_lang FIXED, TLS startup FIXED,
+/health · /api/v1/version · /api/v1/providers), the gRPC server (real
+EN→ES), markdown-translator (EPUB↔︎MD round-trip), preparation-translator
+(FIXED real analysis), cmd/cli (real DeepSeek), monitor-server (live WS
+hub), the DeepSeek library client, and the <strong>LLMsVerifier→agent
+bridge CLI</strong> (<code>cmd/model-bridge</code> —
 <code>helixtranslate-bridge-bestmodel-translate-20260615.mp4</code>:
 in-process verify→SQLite store→select strongest
 <code>novita/Sao10K/L3-8B-Stheno-v3.2</code> score 0.919 → live
@@ -355,11 +365,21 @@ host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td><strong>30</strong> (real, content-verified recordings — see
-Anti-bluff note; Rev-9 / Wave 2 of 2026-06-16 added <strong>5
-net-new</strong> video confirmations, each backed by a real-use Wave-2
-<code>.mp4</code> independently validator-verified ffprobe+frame
-§11.4.107: <strong>DOCX output</strong>
+<td><strong>32</strong> (real, content-verified recordings — see
+Anti-bluff note; Rev-10 / Wave 3a of 2026-06-16 added <strong>2
+net-new</strong> video confirmations — the <strong>Cerebras</strong> and
+<strong>SambaNova</strong> per-provider LLM clients
+(<code>helix_translate-provider-cerebras-translate-wave3a-20260616.mp4</code>
++
+<code>helix_translate-provider-sambanova-translate-wave3a-20260616.mp4</code>),
+each a distinct real EN→ES translation via
+<code>unified-translator -provider &lt;name&gt;</code>,
+ffprobe+frame-verified per §11.4.107 with start-frame ≠ output-frame
+liveness, the two outputs distinct proving genuine per-provider models;
+Rev-9 / Wave 2 of 2026-06-16 added <strong>5 net-new</strong> video
+confirmations, each backed by a real-use Wave-2 <code>.mp4</code>
+independently validator-verified ffprobe+frame §11.4.107: <strong>DOCX
+output</strong>
 (<code>helix_translate-docx-output-20260616-112943.mp4</code>),
 <strong>PDF output</strong>
 (<code>helix_translate-pdf-output-20260616-113057.mp4</code>),
@@ -2844,40 +2864,59 @@ OpenAI-compatible wrapper | Not-inventoried | Source-confirmed | PENDING
 | | Replicate | Replicate client | Library | Implemented | Wired | Async
 prediction-polling API | Not-inventoried | Source-confirmed | PENDING |
 | Cerebras | Cerebras client | Library | Implemented | Wired |
-OpenAI-compatible wrapper (base-URL/model specifics UNCONFIRMED) |
-Not-inventoried | Source-confirmed | PENDING | | Cloudflare | Cloudflare
-Workers AI client | Library | Implemented | Wired | /client/v4 Workers
-AI | Not-inventoried | Source-confirmed | PENDING | | SiliconFlow |
-SiliconFlow client | Library | Implemented | Wired | OpenAI-compatible
-wrapper (specifics UNCONFIRMED) | Not-inventoried | Source-confirmed |
-PENDING | | Hyperbolic | Hyperbolic client | Library | Implemented |
+OpenAI-compatible wrapper (<code>https://api.cerebras.ai/v1</code>,
+model <code>llama3.1-70b</code>) | Not-inventoried | <strong>PASS — real
+EN→ES translation captured</strong> (via unified-translator
+<code>-provider cerebras -model llama3.1-70b</code>: “The morning sun
+rose over the quiet village.” → “El sol de la mañana se alzó sobre el
+tranquilo pueblo.” — distinct from SambaNova’s output, proving a genuine
+per-provider model; Wave-3a, asciinema→agg→ffmpeg, ffprobe 4.03s/4
+frames + 11 extracted frames, ≥6 frames content-verified, start-frame ≠
+output-frame per §11.4.107) |
+Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-provider-cerebras-translate-wave3a-20260616.mp4
+| | Cloudflare | Cloudflare Workers AI client | Library | Implemented |
+Wired | /client/v4 Workers AI | Not-inventoried | Source-confirmed |
+PENDING | | SiliconFlow | SiliconFlow client | Library | Implemented |
 Wired | OpenAI-compatible wrapper (specifics UNCONFIRMED) |
-Not-inventoried | Source-confirmed | PENDING | | TogetherAI | TogetherAI
+Not-inventoried | Source-confirmed | PENDING | | Hyperbolic | Hyperbolic
 client | Library | Implemented | Wired | OpenAI-compatible wrapper
 (specifics UNCONFIRMED) | Not-inventoried | Source-confirmed | PENDING |
-| SambaNova | SambaNova client | Library | Implemented | Wired |
+| TogetherAI | TogetherAI client | Library | Implemented | Wired |
 OpenAI-compatible wrapper (specifics UNCONFIRMED) | Not-inventoried |
-Source-confirmed | PENDING | | Kimi | Kimi (Moonshot) client | Library |
-Implemented | Wired | OpenAI-compatible wrapper (specifics UNCONFIRMED)
-| Not-inventoried | Source-confirmed | PENDING | | Novita | Novita
-client | Library | Implemented | Wired | /v3/openai-compatible wrapper |
-Not-inventoried | Source-confirmed | PENDING | | NLPCloud | NLPCloud
-client | Library | Implemented | Wired | OpenAI-compatible wrapper
-(specifics UNCONFIRMED) | Not-inventoried | Source-confirmed | PENDING |
-| Upstage | Upstage (Solar) client | Library | Implemented | Wired |
+Source-confirmed | PENDING | | SambaNova | SambaNova client | Library |
+Implemented | Wired | OpenAI-compatible wrapper
+(<code>https://api.sambanova.ai/v1</code>, model
+<code>Meta-Llama-3.1-70B-Instruct</code>) | Not-inventoried |
+<strong>PASS — real EN→ES translation captured</strong> (via
+unified-translator
+<code>-provider sambanova -model Meta-Llama-3.1-70B-Instruct</code>:
+“The morning sun rose over the quiet village.” → “El sol matutino se
+alzó sobre el tranquilo pueblo.” — distinct from Cerebras’s output,
+proving a genuine per-provider model; Wave-3a, asciinema→agg→ffmpeg,
+ffprobe 4.39s/4 frames + 12 extracted frames, ≥6 frames
+content-verified, start-frame ≠ output-frame per §11.4.107) |
+Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-provider-sambanova-translate-wave3a-20260616.mp4
+| | Kimi | Kimi (Moonshot) client | Library | Implemented | Wired |
 OpenAI-compatible wrapper (specifics UNCONFIRMED) | Not-inventoried |
-Source-confirmed | PENDING | | Sarvam | Sarvam client | Library |
+Source-confirmed | PENDING | | Novita | Novita client | Library |
+Implemented | Wired | /v3/openai-compatible wrapper | Not-inventoried |
+Source-confirmed | PENDING | | NLPCloud | NLPCloud client | Library |
 Implemented | Wired | OpenAI-compatible wrapper (specifics UNCONFIRMED)
-| Not-inventoried | Source-confirmed | PENDING | | Modal | Modal client
-| Library | Implemented | Wired | OpenAI-compatible wrapper (specifics
-UNCONFIRMED) | Not-inventoried | Source-confirmed | PENDING | | PublicAI
-| PublicAI client | Library | Implemented | Wired | OpenAI-compatible
+| Not-inventoried | Source-confirmed | PENDING | | Upstage | Upstage
+(Solar) client | Library | Implemented | Wired | OpenAI-compatible
 wrapper (specifics UNCONFIRMED) | Not-inventoried | Source-confirmed |
-PENDING | | NIA | NIA client | Library | Implemented | Wired |
+PENDING | | Sarvam | Sarvam client | Library | Implemented | Wired |
 OpenAI-compatible wrapper (specifics UNCONFIRMED) | Not-inventoried |
-Source-confirmed | PENDING | | Vulavula | Vulavula client | Library |
+Source-confirmed | PENDING | | Modal | Modal client | Library |
 Implemented | Wired | OpenAI-compatible wrapper (specifics UNCONFIRMED)
-| Not-inventoried | Source-confirmed | PENDING |</p>
+| Not-inventoried | Source-confirmed | PENDING | | PublicAI | PublicAI
+client | Library | Implemented | Wired | OpenAI-compatible wrapper
+(specifics UNCONFIRMED) | Not-inventoried | Source-confirmed | PENDING |
+| NIA | NIA client | Library | Implemented | Wired | OpenAI-compatible
+wrapper (specifics UNCONFIRMED) | Not-inventoried | Source-confirmed |
+PENDING | | Vulavula | Vulavula client | Library | Implemented | Wired |
+OpenAI-compatible wrapper (specifics UNCONFIRMED) | Not-inventoried |
+Source-confirmed | PENDING |</p>
 </blockquote>
 <h2 id="pkgtranslator-translation-core">pkg/translator — translation
 core</h2>
