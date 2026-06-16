@@ -195,6 +195,14 @@ func loadOrCreateConfig(filename string) (*config.Config, error) {
 		log.Printf("Config file not found, creating default: %s", filename)
 		cfg := config.DefaultConfig()
 
+		// Apply environment overrides (JWT_SECRET, API keys, LLMsVerifier) onto
+		// the freshly-created default. Without this, a clean deployment with no
+		// config.json on disk crash-loops with "JWT secret is required" even when
+		// JWT_SECRET is correctly set in the environment, because DefaultConfig()
+		// ships EnableAuth=true + JWTSecret="" and only the LoadConfig (existing
+		// file) path applied env overrides (§11.4.135 regression guard).
+		cfg.ApplyEnvOverrides()
+
 		if err := config.SaveConfig(filename, cfg); err != nil {
 			return nil, fmt.Errorf("failed to save default config: %w", err)
 		}

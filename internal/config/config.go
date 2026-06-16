@@ -256,6 +256,18 @@ func SaveConfig(filename string, config *Config) error {
 	return nil
 }
 
+// ApplyEnvOverrides applies all environment-variable overrides (API keys,
+// JWT secret, LLMsVerifier config) onto the config. LoadConfig calls the
+// internal loader automatically, but the create-default path (no config.json
+// on disk) MUST call this explicitly — otherwise a freshly-deployed server
+// returns a bare DefaultConfig() (EnableAuth=true, JWTSecret="") and fails
+// Validate() with "JWT secret is required" even when JWT_SECRET is correctly
+// set in the environment (regression guard: §11.4.135
+// TestApplyEnvOverrides_JWTSecretReachesDefaultConfig).
+func (c *Config) ApplyEnvOverrides() {
+	c.loadAPIKeysFromEnv()
+}
+
 // loadAPIKeysFromEnv loads API keys from environment variables
 func (c *Config) loadAPIKeysFromEnv() {
 	// LoadConfig unmarshals into a zero-value Config, so when config.json omits

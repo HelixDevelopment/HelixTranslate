@@ -289,6 +289,8 @@ Guidelines:
 4. Keep proper nouns unchanged unless they have standard %s equivalents
 5. Preserve formatting and punctuation
 6. Ensure grammatical correctness
+7. Output ONLY the translated text itself. Do NOT add any notes, explanations,
+   commentary, disclaimers, or remarks about the translation.
 
 Context: %s
 

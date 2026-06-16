@@ -703,6 +703,8 @@ Guidelines:
 8. **CRITICAL**: Use ONLY pure Serbian vocabulary - avoid Croatian, Bosnian, or Montenegrin words
    - Use standard Serbian words preferred in Serbia, not regional variants
    - Example: use "avion" (not Croatian "zrakoplov"), "pozorište" (not Croatian "kazalište")
+9. **CRITICAL**: Output ONLY the translated text itself. Do NOT add any notes,
+   explanations, commentary, disclaimers, or remarks about the translation.
 
 Context: %s
 
@@ -732,6 +734,8 @@ Guidelines:
 4. Keep names of people and places unchanged unless they have standard %s equivalents
 5. Preserve formatting, punctuation, and paragraph structure
 6. %s
+7. **CRITICAL**: Output ONLY the translated text itself. Do NOT add any notes,
+   explanations, commentary, disclaimers, or remarks about the translation.
 
 Context: %s
 
@@ -750,9 +754,80 @@ Context: %s
 		tgtName)
 }
 
+// commentaryLeadMarkers are case-insensitive English meta-commentary openers an
+// instruct model appends AFTER the translation, separated by a blank line. They
+// are deliberately specific (anti-bluff §11.4.6 — must not eat a genuine
+// translated paragraph that merely begins with a common word). Captured from the
+// live nezha llm-novita responses (qa-results/nezha_heavy_test_*/).
+var commentaryLeadMarkers = []string{
+	"this translation",
+	"the translation",
+	"note:",
+	"translation note",
+	"translator's note",
+	"i've translated",
+	"i have translated",
+	"i translated",
+	"in this translation",
+	"please note",
+}
+
+// stripTranslationCommentary removes a trailing model-commentary block. An
+// instruct model that ignores the "translation only" instruction appends an
+// explanation after a blank line, prefixed either by an enclosing marker
+// ("(Note: ...)", "[Note: ...]") or by an English meta-phrase. Only the LAST
+// blank-line-separated block(s) are eligible, and ONLY when they are clearly
+// commentary — a genuine multi-paragraph translation has no such marker and is
+// returned untouched.
+func stripTranslationCommentary(s string) string {
+	blocks := strings.Split(s, "\n\n")
+	if len(blocks) < 2 {
+		return s
+	}
+	for len(blocks) > 1 {
+		last := strings.TrimSpace(blocks[len(blocks)-1])
+		if last == "" {
+			blocks = blocks[:len(blocks)-1]
+			continue
+		}
+		if !isCommentaryBlock(last) {
+			break
+		}
+		blocks = blocks[:len(blocks)-1]
+	}
+	return strings.TrimRight(strings.Join(blocks, "\n\n"), "\n")
+}
+
+// isCommentaryBlock reports whether a trailing block is model meta-commentary
+// rather than translated content.
+func isCommentaryBlock(block string) bool {
+	t := strings.TrimSpace(block)
+	if t == "" {
+		return false
+	}
+	// Fully enclosed parenthetical / bracketed note, e.g. "(Note: ...)" / "[Note: ...]".
+	if (strings.HasPrefix(t, "(") && strings.HasSuffix(t, ")")) ||
+		(strings.HasPrefix(t, "[") && strings.HasSuffix(t, "]")) {
+		inner := strings.ToLower(strings.TrimLeft(t, "(["))
+		if strings.HasPrefix(inner, "note") || strings.Contains(inner, "translat") {
+			return true
+		}
+	}
+	lower := strings.ToLower(t)
+	for _, m := range commentaryLeadMarkers {
+		if strings.HasPrefix(lower, m) {
+			return true
+		}
+	}
+	return false
+}
+
 // enhanceTranslation post-processes the translation
 func (lt *LLMTranslator) enhanceTranslation(original, translated string) string {
-	enhanced := translated
+	// Strip any trailing model meta-commentary the LLM appended despite the
+	// "translation only" prompt instruction (§11.4.135 regression guard:
+	// TestEnhanceTranslation_StripsModelCommentary).
+	enhanced := stripTranslationCommentary(translated)
 
 	// Fix common punctuation issues
 	enhanced = strings.ReplaceAll(enhanced, "\u201c", "\"")
