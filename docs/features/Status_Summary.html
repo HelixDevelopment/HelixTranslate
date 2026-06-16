@@ -202,7 +202,7 @@ translators, the web dashboards, the REST and gRPC servers, ~32 built-in
 AI providers, ebook format readers (FB2, EPUB, DOCX, HTML, TXT, PDF) and
 writers (EPUB, FB2, TXT, HTML, Markdown, <strong>DOCX and now
 PDF</strong>), caching, security, and all 8 add-on modules.</li>
-<li><strong>23 features are proven on real recordings</strong> — each
+<li><strong>25 features are proven on real recordings</strong> — each
 checked frame-by-frame to confirm it genuinely shows the feature working
 (real translated text in the right language, a live connection count
 changing, etc.), not just “a screen”. These include: the primary
@@ -221,13 +221,17 @@ MCP-stdio server</strong> (a real JSON-RPC MCP session — recording shows
 <code>tools/list</code>, <code>bridge_best_model</code>, and the
 <code>bridge_invoke</code> tool returning a live model translation “Le
 pont relie deux rives.”).</li>
-<li><strong>DOCX output</strong> is built and proven by the produced
-file itself (a real <code>.docx</code> = “Microsoft Word 2007+” with
-real translated text). <strong>PDF output is newly built this
-round</strong> and proven by passing tests (it renders the translated
-book to a real, valid PDF that keeps Serbian Cyrillic readable). Screen
-recordings of both are still owed, so they count as file/test-proven
-rather than video-proven for now.</li>
+<li><strong>DOCX output</strong> is built and proven by an earlier
+produced file (a real <code>.docx</code> = “Microsoft Word 2007+” with
+real translated text). <strong>PDF output is built</strong> and proven
+by passing tests (it renders the translated book to a real, valid PDF
+that keeps Serbian Cyrillic readable). <strong>⚠️ Screen recordings of
+both are now BLOCKED, not merely owed:</strong> while recording Wave 1
+we discovered the default command-line/gRPC translation path is
+currently runtime-broken (the auto-selected verified model is rejected
+by a stale model whitelist), so a fresh DOCX/PDF run through the tool
+does not complete. We did NOT fake a “working” recording. This is a
+HIGH-priority fix (see the engineering page, gap 1).</li>
 <li><strong>New this round:</strong> the <strong>agent bridge MCP-stdio
 server</strong> is now <strong>video-proven</strong>
 (<code>helixtranslate-bridge-mcp-stdio-20260615.mp4</code> — a real
@@ -245,9 +249,9 @@ return “page not found” and now genuinely translates.</li>
 </ul>
 <h2 id="what-is-pending-or-limited">What is pending or limited</h2>
 <ul>
-<li><strong>Video proof is still the main gap:</strong> <strong>23 of
+<li><strong>Video proof is still the main gap:</strong> <strong>25 of
 493</strong> features have a recorded, watch-it-yourself demonstration
-(≈ 4.7%). Everything else is built and present in the code, but a
+(≈ 5.1%). Everything else is built and present in the code, but a
 recording is still owed. Nothing is claimed proven just because the code
 exists.</li>
 <li><strong>PDF <em>output</em> is now built</strong> (this round). The
@@ -282,7 +286,7 @@ stats endpoint that always shows zeros). These are flagged in the
 detailed document.</li>
 </ul>
 <h2 id="video-confirmation-coverage">Video-confirmation coverage</h2>
-<p><strong>23 / 493 ≈ 4.7%</strong>, plus <strong>2
+<p><strong>25 / 493 ≈ 5.1%</strong>, plus <strong>2
 real-artifact/test-confirmed</strong> (DOCX + PDF output, video
 PENDING). This is the headline number to keep improving: each new
 genuine recording raises it.</p>
@@ -366,7 +370,7 @@ host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td>23 (+ 2 real-artifact/test-confirmed: DOCX + PDF output)</td>
+<td>25 (+ 2 real-artifact/test-confirmed: DOCX + PDF output)</td>
 </tr>
 <tr>
 <td>Video PENDING</td>
@@ -554,22 +558,42 @@ local provider was removed in bridge phase-2 R-4).</li>
 </ul>
 <h2 id="top-gaps-engineering">Top gaps (engineering)</h2>
 <ol type="1">
-<li><strong>Video-confirmation 23/493</strong> (+ 2
-real-artifact/test-confirmed: DOCX + PDF output). 23 rows carry real,
-ffprobe- and content-verified recordings (Status.md cites each
-<code>.mp4</code>; the <code>-multipass</code> video is
-<code>helixtranslate-cli-multipass-verify-20260615.mp4</code>, ffprobe
-888x630/93fr/9.3s; the bridge CLI video is
-<code>helixtranslate-bridge-bestmodel-translate-20260615.mp4</code>,
-ffprobe 790×560/80fr/8.0s; the bridge MCP-stdio video is
-<code>helixtranslate-bridge-mcp-stdio-20260615.mp4</code>, ffprobe
-790×560/10fr/11.88s; the 3 video-surfaced bug fixes — prep-translator
-dead, server TLS startup, REST hardcoded target-lang — are in commit
-<code>a5e8866</code>). The remaining Rev-4 additions carry
-<code>PENDING</code> (PDF), <code>SKIP</code> (web dashboard — needs
-HelixQA web/video backend) or <code>N/A</code> (internal verifier gate).
-Per §11.4.2/§11.4.107 nothing may be marked video-confirmed without a
-real, content-verified file.</li>
+<li><strong>Video-confirmation 25/493</strong> (+ 2
+real-artifact/test-confirmed: DOCX + PDF output). 25 rows carry real,
+ffprobe- and content-verified recordings. <strong>Wave 1 (2026-06-16)
+added 2:</strong>
+<code>helix_translate-bridge-ensemble-translate-20260616-104846.mp4</code>
+(best-model selection + provider-diverse fallback + real
+<code>invoke</code>→“Buenos días, querido amigo.”; ffprobe 7.77s/33fr/8
+distinct frame-hashes) and
+<code>helix_translate-bridge-verified-catalogue-translate-20260616-105327.mp4</code>
+(<code>model-bridge list</code> provider-diverse catalogue + real
+<code>invoke</code>→“Le pont relie deux rives.”; ffprobe 13.71s/40fr/6
+distinct). Prior recordings: the <code>-multipass</code> video
+<code>helixtranslate-cli-multipass-verify-20260615.mp4</code>
+(888x630/93fr/9.3s); the Wave-0 bridge CLI video
+<code>helixtranslate-bridge-bestmodel-translate-20260615.mp4</code>
+(790×560/80fr/8.0s); the bridge MCP-stdio video
+<code>helixtranslate-bridge-mcp-stdio-20260615.mp4</code>
+(790×560/10fr/11.88s); the 3 video-surfaced bug fixes in commit
+<code>a5e8866</code>. Per §11.4.2/§11.4.107 nothing may be marked
+video-confirmed without a real, content-verified file.
+<ul>
+<li><strong>🔴 Wave-1 DISCOVERED BLOCKER (§11.4.108/§11.4.138):</strong>
+the default bridge <strong>translator</strong> path
+(<code>unified-translator</code> + gRPC) is RUNTIME-BROKEN —
+<code>VerifiedFactory.CreateTranslatorWithFallback</code>→<code>NewLLMTranslatorWithConfig</code>
+rejects the verified strongest model
+<code>novita/Sao10K/L3-8B-Stheno-v3.2</code> against the stale
+<code>ValidModels</code> whitelist (<code>llm.go:237</code>), while the
+<code>BestModel</code>/<code>invoke</code> path (the recorded videos)
+correctly bypasses it. This BLOCKS Wave-1 videos #2 DOCX / #3 PDF / #4
+gRPC / per-provider-unified (honest SKIPs, not faked PASS). HIGH
+severity — release-critical default path. Fix is a dedicated Wave-2 item
+(route VerifiedFactory through the ResolvedProvider resolver, bypassing
+the whitelist for verified models). See Status.md “Honest gaps” caveat
+8.</li>
+</ul></li>
 <li><strong>PDF output now Implemented</strong> (Rev 4, commit fb265e7)
 — <code>pkg/ebook</code> now has FB2/EPUB/DOCX/PDF writers; zero open
 gap rows remain. Output is EPUB/FB2/TXT/HTML/MD/DOCX/PDF.</li>
@@ -605,7 +629,7 @@ several <code>llms_verifier</code> packages
 <code>doc_processor/archdoc</code>.</li>
 </ol>
 <h2 id="video-coverage-ratio">Video-coverage ratio</h2>
-<p><code>23 / 493</code> enumerated rows = <strong>4.7%</strong> (≈ 5.5%
+<p><code>25 / 493</code> enumerated rows = <strong>5.1%</strong> (≈ 6.0%
 against the 417 headline). Plus 2 real-artifact/test-confirmed (DOCX +
 PDF output, video PENDING). This is the primary metric to drive upward;
 each anti-bluff §11.4.107 recording increments the numerator.</p>
