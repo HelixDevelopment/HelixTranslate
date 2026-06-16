@@ -549,10 +549,37 @@ type clientTranslator struct {
 	stats  translator.TranslationStats
 }
 
-// Translate delegates to the underlying verified client and tracks a minimal
-// translated/error count under mu (the ensemble sites run with concurrency).
+// composeForClient builds the single content-bearing user message that the
+// underlying OpenAI-compatible client actually sends (it forwards only its 2nd
+// arg as the user message and ignores the 1st). The Translator contract delivers
+// the content in `text` and a label/hint in `contextStr`; a verbatim delegate
+// would send `contextStr` and DROP `text` (the wrong-content data-loss class —
+// see docs/qa/translate_arg_audit_completion_20260616-154307/COMPLETION.md, #8/#9).
+//
+// This mirrors the bridge.go realInvokeDispatch convention (content in arg-2):
+// the content (`text`) is always the body; a non-empty `contextStr` is appended
+// as a labelled Context: hint, never substituted for the content. When `contextStr`
+// is empty the body is the content verbatim (preserves the preparation-ensemble
+// callers that already pass a complete prompt in `text` with an empty contextStr).
+func composeForClient(text, contextStr string) string {
+	if strings.TrimSpace(contextStr) == "" {
+		return text
+	}
+	return text + "\n\nContext: " + contextStr
+}
+
+// Translate composes a content-bearing user message (content in the body, context
+// as a labelled hint) and sends it as the 2nd arg the raw client actually uses,
+// so the real content reaches the model instead of being dropped for the label.
+// Tracks a minimal translated/error count under mu (ensemble sites run concurrently).
 func (c *clientTranslator) Translate(ctx context.Context, text, contextStr string) (string, error) {
-	out, err := c.client.Translate(ctx, text, contextStr)
+	if strings.TrimSpace(text) == "" {
+		// No content to translate: never send a label-only / empty user message
+		// (the model would answer with boilerplate stored as a translation §11.4.69).
+		return "", fmt.Errorf("clientTranslator: refusing to translate empty/whitespace content (context=%q)", contextStr)
+	}
+	full := composeForClient(text, contextStr)
+	out, err := c.client.Translate(ctx, "", full)
 	c.mu.Lock()
 	if err != nil {
 		c.stats.Errors++

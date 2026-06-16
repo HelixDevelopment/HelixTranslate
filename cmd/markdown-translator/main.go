@@ -241,7 +241,21 @@ func main() {
 	// Step 3: Translate Markdown — driven through WorkflowConfig.LLMProvider.
 	fmt.Printf("🌍 Step %d/%d: Translating markdown content...\n", stepNum, totalSteps)
 	mdTranslator := markdown.NewMarkdownTranslator(func(text string) (string, error) {
-		return workflowCfg.LLMProvider.Translate(ctx, text, "")
+		// workflowCfg.LLMProvider is the raw OpenAI-compatible client (bridge.BestClient),
+		// which sends ONLY its 2nd arg as the user message and ignores the 1st. Passing
+		// the block content in the 1st arg with an empty 2nd arg sent an EMPTY user
+		// message → provider boilerplate stored as the translation → real chapter text
+		// lost (docs/qa/bug_markdown_empty_payload_rootcause_20260616-152640/FINDING.md).
+		// Build a real translation instruction embedding the block text and pass it as
+		// the 2nd arg, mirroring pkg/markdown/simple_workflow.go's working pattern.
+		prompt := fmt.Sprintf(
+			"Translate the following text to %s.\n"+
+				"Provide ONLY the translation without any explanations, notes, or additional text.\n"+
+				"Maintain the original formatting, line breaks, and structure.\n\n"+
+				"Source text:\n%s\n\nTranslation:",
+			*targetLang, text,
+		)
+		return workflowCfg.LLMProvider.Translate(ctx, text, prompt)
 	})
 
 	if err := mdTranslator.TranslateMarkdownFile(sourceMD, translatedMD); err != nil {

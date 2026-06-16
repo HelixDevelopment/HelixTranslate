@@ -117,8 +117,30 @@ func (c *OpenAIClient) GetProviderName() string {
 	return "openai"
 }
 
-// Translate translates text using OpenAI
+// Translate translates text using OpenAI.
+//
+// Wire contract (FACT): the user message sent to the model is the 2nd arg
+// (`prompt`); the 1st arg (`text`) is the translatable content some callers pass.
+// Defense-in-depth (§11.4.69, fixes the empty-payload data-loss class — see
+// docs/qa/translate_arg_audit_completion_20260616-154307/COMPLETION.md):
+//  1. when `prompt == ""` fall back to using `text` as the user message, so
+//     content-in-1st-arg callers (markdown-translator, preparation ensemble) no
+//     longer send an empty user message that the model answers with boilerplate;
+//  2. refuse an empty/whitespace-only user message with an explicit error rather
+//     than letting provider boilerplate be stored as if it were a translation.
 func (c *OpenAIClient) Translate(ctx context.Context, text string, prompt string) (string, error) {
+	userMessage := prompt
+	if strings.TrimSpace(userMessage) == "" {
+		// prompt empty/whitespace → fall back to the content-bearing 1st arg.
+		userMessage = text
+	}
+	if strings.TrimSpace(userMessage) == "" {
+		// Both args empty/whitespace: never send an empty user message (the model
+		// would reply with "you sent an empty message" boilerplate that downstream
+		// code stores as a translation — silent data loss). Fail loudly instead.
+		return "", fmt.Errorf("OpenAI Translate: refusing to send an empty user message (both text and prompt are empty/whitespace)")
+	}
+
 	model := c.config.Model
 	if model == "" {
 		model = "gpt-4"
@@ -152,7 +174,7 @@ func (c *OpenAIClient) Translate(ctx context.Context, text string, prompt string
 	request := OpenAIRequest{
 		Model: model,
 		Messages: []Message{
-			{Role: "user", Content: prompt},
+			{Role: "user", Content: userMessage},
 		},
 		Temperature: temperature,
 		MaxTokens:   maxTokens,
