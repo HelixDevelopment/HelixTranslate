@@ -1,13 +1,14 @@
 <h1
 id="continuation-helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 83 <strong>Last modified:</strong>
-2026-06-16T12:50:00Z</p>
+<p><strong>Revision:</strong> 84 <strong>Last modified:</strong>
+2026-06-16T13:05:00Z</p>
 <h2
-id="resume-here-2026-06-16-1250-11.4.153-video-confirmation-program-in-progress-30-confirmed-release-helix_translate-2.3.0-published-default-path-defect-foundfixedre-reviewed-go">▶️
-RESUME HERE (2026-06-16 ~12:50) — §11.4.153 VIDEO-CONFIRMATION PROGRAM
-in progress (30 confirmed); release <code>helix_translate-2.3.0</code>
-published; default-path defect found+FIXED+re-reviewed GO</h2>
+id="resume-here-2026-06-16-1305-11.4.153-video-confirmation-program-in-progress-32-confirmed-release-helix_translate-2.3.0-published-default-path-defect-foundfixedre-reviewed-go-recording-root-cause-corrected-slow-not-hung-be-patient">▶️
+RESUME HERE (2026-06-16 ~13:05) — §11.4.153 VIDEO-CONFIRMATION PROGRAM
+in progress (32 confirmed); release <code>helix_translate-2.3.0</code>
+published; default-path defect found+FIXED+re-reviewed GO; recording
+root-cause corrected (slow-not-hung — BE PATIENT)</h2>
 <h3
 id="short-resumption-paste-this-first-sentence-into-a-fresh-session">§11.4.127
 SHORT resumption (paste this first sentence into a fresh session)</h3>
@@ -18,7 +19,9 @@ SHORT resumption (paste this first sentence into a fresh session)</h3>
 main + 10 owned submodules; <code>helix_qa</code> tag OWED §11.4.119);
 the <strong>§11.4.153 per-feature video-confirmation program</strong> is
 the active operator-CRITICAL work — <code>docs/features/Status.md</code>
-Rev 9, <strong>30/494 features video-confirmed</strong> (real bridge
+Rev 9+, <strong>32/494 features video-confirmed</strong> (waves 1+2+3a:
+bridge-ensemble/catalogue, DOCX/PDF/gRPC/HTML-MD, providers
+novita/mistral/groq/siliconflow/cerebras/sambanova — real bridge
 responses, ffprobe+content-verified, NO bluff), model source =
 LLMsVerifier bridge (real keys present), HelixAgent incorporated
 (<code>helix_agent/</code> pinned) NOT integrated (42-dep graph =
@@ -27,19 +30,26 @@ defect the video program CAUGHT is FIXED + re-reviewed GO + guarded:
 commit <code>7c2118a</code></strong> (VerifiedFactory routes
 verifier-selected models through the whitelist-immune path whenever a
 key exists from ANY source; env-independent §11.4.138 guard; proven
-GREEN with all 36 *_API_KEY unset). <strong>⚠️ RECORDING-APPROACH LESSON
-(§11.4.102 Phase 4.5):</strong> 3 long-running recorder/fix subagents
-HUNG at different points (intermittent subagent-runtime instability /
-“server temporarily limiting requests”) — ADAPT: use SMALL/SHORT
-recording units (1–2 videos per subagent, bounded <code>timeout</code>
-on every network/record cmd) + respawn-on-hang (§11.4.147, detect via
-frozen-output + no go-test/build/asciinema/ffmpeg subprocess), or record
-critical ones in the main stream. Continue the loop (§11.4.126), no
-force-push (§11.4.113), no git add -A (§11.4.30), never touch
-helix_qa(§11.4.119)/helix_agent build; SINGLE main-checkout committer at
-a time (§11.4.84 — reviews read-only, recorders worktree-no-commit);
-contested checkout (helix_code session shares machine) — verify
-branch/lock/sync before every commit. NEXT: wave-3 owed (providers
+GREEN with all 36 *_API_KEY unset). <strong>⚠️ RECORDING ROOT-CAUSE
+(corrected via systematic-debugging — do NOT repeat the earlier
+thrash):</strong> recording is INTRINSICALLY SLOW (~5–6 min/video: real
+LLM call + asciinema→agg→ffmpeg + ffprobe + frame-analysis + agent
+reasoning). The bridge is NOT slow/hung (<code>best-model</code>=1s
+cached; 600s provider timeout is intentional for long translations).
+Long stale-output gaps are NORMAL — do NOT misread them as “hung” and
+premature-stop (that churn killed progressing agents, e.g. wave-3a was
+stopped AFTER it had committed). DISCIPLINE: dispatch small recording
+units (2–4 videos), be PATIENT (give 25–30 min before even suspecting a
+hang), check the DECISIVE signal (did it commit / are mp4s landing / is
+there an asciinema/ffmpeg/translate subprocess) before stopping. Full
+autonomous coverage of ~90 remaining eligible features ≈ many hours — a
+long steady iterative program, not a sprint. Continue the loop
+(§11.4.126), no force-push (§11.4.113), no git add -A (§11.4.30), never
+touch helix_qa(§11.4.119)/helix_agent build; SINGLE main-checkout
+committer at a time (§11.4.84 — reviews read-only, recorders
+worktree-no-commit); contested checkout (helix_code session shares
+machine) — verify branch/lock/sync before every commit. NEXT: wave-3
+owed (providers
 deepseek/cerebras/sambanova/hyperbolic/gemini/zhipu/cohere/fireworks/openrouter
 + REST endpoints + verify-models + workable-items), then continue toward
 full coverage; web/desktop = honest operator-attended
