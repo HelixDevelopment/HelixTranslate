@@ -26,6 +26,7 @@ api_keys.json
 .env
 .env.*
 !.env.example
+!.env.nezha.example
 secrets.*
 keys.*
 

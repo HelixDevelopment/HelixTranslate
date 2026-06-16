@@ -43,7 +43,7 @@
         "host": "thinker.local",
         "port": 22,
         "user": "milosvasic",
-        "password": "WhiteSnake8587",
+        "password": "${SSH_WORKER_PASSWORD}",
         "max_capacity": 10,
         "enabled": true,
         "tags": ["llamacpp", "gpu"]

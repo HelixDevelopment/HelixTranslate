@@ -44,7 +44,7 @@
         "host": "localhost",
         "port": 8444,
         "user": "milosvasic",
-        "password": "WhiteSnake8587",
+        "password": "${SSH_WORKER_PASSWORD}",
         "max_capacity": 10,
         "enabled": true,
         "tags": ["gpu", "llamacpp"]

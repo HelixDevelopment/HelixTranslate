@@ -1,0 +1,82 @@
+# Containerfile.nezha — multi-binary image for the nezha distributed-boot full stack.
+#
+# Builds the four runtime services from this repo and selects one at container
+# start time via the SERVICE environment variable (grpc | api | server | monitor).
+# This replaces the legacy ./Dockerfile, which referenced the non-existent
+# `make build-server` target and copied a never-produced `translator-server`
+# binary (Phase-1 finding, §11.4.6 — verified: Makefile has no build-server
+# target; the real targets are grpc-server, api-server, unified-translator;
+# cmd/server is the TLS REST/WS+HTTP3 server, cmd/monitor-server the :8090 hub).
+#
+# Build context = repo root. Go module requires Go 1.26 (see go.mod); the legacy
+# Dockerfile pinned 1.24 which cannot compile this module.
+#
+# Usage (per service, podman/docker):
+#   podman build -f Containerfile.nezha -t helixtranslate:nezha .
+#   podman run -e SERVICE=grpc    -p 50051:50051 helixtranslate:nezha
+#   podman run -e SERVICE=api     -p 8080:8080   helixtranslate:nezha
+#   podman run -e SERVICE=server  -p 8443:8443   -v ./certs:/app/certs:ro helixtranslate:nezha
+#   podman run -e SERVICE=monitor -p 8090:8090   helixtranslate:nezha
+# Normally driven by compose.nezha.yml (one image, per-service SERVICE env).
+
+# ---- build stage ----
+FROM docker.io/library/golang:1.26-alpine AS builder
+
+RUN apk add --no-cache git ca-certificates
+
+WORKDIR /build
+
+# Dependency layer (cached unless go.mod/go.sum change).
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Source.
+COPY . .
+
+# Build the four runtime services with real, existing cmd targets.
+# CGO disabled for a static, portable binary (alpine final stage).
+ENV CGO_ENABLED=0 GOOS=linux
+RUN go build -ldflags "-X main.appVersion=2.3.0" -o /out/grpc-server    ./cmd/grpc-server \
+ && go build -ldflags "-X main.appVersion=2.3.0" -o /out/api-server     ./cmd/api-server \
+ && go build -ldflags "-X main.appVersion=2.3.0" -o /out/server         ./cmd/server \
+ && go build -ldflags "-X main.appVersion=2.3.0" -o /out/monitor-server ./cmd/monitor-server
+
+# ---- final stage ----
+FROM docker.io/library/alpine:3.20
+
+# Runtime deps: TLS roots, timezone data, curl/wget for healthchecks.
+RUN apk add --no-cache ca-certificates tzdata curl
+
+# Non-root runtime user.
+RUN addgroup -g 1000 appuser \
+ && adduser -D -u 1000 -G appuser appuser
+
+WORKDIR /app
+
+# Service binaries.
+COPY --from=builder /out/grpc-server    /app/grpc-server
+COPY --from=builder /out/api-server     /app/api-server
+COPY --from=builder /out/server         /app/server
+COPY --from=builder /out/monitor-server /app/monitor-server
+
+# Per-service dispatch entrypoint.
+COPY scripts/nezha-entrypoint.sh /app/nezha-entrypoint.sh
+RUN chmod +x /app/nezha-entrypoint.sh
+
+# Mount points: TLS certs (read-only) for the `server` TLS service, and a
+# writable config dir for the config-file-driven `server`.
+RUN mkdir -p /app/certs /app/config /app/output \
+ && chown -R appuser:appuser /app
+
+USER appuser
+
+# Documented service ports (only the one matching SERVICE actually binds).
+#   grpc    -> 50051
+#   api     -> 8080  (HTTP REST/WS proxy to grpc backend)
+#   server  -> 8443  (TLS REST/WS + optional HTTP3)
+#   monitor -> 8090
+EXPOSE 50051 8080 8443 8090
+
+ENV SERVICE=api
+
+ENTRYPOINT ["/app/nezha-entrypoint.sh"]

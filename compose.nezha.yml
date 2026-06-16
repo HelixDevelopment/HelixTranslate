@@ -1,0 +1,201 @@
+# compose.nezha.yml — full-stack HelixTranslate deployment for the nezha host.
+#
+# podman-compose 1.5.0 / docker compose compatible. One image
+# (Containerfile.nezha) is built once and run as four services, each selecting
+# its binary via the SERVICE env var (see scripts/nezha-entrypoint.sh).
+#
+# Services + ports (LAN-bound on nezha.local):
+#   postgres        5432   persistent named volume (pg_data)
+#   redis           6379   persistent named volume (redis_data)
+#   grpc-server    50051   translation gRPC backend
+#   api-server      8080   HTTP REST/WS proxy to the gRPC backend
+#   server          8443   TLS REST/WS (+ HTTP3) — certs mounted read-only
+#   monitor-server  8090   WebSocket monitoring hub / dashboard
+#
+# Secrets: provider keys + JWT + DB/Redis creds come from ./.env.nezha
+# (gitignored; provisioned in Phase B from the operator's local env). The
+# tracked ./.env.nezha.example documents every required variable.
+#
+# Boot:  podman-compose -f compose.nezha.yml up -d
+# Config validate: podman-compose -f compose.nezha.yml config
+
+services:
+  postgres:
+    image: docker.io/library/postgres:16-alpine
+    container_name: helixtranslate-postgres
+    env_file:
+      - ./.env.nezha
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-translator}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-translator_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-translator}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-translator} -d ${POSTGRES_DB:-translator}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - translator-network
+    restart: unless-stopped
+
+  redis:
+    image: docker.io/library/redis:7-alpine
+    container_name: helixtranslate-redis
+    env_file:
+      - ./.env.nezha
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-redis_secure_password}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_secure_password}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - translator-network
+    restart: unless-stopped
+
+  grpc-server:
+    image: helixtranslate:nezha
+    build:
+      context: .
+      dockerfile: Containerfile.nezha
+    container_name: helixtranslate-grpc
+    env_file:
+      - ./.env.nezha
+    environment:
+      SERVICE: grpc
+      GRPC_ADDRESS: 0.0.0.0
+      GRPC_PORT: 50051
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DB_TYPE: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-translator}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-translator_secure_password}
+      DB_NAME: ${POSTGRES_DB:-translator}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_secure_password}
+    ports:
+      - "50051:50051"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 50051 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - translator-network
+    restart: unless-stopped
+
+  api-server:
+    image: helixtranslate:nezha
+    build:
+      context: .
+      dockerfile: Containerfile.nezha
+    container_name: helixtranslate-api
+    env_file:
+      - ./.env.nezha
+    environment:
+      SERVICE: api
+      HTTP_ADDRESS: 0.0.0.0
+      HTTP_PORT: 8080
+      GRPC_ADDRESS: grpc-server:50051
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "8080:8080"
+    depends_on:
+      grpc-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - translator-network
+    restart: unless-stopped
+
+  server:
+    image: helixtranslate:nezha
+    build:
+      context: .
+      dockerfile: Containerfile.nezha
+    container_name: helixtranslate-server
+    env_file:
+      - ./.env.nezha
+    environment:
+      SERVICE: server
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-env-nezha}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./certs:/app/certs:ro
+    depends_on:
+      grpc-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-kfsS", "https://localhost:8443/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - translator-network
+    restart: unless-stopped
+
+  monitor-server:
+    image: helixtranslate:nezha
+    build:
+      context: .
+      dockerfile: Containerfile.nezha
+    container_name: helixtranslate-monitor
+    env_file:
+      - ./.env.nezha
+    environment:
+      SERVICE: monitor
+      MONITOR_SERVER_PORT: 8090
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "8090:8090"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - translator-network
+    restart: unless-stopped
+
+networks:
+  translator-network:
+    driver: bridge
+
+volumes:
+  pg_data:
+    driver: local
+  redis_data:
+    driver: local
