@@ -165,10 +165,17 @@ $_build_hits"
   [ -n "$_root_bin" ] && _violations="$_violations
 $_root_bin"
 
-  # 3. Real .env files (allow only .env.example).
+  # 3. Real .env files (allow any *.example placeholder template).
+  #    §11.4.30 explicitly allow-lists '.env.example' placeholders. The project
+  #    ships per-deployment templates (e.g. '.env.nezha.example') that carry NO
+  #    secret (only KEY= / CHANGE_ME_* placeholders) and are the §11.4.30/.77
+  #    re-obtain mechanism for the gitignored real '.env.nezha'. The allow-list
+  #    therefore exempts ANY tracked env file whose basename ends '.example'
+  #    (.env.example, .env.<deploy>.example), while still catching every real
+  #    '.env' / '.env.<suffix>' secret-bearing file.
   _env_hits=$(git ls-files 2>/dev/null \
       | grep -E '(^|/)\.env(\.[^/]+)?$' \
-      | grep -vE '(^|/)\.env\.example$' || true)
+      | grep -vE '(^|/)\.env(\.[^/]+)?\.example$' || true)
   [ -n "$_env_hits" ] && _violations="$_violations
 $_env_hits"
 

@@ -91,8 +91,25 @@ remove_track "api_keys.json"
 expect 0 "Mut4 restored, gate must PASS"
 echo
 
+echo "Mut5 — track a real '.env.nezha' secret file (NOT *.example) — the"
+echo "       broadened *.example allow-list MUST still bite on a real"
+echo "       per-deployment .env.<suffix> secret (§11.4.30 reconciliation)"
+add_track ".env.nezha" "POSTGRES_PASSWORD=REALSECRET"
+expect 1 "Mut5 mutated, gate must FAIL"
+remove_track ".env.nezha"
+expect 0 "Mut5 restored, gate must PASS"
+echo
+
 echo "Neg — confirm allow-listed .env.example stays PASS (no false positive)"
 expect 0 "Neg .env.example tracked, gate must PASS"
+echo
+
+echo "Neg2 — confirm a per-deployment '.env.nezha.example' placeholder template"
+echo "       stays PASS (the §11.4.120 reconciliation: *.example templates are"
+echo "       the §11.4.30/.77 re-obtain mechanism, never a forbidden secret file)"
+add_track ".env.nezha.example" "POSTGRES_PASSWORD=CHANGE_ME_postgres_password"
+expect 0 "Neg2 .env.nezha.example tracked, gate must PASS"
+remove_track ".env.nezha.example"
 echo
 
 if [ "$RC" -eq 0 ]; then
