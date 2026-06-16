@@ -1,0 +1,7 @@
+EVID=docs/qa/fb2_revalidate_20260616T163552Z
+=== FB2 live re-validation on nezha server-TLS :18443 (image 2bb4de5df2c7) ===
+run_utc=2026-06-16T16:35:52Z
+endpoint=POST https://nezha.local:18443/api/v1/translate/fb2
+fixture=test/fixtures/ebooks/sample.fb2 (English source)
+fix-under-test=c2aa7c8 BUG-FB2-HARDCODED-LANG (handler honors target_lang, unknown->400)
+api-image-id=2bb4de5df2c7 (confirmed via podman inspect helixtranslate-api)
