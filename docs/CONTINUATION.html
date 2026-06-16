@@ -178,13 +178,46 @@
 <h1
 id="continuation--helixtranslate-session-resumption-file">CONTINUATION —
 HelixTranslate session-resumption file</h1>
-<p><strong>Revision:</strong> 90 <strong>Last modified:</strong>
-2026-06-17T00:05:00Z</p>
+<p><strong>Revision:</strong> 91 <strong>Last modified:</strong>
+2026-06-17T01:30:00Z</p>
 <h2
-id="arrow_forward-resume-here-2026-06-17-0005--green_circle-overnight-stability--hygiene-4-commits-pushed-62cbb28--3-real-bugs-fixed--11440-green--llmsverifier-honest-blocked-operator--nezha-non-degraded">▶️
-RESUME HERE (2026-06-17 ~00:05) — 🟢 OVERNIGHT STABILITY + HYGIENE: 4
-commits pushed (<code>62cbb28</code>) · 3 real bugs fixed + §11.4.40
-GREEN · LLMsVerifier HONEST-BLOCKED (operator) · nezha NON-degraded</h2>
+id="arrow_forward-resume-here-2026-06-17-0130--green_circle-7-commits-pushed-98e0450--5-real-fixes--11440-green--llmsverifier-seed-at-boot-working-on-nezha-count-02--verify-completion-being-implemented--helixtranslate-non-degraded-never-degrade-guard-holds-0-verified-yet">▶️
+RESUME HERE (2026-06-17 ~01:30) — 🟢 7 commits pushed
+(<code>98e0450</code>) · 5 real fixes + §11.4.40 GREEN · LLMsVerifier
+seed-at-boot WORKING on nezha (count 0→2) · verify-completion being
+implemented · helixtranslate NON-degraded (never-degrade guard holds: 0
+VERIFIED yet)</h2>
+<p><strong>SHORT (rev91):</strong> HEAD
+<strong><code>98e0450</code></strong> (all 4 remotes synced). Operator
+authorized "wire it all + do it all". Since rev90, 3 more commits via
+parallel worktree subagents (each independently reviewed GO, merged
+main-loop): <code>2a36a57</code> (redis ListSessions logs swallowed
+errors + fallback residual-limitation documented §11.4 observability) →
+<code>98e0450</code> (handlers propagate
+<code>c.Request.Context()</code>+5min bound — audit HIGH context-misuse,
+all 6 sites proven SYNC §11.4.102, mutation-proven guard). <strong>7
+session commits total</strong>
+(99bb7a8→a99327b→989f5d1→62cbb28→4223e7c→2a36a57→98e0450). §11.4.40
+retest GREEN at HEAD; -race CLEAN. <strong>LLMsVerifier
+(operator-authorized) — seed-at-boot now WORKING on nezha:</strong>
+verifier image rebuilt WITH seed code (CGO amd64, rollback img
+<code>llm-verifier:nezha-prev-20260617T003159Z</code>, src staged
+<code>/home/milosvasic/helix-system/llmsverifier-src</code>),
+<code>config.yaml</code> rendered (deepseek+groq, secrets never
+printed), <code>/api/models</code> count <strong>0→2</strong> (seed log
+<code>providers +2 models +2</code>). Evidence subagent report.
+<strong>BUT both models <code>pending</code>, NOT verified</strong> →
+never-degrade guard HOLDS (helixtranslate gate needs
+<code>verified</code> → NOT enabled, translation stays on working direct
+path). <strong>Verify-completion feature being implemented</strong>
+(verifier <code>VerifyModelHandler</code> only inserts a "running" row,
+never runs the real <code>ModelVerificationService.VerifyModel</code>
+nor persists status — subagent wiring it w/ TDD). <strong>NEXT:</strong>
+review the verify-completion impl → commit to verifier submodule + bump
+gitlink → rebuild nezha → run real verify pass → INSPECT scores → enable
+helixtranslate ONLY if a sink-side translation through a verified model
+proves correct (§11.4.69/§11.4.107 quality gate); else leave
+NON-degraded + operator.</p>
 <p><strong>SHORT (rev90):</strong> HEAD
 <strong><code>62cbb28</code></strong> (all 4 remotes synced). Since
 rev89, added a 4th commit <code>62cbb28</code> — <strong>api-server
