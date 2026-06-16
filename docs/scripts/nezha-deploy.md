@@ -1,7 +1,7 @@
 # nezha-deploy.sh
 
-**Revision:** 1
-**Last modified:** 2026-06-16T00:00:00Z
+**Revision:** 2
+**Last modified:** 2026-06-16T19:45:00Z
 
 ## Overview
 
@@ -29,6 +29,12 @@ bash scripts/nezha-deploy.sh up
 bash scripts/nezha-deploy.sh reboot api-server
 bash scripts/nezha-deploy.sh reboot server
 
+# Rebuild + reboot the WHOLE stack onto the fresh image (no service arg):
+# recreates ALL app services sharing the helixtranslate:nezha image
+# (grpc-server, api-server, server, monitor-server) so none is stranded on
+# the old image. postgres/redis (external images) are left running.
+bash scripts/nezha-deploy.sh reboot
+
 # Validate that interpolation resolves to the real ports (not defaults):
 bash scripts/nezha-deploy.sh config | grep -E '18080|18443|50061|18090'
 
@@ -42,6 +48,15 @@ bash scripts/nezha-deploy.sh down
 - Missing `compose.nezha.yml` or `.env.nezha` → script exits non-zero with an
   actionable message (never deploys with defaults silently).
 - Unknown action → usage message + exit 2.
+- **`reboot` with NO service arg (dependency-ordering fix, Rev 2):** because all
+  four app services share the `helixtranslate:nezha` image tag and
+  podman-compose 1.5.0 will not recreate a same-tag running container, a no-arg
+  `reboot` now explicitly `stop`+`podman rm`s the full app set
+  (`grpc-server api-server server monitor-server`) before `up -d`, so the fresh
+  image reaches every dependent. Previously the stop+rm loop was gated on a
+  named-service arg, so a no-arg reboot rebuilt the image but stranded the
+  already-running app containers (esp. `helixtranslate-monitor`) on the old
+  binary — the §11.4.108 SOURCE→ARTIFACT→RUNTIME gap.
 
 ## Internal behaviour
 

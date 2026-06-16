@@ -83,23 +83,41 @@ case "${action}" in
 		# sequence is: build → compose stop → native `podman rm` of the named
 		# containers → compose up (which then creates fresh containers from the
 		# new image). Native podman rm is used because compose `rm` does not exist.
+		#
+		# Dependency-ordering fix (operator-review c, 2026-06-16): a no-arg `reboot`
+		# previously ran `build` (all) + `up -d` (all) but SKIPPED the stop+rm loop
+		# (it was gated on `$# -gt 0`). Because every app service shares the same
+		# `helixtranslate:nezha` image tag, podman-compose's `up` left the already-
+		# running app containers on the OLD image — so a no-arg reboot rebuilt the
+		# image but never reached api/grpc/server/monitor (the §11.4.108
+		# SOURCE→ARTIFACT→RUNTIME gap, observed: monitor stranded on a stale image
+		# while api/grpc/server were freshly recreated by an earlier targeted
+		# reboot). Fix: when no service is named, default the recreate set to ALL
+		# app services that build from the shared image, so the fresh image reaches
+		# every dependent. postgres/redis (external images, no rebuild) are left
+		# untouched.
 		"${COMPOSE[@]}" build "$@"
-		if [ "$#" -gt 0 ]; then
-			"${COMPOSE[@]}" stop "$@" || true
-			for svc in "$@"; do
-				# Map compose service name -> container_name (compose.nezha.yml).
-				case "${svc}" in
-					grpc-server) cname=helixtranslate-grpc ;;
-					api-server) cname=helixtranslate-api ;;
-					server) cname=helixtranslate-server ;;
-					monitor-server) cname=helixtranslate-monitor ;;
-					postgres) cname=helixtranslate-postgres ;;
-					redis) cname=helixtranslate-redis ;;
-					*) cname="${svc}" ;;
-				esac
-				podman rm -f "${cname}" 2>/dev/null || true
-			done
+		recreate_svcs=("$@")
+		if [ "$#" -eq 0 ]; then
+			# App services sharing the rebuilt helixtranslate:nezha image.
+			recreate_svcs=(grpc-server api-server server monitor-server)
 		fi
+		"${COMPOSE[@]}" stop "${recreate_svcs[@]}" || true
+		for svc in "${recreate_svcs[@]}"; do
+			# Map compose service name -> container_name (compose.nezha.yml).
+			case "${svc}" in
+				grpc-server) cname=helixtranslate-grpc ;;
+				api-server) cname=helixtranslate-api ;;
+				server) cname=helixtranslate-server ;;
+				monitor-server) cname=helixtranslate-monitor ;;
+				postgres) cname=helixtranslate-postgres ;;
+				redis) cname=helixtranslate-redis ;;
+				*) cname="${svc}" ;;
+			esac
+			podman rm -f "${cname}" 2>/dev/null || true
+		done
+		# up with the original args ("$@") so a no-arg reboot still starts the full
+		# stack (incl. postgres/redis dependencies) from compose.
 		"${COMPOSE[@]}" up -d "$@"
 		;;
 	config)
