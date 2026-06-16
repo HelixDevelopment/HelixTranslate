@@ -37,9 +37,16 @@ type VerifierHandler struct {
 	scoring  *scoring.Engine
 	adapter  *services.LLMsVerifierScoreAdapter
 	selector *selection.Engine
+	// enabled reports whether the LLMsVerifier integration is turned on for this
+	// deployment. The routes are ALWAYS registered (so the documented endpoints
+	// exist and never 404 — a 404 falsely tells clients "this API does not
+	// exist"); when disabled they answer with an honest 503 + a machine-readable
+	// "llmsverifier_disabled" reason instead of being silently absent.
+	enabled bool
 }
 
-// NewVerifierHandler creates a verifier API handler.
+// NewVerifierHandler creates a verifier API handler. The returned handler is
+// enabled by default; use SetEnabled to reflect deployment config.
 func NewVerifierHandler(cfg *verifier.Config) *VerifierHandler {
 	client := verifier.NewClient(cfg)
 	registry := verifier.NewRegistry()
@@ -60,17 +67,42 @@ func NewVerifierHandler(cfg *verifier.Config) *VerifierHandler {
 		scoring:  scoreEngine,
 		adapter:  adapter,
 		selector: selector,
+		enabled:  true,
 	}
 }
 
-// RegisterVerifierRoutes adds LLMsVerifier routes to the router.
+// SetEnabled toggles whether the LLMsVerifier integration is active. When
+// disabled, the registered routes answer with an honest 503 instead of serving
+// upstream data (the routes still exist — they never 404).
+func (h *VerifierHandler) SetEnabled(enabled bool) { h.enabled = enabled }
+
+// requireEnabled is a gin middleware that short-circuits every verifier route
+// with an honest 503 "llmsverifier_disabled" when the integration is off. This
+// keeps the documented endpoints present (no 404) while truthfully reporting
+// that the feature is not active on this deployment.
+func (h *VerifierHandler) requireEnabled(c *gin.Context) {
+	if !h.enabled {
+		c.AbortWithStatusJSON(http.StatusServiceUnavailable, gin.H{
+			"error":  "LLMsVerifier integration is disabled on this deployment",
+			"reason": "llmsverifier_disabled",
+			"hint":   "set llmsverifier.enabled=true (config.json) or LLMSVERIFIER_ENABLED=true to activate",
+		})
+		return
+	}
+	c.Next()
+}
+
+// RegisterVerifierRoutes adds LLMsVerifier routes to the router. The routes are
+// ALWAYS registered (regardless of enabled state) so the documented endpoints
+// exist; the requireEnabled guard returns an honest 503 when disabled.
 func (h *VerifierHandler) RegisterVerifierRoutes(router *gin.RouterGroup) {
-	router.GET("/verified-models", h.listVerifiedModels)
-	router.GET("/verified-models/:id", h.getVerifiedModel)
-	router.GET("/verification-status", h.getVerificationStatus)
-	router.POST("/verification/refresh", h.refreshVerification)
-	router.GET("/providers/verified", h.listVerifiedProviders)
-	router.POST("/translate-with-verification", h.translateWithVerification)
+	v := router.Group("", h.requireEnabled)
+	v.GET("/verified-models", h.listVerifiedModels)
+	v.GET("/verified-models/:id", h.getVerifiedModel)
+	v.GET("/verification-status", h.getVerificationStatus)
+	v.POST("/verification/refresh", h.refreshVerification)
+	v.GET("/providers/verified", h.listVerifiedProviders)
+	v.POST("/translate-with-verification", h.translateWithVerification)
 }
 
 // listVerifiedModels returns all LLMsVerifier-verified models.
@@ -323,5 +355,7 @@ func InitVerifierFromConfig(cfg *config.Config) *VerifierHandler {
 			Recency:           cfg.LLMsVerifier.ScoringWeights.Recency,
 		},
 	}
-	return NewVerifierHandler(vCfg)
+	h := NewVerifierHandler(vCfg)
+	h.SetEnabled(cfg.LLMsVerifier.Enabled)
+	return h
 }

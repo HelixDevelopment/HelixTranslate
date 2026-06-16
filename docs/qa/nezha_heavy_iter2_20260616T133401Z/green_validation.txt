@@ -1,0 +1,12 @@
+=== iter2 GREEN sink-side validation on live nezha (image f3904ccd71c2) — 2026-06-16T13:42:42Z ===
+
+--- FINDING #1: verifier routes now EXIST (honest 503 disabled, not 404) ---
+GET /api/v1/verified-models -> HTTP 503 | reason=llmsverifier_disabled
+GET /api/v1/verification-status -> HTTP 503 | reason=llmsverifier_disabled
+GET /api/v1/providers/verified -> HTTP 503 | reason=llmsverifier_disabled
+POST /api/v1/translate-with-verification -> HTTP 503 | reason=llmsverifier_disabled
+GET /api/v1/verified-models/somemodel -> HTTP 503
+
+--- FINDING #2: api-server /health (active probe; 200 READY) ---
+{"success":true,"message":"Success","data":{"grpc_connected":"READY","status":"healthy","timestamp":1781617363,"version":"3.0.0"},"timestamp":1781617363}
+HTTP 200

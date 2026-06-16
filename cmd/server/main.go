@@ -136,11 +136,18 @@ func main() {
 	apiHandler := api.NewHandler(cfg, eventBus, translationCache, authService, wsHub, distributedManager)
 	apiHandler.RegisterRoutes(router)
 
-	// Register LLMsVerifier routes if enabled
+	// Always register the LLMsVerifier routes so the documented endpoints
+	// (/api/v1/verified-models, /verification-status, /translate-with-verification)
+	// exist regardless of deployment config. When the integration is disabled the
+	// routes return an honest 503 "llmsverifier_disabled" instead of a misleading
+	// 404 (which would falsely tell clients the API does not exist). When enabled
+	// they serve real upstream data. The enabled state is carried by the handler.
+	verifierHandler := api.InitVerifierFromConfig(cfg)
+	verifierHandler.RegisterVerifierRoutes(router.Group("/api/v1"))
 	if cfg.LLMsVerifier.Enabled {
-		verifierHandler := api.InitVerifierFromConfig(cfg)
-		verifierHandler.RegisterVerifierRoutes(router.Group("/api/v1"))
 		log.Println("LLMsVerifier integration enabled")
+	} else {
+		log.Println("LLMsVerifier integration disabled — routes registered, will return 503 until enabled")
 	}
 
 	// Preflight: the server is TLS-only. Verify the (default-backfilled) cert/key

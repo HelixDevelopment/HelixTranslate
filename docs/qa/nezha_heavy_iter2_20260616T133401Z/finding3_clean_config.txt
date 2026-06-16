@@ -1,0 +1,12 @@
+=== Finding #3 GREEN: clean-shell config resolves real ports (no workaround) ===
+    - 18080:8080
+    - 50061:50051
+    - 18090:8090
+    - 18443:8443
+
+(JWT_SECRET also resolves to real value; no change-me-in-env fallback present)
+--- live container images (all on rebuilt f3904ccd71c2) ---
+helixtranslate-api: f3904ccd71c2
+helixtranslate-server: f3904ccd71c2
+helixtranslate-grpc: f3904ccd71c2
+helixtranslate-monitor: 2c1cbbad4af3

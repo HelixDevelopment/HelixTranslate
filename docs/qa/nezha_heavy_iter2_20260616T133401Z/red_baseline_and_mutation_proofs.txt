@@ -1,0 +1,28 @@
+=== RED baselines + mutation proofs (iter2) ===
+
+--- Finding #1 RED (pre-fix, live nezha server before rebuild) ---
+GET /api/v1/verified-models           -> 404
+GET /api/v1/verification-status       -> 404
+POST /api/v1/translate-with-verification -> 404
+(routes registered only if cfg.LLMsVerifier.Enabled; default deploy Enabled=false)
+
+--- Finding #1 guard mutation (remove requireEnabled guard) ---
+TestVerifier_DisabledRoutes_Return503NotFound FAILS:
+  expected reason "llmsverifier_disabled", got <nil> (disabled handler served instead of 503)
+=> guard catches the negation.
+
+--- Finding #2 RED guard mutation (revert active probe to one-shot conn.GetState()) ---
+TestHealthCheck_LazyIdleButReachableBackend_ReportsHealthy FAILS:
+  "reachable backend but health returned HTTP 503
+   (grpc_connected:IDLE status:unhealthy)"
+=> guard reproduces the nezha IDLE false-negative; passes only with the active probe.
+
+--- Finding #2 live runtime signature (post-fix, fresh-restarted api container) ---
+FIRST hit to /api/v1/health after `podman restart helixtranslate-api`:
+  HTTP 200 | grpc_connected=READY status=healthy
+(pre-fix this returned 503 IDLE — the active probe drives the lazy conn to READY)
+
+--- Finding #3 guard mutation (RED_MODE=1) ---
+nezha_deploy_envfile_guard_test.sh RED_MODE=1:
+  "guard correctly flags a podman-compose invocation lacking --env-file .env.nezha"
+=> guard catches a no-env-file invocation.

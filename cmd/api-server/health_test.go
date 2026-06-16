@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -76,6 +77,65 @@ func TestHealthCheck_BackendNotReady_ReportsUnhealthy(t *testing.T) {
 	}
 	if resp["success"] != false {
 		t.Fatalf("expected success=false when backend not Ready, got %v", resp["success"])
+	}
+}
+
+// reachableTranslationBackend embeds the generated Unimplemented base so it is a
+// real, dial-able gRPC server (the conn can actually reach READY) without needing
+// the full translation implementation.
+type reachableTranslationBackend struct {
+	proto.UnimplementedTranslationServiceServer
+}
+
+// startReachableBackend boots a real in-process gRPC server on a loopback port
+// and returns a (lazy, IDLE) api-server client pointed at it. This reproduces the
+// nezha condition: the backend is genuinely reachable, but grpc.NewClient leaves
+// the conn IDLE until the first RPC.
+func startReachableBackend(t *testing.T) (*APIServer, func()) {
+	t.Helper()
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	gs := grpc.NewServer()
+	proto.RegisterTranslationServiceServer(gs, &reachableTranslationBackend{})
+	go func() { _ = gs.Serve(lis) }()
+
+	s, cleanupClient := newTestAPIServerWithBackend(t, lis.Addr().String())
+	return s, func() {
+		cleanupClient()
+		gs.Stop()
+		_ = lis.Close()
+	}
+}
+
+// RED (pre-fix): the gRPC conn is created lazily and sits in IDLE until the first
+// RPC. The pre-fix healthCheck read conn.GetState() once, saw IDLE, and returned
+// 503 "gRPC backend not ready" even though the backend was fully reachable
+// (observed on nezha: /health 503 IDLE while /providers 200 against the same
+// backend). The fix actively probes (Connect + bounded WaitForStateChange) so a
+// reachable backend resolves IDLE→READY → 200 healthy. This test FAILS on the
+// pre-fix one-shot GetState() code and PASSES on the active-probe fix.
+func TestHealthCheck_LazyIdleButReachableBackend_ReportsHealthy(t *testing.T) {
+	s, cleanup := startReachableBackend(t)
+	defer cleanup()
+
+	// Precondition: the conn starts lazy/non-Ready (the exact nezha condition).
+	if st := s.conn.GetState(); st == connectivity.Ready {
+		t.Skipf("conn unexpectedly already Ready (%v); lazy-IDLE precondition not met", st)
+	}
+
+	code, resp := doHealth(t, s)
+
+	if code != http.StatusOK {
+		t.Fatalf("HEALTH BUG: reachable backend but health returned HTTP %d (body=%v)", code, resp)
+	}
+	data, _ := resp["data"].(map[string]any)
+	if got, _ := data["status"].(string); got != "healthy" {
+		t.Fatalf("HEALTH BUG: reachable backend but status=%q (grpc_connected=%v)", got, data["grpc_connected"])
+	}
+	if gs, _ := data["grpc_connected"].(string); gs != connectivity.Ready.String() {
+		t.Fatalf("expected grpc_connected=READY after probe, got %q", gs)
 	}
 }
 

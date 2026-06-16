@@ -1,0 +1,2 @@
+attempt 1: HTTP 200 | READY healthy
+FIRST-HIT-AFTER-RESTART: {"success":true,"message":"Success","data":{"grpc_connected":"READY","status":"healthy","timestamp":1781617378,"version":"3.0.0"},"timestamp":1781617378}

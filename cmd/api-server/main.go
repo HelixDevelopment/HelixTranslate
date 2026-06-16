@@ -27,6 +27,12 @@ import (
 	gorillaws "github.com/gorilla/websocket"
 )
 
+// healthProbeTimeout bounds how long /health actively drives a lazy/idle gRPC
+// connection toward READY before giving up and reporting the last-observed
+// (unhealthy) state. Short enough that /health stays responsive for k8s/ALB
+// probes, long enough to absorb a fresh lazy dial to a reachable backend.
+const healthProbeTimeout = 2 * time.Second
+
 // APIServer represents the REST API server
 type APIServer struct {
 	// gRPC client
@@ -555,7 +561,19 @@ func (s *APIServer) healthCheck(c *gin.Context) {
 	// connection is not Ready makes orchestrators (k8s readiness/liveness, ALB
 	// target health) route real traffic to an instance that fails every request
 	// with 500. Derive health from the actual connection state instead.
-	state := s.conn.GetState()
+	//
+	// gRPC ClientConns are LAZY: grpc.NewClient returns a conn in state IDLE
+	// and only dials on the first RPC. So a freshly-booted api-server whose
+	// backend is fully reachable still reports IDLE here until some other
+	// endpoint (e.g. /providers) triggers an RPC — a false-negative 503 that
+	// fails liveness checks on a healthy stack (observed on nezha: /health 503
+	// IDLE while /providers 200 against the same backend). Fix: actively probe
+	// a non-Ready conn — kick the lazy dial with Connect() and wait briefly for
+	// it to settle. IDLE-against-reachable resolves to READY (healthy);
+	// IDLE-against-unreachable resolves to CONNECTING/TRANSIENT_FAILURE and
+	// stays unhealthy. This never blindly trusts IDLE (which would be a
+	// false-positive when the backend is genuinely down).
+	state := s.probeBackendState(c.Request.Context())
 	healthy := state == connectivity.Ready
 
 	payload := map[string]interface{}{
@@ -579,6 +597,38 @@ func (s *APIServer) healthCheck(c *gin.Context) {
 		Data:      payload,
 		Timestamp: time.Now().Unix(),
 	})
+}
+
+// probeBackendState returns the gRPC backend's connectivity state, actively
+// driving a lazy IDLE connection toward READY so a reachable-but-not-yet-dialed
+// backend is not misreported as down. It bounds its wait so /health stays fast
+// and never blocks indefinitely. When the conn is already Ready it returns
+// immediately; when it is genuinely unreachable it returns the failed state
+// (CONNECTING/TRANSIENT_FAILURE), which the caller treats as unhealthy.
+func (s *APIServer) probeBackendState(ctx context.Context) connectivity.State {
+	state := s.conn.GetState()
+	if state == connectivity.Ready {
+		return state
+	}
+
+	// Kick the lazy dial. Connect() is a no-op if already connecting/ready.
+	s.conn.Connect()
+
+	probeCtx, cancel := context.WithTimeout(ctx, healthProbeTimeout)
+	defer cancel()
+
+	for {
+		state = s.conn.GetState()
+		if state == connectivity.Ready {
+			return state
+		}
+		// WaitForStateChange returns false when probeCtx expires; we then
+		// report whatever state we last observed (e.g. TRANSIENT_FAILURE for a
+		// down backend, or CONNECTING for a slow one) — both correctly unhealthy.
+		if !s.conn.WaitForStateChange(probeCtx, state) {
+			return s.conn.GetState()
+		}
+	}
 }
 
 func (s *APIServer) getMetrics(c *gin.Context) {
