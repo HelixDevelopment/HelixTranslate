@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status-summary">HelixTranslate — Feature
 Status Summary</h1>
-<p><strong>Revision:</strong> 14 <strong>Last modified:</strong>
-2026-06-16T14:30:00Z <strong>Authority:</strong> Two-audience companion
+<p><strong>Revision:</strong> 15 <strong>Last modified:</strong>
+2026-06-16T18:30:00Z <strong>Authority:</strong> Two-audience companion
 to <code>docs/features/Status.md</code> (§11.4.56). Derived from the
 same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync),
 §11.4.6 (no-guessing).</p>
@@ -204,20 +204,30 @@ translators, the web dashboards, the REST and gRPC servers, ~32 built-in
 AI providers, ebook format readers (FB2, EPUB, DOCX, HTML, TXT, PDF) and
 writers (EPUB, FB2, TXT, HTML, Markdown, <strong>DOCX and now
 PDF</strong>), caching, security, and all 8 add-on modules.</li>
-<li><strong>43 features are proven on real recordings</strong> — each
+<li><strong>54 features are proven on real recordings</strong> — each
 checked frame-by-frame to confirm it genuinely shows the feature working
 (real translated text in the right language, a live connection count
 changing, a real CLI database/pipeline output, etc.), not just “a
-screen”. <strong>New this round (Wave 3f):</strong> the translator
-producing a fully-translated <strong>EPUB→EPUB</strong> book (real
-Spanish inside the produced .epub) and a plain <strong>TXT→TXT</strong>
-translation (real Spanish text out), plus fresh re-confirmations of
-FB2→FB2, format auto-detection, Serbian Cyrillic↔︎Latin scripting, and
-the EPUB↔︎Markdown round-trip. These include: the primary command-line
-translator doing real DeepSeek translations and converting between ebook
-formats (EPUB→TXT, <strong>EPUB→EPUB</strong>, HTML→EPUB, FB2→EPUB,
-FB2→FB2, <strong>TXT→TXT</strong>, <strong>and HTML→Markdown</strong>),
-Serbian Cyrillic/Latin handling, the <strong>multi-pass polishing engine
+screen”. <strong>New this round (Waves 4–6, +12 net-new):</strong> the
+translator producing 7 distinct target languages from the same English
+source (French, German, Italian, Portuguese, Japanese, Chinese, Russian
+— proving real per-language translation, not echo), accepting PDF and
+Word (DOCX) files as input, an HTML→HTML round-trip, and the REST API
+converting Serbian script and translating an FB2 book into a real EPUB.
+<strong>Honestly demoted this round:</strong> the multi-pass polishing
+engine (<code>-multipass</code>) — its older recording is superseded
+because the default model is rejected and the polish step silently does
+nothing; a fix + fresh recording is owed before it is re-counted.
+<strong>Earlier round (Wave 3f):</strong> the translator producing a
+fully-translated <strong>EPUB→EPUB</strong> book (real Spanish inside
+the produced .epub) and a plain <strong>TXT→TXT</strong> translation
+(real Spanish text out), plus fresh re-confirmations of FB2→FB2, format
+auto-detection, Serbian Cyrillic↔︎Latin scripting, and the EPUB↔︎Markdown
+round-trip. These include: the primary command-line translator doing
+real DeepSeek translations and converting between ebook formats
+(EPUB→TXT, <strong>EPUB→EPUB</strong>, HTML→EPUB, FB2→EPUB, FB2→FB2,
+<strong>TXT→TXT</strong>, <strong>and HTML→Markdown</strong>), Serbian
+Cyrillic/Latin handling, the <strong>multi-pass polishing engine
 (<code>-multipass</code>)</strong>, the REST API server translating for
 real, the gRPC server translating English→Spanish, the markdown
 round-trip tool, the preparation/analysis runner (fixed), the simple CLI
@@ -313,11 +323,24 @@ stats endpoint that always shows zeros). These are flagged in the
 detailed document.</li>
 </ul>
 <h2 id="video-confirmation-coverage">Video-confirmation coverage</h2>
-<p><strong>43 / 496 ≈ 8.7%</strong> (Wave 3f added 2 net-new video
-confirmations prioritising feature-type diversity: EPUB→EPUB conversion
-[real Spanish EPUB produced] + TXT→TXT translation [real Spanish .txt
-produced], each ffprobe+frame-verified per §11.4.107; Wave 3f also
-re-confirmed FB2→FB2 / format-detection / <code>-script</code>
+<p><strong>54 / 496 ≈ 10.9%</strong> (Waves 4–6 added <strong>12
+net-new</strong> and §11.4.138-demoted 1 [multipass]: Wave 4 +3
+multi-language-pair EN→FR/DE/IT [same EN source → 3 distinct
+language-correct outputs]; Wave 5 +4 EN→PT, EN→JA, REST
+<code>POST /api/v1/convert/script</code> [real Cyrillic↔︎Latin JSON both
+directions], REST <code>POST /api/v1/translate/fb2</code> [FB2→real
+Serbian EPUB; handler hardcodes ru→sr, tracked fix] — the
+<code>-multipass</code> clip was NOT counted; Wave 6 +5 HTML→HTML
+round-trip, PDF input, DOCX input, EN→ZH, EN→RU; all
+ffprobe+frame-verified §11.4.107, input-frame ≠ output-frame. §11.4.138
+demotion: the <code>-multipass</code> polisher row PASS is superseded →
+PENDING_FORENSICS [default-model whitelist reject + silent no-op;
+meta-response corruption — see docs/qa/wave3e-multipass-regression +
+wave5 evidence]. Net 43 − 1 + 12 = 54. Earlier — Wave 3f added 2 net-new
+video confirmations prioritising feature-type diversity: EPUB→EPUB
+conversion [real Spanish EPUB produced] + TXT→TXT translation [real
+Spanish .txt produced], each ffprobe+frame-verified per §11.4.107; Wave
+3f also re-confirmed FB2→FB2 / format-detection / <code>-script</code>
 Cyrillic↔︎Latin / markdown EPUB↔︎MD round-trip with fresh frame-verified
 clips, not double-counted; Wave 3d added 4 net-new video confirmations
 prioritising feature-type diversity: the <code>verify-models</code> CLI
@@ -419,9 +442,13 @@ host-blocked)</td>
 </tr>
 <tr>
 <td>Video-confirmed</td>
-<td>43 (Wave 3f added 2 net-new prioritising feature-type diversity:
-EPUB→EPUB conversion + TXT→TXT translation, each ffprobe+frame-verified
-§11.4.107; Wave 3f also re-confirmed FB2→FB2 / format-detection /
+<td>54 (Waves 4–6 added 12 net-new, §11.4.138-demoted 1 [multipass]:
+Wave 4 +3 EN→FR/DE/IT; Wave 5 +4 EN→PT/JA + REST convert/script + REST
+translate/fb2 [multipass clip NOT counted]; Wave 6 +5 HTML→HTML + PDF
+input + DOCX input + EN→ZH + EN→RU; net 43 − 1 + 12 = 54. Earlier — Wave
+3f added 2 net-new prioritising feature-type diversity: EPUB→EPUB
+conversion + TXT→TXT translation, each ffprobe+frame-verified §11.4.107;
+Wave 3f also re-confirmed FB2→FB2 / format-detection /
 <code>-script</code> Cyrillic↔︎Latin / markdown EPUB↔︎MD round-trip, not
 double-counted; Wave 3d added 4 net-new prioritising feature-type
 diversity: <code>verify-models</code> CLI [real LLMsVerifier pipeline +

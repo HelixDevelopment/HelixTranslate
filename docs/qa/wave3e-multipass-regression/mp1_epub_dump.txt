@@ -1,0 +1,44 @@
+application/epub+zip<?xml version="1.0" encoding="UTF-8"?>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+  <rootfiles>
+    <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
+  </rootfiles>
+</container><?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="2.0" unique-identifier="BookID">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+    <dc:title></dc:title>
+    <dc:language></dc:language>
+    <dc:identifier id="BookID">urn:uuid:generated</dc:identifier>
+  </metadata>
+  <manifest>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+    <item id="chapter1" href="chapter1.xhtml" media-type="application/xhtml+xml"/>
+  </manifest>
+  <spine toc="ncx">
+    <itemref idref="chapter1"/>
+  </spine>
+</package><?xml version="1.0" encoding="UTF-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+  <head>
+    <meta name="dtb:uid" content="urn:uuid:generated"/>
+    <meta name="dtb:depth" content="1"/>
+  </head>
+  <docTitle>
+    <text></text>
+  </docTitle>
+  <navMap>
+    <navPoint id="chapter1" playOrder="1">
+      <navLabel><text>Content</text></navLabel>
+      <content src="chapter1.xhtml"/>
+    </navPoint>
+  </navMap>
+</ncx><?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title></title>
+</head>
+<body>
+<p>[Ту версион мехорада ен диалекто Екавица, о UNCHANGED си ла традуксион ес перфекта]</p>
+</body>
+</html>

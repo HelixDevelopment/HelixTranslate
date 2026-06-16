@@ -177,8 +177,8 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 14 <strong>Last modified:</strong>
-2026-06-16T14:30:00Z <strong>Authority:</strong> Derived from
+<p><strong>Revision:</strong> 15 <strong>Last modified:</strong>
+2026-06-16T18:30:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
 §11.4.56 (two-audience summary → <code>Status_Summary.md</code>),
@@ -195,7 +195,57 @@ genuinely demonstrates the feature working (each cited <code>.mp4</code>
 was ffprobe-verified for non-zero duration+frames and content-verified
 against its claimed behaviour — e.g. real DeepSeek output in the target
 language, real gRPC translated text, live WebSocket count change).
-<strong>43 feature rows are video-confirmed</strong> (Wave 3f of
+<strong>54 feature rows are video-confirmed</strong> (Wave 6 of
+2026-06-16 added <strong>5 net-new</strong> via the default in-process
+direct DeepSeek CLI path, each ffprobe+frame-verified per §11.4.107
+(790×560 yuv420p, advancing frames, English input-frame ≠ translated
+output-frame): <strong>HTML→HTML round-trip EN→ES</strong>
+(<code>helix_translate-html_html_roundtrip-wave6-20260616-175612.mp4</code>,
+real Spanish HTML), <strong>PDF input accepted EN→ES</strong>
+(<code>helix_translate-pdf_input-wave6-20260616-175612.mp4</code>, from
+a real PDF 1.7), <strong>DOCX input accepted EN→ES</strong>
+(<code>helix_translate-docx_input-wave6-20260616-175612.mp4</code>, from
+a real Word 2007+ file), <strong>EN→ZH (Chinese)</strong>
+(<code>helix_translate-en_zh_translate-wave6-20260616-175612.mp4</code>)
+and <strong>EN→RU (Russian)</strong>
+(<code>helix_translate-en_ru_translate-wave6-20260616-175612.mp4</code>);
+Wave 6 also recorded an honest MINOR finding (HTML/EPUB chapter-title
+duplication on output, PENDING_FORENSICS, cosmetic — core translation
+correct). Wave 5 of 2026-06-16 added <strong>4 net-new</strong> (the
+<code>-multipass</code> row was NOT counted — see §11.4.138 demotion
+below): <strong>EN→PT (Portuguese)</strong>
+(<code>helix_translate-en-pt-translate-wave5-20260616-173814.mp4</code>),
+<strong>EN→JA (Japanese, non-Latin)</strong>
+(<code>helix_translate-en-ja-translate-wave5-20260616-173814.mp4</code>),
+<strong>REST <code>POST /api/v1/convert/script</code></strong>
+(<code>helix_translate-rest-convert-script-wave5-20260616-173814.mp4</code>,
+real Cyrillic↔︎Latin JSON both directions) and <strong>REST
+<code>POST /api/v1/translate/fb2</code></strong>
+(<code>helix_translate-rest-translate-fb2-wave5-20260616-173814.mp4</code>,
+FB2→real Serbian EPUB; note: handler hardcodes ru→sr — tracked fix).
+Wave 4 of 2026-06-16 added <strong>3 net-new</strong>
+multi-language-pair translations from the same EN source proving genuine
+per-language LLM calls (distinct outputs): <strong>EN→FR</strong>
+(<code>helix_translate-multilang-en-fr-wave4-20260616-173316.mp4</code>,
+“Le soleil matinal se leva…”), <strong>EN→DE</strong>
+(<code>helix_translate-multilang-en-de-wave4-20260616-173319.mp4</code>,
+“Der morgendliche Sonnenaufgang…”), <strong>EN→IT</strong>
+(<code>helix_translate-multilang-en-it-wave4-20260616-173419.mp4</code>,
+“Il sole mattutino sorse…”); Wave 4 also re-confirmed (NOT
+double-counted) RU→SR-Cyrillic
+(<code>helix_translate-multilang-ru-sr-cyr-wave4-20260616-173445.mp4</code>).
+<strong>§11.4.138 DEMOTION (−1):</strong> the
+<code>pkg/verification</code> <strong>Multi-pass polisher</strong>
+(<code>-multipass</code>) row, previously PASS via
+<code>helixtranslate-cli-multipass-verify-20260615.mp4</code>, is
+DEMOTED to PENDING_FORENSICS — the wave-3e regression
+(<code>docs/qa/wave3e-multipass-regression/FINDING.md</code>) and wave-5
+evidence prove the default-model path (<code>gpt-4</code>) fails the
+<code>ValidModels</code> whitelist and silently no-ops, and even with an
+explicit model the polish path can write an LLM meta-response instead of
+polished prose; a tracked source fix + re-record is owed before any
+re-confirmation. Net video-confirmed: 43 (Rev 14) − 1 (multipass demote)
++ 3 (Wave 4) + 4 (Wave 5) + 5 (Wave 6) = <strong>54</strong>. Wave 3f of
 2026-06-16 added <strong>2 net-new</strong> — <strong>EPUB→EPUB
 conversion</strong>
 (<code>helix_translate-epub-output-wave3e-20260616.mp4</code>: EN .epub
@@ -2196,6 +2246,51 @@ cantaban bajo la luz de la mañana.”, frame-verified §11.4.107)</td>
 </tr>
 <tr>
 <td>unified-translator</td>
+<td>HTML→HTML round-trip</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>HTML parse → DeepSeek translate → HTML writer (round-trip, real
+translated text in produced .html)</td>
+<td>Not-inventoried</td>
+<td><strong>PASS — captured</strong> (Wave 6 net-new: EN .html → real
+deepseek run → valid Spanish <code>&lt;html&gt;</code> “la farola guiaba
+a los barcos a través de la noche neblinosa…”, frame-verified §11.4.107
+— input-frame English ≠ output-frame Spanish). NOTE Wave-6 MINOR
+finding: chapter-title duplication on single-section chapters (cosmetic,
+PENDING_FORENSICS — core translation correct).</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-html_html_roundtrip-wave6-20260616-175612.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td>PDF input accepted</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>PDF parse → DeepSeek translate (real PDF 1.7 input)</td>
+<td>Not-inventoried</td>
+<td><strong>PASS — captured</strong> (Wave 6 net-new: from “PDF
+document, version 1.7” → real Spanish “El bosque se hizo silencioso a la
+caída del sol. Los pinos altos susurraban…”, frame-verified
+§11.4.107)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-pdf_input-wave6-20260616-175612.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
+<td>DOCX input accepted</td>
+<td>CLI</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td>DOCX parse → DeepSeek translate (real Word 2007+ input)</td>
+<td>Not-inventoried</td>
+<td><strong>PASS — captured</strong> (Wave 6 net-new: from “Microsoft
+Word 2007+” → real Spanish “Los barcos de pesca regresaron al puerto al
+atardecer. Gaviotas volaban sobre las redes…”, frame-verified
+§11.4.107)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-docx_input-wave6-20260616-175612.mp4</td>
+</tr>
+<tr>
+<td>unified-translator</td>
 <td>Format detection</td>
 <td>CLI</td>
 <td>Implemented</td>
@@ -2244,25 +2339,26 @@ cantaban bajo la luz de la mañana.”, frame-verified §11.4.107)</td>
 </tr>
 <tr>
 <td>unified-translator</td>
-<td><code>-source-lang</code></td>
+<td><code>-source-lang</code> / <code>-target-lang</code>
+(multi-language-pair capability)</td>
 <td>CLI</td>
 <td>Implemented</td>
 <td>Wired</td>
-<td>Source language</td>
+<td>Source/target language selection driving real per-language LLM
+translation</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td>unified-translator</td>
-<td><code>-target-lang</code></td>
-<td>CLI</td>
-<td>Implemented</td>
-<td>Wired</td>
-<td>Target language</td>
-<td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>N/A</td>
+<td><strong>PASS — video-confirmed</strong> (Waves 4–6 drove the SAME EN
+source into 7 distinct target languages producing 7 genuinely different,
+language-correct outputs — proving real per-language LLM calls, not
+echo/cache: FR “Le soleil matinal se leva…”, DE “Der morgendliche
+Sonnenaufgang…”, IT “Il sole mattutino sorse…”, PT “O antigo farol
+erguia-se…”, JA “古い灯台は…”, ZH “一列列车在黎明时分…”, RU “Библиотека
+стояла тихо под дождем…”, each ffprobe+frame-verified §11.4.107)</td>
+<td>Confirmed: Wave-4
+/Volumes/T7/Downloads/Recordings/helix_translate-multilang-en-{fr,de,it}-wave4-20260616-17331{6,9}.mp4
+; Wave-5 helix_translate-en-{pt,ja}-translate-wave5-20260616-173814.mp4
+; Wave-6
+helix_translate-en_{zh,ru}_translate-wave6-20260616-175612.mp4</td>
 </tr>
 <tr>
 <td>unified-translator</td>
@@ -3858,10 +3954,19 @@ engine. Guard: cmd/unified-translator/multipass_wiring_test.go (httptest
 + real DeepSeek). §11.4.150 research:
 docs/research/20260615_video_surfaced_fixes/verification_multipass_wiring.md</td>
 <td>Not-inventoried</td>
-<td><strong>PASS — video-confirmed</strong> (ffprobe 888x630, 93 frames,
-9.3s; shows “Step 4: Multi-pass Polishing ✅ Success — Polished over 1
-pass with deepseek” + real Spanish output)</td>
-<td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-multipass-verify-20260615.mp4</td>
+<td><strong>PENDING_FORENSICS (§11.4.138 demoted)</strong> — the prior
+<code>helixtranslate-cli-multipass-verify-20260615.mp4</code> PASS is
+superseded: the default model <code>gpt-4</code> fails the
+<code>ValidModels</code> whitelist for deepseek/most providers and the
+polish pass silently no-ops keeping the base translation (wave-5
+<code>docs/qa/video_wave5_20260616-173814/EVIDENCE.md</code>), and even
+with an explicit valid model the path can write an LLM
+meta-response/UNCHANGED-marker instead of polished prose (wave-3e
+<code>docs/qa/wave3e-multipass-regression/FINDING.md</code>). Tracked
+source fix + re-record owed before re-confirmation.</td>
+<td>PENDING_FORENSICS (was
+Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-multipass-verify-20260615.mp4
+— superseded by §11.4.138)</td>
 </tr>
 <tr>
 <td>verification</td>
@@ -5573,8 +5678,15 @@ Re-confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-rest-translate-wav
 <td>Wired</td>
 <td>Parse ebook + translate sections</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — video-confirmed</strong> (Wave 5: FB2 English input →
+POST → valid EPUB 2016 bytes, mimetype
+<code>application/epub+zip</code>, extracted chapter text real Serbian
+“Стари свјетионич стоје сам на каменитој обали…”; ffprobe 16
+frames/8.0s/790×560 yuv420p, input-frame English ≠ output-frame Serbian
+per §11.4.107). NOTE: handler hardcoded ru→sr
+(<code>pkg/api/handler.go:84-85</code>), ignores requested langs —
+tracked fix.</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-rest-translate-fb2-wave5-20260616-173814.mp4</td>
 </tr>
 <tr>
 <td>api/handler.go</td>
@@ -5595,8 +5707,13 @@ Re-confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-rest-translate-wav
 <td>Wired</td>
 <td>Cyrillic↔︎Latin (deterministic)</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed</td>
-<td>PENDING</td>
+<td><strong>PASS — video-confirmed</strong> (Wave 5: real JSON both
+directions — Cyrillic→Latin
+<code>{"converted":"Sistem treba prevesti","original":"Систем треба превести","target":"latin"}</code>,
+Latin→Cyrillic
+<code>{"converted":"Ово је тестни текст","original":"Ovo je testni tekst","target":"cyrillic"}</code>;
+ffprobe 6 frames/3.0s, original ≠ converted per §11.4.107)</td>
+<td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-rest-convert-script-wave5-20260616-173814.mp4</td>
 </tr>
 <tr>
 <td>api/handler.go</td>
