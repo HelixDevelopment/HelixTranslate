@@ -1,6 +1,7 @@
 package verifier
 
 import (
+	"errors"
 	"os"
 	"strings"
 	"testing"
@@ -141,5 +142,66 @@ func TestProviderResolver_MissingKey(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "OPENAI_API_KEY") {
 		t.Errorf("error should name the missing env var, got %q", err.Error())
+	}
+}
+
+// TestProviderResolver_MissingKey_IsTyped: the missing-key error MUST classify
+// as ErrProviderKeyMissing (NOT ErrProviderUnknown), so a caller holding a key
+// from another source (config.json) can distinguish "key not in env" from
+// "provider unknown" and proceed instead of re-routing through the rejecting
+// whitelist (the §11.4.138 review gap).
+func TestProviderResolver_MissingKey_IsTyped(t *testing.T) {
+	r := NewProviderResolverWithEnv(fakeEnv(map[string]string{})) // no keys
+	_, err := r.Resolve("novita")
+	if err == nil {
+		t.Fatal("missing key should error, got nil")
+	}
+	if !errors.Is(err, ErrProviderKeyMissing) {
+		t.Errorf("missing-key error must be ErrProviderKeyMissing, got %v", err)
+	}
+	if errors.Is(err, ErrProviderUnknown) {
+		t.Errorf("a KNOWN provider with a missing key must NOT classify as ErrProviderUnknown: %v", err)
+	}
+}
+
+// TestProviderResolver_Unknown_IsTyped: a genuinely unknown / out-of-range id
+// MUST classify as ErrProviderUnknown so the caller falls back to the standard
+// constructor.
+func TestProviderResolver_Unknown_IsTyped(t *testing.T) {
+	r := NewProviderResolverWithEnv(fakeEnv(map[string]string{}))
+	for _, id := range []string{"not-a-real-provider", "9999", "  "} {
+		_, err := r.Resolve(id)
+		if err == nil {
+			t.Fatalf("Resolve(%q) should error, got nil", id)
+		}
+		if !errors.Is(err, ErrProviderUnknown) {
+			t.Errorf("Resolve(%q) error must be ErrProviderUnknown, got %v", id, err)
+		}
+		if errors.Is(err, ErrProviderKeyMissing) {
+			t.Errorf("Resolve(%q) unknown provider must NOT classify as key-missing: %v", id, err)
+		}
+	}
+}
+
+// TestProviderResolver_ResolveProvider_KeyAgnostic: ResolveProvider materializes
+// a KNOWN provider with NO error even when its env key is unset (key-agnostic),
+// populating BaseURL/EnvVar/FactoryProvider — the seam buildVerifiedTranslator
+// uses to keep a config-keyed-but-env-unset provider OFF the whitelist path.
+func TestProviderResolver_ResolveProvider_KeyAgnostic(t *testing.T) {
+	r := NewProviderResolverWithEnv(fakeEnv(map[string]string{})) // no keys
+	got, err := r.ResolveProvider("novita")
+	if err != nil {
+		t.Fatalf("ResolveProvider(novita) must NOT error on a known provider with unset key: %v", err)
+	}
+	if got.BaseURL == "" || got.FactoryProvider == "" || got.EnvVar != "NOVITA_API_KEY" {
+		t.Errorf("ResolveProvider(novita) did not fully materialize: %+v", got)
+	}
+	if got.APIKey != "" {
+		t.Errorf("APIKey should be empty when env key unset, got non-empty")
+	}
+
+	// And it still errors (ErrProviderUnknown) for a genuinely unknown id.
+	if _, err := r.ResolveProvider("not-a-real-provider"); !errors.Is(err, ErrProviderUnknown) {
+		t.Errorf("ResolveProvider(unknown) must classify as ErrProviderUnknown, got %v", err)
 	}
 }

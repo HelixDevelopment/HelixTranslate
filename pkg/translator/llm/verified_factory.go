@@ -81,6 +81,16 @@ func (f *VerifiedFactory) SetKeyResolver(resolver func(providerID string) string
 	f.keyResolver = resolver
 }
 
+// SetProviderResolver injects the ProviderResolver used to materialize a verified
+// model's provider (BaseURL / env-var name / env-read key). Production wiring may
+// supply a resolver built with a specific getenv (e.g. the bridge's), and tests
+// inject one via verifier.NewProviderResolverWithEnv so construction is
+// deterministic regardless of the ambient process environment (§11.4.50). When
+// unset the factory uses a default resolver reading os.Getenv.
+func (f *VerifiedFactory) SetProviderResolver(resolver *verifier.ProviderResolver) {
+	f.resolver = resolver
+}
+
 func (f *VerifiedFactory) resolveAPIKey(providerID string) string {
 	if f.keyResolver != nil {
 		return f.keyResolver(providerID)
@@ -122,12 +132,21 @@ func (f *VerifiedFactory) CreateTranslator(ctx context.Context, task selection.T
 // (NewLLMTranslatorWithConfig) — validation is NOT weakened for unverified
 // models.
 //
-// Resolution is deterministic (§11.4.6): if the resolver cannot materialize the
-// provider (not in the canonical envProviderSpecs table — e.g. a natively-cased
-// provider such as "anthropic"/"gemini" whose endpoint the generic client does
-// not serve), it falls back to the normal NewLLMTranslatorWithConfig path so
-// those providers keep their existing, correct construction. No API key is
-// logged (§11.4.10).
+// Resolution is deterministic (§11.4.6) and distinguishes three cases:
+//   - provider UNKNOWN / unmaterializable (not in the canonical envProviderSpecs
+//     table — e.g. a natively-cased provider such as "anthropic"/"gemini" whose
+//     endpoint the generic client does not serve) → falls back to the normal
+//     NewLLMTranslatorWithConfig path so those providers keep their existing,
+//     correct construction.
+//   - provider KNOWN and a usable key exists from ANY source (the factory's
+//     keyResolver → config.json OR env, or the resolver's env-read key) → takes
+//     the whitelist-immune delegated bypass. The key need NOT come from the
+//     *_API_KEY env var (the §11.4.138 review gap: a config-keyed provider with
+//     the env var unset was wrongly re-routed through the rejecting whitelist).
+//   - provider KNOWN but NO usable key anywhere → an HONEST missing-key error
+//     naming the env var to set, NEVER a silent whitelist re-route.
+//
+// No API key is logged (§11.4.10).
 func (f *VerifiedFactory) buildVerifiedTranslator(
 	providerID, modelID string, task selection.TaskRequirements,
 ) (*LLMTranslator, error) {
@@ -146,13 +165,44 @@ func (f *VerifiedFactory) buildVerifiedTranslator(
 	if resolver == nil {
 		resolver = verifier.NewProviderResolver()
 	}
-	rp, rerr := resolver.Resolve(providerID)
+	// Resolve KEY-AGNOSTICALLY (§11.4.138 review gap): distinguish "provider
+	// unknown/unmaterializable" (legitimate fallback) from "provider KNOWN but its
+	// key env var is unset". The old code called Resolve(), which errors for BOTH,
+	// so a provider whose key comes from config.json (env unset) was wrongly routed
+	// to NewLLMTranslatorWithConfig — and the static whitelist REJECTED the
+	// verifier-selected model again (the partial-fix defect the review found; the
+	// dev box masked it because NOVITA_API_KEY was set). ResolveProvider errors
+	// ONLY when the provider is genuinely unknown.
+	rp, rerr := resolver.ResolveProvider(providerID)
 	if rerr != nil {
-		// Provider not materializable via the OpenAI-compatible resolver path
-		// (e.g. not in envProviderSpecs, or its key env var is unset). Fall back
-		// to the standard constructor so natively-cased providers and the honest
-		// missing-key error are preserved. This is NOT the whitelist-bypass path.
+		// Provider genuinely not materializable via the OpenAI-compatible resolver
+		// path (not in envProviderSpecs, not a valid numeric index — e.g. a
+		// natively-cased provider such as "anthropic"/"gemini" whose endpoint the
+		// generic client does not serve). Fall back to the standard constructor so
+		// those providers keep their existing, correct construction. This is NOT
+		// the whitelist-bypass path and never fires merely because a key is unset.
 		return NewLLMTranslatorWithConfig(transConfig)
+	}
+
+	// Provider is KNOWN. Determine a usable key from ANY source: the factory's
+	// keyResolver (which the unified-translator wires to resolveProviderAPIKey —
+	// config.json OR env) takes precedence; fall back to the env-resolved key the
+	// resolver read. A KNOWN provider must take the whitelist-immune delegated
+	// bypass whenever a usable key exists ANYWHERE — NOT only when the *_API_KEY
+	// env var is set.
+	clientKey := apiKey
+	if clientKey == "" {
+		clientKey = rp.APIKey
+	}
+	if clientKey == "" {
+		// KNOWN provider but NO usable key from config OR env. Return an HONEST
+		// missing-key error naming the env var to set — NEVER silently re-route
+		// through the rejecting whitelist (which would mask the real cause with a
+		// misleading "model not valid" error). §11.4.6 / §11.4.10 (the value is
+		// never logged; only the env-var NAME).
+		return nil, fmt.Errorf(
+			"verified provider %q (model %q) has no API key: set %s or supply it via config",
+			providerID, modelID, rp.EnvVar)
 	}
 
 	// Delegation marker: the concrete provider id (NOT "openai") so the generic
@@ -161,13 +211,6 @@ func (f *VerifiedFactory) buildVerifiedTranslator(
 	providerMarker := rp.ProviderID
 	if providerMarker == "" || providerMarker == "openai" {
 		providerMarker = rp.FactoryProvider
-	}
-
-	// Prefer the key the factory's resolver already produced (it is the
-	// authoritative source the bridge wires); fall back to the env-resolved key.
-	clientKey := apiKey
-	if clientKey == "" {
-		clientKey = rp.APIKey
 	}
 
 	client, err := NewOpenAIClient(TranslationConfig{

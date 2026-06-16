@@ -84,21 +84,36 @@ func NewProviderResolverWithEnv(getenv func(string) string) *ProviderResolver {
 	return &ProviderResolver{getenv: getenv}
 }
 
-// Resolve materializes a verified model's ProviderID into a ResolvedProvider.
-//
-// Resolution order (§3.3 / §11.4.6 — deterministic, no guessing):
-//  1. Named id (e.g. "deepseek") → looked up directly in envProviderSpecs.
-//  2. Numeric id (e.g. "7", from the HTTP server path) → mapped by index into
-//     the deterministic envProviderSpecs list.
-//  3. Unknown id → honest error naming the id (never a silent fallback).
-//
-// A resolved provider whose API-key environment variable is unset yields a
-// ResolvedProvider with an empty APIKey and a non-nil error so the caller can
-// report exactly which env var to set — never a silent empty-key client.
-func (r *ProviderResolver) Resolve(providerID string) (ResolvedProvider, error) {
+// ErrProviderUnknown is returned (wrapped) by Resolve / ResolveProvider when a
+// ProviderID is neither a known named provider nor a valid numeric index — i.e.
+// the provider is genuinely unmaterializable via the OpenAI-compatible resolver
+// path. Callers MUST distinguish this (legitimate fallback to the standard
+// constructor) from ErrProviderKeyMissing (provider KNOWN but no key in the
+// environment — which is NOT a fallback-to-whitelist condition). §11.4.6.
+var ErrProviderUnknown = fmt.Errorf("verified model provider id is not a known provider and is not a numeric index")
+
+// ErrProviderKeyMissing is returned (wrapped) by Resolve when a provider is
+// KNOWN and fully materialized (BaseURL/EnvVar/FactoryProvider populated) but its
+// API-key environment variable is unset. The ResolvedProvider is still returned
+// populated (only APIKey empty) so a caller holding a key from another source
+// (e.g. config.json) can proceed, while a caller with no key can report exactly
+// which env var to set. errors.Is(err, ErrProviderKeyMissing) is the seam that
+// keeps a config-keyed-but-env-unset provider OFF the whitelist-rejecting path.
+var ErrProviderKeyMissing = fmt.Errorf("verified provider resolved but its API key env var is not set")
+
+// ResolveProvider materializes a verified model's ProviderID into a
+// ResolvedProvider WITHOUT requiring the API-key environment variable to be set.
+// It is the key-agnostic core of Resolve: it answers "is this provider KNOWN and
+// materializable?" and populates ProviderID/FactoryProvider/BaseURL/EnvVar (plus
+// APIKey if the env var happens to be set), returning a wrapped ErrProviderUnknown
+// ONLY when the provider is genuinely not in envProviderSpecs / out of numeric
+// range. A KNOWN provider with an unset key env var is NOT an error here —
+// distinguishing "unknown" from "known-but-key-missing" is the §11.4.138 review
+// gap this method closes. No key is logged (§11.4.10).
+func (r *ProviderResolver) ResolveProvider(providerID string) (ResolvedProvider, error) {
 	id := strings.TrimSpace(providerID)
 	if id == "" {
-		return ResolvedProvider{}, fmt.Errorf("verified model has empty provider id")
+		return ResolvedProvider{}, fmt.Errorf("verified model has empty provider id: %w", ErrProviderUnknown)
 	}
 
 	spec, ok := providerByID[id]
@@ -108,25 +123,49 @@ func (r *ProviderResolver) Resolve(providerID string) (ResolvedProvider, error) 
 			spec, ok = numericProviderIndex(n)
 			if !ok {
 				return ResolvedProvider{}, fmt.Errorf(
-					"verified model provider id %q is a numeric index out of range [0,%d)",
-					id, len(envProviderSpecs))
+					"verified model provider id %q is a numeric index out of range [0,%d): %w",
+					id, len(envProviderSpecs), ErrProviderUnknown)
 			}
 		} else {
 			return ResolvedProvider{}, fmt.Errorf(
-				"verified model provider id %q is not a known provider and is not a numeric index", id)
+				"verified model provider id %q: %w", id, ErrProviderUnknown)
 		}
 	}
 
-	resolved := ResolvedProvider{
+	return ResolvedProvider{
 		ProviderID:      id,
 		FactoryProvider: factoryProviderFor(spec.ID),
 		BaseURL:         spec.BaseURL,
 		EnvVar:          spec.EnvVar,
 		APIKey:          r.getenv(spec.EnvVar),
+	}, nil
+}
+
+// Resolve materializes a verified model's ProviderID into a ResolvedProvider.
+//
+// Resolution order (§3.3 / §11.4.6 — deterministic, no guessing):
+//  1. Named id (e.g. "deepseek") → looked up directly in envProviderSpecs.
+//  2. Numeric id (e.g. "7", from the HTTP server path) → mapped by index into
+//     the deterministic envProviderSpecs list.
+//  3. Unknown id → ErrProviderUnknown naming the id (never a silent fallback).
+//
+// A resolved provider whose API-key environment variable is unset yields a
+// ResolvedProvider with an empty APIKey and a wrapped ErrProviderKeyMissing error
+// so the caller can report exactly which env var to set — never a silent empty-key
+// client. Callers that hold a key from another source (config.json) MUST use
+// ResolveProvider (key-agnostic) instead of treating this error as an unknown
+// provider, per the §11.4.138 review gap. Behaviour is preserved for existing
+// callers: a non-nil error still accompanies a key-missing or unknown provider;
+// only the error is now typed (errors.Is-classifiable).
+func (r *ProviderResolver) Resolve(providerID string) (ResolvedProvider, error) {
+	resolved, err := r.ResolveProvider(providerID)
+	if err != nil {
+		return resolved, err
 	}
 	if resolved.APIKey == "" {
 		return resolved, fmt.Errorf(
-			"verified provider %q resolved but its API key env var %s is not set", spec.ID, spec.EnvVar)
+			"verified provider %q resolved but its API key env var %s is not set: %w",
+			resolved.ProviderID, resolved.EnvVar, ErrProviderKeyMissing)
 	}
 	return resolved, nil
 }

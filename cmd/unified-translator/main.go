@@ -453,6 +453,29 @@ func resolveProviderAPIKey(config *UnifiedConfig, providerID string) string {
 	return ""
 }
 
+// requiresProviderKey reports whether the run will use a per-provider LLM client
+// that needs Provider's API key, versus the default LLMsVerifier-bridge path that
+// keys its own verified models. It mirrors executeAPITranslation's runtime switch
+// EXACTLY (main.go ~line 330):
+//   - mock provider: builds a direct mock translator — no key, no network.
+//   - -use-verifier (VerifierEnabled): executeVerifiedTranslation builds a
+//     per-provider client via VerifiedFactory + resolveProviderAPIKey — the ONLY
+//     runtime path that consumes Provider's key.
+//   - default (everything else, INCLUDING an explicit -provider): routes to the
+//     LLMsVerifier bridge, which selects + keys its OWN verified models and
+//     ignores config.Provider; it hard-errors honestly when none verify (§11.4.69).
+//
+// Crucially, an explicit `-provider X` (without -use-verifier) still hits the
+// default bridge case — there is NO direct per-provider runtime path — so the gate
+// must NOT fire on it. The sole trigger is VerifierEnabled. Keeping this a pure
+// function makes the gate unit-testable without os.Exit.
+func requiresProviderKey(config *UnifiedConfig) bool {
+	if config.Provider == "mock" {
+		return false
+	}
+	return config.VerifierEnabled
+}
+
 // Helper functions
 
 func parseFlags() *UnifiedConfig {
@@ -560,7 +583,15 @@ func parseFlags() *UnifiedConfig {
 		if config.APIKey == "" {
 			config.APIKey = resolveProviderAPIKey(config, config.Provider)
 		}
-		if config.APIKey == "" {
+		// Require a per-provider key ONLY for runs that actually use a
+		// per-provider client. The default-translate path routes to the
+		// LLMsVerifier bridge (see executeAPITranslation's default switch case),
+		// which selects + keys its own verified models and hard-errors honestly
+		// (§11.4.69) when none are available — it never consumes Provider's key.
+		// A bare default run (Provider left at "openai", no -use-verifier) must
+		// therefore NOT be blocked by this gate. Found by §11.4.153 video wave 2;
+		// reproduce-first RED → GREEN per §11.4.115/§11.4.146.
+		if requiresProviderKey(config) && config.APIKey == "" {
 			fmt.Fprintf(os.Stderr, "Error: API key required for provider=%s (pass -api-key or set the provider's *_API_KEY env var)\n", config.Provider)
 			os.Exit(1)
 		}
