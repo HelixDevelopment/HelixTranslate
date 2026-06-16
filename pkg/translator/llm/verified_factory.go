@@ -9,6 +9,15 @@ import (
 	"digital.vasic.translator/internal/verifier/selection"
 )
 
+// verifiedMaxTokens bounds the completion budget for a translator materialized
+// from a verifier-selected model. Sized to fit comfortably within the smallest
+// common verified-model context window (8192 total) alongside the translation
+// prompt, so no verified model is rejected with an HTTP 400 max_tokens overflow,
+// while still allowing multi-paragraph translation segments (larger inputs are
+// chunked by translateWithRetry). Mirrors the bridge's invokeMaxTokens rationale
+// for the translator path.
+const verifiedMaxTokens = 4096
+
 // VerifiedFactory creates LLM translators using LLMsVerifier-verified models.
 // This is the CONST-034-compliant factory that only permits verified models.
 // When a verifier.Client is provided, the factory queries LLMsVerifier as the
@@ -19,6 +28,7 @@ type VerifiedFactory struct {
 	config      *verifier.Config
 	client      *verifier.Client
 	keyResolver func(providerID string) string
+	resolver    *verifier.ProviderResolver
 }
 
 // NewVerifiedFactory creates a verified translator factory.
@@ -36,6 +46,7 @@ func NewVerifiedFactory(cfg *verifier.Config) *VerifiedFactory {
 	return &VerifiedFactory{
 		selector: selector,
 		config:   cfg,
+		resolver: verifier.NewProviderResolver(),
 	}
 }
 
@@ -94,15 +105,111 @@ func (f *VerifiedFactory) CreateTranslator(ctx context.Context, task selection.T
 		return nil, fmt.Errorf("no verified model available: %w", err)
 	}
 
-	// Build translation config for the selected model
+	return f.buildVerifiedTranslator(model.ProviderID, model.ID, task)
+}
+
+// buildVerifiedTranslator materializes a translator for a model that has ALREADY
+// passed LLMsVerifier verification (§11.4.108 runtime-signature: a model the
+// verifier selected is proven working). It MUST NOT be rejected by the static
+// `ValidModels` whitelist (the §11.4.153-wave-1 / §11.4.138 defect: the default
+// translate path died on verifier-selected ids like novita
+// "Sao10K/L3-8B-Stheno-v3.2"). It reuses the SAME whitelist-immune
+// materialization the bridge Invoke/BestClient path uses: resolve the provider
+// to its OpenAI-compatible BaseURL, then build the generic OpenAI-compatible
+// client with the provider id as a DELEGATION MARKER (Provider != "" && !=
+// "openai" → NewOpenAIClient skips its whitelist). The whitelist remains in
+// force for the EXPLICIT / non-verifier construction path
+// (NewLLMTranslatorWithConfig) — validation is NOT weakened for unverified
+// models.
+//
+// Resolution is deterministic (§11.4.6): if the resolver cannot materialize the
+// provider (not in the canonical envProviderSpecs table — e.g. a natively-cased
+// provider such as "anthropic"/"gemini" whose endpoint the generic client does
+// not serve), it falls back to the normal NewLLMTranslatorWithConfig path so
+// those providers keep their existing, correct construction. No API key is
+// logged (§11.4.10).
+func (f *VerifiedFactory) buildVerifiedTranslator(
+	providerID, modelID string, task selection.TaskRequirements,
+) (*LLMTranslator, error) {
+	apiKey := f.resolveAPIKey(providerID)
+
+	// Full config so the prompt builder honours the requested language pair.
 	transConfig := TranslationConfig{
-		Provider: model.ProviderID,
-		Model:    model.ID,
-		APIKey:   f.resolveAPIKey(model.ProviderID),
+		Provider:   providerID,
+		Model:      modelID,
+		APIKey:     apiKey,
+		SourceLang: task.SourceLang,
+		TargetLang: task.TargetLang,
 	}
 
-	return NewLLMTranslatorWithConfig(transConfig)
+	resolver := f.resolver
+	if resolver == nil {
+		resolver = verifier.NewProviderResolver()
+	}
+	rp, rerr := resolver.Resolve(providerID)
+	if rerr != nil {
+		// Provider not materializable via the OpenAI-compatible resolver path
+		// (e.g. not in envProviderSpecs, or its key env var is unset). Fall back
+		// to the standard constructor so natively-cased providers and the honest
+		// missing-key error are preserved. This is NOT the whitelist-bypass path.
+		return NewLLMTranslatorWithConfig(transConfig)
+	}
+
+	// Delegation marker: the concrete provider id (NOT "openai") so the generic
+	// OpenAI-compatible client skips its hardcoded model whitelist; the genuine
+	// OpenAI provider keeps "openai" so its real model whitelist still applies.
+	providerMarker := rp.ProviderID
+	if providerMarker == "" || providerMarker == "openai" {
+		providerMarker = rp.FactoryProvider
+	}
+
+	// Prefer the key the factory's resolver already produced (it is the
+	// authoritative source the bridge wires); fall back to the env-resolved key.
+	clientKey := apiKey
+	if clientKey == "" {
+		clientKey = rp.APIKey
+	}
+
+	client, err := NewOpenAIClient(TranslationConfig{
+		Provider: providerMarker, // delegation marker → whitelist-immune
+		Model:    modelID,
+		APIKey:   clientKey,
+		BaseURL:  rp.BaseURL,
+		// Bound the completion budget. The generic OpenAI-compatible client
+		// defaults max_tokens to 8192 when unset, which a verifier-selected model
+		// with an 8192-TOTAL context window rejects (HTTP 400: completion 8192 +
+		// prompt > 8192 context). Verified models span a wide range of context
+		// sizes, so cap the completion conservatively — same rationale as the
+		// bridge's invokeMaxTokens cap — leaving headroom for the prompt while
+		// still sized for multi-paragraph translation segments. Larger inputs are
+		// chunked by translateWithRetry.
+		MaxTokens: verifiedMaxTokens,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("build verified translator for %s/%s: %w", providerID, modelID, err)
+	}
+
+	// Wrap the whitelist-immune client in an LLMTranslator carrying the full
+	// config (the prompt builder reads SourceLang/TargetLang/Script from it).
+	// The reported provider is the verifier-selected provider id, not the
+	// underlying client's hardcoded "openai".
+	return &LLMTranslator{
+		BaseTranslator: NewBaseTranslator(transConfig),
+		provider:       Provider(providerID),
+		client:         &markedVerifiedClient{LLMClient: client, provider: providerID},
+	}, nil
 }
+
+// markedVerifiedClient wraps the generic OpenAI-compatible client so its
+// GetProviderName reports the verifier-selected provider id (e.g. "novita")
+// rather than the underlying *OpenAIClient hardcoded "openai". Mirrors the
+// bridge's markedClient so both materialization paths report identically.
+type markedVerifiedClient struct {
+	LLMClient
+	provider string
+}
+
+func (m *markedVerifiedClient) GetProviderName() string { return m.provider }
 
 // CreateTranslatorWithFallback builds a translator with fallback chain.
 func (f *VerifiedFactory) CreateTranslatorWithFallback(ctx context.Context, task selection.TaskRequirements) (*LLMTranslator, []string, error) {
@@ -118,13 +225,7 @@ func (f *VerifiedFactory) CreateTranslatorWithFallback(ctx context.Context, task
 		return nil, nil, fmt.Errorf("no verified model available: %w", err)
 	}
 
-	transConfig := TranslationConfig{
-		Provider: primary.ProviderID,
-		Model:    primary.ID,
-		APIKey:   f.resolveAPIKey(primary.ProviderID),
-	}
-
-	translator, err := NewLLMTranslatorWithConfig(transConfig)
+	translator, err := f.buildVerifiedTranslator(primary.ProviderID, primary.ID, task)
 	if err != nil {
 		return nil, nil, err
 	}
