@@ -14,7 +14,7 @@ timeout 300 ./translator-ssh-test \
   -output "$OUTPUT_EPUB" \
   -host thinker.local \
   -user milosvasic \
-  -password WhiteSnake8587
+  -password "${SSH_WORKER_PASSWORD}"
 
 echo "Translation test completed with exit code: $?"
 

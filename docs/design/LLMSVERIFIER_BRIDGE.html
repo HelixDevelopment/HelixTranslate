@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>LLMSVERIFIER_BRIDGE</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">LLMSVERIFIER_BRIDGE</h1>
+</header>
+<h1
+id="llmsverifier-bridge--architecture-llamacpp-removal-map--phased-plan">LLMsVerifier
+Bridge — Architecture, llama.cpp Removal Map &amp; Phased Plan</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-15T00:00:00Z <strong>Status:</strong> DESIGN (uncommitted) — no
+source edited; survey is FACT-based and cited
+<strong>Authority:</strong> Operator mandate 2026-06-15 (verbatim intent
+quoted below) <strong>Scope:</strong> Replace all llama.cpp local
+inference with LLMsVerifier-obtained strongest verified models across
+every HelixTranslate component, AND expose those models directly to a
+Claude Code agent session. Out-of-the-box, fully documented, full test
+coverage.</p>
+<blockquote>
+<p><strong>Mandate (verbatim intent):</strong> "Do NOT use any local
+running models using llama.cpp — only LLMsVerifier-obtained STRONGEST
+models. Create a BRIDGE between the HelixTranslate System and all its
+components AND this Claude Code session for DIRECT access to model
+capabilities (via the LLMsVerifier-obtained strongest models). Document
+everything to the smallest detail, make it work OUT OF THE BOX (no
+manual tuning), and FULL test coverage."</p>
+</blockquote>
+<hr />
+<h2 id="0-tldr-for-the-conductor">0. TL;DR for the conductor</h2>
+<ul>
+<li><strong>llama.cpp non-test source sites to remove/redirect:
+19</strong> (enumerated §2). Plus a <code>_test.go</code> cluster in
+<code>pkg/translator/llm/</code> (4 files) + scattered
+SSH-remote-llama.cpp paths.</li>
+<li><strong>LLMsVerifier integration maturity: HIGH but with one
+load-bearing gap.</strong> Both a remote-HTTP client AND a complete
+in-process verification pipeline already exist and are wired into
+<code>unified-translator</code> via <code>VerifiedFactory</code>. The
+gap is the <strong>provider→base_url materialization</strong> when
+turning a verified model into a translating <code>LLMClient</code>
+(§3.3) and the <strong>lack of a <code>strongest-only</code> selection
+contract + an agent-direct surface</strong> (§4, §5).</li>
+<li><strong>Recommended bridge approach: a single
+<code>pkg/bridge</code> package</strong> that wraps the existing
+<code>VerifiedFactory</code> + <code>selection.Engine</code> behind one
+<code>Bridge</code> facade with: (a) <code>BestTranslator(task)</code>
+for every component, (b) <code>Invoke(ctx, prompt)</code> for the
+agent-direct path, (c) an out-of-the-box bootstrap that prefers the
+<strong>in-process pipeline → local SQLite store</strong> (no server
+needed) and falls back to a running LLMsVerifier HTTP service if
+<code>LLMSVERIFIER_API_URL</code> is set. New thin binary
+<code>cmd/model-bridge</code> exposes (b) to the Claude Code agent as a
+CLI subcommand + an optional stdio MCP server.</li>
+<li><strong>Out-of-the-box bootstrap mechanism:</strong>
+<code>verify-models</code> in-process pipeline (already exists,
+cmd/verify-models) seeded from <code>ProvidersFromEnv()</code> (already
+exists) → SQLite store → <code>Bridge</code>. Zero running service
+required; zero manual tuning. Honest fallback to HTTP service
+documented.</li>
+<li><strong>Operator-decision points (surface via
+AskUserQuestion):</strong> see §9 — (D1) keep-vs-remove llama.cpp under
+§11.4.122, (D2) SSH-remote-llama.cpp worker removal, (D3) agent-direct
+transport choice (CLI subcommand vs full MCP server vs both), (D4)
+"strongest" definition (top-1 strict vs top-N fallback chain), (D5)
+whether the in-process pipeline or an HTTP service is the canonical OOTB
+source.</li>
+</ul>
+<hr />
+<h2 id="1-survey--current-state-fact-cited">1. Survey — current state
+(FACT, cited)</h2>
+<h3 id="11-the-llmclient-seam-the-integration-point">1.1 The LLMClient
+seam (the integration point)</h3>
+<p><code>pkg/translator/llm/llm.go</code>:</p>
+<ul>
+<li><code>LLMClient</code> interface (<code>llm.go:211-214</code>):
+<code>Translate(ctx, text, prompt) (string, error)</code> +
+<code>GetProviderName() string</code>. This is the single seam every
+translating client implements.</li>
+<li><code>NewLLMTranslatorWithConfig(config)</code> factory
+(<code>llm.go:222-327</code>): a <code>switch provider</code> over
+<code>Provider</code> constants building one of ~30 per-provider
+clients. <code>ProviderLlamaCpp</code> constant at
+<code>llm.go:35</code>; its <code>ValidModels</code> row at
+<code>llm.go:71</code>; its switch branch
+<code>case ProviderLlamaCpp: client, err = NewLlamaCppClient(config)</code>
+at <code>llm.go:269-270</code>; the "custom model" warning path at
+<code>llm.go:246-248</code>.</li>
+<li><code>TranslationConfig</code> carries <code>Provider</code>,
+<code>Model</code>, <code>APIKey</code>, <code>BaseURL</code>,
+<code>Temperature</code>, <code>MaxTokens</code>, <code>Timeout</code>,
+<code>Options</code> (aliased from <code>pkg/translator</code>,
+<code>llm.go:17</code>).</li>
+</ul>
+<h3 id="12-llamacpp-implementation-to-remove">1.2 llama.cpp
+implementation (to remove)</h3>
+<ul>
+<li><code>pkg/translator/llm/llamacpp.go</code> —
+<code>LlamaCppClient</code> (hardware detection, model download,
+<code>llama-cli</code> subprocess exec).
+<code>findLlamaCppExecutable()</code> (<code>llamacpp.go:133-150</code>)
+probes <code>llama-cli</code> in PATH/homebrew. <code>Translate</code>
+shells out via <code>exec.CommandContext</code>
+(<code>llamacpp.go:158-208</code>). Depends on <code>pkg/hardware</code>
++ <code>pkg/models</code>.</li>
+<li><code>pkg/translator/llm/llamacpp_provider.go</code> —
+<code>llamacpp-multi</code> coordinator variant (provider name asserted
+in <code>llamacpp_provider_test.go:424-428</code>).</li>
+<li>Tests: <code>llamacpp_test.go</code>,
+<code>llamacpp_provider_test.go</code>,
+<code>llamacpp_buildargs_defect_test.go</code>, plus references in
+<code>llm_test.go</code>, <code>provider_clients_test.go</code>,
+<code>integration_test.go</code>.</li>
+</ul>
+<h3 id="13-llmsverifier-integration--what-exists">1.3 LLMsVerifier
+integration — what EXISTS</h3>
+<p>LLMsVerifier is already integrated <strong>two ways</strong>:</p>
+<p><strong>(A) Remote HTTP client</strong> —
+<code>internal/verifier/client.go</code>:</p>
+<ul>
+<li><code>verifier.Client</code> hits
+<code>&lt;APIURL&gt;/api/models</code> (<code>client.go:96</code>) +
+<code>/api/health</code> (<code>client.go:51</code>), Bearer auth,
+1-line cache TTL.</li>
+<li>Default <code>APIURL = "http://localhost:8080"</code>
+(<code>config.go:50</code>). <strong>Requires a running LLMsVerifier
+server.</strong></li>
+<li><code>Model</code> type aliased from the submodule's
+<code>digital.vasic.llmsverifier/pkg/api</code>
+(<code>client.go:12,27</code>). The submodule package resolves via
+go.mod
+<code>replace digital.vasic.llmsverifier =&gt; ./llms_verifier/llm-verifier</code>
+(go.mod:82) — the canonical <code>api.Model</code> is at
+<code>llms_verifier/llm-verifier/pkg/api/types.go</code>. <strong>NOTE
+(§11.4.28(C) finding):</strong> the consumed package is nested at
+<code>llms_verifier/llm-verifier/...</code>, not at the submodule root —
+an honest layout observation, not a blocker for this work.</li>
+</ul>
+<p><strong>(B) In-process verification pipeline (NO server
+needed)</strong> —
+<code>internal/verifier/{run.go,pipeline.go,providers_env.go,registry.go,persistence/sqlite_store.go}</code>
++ <code>cmd/verify-models/main.go</code>:</p>
+<ul>
+<li><code>ProvidersFromEnv()</code>
+(<code>providers_env.go:52-67</code>) builds OpenAI-compatible
+<code>ProviderConfig</code>s for every <code>*_API_KEY</code> env var
+present (16 providers, <code>providers_env.go:23-41</code>). Keys read
+in-memory only, never logged (<code>providers_env.go:48-51</code>).</li>
+<li><code>RunVerification(...)</code> (<code>run.go:64-152</code>)
+discovers each provider's live <code>/models</code>, runs the 8-step
+<code>Pipeline.Verify</code> (<code>pipeline.go:48-92</code>:
+reachability/auth/model-existence/response-format/latency/capabilities/rate-limits/error-handling)
+against REAL provider APIs, scores, and persists passing models to a
+<code>ModelSink</code> (SQLite).</li>
+<li><code>cmd/verify-models/main.go</code> is the runnable OOTB entry:
+<code>source api_keys.sh &amp;&amp; go run ./cmd/verify-models -db ./data/verified_models.db</code>
+→ persists verified models. <strong>This path needs no LLMsVerifier
+server at all.</strong></li>
+</ul>
+<p><strong>Scoring/selection/adapter (shared by both
+modes):</strong></p>
+<ul>
+<li><code>internal/verifier/scoring/engine.go</code> — 5-component
+weighted scoring engine.</li>
+<li><code>internal/verifier/selection/engine.go</code> —
+<code>SelectModel(task)</code> (<code>engine.go:44-75</code>) filters
+verified (<code>registry.FilterVerified(MinScoreThreshold)</code>),
+scores per task, returns highest; <code>SelectFallback</code> +
+<code>buildFallbackChain</code> (<code>engine.go:78-120</code>) produce
+a deterministic score-descending fallback chain.</li>
+<li><code>internal/services/llmsverifier_score_adapter.go</code> —
+<code>GetPreferences(ctx)</code> (<code>:87-141</code>) returns verified
+models sorted score-descending with <code>FallbackOrder</code> rank;
+enforces CONST-034
+(<code>VerificationStatus=="verified" &amp;&amp; CanSeeCode &amp;&amp; AffirmativeResponse</code>,
+<code>:96</code>).</li>
+<li><code>pkg/translator/llm/verified_factory.go</code> —
+<strong><code>VerifiedFactory</code></strong> already bridges
+verified-model → <code>LLMTranslator</code>:
+<code>CreateTranslator</code>/<code>CreateTranslatorWithFallback</code>
+(<code>verified_factory.go:82-140</code>) call
+<code>selector.SelectModel</code>, build
+<code>TranslationConfig{Provider, Model, APIKey: resolveAPIKey(providerID)}</code>,
+and call <code>NewLLMTranslatorWithConfig</code>.
+<code>SetKeyResolver</code>/<code>SetClient</code> injection points
+exist.</li>
+<li><code>pkg/api/handler.go</code> <code>/api/v1/verified-models</code>
+endpoint + <code>createTranslator</code>
+(<code>handler.go:722-762</code>).</li>
+</ul>
+<p><strong>Already wired into a component:</strong>
+<code>cmd/unified-translator/main.go</code>
+<code>executeVerifiedTranslation</code> (<code>:528-559</code>) +
+<code>resolveProviderAPIKey</code> env-map (<code>:561-585</code>) —
+when <code>VerifierEnabled</code>, it uses <code>VerifiedFactory</code>
++ <code>verifier.NewClient</code> instead of the legacy direct path.</p>
+<h3 id="14-credentials-11410">1.4 Credentials (§11.4.10)</h3>
+<p>API keys come from env vars only (<code>ProvidersFromEnv</code>
+<code>providers_env.go:55</code>, <code>resolveProviderAPIKey</code>
+<code>unified-translator/main.go:582</code>). Never logged. The bridge
+MUST preserve this — keys in-memory, never printed, never persisted to
+the SQLite store (the store holds only verified-model metadata, not
+keys).</p>
+<hr />
+<h2 id="2-llamacpp-removal--redirect-map-every-site">2. llama.cpp
+removal / redirect map (every site)</h2>
+<p><strong>19 non-test source sites</strong> + test cluster. For each:
+action under the bridge.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Site (file:symbol)</th>
+<th>Current role</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>pkg/translator/llm/llamacpp.go</code></td>
+<td><code>LlamaCppClient</code> impl</td>
+<td><strong>DELETE</strong> (§11.4.124 git-history investigation first;
+separate commit)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>pkg/translator/llm/llamacpp_provider.go</code></td>
+<td><code>llamacpp-multi</code> coordinator</td>
+<td><strong>DELETE</strong> (same)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>pkg/translator/llm/llm.go:35</code></td>
+<td><code>ProviderLlamaCpp</code> const</td>
+<td><strong>REMOVE</strong> const</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>pkg/translator/llm/llm.go:71</code></td>
+<td><code>ValidModels[ProviderLlamaCpp]</code></td>
+<td><strong>REMOVE</strong> row</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>pkg/translator/llm/llm.go:246-248</code></td>
+<td>Ollama/LlamaCpp custom-model warning</td>
+<td><strong>REMOVE</strong> LlamaCpp arm (Ollama decision = D-ollama,
+§9)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>pkg/translator/llm/llm.go:269-270</code></td>
+<td><code>case ProviderLlamaCpp:</code> factory branch</td>
+<td><strong>REMOVE</strong> branch; unknown/llamacpp → error</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>cmd/unified-translator/main.go</code></td>
+<td><code>-llama-binary/-llama-model/-context-size</code> flags,
+<code>provider=llamacpp</code>, <code>executeLlamaCppTranslation</code>
+(<code>:446-481</code>), <code>case "llamacpp"</code>
+(<code>:306</code>)</td>
+<td><strong>REMOVE</strong> flags+branch; redirect to verified path
+(§4)</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>cmd/translate-ssh/main.go</code></td>
+<td>SSH worker runs remote llama.cpp</td>
+<td><strong>D2 operator decision</strong> (§9): remove or redirect
+worker to verified API</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>cmd/ssh-translation/main.go</code></td>
+<td>SSH→remote llama.cpp orchestration</td>
+<td>D2</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>cmd/ebook-translator/ebook_translator.go</code></td>
+<td>llamacpp provider option</td>
+<td><strong>REMOVE</strong> option; redirect to verified</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>cmd/markdown-translator/main.go</code></td>
+<td>llamacpp provider option</td>
+<td><strong>REMOVE</strong> option; redirect to verified</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>cmd/cli/main.go</code></td>
+<td>llamacpp provider option</td>
+<td><strong>REMOVE</strong> option; redirect to verified</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>cmd/translator/main.go</code></td>
+<td>llamacpp provider option</td>
+<td><strong>REMOVE</strong> option; redirect to verified</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>pkg/api/handler.go:573,1814</code></td>
+<td><code>"name":"llamacpp"</code> in models list +
+<code>validProviders</code> array</td>
+<td><strong>REMOVE</strong> from both lists;
+<code>createTranslator</code> routes via bridge</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>pkg/api/batch_handlers.go</code></td>
+<td>llamacpp reference</td>
+<td><strong>REMOVE/redirect</strong></td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>pkg/grpc/core_translator.go</code>,
+<code>pkg/grpc/server.go</code></td>
+<td>llamacpp provider handling</td>
+<td><strong>REMOVE/redirect</strong> to bridge</td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>pkg/grpc/proto/translator.pb.go</code></td>
+<td>generated — may enumerate provider</td>
+<td><strong>REGENERATE</strong> from <code>.proto</code> after enum edit
+(do not hand-edit)</td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>pkg/distributed/coordinator.go</code>,
+<code>pkg/distributed/pairing.go</code></td>
+<td>distributed worker llama.cpp</td>
+<td><strong>D2 decision</strong> (distributed mode = remote llama.cpp
+workers)</td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>pkg/challenge_runner/provider_challenges.go</code>,
+<code>pkg/report/report_generator.go</code></td>
+<td>llamacpp in challenge/report provider sets</td>
+<td><strong>REMOVE</strong> llamacpp entries; add verified-bridge
+challenge</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Test cluster (remove/rewrite under TDD §11.4.43):</strong>
+<code>llamacpp_test.go</code>, <code>llamacpp_provider_test.go</code>,
+<code>llamacpp_buildargs_defect_test.go</code>, + llamacpp arms in
+<code>llm_test.go</code>, <code>provider_clients_test.go</code>,
+<code>integration_test.go</code>,
+<code>cmd/unified-translator/ssh_command_test.go</code>,
+<code>cmd/cli/main_test.go</code>,
+<code>cmd/markdown-translator/*_test.go</code>.</p>
+<p><strong>Out-of-scope (do NOT touch — third-party / other
+submodules):</strong>
+<code>llms_verifier/internal/benchmark/http_provider.go</code>, all
+<code>helix_qa/**</code>, <code>vision_engine/**</code>, root
+demo-<em>.go / test_</em>.go / <code>tools/**</code> scrap scripts
+(already non-authoritative per project CLAUDE.md).</p>
+<p><strong>Dead-code investigation (§11.4.124):</strong>
+<code>pkg/models</code> (model registry/downloader) and
+<code>pkg/hardware</code> are imported ONLY by llamacpp.go for non-test
+source. After removal, run <code>git log -S</code> pickaxe on each
+before deleting; if they have hidden refs, wire-or-keep, do not delete
+on sight.</p>
+<hr />
+<h2 id="3-the-gap-that-blocks-verified-model--translating-client">3. The
+gap that blocks "verified model → translating client"</h2>
+<h3 id="31-what-the-verified-model-carries">3.1 What the verified
+<code>Model</code> carries</h3>
+<p><code>api.Model</code>
+(<code>llms_verifier/llm-verifier/pkg/api/types.go:9-24</code>):
+<code>ID</code>, <code>ProviderID</code>, <code>Name</code>,
+<code>VerificationStatus</code>, <code>CanSeeCode</code>,
+<code>AffirmativeResponse</code>, <code>OverallScore</code>, four
+component scores, <code>Capabilities</code>, <code>Pricing</code>,
+<code>LastVerifiedAt</code>. <strong>It carries NO API key and NO
+base_url.</strong></p>
+<h3 id="32-what-newllmtranslatorwithconfig-needs">3.2 What
+<code>NewLLMTranslatorWithConfig</code> needs</h3>
+<p>The factory switch keys on <code>Provider</code> (a known string like
+<code>"openai"</code>, <code>"deepseek"</code>) and each per-provider
+client supplies its own hardcoded base_url unless
+<code>config.BaseURL</code> overrides. So building a client needs: a
+<code>Provider</code> string the switch recognizes + an
+<code>APIKey</code> + (optionally) a <code>BaseURL</code>.</p>
+<h3 id="33-the-two-part-gap">3.3 The two-part gap</h3>
+<ol type="1">
+<li><strong>Provider-ID → factory Provider mapping.</strong> A verified
+model's <code>ProviderID</code> from the in-process pipeline is the
+<code>ProvidersFromEnv</code> id (e.g. <code>"deepseek"</code>,
+<code>"groq"</code>, <code>"openrouter"</code>, <code>"together"</code>,
+<code>"fireworks"</code>, <code>"nvidia"</code>,
+<code>"sambanova"</code>, <code>"hyperbolic"</code>,
+<code>"novita"</code>, <code>"siliconflow"</code>,
+<code>"upstage"</code>, <code>"cerebras"</code>, <code>"mistral"</code>,
+<code>"openai"</code>, <code>"zhipu"</code>, <code>"gemini"</code>). The
+<code>NewLLMTranslatorWithConfig</code> switch knows only a subset (no
+<code>openrouter</code>/<code>together</code>/<code>fireworks</code>/<code>nvidia</code>
+cases). <strong>From the HTTP server path, <code>ProviderID</code> is a
+numeric string</strong> (<code>client.go:177</code>
+<code>fmt.Sprintf("%d", sm.ProviderID)</code>) — NOT a
+factory-recognized provider name at all. This is the load-bearing bug: a
+verified model selected via the HTTP path cannot currently be turned
+into a working client because its <code>ProviderID</code> is a
+number.</li>
+<li><strong>base_url propagation.</strong> <code>envProviderSpecs</code>
+(<code>providers_env.go:23-41</code>) already holds the canonical
+OpenAI-compatible base_url per provider. The bridge must thread that
+base_url into <code>TranslationConfig.BaseURL</code> so
+OpenAI-compatible providers the factory does not natively case can still
+be served through a generic OpenAI-compatible client.</li>
+</ol>
+<h3 id="34-resolution-design">3.4 Resolution (design)</h3>
+<p>Introduce a <strong><code>ProviderResolver</code></strong> in the
+bridge that maps
+<code>ProviderID → (factoryProvider, baseURL, envKeyVar)</code> using
+<code>envProviderSpecs</code> as the single source of truth (extend it
+with the factory-provider name + a generic
+<code>openai</code>-compatible fallback for providers the switch does
+not natively case). The bridge sets
+<code>TranslationConfig{Provider, Model, APIKey, BaseURL}</code> so
+EVERY verified provider materializes — closing both halves of §3.3.</p>
+<hr />
+<h2 id="4-bridge-architecture">4. Bridge architecture</h2>
+<pre><code>                       ┌────────────────────────────────────────────┐
+                       │  pkg/bridge  (NEW — the single facade)       │
+                       │                                              │
+  env *_API_KEY ──────▶│  Source (OOTB):                              │
+                       │   A. in-process: ProvidersFromEnv()          │
+                       │      → RunVerification → SQLite store        │
+                       │   B. HTTP (opt-in if LLMSVERIFIER_API_URL):  │
+                       │      → verifier.Client → /api/models          │
+                       │                  │                           │
+                       │   ┌──────────────▼───────────────┐          │
+                       │   │ selection.Engine (strongest) │          │
+                       │   │  + ProviderResolver (§3.4)    │          │
+                       │   └──────────────┬───────────────┘          │
+                       │   ┌──────────────▼───────────────┐          │
+                       │   │ VerifiedFactory.CreateTrans.  │          │
+                       │   │  → NewLLMTranslatorWithConfig │          │
+                       │   └──────────────┬───────────────┘          │
+                       └──────────────────┼──────────────────────────┘
+            ┌───────────────────┬─────────┴───────────┬───────────────────────┐
+            ▼                   ▼                     ▼                       ▼
+   unified-translator   cmd/server REST       grpc-server          cmd/model-bridge (NEW)
+   markdown-translator  preparation-trans.    cmd/cli              ├ CLI: invoke / best-model / list
+   ebook-translator     cmd/translator        batch_handlers       └ MCP stdio server (D3)
+   (BestTranslator)     (BestTranslator)      (BestTranslator)        → Claude Code agent direct</code></pre>
+<h3 id="41-public-api-proposed">4.1 Public API (proposed)</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> bridge</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Bridge <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* wraps VerifiedFactory + selection.Engine + ProviderResolver */</span> <span class="op">}</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Bootstrap chooses the OOTB source (in-process pipeline → SQLite) unless</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">// LLMSVERIFIER_API_URL is set (then HTTP). Never requires manual tuning.</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Open<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts Options<span class="op">)</span> <span class="op">(*</span>Bridge<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">// (a) component path — every translating component calls this:</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>Bridge<span class="op">)</span> BestTranslator<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> task selection<span class="op">.</span>TaskRequirements<span class="op">)</span> <span class="op">(</span>translator<span class="op">.</span>Translator<span class="op">,</span> <span class="op">[]</span><span class="dt">string</span> <span class="co">/*fallbacks*/</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">// (b) agent-direct path — raw capability access for the Claude Code session:</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>Bridge<span class="op">)</span> Invoke<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> system<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>Bridge<span class="op">)</span> BestModel<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> task selection<span class="op">.</span>TaskRequirements<span class="op">)</span> <span class="op">(</span>verifier<span class="op">.</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>Bridge<span class="op">)</span> ListVerified<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">([]</span>services<span class="op">.</span>ProviderPreference<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><code>BestTranslator</code> reuses
+<code>VerifiedFactory.CreateTranslatorWithFallback</code> verbatim — no
+reimplementation (§11.4.74). <code>Invoke</code> builds the strongest
+<code>LLMClient</code> once and calls
+<code>Translate(ctx, prompt, system)</code> (the generic chat seam) —
+exposing the model's raw capability, not just translation.</p>
+<h3 id="42-strongest-contract-d4">4.2 "Strongest" contract (D4)</h3>
+<p><code>selection.Engine.SelectModel</code> already returns the highest
+score-ranked verified candidate; <code>GetPreferences</code> already
+sorts score-descending with <code>FallbackOrder</code>. "Strongest" =
+<code>FallbackOrder==1</code>. The fallback chain (D4 decision: strict
+top-1 vs degrade) is already built deterministically by
+<code>buildFallbackChain</code>
+(<code>selection/engine.go:111-120</code>).</p>
+<hr />
+<h2 id="5-agent-direct-access-the-claude-code-bridge">5. Agent-direct
+access (the Claude Code bridge)</h2>
+<p><code>cmd/model-bridge</code> (NEW thin binary) exposes the strongest
+verified model to this agent session:</p>
+<ul>
+<li><strong>CLI subcommand (always):</strong>
+<code>model-bridge invoke --prompt "..."</code> → prints the strongest
+verified model's completion; <code>model-bridge best-model</code> →
+prints provider/model/score; <code>model-bridge list</code> → verified
+models JSON. The agent calls these via Bash. Out-of-the-box (reads env
+keys, runs in-process verify, invokes). No secrets printed.</li>
+<li><strong>MCP stdio server (D3, optional):</strong>
+<code>model-bridge mcp</code> exposes tools
+<code>verified_invoke</code>, <code>verified_best_model</code>,
+<code>verified_list</code> over stdio MCP, wired into
+<code>.mcp.json</code> so the agent calls them as native tools (mirrors
+the §11.4.78 CodeGraph MCP pattern). Reuse <code>mcp-server-dev</code>
+skill; do NOT reimplement an MCP framework — check the catalogue
+(§11.4.74) for an existing Go MCP helper first.</li>
+</ul>
+<p>This is the literal "bridge between … this Claude Code session for
+DIRECT access to model capabilities."</p>
+<hr />
+<h2 id="6-out-of-the-box-bootstrap-no-manual-tuning">6. Out-of-the-box
+bootstrap (no manual tuning)</h2>
+<p><code>bridge.Open</code> resolution order (honest, §11.4.6 — no
+guessing about a running service):</p>
+<ol type="1">
+<li>If <code>LLMSVERIFIER_API_URL</code> set → HTTP
+<code>verifier.Client</code> mode (server is operator-provided).</li>
+<li>Else → <strong>in-process mode (canonical OOTB):</strong>
+<code>ProvidersFromEnv()</code> → if a fresh SQLite store at
+<code>./data/verified_models.db</code> exists and is recent, load it;
+else run <code>RunVerification</code> once (bounded
+<code>-max</code>/timeout) to populate it, then select. No server, no
+manual config.</li>
+<li>If NO <code>*_API_KEY</code> present → honest hard error listing
+which env vars to set (mirrors
+<code>verify-models/main.go:33-37</code>), never a silent fallback to
+llama.cpp (which is being removed).</li>
+</ol>
+<p>§11.4.76 note: if the operator later wants LLMsVerifier-as-a-service,
+it boots on-demand via the Containers submodule — documented, not
+assumed. The in-process path means OOTB never depends on it.</p>
+<hr />
+<h2 id="7-full-test-plan-11427-no-fakes-beyond-unit">7. Full test plan
+(§11.4.27 no-fakes-beyond-unit)</h2>
+<ul>
+<li><strong>Unit:</strong> <code>ProviderResolver</code> mapping table
+(every <code>ProvidersFromEnv</code> id → factory provider + base_url,
+incl. the generic OpenAI-compatible fallback); <code>bridge.Open</code>
+source-selection logic; "strongest"=FallbackOrder==1 ordering; the
+numeric-ProviderID HTTP bug regression (§3.3 part 1) as a §11.4.115
+RED-then-GREEN polarity test.</li>
+<li><strong>Integration (real LLMsVerifier, real provider
+APIs):</strong> in-process <code>RunVerification</code> against the
+providers whose keys are in env → assert a verified model is selectable
+AND its <code>BestTranslator</code> produces real translated text
+(anti-bluff §11.4 — actual target-language output, not a session id).
+Skip-with-reason when no keys present (§11.4.3), never a faked
+PASS.</li>
+<li><strong>Unforgeable-challenge E2E (§11.4.78 style):</strong> agent
+calls <code>model-bridge invoke</code> / the MCP tool with a prompt
+whose answer is only obtainable from a live model response → assert real
+content. A bridge that returns canned text fails.</li>
+<li><strong>Anti-llama.cpp gate:</strong> a pre-build gate
+(<code>CM-NO-LLAMACPP</code>) greps the authoritative source tree (cmd/
++ pkg/ + internal/, excluding submodules/tests-of-removal) for
+<code>llama.cpp</code>/<code>llamacpp</code>/<code>llama-cli</code>/<code>ProviderLlamaCpp</code>
+and FAILs on any new occurrence; paired §1.1 mutation re-introduces a
+usage and asserts the gate FAILs.</li>
+<li><strong>docs/qa/<run-id>/</strong> transcript per §11.4.83 for the
+agent-direct feature.</li>
+</ul>
+<hr />
+<h2
+id="8-phased-implementation-plan-ordered-file-level-each-phase-independently-buildable--testable">8.
+Phased implementation plan (ordered, file-level, each phase
+independently buildable + testable)</h2>
+<p><strong>Phase 0 — Scaffolding + resolver (no removal yet; additive,
+builds green).</strong></p>
+<ul>
+<li>Add <code>pkg/bridge/resolver.go</code>
+(<code>ProviderResolver</code> + mapping table extending
+<code>envProviderSpecs</code> with factory-provider + base_url + generic
+OpenAI-compatible fallback).</li>
+<li>Add <code>pkg/bridge/bridge.go</code> (<code>Bridge</code> facade,
+<code>Open</code>, <code>BestTranslator</code>, <code>BestModel</code>,
+<code>ListVerified</code>, <code>Invoke</code>) wrapping existing
+<code>VerifiedFactory</code>.</li>
+<li>Unit tests for resolver + Open source-selection. Buildable +
+testable alone.</li>
+</ul>
+<p><strong>Phase 1 — Close the numeric-ProviderID gap (§3.3 part
+1).</strong></p>
+<ul>
+<li>Fix <code>internal/verifier/client.go:177</code> so HTTP-path
+<code>ProviderID</code> carries the provider name (not the numeric id),
+or have the resolver map server provider numbers via
+<code>/api/models</code> provider field. §11.4.115 RED test on the bug
+first.</li>
+</ul>
+<p><strong>Phase 2 — Agent-direct surface.</strong></p>
+<ul>
+<li>Add <code>cmd/model-bridge/main.go</code>
+(<code>invoke</code>/<code>best-model</code>/<code>list</code>
+subcommands). Unforgeable-challenge E2E test. (D3) optionally add
+<code>mcp</code> subcommand + <code>.mcp.json</code> wiring.</li>
+</ul>
+<p><strong>Phase 3 — Redirect components to the bridge (additive
+default, llama.cpp still present).</strong></p>
+<ul>
+<li>Route <code>unified-translator</code>,
+<code>cmd/server</code>/<code>pkg/api/handler.go createTranslator</code>,
+<code>grpc-server</code>, <code>preparation-translator</code>,
+<code>markdown-translator</code>, <code>ebook-translator</code>,
+<code>cmd/cli</code>, <code>cmd/translator</code>,
+<code>batch_handlers</code> through <code>bridge.BestTranslator</code>.
+Make verified-bridge the default provisioning path. Each component
+independently buildable.</li>
+</ul>
+<p><strong>Phase 4 — Remove llama.cpp (§11.4.124 +
+§11.4.122).</strong></p>
+<ul>
+<li>AskUserQuestion for D1/D2/D-ollama BEFORE removal. Then, in separate
+per-area commits with git-history evidence: delete
+<code>llamacpp.go</code> + <code>llamacpp_provider.go</code>, remove the
+const/ValidModels/switch/warning sites (#3-6), remove flags + branches
+(#7,10-16), regenerate proto (#17), handle distributed/SSH per D2
+(#8,9,18). Investigate <code>pkg/models</code>/<code>pkg/hardware</code>
+orphaning before deletion.</li>
+</ul>
+<p><strong>Phase 5 — Anti-bluff gate + full retest.</strong></p>
+<ul>
+<li>Add <code>CM-NO-LLAMACPP</code> gate + paired mutation. Full-suite
+retest (§11.4.40). Update <code>config.json</code>
+(<code>default_provider</code> → verified path), docs
+(<code>Documentation/AGENTS.md</code>, README,
+<code>docs/CODEGRAPH.md</code> exclude is unaffected), and the §11.4.131
+session-resumption file.</li>
+</ul>
+<hr />
+<h2
+id="9-operator-decision-points-surface-via-askuserquestion--11466114122">9.
+Operator-decision points (surface via AskUserQuestion —
+§11.4.66/§11.4.122)</h2>
+<ul>
+<li><strong>D1 — llama.cpp removal confirmation (§11.4.122
+MANDATORY):</strong> llama.cpp is an existing end-user capability
+(<code>-provider llamacpp</code>, offline local inference). Removing it
+is a removal under §11.4.122 → MUST be operator-confirmed before Phase
+4. Recommended: remove (per mandate), tracked as <code>Obsolete</code>
+reason <code>feature-removed</code>.</li>
+<li><strong>D2 — SSH-remote-llama.cpp + distributed workers:</strong>
+<code>cmd/translate-ssh</code>, <code>cmd/ssh-translation</code>,
+<code>pkg/distributed/*</code> run llama.cpp on remote workers. Remove
+entirely, or redirect workers to call the verified API? (Distributed
+mode is a separate end-user capability.)</li>
+<li><strong>D3 — agent-direct transport:</strong> CLI subcommand only /
+full MCP stdio server / both? (Both recommended; MCP matches §11.4.78
+pattern.)</li>
+<li><strong>D4 — "strongest" definition:</strong> strict top-1 only, or
+top-1 + deterministic score-descending fallback chain (already built)?
+Recommended: top-1 with fallback chain.</li>
+<li><strong>D5 — canonical OOTB source:</strong> in-process
+pipeline+SQLite (no server, recommended) vs require a running
+LLMsVerifier HTTP service vs Containers-booted service. Recommended:
+in-process default, HTTP opt-in via
+<code>LLMSVERIFIER_API_URL</code>.</li>
+<li><strong>D-ollama (minor):</strong> Ollama is the other "local model"
+provider (<code>ProviderOllama</code>). The mandate names only
+llama.cpp. Keep Ollama, or is "no local models" intended to cover Ollama
+too? Recommended: keep Ollama unless operator says otherwise (§11.4.122
+— do not silently remove).</li>
+</ul>
+<hr />
+<h2 id="10-catalogue-check-11474">10. Catalogue-check (§11.4.74)</h2>
+<ul>
+<li><code>Catalogue-Check: extend vasic-digital/LLMsVerifier</code> —
+reuse the existing <code>internal/verifier</code> +
+<code>llms_verifier</code> submodule pipeline/scoring/selection; the
+bridge is a thin facade, NOT a reimplementation of
+discovery/scoring.</li>
+<li><code>Catalogue-Check: reuse VerifiedFactory + selection.Engine + score_adapter</code>
+— already in-tree; do not duplicate.</li>
+<li>Agent-direct MCP: check catalogue for an existing Go MCP helper
+before writing one (<code>mcp-server-dev</code> skill available).</li>
+</ul>
+</body>
+</html>

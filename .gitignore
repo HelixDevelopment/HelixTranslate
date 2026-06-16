@@ -44,9 +44,22 @@ keys.*
 reports/demos/
 
 # Build artifacts (large binaries)
-build/api-server
-build/grpc-server
-build/unified-translator
+# §11.4.30/§11.4.10 GAP2 root cause: the entire build/ dir is regenerable derivatives
+# (make build / go build ./cmd/...). Ignore wholesale so no compiled binary — and no
+# secret baked into one — can ever be re-tracked. Was per-file (api/grpc/unified only),
+# which let build/ebook-translator (with an embedded SSH password) get tracked.
+/build/
+# §11.4.30/§11.4.10: root-anchored compiled binaries (build derivatives of cmd/*).
+# These 6 previously carried an embedded SSH-password literal — un-tracked + ignored
+# here so a rebuild from scrubbed source produces secret-free, never-tracked artifacts.
+# Regenerate via `go build ./cmd/...` / `make build`.
+/ebook-translator
+/download-model
+/test-model
+/test-enhanced-conversion
+/test-simple-translation
+/test_ssh_worker
+/model-bridge
 
 # Test outputs
 cmd/cli/test_output.epub

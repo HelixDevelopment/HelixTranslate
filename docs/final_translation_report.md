@@ -12,7 +12,7 @@ Successfully translated Russian ebook "Кровь на снегу" (Blood on Sno
 ### Distributed Translation System
 - **Local Orchestrator**: macOS system running Go translation application
 - **Remote Worker**: thinker.local (Ubuntu) with Python translation engine
-- **Communication**: SSH with password authentication (milosvasic/WhiteSnake8587)
+- **Communication**: SSH with password authentication (milosvasic/<redacted-per-11.4.10>)
 - **Codebase Sync**: Hash-based verification ensuring both systems run identical code
 
 ### Translation Pipeline
@@ -75,7 +75,7 @@ FB2 (Russian) → Markdown → Serbian Cyrillic Translation → EPUB
 ### Build and Execute
 ```bash
 go build -o translator-ssh ./cmd/translate-ssh
-./translator-ssh -input materials/books/book1.fb2 -output materials/books/book1_sr.epub -host thinker.local -user milosvasic -password WhiteSnake8587
+./translator-ssh -input materials/books/book1.fb2 -output materials/books/book1_sr.epub -host thinker.local -user milosvasic -password <redacted-per-11.4.10>
 ```
 
 ### Verification

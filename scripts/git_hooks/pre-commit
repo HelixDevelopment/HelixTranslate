@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# pre-commit — §11.4.75 Layer 1 / §11.4.10.A clause 5 credential-leak guard.
+#
+# Purpose:    Block any commit that stages an inline secret-shaped literal.
+# Usage:      installed into .git/hooks/pre-commit by scripts/install_git_hooks.sh
+# Inputs:     the staged diff (git diff --cached)
+# Outputs:    on a hit, prints masked file:line and aborts the commit (exit 1).
+# Side-effects: none (read-only scan).
+# Dependencies: bash, git, scripts/git_hooks/credential_scan.sh.
+# Cross-references: docs/scripts/credential_scan.md; constitution §11.4.10 / §11.4.75.
+set -euo pipefail
+ROOT="$(git rev-parse --show-toplevel)"
+SCAN="$ROOT/scripts/git_hooks/credential_scan.sh"
+[ -x "$SCAN" ] || SCAN="bash $ROOT/scripts/git_hooks/credential_scan.sh"
+if ! $SCAN --staged; then
+  echo "" >&2
+  echo "pre-commit ABORT (§11.4.10/§11.4.75): inline credential literal in staged content." >&2
+  echo "Replace the value with an env ref (\${SSH_WORKER_PASSWORD}) or <redacted-per-11.4.10>." >&2
+  exit 1
+fi
+exit 0

@@ -68,7 +68,7 @@ This is a production-ready SSH-based ebook translation system with rock-solid ha
   --output materials/books/book1_sr.epub \
   --host thinker.local \
   --user milosvasic \
-  --password WhiteSnake8587 \
+  --password <redacted-per-11.4.10> \
   --report-dir production_translation_$(date +%Y%m%d_%H%M%S)
 ```
 
@@ -136,7 +136,7 @@ SSHWorkerConfig{
     Host:           "thinker.local",
     Port:           22,
     Username:       "milosvasic", 
-    Password:       "WhiteSnake8587",
+    Password:       "<redacted-per-11.4.10>",
     RemoteDir:      "/tmp/translate-ssh",
     ConnectionTimeout: 30 * time.Second,
     CommandTimeout:    10 * time.Minute,

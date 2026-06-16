@@ -149,7 +149,7 @@ echo ""
 # Step 10: Run the actual translation
 echo "🚀 Step 10: Starting Actual Translation"
 echo "-----------------------------------------"
-echo "Command: ./translate-ssh -input=\"internal/materials/books/book1.fb2\" -host=\"thinker.local\" -user=\"milosvasic\" -password=\"WhiteSnake8587\""
+echo "Command: ./translate-ssh -input=\"internal/materials/books/book1.fb2\" -host=\"thinker.local\" -user=\"milosvasic\" -password=\"\${SSH_WORKER_PASSWORD}\""
 echo ""
 
 # Create final demonstration script
@@ -163,7 +163,7 @@ echo ""
                 -output="internal/materials/books/book1_sr.epub" \
                 -host="thinker.local" \
                 -user="milosvasic" \
-                -password="WhiteSnake8587" \
+                -password="${SSH_WORKER_PASSWORD}" \
                 -port=22 \
                 -remote-dir="/tmp/translation-workspace"
 EOF

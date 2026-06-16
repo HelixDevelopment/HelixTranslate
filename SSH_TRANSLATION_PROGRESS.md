@@ -4,7 +4,7 @@
 
 1. **SSH Worker Connection**
    - Successfully connected to thinker.local (SSH worker)
-   - Credentials validated (milosvasic/WhiteSnake8587)
+   - Credentials validated (milosvasic/<redacted-per-11.4.10>)
    - File upload working
 
 2. **Codebase Synchronization**

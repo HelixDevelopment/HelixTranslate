@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# pre-push — §11.4.75 Layer 3 / §11.4.10.A clause 5 credential-leak guard.
+#
+# Purpose:    Re-scan every commit being pushed for inline secret-shaped literals,
+#             so a leak that bypassed pre-commit (--no-verify) is still caught.
+# Usage:      installed into .git/hooks/pre-push by scripts/install_git_hooks.sh
+# Inputs:     refs to push on stdin (<local-ref> <local-sha> <remote-ref> <remote-sha>)
+# Outputs:    on a hit, prints masked file:line and aborts the push (exit 1).
+# Side-effects: none (read-only scan).
+# Dependencies: bash, git, scripts/git_hooks/credential_scan.sh.
+# Cross-references: docs/scripts/credential_scan.md; constitution §11.4.10 / §11.4.75.
+set -euo pipefail
+ROOT="$(git rev-parse --show-toplevel)"
+SCAN="$ROOT/scripts/git_hooks/credential_scan.sh"
+
+leak=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    range="$local_sha"
+  else
+    range="$remote_sha..$local_sha"
+  fi
+  # Collect changed files across the pushed range, scan their current content.
+  files=$(git diff --name-only "$range" 2>/dev/null | sort -u || true)
+  [ -z "$files" ] && continue
+  while IFS= read -r f; do
+    [ -f "$ROOT/$f" ] || continue
+    bash "$SCAN" "$ROOT/$f" || leak=1
+  done <<< "$files"
+done
+
+if [ "$leak" -ne 0 ]; then
+  echo "" >&2
+  echo "pre-push ABORT (§11.4.10/§11.4.75): inline credential literal in pushed commits." >&2
+  exit 1
+fi
+exit 0

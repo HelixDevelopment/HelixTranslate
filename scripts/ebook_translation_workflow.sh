@@ -10,7 +10,7 @@ SOURCE_FILE=""
 TARGET_LANGUAGE="sr-cyrl"
 REMOTE_HOST="thinker.local"
 REMOTE_USER="milosvasic"
-REMOTE_PASS="WhiteSnake8587"
+REMOTE_PASS=""
 VERBOSE=false
 TEST_MODE=false
 
@@ -73,14 +73,14 @@ Optional arguments:
     --target, -t <lang>         Target language (default: sr-cyrl)
     --host, -h <host>          Remote SSH host (default: thinker.local)
     --user, -u <user>          SSH username (default: milosvasic)
-    --password, -p <pass>      SSH password (default: WhiteSnake8587)
+    --password, -p <pass>      SSH password (default: <redacted-per-11.4.10>)
     --verbose, -v               Enable verbose logging
     --test                      Run in test mode (verify components only)
     --help                      Show this help message
 
 Examples:
     $0 --source materials/books/book1.fb2
-    $0 --source materials/books/book1.fb2 --target sr-cyrl --host thinker.local --user milosvasic --password WhiteSnake8587 --verbose
+    $0 --source materials/books/book1.fb2 --target sr-cyrl --host thinker.local --user milosvasic --password <redacted-per-11.4.10> --verbose
     $0 --source materials/books/book1.fb2 --test
 
 Supported target languages:

@@ -6,6 +6,6 @@ echo ""
                 -output="internal/materials/books/book1_sr.epub" \
                 -host="thinker.local" \
                 -user="milosvasic" \
-                -password="WhiteSnake8587" \
+                -password="${SSH_WORKER_PASSWORD}" \
                 -port=22 \
                 -remote-dir="/tmp/translation-workspace"

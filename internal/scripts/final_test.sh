@@ -29,7 +29,7 @@ timeout 600 ./internal/scripts/translator-final \
   -output "$OUTPUT_EPUB" \
   -host thinker.local \
   -user milosvasic \
-  -password WhiteSnake8587
+  -password "${SSH_WORKER_PASSWORD}"
 
 EXIT_CODE=$?
 echo

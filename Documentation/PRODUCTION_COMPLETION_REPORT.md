@@ -26,7 +26,7 @@
 - **Preserves all content**: All 4 files contain full book content
 
 ### 🔐 SSH Worker System
-- **Specified credentials**: thinker.local, milosvasic, WhiteSnake8587
+- **Specified credentials**: thinker.local, milosvasic, <redacted-per-11.4.10>
 - **Connection reuse**: Single connection across all 6 steps
 - **Base64 file transfer**: Safe binary uploads
 - **Error handling**: Comprehensive recovery mechanisms
@@ -61,7 +61,7 @@ PRODUCTION_DOCUMENTATION.md                     # Complete technical docs
   --output materials/books/book1_sr.epub \
   --host thinker.local \
   --user milosvasic \
-  --password WhiteSnake8587 \
+  --password <redacted-per-11.4.10> \
   --report-dir production_translation_$(date +%Y%m%d_%H%M%S)
 ```
 
