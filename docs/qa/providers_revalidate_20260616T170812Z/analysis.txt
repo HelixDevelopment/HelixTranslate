@@ -1,0 +1,5 @@
+total providers: 19
+names: cerebras, cloudflare, cohere, deepseek, gemini, groq, hyperbolic, kimi, mistral, modal, nia, novita, publicai, replicate, sambanova, siliconflow, upstage, vulavula, zhipu
+strictly more than the old static 4? True
+has new fields (configured/available)? True
+sample gemini entry: {"available": true, "configured": true, "description": "Google Gemini models", "models": [], "name": "gemini", "requires_api_key": true}
