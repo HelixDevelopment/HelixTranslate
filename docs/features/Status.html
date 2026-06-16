@@ -177,7 +177,7 @@
 </header>
 <h1 id="helixtranslate-feature-status">HelixTranslate — Feature
 Status</h1>
-<p><strong>Revision:</strong> 7 <strong>Last modified:</strong>
+<p><strong>Revision:</strong> 8 <strong>Last modified:</strong>
 2026-06-16T00:00:00Z <strong>Authority:</strong> Derived from
 <code>docs/features/.feature_inventory_raw.md</code> (Revision 1). Per
 §11.4.45 (captured-evidence Status doc), §11.4.44 (revision header),
@@ -233,12 +233,16 @@ Book→HTML5→<code>weasyprint</code>→valid Cyrillic-faithful PDF, wired
 into unified-translator (<code>.pdf</code> output; main.go:1160);
 <code>pkg/ebook</code> PDF tests green this session (no
 <code>.mp4</code> yet, video PENDING). <strong>Honest gaps recorded, NOT
-confirmed:</strong> <code>cmd/translator</code> local path is a STUB
-(“local translation not yet implemented”); <code>translate-ssh</code> +
-<code>ebook-translator</code> are OPERATOR-BLOCKED (need a remote
-SSH/llama.cpp worker host); <code>GET /api/v1/verified-models</code>
-returns 404 because LLMsVerifier is disabled in config. Everything else
-is <code>PENDING</code> (a recording is owed) or <code>N/A</code> (no
+confirmed:</strong> <code>cmd/translator</code> +
+<code>translate-ssh</code> + <code>ebook-translator</code> are
+<strong>Obsolete (→ Fixed.md), Rev 7</strong>
+(<code>feature-removed</code> — the local-runtime + SSH-local paths were
+removed in bridge phase-2 R-2..R-4; the default path now sources the
+LLMsVerifier <code>pkg/bridge</code>; the earlier STUB/OPERATOR-BLOCKED
+wording is stale and corrected);
+<code>GET /api/v1/verified-models</code> returns 404 because
+LLMsVerifier is disabled in config. Everything else is
+<code>PENDING</code> (a recording is owed) or <code>N/A</code> (no
 user-visible video applies — e.g. CLI flags, internal library types).
 Absence of a runtime recording is stated honestly, never papered
 over.</p>
@@ -282,16 +286,24 @@ tally)</td>
 </tr>
 <tr>
 <td>Enumerated feature rows in this doc</td>
-<td><strong>478</strong> (470 source-inventory rows + 2 gap rows added
-Rev 2 [DOCX-write→Implemented Rev 3, PDF-write→Implemented Rev 4] + 6
-new rows added Rev 4: cmd/model-bridge CLI ×2, pkg/bridge ×2,
-internal/verifier affirmative-gate ×1, pkg/api/dashboard.go ×1)</td>
+<td><strong>493</strong> (Rev 8 — RE-DERIVED MECHANICALLY from the live
+tables, §11.4.6: count of 9-column feature data rows across the 60
+per-category tables; <code>awk</code> counting rows with exactly 9
+columns, excluding the 60 header rows + separators. The earlier “478”
+was NOT re-derivable from the live table — it was a hand-tracked running
+tally that had drifted (the actual live count was 486 before Rev 8 added
+the 7 missing <code>pkg/bridge</code> ensemble-seam rows:
+<code>BestTranslator</code>, <code>BestTranslatorFunc</code>,
+<code>EnsembleFactory</code>, <code>ProviderDiverseTranslators</code>,
+<code>ProviderDiverseClients</code>, <code>ProviderDiverseModels</code>,
+<code>BestClient</code>). 493 is the FACT; re-derive with
+<code>awk</code> over <code>^\|</code> 9-column rows)</td>
 </tr>
 <tr>
 <td>Implemented</td>
-<td>435 (was 471 Rev 6; <strong>−36</strong> flipped to Obsolete Rev 7 —
-local-runtime + SSH-local features removed in bridge phase-2
-R-2..R-4)</td>
+<td>442 (Rev 8: 435 Rev 7 + 7 new pkg/bridge ensemble-seam rows; was 471
+Rev 6, −36 flipped to Obsolete Rev 7 — local-runtime + SSH-local
+features removed in bridge phase-2 R-2..R-4)</td>
 </tr>
 <tr>
 <td><strong>Obsolete (→ Fixed.md)</strong></td>
@@ -333,7 +345,7 @@ host-blocked)</td>
 <tr>
 <td>Video-confirmed</td>
 <td><strong>23</strong> (real, content-verified recordings this session
-— see Anti-bluff note) — ≈ 4.8% of 478 enumerated rows (≈ 5.5% of the
+— see Anti-bluff note) — ≈ 4.7% of 493 enumerated rows (≈ 5.5% of the
 417 headline). Plus <strong>2 real-artifact/unit-confirmed</strong>
 (DOCX output — produced <code>.docx</code> = Microsoft Word 2007+; PDF
 output — <code>pkg/ebook</code> tests green + weasyprint present; both
@@ -4362,6 +4374,111 @@ mis-route, -race green)</td>
 through selected model; routing guard catches mis-route)</td>
 <td>N/A (internal routing — surfaced via cmd/model-bridge)</td>
 </tr>
+<tr>
+<td>bridge</td>
+<td><code>BestTranslator</code> (single strongest translator + fallback
+chain)</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired (R-1 redirect seam)</td>
+<td><code>bridge.go:242</code> — returns the single strongest verified
+<code>translator.Translator</code> plus its fallback-chain model IDs for
+the task; the non-ensemble single-translator source</td>
+<td>Covered (<code>pkg/bridge/bridge_test.go</code>,
+<code>pkg/bridge/ensemble_test.go</code>,
+<code>go test ./pkg/bridge</code> green this session)</td>
+<td><strong>PASS</strong> (<code>go test ./pkg/bridge</code> → ok)</td>
+<td>PENDING (surfaced via the cmd/model-bridge ensemble run — recording
+owed)</td>
+</tr>
+<tr>
+<td>bridge</td>
+<td><code>BestTranslatorFunc</code> (context-only single-translator
+closure)</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired (R-1 redirect seam)</td>
+<td><code>ensemble.go:37</code> — context-only closure yielding the
+single strongest verified translator (fallback chain discarded); plain
+function value passed to single-translator sites WITHOUT importing the
+bridge (§11.4.28 decoupling); no API key captured/logged (§11.4.10)</td>
+<td>Covered (<code>pkg/bridge/ensemble_test.go</code>, -race green)</td>
+<td><strong>PASS</strong> (<code>go test ./pkg/bridge</code> → ok)</td>
+<td>PENDING (recording owed)</td>
+</tr>
+<tr>
+<td>bridge</td>
+<td><code>EnsembleFactory</code> (provider-diverse ensemble seam)</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired (R-1 ensemble redirect)</td>
+<td><code>ensemble.go:25</code> — context-only closure yielding the
+provider-diverse verified translator set (one per distinct provider,
+strongest-first); structural shape of the per-component
+<code>EnsembleTranslatorFactory</code> seams, passed to
+<code>NewMultiLLMCoordinatorWithFactory</code> /
+<code>NewPreparationCoordinatorWithFactory</code> /
+<code>NewBookPolisherWithFactory</code> WITHOUT those packages importing
+the bridge (§11.4.28); no API key captured/logged (§11.4.10)</td>
+<td>Covered (<code>pkg/bridge/ensemble_test.go</code>, -race green)</td>
+<td><strong>PASS</strong> (<code>go test ./pkg/bridge</code> → ok)</td>
+<td>PENDING (recording owed)</td>
+</tr>
+<tr>
+<td>bridge</td>
+<td><code>ProviderDiverseTranslators</code></td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired (backs <code>EnsembleFactory</code>)</td>
+<td><code>bridge.go:527</code> — returns provider-diverse verified
+<code>translator.Translator</code> set (one per distinct provider,
+strongest-first); the ensemble translator source</td>
+<td>Covered (<code>pkg/bridge/bridge_test.go</code>,
+<code>pkg/bridge/ensemble_test.go</code>, -race green)</td>
+<td><strong>PASS</strong> (<code>go test ./pkg/bridge</code> → ok)</td>
+<td>PENDING (recording owed)</td>
+</tr>
+<tr>
+<td>bridge</td>
+<td><code>ProviderDiverseClients</code></td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td><code>bridge.go:492</code> — returns provider-diverse verified
+low-level LLM clients (one per distinct provider, strongest-first) for
+callers needing the client rather than a translator</td>
+<td>Covered (<code>pkg/bridge/bridge_test.go</code>, -race green)</td>
+<td><strong>PASS</strong> (<code>go test ./pkg/bridge</code> → ok)</td>
+<td>PENDING (recording owed)</td>
+</tr>
+<tr>
+<td>bridge</td>
+<td><code>ProviderDiverseModels</code></td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired (backs the ProviderDiverse* set)</td>
+<td><code>bridge.go:455</code> — returns the provider-diverse verified
+<code>ModelInfo</code> list (one per distinct provider, strongest-first)
+underlying the ProviderDiverse clients/translators</td>
+<td>Covered (<code>pkg/bridge/bridge_test.go</code>, -race green)</td>
+<td><strong>PASS</strong> (<code>go test ./pkg/bridge</code> → ok)</td>
+<td>N/A (internal model-list helper — surfaced via the ProviderDiverse*
+translators/clients)</td>
+</tr>
+<tr>
+<td>bridge</td>
+<td><code>BestClient</code> (single strongest low-level client)</td>
+<td>Library</td>
+<td>Implemented</td>
+<td>Wired</td>
+<td><code>bridge.go:413</code> — returns the single strongest verified
+low-level LLM client for the task (client-level analogue of
+<code>BestTranslator</code>)</td>
+<td>Covered (<code>pkg/bridge/bridge_test.go</code>, -race green)</td>
+<td><strong>PASS</strong> (<code>go test ./pkg/bridge</code> → ok)</td>
+<td>N/A (internal client helper — surfaced via cmd/model-bridge /
+ProviderDiverse*)</td>
+</tr>
 </tbody>
 </table>
 <h2 id="pkgversion">pkg/version</h2>
@@ -7225,13 +7342,17 @@ distributed llama.cpp RPC</td>
 <h2 id="honest-gaps-caveats-11.4.6">Honest gaps &amp; caveats
 (§11.4.6)</h2>
 <ol type="1">
-<li><strong>Video coverage is 21 feature rows</strong> (+ 1
-real-artifact-confirmed). 21 features are confirmed by real, ffprobe-
-and content-verified recordings this session (see the Anti-bluff note
-for the full list); DOCX output is real-artifact-confirmed (produced
-<code>.docx</code> = Microsoft Word 2007+) with its video still PENDING.
-Every other runtime/user-visible feature is <code>PENDING</code> a
-recording. This is stated, not hidden. 1a. <strong>DOCX output is
+<li><strong>Video coverage is 23 feature rows</strong> (+ 2
+real-artifact/unit-confirmed). 23 features are confirmed by real,
+ffprobe- and content-verified recordings this session (see the
+Anti-bluff note + the Coverage-summary <code>Video-confirmed</code> row
+for the authoritative count and full list — this number is reconciled
+with both, §11.4.60); DOCX output and PDF output are
+real-artifact/unit-confirmed (DOCX = produced <code>.docx</code> =
+Microsoft Word 2007+; PDF = <code>pkg/ebook</code> tests green +
+weasyprint present) with their videos still PENDING. Every other
+runtime/user-visible feature is <code>PENDING</code> a recording or
+<code>N/A</code>. This is stated, not hidden. 1a. <strong>DOCX output is
 Implemented (Rev 3, commit 87cd2be)</strong> — pure-Go OOXML writer; a
 real DeepSeek run produced <code>garden_es.docx</code> =
 <code>Microsoft Word 2007+</code>. <strong>PDF output is now Implemented
@@ -7244,13 +7365,19 @@ EPUB/FB2/TXT/HTML/MD/DOCX/PDF. 1b. <strong><code>-multipass</code> ≠
 <code>-verify</code> flag runs the CLI’s own per-step output check; the
 separate <code>-multipass</code> flag (d53e085) invokes the
 <code>pkg/verification</code> multi-pass polisher engine — now wired and
-video-confirmed. 1c. <strong><code>cmd/translator</code> local path is a
-STUB</strong> (“local translation not yet implemented”); its remote path
-is OPERATOR-BLOCKED (no SSH/llama.cpp worker host). 1d.
-<strong><code>translate-ssh</code> + <code>ebook-translator</code> are
-OPERATOR-BLOCKED</strong> — both require a remote SSH worker host
-running llama.cpp; none available. Binaries build and run as far as
-possible (blocked-binaries demo recorded). 1e.
+video-confirmed. 1c. <strong><code>cmd/translator</code>,
+<code>cmd/translate-ssh</code>, <code>cmd/ebook-translator</code> are
+now Obsolete (→ Fixed.md), Rev 7</strong> — RECONCILED with the
+per-binary table rows (lines ~136/218/233) which mark all three
+<code>Obsolete (→ Fixed.md)</code> with
+Reason=<code>feature-removed</code>. The local-runtime + SSH-local
+translation paths were REMOVED in bridge phase-2 R-2..R-4
+(operator-approved 2026-06-15 D1/D2 + R-4 “keep distributed API, remove
+SSH-local”); the default path now sources the LLMsVerifier bridge
+(<code>pkg/bridge</code>). These are therefore NO LONGER open STUB /
+OPERATOR-BLOCKED items — the earlier “STUB / OPERATOR-BLOCKED” wording
+was stale and is corrected here. The KEPT distributed-API translation
+path is NOT Obsolete. 1e.
 <strong><code>GET /api/v1/verified-models</code> returns 404</strong> —
 LLMsVerifier is disabled in the current config so the route is not
 mounted (feature-disabled-by-config, not a defect). 1f.

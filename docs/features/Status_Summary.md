@@ -1,6 +1,6 @@
 # HelixTranslate — Feature Status Summary
 
-**Revision:** 7
+**Revision:** 8
 **Last modified:** 2026-06-16T00:00:00Z
 **Authority:** Two-audience companion to `docs/features/Status.md` (§11.4.56). Derived from the same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync), §11.4.6 (no-guessing).
 
@@ -12,7 +12,7 @@
 
 ## What works
 
-- We have a complete catalogue of **every feature** in the product and its 8 owned add-on modules — **478 individual capabilities** catalogued (470 from the source inventory + 2 output rows [DOCX + PDF output, both now built] + 6 new rows this round [the agent bridge CLI+MCP, the bridge library, the model-verification fix, the web-dashboard backend]; the headline "417" is the same list with closely-related sub-options counted once).
+- We have a complete catalogue of **every feature** in the product and its 8 owned add-on modules — **493 individual capabilities** catalogued (Rev 8 re-counted the live tables directly: the earlier "478" was a hand-tracked tally that had drifted; the real live count was 486, and this round added the 7 missing agent-bridge ensemble rows to reach 493; the headline "417" is the same list with closely-related sub-options counted once).
 - The majority are fully built and reachable: the command-line translators, the web dashboards, the REST and gRPC servers, ~32 built-in AI providers, ebook format readers (FB2, EPUB, DOCX, HTML, TXT, PDF) and writers (EPUB, FB2, TXT, HTML, Markdown, **DOCX and now PDF**), caching, security, and all 8 add-on modules.
 - **23 features are proven on real recordings** — each checked frame-by-frame to confirm it genuinely shows the feature working (real translated text in the right language, a live connection count changing, etc.), not just "a screen". These include: the primary command-line translator doing real DeepSeek translations and converting between ebook formats (EPUB→TXT, HTML→EPUB, FB2→EPUB, FB2→FB2), Serbian Cyrillic/Latin handling, the **multi-pass polishing engine (`-multipass`)**, the REST API server translating for real, the gRPC server translating English→Spanish, the markdown round-trip tool, the preparation/analysis runner (fixed), the simple CLI translator, the live monitoring dashboard, **the agent bridge command-line tool** (picks the best verifier-scored model and translates through it — recording shows it choosing `novita/Sao10K/L3-8B-Stheno-v3.2` and translating "Good morning, friend." → "Buenos días, amigo."), and **the agent bridge MCP-stdio server** (a real JSON-RPC MCP session — recording shows `tools/list`, `bridge_best_model`, and the `bridge_invoke` tool returning a live model translation "Le pont relie deux rives.").
 - **DOCX output** is built and proven by the produced file itself (a real `.docx` = "Microsoft Word 2007+" with real translated text). **PDF output is newly built this round** and proven by passing tests (it renders the translated book to a real, valid PDF that keeps Serbian Cyrillic readable). Screen recordings of both are still owed, so they count as file/test-proven rather than video-proven for now.
@@ -20,7 +20,7 @@
 
 ## What is pending or limited
 
-- **Video proof is still the main gap:** **23 of 478** features have a recorded, watch-it-yourself demonstration (≈ 4.8%). Everything else is built and present in the code, but a recording is still owed. Nothing is claimed proven just because the code exists.
+- **Video proof is still the main gap:** **23 of 493** features have a recorded, watch-it-yourself demonstration (≈ 4.7%). Everything else is built and present in the code, but a recording is still owed. Nothing is claimed proven just because the code exists.
 - **PDF *output* is now built** (this round). The product can *read* DOCX and PDF, and can now *write* DOCX **and PDF**. Output is now EPUB, FB2, TXT, HTML, Markdown, DOCX and PDF. (PDF writing needs the `weasyprint` tool, which is installed here.)
 - **The web dashboard's video proof is honestly skipped, not faked:** recording the dashboard translating end-to-end needs the HelixQA web/video test backend, which was off-limits to this round. The page is proven working by its tests + a real run, but its on-camera proof is owed.
 - **The on-this-computer AI engines and the remote-worker translators were removed (this round):** the product no longer runs a local AI model (llama.cpp / Ollama) and no longer ships the SSH-based remote-worker tools (`translate-ssh`, `ssh-translation`, `ebook-translator`, the documented `translator` tool). Every translation now uses an online verified AI provider chosen automatically via the LLMsVerifier bridge. These removed tools are marked **Obsolete** (operator-approved 2026-06-15). The team-facing distributed/API capability is kept.
@@ -30,7 +30,7 @@
 
 ## Video-confirmation coverage
 
-**23 / 478 ≈ 4.8%**, plus **2 real-artifact/test-confirmed** (DOCX + PDF output, video PENDING). This is the headline number to keep improving: each new genuine recording raises it.
+**23 / 493 ≈ 4.7%**, plus **2 real-artifact/test-confirmed** (DOCX + PDF output, video PENDING). This is the headline number to keep improving: each new genuine recording raises it.
 
 ## Team actions
 
@@ -50,8 +50,8 @@ Derived 1:1 from `docs/features/.feature_inventory_raw.md` (Rev 1). Every detail
 | Dimension | Value |
 |---|---|
 | Headline total (dedup per-category tally) | 417 |
-| Enumerated detailed rows (this doc + Status.md) | 478 (470 inventory + 2 output rows [DOCX-write Implemented Rev 3, PDF-write Implemented Rev 4] + 6 new Rev 4 rows: cmd/model-bridge ×2, pkg/bridge ×2, internal/verifier gate ×1, pkg/api/dashboard.go ×1) |
-| Implemented | 435 (was 471 Rev 6; −36 flipped to Obsolete Rev 7) |
+| Enumerated detailed rows (this doc + Status.md) | 493 (Rev 8 — re-derived mechanically from the live 60 feature tables via `awk` over 9-column rows; the earlier "478" hand-tally had drifted from the true live count of 486; Rev 8 added the 7 missing `pkg/bridge` ensemble-seam rows [`BestTranslator`, `BestTranslatorFunc`, `EnsembleFactory`, `ProviderDiverseTranslators`, `ProviderDiverseClients`, `ProviderDiverseModels`, `BestClient`] → 493) |
+| Implemented | 442 (Rev 8: 435 Rev 7 + 7 new pkg/bridge ensemble-seam rows; was 471 Rev 6, −36 flipped to Obsolete Rev 7) |
 | **Obsolete (→ Fixed.md)** | **39** (Rev 7 — bridge phase-2 R-2..R-4 removals: `cmd/translate-ssh`/`ssh-translation`/`translator`/`ebook-translator`, `pkg/sshworker`, `pkg/modelsbridge`, Ollama + llama.cpp providers; Reason=`feature-removed`) |
 | Stub | 4 |
 | Not implemented (gap rows) | 0 (PDF-write flipped gap→Implemented Rev 4, commit fb265e7) |
@@ -124,7 +124,7 @@ None — the Rev 6 operator-blocked binaries (`cmd/translate-ssh`, `cmd/ebook-tr
 
 ## Top gaps (engineering)
 
-1. **Video-confirmation 23/478** (+ 2 real-artifact/test-confirmed: DOCX + PDF output). 23 rows carry real, ffprobe- and content-verified recordings (Status.md cites each `.mp4`; the `-multipass` video is `helixtranslate-cli-multipass-verify-20260615.mp4`, ffprobe 888x630/93fr/9.3s; the bridge CLI video is `helixtranslate-bridge-bestmodel-translate-20260615.mp4`, ffprobe 790×560/80fr/8.0s; the bridge MCP-stdio video is `helixtranslate-bridge-mcp-stdio-20260615.mp4`, ffprobe 790×560/10fr/11.88s; the 3 video-surfaced bug fixes — prep-translator dead, server TLS startup, REST hardcoded target-lang — are in commit `a5e8866`). The remaining Rev-4 additions carry `PENDING` (PDF), `SKIP` (web dashboard — needs HelixQA web/video backend) or `N/A` (internal verifier gate). Per §11.4.2/§11.4.107 nothing may be marked video-confirmed without a real, content-verified file.
+1. **Video-confirmation 23/493** (+ 2 real-artifact/test-confirmed: DOCX + PDF output). 23 rows carry real, ffprobe- and content-verified recordings (Status.md cites each `.mp4`; the `-multipass` video is `helixtranslate-cli-multipass-verify-20260615.mp4`, ffprobe 888x630/93fr/9.3s; the bridge CLI video is `helixtranslate-bridge-bestmodel-translate-20260615.mp4`, ffprobe 790×560/80fr/8.0s; the bridge MCP-stdio video is `helixtranslate-bridge-mcp-stdio-20260615.mp4`, ffprobe 790×560/10fr/11.88s; the 3 video-surfaced bug fixes — prep-translator dead, server TLS startup, REST hardcoded target-lang — are in commit `a5e8866`). The remaining Rev-4 additions carry `PENDING` (PDF), `SKIP` (web dashboard — needs HelixQA web/video backend) or `N/A` (internal verifier gate). Per §11.4.2/§11.4.107 nothing may be marked video-confirmed without a real, content-verified file.
 2. **PDF output now Implemented** (Rev 4, commit fb265e7) — `pkg/ebook` now has FB2/EPUB/DOCX/PDF writers; zero open gap rows remain. Output is EPUB/FB2/TXT/HTML/MD/DOCX/PDF.
 3. **`-multipass` wired (d53e085); `-verify` ≠ `-multipass`** — unified-translator `-verify` runs the CLI's own per-step check; the new `-multipass` flag invokes the `pkg/verification` multi-pass polisher engine (now wired + video-confirmed). cmd/cli write-safety FIXED (87cd2be, atomic write/no-clobber, guard cmd/cli/no_partial_output_test.go) + title path-leak FIXED (d53e085).
 4. **SSH-local + local-runtime features removed (Rev 7, 39 rows Obsolete)** — `translate-ssh`/`ssh-translation`/`translator`/`ebook-translator` binaries, `pkg/sshworker`, `pkg/modelsbridge`, and the Ollama + llama.cpp providers are gone (operator-approved); the default path now sources the LLMsVerifier bridge.
@@ -135,7 +135,7 @@ None — the Rev 6 operator-blocked binaries (`cmd/translate-ssh`, `cmd/ebook-tr
 
 ## Video-coverage ratio
 
-`23 / 478` enumerated rows = **4.8%** (≈ 5.5% against the 417 headline). Plus 2 real-artifact/test-confirmed (DOCX + PDF output, video PENDING). This is the primary metric to drive upward; each anti-bluff §11.4.107 recording increments the numerator.
+`23 / 493` enumerated rows = **4.7%** (≈ 5.5% against the 417 headline). Plus 2 real-artifact/test-confirmed (DOCX + PDF output, video PENDING). This is the primary metric to drive upward; each anti-bluff §11.4.107 recording increments the numerator.
 
 ## Cross-references
 

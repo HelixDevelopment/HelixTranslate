@@ -177,7 +177,7 @@
 </header>
 <h1 id="helixtranslate-feature-status-summary">HelixTranslate — Feature
 Status Summary</h1>
-<p><strong>Revision:</strong> 7 <strong>Last modified:</strong>
+<p><strong>Revision:</strong> 8 <strong>Last modified:</strong>
 2026-06-16T00:00:00Z <strong>Authority:</strong> Two-audience companion
 to <code>docs/features/Status.md</code> (§11.4.56). Derived from the
 same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync),
@@ -191,12 +191,12 @@ catalogued and how much we have proven works on camera.</p>
 <h2 id="what-works">What works</h2>
 <ul>
 <li>We have a complete catalogue of <strong>every feature</strong> in
-the product and its 8 owned add-on modules — <strong>478 individual
-capabilities</strong> catalogued (470 from the source inventory + 2
-output rows [DOCX + PDF output, both now built] + 6 new rows this round
-[the agent bridge CLI+MCP, the bridge library, the model-verification
-fix, the web-dashboard backend]; the headline “417” is the same list
-with closely-related sub-options counted once).</li>
+the product and its 8 owned add-on modules — <strong>493 individual
+capabilities</strong> catalogued (Rev 8 re-counted the live tables
+directly: the earlier “478” was a hand-tracked tally that had drifted;
+the real live count was 486, and this round added the 7 missing
+agent-bridge ensemble rows to reach 493; the headline “417” is the same
+list with closely-related sub-options counted once).</li>
 <li>The majority are fully built and reachable: the command-line
 translators, the web dashboards, the REST and gRPC servers, ~32 built-in
 AI providers, ebook format readers (FB2, EPUB, DOCX, HTML, TXT, PDF) and
@@ -246,8 +246,8 @@ return “page not found” and now genuinely translates.</li>
 <h2 id="what-is-pending-or-limited">What is pending or limited</h2>
 <ul>
 <li><strong>Video proof is still the main gap:</strong> <strong>23 of
-478</strong> features have a recorded, watch-it-yourself demonstration
-(≈ 4.8%). Everything else is built and present in the code, but a
+493</strong> features have a recorded, watch-it-yourself demonstration
+(≈ 4.7%). Everything else is built and present in the code, but a
 recording is still owed. Nothing is claimed proven just because the code
 exists.</li>
 <li><strong>PDF <em>output</em> is now built</strong> (this round). The
@@ -282,7 +282,7 @@ stats endpoint that always shows zeros). These are flagged in the
 detailed document.</li>
 </ul>
 <h2 id="video-confirmation-coverage">Video-confirmation coverage</h2>
-<p><strong>23 / 478 ≈ 4.8%</strong>, plus <strong>2
+<p><strong>23 / 493 ≈ 4.7%</strong>, plus <strong>2
 real-artifact/test-confirmed</strong> (DOCX + PDF output, video
 PENDING). This is the headline number to keep improving: each new
 genuine recording raises it.</p>
@@ -324,13 +324,19 @@ honest unknown, never guessed).</p>
 </tr>
 <tr>
 <td>Enumerated detailed rows (this doc + Status.md)</td>
-<td>478 (470 inventory + 2 output rows [DOCX-write Implemented Rev 3,
-PDF-write Implemented Rev 4] + 6 new Rev 4 rows: cmd/model-bridge ×2,
-pkg/bridge ×2, internal/verifier gate ×1, pkg/api/dashboard.go ×1)</td>
+<td>493 (Rev 8 — re-derived mechanically from the live 60 feature tables
+via <code>awk</code> over 9-column rows; the earlier “478” hand-tally
+had drifted from the true live count of 486; Rev 8 added the 7 missing
+<code>pkg/bridge</code> ensemble-seam rows [<code>BestTranslator</code>,
+<code>BestTranslatorFunc</code>, <code>EnsembleFactory</code>,
+<code>ProviderDiverseTranslators</code>,
+<code>ProviderDiverseClients</code>, <code>ProviderDiverseModels</code>,
+<code>BestClient</code>] → 493)</td>
 </tr>
 <tr>
 <td>Implemented</td>
-<td>435 (was 471 Rev 6; −36 flipped to Obsolete Rev 7)</td>
+<td>442 (Rev 8: 435 Rev 7 + 7 new pkg/bridge ensemble-seam rows; was 471
+Rev 6, −36 flipped to Obsolete Rev 7)</td>
 </tr>
 <tr>
 <td><strong>Obsolete (→ Fixed.md)</strong></td>
@@ -548,7 +554,7 @@ local provider was removed in bridge phase-2 R-4).</li>
 </ul>
 <h2 id="top-gaps-engineering">Top gaps (engineering)</h2>
 <ol type="1">
-<li><strong>Video-confirmation 23/478</strong> (+ 2
+<li><strong>Video-confirmation 23/493</strong> (+ 2
 real-artifact/test-confirmed: DOCX + PDF output). 23 rows carry real,
 ffprobe- and content-verified recordings (Status.md cites each
 <code>.mp4</code>; the <code>-multipass</code> video is
@@ -599,7 +605,7 @@ several <code>llms_verifier</code> packages
 <code>doc_processor/archdoc</code>.</li>
 </ol>
 <h2 id="video-coverage-ratio">Video-coverage ratio</h2>
-<p><code>23 / 478</code> enumerated rows = <strong>4.8%</strong> (≈ 5.5%
+<p><code>23 / 493</code> enumerated rows = <strong>4.7%</strong> (≈ 5.5%
 against the 417 headline). Plus 2 real-artifact/test-confirmed (DOCX +
 PDF output, video PENDING). This is the primary metric to drive upward;
 each anti-bluff §11.4.107 recording increments the numerator.</p>
