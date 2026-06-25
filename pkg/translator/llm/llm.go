@@ -257,6 +257,54 @@ func NewLLMTranslatorWithConfig(config TranslationConfig) (*LLMTranslator, error
 		}
 	}
 
+	client, err := newClientForProvider(provider, config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &LLMTranslator{
+		BaseTranslator: NewBaseTranslator(config),
+		provider:       provider,
+		client:         client,
+	}, nil
+}
+
+// NewLLMTranslatorWithClient wraps an already-constructed LLMClient in an
+// LLMTranslator carrying the given config, so the translator's prompt builder
+// honors the configured SourceLang / TargetLang / Script. It is the seam the
+// bridge's explicit-provider path uses: build a provider client (possibly the
+// whitelist-immune generic OpenAI-compatible client for a verified model), then
+// wrap it here so the REAL translation prompt — not the raw input text — reaches
+// the model. The reported provider name comes from config.Provider.
+func NewLLMTranslatorWithClient(config translator.TranslationConfig, client LLMClient) *LLMTranslator {
+	local := ConvertFromTranslatorConfig(config)
+	return &LLMTranslator{
+		BaseTranslator: NewBaseTranslator(local),
+		provider:       Provider(local.Provider),
+		client:         client,
+	}
+}
+
+// NewClientForProvider builds the raw per-provider LLMClient for an EXPLICIT
+// provider selection, honoring config.Model / config.APIKey / config.BaseURL.
+// It is the client-only counterpart of NewLLMTranslatorWithConfig (which wraps the
+// same client in an LLMTranslator), exported so the bridge's explicit-provider
+// path (`-provider X`) can build a native-wire client (e.g. anthropic) without a
+// translator wrapper. Unsupported providers yield an honest error — never a silent
+// fallback to a different provider (§11.4.69). No API key is logged (§11.4.10).
+func NewClientForProvider(config translator.TranslationConfig) (LLMClient, error) {
+	local := ConvertFromTranslatorConfig(config)
+	provider := Provider(local.Provider)
+	if provider == "" {
+		return nil, fmt.Errorf("provider must be specified")
+	}
+	return newClientForProvider(provider, local)
+}
+
+// newClientForProvider is the single per-provider client construction switch,
+// shared by NewLLMTranslatorWithConfig and NewClientForProvider so the provider
+// set never drifts between the translator and client construction paths.
+func newClientForProvider(provider Provider, config TranslationConfig) (LLMClient, error) {
 	var client LLMClient
 	var err error
 
@@ -323,12 +371,7 @@ func NewLLMTranslatorWithConfig(config TranslationConfig) (*LLMTranslator, error
 	if err != nil {
 		return nil, fmt.Errorf("failed to create LLM client: %w", err)
 	}
-
-	return &LLMTranslator{
-		BaseTranslator: NewBaseTranslator(config),
-		provider:       provider,
-		client:         client,
-	}, nil
+	return client, nil
 }
 
 // GetName returns the translator name

@@ -440,6 +440,143 @@ func (b *Bridge) Invoke(ctx context.Context, system, prompt string) (string, err
 	return out, nil
 }
 
+// ProviderRequest carries an operator's EXPLICIT provider selection and optional
+// per-field overrides for TranslatorForProvider / ClientForProvider. It exists so
+// an explicit `-provider X` (with optional `-model` / `-api-key` / `-base-url`)
+// constructs THAT provider's client deterministically — honoring the operator's
+// choice instead of the bridge's global strongest-verified-model selection.
+//
+// Override precedence per field (§11.4.6 — deterministic, no guessing):
+//   - Model:   Model flag → strongest VERIFIED model for the provider → error
+//     (an explicit provider with no -model and no verified model for it is a
+//     misconfiguration, NOT a silent switch to another provider).
+//   - BaseURL: BaseURL flag → resolver's canonical OpenAI-compatible base URL for
+//     the provider → (provider not OpenAI-compatible, e.g. anthropic) the native
+//     client's own default.
+//   - APIKey:  APIKey flag → <PROVIDER>_API_KEY env (via the bridge's keyResolver)
+//     → error (NEVER a silent empty-key client).
+type ProviderRequest struct {
+	ProviderID string
+	Model      string
+	APIKey     string
+	BaseURL    string
+	Task       selection.TaskRequirements
+}
+
+// openAICompatibleProviders is the set of provider ids the generic
+// OpenAI-compatible client serves directly (their endpoints speak the OpenAI
+// chat/completions wire format). It mirrors internal/verifier.envProviderSpecs.
+// Providers OUTSIDE this set (e.g. "anthropic") use a native non-OpenAI wire
+// format and MUST be built through the per-provider client (NewLLMTranslatorWithConfig).
+var openAICompatibleProviders = map[string]bool{
+	"openai": true, "deepseek": true, "groq": true, "openrouter": true,
+	"cerebras": true, "mistral": true, "together": true, "fireworks": true,
+	"nvidia": true, "sambanova": true, "hyperbolic": true, "novita": true,
+	"siliconflow": true, "zhipu": true, "upstage": true, "gemini": true,
+}
+
+// strongestVerifiedModelFor returns the strongest VERIFIED model id for the given
+// provider id, or "" if the provider has no verified model in the registry.
+func (b *Bridge) strongestVerifiedModelFor(ctx context.Context, providerID string) string {
+	for _, m := range b.rankedModels() { // score-descending
+		if m.ProviderID == providerID {
+			return m.ModelID
+		}
+	}
+	return ""
+}
+
+// TranslatorForProvider builds a translator.Translator for the EXPLICITLY requested
+// provider, honoring -model / -api-key / -base-url overrides (see ProviderRequest).
+// It is the no-silent-fallback path for `-provider X`: it constructs THAT provider's
+// client and hard-errors on misconfiguration (unknown provider / no model / no key)
+// rather than switching to a different provider or a local runtime (§11.4.69).
+//
+// For OpenAI-compatible providers it builds the whitelist-immune generic client
+// (so a verified model outside a provider's static whitelist is accepted), routed
+// to the provider's base URL. For native-wire providers (anthropic) it delegates
+// to the per-provider client via the llm factory. No API key is logged (§11.4.10).
+func (b *Bridge) TranslatorForProvider(ctx context.Context, req ProviderRequest) (translator.Translator, error) {
+	c, err := b.ClientForProvider(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &clientTranslator{client: c}, nil
+}
+
+// ClientForProvider is TranslatorForProvider's llm.LLMClient-returning core. See
+// ProviderRequest for the override precedence. It NEVER silently falls back to a
+// different provider, an empty key, or a local runtime.
+func (b *Bridge) ClientForProvider(ctx context.Context, req ProviderRequest) (llmClient, error) {
+	providerID := strings.TrimSpace(req.ProviderID)
+	if providerID == "" {
+		return nil, fmt.Errorf("bridge: explicit provider request has empty provider id")
+	}
+
+	// Resolve the model: explicit -model wins; else the strongest verified model
+	// for THIS provider; else an honest error (never a cross-provider switch).
+	modelID := strings.TrimSpace(req.Model)
+	if modelID == "" {
+		modelID = b.strongestVerifiedModelFor(ctx, providerID)
+	}
+	if modelID == "" {
+		return nil, fmt.Errorf(
+			"bridge: provider %q has no verified model and no -model was given; "+
+				"pass -model <id> or choose a provider with a verified model",
+			providerID)
+	}
+
+	// Resolve the API key: explicit -api-key wins; else <PROVIDER>_API_KEY via the
+	// bridge's keyResolver (env). Empty → honest error (never an empty-key client).
+	apiKey := strings.TrimSpace(req.APIKey)
+	if apiKey == "" {
+		apiKey = b.factory.ResolveProviderKey(providerID)
+	}
+	if apiKey == "" {
+		return nil, fmt.Errorf(
+			"bridge: no API key for provider %q; pass -api-key or set the provider's *_API_KEY env var",
+			providerID)
+	}
+
+	// OpenAI-compatible providers → whitelist-immune generic client at the
+	// resolved (or overridden) base URL. The provider id is the delegation marker
+	// (!= "openai" → skip the static model whitelist; genuine "openai" keeps it).
+	if openAICompatibleProviders[providerID] {
+		baseURL := strings.TrimSpace(req.BaseURL)
+		if baseURL == "" {
+			if rp, rerr := b.resolver.ResolveProvider(providerID); rerr == nil {
+				baseURL = rp.BaseURL
+			}
+		}
+		marker := providerID
+		c, err := clientBuild(marker, modelID, &verifier.ResolvedProvider{
+			ProviderID: providerID,
+			APIKey:     apiKey,
+			BaseURL:    baseURL,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("bridge: build %s client: %w", providerID, err)
+		}
+		return c, nil
+	}
+
+	// Native-wire providers (anthropic, …): build via the per-provider llm client,
+	// honoring -base-url when given. The client reports its own provider name; wrap
+	// it so GetProviderName reflects the requested provider id for honest logging.
+	nativeClient, err := llm.NewClientForProvider(translator.TranslationConfig{
+		Provider:   providerID,
+		Model:      modelID,
+		APIKey:     apiKey,
+		BaseURL:    req.BaseURL,
+		SourceLang: req.Task.SourceLang,
+		TargetLang: req.Task.TargetLang,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("bridge: build %s client: %w", providerID, err)
+	}
+	return &markedClient{LLMClient: nativeClient, provider: providerID}, nil
+}
+
 // ProviderDiverseModels returns the STRONGEST verified model of EACH distinct
 // provider, ranked score-descending — the metadata backbone of the provider-
 // diverse ensemble. It preserves multi-provider diversity (one model per

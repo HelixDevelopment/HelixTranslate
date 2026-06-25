@@ -44,6 +44,18 @@ type UnifiedConfig struct {
 
 	// Provider Selection
 	Provider string // openai, anthropic, zhipu, deepseek, qwen, gemini
+	// ProviderExplicit is true when the operator passed -provider on the command
+	// line (vs. the default). When true, the run MUST route to THAT provider's
+	// client (honoring -model/-api-key/-base-url) and hard-error on
+	// misconfiguration — it must NOT fall through to the bridge's global
+	// strongest-verified-model selection (§11.4.69: no silent wrong-provider).
+	ProviderExplicit bool
+	// ModelExplicit is true when the operator passed -model. The Model field
+	// defaults to "gpt-4", so the explicit-provider path must NOT treat that
+	// default as a requested model for a non-openai provider (e.g. gemini): it
+	// would be a wrong-model misconfiguration. Only an explicit -model overrides
+	// the per-provider strongest-verified-model selection.
+	ModelExplicit bool
 
 	// API/Local LLM Configuration
 	APIKey      string
@@ -313,9 +325,14 @@ func executeProviderTranslation(ctx context.Context, config *UnifiedConfig, sess
 
 // executeAPITranslation uses API-based LLM providers
 func executeAPITranslation(ctx context.Context, config *UnifiedConfig, session *TranslationSession, text string) (string, error) {
+	// Report the REQUESTED provider here; the concrete model is selected below
+	// (bridge / explicit-provider path) and logged once the translator is built —
+	// the old code logged config.Model ("gpt-4" default) unconditionally, which
+	// misleadingly implied an OpenAI gpt-4 call even when another provider/model
+	// was actually used.
 	session.Logger.Info("Starting API-based translation", map[string]interface{}{
-		"provider": config.Provider,
-		"model":    config.Model,
+		"provider":          config.Provider,
+		"provider_explicit": config.ProviderExplicit,
 	})
 
 	// trans is the translator.Translator surface every branch produces; the
@@ -348,6 +365,18 @@ func executeAPITranslation(ctx context.Context, config *UnifiedConfig, session *
 			return "", fmt.Errorf("verified translation failed: %w", err)
 		}
 		trans = lt
+	case config.ProviderExplicit:
+		// EXPLICIT -provider X: honor the operator's provider choice. Build THAT
+		// provider's client (honoring -model/-api-key/-base-url; key from
+		// <PROVIDER>_API_KEY env when -api-key absent) and hard-error on
+		// misconfiguration. NEVER fall through to the bridge's global
+		// strongest-verified selection — a silent wrong-provider switch is
+		// forbidden (§11.4.69). The bridge still bootstraps verified models so a
+		// bare `-provider X` (no -model) can pick X's strongest verified model.
+		trans, err = providerTranslator(ctx, config)
+		if err != nil {
+			return "", fmt.Errorf("provider=%s translation unavailable (no silent fallback): %w", config.Provider, err)
+		}
 	default:
 		// R-1/R2 default: source the strongest verified model from the LLMsVerifier
 		// bridge — NO local runtime, NO hardcoded provider. On no API keys the
@@ -359,6 +388,12 @@ func executeAPITranslation(ctx context.Context, config *UnifiedConfig, session *
 			return "", fmt.Errorf("bridge translation unavailable (no local-runtime fallback): %w", err)
 		}
 	}
+
+	// Log the translator actually selected (honest provider, no API key) — so the
+	// run reports the REAL provider used instead of the raw -provider/-model flags.
+	session.Logger.Info("Translator selected", map[string]interface{}{
+		"selected_provider": trans.GetName(),
+	})
 
 	// Translate
 	result, err := trans.TranslateWithProgress(ctx, text, "Ebook content", session.EventBus, session.ID)
@@ -397,6 +432,52 @@ func bridgeTranslator(ctx context.Context, config *UnifiedConfig) (translator.Tr
 		return nil, err
 	}
 	return tr, nil
+}
+
+// providerTranslator builds a translator for the EXPLICITLY requested -provider,
+// honoring -model/-api-key/-base-url overrides and sourcing the key from
+// <PROVIDER>_API_KEY when -api-key is absent. It opens the bridge (so a bare
+// `-provider X` with no -model can select X's strongest VERIFIED model) and routes
+// through bridge.TranslatorForProvider, which constructs THAT provider's client and
+// hard-errors on misconfiguration — NEVER a silent switch to another provider or a
+// local runtime (§11.4.69).
+func providerTranslator(ctx context.Context, config *UnifiedConfig) (translator.Translator, error) {
+	b, err := bridgeOpener(ctx)
+	if err != nil {
+		return nil, err
+	}
+	// Only forward -model when the operator actually set it; otherwise the bridge
+	// selects the strongest VERIFIED model for the provider (the "gpt-4" default
+	// must not leak in as a wrong model for e.g. gemini).
+	model := ""
+	if config.ModelExplicit {
+		model = config.Model
+	}
+	task := selection.TaskRequirements{
+		SourceLang: config.SourceLang,
+		TargetLang: config.TargetLang,
+	}
+	// Build the raw provider client (honors provider/model/key/base-url + no silent
+	// fallback), then wrap it in an LLMTranslator so the REAL translation prompt
+	// (source/target/script-aware) reaches the model — the bare client would
+	// receive only the raw text and answer conversationally instead of translating.
+	client, err := b.ClientForProvider(ctx, bridge.ProviderRequest{
+		ProviderID: config.Provider,
+		Model:      model,
+		APIKey:     config.APIKey,
+		BaseURL:    config.BaseURL,
+		Task:       task,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return llm.NewLLMTranslatorWithClient(translator.TranslationConfig{
+		Provider:   config.Provider,
+		Model:      config.Model,
+		SourceLang: config.SourceLang,
+		TargetLang: config.TargetLang,
+		Script:     config.Script,
+	}, client), nil
 }
 
 // executeVerifiedTranslation uses VerifiedFactory to select and translate with a verified model.
@@ -546,6 +627,20 @@ func parseFlags() *UnifiedConfig {
 	help := flag.Bool("help", false, "Show help information")
 
 	flag.Parse()
+
+	// Detect whether -provider was passed explicitly on the command line (vs. left
+	// at its default). flag.Visit only iterates flags that were actually set, so
+	// this distinguishes `-provider gemini` from the default "openai" — the signal
+	// that the operator's provider choice MUST be honored (routed to that provider's
+	// client) rather than overridden by the bridge's strongest-verified selection.
+	flag.Visit(func(f *flag.Flag) {
+		switch f.Name {
+		case "provider":
+			config.ProviderExplicit = true
+		case "model":
+			config.ModelExplicit = true
+		}
+	})
 
 	if *versionFlag {
 		fmt.Printf("Unified Translator v%s\n", appVersion)

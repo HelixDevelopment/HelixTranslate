@@ -7,6 +7,7 @@ import (
 	"digital.vasic.translator/pkg/ebook"
 	"digital.vasic.translator/pkg/markdown"
 	"digital.vasic.translator/pkg/preparation"
+	"digital.vasic.translator/pkg/translator/llm"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -42,7 +43,23 @@ func main() {
 	keepMarkdown := flag.Bool("keep-md", true, "Keep intermediate markdown files")
 	enablePreparation := flag.Bool("prepare", false, "Enable preparation phase with multi-LLM analysis")
 	preparationPasses := flag.Int("prep-passes", 2, "Number of preparation analysis passes")
+	apiKey := flag.String("api-key", "", "API key for the provider (overrides <PROVIDER>_API_KEY env)")
+	baseURL := flag.String("base-url", "", "Base URL override for the provider")
 	flag.Parse()
+
+	// Detect whether -provider / -model were passed EXPLICITLY (vs. their defaults).
+	// An explicit -provider must route to THAT provider's client (honoring -model/
+	// -api-key/-base-url) and hard-error on misconfiguration — never the bridge's
+	// global strongest-verified selection (§11.4.69: no silent wrong-provider).
+	var providerExplicit, modelExplicit bool
+	flag.Visit(func(f *flag.Flag) {
+		switch f.Name {
+		case "provider":
+			providerExplicit = true
+		case "model":
+			modelExplicit = true
+		}
+	})
 
 	if *inputFile == "" {
 		fmt.Println("Usage: markdown-translator -input <file> [-output <output_file>] [-format <format>] [-lang <language>] [-provider <provider>] [-keep-md]")
@@ -108,11 +125,14 @@ func main() {
 	}
 	task := selection.TaskRequirements{TargetLang: *targetLang}
 
-	// -provider/-model are advisory under R2 (the bridge selects the verified
-	// model). Surface them so the operator sees they no longer drive selection,
-	// and so the retained flags remain referenced (removal is R-2/R-4).
-	if *model != "" {
+	// When -provider is NOT set explicitly, it stays advisory under R2 (the bridge
+	// selects the strongest verified model). When it IS set explicitly, it is
+	// HONORED: the run routes to that provider's client (see bridgeWorkflowConfig).
+	if !providerExplicit && *model != "" {
 		fmt.Printf("ℹ️  -provider=%s -model=%s are advisory; the bridge selects the strongest verified model.\n", *provider, *model)
+	}
+	if providerExplicit {
+		fmt.Printf("ℹ️  -provider=%s is honored (explicit); routing to that provider.\n", *provider)
 	}
 
 	fmt.Printf("🚀 Markdown-Based Translation Pipeline\n\n")
@@ -231,7 +251,17 @@ func main() {
 	// so the seam is genuinely wired (not an unset, nil-panicking field).
 	fmt.Printf("🔧 Step %d/%d: Initializing translator...\n", stepNum, totalSteps)
 	ctx := context.Background()
-	workflowCfg, err := bridgeWorkflowConfig(ctx, b, task)
+	explicitModel := ""
+	if modelExplicit {
+		explicitModel = *model
+	}
+	workflowCfg, err := bridgeWorkflowConfig(ctx, b, task, providerSelection{
+		explicit:   providerExplicit,
+		providerID: *provider,
+		model:      explicitModel,
+		apiKey:     *apiKey,
+		baseURL:    *baseURL,
+	})
 	if err != nil {
 		log.Fatalf("Failed to create translator: %v", err)
 	}
@@ -322,8 +352,34 @@ const bridgeOpenTimeout = 5*time.Minute + 30*time.Second
 // returns an honest hard error and this function propagates it, so there is
 // NEVER a silent local-runtime (e.g. llama.cpp) fallback (§11.4.69). The former
 // -provider/llamacpp arm is intentionally removed.
-func bridgeWorkflowConfig(ctx context.Context, b *bridge.Bridge, task selection.TaskRequirements) (markdown.WorkflowConfig, error) {
-	client, err := b.BestClient(ctx, task)
+// providerSelection carries the operator's provider routing choice for
+// bridgeWorkflowConfig: when explicit is true the run is routed to providerID's
+// client (honoring model/apiKey/baseURL); otherwise the bridge selects the
+// strongest verified model (the R2 advisory default).
+type providerSelection struct {
+	explicit   bool
+	providerID string
+	model      string
+	apiKey     string
+	baseURL    string
+}
+
+func bridgeWorkflowConfig(ctx context.Context, b *bridge.Bridge, task selection.TaskRequirements, sel providerSelection) (markdown.WorkflowConfig, error) {
+	var client llm.LLMClient
+	var err error
+	if sel.explicit {
+		// EXPLICIT -provider X: build THAT provider's client (no silent fallback).
+		client, err = b.ClientForProvider(ctx, bridge.ProviderRequest{
+			ProviderID: sel.providerID,
+			Model:      sel.model,
+			APIKey:     sel.apiKey,
+			BaseURL:    sel.baseURL,
+			Task:       task,
+		})
+	} else {
+		// R2 advisory default: strongest verified model across all providers.
+		client, err = b.BestClient(ctx, task)
+	}
 	if err != nil {
 		return markdown.WorkflowConfig{}, err
 	}

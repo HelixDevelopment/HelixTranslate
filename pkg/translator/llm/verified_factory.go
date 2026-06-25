@@ -98,6 +98,15 @@ func (f *VerifiedFactory) resolveAPIKey(providerID string) string {
 	return ""
 }
 
+// ResolveProviderKey exposes the factory's configured key resolution for a
+// provider id (the keyResolver set via SetKeyResolver, e.g. the bridge's
+// env-reading resolver). It returns "" when no key is configured. Used by the
+// bridge's explicit-provider path to source <PROVIDER>_API_KEY from the
+// environment without duplicating the resolution wiring. No key is logged.
+func (f *VerifiedFactory) ResolveProviderKey(providerID string) string {
+	return f.resolveAPIKey(providerID)
+}
+
 // CreateTranslator builds an LLM translator for the best verified model
 // matching the given task requirements.
 func (f *VerifiedFactory) CreateTranslator(ctx context.Context, task selection.TaskRequirements) (*LLMTranslator, error) {
