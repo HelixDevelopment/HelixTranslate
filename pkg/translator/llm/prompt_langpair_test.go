@@ -168,3 +168,25 @@ func TestPromptEmptyConfigDefaultsToRussianSerbian(t *testing.T) {
 		t.Errorf("empty-lang config MUST default to Ekavica guidance; got:\n%s", p2)
 	}
 }
+
+// TestPromptNamesUnderspecifiedCyrillicAndEasternLangs is the regression test
+// for the defect where languageName() lacked entries for Belarusian (be),
+// Kazakh (kk) and Persian (fa). The generic prompt then fell back to the raw
+// code ("...into natural, idiomatic be"), and the model guessed — producing
+// Bulgarian for "be" in particular (caught by the independent §11.4.141 review).
+// The prompt MUST name the real language so the model is unambiguously steered.
+func TestPromptNamesUnderspecifiedCyrillicAndEasternLangs(t *testing.T) {
+	cases := map[string]string{"be": "Belarusian", "kk": "Kazakh", "fa": "Persian"}
+	for code, name := range cases {
+		t.Run(code, func(t *testing.T) {
+			p := newPromptTranslator("en", code, "").createTranslationPrompt("hello", "")
+			if !strings.Contains(p, name) {
+				t.Errorf("prompt for en->%s must name %q; got:\n%s", code, name, p)
+			}
+			// Belarusian must NOT be confused with Bulgarian.
+			if code == "be" && strings.Contains(p, "Bulgarian") {
+				t.Errorf("en->be prompt must not mention Bulgarian")
+			}
+		})
+	}
+}
