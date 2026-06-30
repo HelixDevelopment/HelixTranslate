@@ -1,3 +1,11 @@
+<!-- HELIX-CONSTITUTION-INHERITANCE (prepended; do not remove) -->
+> **Base agent rules: Helix Constitution** — `constitution/AGENTS.md` and the
+> `constitution/Constitution.md` it references. READ THEM FIRST; they are
+> authoritative for any topic not covered below and are never weakened by it.
+> Locate the constitution from any nested depth via `constitution/find_constitution.sh`.
+> Canonical reference: https://github.com/HelixDevelopment/HelixConstitution
+<!-- END HELIX-CONSTITUTION-INHERITANCE -->
+
 <!-- AGENTS.md - Universal Multi-Format Multi-Language Ebook Translation System -->
 
 > Base agent rules: `constitution/AGENTS.md` — READ IT FIRST.

@@ -1,3 +1,16 @@
+<!-- HELIX-CONSTITUTION-INHERITANCE (prepended; do not remove) -->
+## INHERITED FROM Helix Constitution
+
+This module is integrated as a submodule of a project that includes the
+Helix Constitution submodule. All rules in `constitution/CLAUDE.md` and the
+`constitution/Constitution.md` it references apply unconditionally — they are
+never weakened by anything below. Locate the constitution submodule from any
+arbitrary nested depth using its `find_constitution.sh` helper.
+
+Canonical reference: https://github.com/HelixDevelopment/HelixConstitution
+
+<!-- END HELIX-CONSTITUTION-INHERITANCE -->
+
 # CLAUDE.md
 
 ## INHERITED FROM constitution/CLAUDE.md
