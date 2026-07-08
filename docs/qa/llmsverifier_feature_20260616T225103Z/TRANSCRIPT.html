@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>TRANSCRIPT</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">TRANSCRIPT</h1>
+</header>
+<h1
+id="qa-evidence-transcript--llmsverifier-verify-completion--honest-scoring-11483">QA
+Evidence Transcript — LLMsVerifier verify-completion + honest scoring
+(§11.4.83)</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-17T00:00:00Z <strong>Project:</strong> helix_translate
+<strong>Scope:</strong> the verify-completion feature shipped this
+session — the LLMsVerifier now runs real per-model verification and
+persists honest 0.0–1.0 scores; helixtranslate exposes the verified set
+via <code>/api/v1/verified-models</code>. <strong>Submodule
+commit:</strong> <code>ed03a98c</code> (<code>llms_verifier/</code>) ·
+<strong>parent gitlink:</strong> <code>9aa8d2d</code>
+<strong>Discipline:</strong> facts only (§11.4.6); every claim cites a
+source-evidence path. Unproven items are marked UNCONFIRMED. No secret
+values appear in this document (§11.4.10).</p>
+<blockquote>
+<p>NOTE — this is a CURATED record assembled from the session's raw QA
+evidence on T7. The raw evidence paths are cited verbatim so a future
+reader/operator can re-open the underlying artefacts. This transcript
+itself introduces no new claims beyond what those artefacts show.</p>
+</blockquote>
+<hr />
+<h2 id="0-one-line-summary">0. One-line summary</h2>
+<p>The verifier verifies real models and persists honest scores (2
+verified: <code>deepseek-chat</code> 0.80,
+<code>llama-3.3-70b-versatile</code> 1.0, reachable from the
+helixtranslate API in-container); an attempt to WIRE that verified set
+into the live translation path on nezha was <strong>not viable</strong>,
+was <strong>auto-rolled-back</strong>, and left translation
+<strong>NON-degraded</strong> on the working direct path
+(<code>llm-novita</code> / <code>llm-mistral</code>).</p>
+<hr />
+<h2 id="1-what-the-feature-does--runtime-signature">1. What the feature
+does + runtime signature</h2>
+<h3 id="11-the-feature">1.1 The feature</h3>
+<p>The LLMsVerifier submodule now (a) seeds candidate models from its
+<code>config.yaml</code> <code>llms:</code> at boot and (b) runs a real
+per-model verification pass (<code>POST /api/models/{id}/verify</code>)
+that makes live provider API calls and <strong>persists an honest
+0.0–1.0 score</strong> plus a <code>verification_status</code>. Models
+that pass become <code>verification_status:"verified"</code>;
+helixtranslate reads the verified set through its
+<code>/api/v1/verified-models</code> reporting endpoint.</p>
+<h3
+id="12-runtime-signature-fact--countverified2-two-models--scores">1.2
+Runtime signature (FACT — count(verified)=2, two models + scores)</h3>
+<p>Captured live against the nezha deployment during the enable attempt
+(verifier reachable, the helixtranslate API serving the verified
+set):</p>
+<ul>
+<li>helixtranslate API <code>:18443 GET /api/v1/verified-models</code> →
+<code>{"count":2,"models":[ {"id":"deepseek-chat","name":"DeepSeek Provider","overall_score":0.7999999999999999,"verification_status":"verified"}, {"id":"llama-3.3-70b-versatile","name":"Groq Provider","overall_score":1,"verification_status":"verified"} ]}</code>
+— evidence:
+<code>helixtranslate_enable_20260616T222048Z/step2b_verified_models_after.json</code>.</li>
+<li>In-container, the verifier itself
+<code>http://llm-verifier:8080/api/models</code> returned the same 2
+rows (<code>deepseek-chat</code> score <code>0.7999999999999999</code>
+<code>status:"verified"</code>, created
+<code>2026-06-16T21:32:09Z</code>) — evidence:
+<code>helixtranslate_enable_20260616T222048Z/step2a_post_recreate_state.txt</code>.</li>
+</ul>
+<p>Note on endpoint naming: the <strong>verifier-side</strong> endpoint
+is <code>/api/models</code>; the <strong>helixtranslate-side</strong>
+reporting endpoint is <code>/api/v1/verified-models</code>. Both
+reported <code>count:2</code> with the same two models. (The task
+brief's shorthand "/api/models count(verified)=2" maps to these two
+captured surfaces.)</p>
+<p>The numeric scores are honest persisted values:
+<code>0.7999999999999999</code> (deepseek-chat) and <code>1</code>
+(llama-3.3-70b-versatile / Groq) — not placeholders.</p>
+<hr />
+<h2
+id="2-the-verify-completion-mechanism-handler--modelverificationservice--persist--auth-header-fix">2.
+The verify-completion mechanism (handler → ModelVerificationService →
+persist) + auth-header fix</h2>
+<h3 id="21-verification-path">2.1 Verification path</h3>
+<ul>
+<li>Verification is driven by the verifier's <code>VerifyModel</code>
+flow
+(<code>llms_verifier/llm-verifier/providers/model_verification_service.go</code>,
+<code>llms_verifier/llm-verifier/verification/code_verification.go</code>).
+It runs three real probes per model
+(<code>max_tokens:150, temperature:0.1</code>): a meaningful-response
+gate (<code>"hello!"</code>), a realistic-debate prompt, and a
+code-visibility probe over 5 fixed code samples. On a non-error result
+it persists <code>VerificationScore</code> and flips
+<code>verification_status</code> toward <code>"verified"</code>. —
+evidence: <code>research_verify_completion.md</code> §1 (quoted
+<code>file:line</code>).</li>
+<li>helixtranslate consumes the persisted verified set via its reporting
+handler (<code>pkg/api/verifier_handlers.go</code>
+<code>listVerifiedModels</code>, registered ~<code>:100</code>), which
+calls the verifier client and returns
+<code>{"models":[...],"count":N}</code>; it is gated by
+<code>requireEnabled</code> (503 when the integration is disabled). —
+evidence: <code>llmsverifier_analysis.md</code> §Q3(a).</li>
+<li>The verified set only ENTERS translation through the bridge
+(<code>pkg/api/handler.go</code> <code>createTranslator</code> →
+<code>bridgeFor</code> → <code>pkg/bridge/bridge.go</code>
+<code>Open</code>); in HTTP mode the bridge's registry is fed from the
+verifier's <code>/api/models</code>. — evidence:
+<code>llmsverifier_analysis.md</code> §Q3(b), key file:line list.</li>
+</ul>
+<h3
+id="22-boot-seed-the-prerequisite-that-makes-verification-have-inputs">2.2
+Boot-seed (the prerequisite that makes verification have inputs)</h3>
+<ul>
+<li><code>seed.FromConfig(cfg, db)</code> is called in
+<code>runServer()</code> after DB init, <strong>non-fatal</strong>;
+<code>seed.go</code> <code>for i := range cfg.LLMs</code> idempotently
+upserts providers + models; seeded rows are written
+<code>VerificationStatus:"pending"</code> (NOT yet
+<code>"verified"</code>), so a real verification pass is required to
+reach <code>verified</code>. 6 real-in-memory-SQLite tests in
+<code>seed_test.go</code> (incl. a RED-baseline asserting
+<code>db.ListModels</code> returns the seeded rows + idempotency). —
+evidence: <code>llmsverifier_analysis.md</code> §Q1; committed
+<code>docs/qa/llmsverifier_wire_attempt_20260616T203122Z/STATE.md</code>
+§"INDEPENDENT review … GO".</li>
+</ul>
+<h3 id="23-the-auth-header-fix">2.3 The auth-header fix</h3>
+<p>When helixtranslate was first enabled against the verifier, the
+server <strong>crash-looped</strong> on config validation:
+<em>"LLMsVerifier API key is required when verifier is enabled"</em> —
+the env had an empty <code>LLMSVERIFIER_API_KEY</code>. The verifier's
+<code>/api/models</code> needs <strong>no auth</strong>, so the fix was
+to set a <strong>NON-SECRET placeholder</strong> key value purely to
+satisfy the "key is required when enabled" validation; no real secret
+was used or stored. After that, the server booted healthy and the
+verified-models endpoint returned the real 2-model set. — evidence:
+<code>helixtranslate_enable_20260616T222048Z/RESULT.md</code> STEP 1/2;
+<code>helixtranslate_enable_20260616T222048Z/CONFIG_TRACKING.md</code>
+(the appended env lines were non-secret).</p>
+<hr />
+<h2
+id="3-honest-114150-finding--the-score-is-a-liveness-gate-not-a-quality-signal">3.
+Honest §11.4.150 finding — the score is a LIVENESS gate, not a quality
+signal</h2>
+<p>A deep multi-angle research pass (§11.4.150 / §11.4.99) evaluated
+whether the persisted 0.0–1.0 score is a sound basis for SELECTING a
+translation model. Finding (FACT, from code):</p>
+<ul>
+<li>The score is computed by <strong>keyword counting</strong> over a
+fixed "Do you see my code?" probe across 5 code samples —
+<code>+0.5</code> affirmative ("yes"/"I can see"), <code>+0.2</code>
+no-negative, <code>+0.1 × code-keyword-count</code>, plus an
+understanding-level bump — then averaged, with a <strong>floor of
+0.70</strong> applied
+(<code>code_verification.go:153 max(ConfidenceScore, 0.7)</code>). It
+does <strong>not</strong> run a translation task and contains
+<strong>zero translation-quality signal</strong>.</li>
+<li>Consequence: the meaningful range is compressed to ~0.70–1.00, and
+the 1.0-vs-0.80 gap between groq/llama and deepseek-chat is
+<strong>largely a phrasing/verbosity artifact</strong>, not a quality
+finding. helixtranslate's gate (<code>MinScoreThreshold</code> default
+<code>0.0</code>) filters essentially nothing at default, and selection
+picks the highest score (descending sort).</li>
+<li><strong>Soundness verdict:</strong> GOOD ENOUGH as a <em>liveness /
+"model reachable and answering coherently"</em> gate (real API calls,
+catches errors/refusals/timeouts,
+<code>verified</code>+<code>CanSeeCode</code>+<code>AffirmativeResponse</code>
+admission filter); <strong>NOT SOUND</strong> as a 0.0–1.0 quality rank
+for choosing a translation model.</li>
+<li>Cited external authorities establishing that single-prompt keyword
+scoring is below the bar for a capability rank: EleutherAI
+lm-evaluation-harness; Stanford CRFM HELM (7 metrics × 42
+scenarios).</li>
+<li><strong>UNCONFIRMED (honest gap):</strong> whether the
+verify-completion <code>VerificationScore</code> actually becomes the
+registry <code>OverallScore</code> (the selection rank key), or only
+gates <code>verified</code> status while <code>OverallScore</code> is
+computed by the separate 5-component <code>scoring/engine.go</code>, was
+<strong>not traced end-to-end</strong> — flagged as a tracked
+follow-up.</li>
+<li><strong>Recommended follow-ups (NOT changes made this
+session):</strong> treat the score as a binary gate, add
+translation-specific multi-sample scoring (chrF/COMET-class), raise
+<code>MinScoreThreshold</code> above 0.0 only after that, and close the
+score→OverallScore wiring UNCONFIRMED.</li>
+</ul>
+<p>— evidence: <code>research_verify_completion.md</code> §1–§4 +
+Sources.</p>
+<hr />
+<h2
+id="4-helixtranslate-enable-outcome--not-viable--auto-rolled-back--non-degraded">4.
+helixtranslate-enable outcome — NOT viable → auto-rolled-back →
+NON-degraded</h2>
+<p>An attempt to WIRE the verified set into the live translation path on
+nezha (<code>nezha.local</code>, deploy dir
+<code>/home/milosvasic/helixtranslate</code>) was executed and then
+reversed. Full bidirectional record:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+<th>Result</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 — baseline</td>
+<td><code>:18443 POST translate</code> "Good morning" en→sr</td>
+<td><code>{"translated":"Добро јутро","provider":"llm-mistral","Errors":0}</code>
+WORKING</td>
+<td><code>helixtranslate_enable_.../step0_baseline_translate_18443.json</code></td>
+</tr>
+<tr>
+<td>1 — enable</td>
+<td>added <code>LLMSVERIFIER_ENABLED=true</code> +
+<code>LLMSVERIFIER_API_URL=http://llm-verifier:8080</code> to
+nezha-local <code>.env.nezha</code>; connected 4 app containers to
+<code>llmsverifier_default</code> net</td>
+<td>first boot crash-looped on empty <code>LLMSVERIFIER_API_KEY</code> →
+fixed with non-secret placeholder (§2.3)</td>
+<td><code>helixtranslate_enable_.../RESULT.md</code> STEP 1/2;
+<code>.../step1_redeploy.log</code>;
+<code>.../step1b_recreate_with_key.log</code></td>
+</tr>
+<tr>
+<td>2 — post-enable</td>
+<td>verifier reachable + verified-models served</td>
+<td><code>verified-models</code> <code>count:2</code> SUCCESS, but
+<code>:18443 POST translate</code> → ERROR <em>"bridge: no verified
+translator available: no verified models available meeting threshold
+0.00"</em> (HTTP exit 56) — DEGRADATION</td>
+<td><code>.../step2b_verified_models_after.json</code>;
+<code>.../step2c/2d_translate*.json</code>;
+<code>.../step2_FAIL_translate_18443_after_enable.txt</code></td>
+</tr>
+<tr>
+<td>3 — auto-rollback</td>
+<td>restored original <code>.env.nezha</code>, disconnected app
+containers from <code>llmsverifier_default</code>, recreated
+containers</td>
+<td>baseline restored</td>
+<td><code>.../step3_rollback.log</code>;
+<code>.../step3a_post_rollback_state.txt</code></td>
+</tr>
+<tr>
+<td>3b/3c — confirm</td>
+<td>re-ran translation in final state</td>
+<td><code>{"translated":"Добро јутро","provider":"llm-novita","Errors":0}</code>
+(exit 0); 2nd phrase translates, 0 errors; verified-models →
+"integration disabled"; all 6 containers healthy</td>
+<td><code>.../step3b_ROLLBACK_translate_confirm.json</code>;
+<code>.../step3c_rollback_final_state.txt</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="root-cause-of-the-degradation-fact">Root cause of the
+degradation (FACT)</h3>
+<p>Enabling the verifier <strong>reroutes</strong> translation through
+the bridge, which selects only VERIFIED models
+(<code>deepseek-chat</code> / <code>llama-3.3-70b-versatile</code>).
+Those verified providers had <strong>no usable translator
+binding</strong> in the nezha deployment (no provider keys wired for
+them on the translate path), so the bridge returned <em>"no verified
+translator available"</em> and translation FAILED — while the working
+direct multi-provider path (<code>mistral</code>/<code>novita</code>)
+was bypassed. In HTTP-bridge mode there is <strong>no graceful
+fallback</strong> to the direct path (<code>bridge.Open</code> returns
+in the HTTP branch before in-process is reached). The never-degrade
+precondition was violated → <strong>AUTO-ROLLBACK</strong>. — evidence:
+<code>helixtranslate_enable_.../RESULT.md</code> "Root cause of
+degradation"; <code>llmsverifier_analysis.md</code> §Q3(b).</p>
+<h3 id="final-state-non-degraded--11469-never-degrade-proof">Final state
+(NON-degraded — §11.4.69 never-degrade proof)</h3>
+<p>Translation works on the direct path (<code>llm-novita</code>, "Добро
+јутро", 0 errors), verified-models endpoint cleanly reports disabled,
+all 6 containers healthy. Net config change to the deployment is ZERO
+(the nezha-local <code>.env.nezha</code> is gitignored secrets and was
+restored to its original; nothing to commit there). The earlier
+honest-blocked verdict
+(<code>docs/qa/llmsverifier_wire_attempt_20260616T203122Z/STATE.md</code>,
+20:31Z) and this later enable-attempt-then-rollback (22:20Z → 01:37)
+agree on the outcome: <strong>LLMsVerifier remains a quality
+enhancement, not a translation dependency; the direct path stays
+intact.</strong></p>
+<hr />
+<h2 id="5-cited-evidence-paths-raw-artefacts-on-t7">5. Cited evidence
+paths (raw artefacts on T7)</h2>
+<p>Raw evidence (read-only source material for this transcript):</p>
+<ul>
+<li><code>/Volumes/T7/helix-build/qa/llmsverifier_analysis.md</code> —
+seed-at-boot + bridge HTTP-vs-in-process safety analysis (code-quoted,
+<code>file:line</code>).</li>
+<li><code>/Volumes/T7/helix-build/qa/research_verify_completion.md</code>
+— §11.4.150 deep-research on the verify-completion scoring methodology
+(liveness-gate-not-quality finding + cited sources).</li>
+<li><code>/Volumes/T7/helix-build/qa/helixtranslate_enable_20260616T222048Z/</code>
+— the enable→fail→rollback run: <code>RESULT.md</code>,
+<code>CONFIG_TRACKING.md</code>, <code>step0</code>…<code>step3c</code>
+captured outputs.</li>
+</ul>
+<p>Committed-in-repo evidence (durable record):</p>
+<ul>
+<li><code>/Volumes/T7/Projects/helix_translate/docs/qa/llmsverifier_wire_attempt_20260616T203122Z/STATE.md</code>
+(+ <code>.html</code>/<code>.pdf</code>) — honest-blocked verdict +
+§11.4.142 independent GO review of the seed code.</li>
+<li><code>/Volumes/T7/Projects/helix_translate/docs/qa/llmsverifier_wire_attempt_20260616T203122Z/INDEPENDENT_ANALYSIS_6e6b0309.md</code>
+— independent analysis of the seed submodule commit.</li>
+</ul>
+<p>Code references (helix_translate working tree, read-only):</p>
+<ul>
+<li><code>llms_verifier/llm-verifier/providers/model_verification_service.go</code>,
+<code>.../verification/code_verification.go</code> — VerifyModel +
+scoring.</li>
+<li><code>llms_verifier/llm-verifier/seed/seed.go</code>,
+<code>.../seed/seed_test.go</code>, <code>.../cmd/main.go</code>,
+<code>.../config.yaml</code> — boot-seed.</li>
+<li><code>pkg/api/verifier_handlers.go</code> —
+<code>/api/v1/verified-models</code> reporting handler.</li>
+<li><code>pkg/api/handler.go</code>
+<code>createTranslator</code>/<code>bridgeFor</code>;
+<code>pkg/bridge/bridge.go</code>
+<code>Open</code>/<code>BestModel</code> — the translation bridge (HTTP
+vs in-process).</li>
+<li><code>internal/verifier/scoring/engine.go</code>,
+<code>internal/verifier/selection/engine.go</code>,
+<code>internal/verifier/registry.go</code>,
+<code>internal/verifier/config.go</code> — score/select/gate.</li>
+</ul>
+<hr />
+<h2 id="6-auditable-conclusions-anti-bluff">6. Auditable conclusions
+(anti-bluff)</h2>
+<ol type="1">
+<li>The verify-completion feature <strong>really runs</strong> and
+<strong>persists honest scores</strong> — proven by the live
+2-verified-model runtime signature captured in-container and at the
+helixtranslate API (§1.2).</li>
+<li>The scores are a <strong>liveness gate, not a translation-quality
+rank</strong> — an honestly-recorded limitation with cited external
+authorities, plus one UNCONFIRMED wiring gap left tracked (§3).</li>
+<li>Wiring the verified set into live translation is <strong>not viable
+in the current nezha deployment</strong> (verified providers lack
+translator bindings), was <strong>auto-rolled-back</strong>, and
+translation is <strong>confirmed working NON-degraded</strong> on the
+direct path (§4).</li>
+<li>Net deployment change = ZERO; no secret values appear in any
+artefact or in this transcript (§11.4.10).</li>
+</ol>
+</body>
+</html>
