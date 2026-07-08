@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>Status</title>
   <style>
@@ -156,8 +156,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -175,7 +179,7 @@
 <header id="title-block-header">
 <h1 class="title">Status</h1>
 </header>
-<h1 id="helixtranslate-feature-status">HelixTranslate — Feature
+<h1 id="helixtranslate--feature-status">HelixTranslate — Feature
 Status</h1>
 <p><strong>Revision:</strong> 18 <strong>Last modified:</strong>
 2026-06-16T20:05:00Z <strong>Authority:</strong> Derived from
@@ -193,7 +197,7 @@ included.</p>
 <strong>only</strong> where a recording exists AND that recording
 genuinely demonstrates the feature working (each cited <code>.mp4</code>
 was ffprobe-verified for non-zero duration+frames and content-verified
-against its claimed behaviour — e.g. real DeepSeek output in the target
+against its claimed behaviour — e.g. real DeepSeek output in the target
 language, real gRPC translated text, live WebSocket count change).
 <strong>66 feature rows are video-confirmed</strong> (Wave 9 / Wave 8 /
 Wave 7 of 2026-06-16 added <strong>12 net-new</strong> (4 Wave 7 + 5
@@ -202,57 +206,57 @@ bridge, NOT <code>-use-verifier</code>) → real output clip,
 window-scoped (§11.4.154), <code>helix_translate-</code>-prefixed
 (§11.4.155), frame-content-read so source-frame ≠ output-frame per
 §11.4.107. <strong>Wave 7 (4):</strong> <strong>EPUB→EPUB round-trip
-EN→ES</strong> (“The old man walked along the shore at dawn…” → “El
-anciano caminaba por la orilla al amanecer…”, output
+EN→ES</strong> ("The old man walked along the shore at dawn…" → "El
+anciano caminaba por la orilla al amanecer…", output
 <code>EPUB document</code> —
 <code>helix_translate-epub-to-epub-en-es-wave7-20260616-181058.mp4</code>;
 <strong>headline re-confirm</strong> — the existing EPUB→EPUB-conversion
 row was already Confirmed, this clip is an additional distinct-scope
 confirmation, NOT a new row), <strong>standalone <code>-script</code>
-Cyrillic→Latin</strong> (pkg/script, NO LLM: “Добар дан свима…ђ…џ” →
-“Dobar dan svima…đ…dž”, zero Cyrillic remaining —
+Cyrillic→Latin</strong> (pkg/script, NO LLM: "Добар дан свима…ђ…џ" →
+"Dobar dan svima…đ…dž", zero Cyrillic remaining —
 <code>helix_translate-script-cyrillic-to-latin-wave7-20260616-181012.mp4</code>;
 <strong>headline-only</strong> re-confirm of an already-Confirmed row),
-<strong>preparation-translator analysis pass</strong> (genre “science
-fiction”, chars Sarah Mills/Admiral Chen, untranslatable Captain Sarah
+<strong>preparation-translator analysis pass</strong> (genre "science
+fiction", chars Sarah Mills/Admiral Chen, untranslatable Captain Sarah
 Mills/Admiral Chen/starship Aurora/New Geneva —
 <code>helix_translate-preparation-analysis-en-es-wave7-20260616-181123.mp4</code>;
 <strong>headline-only</strong> re-confirm — the preparation-translator
 row is already Confirmed) and <strong>REST
 <code>POST /api/v1/translate/string</code></strong> (local
 <code>./build/server</code> :8080, JSON <code>translated_text</code> =
-“Las montañas estaban cubiertas de nieve y el río fluía tranquilamente
-por el valle.”, provider deepseek — a real translation, NOT a session_id
+"Las montañas estaban cubiertas de nieve y el río fluía tranquilamente
+por el valle.", provider deepseek — a real translation, NOT a session_id
 —
 <code>helix_translate-rest-translate-string-en-es-wave7-20260616-181155.mp4</code>;
 <strong>ROW-FLIPPED</strong> PENDING→Confirmed). <strong>§11.4.138 /
 §11.4.146 honest finding:</strong> Wave 7 ALSO recorded the
 <strong>markdown-translator EPUB→MD empty-payload data-loss BUG</strong>
-(step-3 translate sends empty strings to DeepSeek, the LLM’s “you sent
-an empty message” boilerplate written AS IF the translation, chapter
+(step-3 translate sends empty strings to DeepSeek, the LLM's "you sent
+an empty message" boilerplate written AS IF the translation, chapter
 text lost) — <strong>found broken (wave7) → fixed at source in commit
-4fbe581 (this session’s PART-1 Translate-arg data-loss fix) → a
+4fbe581 (this session's PART-1 Translate-arg data-loss fix) → a
 re-record is owed before any confirmation</strong>; it was NOT a
 previously-confirmed row so there is NO demotion, and it is NOT counted
 as a confirmed net-new. <strong>Wave 8 (5):</strong> <strong>GROQ
 provider path EN→ES</strong> (groq/llama-3.3-70b-versatile, real Groq
-API: “La vieja farola se erguía sola sobre el acantilado rocoso…” —
+API: "La vieja farola se erguía sola sobre el acantilado rocoso…" —
 <code>helix_translate-groq-en-es-wave8-20260616_182021.mp4</code>;
 <strong>ROW-FLIPPED</strong> the <code>Groq client</code> library row
 PENDING→Confirmed), and 4 language-pair confirmations through the
 deepseek path (<strong>headline-only</strong> — covered by the
 already-Confirmed generic multi-language-pair coverage, no fabricated
-per-pair rows): <strong>EN→KO Korean/Hangul</strong> (“새벽에 용이 잠든
-숨겨진 성을 찾기 위해 용감한 기사가 고대 숲을 가로질렀다.” —
+per-pair rows): <strong>EN→KO Korean/Hangul</strong> ("새벽에 용이 잠든
+숨겨진 성을 찾기 위해 용감한 기사가 고대 숲을 가로질렀다." —
 <code>helix_translate-en-ko-korean-wave8-20260616_182059.mp4</code>),
-<strong>DE→EN reverse</strong> (“The scientist worked all night in his
-lab…” —
+<strong>DE→EN reverse</strong> ("The scientist worked all night in his
+lab…" —
 <code>helix_translate-de-en-reverse-wave8-20260616_182101.mp4</code>),
-<strong>FR→ES non-English↔︎non-English</strong> (“El anciano marinero
-contaba historias de tormentas y tesoros ocultos…” —
+<strong>FR→ES non-English↔︎non-English</strong> ("El anciano marinero
+contaba historias de tormentas y tesoros ocultos…" —
 <code>helix_translate-fr-es-pair-wave8-20260616_182111.mp4</code>) and
-<strong>EN→SR Latin script</strong> (“U srcu planina živela je mudra
-stara žena…”, all-Latin, no Cyrillic —
+<strong>EN→SR Latin script</strong> ("U srcu planina živela je mudra
+stara žena…", all-Latin, no Cyrillic —
 <code>helix_translate-en-sr-latin-wave8-20260616_182113.mp4</code>).
 §11.4.6 nit (not a bug): <code>-h</code> provider help omits groq though
 groq IS fully wired + works end-to-end. <strong>Wave 9 (3):</strong>
@@ -266,11 +270,11 @@ codebase 2.3.0, git_commit c2aa7c8…, go1.26.2, build_time + components
 map, NOT a bare status — same clip; <strong>headline re-confirm</strong>
 of the already-Confirmed combined endpoints row) and
 <strong>preparation→translate two-stage pipeline</strong> (stage-1 real
-DeepSeek analysis: “short story”/“literary fiction”, chars Captain
+DeepSeek analysis: "short story"/"literary fiction", chars Captain
 Marlowe + Eli, 3 untranslatable Stormcrag Point/Captain Marlowe/Eli,
 1974 tokens; stage-2 output EPUB preserves exactly those names in
-Spanish “…El viejo capitán Marlowe había sido farero de Stormcrag Point
-durante cuarenta años…” —
+Spanish "…El viejo capitán Marlowe había sido farero de Stormcrag Point
+durante cuarenta años…" —
 <code>helix_translate-prep-translate-two-stage-wave9-20260616_184823.mp4</code>;
 <strong>headline-only</strong> — covered by the already-Confirmed
 preparation-translator row). <strong>§11.4.6 / §11.4.124 honest
@@ -283,7 +287,7 @@ runnable binary (did NOT fabricate a runner); and
 <code>GET /api/v1/providers</code> returns a <strong>static hardcoded
 list</strong> (openai/anthropic/zhipu/deepseek), NOT substantive real
 upstream data, so NOT confirmed as substantive per the Wave-9 criterion.
-<strong>[Both addressed post-Wave-9, this session:** the
+<strong>[Both addressed post-Wave-9, this session:</strong> the
 <code>pkg/api/server.go</code> alt <code>Server</code> is now documented
 as honest §11.4.124 NEVER-WIRED test-only-scaffolding
 <strong>N/A</strong> (see the dedicated section header note below,
@@ -293,15 +297,14 @@ kept-not-deleted per operator review); and the
 configured/available provider set (§11.4.115 RED→GREEN + §11.4.135 guard
 <code>HTQ-FIX-006</code>), with a live re-record of
 <code>/api/v1/providers</code> against the rebuilt nezha image owed
-before flipping that aspect to a fresh Confirmed.]</strong>
-<strong>Running tally (§11.4.6 honest arithmetic): 54 (prior
-authoritative total) + 4 (Wave 7) + 5 (Wave 8) + 3 (Wave 9) =
-66.</strong> Of the 12 net-new, <strong>3 are genuine row-flips</strong>
-(PENDING→Confirmed: <code>POST /api/v1/translate/string</code>, the
-<code>Groq client</code> library row,
-<code>POST /api/v1/translate/batch</code>); the remaining 9 are
-headline-counted additional distinct-scope confirmations on rows that
-were already Confirmed (EPUB→EPUB round-trip, <code>-script</code>
+before flipping that aspect to a fresh Confirmed.]** <strong>Running
+tally (§11.4.6 honest arithmetic): 54 (prior authoritative total) + 4
+(Wave 7) + 5 (Wave 8) + 3 (Wave 9) = 66.</strong> Of the 12 net-new,
+<strong>3 are genuine row-flips</strong> (PENDING→Confirmed:
+<code>POST /api/v1/translate/string</code>, the <code>Groq client</code>
+library row, <code>POST /api/v1/translate/batch</code>); the remaining 9
+are headline-counted additional distinct-scope confirmations on rows
+that were already Confirmed (EPUB→EPUB round-trip, <code>-script</code>
 Cyrillic→Latin, preparation analysis, <code>GET /api/v1/version</code>,
 preparation→translate two-stage) or language-pair/provider confirmations
 covered by already-Confirmed generic rows (EN→KO, DE→EN, FR→ES,
@@ -338,11 +341,11 @@ Wave 4 of 2026-06-16 added <strong>3 net-new</strong>
 multi-language-pair translations from the same EN source proving genuine
 per-language LLM calls (distinct outputs): <strong>EN→FR</strong>
 (<code>helix_translate-multilang-en-fr-wave4-20260616-173316.mp4</code>,
-“Le soleil matinal se leva…”), <strong>EN→DE</strong>
+"Le soleil matinal se leva…"), <strong>EN→DE</strong>
 (<code>helix_translate-multilang-en-de-wave4-20260616-173319.mp4</code>,
-“Der morgendliche Sonnenaufgang…”), <strong>EN→IT</strong>
+"Der morgendliche Sonnenaufgang…"), <strong>EN→IT</strong>
 (<code>helix_translate-multilang-en-it-wave4-20260616-173419.mp4</code>,
-“Il sole mattutino sorse…”); Wave 4 also re-confirmed (NOT
+"Il sole mattutino sorse…"); Wave 4 also re-confirmed (NOT
 double-counted) RU→SR-Cyrillic
 (<code>helix_translate-multilang-ru-sr-cyr-wave4-20260616-173445.mp4</code>).
 <strong>§11.4.138 DEMOTION (−1):</strong> the
@@ -360,12 +363,12 @@ re-confirmation. Net video-confirmed: 43 (Rev 14) − 1 (multipass demote)
 2026-06-16 added <strong>2 net-new</strong> — <strong>EPUB→EPUB
 conversion</strong>
 (<code>helix_translate-epub-output-wave3e-20260616.mp4</code>: EN .epub
-→ real deepseek run → OUTPUT EPUB carries real Spanish “La Antigua
-Farola la vieja farola se alzaba sola en la rocosa costa…”) and
+→ real deepseek run → OUTPUT EPUB carries real Spanish "La Antigua
+Farola la vieja farola se alzaba sola en la rocosa costa…") and
 <strong>TXT→TXT translation</strong>
 (<code>helix_translate-txt-translation-wave3f-20260616.mp4</code>: EN
-.txt → real deepseek run → ES .txt “El río fluía tranquilamente a través
-del valle verde. Los pájaros cantaban bajo la luz de la mañana.”), each
+.txt → real deepseek run → ES .txt "El río fluía tranquilamente a través
+del valle verde. Los pájaros cantaban bajo la luz de la mañana."), each
 ffprobe+frame-verified per §11.4.107 (790×560 yuv420p, ≥6 frames,
 start-frame English-only ≠ output-frame Spanish); Wave 3f also
 <strong>re-confirmed</strong> (NOT double-counted) the already-confirmed
@@ -376,10 +379,10 @@ preserved + real Spanish), <strong>format-detection</strong>
 extensionless <code>.dat</code> detected-by-content),
 <strong><code>-script</code> Cyrillic↔︎Latin</strong>
 (<code>helix_translate-script-conversion-wave3e-20260616.mp4</code>, RUN
-A latin “Ovo je testni…” ≠ RUN B cyrillic “Систем треба…”) and
+A latin "Ovo je testni…" ≠ RUN B cyrillic "Систем треба…") and
 <strong>markdown-translator EPUB↔︎MD round-trip</strong>
-(<code>helix_translate-markdown-roundtrip-wave3f-20260616.mp4</code>, “#
-El Faro Viejo / El viejo faro se alzaba solitario en la costa rocosa.”)
+(<code>helix_translate-markdown-roundtrip-wave3f-20260616.mp4</code>, "#
+El Faro Viejo / El viejo faro se alzaba solitario en la costa rocosa.")
 rows with fresh frame-verified clips; running total 41 (Rev 13) + 2 =
 <strong>43</strong>. Wave 3d of 2026-06-16 added <strong>4
 net-new</strong>, prioritising feature-type diversity — the
@@ -396,11 +399,11 @@ SQLite SSoT: <code>validate</code> →
 real ATM-NNN rows + descriptions —
 <code>helix_translate-workable-items-wave3d-20260616.mp4</code>), and
 <strong>2 more providers</strong> — <strong><code>nvidia</code></strong>
-(“…Un anciano pescador <strong>caminaba</strong> a lo largo de la
-orilla.” via <code>integrate.api.nvidia.com</code>,
+("…Un anciano pescador <strong>caminaba</strong> a lo largo de la
+orilla." via <code>integrate.api.nvidia.com</code>,
 <code>helix_translate-provider-nvidia-translate-wave3d-20260616.mp4</code>)
-and <strong><code>openrouter</code></strong> (“…Un anciano pescador
-<strong>paseaba</strong> a lo largo de la orilla.” via
+and <strong><code>openrouter</code></strong> ("…Un anciano pescador
+<strong>paseaba</strong> a lo largo de la orilla." via
 <code>openrouter.ai/api</code>,
 <code>helix_translate-provider-openrouter-translate-wave3d-20260616.mp4</code>),
 the two provider outputs distinct (caminaba/paseaba) proving genuine
@@ -419,11 +422,11 @@ provider in the <code>llm_provider</code> submodule
 real-use Wave-3c <code>.mp4</code> showing a distinct EN→ES translation
 through the OpenAI-compat per-provider path —
 <code>helix_translate-provider-hyperbolic-translate-wave3c-20260616.mp4</code>
-(“Al amanecer, el sol salía sobre el tranquilo pueblo. Un anciano
-pescador caminaba por la orilla…”) and
+("Al amanecer, el sol salía sobre el tranquilo pueblo. Un anciano
+pescador caminaba por la orilla…") and
 <code>helix_translate-provider-fireworks-translate-wave3c-20260616.mp4</code>
-(“Al amanecer, el sol ascendió sobre el tranquilo pueblo. Un anciano
-pescador paseaba por la orilla…”), the two outputs distinct from each
+("Al amanecer, el sol ascendió sobre el tranquilo pueblo. Un anciano
+pescador paseaba por la orilla…"), the two outputs distinct from each
 other (salía/caminaba vs ascendió/paseaba) proving genuine per-provider
 models, ffprobe+frame-verified per §11.4.107 (790×560 yuv420p, ≥6 frames
 at fps=2, start-frame input-only ≠ output-frame Spanish). Wave 3c also
@@ -444,16 +447,16 @@ gap (LLMsVerifier disabled in config — not confirmed). Wave 3b of
 by a real-use Wave-3b <code>.mp4</code> showing a distinct EN→SR-latin
 translation through the per-provider path —
 <code>helix_translate-provider-gemini-translate-wave3b-20260616.mp4</code>
-(“Staro svjetiljko stajalo je samotočno na kamenitoj obali…”),
+("Staro svjetiljko stajalo je samotočno na kamenitoj obali…"),
 <code>helix_translate-provider-zhipu-translate-wave3b-20260616.mp4</code>
-(“Stara svjetiljka stojeća samostalno na kamenitoj obali…”),
+("Stara svjetiljka stojeća samostalno na kamenitoj obali…"),
 <code>helix_translate-provider-cohere-translate-wave3b-20260616.mp4</code>
 (provider=cohere via
-<code>-base-url https://api.cohere.ai/compatibility/v1</code>, “Stari
+<code>-base-url https://api.cohere.ai/compatibility/v1</code>, "Stari
 svjetionik stojeo je sam na kamenitoj obali… svijeća njegova vodila
-brodove…”), all four outputs (incl. the re-confirmed deepseek clip
+brodove…"), all four outputs (incl. the re-confirmed deepseek clip
 <code>helix_translate-provider-deepseek-translate-wave3b-20260616.mp4</code>
-“Stari svjetionik stajao je sam na kamenitoj obali…”) distinct from one
+"Stari svjetionik stajao je sam na kamenitoj obali…") distinct from one
 another proving genuine per-provider models, ffprobe-verified (non-zero
 dur+frames, 790×560 even-dims yuv420p) + ≥6 frames extracted with one
 content-verified per §11.4.107; the deepseek clip is a re-confirmation,
@@ -463,9 +466,9 @@ LLM clients, each backed by a real-use Wave-3a <code>.mp4</code> showing
 a distinct EN→ES translation through
 <code>unified-translator -provider &lt;name&gt;</code> —
 <code>helix_translate-provider-cerebras-translate-wave3a-20260616.mp4</code>
-(“El sol de la mañana se alzó sobre el tranquilo pueblo.”) and
+("El sol de la mañana se alzó sobre el tranquilo pueblo.") and
 <code>helix_translate-provider-sambanova-translate-wave3a-20260616.mp4</code>
-(“El sol matutino se alzó sobre el tranquilo pueblo.”), the two outputs
+("El sol matutino se alzó sobre el tranquilo pueblo."), the two outputs
 distinct from each other proving genuine per-provider models,
 ffprobe+frame-verified per §11.4.107 with start-frame ≠ output-frame
 liveness; Wave 2 of 2026-06-16 added 5 net-new — DOCX output, PDF
@@ -489,15 +492,15 @@ bridge CLI</strong> (<code>cmd/model-bridge</code> —
 <code>helixtranslate-bridge-bestmodel-translate-20260615.mp4</code>:
 in-process verify→SQLite store→select strongest
 <code>novita/Sao10K/L3-8B-Stheno-v3.2</code> score 0.919 → live
-<code>invoke</code> EN→ES “Good morning, friend.” → “Buenos días,
-amigo.”; ffprobe 8.0s/80 frames, ≥6 frames content-verified) <strong>and
+<code>invoke</code> EN→ES "Good morning, friend." → "Buenos días,
+amigo."; ffprobe 8.0s/80 frames, ≥6 frames content-verified) <strong>and
 the LLMsVerifier→agent bridge MCP-stdio surface</strong>
 (<code>cmd/model-bridge mcp</code> —
 <code>helixtranslate-bridge-mcp-stdio-20260615.mp4</code>: a real
 JSON-RPC MCP session over stdio —
 initialize→tools/list→<code>bridge_best_model</code>→<code>bridge_invoke</code>
 — where tool <code>bridge_invoke</code> returned a live verified-model
-translation “Le pont relie deux rives.” (isError:None); ffprobe
+translation "Le pont relie deux rives." (isError:None); ffprobe
 11.88s/10 frames, ≥6 frames content-verified). <strong>Now
 video-confirmed (Wave 2):</strong> <strong>DOCX output</strong>
 (Implemented; pure-Go OOXML writer
@@ -527,12 +530,12 @@ STUB/OPERATOR-BLOCKED wording is stale and corrected);
 <code>GET /api/v1/verified-models</code> returns 404 because
 LLMsVerifier is disabled in config. Everything else is
 <code>PENDING</code> (a recording is owed) or <code>N/A</code> (no
-user-visible video applies — e.g. CLI flags, internal library types).
+user-visible video applies — e.g. CLI flags, internal library types).
 Absence of a runtime recording is stated honestly, never papered
 over.</p>
 </blockquote>
-<h2 id="operator-blocked-items-read-first-11.4.45">Operator-blocked
-items (read first, §11.4.45)</h2>
+<h2 id="operator-blocked-items-read-first-11445">Operator-blocked items
+(read first, §11.4.45)</h2>
 <p>Two binaries are OPERATOR-BLOCKED — both require a remote SSH worker
 host running llama.cpp, which is not available in this environment. The
 binaries build and run as far as the missing host allows (captured in
@@ -547,15 +550,11 @@ translate, downloads outputs). <strong>Unblock condition:</strong> same
 remote SSH/llama.cpp host.</li>
 <li><strong><code>cmd/translator</code> (remote path)</strong> — remote
 SSH/llama.cpp translate path is OPERATOR-BLOCKED (same host
-requirement); its LOCAL path is a separate STUB (“local translation not
-yet implemented”).</li>
+requirement); its LOCAL path is a separate STUB ("local translation not
+yet implemented").</li>
 </ul>
 <h2 id="coverage-summary">Coverage summary</h2>
 <table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr>
 <th>Metric</th>
@@ -564,7 +563,7 @@ yet implemented”).</li>
 </thead>
 <tbody>
 <tr>
-<td>Headline feature total (inventory’s deduplicated per-category
+<td>Headline feature total (inventory's deduplicated per-category
 tally)</td>
 <td><strong>417</strong></td>
 </tr>
@@ -579,7 +578,7 @@ new unified-translator rows added Wave 3f for the net-new videos:
 Rev 9 = 493 Rev 8 + 1 new unified-translator
 <code>HTML→Markdown conversion</code> row added that wave for the Wave-2
 html-to-md video; §11.4.6 — re-derive with <code>awk</code> over
-<code>^\|</code> 9-column rows. The earlier “478” was NOT re-derivable
+<code>^|</code> 9-column rows. The earlier "478" was NOT re-derivable
 from the live table — it was a hand-tracked running tally that had
 drifted; Rev 8 added the 7 missing <code>pkg/bridge</code> ensemble-seam
 rows: <code>BestTranslator</code>, <code>BestTranslatorFunc</code>,
@@ -676,19 +675,19 @@ LLMsVerifier discovery/scoring/selection + ranking), the
 §11.4.93 SQLite validate+list), and <strong>2 more providers</strong>
 <strong>nvidia</strong>
 (<code>helix_translate-provider-nvidia-translate-wave3d-20260616.mp4</code>,
-“…caminaba a lo largo de la orilla.”) + <strong>openrouter</strong>
+"…caminaba a lo largo de la orilla.") + <strong>openrouter</strong>
 (<code>helix_translate-provider-openrouter-translate-wave3d-20260616.mp4</code>,
-“…paseaba a lo largo de la orilla.”), each ffprobe+frame-verified per
+"…paseaba a lo largo de la orilla."), each ffprobe+frame-verified per
 §11.4.107; running total 37 (Rev 12) + 4 = <strong>41</strong>.
 <code>upstage</code> HTTP-403 SKIP + <code>together</code> no-key SKIP,
 never faked. Rev-12 / Wave 3c of 2026-06-16 added <strong>2
 net-new</strong> video confirmations — the <strong>Hyperbolic</strong>
 library client
 (<code>helix_translate-provider-hyperbolic-translate-wave3c-20260616.mp4</code>,
-“…el sol salía…caminaba por la orilla…”) and the
+"…el sol salía…caminaba por la orilla…") and the
 <strong>Fireworks</strong> <code>llm_provider</code> submodule client
 (<code>helix_translate-provider-fireworks-translate-wave3c-20260616.mp4</code>,
-“…el sol ascendió…paseaba por la orilla…”), each a distinct real EN→ES
+"…el sol ascendió…paseaba por la orilla…"), each a distinct real EN→ES
 translation via the OpenAI-compat per-provider path,
 ffprobe+frame-verified per §11.4.107 (790×560 yuv420p, ≥6 frames at
 fps=2, start-frame input-only ≠ output-frame Spanish), the two outputs
@@ -736,7 +735,7 @@ Wave 2 also re-confirmed the already-confirmed <strong>gRPC
 TranslationService</strong> row with an additional clip
 <code>helix_translate-grpc-translate-20260616-113415.mp4</code> (NOT
 double-counted — that row was already video-confirmed). <strong>DOCX
-output and PDF output are no longer “real-artifact-only” — they are now
+output and PDF output are no longer "real-artifact-only" — they are now
 video-confirmed.</strong> §11.4.108 note: the Wave-1
 bridge-translator-path runtime blocker (caveat 8) is RESOLVED, which is
 what made the DOCX/PDF/gRPC/per-provider Wave-2 recordings genuinely
@@ -758,25 +757,26 @@ user-visible video)</td>
 </tbody>
 </table>
 <blockquote>
-<p><strong>§11.4.6 reconciliation:</strong> The inventory’s headline is
+<p><strong>§11.4.6 reconciliation:</strong> The inventory's headline is
 <strong>417</strong> — its own note states this is an <em>approximate,
-deduplicated</em> per-category tally where “some rows are sub-features…
-counted once, and a few rows span two categories (counted once, in the
-first/primary category).” The inventory’s <em>detailed</em> tables
-actually enumerate <strong>470</strong> feature rows. This document
-transcribes <strong>all 470 detailed rows 1:1</strong> so <strong>no
-feature is dropped</strong> (which would itself be a bluff). The 417
-headline and the 470 enumerated rows are both reported honestly; the
-53-row gap is dedup, not missing coverage.</p>
+deduplicated</em> per-category tally where "some rows are
+sub-features... counted once, and a few rows span two categories
+(counted once, in the first/primary category)." The inventory's
+<em>detailed</em> tables actually enumerate <strong>470</strong> feature
+rows. This document transcribes <strong>all 470 detailed rows
+1:1</strong> so <strong>no feature is dropped</strong> (which would
+itself be a bluff). The 417 headline and the 470 enumerated rows are
+both reported honestly; the 53-row gap is dedup, not missing
+coverage.</p>
 </blockquote>
 <blockquote>
-<p>“Static-return” endpoints (e.g. <code>GET /api/stats</code> hardcoded
+<p>"Static-return" endpoints (e.g. <code>GET /api/stats</code> hardcoded
 zeros, <code>GET /api/v1/status/:id</code> hardcoded
 <code>completed</code>, <code>GET /api/v1/metrics</code> static,
 monitor-server <code>GET /api/v1/status</code> static
 <code>monitoring_active</code>) are marked <strong>Implemented</strong>
 at the route level but their <code>Real-use</code> cell states the
-static/hardcoded behaviour honestly so no false “working backend”
+static/hardcoded behaviour honestly so no false "working backend"
 impression is created.</p>
 </blockquote>
 <h3 id="per-category-counts">Per-category counts</h3>
@@ -850,20 +850,9 @@ Covered or None. The repo is known to carry extensive
 per-feature test attribution was not part of the raw inventory.</p>
 </blockquote>
 <hr />
-<h1 id="cli-binaries-cmd">1. CLI Binaries — cmd/</h1>
+<h1 id="1-cli-binaries--cmd">1. CLI Binaries — cmd/</h1>
 <h2 id="cmdapi-server">cmd/api-server</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -938,18 +927,7 @@ env)</td>
 </tbody>
 </table>
 <h2 id="cmdchallenge-runner">cmd/challenge-runner</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -1067,18 +1045,7 @@ writes results dir</td>
 </tbody>
 </table>
 <h2 id="cmdcli">cmd/cli</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -1322,18 +1289,7 @@ tests, mutation-proven)</td>
 </tbody>
 </table>
 <h2 id="cmddeployment">cmd/deployment</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -1464,12 +1420,13 @@ pkg/sshworker + pkg/modelsbridge + ollama.go/llamacpp*.go) +
 <code>CM-NO-LOCAL-RUNTIME</code> gate PASS. The KEPT distributed-API
 path is NOT Obsolete. | Component | Feature | Category | Implementation
 | Wiring | Real-use | Tests | Validation | Video-confirmation |
-|—|—|—|—|—|—|—|—|—| | ebook-translator | FB2 remote-translate workflow |
-CLI | <strong>Obsolete (→ Fixed.md)</strong> | Wired | SSH worker syncs
-binary, runs remote FB2→MD→translate→EPUB, downloads + verifies outputs
-| Not-inventoried | <strong>OPERATOR-BLOCKED</strong> — needs a remote
-SSH worker host + remote llama.cpp; none available. Binary builds +
-prints usage in blocked-binaries demo | OPERATOR-BLOCKED;
+|---|---|---|---|---|---|---|---|---| | ebook-translator | FB2
+remote-translate workflow | CLI | <strong>Obsolete (→ Fixed.md)</strong>
+| Wired | SSH worker syncs binary, runs remote FB2→MD→translate→EPUB,
+downloads + verifies outputs | Not-inventoried |
+<strong>OPERATOR-BLOCKED</strong> — needs a remote SSH worker host +
+remote llama.cpp; none available. Binary builds + prints usage in
+blocked-binaries demo | OPERATOR-BLOCKED;
 evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-cmd-blocked-binaries_20260615-172456.mp4
 | | ebook-translator | Positional args (no flags) | CLI |
 <strong>Obsolete (→ Fixed.md)</strong> | Wired |
@@ -1480,18 +1437,7 @@ Verifies MD/EPUB exist, non-degenerate, target-language (Cyrillic) check
 | Not-inventoried | Source-confirmed | PENDING |</p>
 </blockquote>
 <h2 id="cmdgrpc-server">cmd/grpc-server</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -1517,8 +1463,8 @@ Start/Status/List/Cancel/Stream/GetProviders/SubscribeEvents</td>
 <td>Not-inventoried</td>
 <td><strong>PASS — real EN→ES translation over gRPC captured</strong>
 (StartTranslation → real Spanish DeepSeek output). Wave 2 re-confirms
-via the verified-bridge path (EN→ES “Hola, mundo. Este es un pequeño
-test.”)</td>
+via the verified-bridge path (EN→ES "Hola, mundo. Este es un pequeño
+test.")</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-grpc-deepseek-20260615-171206-v2.mp4
 (additional Wave-2:
 /Volumes/T7/Downloads/Recordings/helix_translate-grpc-translate-20260616-113415.mp4)</td>
@@ -1614,18 +1560,7 @@ test.”)</td>
 </tbody>
 </table>
 <h2 id="cmdgrpc-translate-probe">cmd/grpc-translate-probe</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -1665,18 +1600,7 @@ real-use recording yet</td>
 </tbody>
 </table>
 <h2 id="cmdmarkdown-translator">cmd/markdown-translator</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -1701,9 +1625,9 @@ real-use recording yet</td>
 phase</td>
 <td>Not-inventoried</td>
 <td><strong>PASS — EPUB↔︎MD round-trip captured</strong> (Wave 3f
-re-confirm: EPUB→source MD “# The Old Lighthouse / The old lighthouse
-stood alone…” → translated MD “# El Faro Viejo / El viejo faro se alzaba
-solitario en la costa rocosa.”, real deepseek round-trip, frame-verified
+re-confirm: EPUB→source MD "# The Old Lighthouse / The old lighthouse
+stood alone…" → translated MD "# El Faro Viejo / El viejo faro se alzaba
+solitario en la costa rocosa.", real deepseek round-trip, frame-verified
 §11.4.107)</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-markdown-roundtrip-20260615.mp4
 (Wave-3f re-confirm:
@@ -1811,18 +1735,7 @@ solitario en la costa rocosa.”, real deepseek round-trip, frame-verified
 </tbody>
 </table>
 <h2 id="cmdmonitor-server">cmd/monitor-server</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -1910,18 +1823,7 @@ session lookup)</td>
 </tbody>
 </table>
 <h2 id="cmdpreparation-translator">cmd/preparation-translator</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -2030,18 +1932,7 @@ tokens/genre/characters/cultural-refs/key-themes)</td>
 </tbody>
 </table>
 <h2 id="cmdserver">cmd/server</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -2066,7 +1957,7 @@ tokens/genre/characters/cultural-refs/key-themes)</td>
 optional distributed + LLMsVerifier</td>
 <td>Not-inventoried</td>
 <td><strong>PASS — FIXED, real TLS startup captured</strong> (TLS cert
-backfill bug a5e8866; “Server started successfully” + HTTP/2 TLS on
+backfill bug a5e8866; "Server started successfully" + HTTP/2 TLS on
 :8443)</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-api-translate-target-lang-FIXED-20260615.mp4</td>
 </tr>
@@ -2153,12 +2044,12 @@ pkg/sshworker + pkg/modelsbridge + ollama.go/llamacpp*.go) +
 <code>CM-NO-LOCAL-RUNTIME</code> gate PASS. The KEPT distributed-API
 path is NOT Obsolete. | Component | Feature | Category | Implementation
 | Wiring | Real-use | Tests | Validation | Video-confirmation |
-|—|—|—|—|—|—|—|—|—| | ssh-translation | SSH translation system
-(fixed-config) | CLI/Web | <strong>Obsolete (→ Fixed.md)</strong> |
-Wired | Hardcoded Russian→Serbian-Cyrillic workflow over SSH worker w/
-llama.cpp; WebSocket monitoring | Not-inventoried | Source-confirmed |
-PENDING | | ssh-translation | (no CLI flags) | CLI | <strong>Obsolete (→
-Fixed.md)</strong> | Wired | All config hardcoded in
+|---|---|---|---|---|---|---|---|---| | ssh-translation | SSH
+translation system (fixed-config) | CLI/Web | <strong>Obsolete (→
+Fixed.md)</strong> | Wired | Hardcoded Russian→Serbian-Cyrillic workflow
+over SSH worker w/ llama.cpp; WebSocket monitoring | Not-inventoried |
+Source-confirmed | PENDING | | ssh-translation | (no CLI flags) | CLI |
+<strong>Obsolete (→ Fixed.md)</strong> | Wired | All config hardcoded in
 <code>SystemConfig</code> (host, creds, langs, llama providers) |
 Not-inventoried | Source-confirmed | N/A |</p>
 </blockquote>
@@ -2177,10 +2068,10 @@ pkg/sshworker + pkg/modelsbridge + ollama.go/llamacpp*.go) +
 <code>CM-NO-LOCAL-RUNTIME</code> gate PASS. The KEPT distributed-API
 path is NOT Obsolete. | Component | Feature | Category | Implementation
 | Wiring | Real-use | Tests | Validation | Video-confirmation |
-|—|—|—|—|—|—|—|—|—| | translate-ssh | SSH worker 4-step FB2→EPUB
-translator | CLI | <strong>Obsolete (→ Fixed.md)</strong> | Wired |
-FB2→MD → translate (remote llama.cpp) → MD→EPUB; standalone worker
-invoked by coordinator | Not-inventoried |
+|---|---|---|---|---|---|---|---|---| | translate-ssh | SSH worker
+4-step FB2→EPUB translator | CLI | <strong>Obsolete (→
+Fixed.md)</strong> | Wired | FB2→MD → translate (remote llama.cpp) →
+MD→EPUB; standalone worker invoked by coordinator | Not-inventoried |
 <strong>OPERATOR-BLOCKED</strong> — needs a remote SSH worker host
 running llama.cpp; none available. Binary builds + runs as far as
 possible (blocked-binaries demo) | OPERATOR-BLOCKED;
@@ -2220,13 +2111,13 @@ pkg/sshworker + pkg/modelsbridge + ollama.go/llamacpp*.go) +
 <code>CM-NO-LOCAL-RUNTIME</code> gate PASS. The KEPT distributed-API
 path is NOT Obsolete. | Component | Feature | Category | Implementation
 | Wiring | Real-use | Tests | Validation | Video-confirmation |
-|—|—|—|—|—|—|—|—|—| | translator | Documented FB2 local/remote
-translator | CLI | <strong>Obsolete (→ Fixed.md)</strong> | Wired |
-Remote SSH/llama.cpp path produces a documentation report; LOCAL path is
-a STUB — emits “local translation not yet implemented” (captured).
-Remote path is OPERATOR-BLOCKED (no SSH worker host) | Not-inventoried |
-<strong>GAP — local STUB captured; remote OPERATOR-BLOCKED</strong> |
-PENDING/OPERATOR-BLOCKED;
+|---|---|---|---|---|---|---|---|---| | translator | Documented FB2
+local/remote translator | CLI | <strong>Obsolete (→ Fixed.md)</strong> |
+Wired | Remote SSH/llama.cpp path produces a documentation report; LOCAL
+path is a STUB — emits "local translation not yet implemented"
+(captured). Remote path is OPERATOR-BLOCKED (no SSH worker host) |
+Not-inventoried | <strong>GAP — local STUB captured; remote
+OPERATOR-BLOCKED</strong> | PENDING/OPERATOR-BLOCKED;
 evidence:/Volumes/T7/Downloads/Recordings/helixtranslate-cmd-blocked-binaries_20260615-172456.mp4
 | | translator | <code>-i/-input</code> | CLI | <strong>Obsolete (→
 Fixed.md)</strong> | Wired | Input ebook | Not-inventoried |
@@ -2274,18 +2165,7 @@ Source-confirmed | N/A |</p>
 </blockquote>
 <h2 id="cmdunified-translator-primary-cli">cmd/unified-translator
 (PRIMARY CLI)</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -2382,7 +2262,7 @@ preserved)</td>
 <td>Not-inventoried</td>
 <td><strong>PASS — captured</strong> (Wave 3f re-confirm: FB2 namespace
 <code>http://www.gribuser.ru/xml/fictionbook/2.0</code> PRESERVED + real
-Spanish “Este es un párrafo de prueba…”, frame-verified §11.4.107)</td>
+Spanish "Este es un párrafo de prueba…", frame-verified §11.4.107)</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-fb2-to-fb2-deepseek_20260615-172006.mp4
 (Wave-3f re-confirm:
 /Volumes/T7/Downloads/Recordings/helix_translate-fb2-convert-wave3e-20260616.mp4)</td>
@@ -2408,11 +2288,11 @@ Spanish “Este es un párrafo de prueba…”, frame-verified §11.4.107)</td>
 translated text in produced .epub)</td>
 <td>Not-inventoried</td>
 <td><strong>PASS — captured</strong> (Wave 3f net-new: EN .epub input →
-real deepseek run → OUTPUT EPUB carries real Spanish “La Antigua Farola
-la vieja farola se alzaba sola en la rocosa costa…”, frame-verified
+real deepseek run → OUTPUT EPUB carries real Spanish "La Antigua Farola
+la vieja farola se alzaba sola en la rocosa costa…", frame-verified
 §11.4.107 — start frame English-only ≠ output frame Spanish). Wave-7
-additional EPUB→EPUB round-trip clip (EN→ES): “The old man walked along
-the shore at dawn…” → “El anciano caminaba por la orilla al amanecer…”,
+additional EPUB→EPUB round-trip clip (EN→ES): "The old man walked along
+the shore at dawn…" → "El anciano caminaba por la orilla al amanecer…",
 output verified <code>EPUB document</code> (re-confirmation of this
 already-Confirmed row, no double-count).</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-epub-output-wave3e-20260616.mp4
@@ -2428,10 +2308,10 @@ re-confirm:/Volumes/T7/Downloads/Recordings/helix_translate-epub-to-epub-en-es-w
 <td>Plain-text parse → DeepSeek translate → TXT writer (real translated
 text, no format conversion)</td>
 <td>Not-inventoried</td>
-<td><strong>PASS — captured</strong> (Wave 3f net-new: EN .txt “The
-river flowed quietly through the green valley…” → real deepseek run → ES
-.txt “El río fluía tranquilamente a través del valle verde. Los pájaros
-cantaban bajo la luz de la mañana.”, frame-verified §11.4.107)</td>
+<td><strong>PASS — captured</strong> (Wave 3f net-new: EN .txt "The
+river flowed quietly through the green valley…" → real deepseek run → ES
+.txt "El río fluía tranquilamente a través del valle verde. Los pájaros
+cantaban bajo la luz de la mañana.", frame-verified §11.4.107)</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-txt-translation-wave3f-20260616.mp4</td>
 </tr>
 <tr>
@@ -2444,8 +2324,8 @@ cantaban bajo la luz de la mañana.”, frame-verified §11.4.107)</td>
 translated text in produced .html)</td>
 <td>Not-inventoried</td>
 <td><strong>PASS — captured</strong> (Wave 6 net-new: EN .html → real
-deepseek run → valid Spanish <code>&lt;html&gt;</code> “la farola guiaba
-a los barcos a través de la noche neblinosa…”, frame-verified §11.4.107
+deepseek run → valid Spanish <code>&lt;html&gt;</code> "la farola guiaba
+a los barcos a través de la noche neblinosa…", frame-verified §11.4.107
 — input-frame English ≠ output-frame Spanish). NOTE Wave-6 MINOR
 finding: chapter-title duplication on single-section chapters (cosmetic,
 PENDING_FORENSICS — core translation correct).</td>
@@ -2459,9 +2339,9 @@ PENDING_FORENSICS — core translation correct).</td>
 <td>Wired</td>
 <td>PDF parse → DeepSeek translate (real PDF 1.7 input)</td>
 <td>Not-inventoried</td>
-<td><strong>PASS — captured</strong> (Wave 6 net-new: from “PDF
-document, version 1.7” → real Spanish “El bosque se hizo silencioso a la
-caída del sol. Los pinos altos susurraban…”, frame-verified
+<td><strong>PASS — captured</strong> (Wave 6 net-new: from "PDF
+document, version 1.7" → real Spanish "El bosque se hizo silencioso a la
+caída del sol. Los pinos altos susurraban…", frame-verified
 §11.4.107)</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-pdf_input-wave6-20260616-175612.mp4</td>
 </tr>
@@ -2473,9 +2353,9 @@ caída del sol. Los pinos altos susurraban…”, frame-verified
 <td>Wired</td>
 <td>DOCX parse → DeepSeek translate (real Word 2007+ input)</td>
 <td>Not-inventoried</td>
-<td><strong>PASS — captured</strong> (Wave 6 net-new: from “Microsoft
-Word 2007+” → real Spanish “Los barcos de pesca regresaron al puerto al
-atardecer. Gaviotas volaban sobre las redes…”, frame-verified
+<td><strong>PASS — captured</strong> (Wave 6 net-new: from "Microsoft
+Word 2007+" → real Spanish "Los barcos de pesca regresaron al puerto al
+atardecer. Gaviotas volaban sobre las redes…", frame-verified
 §11.4.107)</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-docx_input-wave6-20260616-175612.mp4</td>
 </tr>
@@ -2540,10 +2420,10 @@ translation</td>
 <td><strong>PASS — video-confirmed</strong> (Waves 4–6 drove the SAME EN
 source into 7 distinct target languages producing 7 genuinely different,
 language-correct outputs — proving real per-language LLM calls, not
-echo/cache: FR “Le soleil matinal se leva…”, DE “Der morgendliche
-Sonnenaufgang…”, IT “Il sole mattutino sorse…”, PT “O antigo farol
-erguia-se…”, JA “古い灯台は…”, ZH “一列列车在黎明时分…”, RU “Библиотека
-стояла тихо под дождем…”, each ffprobe+frame-verified §11.4.107)</td>
+echo/cache: FR "Le soleil matinal se leva…", DE "Der morgendliche
+Sonnenaufgang…", IT "Il sole mattutino sorse…", PT "O antigo farol
+erguia-se…", JA "古い灯台は…", ZH "一列列车在黎明时分…", RU "Библиотека
+стояла тихо под дождем…", each ffprobe+frame-verified §11.4.107)</td>
 <td>Confirmed: Wave-4
 /Volumes/T7/Downloads/Recordings/helix_translate-multilang-en-{fr,de,it}-wave4-20260616-17331{6,9}.mp4
 ; Wave-5 helix_translate-en-{pt,ja}-translate-wave5-20260616-173814.mp4
@@ -2559,8 +2439,8 @@ helix_translate-en_{zh,ru}_translate-wave6-20260616-175612.mp4</td>
 <td>Target script (cyrillic/latin) script normalization on real run</td>
 <td>Not-inventoried</td>
 <td><strong>PASS — captured</strong> (Wave 3f re-confirm: RUN A
-<code>-script latin</code> “Ovo je testni paragraf…” ≠ RUN B
-<code>-script cyrillic</code> “Систем треба да преводи…” — same text,
+<code>-script latin</code> "Ovo je testni paragraf…" ≠ RUN B
+<code>-script cyrillic</code> "Систем треба да преводи…" — same text,
 genuinely different script, frame-verified §11.4.107)</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-serbian-script-cyrillic-latin_20260615-171843.mp4
 (Wave-3f re-confirm:
@@ -2773,7 +2653,7 @@ genuinely different script, frame-verified §11.4.107)</td>
 <td>Wired</td>
 <td>Built-in per-step verification:
 input/markdown/translation-quality/valid-EPUB verdicts in session
-report. NOTE: this is the unified-translator’s own verify pass, NOT the
+report. NOTE: this is the unified-translator's own verify pass, NOT the
 <code>pkg/verification</code> multipass engine (that engine is not wired
 into this CLI — see gap row below)</td>
 <td>Not-inventoried</td>
@@ -2871,18 +2751,7 @@ into this CLI — see gap row below)</td>
 </tbody>
 </table>
 <h2 id="cmdverify-models">cmd/verify-models</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -2911,7 +2780,8 @@ captured</strong>
 (<code>./build/verify-models -db /tmp/vm_record.db -max 1</code> ran the
 in-process pipeline against 14 env-keyed providers and printed real
 per-provider reachability/auth/HTTP-status/candidate/verified counts —
-e.g. <code>nvidia reachable=true auth=true status=200 candidates=1</code>,
+e.g.
+<code>nvidia reachable=true auth=true status=200 candidates=1</code>,
 <code>openrouter status=200</code>,
 <code>upstage auth=false status=403</code>,
 <code>siliconflow verified=1</code> — with summary
@@ -2974,18 +2844,7 @@ best LLMsVerifier-scored model, exposes it to agents/components via a
 CLI and an MCP stdio server wired in <code>.mcp.json</code>. Source:
 <code>cmd/model-bridge/{main.go,mcp.go}</code>,
 <code>pkg/bridge/</code>, commit ab1bed3 (+ routing seam a5860b2).</p>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -3012,15 +2871,16 @@ translates/invokes through it; no local models</td>
 green this session)</td>
 <td><strong>PASS — real run captured</strong> (best-model selection
 <code>novita/Sao10K/L3-8B-Stheno-v3.2</code> score 0.919;
-<code>Invoke</code> EN→ES “Good morning, friend.” → “Buenos días,
-amigo.”)</td>
+<code>Invoke</code> EN→ES "Good morning, friend." → "Buenos días,
+amigo.")</td>
 <td><strong>CONFIRMED</strong> — real-use video
 <code>/Volumes/T7/Downloads/Recordings/helixtranslate-bridge-bestmodel-translate-20260615.mp4</code>
 (asciinema→agg→ffmpeg pipeline; ffprobe 8.0s / 80 frames / 790×560; ≥6
 frames readable — selected model
-<code>novita/Sao10K/L3-8B-Stheno-v3.2</code> (score 0.919, base_url
-https://api.novita.ai/v3/openai) + live OUTPUT “Buenos días, amigo.”
-visible, not frozen/spinner per §11.4.107)</td>
+<code>novita/Sao10K/L3-8B-Stheno-v3.2</code> (score 0.919, base_url <a
+href="https://api.novita.ai/v3/openai">https://api.novita.ai/v3/openai</a>)
++ live OUTPUT "Buenos días, amigo." visible, not frozen/spinner per
+§11.4.107)</td>
 </tr>
 <tr>
 <td>model-bridge</td>
@@ -3035,7 +2895,7 @@ visible, not frozen/spinner per §11.4.107)</td>
 <td><strong>PASS — real MCP JSON-RPC round-trip captured</strong>
 (initialize→tools/list→<code>bridge_best_model</code>→<code>bridge_invoke</code>
 over stdio; tool <code>bridge_invoke</code> returned live verified-model
-translation “Le pont relie deux rives.”, isError:None)</td>
+translation "Le pont relie deux rives.", isError:None)</td>
 <td><strong>CONFIRMED</strong> — real-use video
 <code>/Volumes/T7/Downloads/Recordings/helixtranslate-bridge-mcp-stdio-20260615.mp4</code>
 (asciinema→agg→ffmpeg; ffprobe 11.88s / 10 frames / 790×560; ≥6 frames
@@ -3044,24 +2904,13 @@ readable showing the progressive REAL MCP-stdio session —
 <code>bridge_best_model</code> strongest
 <code>novita/Sao10K/L3-8B-Stheno-v3.2</code> score 0.919 + fallback
 chain, and tool <code>bridge_invoke</code> real verified-model OUTPUT
-“Le pont relie deux rives.” with isError:None — not frozen/spinner per
+"Le pont relie deux rives." with isError:None — not frozen/spinner per
 §11.4.107)</td>
 </tr>
 </tbody>
 </table>
 <h2 id="cmdworkable-items">cmd/workable-items</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -3179,22 +3028,11 @@ live/advancing per §11.4.107)</td>
 </tbody>
 </table>
 <hr />
-<h1 id="library-packages-pkg">2. Library Packages — pkg/</h1>
+<h1 id="2-library-packages--pkg">2. Library Packages — pkg/</h1>
 <h2
-id="pkgtranslatorllm-llm-provider-clients-factory">pkg/translator/llm —
-LLM provider clients &amp; factory</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+id="pkgtranslatorllm--llm-provider-clients--factory">pkg/translator/llm
+— LLM provider clients &amp; factory</h2>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -3288,9 +3126,9 @@ factory dispatching to ~32 providers</td>
 <td><strong>PASS — real Gemini translation captured</strong> (Wave-3b
 real-use video:
 <code>unified-translator -provider gemini -model gemini-2.0-flash</code>,
-real key, EN→SR-latin “Staro svjetiljko stajalo je samotočno na
+real key, EN→SR-latin "Staro svjetiljko stajalo je samotočno na
 kamenitoj obali. Noću svakog dana njeno svjetlo vodilo brodove bezbedno
-kući kroz oluju.”; ffprobe 7.16s / 790×560 / non-zero frames; ≥6 frames
+kući kroz oluju."; ffprobe 7.16s / 790×560 / non-zero frames; ≥6 frames
 extracted, f_05 content-verified showing provider+model+distinct SR
 output per §11.4.107; output distinct from deepseek/zhipu/cohere proving
 genuine per-provider model)</td>
@@ -3306,8 +3144,8 @@ genuine per-provider model)</td>
 <td>Not-inventoried</td>
 <td><strong>Exercised in unified-translator real run</strong>
 (re-confirmed Wave-3b:
-<code>-provider deepseek -model deepseek-chat</code> EN→SR-latin “Stari
-svjetionik stajao je sam na kamenitoj obali…”; ffprobe 4.7s/790×560,
+<code>-provider deepseek -model deepseek-chat</code> EN→SR-latin "Stari
+svjetionik stajao je sam na kamenitoj obali…"; ffprobe 4.7s/790×560,
 f_03 content-verified — additional clip, no double-count)</td>
 <td>Confirmed (via
 unified-translator):/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek-translation-FIXED_20260615_163824.mp4
@@ -3325,8 +3163,8 @@ unified-translator):/Volumes/T7/Downloads/Recordings/helixtranslate-cli-deepseek
 <td><strong>PASS — real Zhipu translation captured</strong> (Wave-3b
 real-use video:
 <code>unified-translator -provider zhipu -model glm-4-flash</code>, real
-key, EN→SR-latin “Stara svjetiljka stojeća samostalno na kamenitoj
-obali. Noću svaki put svjetlo vodi brodove bezbedno kući kroz oluju.”;
+key, EN→SR-latin "Stara svjetiljka stojeća samostalno na kamenitoj
+obali. Noću svaki put svjetlo vodi brodove bezbedno kući kroz oluju.";
 ffprobe 5.05s / 790×560 / non-zero frames; ≥6 frames extracted, f_04
 content-verified per §11.4.107; output distinct from
 deepseek/gemini/cohere)</td>
@@ -3397,19 +3235,19 @@ clients (OpenAI/Anthropic/DeepSeek/…) in this section are NOT Obsolete.
 wrapper | Not-inventoried | <strong>PASS — real EN→ES translation
 captured</strong> (Wave 8:
 <code>build/unified-translator -provider groq -model llama-3.3-70b-versatile</code>,
-real Groq API path: “The old lighthouse stood alone on the rocky cliff…”
-→ “La vieja farola se erguía sola sobre el acantilado rocoso. Cada noche
+real Groq API path: "The old lighthouse stood alone on the rocky cliff…"
+→ "La vieja farola se erguía sola sobre el acantilado rocoso. Cada noche
 su haz barría el mar oscuro, guiando a las naves perdidas de vuelta a
-puerto.”; ffprobe 115 frames/3.83s, source-frame ≠ output-frame per
+puerto."; ffprobe 115 frames/3.83s, source-frame ≠ output-frame per
 §11.4.107) |
 Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-groq-en-es-wave8-20260616_182021.mp4
 | | Cohere | Cohere client | Library | Implemented | Wired | command-r
 via OpenAI-compat endpoint | Not-inventoried | <strong>PASS — real
 Cohere translation captured</strong> (Wave-3b real-use video:
 <code>unified-translator -provider cohere -model command-r-08-2024 -base-url https://api.cohere.ai/compatibility/v1</code>,
-real key, EN→SR-latin “Stari svjetionik stojeo je sam na kamenitoj
+real key, EN→SR-latin "Stari svjetionik stojeo je sam na kamenitoj
 obali. Noću svaki put svijeća njegova vodila brodove sigurno kući kroz
-oluju.”; log shows provider=cohere; ffprobe 6.24s / 790×560 / non-zero
+oluju."; log shows provider=cohere; ffprobe 6.24s / 790×560 / non-zero
 frames; ≥6 frames extracted, f_04 content-verified per §11.4.107; output
 distinct from deepseek/gemini/zhipu) |
 Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-provider-cohere-translate-wave3b-20260616.mp4
@@ -3423,9 +3261,9 @@ prediction-polling API | Not-inventoried | Source-confirmed | PENDING |
 OpenAI-compatible wrapper (<code>https://api.cerebras.ai/v1</code>,
 model <code>llama3.1-70b</code>) | Not-inventoried | <strong>PASS — real
 EN→ES translation captured</strong> (via unified-translator
-<code>-provider cerebras -model llama3.1-70b</code>: “The morning sun
-rose over the quiet village.” → “El sol de la mañana se alzó sobre el
-tranquilo pueblo.” — distinct from SambaNova’s output, proving a genuine
+<code>-provider cerebras -model llama3.1-70b</code>: "The morning sun
+rose over the quiet village." → "El sol de la mañana se alzó sobre el
+tranquilo pueblo." — distinct from SambaNova's output, proving a genuine
 per-provider model; Wave-3a, asciinema→agg→ffmpeg, ffprobe 4.03s/4
 frames + 11 extracted frames, ≥6 frames content-verified, start-frame ≠
 output-frame per §11.4.107) |
@@ -3441,10 +3279,10 @@ client | Library | Implemented | Wired | OpenAI-compatible wrapper
 <strong>PASS — real EN→ES translation captured</strong> (via
 unified-translator
 <code>-provider openai -base-url https://api.hyperbolic.xyz/v1 -model meta-llama/Meta-Llama-3.1-70B-Instruct</code>:
-“The morning sun rose over the quiet village. An old fisherman walked
-along the shore…” → “Al amanecer, el sol salía sobre el tranquilo
-pueblo. Un anciano pescador caminaba por la orilla…” — distinct verbs
-(salía/caminaba) from Fireworks’s output (ascendió/paseaba), proving a
+"The morning sun rose over the quiet village. An old fisherman walked
+along the shore…" → "Al amanecer, el sol salía sobre el tranquilo
+pueblo. Un anciano pescador caminaba por la orilla…" — distinct verbs
+(salía/caminaba) from Fireworks's output (ascendió/paseaba), proving a
 genuine per-provider model; Wave-3c, asciinema→agg→ffmpeg, ffprobe
 8.01s/790×560 yuv420p + 16 extracted frames at fps=2, ≥6 frames
 content-verified, start-frame (input only) ≠ output-frame (Spanish) per
@@ -3459,8 +3297,8 @@ Implemented | Wired | OpenAI-compatible wrapper
 <strong>PASS — real EN→ES translation captured</strong> (via
 unified-translator
 <code>-provider sambanova -model Meta-Llama-3.1-70B-Instruct</code>:
-“The morning sun rose over the quiet village.” → “El sol matutino se
-alzó sobre el tranquilo pueblo.” — distinct from Cerebras’s output,
+"The morning sun rose over the quiet village." → "El sol matutino se
+alzó sobre el tranquilo pueblo." — distinct from Cerebras's output,
 proving a genuine per-provider model; Wave-3a, asciinema→agg→ffmpeg,
 ffprobe 4.39s/4 frames + 12 extracted frames, ≥6 frames
 content-verified, start-frame ≠ output-frame per §11.4.107) |
@@ -3487,20 +3325,9 @@ PENDING | | Vulavula | Vulavula client | Library | Implemented | Wired |
 OpenAI-compatible wrapper (specifics UNCONFIRMED) | Not-inventoried |
 Source-confirmed | PENDING |</p>
 </blockquote>
-<h2 id="pkgtranslator-translation-core">pkg/translator — translation
+<h2 id="pkgtranslator--translation-core">pkg/translator — translation
 core</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -3553,20 +3380,9 @@ translation, progress events</td>
 </tr>
 </tbody>
 </table>
-<h2 id="pkgebook-format-parsers-writers">pkg/ebook — format parsers
+<h2 id="pkgebook--format-parsers--writers">pkg/ebook — format parsers
 &amp; writers</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -3712,7 +3528,7 @@ ffprobe+frame-verified)</td>
 <td>PDF writer <code>pkg/ebook/pdf_writer.go</code> (commit fb265e7):
 renders the in-memory Book to UTF-8 HTML5 then hands it to
 <code>weasyprint</code> to emit a VALID, Cyrillic-faithful PDF
-(Standard-14 fonts can’t render Cyrillic — weasyprint embeds glyphs,
+(Standard-14 fonts can't render Cyrillic — weasyprint embeds glyphs,
 avoiding a silent-glyph-drop bluff). Wired into unified-translator
 generateOutput (<code>case .pdf</code> →
 <code>ebook.NewPDFWriter().Write</code>, main.go:1160);
@@ -3733,19 +3549,8 @@ ffprobe+frame-verified)</td>
 </tr>
 </tbody>
 </table>
-<h2 id="pkgfb2-fb2-specific-xml">pkg/fb2 — FB2-specific XML</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<h2 id="pkgfb2--fb2-specific-xml">pkg/fb2 — FB2-specific XML</h2>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -3785,18 +3590,7 @@ ffprobe+frame-verified)</td>
 </tbody>
 </table>
 <h2 id="pkgformat">pkg/format</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -3825,20 +3619,9 @@ ffprobe+frame-verified)</td>
 </tr>
 </tbody>
 </table>
-<h2 id="pkgmarkdown-epubmarkdown-workflow">pkg/markdown — EPUB↔︎Markdown
+<h2 id="pkgmarkdown--epubmarkdown-workflow">pkg/markdown — EPUB↔︎Markdown
 workflow</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -3900,18 +3683,7 @@ workflow</h2>
 </tbody>
 </table>
 <h2 id="pkgscript">pkg/script</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -3940,18 +3712,7 @@ workflow</h2>
 </tbody>
 </table>
 <h2 id="pkgstorage">pkg/storage</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -4024,18 +3785,7 @@ workflow</h2>
 </tbody>
 </table>
 <h2 id="pkgsecurity">pkg/security</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -4096,20 +3846,10 @@ workflow</h2>
 </tr>
 </tbody>
 </table>
-<h2 id="pkgverification-quality-verification-polishing">pkg/verification
-— quality verification &amp; polishing</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<h2
+id="pkgverification--quality-verification--polishing">pkg/verification —
+quality verification &amp; polishing</h2>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -4146,7 +3886,7 @@ d53e085)</strong></td>
 reachable via the unified-translator opt-in <code>-multipass</code> flag
 (+ <code>-multipass-passes</code>, <code>-multipass-db</code>; default
 OFF, zero overhead/behavior change when absent). NOTE: distinct from
-<code>-verify</code> (the CLI’s own per-step output check) —
+<code>-verify</code> (the CLI's own per-step output check) —
 <code>-multipass</code> invokes this <code>pkg/verification</code>
 engine. Guard: cmd/unified-translator/multipass_wiring_test.go (httptest
 + real DeepSeek). §11.4.150 research:
@@ -4213,23 +3953,12 @@ Confirmed:/Volumes/T7/Downloads/Recordings/helixtranslate-cli-multipass-verify-2
 </tbody>
 </table>
 <h2
-id="internalverifier-llmsverifier-consumer-integration">internal/verifier
+id="internalverifier--llmsverifier-consumer-integration">internal/verifier
 — LLMsVerifier consumer integration</h2>
 <p>Consumer-side LLMsVerifier verification gate (client + scoring +
 discovery + selection). Source:
 <code>internal/verifier/pipeline.go</code>.</p>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -4265,20 +3994,9 @@ surface)</td>
 </tr>
 </tbody>
 </table>
-<h2 id="pkgpreparation-pre-translation-analysis">pkg/preparation —
+<h2 id="pkgpreparation--pre-translation-analysis">pkg/preparation —
 pre-translation analysis</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -4350,20 +4068,9 @@ pre-translation analysis</h2>
 </tr>
 </tbody>
 </table>
-<h2 id="pkgcoordination-multi-llm-coordination">pkg/coordination —
+<h2 id="pkgcoordination--multi-llm-coordination">pkg/coordination —
 multi-LLM coordination</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -4404,20 +4111,9 @@ interface</td>
 </tr>
 </tbody>
 </table>
-<h2 id="pkgdistributed-ssh-distributed-workers">pkg/distributed — SSH
+<h2 id="pkgdistributed--ssh-distributed-workers">pkg/distributed — SSH
 distributed workers</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -4541,8 +4237,8 @@ pkg/sshworker + pkg/modelsbridge + ollama.go/llamacpp*.go) +
 <code>CM-NO-LOCAL-RUNTIME</code> gate PASS. The KEPT distributed-API
 path is NOT Obsolete. | Component | Feature | Category | Implementation
 | Wiring | Real-use | Tests | Validation | Video-confirmation |
-|—|—|—|—|—|—|—|—|—| | sshworker | SSH worker | Library |
-<strong>Obsolete (→ Fixed.md)</strong> | Wired | SSH exec, file
+|---|---|---|---|---|---|---|---|---| | sshworker | SSH worker | Library
+| <strong>Obsolete (→ Fixed.md)</strong> | Wired | SSH exec, file
 up/download, codebase sync, key generation | Not-inventoried |
 Source-confirmed | N/A | | sshworker | Monitored worker | Library |
 <strong>Obsolete (→ Fixed.md)</strong> | Wired | Event-monitored
@@ -4550,18 +4246,7 @@ progress tracking for long commands | Not-inventoried | Source-confirmed
 | N/A |</p>
 </blockquote>
 <h2 id="pkgdeployment">pkg/deployment</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -4645,18 +4330,7 @@ progress tracking for long commands | Not-inventoried | Source-confirmed
 </tbody>
 </table>
 <h2 id="pkggrpc">pkg/grpc</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -4698,18 +4372,7 @@ factory</td>
 </tbody>
 </table>
 <h2 id="pkgapi-library-layer">pkg/api (library layer)</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -4774,18 +4437,7 @@ factory</td>
 <h2
 id="pkgevents-websocket-batch-progress-report-logger-hardware-hash">pkg/events,
 websocket, batch, progress, report, logger, hardware, hash</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -4891,18 +4543,7 @@ websocket, batch, progress, report, logger, hardware, hash</h2>
 </tbody>
 </table>
 <h2 id="pkglanguage">pkg/language</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -4941,7 +4582,7 @@ websocket, batch, progress, report, logger, hardware, hash</h2>
 </tr>
 </tbody>
 </table>
-<h2 id="pkgmodels-modelsbridge">pkg/models &amp; modelsbridge</h2>
+<h2 id="pkgmodels--modelsbridge">pkg/models &amp; modelsbridge</h2>
 <blockquote>
 <p><strong>Obsolete-Details:</strong> Since=bridge phase-2 R-2/R-4
 (2026-06-16); Reason=<code>feature-removed</code> (local-runtime +
@@ -4956,41 +4597,30 @@ pkg/sshworker + pkg/modelsbridge + ollama.go/llamacpp*.go) +
 <code>CM-NO-LOCAL-RUNTIME</code> gate PASS. The KEPT distributed-API
 path is NOT Obsolete. | Component | Feature | Category | Implementation
 | Wiring | Real-use | Tests | Validation | Video-confirmation |
-|—|—|—|—|—|—|—|—|—| | models | Model registry | Library | Implemented |
-Wired | Translation-model metadata registry (50+ models) |
-Not-inventoried | Source-confirmed | N/A | | models | Model downloader |
-Library | Implemented | Wired | HTTP model download w/ caching + sha256
-verification | Not-inventoried | Source-confirmed | N/A | | models |
-User domain | Library | Implemented | Wired | User struct, bcrypt
-hashing, in-memory repo | Not-inventoried | Source-confirmed | N/A | |
-models | Error definitions | Library | Implemented | Wired | Domain
-error constants | Not-inventoried | Source-confirmed | N/A | | models |
-Verifier registry | Library | Implemented | Wired | LLMsVerifier-backed
-registry w/ thresholds &amp; filtering | Not-inventoried |
-Source-confirmed | PENDING | | modelsbridge | Models bridge | Library |
-<strong>Obsolete (→ Fixed.md)</strong> | Wired | Adapter mapping
-models.LLMRequest/Response → llm.LLMClient | Not-inventoried |
-Source-confirmed | N/A |</p>
+|---|---|---|---|---|---|---|---|---| | models | Model registry |
+Library | Implemented | Wired | Translation-model metadata registry (50+
+models) | Not-inventoried | Source-confirmed | N/A | | models | Model
+downloader | Library | Implemented | Wired | HTTP model download w/
+caching + sha256 verification | Not-inventoried | Source-confirmed | N/A
+| | models | User domain | Library | Implemented | Wired | User struct,
+bcrypt hashing, in-memory repo | Not-inventoried | Source-confirmed |
+N/A | | models | Error definitions | Library | Implemented | Wired |
+Domain error constants | Not-inventoried | Source-confirmed | N/A | |
+models | Verifier registry | Library | Implemented | Wired |
+LLMsVerifier-backed registry w/ thresholds &amp; filtering |
+Not-inventoried | Source-confirmed | PENDING | | modelsbridge | Models
+bridge | Library | <strong>Obsolete (→ Fixed.md)</strong> | Wired |
+Adapter mapping models.LLMRequest/Response → llm.LLMClient |
+Not-inventoried | Source-confirmed | N/A |</p>
 </blockquote>
-<h2 id="pkgbridge-llmsverifiercomponentagent-bridge">pkg/bridge —
+<h2 id="pkgbridge--llmsverifiercomponentagent-bridge">pkg/bridge —
 LLMsVerifier→component+agent bridge</h2>
 <p>In-process bridge (no local models) that selects the best
 LLMsVerifier-scored model and routes component/agent calls to it; backs
 <code>cmd/model-bridge</code> CLI + MCP. Source:
 <code>pkg/bridge/bridge.go</code>, commit ab1bed3 (+ routing mutation
 seam a5860b2).</p>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -5024,7 +4654,7 @@ provider-diverse fallback chain novita/mistral/groq/siliconflow)</td>
 frame-hashes; ≥6 frames readable — <code>best-model</code> shows
 strongest <code>novita/Sao10K/L3-8B-Stheno-v3.2</code> 0.919 + the
 provider-diverse fallback chain, then real <code>invoke</code> OUTPUT
-“Buenos días, querido amigo.” visible, not frozen per §11.4.107)</td>
+"Buenos días, querido amigo." visible, not frozen per §11.4.107)</td>
 </tr>
 <tr>
 <td>bridge</td>
@@ -5036,7 +4666,7 @@ provider-diverse fallback chain, then real <code>invoke</code> OUTPUT
 <td>Covered + <strong>§1.1 paired mutation seam</strong>
 <code>TestBridge_Invoke_RoutesToBestModel</code> (RED FAILs on
 mis-route, -race green)</td>
-<td><strong>PASS</strong> (<code>Invoke</code>→“Buenos días, amigo.”
+<td><strong>PASS</strong> (<code>Invoke</code>→"Buenos días, amigo."
 through selected model; routing guard catches mis-route)</td>
 <td>N/A (internal routing — surfaced via cmd/model-bridge)</td>
 </tr>
@@ -5064,7 +4694,7 @@ stale <code>ValidModels</code> whitelist in
 <code>BestModel</code>/invoke path which correctly bypasses it. See
 <strong>Wave-1 discovered blocker</strong> below</td>
 <td>PENDING — NOT recordable until the whitelist blocker is fixed
-(recording a “working” video here would be a §11.4.107 bluff)</td>
+(recording a "working" video here would be a §11.4.107 bluff)</td>
 </tr>
 <tr>
 <td>bridge</td>
@@ -5130,10 +4760,10 @@ strongest-first); the ensemble translator source</td>
 (§11.4.108):</strong> the <code>ValidModels</code>-whitelist blocker
 (caveat 8) is resolved — <code>ProviderDiverseTranslators</code> now
 yields working verified translators per provider. Wave-2 provider clips
-show real EN→ES translations through each provider’s verified translator
-(novita “Hola, mundo. Esta es una pequeña prueba.” · mistral “Hola,
-mundo. Este es un pequeño test.” · groq “Hola, mundo. Este es un pequeño
-prueba.” · siliconflow “Hola, mundo. Esta es una pequeña prueba.”) —
+show real EN→ES translations through each provider's verified translator
+(novita "Hola, mundo. Esta es una pequeña prueba." · mistral "Hola,
+mundo. Este es un pequeño test." · groq "Hola, mundo. Este es un pequeño
+prueba." · siliconflow "Hola, mundo. Esta es una pequeña prueba.") —
 validator ffprobe+frame-verified</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-provider-novita-translate-20260616-114032.mp4
 ·
@@ -5176,8 +4806,8 @@ underlying the ProviderDiverse clients/translators</td>
 <code>/Volumes/T7/Downloads/Recordings/helix_translate-bridge-verified-catalogue-translate-20260616-105327.mp4</code>
 (Wave 1; <code>model-bridge list</code> renders the provider-diverse
 verified ModelInfo catalogue — novita/mistral/groq/siliconflow each with
-real base_url + score — then a real <code>invoke</code> returns “Le pont
-relie deux rives.”; ffprobe 13.71s / 40 frames / 6 distinct
+real base_url + score — then a real <code>invoke</code> returns "Le pont
+relie deux rives."; ffprobe 13.71s / 40 frames / 6 distinct
 frame-hashes; ≥6 frames readable per §11.4.107)</td>
 </tr>
 <tr>
@@ -5197,18 +4827,7 @@ ProviderDiverse*)</td>
 </tbody>
 </table>
 <h2 id="pkgversion">pkg/version</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -5249,21 +4868,10 @@ patterns</td>
 </tbody>
 </table>
 <h2
-id="pkgchallenge_runner-anti-bluff-test-harness-uses-digital.vasic.challenges">pkg/challenge_runner
+id="pkgchallenge_runner--anti-bluff-test-harness-uses-digitalvasicchallenges">pkg/challenge_runner
 — anti-bluff test harness (uses
 <code>digital.vasic.challenges</code>)</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -5328,20 +4936,10 @@ calls)</td>
 </tbody>
 </table>
 <hr />
-<h1 id="web-dashboards-endpoints">3. Web Dashboards &amp; Endpoints</h1>
+<h1 id="3-web-dashboards--endpoints">3. Web Dashboards &amp;
+Endpoints</h1>
 <h2 id="web-dashboards">Web Dashboards</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -5584,7 +5182,7 @@ ws://localhost:8090/ws</td>
 <td>Web</td>
 <td>Implemented</td>
 <td>Wired</td>
-<td>Connects ws://localhost:8080/ws?session_id=…;
+<td>Connects ws://localhost:8080/ws?session_id=...;
 progress_update/step_*</td>
 <td>Not-inventoried</td>
 <td>Source-confirmed</td>
@@ -5627,25 +5225,14 @@ translation</td>
 </tr>
 </tbody>
 </table>
-<h2 id="web-dashboard-backend-handler-pkgapidashboard.go">Web Dashboard
+<h2 id="web-dashboard-backend-handler--pkgapidashboardgo">Web Dashboard
 backend handler — pkg/api/dashboard.go</h2>
 <p>Backend that serves the dashboard page (<code>/</code>,
 <code>/dashboard</code>, <code>/monitor</code>) and the translations
 endpoints. Was previously UNROUTED (returned 404); now wired so the
 dashboard genuinely translates for end users. Source:
 <code>pkg/api/dashboard.go</code>, commit f6ba5cc.</p>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -5676,7 +5263,7 @@ translation start; <code>RED_MODE=1</code> reproduces the pre-fix 404) —
 <code>go test -race ./pkg/api</code> GREEN this session</td>
 <td><strong>PASS (unit/integration)</strong> —
 <code>dashboard_test.go</code> observed green this session; live run
-produced real translation “Dobro jutro, prijatelju.” through the
+produced real translation "Dobro jutro, prijatelju." through the
 dashboard handler</td>
 <td><strong>SKIP (§11.4.3/§11.4.52)</strong> — autonomous browser+video
 capture needs the HelixQA web/video backend, off-limits to this session;
@@ -5687,7 +5274,7 @@ backend). NOT a faked confirmation</td>
 </tbody>
 </table>
 <h2
-id="rest-api-pkgapiserver.go-standalone-server-gin-unwired-test-only-scaffolding">REST
+id="rest-api--pkgapiservergo-standalone-server-gin--unwired-test-only-scaffolding">REST
 API — pkg/api/server.go (standalone <code>Server</code>, gin) —
 <strong>UNWIRED test-only scaffolding</strong></h2>
 <blockquote>
@@ -5720,18 +5307,7 @@ as a shipping API surface. Evidence:
 <code>docs/qa/deadcode_providers_investigation_20260616_160012/FINDING.md</code>
 TASK 1.</p>
 </blockquote>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -5815,20 +5391,9 @@ no cmd ships it</td>
 </tr>
 </tbody>
 </table>
-<h2 id="rest-api-pkgapihandler.go-primary-handler-gin">REST API —
+<h2 id="rest-api--pkgapihandlergo-primary-handler-gin">REST API —
 pkg/api/handler.go (primary <code>Handler</code>, gin)</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -5934,7 +5499,7 @@ Re-confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-rest-translate-wav
 <td><strong>PASS — video-confirmed</strong> (Wave 5: FB2 English input →
 POST → valid EPUB 2016 bytes, mimetype
 <code>application/epub+zip</code>, extracted chapter text real Serbian
-“Стари свјетионич стоје сам на каменитој обали…”; ffprobe 16
+"Стари свјетионич стоје сам на каменитој обали…"; ffprobe 16
 frames/8.0s/790×560 yuv420p, input-frame English ≠ output-frame Serbian
 per §11.4.107). NOTE: handler hardcoded ru→sr
 (<code>pkg/api/handler.go:84-85</code>), ignores requested langs —
@@ -5951,9 +5516,9 @@ tracked fix.</td>
 <td>Not-inventoried</td>
 <td><strong>PASS — video-confirmed</strong> (Wave 9: live
 <code>server-w9</code> :8091 TLS, in-process bridge — 3 EN→SR translated
-in one request: “The river flows to the sea.”→“Река тече до мора.”,
-“Books open windows to the world.”→“Knjige otvaraju prozore u svet.”,
-“Time heals all wounds.”→“Vrijeme leči sve rane.”, 0 errors, provider
+in one request: "The river flows to the sea."→"Река тече до мора.",
+"Books open windows to the world."→"Knjige otvaraju prozore u svet.",
+"Time heals all wounds."→"Vrijeme leči sve rane.", 0 errors, provider
 resolved llm-novita; ffprobe 790 frames/7.52s, early-frame ≠ late-frame
 per §11.4.107)</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-rest-batch-version-wave9-20260616_184823.mp4</td>
@@ -6210,20 +5775,9 @@ lookup)</td>
 </tr>
 </tbody>
 </table>
-<h2 id="rest-api-pkgapibatch_handlers.go-under-apiv1">REST API —
+<h2 id="rest-api--pkgapibatch_handlersgo-under-apiv1">REST API —
 pkg/api/batch_handlers.go (under /api/v1)</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -6248,8 +5802,8 @@ pkg/api/batch_handlers.go (under /api/v1)</h2>
 <td>Not-inventoried</td>
 <td><strong>PASS — video-confirmed</strong> (Wave 7: local
 <code>./build/server</code> :8080, real DeepSeek path — JSON
-<code>translated_text</code> = “Las montañas estaban cubiertas de nieve
-y el río fluía tranquilamente por el valle.”, provider deepseek (a real
+<code>translated_text</code> = "Las montañas estaban cubiertas de nieve
+y el río fluía tranquilamente por el valle.", provider deepseek (a real
 translation, NOT a bare session_id); frame-verified §11.4.107 —
 advancing frames, request-frame ≠ response-frame)</td>
 <td>Confirmed:/Volumes/T7/Downloads/Recordings/helix_translate-rest-translate-string-en-es-wave7-20260616-181155.mp4</td>
@@ -6268,20 +5822,9 @@ advancing frames, request-frame ≠ response-frame)</td>
 </tbody>
 </table>
 <h2
-id="rest-api-pkgapiverifier_handlers.go-llmsverifier-under-apiv1">REST
+id="rest-api--pkgapiverifier_handlersgo-llmsverifier-under-apiv1">REST
 API — pkg/api/verifier_handlers.go (LLMsVerifier, under /api/v1)</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -6370,20 +5913,9 @@ translate</td>
 </tr>
 </tbody>
 </table>
-<h2 id="rest-api-cmdapi-servermain.go-grpc-proxying-rest-8080">REST API
+<h2 id="rest-api--cmdapi-servermaingo-grpc-proxying-rest-8080">REST API
 — cmd/api-server/main.go (gRPC-proxying REST, :8080)</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -6521,19 +6053,8 @@ translate</td>
 </tr>
 </tbody>
 </table>
-<h2 id="websocket-hub-fan-out">WebSocket — hub &amp; fan-out</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<h2 id="websocket--hub--fan-out">WebSocket — hub &amp; fan-out</h2>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -6573,20 +6094,9 @@ per-session filter; Broadcast()</td>
 </tr>
 </tbody>
 </table>
-<h2 id="grpc-pkggrpcserver.go-service-translationservice">gRPC —
+<h2 id="grpc--pkggrpcservergo-service-translationservice">gRPC —
 pkg/grpc/server.go (service <code>TranslationService</code>)</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -6608,7 +6118,7 @@ pkg/grpc/server.go (service <code>TranslationService</code>)</h2>
 <td>Implemented</td>
 <td>Wired</td>
 <td>Reserves session, spawns runTranslation →
-translator.Translate(…)</td>
+translator.Translate(...)</td>
 <td>Not-inventoried</td>
 <td>Source-confirmed</td>
 <td>PENDING</td>
@@ -6681,20 +6191,9 @@ translator.Translate(…)</td>
 </tr>
 </tbody>
 </table>
-<h2 id="cors-middleware-auth-infra">CORS / Middleware / Auth
+<h2 id="cors--middleware--auth-infra">CORS / Middleware / Auth
 (Infra)</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -6772,20 +6271,9 @@ registered</td>
 </tbody>
 </table>
 <hr />
-<h1 id="owned-submodules">4. Owned Submodules</h1>
+<h1 id="4-owned-submodules">4. Owned Submodules</h1>
 <h2 id="challenges">challenges/</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -6972,18 +6460,7 @@ WS, Gradle, Cargo, npm), 19 templates, 12 evaluators</td>
 </tbody>
 </table>
 <h2 id="containers">containers/</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -7177,18 +6654,7 @@ WS, Gradle, Cargo, npm), 19 templates, 12 evaluators</td>
 </tbody>
 </table>
 <h2 id="doc_processor">doc_processor/</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -7294,18 +6760,7 @@ WS, Gradle, Cargo, npm), 19 templates, 12 evaluators</td>
 </tbody>
 </table>
 <h2 id="docs_chain">docs_chain/</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -7329,7 +6784,7 @@ WS, Gradle, Cargo, npm), 19 templates, 12 evaluators</td>
 <td>Propagate changes through chain (regenerate + re-export
 atomically)</td>
 <td>Not-inventoried</td>
-<td>Source-confirmed; used to produce this doc’s exports</td>
+<td>Source-confirmed; used to produce this doc's exports</td>
 <td>PENDING</td>
 </tr>
 <tr>
@@ -7460,18 +6915,7 @@ colorize-html</td>
 </tbody>
 </table>
 <h2 id="llm_orchestrator">llm_orchestrator/</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -7568,18 +7012,7 @@ types</td>
 </tbody>
 </table>
 <h2 id="llm_provider">llm_provider/</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -7690,10 +7123,10 @@ translation captured</strong> (the
 <code>llm_provider/pkg/providers/fireworks/fireworks.go</code> client,
 reached via unified-translator
 <code>-provider openai -base-url https://api.fireworks.ai/inference/v1 -model accounts/fireworks/models/llama-v3p1-70b-instruct</code>:
-“The morning sun rose over the quiet village. An old fisherman walked
-along the shore…” → “Al amanecer, el sol ascendió sobre el tranquilo
-pueblo. Un anciano pescador paseaba por la orilla…” — distinct verbs
-(ascendió/paseaba) from Hyperbolic’s output (salía/caminaba), proving a
+"The morning sun rose over the quiet village. An old fisherman walked
+along the shore…" → "Al amanecer, el sol ascendió sobre el tranquilo
+pueblo. Un anciano pescador paseaba por la orilla…" — distinct verbs
+(ascendió/paseaba) from Hyperbolic's output (salía/caminaba), proving a
 genuine per-provider model; Wave-3c, asciinema→agg→ffmpeg, ffprobe
 4.54s/790×560 yuv420p + 9 extracted frames at fps=2, ≥6 frames
 content-verified, start-frame (input only) ≠ output-frame (Spanish) per
@@ -7701,16 +7134,16 @@ content-verified, start-frame (input only) ≠ output-frame (Spanish) per
 <code>openrouter</code></strong> — <code>nvidia</code> (reached via
 unified-translator
 <code>-provider openai -base-url https://integrate.api.nvidia.com/v1 -model meta/llama-3.1-8b-instruct</code>):
-“At dawn, the sun rose over the quiet village. An old fisherman walked
-along the shore.” → “Al amanecer, el sol se alzó sobre el tranquilo
+"At dawn, the sun rose over the quiet village. An old fisherman walked
+along the shore." → "Al amanecer, el sol se alzó sobre el tranquilo
 pueblo. Un anciano pescador <strong>caminaba</strong> a lo largo de la
-orilla.”
+orilla."
 (<code>helix_translate-provider-nvidia-translate-wave3d-20260616.mp4</code>,
 ffprobe 6.5s/790×560 yuv420p + 13 frames at fps=2);
 <code>openrouter</code>
 (<code>-base-url https://openrouter.ai/api/v1 -model meta-llama/llama-3.1-8b-instruct</code>):
-same EN source → “Al amanecer, el sol se alzó sobre el tranquilo pueblo.
-Un anciano pescador <strong>paseaba</strong> a lo largo de la orilla.”
+same EN source → "Al amanecer, el sol se alzó sobre el tranquilo pueblo.
+Un anciano pescador <strong>paseaba</strong> a lo largo de la orilla."
 (<code>helix_translate-provider-openrouter-translate-wave3d-20260616.mp4</code>,
 ffprobe 5.5s/790×560 yuv420p + 11 frames at fps=2) — distinct verbs
 (caminaba/paseaba) prove genuine per-provider models, each start-frame
@@ -7727,18 +7160,7 @@ Source-confirmed, PENDING a per-provider recording.</td>
 </tbody>
 </table>
 <h2 id="llms_verifier">llms_verifier/</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -7759,7 +7181,7 @@ Source-confirmed, PENDING a per-provider recording.</td>
 <td>Submodule</td>
 <td>Implemented</td>
 <td>Wired</td>
-<td>“Do you see my code?” +
+<td>"Do you see my code?" +
 existence/responsiveness/latency/streaming/function-calling/vision/embeddings
 tests</td>
 <td>Not-inventoried</td>
@@ -7925,18 +7347,7 @@ LLM)</td>
 </tbody>
 </table>
 <h2 id="security">security/</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -8049,7 +7460,7 @@ cgroups</td>
 <td>Submodule</td>
 <td>Implemented</td>
 <td>Wired</td>
-<td>Denies SSRF on caller’s outbound HTTP client</td>
+<td>Denies SSRF on caller's outbound HTTP client</td>
 <td>Not-inventoried</td>
 <td>Source-confirmed</td>
 <td>N/A</td>
@@ -8090,18 +7501,7 @@ cgroups</td>
 </tbody>
 </table>
 <h2 id="vision_engine">vision_engine/</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-<col style="width: 11%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -8188,7 +7588,7 @@ distributed llama.cpp RPC</td>
 </tbody>
 </table>
 <hr />
-<h2 id="honest-gaps-caveats-11.4.6">Honest gaps &amp; caveats
+<h2 id="honest-gaps--caveats-1146">Honest gaps &amp; caveats
 (§11.4.6)</h2>
 <ol type="1">
 <li><strong>Video coverage is 66 feature rows.</strong> 66 features are
@@ -8223,7 +7623,7 @@ unified-translator (<code>.pdf</code> output, main.go:1160);
 (openai/gpt-4, valid PDF with real Spanish). Output formats are
 EPUB/FB2/TXT/HTML/MD/DOCX/PDF. 1b. <strong><code>-multipass</code> ≠
 <code>-verify</code>.</strong> The unified-translator
-<code>-verify</code> flag runs the CLI’s own per-step output check; the
+<code>-verify</code> flag runs the CLI's own per-step output check; the
 separate <code>-multipass</code> flag (d53e085) invokes the
 <code>pkg/verification</code> multi-pass polisher engine — now wired and
 video-confirmed. 1c. <strong><code>cmd/translator</code>,
@@ -8233,10 +7633,10 @@ per-binary table rows (lines ~136/218/233) which mark all three
 <code>Obsolete (→ Fixed.md)</code> with
 Reason=<code>feature-removed</code>. The local-runtime + SSH-local
 translation paths were REMOVED in bridge phase-2 R-2..R-4
-(operator-approved 2026-06-15 D1/D2 + R-4 “keep distributed API, remove
-SSH-local”); the default path now sources the LLMsVerifier bridge
+(operator-approved 2026-06-15 D1/D2 + R-4 "keep distributed API, remove
+SSH-local"); the default path now sources the LLMsVerifier bridge
 (<code>pkg/bridge</code>). These are therefore NO LONGER open STUB /
-OPERATOR-BLOCKED items — the earlier “STUB / OPERATOR-BLOCKED” wording
+OPERATOR-BLOCKED items — the earlier "STUB / OPERATOR-BLOCKED" wording
 was stale and is corrected here. The KEPT distributed-API translation
 path is NOT Obsolete. 1e.
 <strong><code>GET /api/v1/verified-models</code> returns 404</strong> —
@@ -8303,13 +7703,13 @@ unified-translator (all outputs:
 TXT/HTML/EPUB/FB2/MD/<strong>DOCX</strong>/<strong>PDF</strong>) + gRPC
 translate are non-functional via the default bridge path until fixed.
 This BLOCKS Wave-1 videos #2 (DOCX), #3 (PDF), #4 (gRPC), and the
-per-provider unified-path; recording any of them as “working” would be a
+per-provider unified-path; recording any of them as "working" would be a
 §11.4.107 bluff, so they are honest SKIPs this wave. <strong>Fix
 direction (not yet applied — needs its own §11.4.115 RED→GREEN +
 §11.4.142 independent review + §11.4.145 impact research + §11.4.40
-full-suite retest):</strong> route <code>VerifiedFactory</code>’s
+full-suite retest):</strong> route <code>VerifiedFactory</code>'s
 verified-translator construction through the
-<code>ResolvedProvider</code> resolver (FactoryProvider=“openai” +
+<code>ResolvedProvider</code> resolver (FactoryProvider="openai" +
 BaseURL) the way <code>bridge.realClientBuild</code> already does,
 bypassing the <code>ValidModels</code> whitelist for already-verified
 models. Tracked as a Wave-2 / dedicated fix item (severity HIGH —

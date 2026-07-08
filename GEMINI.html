@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>GEMINI</title>
   <style>
@@ -156,8 +156,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -175,8 +179,8 @@
 <header id="title-block-header">
 <h1 class="title">GEMINI</h1>
 </header>
-<h1 id="gemini.md">GEMINI.md</h1>
-<h2 id="inherited-from-constitutionclaude.md">INHERITED FROM
+<h1 id="geminimd">GEMINI.md</h1>
+<h2 id="inherited-from-constitutionclaudemd">INHERITED FROM
 constitution/CLAUDE.md</h2>
 <p>All rules in <code>constitution/CLAUDE.md</code> (and the
 <code>constitution/Constitution.md</code> it references) apply
@@ -192,7 +196,7 @@ project guidance, conventions, architecture, commands, and the complete
 <code>AGENTS.md</code> — they are authoritative and this file mirrors
 the same universal anchors. Any governance edit MUST land here alongside
 the other four carriers in the same change-window.</p>
-<h2 id="mirrored-constitution-anchors-11.4.15411.4.157">Mirrored
+<h2 id="mirrored-constitution-anchors-114154114157">Mirrored
 constitution anchors (§11.4.154–§11.4.157)</h2>
 <p>Condensed consumer-side mirrors of the four universal anchors most
 recently added to the constitution submodule (HEAD
@@ -211,11 +215,11 @@ windows; target by stable identity (window id/title, device serial,
 browser context, tmux target) per §11.4.111, never a fixed full-screen
 index; platform genuinely cannot capture below whole-screen ⇒ honest
 §11.4.3 SKIP + tracked migration item. <strong>(B) Fresh-corpus
-rotation</strong> — a new recording run for a scope removes the agent’s
+rotation</strong> — a new recording run for a scope removes the agent's
 OWN prior in-scope stale recordings FIRST (§11.4.107 not-stale +
-§11.4.86 roster-freshness); the agent’s own SAME-scope recordings ONLY,
-NEVER another project’s/operator-authored files (uncertain ⇒ surface,
-don’t delete §11.4.122/§9.2); committed
+§11.4.86 roster-freshness); the agent's own SAME-scope recordings ONLY,
+NEVER another project's/operator-authored files (uncertain ⇒ surface,
+don't delete §11.4.122/§9.2); committed
 <code>docs/qa/&lt;run-id&gt;/</code> evidence (§11.4.83) is the durable
 record, NOT rotated. Classification: universal (§11.4.17). Composes
 §11.4.2/.5/.10/.83/.86/.107/.111/.122/.128/.137/.153/§9.2/.6. Canonical
@@ -255,7 +259,7 @@ governed repos; enforcement migrates to the LOCAL §11.4.75 git-hook
 ritual + §11.4.40 pre-tag sweep, never a remote runner. ALL hold:
 <strong>(A)</strong> zero active root-level
 <code>.github/workflows/*.yml|yaml</code> / <code>.gitlab-ci.yml</code>
-/ equivalent; <strong>(B)</strong> “disabled” = a push triggers ZERO
+/ equivalent; <strong>(B)</strong> "disabled" = a push triggers ZERO
 runs — delete OR rename to a non-trigger name (the §11.4.75
 <code>.disabled-local-only</code> pattern); a
 live-<code>on:</code>+<code>if:false</code> workflow is NOT compliant;
@@ -278,13 +282,13 @@ never optional/best-effort. ALL hold: <strong>(A)</strong> five-carrier
 lockstep — no governance change is complete until <code>GEMINI.md</code>
 carries it alongside the other three mirrors (added to the §11.4.26
 propagation + cross-reference set); <strong>(B)</strong> no silent drift
-— <code>GEMINI.md</code> lagging the other mirrors’ highest rule is a
+— <code>GEMINI.md</code> lagging the other mirrors' highest rule is a
 §11.4.157 violation (§11.4.65-class); <strong>(C)</strong> equal status
 — <code>GEMINI.md</code> restates the SAME literal <code>11.4.N</code>
 anchors the propagation gates require (§11.4.35), fleet count INCLUDES
-<code>GEMINI.md</code>; <strong>(D)</strong> consumer projects’ own
+<code>GEMINI.md</code>; <strong>(D)</strong> consumer projects' own
 CLAUDE/AGENTS/QWEN/GEMINI bind too (§11.4.35). Honest boundary
-(§11.4.6): claiming <code>GEMINI.md</code> “in sync” while a back-fill
+(§11.4.6): claiming <code>GEMINI.md</code> "in sync" while a back-fill
 is incomplete is itself a §11.4.157 violation. Composes
 §11.4.26/.35/.17/.44/.65/.140/.156. Classification: universal
 (§11.4.17). This parent repo now maintains <code>CLAUDE.md</code> +

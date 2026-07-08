@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>Status_Summary</title>
   <style>
@@ -156,8 +156,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -175,7 +179,7 @@
 <header id="title-block-header">
 <h1 class="title">Status_Summary</h1>
 </header>
-<h1 id="helixtranslate-feature-status-summary">HelixTranslate — Feature
+<h1 id="helixtranslate--feature-status-summary">HelixTranslate — Feature
 Status Summary</h1>
 <p><strong>Revision:</strong> 18 <strong>Last modified:</strong>
 2026-06-16T20:05:00Z <strong>Authority:</strong> Two-audience companion
@@ -183,7 +187,7 @@ to <code>docs/features/Status.md</code> (§11.4.56). Derived from the
 same inventory. Per §11.4.44 (revision header), §11.4.60 (always-sync),
 §11.4.6 (no-guessing).</p>
 <hr />
-<h1 id="page-1-for-the-team-non-developer">Page 1 — For the team
+<h1 id="page-1--for-the-team-non-developer">Page 1 — For the team
 (non-developer)</h1>
 <p><strong>What is this?</strong> HelixTranslate is an ebook translation
 system. This page is a plain-language snapshot of how much of it we have
@@ -199,7 +203,7 @@ unified-translator rows for the Wave-3f net-new videos: EPUB→EPUB
 conversion + TXT→TXT translation; Rev 9 added 1 new unified-translator
 HTML→Markdown conversion row for the Wave-2 video; Rev 8 re-counted the
 live tables directly and added the 7 missing agent-bridge ensemble rows
-to reach 493; the headline “417” is the same list with closely-related
+to reach 493; the headline "417" is the same list with closely-related
 sub-options counted once).</li>
 <li>The majority are fully built and reachable: the command-line
 translators, the web dashboards, the REST and gRPC servers, ~32 built-in
@@ -209,24 +213,24 @@ PDF</strong>), caching, security, and all 8 add-on modules.</li>
 <li><strong>66 features are proven on real recordings</strong> — each
 checked frame-by-frame to confirm it genuinely shows the feature working
 (real translated text in the right language, a live connection count
-changing, a real CLI database/pipeline output, etc.), not just “a
-screen”. <strong>New this round (Waves 7–9, +12 net-new):</strong> the
+changing, a real CLI database/pipeline output, etc.), not just "a
+screen". <strong>New this round (Waves 7–9, +12 net-new):</strong> the
 translator producing distinct real translations in more languages
 (Korean/Hangul, a German→English reverse, French→Spanish,
 English→Serbian-Latin) and through a new AI provider (Groq); the REST
 API translating a single string, translating a batch of three sentences
 at once, and reporting real version/build details; the script converter
 turning Cyrillic into Latin on its own; the preparation analysis reading
-a book’s genre/characters and feeding that into a real Spanish
+a book's genre/characters and feeding that into a real Spanish
 translation. Of these 12, <strong>3 genuinely flipped a row from
-“pending” to “proven”</strong> (translate-a-string API, the Groq
+"pending" to "proven"</strong> (translate-a-string API, the Groq
 provider, translate-a-batch API); the other 9 are extra proof on
 features already proven or covered by general language-pair rows —
 counted in the running total but honestly distinguished in the detailed
 document so nothing is double-counted. <strong>Honestly recorded but NOT
 counted as proven:</strong> the EPUB→Markdown tool hit an empty-payload
-bug (it sent blank text to the AI and wrote the AI’s “you sent an empty
-message” reply as if it were the translation) — that bug is <strong>now
+bug (it sent blank text to the AI and wrote the AI's "you sent an empty
+message" reply as if it were the translation) — that bug is <strong>now
 fixed at source (commit 4fbe581)</strong>, but a fresh recording is owed
 before it is marked proven; and two API findings (an unwired alternate
 server with no runnable entry point, and a providers endpoint that
@@ -267,26 +271,26 @@ project-tracker database), and <strong>two more providers</strong>
 (nvidia + openrouter, distinct real Spanish translations).</li>
 <li><strong>DOCX output and PDF output are now proven on camera (Wave
 2).</strong> A real run of the command-line translator produces a real
-<code>.docx</code> (“Microsoft Word 2007+” with real Spanish text) and a
+<code>.docx</code> ("Microsoft Word 2007+" with real Spanish text) and a
 valid PDF with real Spanish — both captured as real-use videos and
 checked frame-by-frame. <strong>The blocker is fixed:</strong> the
 default command-line/gRPC translation path that was runtime-broken in
 Wave 1 (the auto-selected verified model being rejected by a stale model
 whitelist) now works — which is exactly why these recordings genuinely
-demonstrate working features. We never faked a “working” recording; in
+demonstrate working features. We never faked a "working" recording; in
 Wave 1 these were honest skips.</li>
 <li><strong>New this round (Wave 3d):</strong> four feature-type-diverse
 confirmations — the <strong><code>verify-models</code> CLI</strong>
 (shows the real LLMsVerifier model-verification pipeline: 14 providers
 checked live with real reachable/auth/HTTP-status results, 4 models
 verified and persisted, then a selection ranking with real scores), the
-<strong><code>workable-items</code> CLI</strong> (the project’s real
-SQLite issue-tracker: <code>validate</code> reports “DB matches markdown
-(81 items)” and <code>list</code> prints real ticket rows), and
-<strong>two more providers</strong> — <strong>nvidia</strong> (“…el sol
+<strong><code>workable-items</code> CLI</strong> (the project's real
+SQLite issue-tracker: <code>validate</code> reports "DB matches markdown
+(81 items)" and <code>list</code> prints real ticket rows), and
+<strong>two more providers</strong> — <strong>nvidia</strong> ("…el sol
 se alzó… Un anciano pescador <strong>caminaba</strong> a lo largo de la
-orilla.”) and <strong>openrouter</strong> (“…<strong>paseaba</strong> a
-lo largo de la orilla.”), the two outputs distinct (caminaba/paseaba)
+orilla.") and <strong>openrouter</strong> ("…<strong>paseaba</strong> a
+lo largo de la orilla."), the two outputs distinct (caminaba/paseaba)
 proving genuine separate per-provider models. <code>upstage</code> was
 tried but honestly skipped (its key was rejected, HTTP 403) and
 <code>together</code> skipped (no key) — never faked.</li>
@@ -295,8 +299,8 @@ tried but honestly skipped (its key was rejected, HTTP 403) and
 <strong>Fireworks</strong> provider (in the <code>llm_provider</code>
 submodule) are now video-proven — each a real EN→ES translation run
 through the OpenAI-compatible per-provider path, with the two Spanish
-outputs distinct from each other (“…el sol salía…caminaba por la
-orilla…” for Hyperbolic vs “…el sol ascendió…paseaba por la orilla…” for
+outputs distinct from each other ("…el sol salía…caminaba por la
+orilla…" for Hyperbolic vs "…el sol ascendió…paseaba por la orilla…" for
 Fireworks), proving genuine, separate per-provider models rather than a
 canned response. Wave 3c also re-confirmed (not double-counted) the REST
 <code>POST /api/v1/translate</code> and the
@@ -322,7 +326,7 @@ product can <em>read</em> DOCX and PDF, and can now <em>write</em> DOCX
 <strong>and PDF</strong>. Output is now EPUB, FB2, TXT, HTML, Markdown,
 DOCX and PDF. (PDF writing needs the <code>weasyprint</code> tool, which
 is installed here.)</li>
-<li><strong>The web dashboard’s video proof is honestly skipped, not
+<li><strong>The web dashboard's video proof is honestly skipped, not
 faked:</strong> recording the dashboard translating end-to-end needs the
 HelixQA web/video test backend, which was off-limits to this round. The
 page is proven working by its tests + a real run, but its on-camera
@@ -337,14 +341,14 @@ online verified AI provider chosen automatically via the LLMsVerifier
 bridge. These removed tools are marked <strong>Obsolete</strong>
 (operator-approved 2026-06-15). The team-facing distributed/API
 capability is kept.</li>
-<li><strong>The “verified models” API returns 404</strong> because the
+<li><strong>The "verified models" API returns 404</strong> because the
 model-verification service is switched off in the current configuration
 (a config choice, not a broken feature).</li>
-<li><strong>4 features are “stubs”</strong> — they look like real
+<li><strong>4 features are "stubs"</strong> — they look like real
 endpoints but return placeholder data: ebook-translate-via-API, the two
 preparation/analysis API endpoints, and
 translate-with-verification.</li>
-<li>A handful of small API endpoints return fixed/sample data (e.g. a
+<li>A handful of small API endpoints return fixed/sample data (e.g. a
 stats endpoint that always shows zeros). These are flagged in the
 detailed document.</li>
 </ul>
@@ -411,9 +415,9 @@ runtime features (web dashboard translation, the other AI providers) to
 keep lifting video-confirmation coverage.</li>
 </ul>
 <hr />
-<h1 id="page-2-for-software-engineers">Page 2 — For software
+<h1 id="page-2--for-software-engineers">Page 2 — For software
 engineers</h1>
-<h2 id="source-method">Source &amp; method</h2>
+<h2 id="source--method">Source &amp; method</h2>
 <p>Derived 1:1 from <code>docs/features/.feature_inventory_raw.md</code>
 (Rev 1). Every detailed inventory row → one Status row. Statuses set per
 §11.4.6 from what the inventory actually found in source; no test files
@@ -421,10 +425,6 @@ were attributed per-feature (recorded <code>Not-inventoried</code>, an
 honest unknown, never guessed).</p>
 <h2 id="counts">Counts</h2>
 <table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr>
 <th>Dimension</th>
@@ -577,7 +577,7 @@ headline)</h3>
 </tr>
 </tbody>
 </table>
-<h2 id="stub-list-implementationstub-returns-mock-no-real-work">Stub
+<h2 id="stub-list-implementationstub--returns-mock-no-real-work">Stub
 list (Implementation=Stub — returns mock, no real work)</h2>
 <ol type="1">
 <li><code>POST /api/v1/translate/ebook</code> —
@@ -605,7 +605,7 @@ behind a build tag.</li>
 OPERATOR-BLOCKED) — flipped to <strong>Obsolete</strong> Rev 7 (the
 whole binary was removed in bridge phase-2 R-4).</p>
 </blockquote>
-<h2 id="not-implemented-gap-rows-11.4.6">Not-implemented gap rows
+<h2 id="not-implemented-gap-rows-1146">Not-implemented gap rows
 (§11.4.6)</h2>
 <p>None — both former gap rows are now Implemented.</p>
 <blockquote>
@@ -621,7 +621,7 @@ unified-translator <code>.pdf</code> output, main.go:1160;
 FB2 / TXT / HTML / MD / DOCX / PDF.</p>
 </blockquote>
 <h2
-id="new-rev-4-features-built-tested-this-round-recordings-owedskipped">New
+id="new-rev-4-features-built--tested-this-round-recordings-owedskipped">New
 Rev 4 features (built + tested this round, recordings owed/skipped)</h2>
 <ol type="1">
 <li><strong>cmd/model-bridge + pkg/bridge</strong> —
@@ -629,7 +629,7 @@ LLMsVerifier→component+agent bridge (no local models): selects the best
 verifier-scored model (top-1 + fallback) and exposes it via a CLI and an
 MCP stdio server (<code>.mcp.json</code>). Commits ab1bed3 + a5860b2.
 PASS (real run: best-model <code>novita/Sao10K/L3-8B-Stheno-v3.2</code>
-score 0.919, <code>Invoke</code>→“Buenos días, amigo.”; MCP nonce-echo
+score 0.919, <code>Invoke</code>→"Buenos días, amigo."; MCP nonce-echo
 <code>HELIX-PROOF-9b21x</code>; <code>go test -race ./pkg/bridge</code>
 green; §1.1 routing-guard
 <code>TestBridge_Invoke_RoutesToBestModel</code>). <strong>CLI video
@@ -640,7 +640,7 @@ surface video CONFIRMED</strong>
 (<code>helixtranslate-bridge-mcp-stdio-20260615.mp4</code> — real
 JSON-RPC MCP session:
 initialize→tools/list→<code>bridge_best_model</code>→<code>bridge_invoke</code>,
-tool <code>bridge_invoke</code> real output “Le pont relie deux rives.”
+tool <code>bridge_invoke</code> real output "Le pont relie deux rives."
 isError:None; ffprobe 11.88s/10fr, ≥6 frames §11.4.107
 content-verified).</li>
 <li><strong>internal/verifier affirmative-response hard-gate</strong> —
@@ -654,20 +654,20 @@ only under <code>RED_MODE=1</code>, green this session). Video N/A
 f6ba5cc: dashboard page + translations endpoints, previously 404, now
 genuinely translates. PASS unit/integration
 (<code>dashboard_test.go</code> §11.4.115 RED→GREEN,
-<code>go test -race ./pkg/api</code> green; live run → “Dobro jutro,
-prijatelju.”). Video <strong>SKIP</strong> (§11.4.3/§11.4.52 —
+<code>go test -race ./pkg/api</code> green; live run → "Dobro jutro,
+prijatelju."). Video <strong>SKIP</strong> (§11.4.3/§11.4.52 —
 autonomous browser+video capture needs the HelixQA web/video backend,
 off-limits this round; migration item owed; NOT a faked
 confirmation).</li>
 </ol>
-<h2 id="operator-blocked-list-11.4.45">Operator-blocked list
+<h2 id="operator-blocked-list-11445">Operator-blocked list
 (§11.4.45)</h2>
 <p>None — the Rev 6 operator-blocked binaries
 (<code>cmd/translate-ssh</code>, <code>cmd/ebook-translator</code>) were
 <strong>removed</strong> in bridge phase-2 R-4 and are now Obsolete (see
 the Obsolete list), not host-blocked.</p>
 <h2
-id="obsolete-list-11.4.90-rev-7-operator-approved-2026-06-15-d1d2-r-1-r-4">Obsolete
+id="obsolete-list-11490--rev-7-operator-approved-2026-06-15-d1d2--r-1--r-4">Obsolete
 list (§11.4.90 — Rev 7, operator-approved 2026-06-15 D1/D2 + R-1 +
 R-4)</h2>
 <ol type="1">
@@ -688,8 +688,8 @@ the KEPT distributed-API path is NOT Obsolete. Triple-check: source
 files gone + <code>CM-NO-LOCAL-RUNTIME</code> gate PASS.</p>
 </blockquote>
 <h2
-id="static-hardcoded-return-endpoints-implemented-but-not-live">Static /
-hardcoded-return endpoints (Implemented, but not live)</h2>
+id="static--hardcoded-return-endpoints-implemented-but-not-live">Static
+/ hardcoded-return endpoints (Implemented, but not live)</h2>
 <ul>
 <li><code>GET /api/stats</code> (<code>pkg/api/server.go</code>) —
 hardcoded zeros.</li>
@@ -741,7 +741,7 @@ honest Wave-1 SKIPs are now genuine CONFIRMED rows. See Status.md caveat
 gap rows remain. Output is EPUB/FB2/TXT/HTML/MD/DOCX/PDF.</li>
 <li><strong><code>-multipass</code> wired (d53e085);
 <code>-verify</code> ≠ <code>-multipass</code></strong> —
-unified-translator <code>-verify</code> runs the CLI’s own per-step
+unified-translator <code>-verify</code> runs the CLI's own per-step
 check; the new <code>-multipass</code> flag invokes the
 <code>pkg/verification</code> multi-pass polisher engine (now wired +
 video-confirmed). cmd/cli write-safety FIXED (87cd2be, atomic
@@ -764,7 +764,7 @@ features is future work.</li>
 be implemented or reclassified per §11.4.90 before they can be claimed
 as working capabilities.</li>
 <li><strong>UNCONFIRMED LLM determinations</strong> carried from the
-inventory: thin OpenAI-compatible providers’ base-URL/model specifics;
+inventory: thin OpenAI-compatible providers' base-URL/model specifics;
 several <code>llms_verifier</code> packages
 (scoring/helixqa/cliagents/crush/opencode/scheduler/partners/bigdata/multimodal/performance);
 <code>challenges/userflow</code> evaluators;

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>docx_output_writer</title>
   <style>
@@ -156,8 +156,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -172,7 +176,10 @@
   </style>
 </head>
 <body>
-<h1 id="docx-output-writer-deep-multi-angle-research-11.4.150">DOCX
+<header id="title-block-header">
+<h1 class="title">docx_output_writer</h1>
+</header>
+<h1 id="docx-output-writer--deep-multi-angle-research-114150">DOCX
 output writer — deep multi-angle research (§11.4.150)</h1>
 <p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
 2026-06-15T00:00:00Z <strong>Scope:</strong> unified-translator DOCX
@@ -194,7 +201,7 @@ DOCX is INPUT-only in <code>pkg/ebook</code>
 DOCX is a genuinely useful manuscript-review OUTPUT the operator
 video-tested.</p>
 <h2 id="options-considered">Options considered</h2>
-<h3 id="a-pandoc-backed-render-content-markdown-docx-via-pandoc">(a)
+<h3 id="a-pandoc-backed-render-content--markdown--docx-via-pandoc">(a)
 Pandoc-backed (render content → markdown → docx via
 <code>pandoc</code>)</h3>
 <ul>
@@ -205,11 +212,11 @@ battle-tested.</li>
 <li>Cons: a RUNTIME external-process dependency — fragile on hosts/CI
 without pandoc (must gate on availability with an honest typed error per
 §11.4.3/§11.4.6, never silent). Lossy round-trip is irrelevant here
-because the translator’s content is already plain markdown-ish text, so
-pandoc’s rich-feature advantage is largely unused. Adds process-spawn +
+because the translator's content is already plain markdown-ish text, so
+pandoc's rich-feature advantage is largely unused. Adds process-spawn +
 temp-file surface.</li>
 </ul>
-<h3 id="b-pure-go-ooxml-writer-stdlib-archivezip-encodingxml">(b)
+<h3 id="b-pure-go-ooxml-writer-stdlib-archivezip--encodingxml">(b)
 Pure-Go OOXML writer (stdlib <code>archive/zip</code> +
 <code>encoding/xml</code>)</h3>
 <ul>
@@ -224,7 +231,7 @@ structure doc, see Sources): four parts —
 external-process failure mode; fully testable in-process; matches the
 existing pure-Go writer pattern (FB2/EPUB writers spawn no external
 process); deterministic full control of the OOXML; non-lossy for the
-translator’s in-memory structured Book (title + chapters/sections →
+translator's in-memory structured Book (title + chapters/sections →
 headings + paragraphs).</li>
 <li>Cons: must implement OOXML correctly (mitigated — minimal part set
 is tiny and standardized; validity asserted programmatically by
@@ -233,7 +240,7 @@ real <code>file</code>/<code>unzip -l</code> proof and
 Word-openability).</li>
 </ul>
 <h3
-id="c-maintained-go-docx-library-unioffice-go-docx-v2-docxgo-gooxml">(c)
+id="c-maintained-go-docx-library-unioffice--go-docx-v2--docxgo--gooxml">(c)
 Maintained Go docx library (unioffice / go-docx v2 / docxgo /
 gooxml)</h3>
 <ul>
@@ -243,22 +250,24 @@ several are heavyweight (unioffice is commercial-licensed for some
 uses); §11.4.74/§11.4.28 favour not pulling a dependency we can satisfy
 with stdlib. Rejected — disproportionate dependency for the scope.</li>
 </ul>
-<h2 id="decision-option-b-pure-go-ooxml-writer">Decision — Option (b),
+<h2 id="decision--option-b-pure-go-ooxml-writer">Decision — Option (b),
 pure-Go OOXML writer</h2>
 <p>Most robust + lowest-risk for THIS content: the translator output is
-plain structured text, so pandoc’s rich-feature edge is unused while its
+plain structured text, so pandoc's rich-feature edge is unused while its
 runtime-process fragility is a real cost; a third-party library is a
 disproportionate dependency. A pure-Go writer over stdlib
-<code>archive/zip</code> + <code>encoding/xml</code>, emitting the
-ISO/IEC 29500 minimal valid part set, is dependency-free, in-process
-testable, deterministic, and non-lossy for the Book model. Headings
-(book title, chapter titles, section titles) are emitted as bold +
-larger-size paragraphs; body text is split on blank lines into separate
-<code>w:p</code> paragraphs (mirroring the FB2/HTML writers). All text
-is carried as <code>w:t</code> chardata with
-<code>xml:space="preserve"</code> so the <code>encoding/xml</code>
-encoder escapes XML specials automatically (translated content can never
-inject markup).</p>
+<code>archive/zip</code></p>
+<ul>
+<li><code>encoding/xml</code>, emitting the ISO/IEC 29500 minimal valid
+part set, is dependency-free, in-process testable, deterministic, and
+non-lossy for the Book model. Headings (book title, chapter titles,
+section titles) are emitted as bold + larger-size paragraphs; body text
+is split on blank lines into separate <code>w:p</code> paragraphs
+(mirroring the FB2/HTML writers). All text is carried as
+<code>w:t</code> chardata with <code>xml:space="preserve"</code> so the
+<code>encoding/xml</code> encoder escapes XML specials automatically
+(translated content can never inject markup).</li>
+</ul>
 <p>Validity is proven programmatically (unzip the produced
 <code>.docx</code>; assert <code>[Content_Types].xml</code> +
 <code>word/document.xml</code> present + the translated chapter text
@@ -267,9 +276,9 @@ appears in <code>document.xml</code>) AND on-screen in a real run
 the OOXML parts, the translated text is grep-able in
 <code>word/document.xml</code>). A mutation (break the writer) flips the
 test RED.</p>
-<p>This is NOT a half-baked/lossy writer — for the translator’s
+<p>This is NOT a half-baked/lossy writer — for the translator's
 plain-text book content the OOXML mapping is complete; the §11.4.6
-STOP-and-report path (research concludes a quality writer can’t be done
+STOP-and-report path (research concludes a quality writer can't be done
 safely) does NOT apply, because the stdlib path is both safe and
 quality.</p>
 <h2 id="sources-verified">Sources verified</h2>
@@ -277,20 +286,25 @@ quality.</p>
 <li>Microsoft Learn — Structure of a WordprocessingML document (ISO/IEC
 29500 minimal document scenario; required
 <code>w:document &gt; w:body &gt; w:p &gt; w:r &gt; w:t</code>; minimal
-part set):
-https://learn.microsoft.com/en-us/office/open-xml/word/structure-of-a-wordprocessingml-document
+part set): <a
+href="https://learn.microsoft.com/en-us/office/open-xml/word/structure-of-a-wordprocessingml-document">https://learn.microsoft.com/en-us/office/open-xml/word/structure-of-a-wordprocessingml-document</a>
 (accessed 2026-06-15)</li>
-<li>Pandoc markdown→docx command reference (option (a) baseline):
-https://opensource.com/article/19/5/convert-markdown-to-word-pandoc
+<li>Pandoc markdown→docx command reference (option (a) baseline): <a
+href="https://opensource.com/article/19/5/convert-markdown-to-word-pandoc">https://opensource.com/article/19/5/convert-markdown-to-word-pandoc</a>
 (accessed 2026-06-15)</li>
 <li>Go OOXML library survey (option (c) — rejected as disproportionate
-dependency): https://github.com/unidoc/unioffice ,
-https://github.com/mmonterroca/docxgo (accessed 2026-06-15)</li>
+dependency): <a
+href="https://github.com/unidoc/unioffice">https://github.com/unidoc/unioffice</a>
+, <a
+href="https://github.com/mmonterroca/docxgo">https://github.com/mmonterroca/docxgo</a>
+(accessed 2026-06-15)</li>
 </ul>
 <hr />
-<p>Deep-research 2026-06-15:
-https://learn.microsoft.com/en-us/office/open-xml/word/structure-of-a-wordprocessingml-document
-; https://opensource.com/article/19/5/convert-markdown-to-word-pandoc ;
-https://github.com/unidoc/unioffice</p>
+<p>Deep-research 2026-06-15: <a
+href="https://learn.microsoft.com/en-us/office/open-xml/word/structure-of-a-wordprocessingml-document">https://learn.microsoft.com/en-us/office/open-xml/word/structure-of-a-wordprocessingml-document</a>
+; <a
+href="https://opensource.com/article/19/5/convert-markdown-to-word-pandoc">https://opensource.com/article/19/5/convert-markdown-to-word-pandoc</a>
+; <a
+href="https://github.com/unidoc/unioffice">https://github.com/unidoc/unioffice</a></p>
 </body>
 </html>

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>CLAUDE</title>
   <style>
@@ -156,8 +156,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -240,6 +244,21 @@
 <header id="title-block-header">
 <h1 class="title">CLAUDE</h1>
 </header>
+<!-- HELIX-CONSTITUTION-INHERITANCE (prepended; do not remove) -->
+
+<h2 id="inherited-from-helix-constitution">INHERITED FROM Helix
+Constitution</h2>
+<p>This module is integrated as a submodule of a project that includes
+the Helix Constitution submodule. All rules in
+<code>constitution/CLAUDE.md</code> and the
+<code>constitution/Constitution.md</code> it references apply
+unconditionally — they are never weakened by anything below. Locate the
+constitution submodule from any arbitrary nested depth using its
+<code>find_constitution.sh</code> helper.</p>
+<p>Canonical reference: <a
+href="https://github.com/HelixDevelopment/HelixConstitution">https://github.com/HelixDevelopment/HelixConstitution</a></p>
+<!-- END HELIX-CONSTITUTION-INHERITANCE -->
+
 <h1 id="claudemd">CLAUDE.md</h1>
 <h2 id="inherited-from-constitutionclaudemd">INHERITED FROM
 constitution/CLAUDE.md</h2>

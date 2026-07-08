@@ -1,4 +1,185 @@
-<h1 id="pdf-output-writer-deep-multi-angle-research-11.4.150">PDF output
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>pdf_output_writer</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">pdf_output_writer</h1>
+</header>
+<h1 id="pdf-output-writer--deep-multi-angle-research-114150">PDF output
 writer — deep multi-angle research (§11.4.150)</h1>
 <p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
 2026-06-15T00:00:00Z <strong>Scope:</strong> unified-translator PDF
@@ -21,13 +202,13 @@ there is no <code>pdf_writer.go</code>); <code>-o book.pdf</code> hits
 the default case and is rejected. This is the last format-matrix output
 gap.</p>
 <h2
-id="the-load-bearing-correctness-constraint-fact-angle-1-unicodecyrillic">The
+id="the-load-bearing-correctness-constraint-fact--angle-1-unicodecyrillic">The
 load-bearing correctness constraint (FACT — Angle 1:
 Unicode/Cyrillic)</h2>
-<p>This project’s PRIMARY use case is Serbian translation, including
+<p>This project's PRIMARY use case is Serbian translation, including
 <strong>Serbian Cyrillic</strong> (<code>-script cyrillic</code>;
 <code>pkg/script/</code>). A PDF writer that silently drops Cyrillic
-glyphs is a §11.4 PASS-bluff: it produces an “openable PDF” carrying
+glyphs is a §11.4 PASS-bluff: it produces an "openable PDF" carrying
 garbage/blank where the translated text should be.</p>
 <p>PDF text rendering with the <strong>Standard-14 base fonts</strong>
 (Helvetica / Times-Roman / Courier) is restricted to
@@ -36,9 +217,9 @@ render Cyrillic — confirmed against multiple authoritative sources (see
 Sources). To render Cyrillic (or any non-Latin-1 script) a PDF MUST
 embed a CID/TrueType font (Identity-H encoding + UTF-16 text + a
 ToUnicode CMap) whose glyf table actually contains the glyphs. Any
-“minimal pure-Go PDF” that uses only a Standard-14 font is therefore
+"minimal pure-Go PDF" that uses only a Standard-14 font is therefore
 CORRECT only for Latin-1 content and WRONG (silent glyph drop) for the
-project’s own primary content.</p>
+project's own primary content.</p>
 <h2 id="options-considered">Options considered</h2>
 <h3
 id="a-pure-go-minimal-pdf-writer-with-a-standard-14-font-stdlib-only">(a)
@@ -49,27 +230,25 @@ Pure-Go minimal PDF writer with a Standard-14 font (stdlib only)</h3>
 → Content stream <code>BT /F1 Tf Td (text) Tj ET</code>), an xref table
 of byte offsets from file start, trailer <code>/Root</code> +
 <code>startxref</code> + <code>%%EOF</code> (verified against the PDF
-Association “smallest valid PDF” + Zagaeski minimal-PDF references, see
+Association "smallest valid PDF" + Zagaeski minimal-PDF references, see
 Sources).</li>
 <li><strong>REJECTED for primary correctness:</strong> Standard-14 +
 WinAnsiEncoding cannot render Cyrillic → silent glyph drop on the
-project’s #1 content (§11.4.1/§11.4.6 violation). Latin-only output is
+project's #1 content (§11.4.1/§11.4.6 violation). Latin-only output is
 not acceptable for a Serbian-Cyrillic translator.</li>
 </ul>
 <h3
-id="b-pure-go-pdf-writer-with-an-embedded-truetype-cid-font-stdlib-a-font-asset">(b)
+id="b-pure-go-pdf-writer-with-an-embedded-truetype-cid-font-stdlib--a-font-asset">(b)
 Pure-Go PDF writer with an EMBEDDED TrueType CID font (stdlib + a font
 asset)</h3>
 <ul>
 <li>Would render full Unicode, but requires: (i) shipping/locating a
 Unicode TTF (a non-stdlib asset, or a fragile system-font-path lookup
-that differs per OS — §11.4.6 unknown-at-runtime),
-<ol start="2" type="i">
-<li>implementing TrueType subsetting / Identity-H / ToUnicode CMap /
-composite-font plumbing by hand. High implementation + correctness risk
-for a single output format; the fragile font-path lookup is exactly the
-§11.4.6 “unknown without checking” anti-pattern.</li>
-</ol></li>
+that differs per OS — §11.4.6 unknown-at-runtime), (ii) implementing
+TrueType subsetting / Identity-H / ToUnicode CMap / composite-font
+plumbing by hand. High implementation + correctness risk for a single
+output format; the fragile font-path lookup is exactly the §11.4.6
+"unknown without checking" anti-pattern.</li>
 </ul>
 <h3
 id="c-maintained-third-party-go-pdf-lib-go-pdffpdf-gopdf-maroto-gpdf">(c)
@@ -84,7 +263,7 @@ and Unicode/Cyrillic still requires supplying + embedding a TTF
 advantage over (d) for this project.</li>
 </ul>
 <h3
-id="d-weasyprint-backed-render-book-html-pdf-via-the-already-installed-weasyprint-chosen">(d)
+id="d-weasyprint-backed-render-book--html--pdf-via-the-already-installed-weasyprint--chosen">(d)
 WeasyPrint-backed (render Book → HTML → PDF via the already-installed
 <code>weasyprint</code>) — CHOSEN</h3>
 <ul>
@@ -95,7 +274,7 @@ doc-export pipeline for <code>.md → .pdf</code> siblings per
 <li>Reuses the EXISTING HTML writer pattern (translate → structured HTML
 → PDF), so the writer is thin: build a UTF-8 HTML document from the
 in-memory <code>Book</code>, hand it to weasyprint.</li>
-<li><strong>Renders full Unicode incl. Cyrillic correctly</strong> —
+<li><strong>Renders full Unicode incl. Cyrillic correctly</strong> —
 weasyprint embeds the needed system-font glyphs automatically, so the
 translated text is real, visible, and text-extractable (verified:
 <code>Здраво свете</code> rendered into a valid <code>%PDF-1.7</code>
@@ -111,23 +290,23 @@ project, and the unavailable case is an explicit typed error, not a
 degraded silent fallback.</li>
 </ul>
 <h2 id="decision">Decision</h2>
-<p><strong>(d) WeasyPrint-backed</strong>, mirroring the project’s
+<p><strong>(d) WeasyPrint-backed</strong>, mirroring the project's
 existing HTML/doc-export pipeline. It is the only option that (1)
-renders the project’s own primary content (Serbian Cyrillic) CORRECTLY,
+renders the project's own primary content (Serbian Cyrillic) CORRECTLY,
 (2) adds ZERO new <code>go.mod</code> dependency, (3) reuses the
 existing HTML-writer pattern, and (4) fails honestly + loudly when the
 tool is absent rather than shipping a broken PDF. The pure-Go options
 (a)/(b)/(c) either silently drop Cyrillic (a) or impose hand-rolled
 font-embedding + a fragile font-asset dependency (b)/(c) with no
 offsetting benefit.</p>
-<h2 id="angle-2-no-bigger-problem-check-11.4.150c">Angle 2 —
+<h2 id="angle-2--no-bigger-problem-check-114150c">Angle 2 —
 no-bigger-problem check (§11.4.150(C))</h2>
 <ul>
 <li>Does PDF output regress any existing format? No — the writer is
 additive (<code>case "pdf"</code>), and the
 default/epub/fb2/html/txt/md/docx branches are unchanged (asserted by
 the format-matrix regression test).</li>
-<li>Does weasyprint’s HTML→PDF lose translated text? No — text is
+<li>Does weasyprint's HTML→PDF lose translated text? No — text is
 HTML-escaped (no markup injection), fonts embedded, text extractable
 (validity asserted: <code>%PDF-</code> header + page count + the
 translated text present in the PDF).</li>
@@ -135,30 +314,37 @@ translated text present in the PDF).</li>
 weasyprint (no markup/JS injection); no remote resource fetching is
 required for plain text.</li>
 </ul>
-<h2 id="sources-verified-11.4.99-latest-source">Sources verified
+<h2 id="sources-verified-11499--latest-source">Sources verified
 (§11.4.99 — latest-source)</h2>
 <ul>
-<li>PDF Association — “The smallest possible (valid) PDF” —
-https://pdfa.org/the-smallest-possible-valid-pdf/ (accessed 2026-06-15)
-— minimal PDF object/xref/trailer structure.</li>
-<li>Brendan Zagaeski — “Minimal PDF” —
-https://brendanzagaeski.appspot.com/0004.html (accessed 2026-06-15) —
-complete minimal Hello-World PDF with content-stream text operators
-(BT/Tf/Td/Tj/ET) + xref offsets.</li>
-<li>libharu Fonts &amp; Encodings —
-https://libharu.sourceforge.net/fonts.html (accessed 2026-06-15) —
-Standard-14 fonts use WinAnsiEncoding; Cyrillic/CJK require embedded
-Unicode TrueType (cmap/OS-2/glyf).</li>
+<li>PDF Association — "The smallest possible (valid) PDF" — <a
+href="https://pdfa.org/the-smallest-possible-valid-pdf/">https://pdfa.org/the-smallest-possible-valid-pdf/</a>
+(accessed 2026-06-15) — minimal PDF object/xref/trailer structure.</li>
+<li>Brendan Zagaeski — "Minimal PDF" — <a
+href="https://brendanzagaeski.appspot.com/0004.html">https://brendanzagaeski.appspot.com/0004.html</a>
+(accessed 2026-06-15) — complete minimal Hello-World PDF with
+content-stream text operators (BT/Tf/Td/Tj/ET) + xref offsets.</li>
+<li>libharu Fonts &amp; Encodings — <a
+href="https://libharu.sourceforge.net/fonts.html">https://libharu.sourceforge.net/fonts.html</a>
+(accessed 2026-06-15) — Standard-14 fonts use WinAnsiEncoding;
+Cyrillic/CJK require embedded Unicode TrueType (cmap/OS-2/glyf).</li>
 <li>pdf-lib standard-fonts / Adobe community PDF specs (accessed
 2026-06-15) — Standard-14 + WinAnsiEncoding cannot render Cyrillic; CID
 font + Identity-H + UTF-16 required for Cyrillic.</li>
 <li>go PDF library comparison (gofpdf archived 2021; go-pdf/fpdf fork;
-gopdf/maroto/gpdf maintained) — https://www.libhunt.com/r/fpdf ,
-https://gpdf.dev/ (accessed 2026-06-15) — third-party libs add a dep and
-still need an embedded TTF for Cyrillic.</li>
+gopdf/maroto/gpdf maintained) — <a
+href="https://www.libhunt.com/r/fpdf">https://www.libhunt.com/r/fpdf</a>
+, <a href="https://gpdf.dev/">https://gpdf.dev/</a> (accessed
+2026-06-15) — third-party libs add a dep and still need an embedded TTF
+for Cyrillic.</li>
 </ul>
-<p>Deep-research 2026-06-15:
-https://pdfa.org/the-smallest-possible-valid-pdf/ ;
-https://brendanzagaeski.appspot.com/0004.html ;
-https://libharu.sourceforge.net/fonts.html ;
-https://www.libhunt.com/r/fpdf</p>
+<p>Deep-research 2026-06-15: <a
+href="https://pdfa.org/the-smallest-possible-valid-pdf/">https://pdfa.org/the-smallest-possible-valid-pdf/</a>
+; <a
+href="https://brendanzagaeski.appspot.com/0004.html">https://brendanzagaeski.appspot.com/0004.html</a>
+; <a
+href="https://libharu.sourceforge.net/fonts.html">https://libharu.sourceforge.net/fonts.html</a>
+; <a
+href="https://www.libhunt.com/r/fpdf">https://www.libhunt.com/r/fpdf</a></p>
+</body>
+</html>

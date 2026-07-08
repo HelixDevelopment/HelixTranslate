@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>prep_translator_keywiring</title>
   <style>
@@ -156,8 +156,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -172,7 +176,10 @@
   </style>
 </head>
 <body>
-<h1 id="deep-research-preparation-translator-api-key-wiring-fix">Deep
+<header id="title-block-header">
+<h1 class="title">prep_translator_keywiring</h1>
+</header>
+<h1 id="deep-research--preparation-translator-api-key-wiring-fix">Deep
 Research — preparation-translator API-key wiring fix</h1>
 <p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
 2026-06-15T00:00:00Z <strong>Authority:</strong> §11.4.150 deep
@@ -183,20 +190,18 @@ provider API key from a flag or environment variable; the fix adds a
 <code>-api-key</code> flag, a per-provider <code>*_API_KEY</code> env
 fallback, and a per-provider default model.</p>
 <h2 id="the-question">The question</h2>
-<ol type="i">
-<li>Does reading the provider API key from a CLI flag with a
+<p>(i) Does reading the provider API key from a CLI flag with a
 per-provider <code>*_API_KEY</code> environment-variable fallback follow
 best practice / is it the best available solution? (ii) Are we masking a
 deeper problem — specifically, is per-provider env-key reading
-consistent with the project’s existing <code>unified-translator</code>
+consistent with the project's existing <code>unified-translator</code>
 resolver, and does the new flag/env path leak secrets or duplicate logic
-that should be shared?</li>
-</ol>
+that should be shared?</p>
 <h2
-id="angle-1-12-factor-config-cli-precedence-convention-external-authority">Angle
+id="angle-1--12-factor-config--cli-precedence-convention-external-authority">Angle
 1 — 12-factor config + CLI precedence convention (external
 authority)</h2>
-<p>The Twelve-Factor App “Config” factor mandates storing
+<p>The Twelve-Factor App "Config" factor mandates storing
 deployment-varying config — explicitly including API keys — in
 <strong>environment variables</strong>, not in code or committed config
 files, because config files get accidentally committed, get scattered,
@@ -208,54 +213,58 @@ variable &gt; config file &gt; built-in default</strong>. A flag
 explicitly passed on the command line overrides an env var, which
 overrides a config file, which overrides a hard-coded default.</p>
 <p>The fix implements exactly this: <code>-api-key</code> flag takes
-precedence; when absent, fall back to the provider’s well-known
+precedence; when absent, fall back to the provider's well-known
 <code>*_API_KEY</code> env var. This is the textbook-correct precedence
 and the textbook-correct storage location for a secret. Per-provider
-default model is the “built-in default” tier — correct.</p>
+default model is the "built-in default" tier — correct.</p>
 <ul>
-<li>The Twelve-Factor App — Config — https://12factor.net/config
+<li>The Twelve-Factor App — Config — <a
+href="https://12factor.net/config">https://12factor.net/config</a>
 (accessed 2026-06-15)</li>
 <li>Cobra — Configuration Precedence Rules (flag &gt; env &gt; config
-&gt; default) —
-https://app.studyraid.com/en/read/11421/357759/configuration-precedence-rules
+&gt; default) — <a
+href="https://app.studyraid.com/en/read/11421/357759/configuration-precedence-rules">https://app.studyraid.com/en/read/11421/357759/configuration-precedence-rules</a>
 (accessed 2026-06-15)</li>
-<li>Cobra — Building a 12-Factor App with Viper —
-https://cobra.dev/docs/tutorials/12-factor-app/ (accessed
-2026-06-15)</li>
+<li>Cobra — Building a 12-Factor App with Viper — <a
+href="https://cobra.dev/docs/tutorials/12-factor-app/">https://cobra.dev/docs/tutorials/12-factor-app/</a>
+(accessed 2026-06-15)</li>
 </ul>
 <h2
-id="angle-2-internal-consistency-with-the-projects-existing-resolver-no-deeper-problem-check-11.4.150c">Angle
-2 — Internal consistency with the project’s existing resolver
+id="angle-2--internal-consistency-with-the-projects-existing-resolver-no-deeper-problem-check-114150c">Angle
+2 — Internal consistency with the project's existing resolver
 (no-deeper-problem check, §11.4.150(C))</h2>
 <p>The concern flagged in the brief: is per-provider env-key reading
 <em>consistent</em> with <code>unified-translator</code>, or did the fix
 invent a divergent scheme (which would be a latent
 maintenance/behaviour-mismatch defect)?</p>
 <p>Captured FACT from the codebase
-(<code>cmd/unified-translator/main.go</code>): - Lines 541–554 define
-the same per-provider env-var map the fix uses:
+(<code>cmd/unified-translator/main.go</code>):</p>
+<ul>
+<li>Lines 541–554 define the same per-provider env-var map the fix uses:
 <code>openai→OPENAI_API_KEY</code>,
 <code>anthropic→ANTHROPIC_API_KEY</code>,
 <code>deepseek→DEEPSEEK_API_KEY</code>,
 <code>zhipu→ZHIPU_API_KEY</code>, <code>qwen→QWEN_API_KEY</code>,
 <code>gemini→GEMINI_API_KEY</code>, plus
-groq/mistral/xai/cohere/togetherai. - Line 592: <code>-api-key</code>
-flag default <code>""</code>. - Lines 668–677: flag-first, then “Fall
-back to the provider’s well-known env var … when -api-key was not
-passed”, with a clear error if neither is present.</p>
+groq/mistral/xai/cohere/togetherai.</li>
+<li>Line 592: <code>-api-key</code> flag default <code>""</code>.</li>
+<li>Lines 668–677: flag-first, then "Fall back to the provider's
+well-known env var … when -api-key was not passed", with a clear error
+if neither is present.</li>
+</ul>
 <p>The prep-translator fix therefore <strong>mirrors the already-shipped
 unified-translator pattern</strong> (same env-var names, same
 flag-first-then-env precedence, same clear-error-on-missing). This is
 consistency-confirmed, not a divergence — it makes the two CLIs behave
 identically for key resolution. It also matches the env-var names
-documented in the project CLAUDE.md (“API keys come from environment
-variables only”).</p>
+documented in the project CLAUDE.md ("API keys come from environment
+variables only").</p>
 <p>Residual observation (improvement candidate, NOT a defect): the two
 CLIs now hold two copies of the provider→env-var map. A future refactor
 could lift the map + resolver into a shared <code>pkg/</code> helper
 (DRY), which would also be the natural place to add the remaining
-providers (the prep map should be kept in sync with unified’s 11-entry
-map). This is a §11.4.124-style “extend/share, don’t duplicate”
+providers (the prep map should be kept in sync with unified's 11-entry
+map). This is a §11.4.124-style "extend/share, don't duplicate"
 follow-up, not a blocker for this fix.</p>
 <p>Secrets check (§11.4.10): reading from a flag/env into memory and
 never logging it is the correct handling. The fix must not print the key
@@ -266,21 +275,23 @@ no-echo rule.</p>
 <li>Project source —
 <code>cmd/unified-translator/main.go:541-554, 592, 668-677</code>
 (captured this session)</li>
-<li>Project governance — <code>CLAUDE.md</code> “Configuration”: “API
-keys come from environment variables only — never commit them.”</li>
+<li>Project governance — <code>CLAUDE.md</code> "Configuration": "API
+keys come from environment variables only — never commit them."</li>
 </ul>
 <h2 id="finding">Finding</h2>
 <p><strong>Best-practice-confirmed.</strong>
 Flag-with-<code>*_API_KEY</code>-env-fallback + per-provider default
 model is the correct, conventional solution (12-factor storage +
 flag&gt;env&gt;default precedence) and is <strong>consistent with the
-project’s existing unified-translator resolver</strong> (same env-var
+project's existing unified-translator resolver</strong> (same env-var
 map, same precedence) — no deeper problem masked. One non-blocking
 improvement: de-duplicate the provider→env map into a shared helper and
-keep prep’s provider list in sync with unified’s. No secret-leak risk
+keep prep's provider list in sync with unified's. No secret-leak risk
 provided the key is never logged.</p>
-<p>Deep-research 2026-06-15: https://12factor.net/config,
-https://app.studyraid.com/en/read/11421/357759/configuration-precedence-rules,
-https://cobra.dev/docs/tutorials/12-factor-app/</p>
+<p>Deep-research 2026-06-15: <a
+href="https://12factor.net/config">https://12factor.net/config</a>, <a
+href="https://app.studyraid.com/en/read/11421/357759/configuration-precedence-rules">https://app.studyraid.com/en/read/11421/357759/configuration-precedence-rules</a>,
+<a
+href="https://cobra.dev/docs/tutorials/12-factor-app/">https://cobra.dev/docs/tutorials/12-factor-app/</a></p>
 </body>
 </html>

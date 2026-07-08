@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>verification_multipass_wiring</title>
   <style>
@@ -156,8 +156,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -172,8 +176,11 @@
   </style>
 </head>
 <body>
+<header id="title-block-header">
+<h1 class="title">verification_multipass_wiring</h1>
+</header>
 <h1
-id="deep-research-wiring-the-dormant-pkgverification-multipass-polisher-into-unified-translator">Deep-research
+id="deep-research--wiring-the-dormant-pkgverification-multipass-polisher-into-unified-translator">Deep-research
 — Wiring the dormant <code>pkg/verification</code> multipass polisher
 into <code>unified-translator</code></h1>
 <p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
@@ -182,7 +189,8 @@ feature-completion stream (§11.4.124 / §11.4.150)
 <strong>Scope:</strong> <code>cmd/unified-translator/main.go</code> +
 <code>pkg/verification</code></p>
 <hr />
-<h2 id="the-gap-fact-this-session">1. The gap (FACT, this session)</h2>
+<h2 id="1-the-gap-fact-this-session">1. The gap (FACT, this
+session)</h2>
 <p><code>pkg/verification</code> contains a substantial,
 actively-maintained multi-pass LLM verification/polishing engine
 (<code>MultiPassPolisher</code>, <code>BookPolisher</code>,
@@ -193,19 +201,19 @@ checks (<code>verifyTranslation</code> = target-script character
 presence; <code>verifyEPUB</code> = structural check). The real
 multipass <em>polishing</em> capability ships dormant.</p>
 <h3
-id="git-history-investigation-11.4.124-investigate-before-wire">Git-history
+id="git-history-investigation-114124--investigate-before-wire">Git-history
 investigation (§11.4.124 — investigate-before-wire)</h3>
 <ul>
 <li><code>git log --all -S "pkg/verification" -- cmd/</code> →
 <strong>empty</strong>. No <code>cmd/</code> binary has <em>ever</em>
 imported the package across the entire history.</li>
-<li>First add: commit <code>717bf18</code> (“Auto-commit”, 2025-11-20)
+<li>First add: commit <code>717bf18</code> ("Auto-commit", 2025-11-20)
 created the package already unwired, alongside
 <code>Documentation/VERIFICATION_SYSTEM.md</code>.</li>
 <li>Current importers (whole tree): only
 <code>test/performance/…</code>,
 <code>test/unit/verification_test.go</code>, <code>test/e2e/…</code>
-plus the package’s own <code>_test.go</code> files. Zero production
+plus the package's own <code>_test.go</code> files. Zero production
 importers.</li>
 <li><code>verifier.go</code> has 5 commits; <code>multipass.go</code>
 carries recent mutation-proven defensive fixes (chapter-count cap to
@@ -229,63 +237,59 @@ CONTEXT/VOCABULARY scores, ISSUES, POLISHED_TEXT) →
 the LLM and applies a parsed, consensus-selected polished version — it
 is not a stub.</p>
 <hr />
-<h2 id="deep-multi-angle-research-11.4.150-2-angles-latest-sources">2.
+<h2 id="2-deep-multi-angle-research-114150--2-angles-latest-sources">2.
 Deep multi-angle research (§11.4.150 — ≥2 angles, latest sources)</h2>
 <h3
-id="angle-1-technique-iterative-llm-mt-post-editing-is-established-practice">Angle
+id="angle-1--technique-iterative-llm-mt-post-editing-is-established-practice">Angle
 1 — Technique: iterative LLM MT post-editing is established
 practice</h3>
 <p>The canonical translation-specific method is <strong>TEaR (Translate,
-Estimate, Refine)</strong> — exactly the “translate → verify/critique →
-polish” shape we are wiring. Key findings:</p>
+Estimate, Refine)</strong> — exactly the "translate → verify/critique →
+polish" shape we are wiring. Key findings:</p>
 <ul>
 <li>A <strong>single</strong> refinement round is best by design; COMET
 peaks at pass 1 then plateaus/declines (78.67 → 79.50 → 79.29 → 79.28 on
 WMT23 Zh-En), later passes regress due to hallucinated estimation
-feedback. <a href="https://arxiv.org/html/2402.16379v3"
-class="uri">https://arxiv.org/html/2402.16379v3</a> (accessed
-2026-06-15); <a href="https://arxiv.org/abs/2402.16379"
-class="uri">https://arxiv.org/abs/2402.16379</a> (accessed
-2026-06-15).</li>
+feedback. <a
+href="https://arxiv.org/html/2402.16379v3">https://arxiv.org/html/2402.16379v3</a>
+(accessed 2026-06-15); <a
+href="https://arxiv.org/abs/2402.16379">https://arxiv.org/abs/2402.16379</a>
+(accessed 2026-06-15).</li>
 <li>Stopping = a quality-estimation <strong>gate</strong>: if no errors
 detected, return the original <strong>unchanged</strong> — the built-in
 regression guard.</li>
 <li>Multi-LLM consensus per pass (M-MAD / multi-agent debate, best-of-N
 QE reranking) is a credible <em>verification</em>-stage pattern. <a
-href="https://www.emergentmind.com/topics/multi-agent-debate-mad-paradigm"
-class="uri">https://www.emergentmind.com/topics/multi-agent-debate-mad-paradigm</a>
-(accessed 2026-06-15); <a href="https://arxiv.org/html/2510.08870v1"
-class="uri">https://arxiv.org/html/2510.08870v1</a> (accessed
-2026-06-15).</li>
+href="https://www.emergentmind.com/topics/multi-agent-debate-mad-paradigm">https://www.emergentmind.com/topics/multi-agent-debate-mad-paradigm</a>
+(accessed 2026-06-15); <a
+href="https://arxiv.org/html/2510.08870v1">https://arxiv.org/html/2510.08870v1</a>
+(accessed 2026-06-15).</li>
 <li>Standard gating metrics: COMET / GEMBA / LLM-as-judge. <a
-href="https://kvashee.medium.com/mt-quality-evaluation-in-the-age-of-llm-mt-ca8a9540a2ab"
-class="uri">https://kvashee.medium.com/mt-quality-evaluation-in-the-age-of-llm-mt-ca8a9540a2ab</a>
+href="https://kvashee.medium.com/mt-quality-evaluation-in-the-age-of-llm-mt-ca8a9540a2ab">https://kvashee.medium.com/mt-quality-evaluation-in-the-age-of-llm-mt-ca8a9540a2ab</a>
 (accessed 2026-06-15).</li>
 </ul>
 <h3
-id="angle-2-risk-failure-modes-refinement-can-harm-without-guards">Angle
+id="angle-2--risk--failure-modes-refinement-can-harm-without-guards">Angle
 2 — Risk / failure-modes: refinement can HARM without guards</h3>
 <ul>
 <li>Intrinsic self-correction without an external signal often fails to
 improve or <strong>degrades</strong> output (inherits the same
 hallucinations that caused the original error). TACL critical survey
-“When Can LLMs Actually Correct Their Own Mistakes”: <a
-href="https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00713/125177/"
-class="uri">https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00713/125177/</a>
+"When Can LLMs Actually Correct Their Own Mistakes": <a
+href="https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00713/125177/">https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00713/125177/</a>
 (accessed 2026-06-15; full PDF returned HTTP 403, finding quoted from
 the publisher abstract/excerpt — honest gap).</li>
 <li>Vanilla multi-agent debate <strong>frequently underperforms a single
 agent</strong>. <a
-href="https://d2jud02ci9yv69.cloudfront.net/2025-04-28-mad-159/blog/mad/"
-class="uri">https://d2jud02ci9yv69.cloudfront.net/2025-04-28-mad-159/blog/mad/</a>
-(accessed 2026-06-15); <a href="https://arxiv.org/pdf/2502.08788"
-class="uri">https://arxiv.org/pdf/2502.08788</a> (accessed
-2026-06-15).</li>
+href="https://d2jud02ci9yv69.cloudfront.net/2025-04-28-mad-159/blog/mad/">https://d2jud02ci9yv69.cloudfront.net/2025-04-28-mad-159/blog/mad/</a>
+(accessed 2026-06-15); <a
+href="https://arxiv.org/pdf/2502.08788">https://arxiv.org/pdf/2502.08788</a>
+(accessed 2026-06-15).</li>
 <li>Cost/latency multiply per pass and per voter (a real concern for a
 CLI).</li>
 </ul>
 <hr />
-<h2 id="verdict">3. Verdict</h2>
+<h2 id="3-verdict">3. Verdict</h2>
 <ul>
 <li><strong>(A) Wiring is sound, current best practice — YES.</strong>
 TEaR is precisely this pattern and improves quality on the first
@@ -300,12 +304,12 @@ the engine already provides + the CLI defaults we choose.</li>
 wiring</h3>
 <ul>
 <li><strong>Cap passes low.</strong> New <code>-multipass-passes</code>
-flag defaults to <strong>1</strong> (TEaR’s optimum); operator may raise
+flag defaults to <strong>1</strong> (TEaR's optimum); operator may raise
 it but the default never regresses.</li>
-<li><strong>Gate on a real verify signal.</strong> The engine’s
+<li><strong>Gate on a real verify signal.</strong> The engine's
 per-provider LLM critique
 <ul>
-<li>consensus IS the gate (not blind “improve again”).</li>
+<li>consensus IS the gate (not blind "improve again").</li>
 </ul></li>
 <li><strong>Preserve original on no improvement.</strong> Engine
 defaults <code>PolishedText</code> to the existing translation and skips
@@ -315,7 +319,7 @@ empty/identical text the original markdown is retained.</li>
 SEPARATE <code>-multipass</code> flag. The existing <code>-verify</code>
 heuristic path is untouched (§11.4.1 — no solve-A-create-B). Multipass
 OFF by default (it costs real LLM calls).</li>
-<li><strong>Don’t mask upstream defects.</strong> Multipass runs
+<li><strong>Don't mask upstream defects.</strong> Multipass runs
 <em>after</em> the base translation and only polishes; a
 base-translation failure still surfaces as a translation error before
 multipass runs.</li>
@@ -323,26 +327,22 @@ multipass runs.</li>
 <hr />
 <h2 id="sources-verified-2026-06-15">Sources verified 2026-06-15</h2>
 <ul>
-<li>TEaR: <a href="https://arxiv.org/html/2402.16379v3"
-class="uri">https://arxiv.org/html/2402.16379v3</a>, <a
-href="https://arxiv.org/abs/2402.16379"
-class="uri">https://arxiv.org/abs/2402.16379</a></li>
-<li>QE reranking: <a href="https://arxiv.org/html/2510.08870v1"
-class="uri">https://arxiv.org/html/2510.08870v1</a></li>
+<li>TEaR: <a
+href="https://arxiv.org/html/2402.16379v3">https://arxiv.org/html/2402.16379v3</a>,
+<a
+href="https://arxiv.org/abs/2402.16379">https://arxiv.org/abs/2402.16379</a></li>
+<li>QE reranking: <a
+href="https://arxiv.org/html/2510.08870v1">https://arxiv.org/html/2510.08870v1</a></li>
 <li>MAD paradigm: <a
-href="https://www.emergentmind.com/topics/multi-agent-debate-mad-paradigm"
-class="uri">https://www.emergentmind.com/topics/multi-agent-debate-mad-paradigm</a></li>
+href="https://www.emergentmind.com/topics/multi-agent-debate-mad-paradigm">https://www.emergentmind.com/topics/multi-agent-debate-mad-paradigm</a></li>
 <li>MAD underperformance: <a
-href="https://d2jud02ci9yv69.cloudfront.net/2025-04-28-mad-159/blog/mad/"
-class="uri">https://d2jud02ci9yv69.cloudfront.net/2025-04-28-mad-159/blog/mad/</a>,
-<a href="https://arxiv.org/pdf/2502.08788"
-class="uri">https://arxiv.org/pdf/2502.08788</a></li>
+href="https://d2jud02ci9yv69.cloudfront.net/2025-04-28-mad-159/blog/mad/">https://d2jud02ci9yv69.cloudfront.net/2025-04-28-mad-159/blog/mad/</a>,
+<a
+href="https://arxiv.org/pdf/2502.08788">https://arxiv.org/pdf/2502.08788</a></li>
 <li>MT QE metrics: <a
-href="https://kvashee.medium.com/mt-quality-evaluation-in-the-age-of-llm-mt-ca8a9540a2ab"
-class="uri">https://kvashee.medium.com/mt-quality-evaluation-in-the-age-of-llm-mt-ca8a9540a2ab</a></li>
+href="https://kvashee.medium.com/mt-quality-evaluation-in-the-age-of-llm-mt-ca8a9540a2ab">https://kvashee.medium.com/mt-quality-evaluation-in-the-age-of-llm-mt-ca8a9540a2ab</a></li>
 <li>Self-correction limits: <a
-href="https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00713/125177/"
-class="uri">https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00713/125177/</a>
+href="https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00713/125177/">https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00713/125177/</a>
 (abstract only; PDF 403 — honest gap)</li>
 </ul>
 <p>Deep-research 2026-06-15: NO external solution found that contradicts
