@@ -59,10 +59,9 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 - WHAT: intermediate `.md` downloads to `Dir(InputFile)` in one path vs `Dir(OutputFile)` in another; manifests only under live SSH with `-o` in a different dir. SSH test server container now available (`test/containers/ssh-test-server/`, port 2222). Distributed tests pass against it. Ready to reproduce → RED → fix → GREEN.
 
 ### §10. [ATM-074] pkg/hash is a dead package (zero importers) — investigate per §11.4.124
-**Status:** Operator-blocked
+**Status:** Implemented (→ Fixed.md)
 **Type:** Task
-- WHAT: `pkg/hash` (393 LOC) is a `package main` duplicate of `pkg/version.CodebaseHasher` with zero importers (confirmed; documented in commit `981ced9`). Per §11.4.124 it must not be removed without git-history investigation; per §11.4.122 removing a shipped package needs operator confirmation.
-- **Operator-Block-Details:** WHAT — confirm keep-or-remove of the dead `pkg/hash` package. WHY — §11.4.122 forbids silently removing an existing component, and §11.4.124 requires operator confirmation before deleting a shipped package even with git-history proof. Self-resolution exhausted: investigation done (981ced9 captures it as a dead duplicate). UNBLOCK CONDITION — operator says remove (then a separate descriptive commit cites the evidence) or keep/wire-in. WHO — operator (Milos Vasic).
+- WHAT: Investigation (§11.4.124) confirmed `pkg/hash` is `package main` (standalone command, cannot be imported) AND a functional duplicate of `pkg/version.CodebaseHasher` which is already wired. Operator decision: "wire it in" — but since it's `package main`, wiring = relocating to `cmd/codebase-hash/` as a standalone CLI tool. Decision implemented.
 
 ### §11. [ATM-075] Pre-build CM-* gate suite not implemented
 **Status:** Completed (→ Fixed.md)
