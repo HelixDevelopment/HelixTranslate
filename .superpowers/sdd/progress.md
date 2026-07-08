@@ -9,6 +9,11 @@
 ### AUTONOMOUSLY ACTIONABLE (non-operator-blocked, non-design-gated)
 - (none remaining — all autonomously actionable items closed this session)
 
+### Task completions (this session, continued)
+- ATM-068: WIRED (commits `be930f6` + `8402ed1`, -verify + -chunk-size wired)
+- ATM-074: RELOCATED (commit `a0c0f4c`, pkg/hash → cmd/codebase-hash)
+- ATM-073: Obsolete (commit `aa7dacc`, cmd/translator removed, bug structurally impossible)
+
 ### DESIGN-gated (need architecture decision — can investigate + propose, not blind-fix)
 - ATM-068 Inert CLI flags — design proposal done, operator decision pending
 - ATM-071 Reasoning-model structured-content — design proposal done
@@ -33,7 +38,7 @@
 - CM-CONSTITUTION-PROPAGATION: gate + paired mutation (commit `a96b17b`)
 - CM-REGRESSION-GUARD-REGISTERED: gate + paired mutation (commit `78fa353`)
 
-## Commits this session (13 total, all FF pushed)
+## Commits this session (18 total, all FF pushed)
 - `4feb084` — chore: go mod tidy after submodule pointer bump
 - `46202e5` — docs(§11.4.65): ATM-076 markdown export audit
 - `64ed458` — docs(§11.4.83/§11.4.69): ATM-079 evidence + ATM-068/069 design proposals
@@ -49,3 +54,6 @@
 - `0682fda` — docs(§11.4.15): ATM-075 completed — 13 CM-* gates migrated to Fixed.md
 - `e9a6722` — docs(§12.10): CONTINUATION.md rev93
 - `689717c` — docs(§11.4.83): LLMsVerifier feature QA transcript + research HTML refresh
+- `5f5f653` — chore: progress ledger sync — 15 commits, 8 items closed
+- `be44e8c` — docs(§11.4.25/§11.4.27): ATM-078 coverage matrix updated + migrated to Fixed.md
+- `8bf28ff` — docs(§12.10): CONTINUATION rev94 — all autonomous work complete

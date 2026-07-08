@@ -1,11 +1,11 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 95
-**Last modified:** 2026-07-08T13:00:00Z
+**Revision:** 96
+**Last modified:** 2026-07-08T13:30:00Z
 
-## ▶️ RESUME HERE (2026-07-08 ~13:00) — 🟢 20 commits this session (`bec1498`) · 6 items closed + 3 unblocked + 4 subagents in flight
+## ▶️ RESUME HERE (2026-07-08 ~13:30) — 🟢 27 commits this session (`aa7dacc`) · 9 items closed + all autonomously actionable done
 
-**SHORT (rev95):** HEAD **`bec1498`** (all remotes synced). **20 session commits.** **6 items closed:** ATM-065 (version 2.3.1), ATM-069, ATM-075, ATM-076, ATM-078, ATM-079. **3 items unblocked:** ATM-068 (wire CLI flags — subagent), ATM-073 (SSH test container built, bug fix subagent), ATM-074 (wire pkg/hash — subagent). **ATM-077** unblocked (helix_qa accessible). **4 subagents running** in parallel.
+**SHORT (rev96):** HEAD **`aa7dacc`** (all remotes synced). **27 session commits.** **9 items closed/migrated:** ATM-065 (version 2.3.1), ATM-068 (CLI flags wired), ATM-069 (DOCXConfig wired), ATM-073 (Obsolete — cmd/translator removed), ATM-074 (pkg/hash relocated to cmd/codebase-hash), ATM-075 (13 CM-* gates), ATM-076 (markdown export audit), ATM-078 (coverage matrix), ATM-079 (docs/qa evidence). **ALL autonomously actionable items exhausted.**
 
 ### LIVE STATE ANCHORS
 - **HEAD = `bec1498`**, all 4 remotes synced.
