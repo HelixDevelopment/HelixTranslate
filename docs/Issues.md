@@ -28,9 +28,9 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 - WHAT: qwen, groq, cohere, mistral, cerebras, cloudflare, siliconflow, hyperbolic, sambanova, kimi, novita, nlpcloud, upstage, sarvam, modal, publicai, nia, vulavula — all have API keys in the environment. Allowlists can be refreshed NOW using the proven deepseek pattern (live `/models` → verify-translate → additive allowlist + RED gate).
 
 ### §4. [ATM-068] Inert CLI flags in unified-translator (-chunk-size/-workers/-concurrency/-verify, -monitoring stub)
-**Status:** Design
+**Status:** Implemented (→ Fixed.md)
 **Type:** Task
-- WHAT: `cmd/unified-translator` parses `-chunk-size`, `-workers`, `-concurrency`, `-verify` but never consumes them (chunking is automatic+correct via `translateWithRetry`/`splitText`); `startMonitoringServer` is a print-only stub. Decision needed: wire each flag to real semantics OR remove it (removing a user-facing flag needs operator confirmation per §11.4.122). Not a blind autonomous fix.
+- WHAT: Wired `-verify` (controls verification, was always-on) and `-chunk-size` (plumbed to LLMTranslator.splitText, was hardcoded 20000). `-monitoring` was already wired. `-workers`/`-concurrency` reserved for distributed path (currently removed). Commit `be930f6`.
 
 ### §5. [ATM-069] Inert config fields (DOCXConfig.MinTextLength/IgnoreStyles, PDFConfig.MinTextLength)
 **Status:** Implemented (→ Fixed.md)
