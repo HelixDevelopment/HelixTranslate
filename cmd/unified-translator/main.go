@@ -723,7 +723,7 @@ Providers:
   gemini      - Google Gemini models (requires API key)
 
 Basic Options:
-  -i, -input <file>        Input ebook file (FB2, EPUB, PDF, DOCX, TXT, HTML)
+  -i, -input <file>        Input ebook file (FB2, EPUB, PDF, DOCX, TXT, HTML, MD)
   -o, -output <file>       Output file (auto-detected if not specified)
   -source-lang <lang>       Source language (default: ru)
   -target-lang <lang>       Target language (default: sr)

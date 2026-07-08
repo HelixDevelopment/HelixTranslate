@@ -162,6 +162,29 @@ func TestDetectFileRTF(t *testing.T) {
 	}
 }
 
+func TestDetectFileMarkdown(t *testing.T) {
+	detector := NewDetector()
+	tempDir := t.TempDir()
+
+	// ATM-072: .md files should be detected as TXT format
+	mdContent := "# Hello World\n\nThis is a **markdown** file with `code`.\n\n- item 1\n- item 2\n"
+
+	filename := filepath.Join(tempDir, "test.md")
+	err := os.WriteFile(filename, []byte(mdContent), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+
+	format, err := detector.DetectFile(filename)
+	if err != nil {
+		t.Fatalf("DetectFile() failed: %v", err)
+	}
+
+	if format != FormatTXT {
+		t.Errorf("Expected FormatTXT for .md file, got %s", format)
+	}
+}
+
 func TestDetectFileUnknown(t *testing.T) {
 	detector := NewDetector()
 	tempDir := t.TempDir()
@@ -208,6 +231,7 @@ func TestDetectByExtension(t *testing.T) {
 		{".azw", FormatAZW},
 		{".azw3", FormatAZW3},
 		{".txt", FormatTXT},
+		{".md", FormatTXT}, // ATM-072: .md input as TXT alias
 		{".html", FormatHTML},
 		{".htm", FormatHTML},
 		{".docx", FormatDOCX},

@@ -176,7 +176,7 @@ func (d *Detector) detectByExtension(ext string) Format {
 		return FormatAZW
 	case "azw3":
 		return FormatAZW3
-	case "txt":
+	case "txt", "md": // ATM-072: .md input as TXT alias
 		return FormatTXT
 	case "html", "htm":
 		return FormatHTML
