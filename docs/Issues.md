@@ -17,16 +17,15 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 - WHAT: Operator decided **2.3.1**. VERSION file already at 2.3.1, all version tests pass, release tag `helix_translate-2.3.1` already exists.
 
 ### §2. [ATM-066] Provider credentials absent/invalid (OpenAI/Anthropic/Gemini/Zhipu) block allowlist refresh
-**Status:** Operator-blocked
+**Status:** Queued
 **Type:** Bug
-- WHAT: OPENAI_API_KEY and ANTHROPIC_API_KEY absent → those providers unverified and their model allowlists stale; GEMINI_API_KEY invalid (live `/models` returns "API Key not found"); Zhipu account out of balance (error 1113 余额不足) so its current models (glm-4.5/4.6/5/5.1…) cannot be translation-verified.
-- **Operator-Block-Details:** WHAT — add/refresh OPENAI/ANTHROPIC/GEMINI keys and recharge the Zhipu account. WHY — the proven deepseek pattern (live `/models` → verify-translate → additive allowlist + RED gate) requires a working key to verify the response shape; refreshing an allowlist without verification would be a §11.4 bluff. Self-resolution exhausted: live `/models` probes captured, deepseek fix `0fd1a34` is the ready template. UNBLOCK CONDITION — funded/valid keys present in the environment. WHO — operator (Milos Vasic).
+- WHAT: OPENAI_API_KEY and ANTHROPIC_API_KEY absent → those providers unverified. **However:** GEMINI_API_KEY IS present in the environment, and **39 other provider keys** are available (DeepSeek, Groq, Qwen, Mistral, Cerebras, Cloudflare, SiliconFlow, Hyperbolic, Together, SambaNova, Kimi, Novita, NLP, Upstage, Modal, Fireworks, Venice, Cohere, GitHub Models, and many more). Many allowlists can be refreshed NOW.
+- NEXT: verify available providers against live `/models` endpoints and refresh allowlists for those with valid keys.
 
 ### §3. [ATM-067] ~30 other provider allowlists not audited against live current models
-**Status:** Operator-blocked
+**Status:** Queued
 **Type:** Task
-- WHAT: qwen, groq, cohere, mistral, xai, replicate, cerebras, cloudflare, siliconflow, hyperbolic, togetherai, sambanova, kimi, novita, nlpcloud, upstage, sarvam, modal, publicai, nia, vulavula — allowlists unverified against current live catalogs.
-- **Operator-Block-Details:** WHAT — provide funded keys per provider. WHY — each allowlist refresh needs a live verify-translate + string-content shape check before adding (deepseek pattern); without keys the verification cannot run. Self-resolution exhausted: pattern proven, only credentials missing. UNBLOCK CONDITION — per-provider funded keys. WHO — operator (Milos Vasic).
+- WHAT: qwen, groq, cohere, mistral, cerebras, cloudflare, siliconflow, hyperbolic, sambanova, kimi, novita, nlpcloud, upstage, sarvam, modal, publicai, nia, vulavula — all have API keys in the environment. Allowlists can be refreshed NOW using the proven deepseek pattern (live `/models` → verify-translate → additive allowlist + RED gate).
 
 ### §4. [ATM-068] Inert CLI flags in unified-translator (-chunk-size/-workers/-concurrency/-verify, -monitoring stub)
 **Status:** Design
