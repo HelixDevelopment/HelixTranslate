@@ -67,9 +67,9 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 - **Operator-Block-Details:** WHAT — confirm keep-or-remove of the dead `pkg/hash` package. WHY — §11.4.122 forbids silently removing an existing component, and §11.4.124 requires operator confirmation before deleting a shipped package even with git-history proof. Self-resolution exhausted: investigation done (981ced9 captures it as a dead duplicate). UNBLOCK CONDITION — operator says remove (then a separate descriptive commit cites the evidence) or keep/wire-in. WHO — operator (Milos Vasic).
 
 ### §11. [ATM-075] Pre-build CM-* gate suite not implemented
-**Status:** Queued
+**Status:** Completed (→ Fixed.md)
 **Type:** Task
-- WHAT: the constitution references dozens of `CM-*` pre-build gates + paired §1.1 mutations. **12 gates already implemented + wired** (2026-07-08): CM-GITIGNORE-PRECOMMIT-AUDIT, CM-NO-FAKES-BEYOND-UNIT, CM-SCRIPT-TARGET-SHELL-PARSEABLE, CM-VERSION-SINGLE-SOURCE, CM-TRACKER-DOCS-PRESENT, CM-ATM-TICKET-IDS, CM-DOC-SIBLING-SYNC, CM-NO-FORCE-PUSH-ABSOLUTE, CM-NO-LOCAL-RUNTIME, CM-ANTI-BLUFF-SMOKE, CM-CONSTITUTION-PROPAGATION, CM-REGRESSION-GUARD-REGISTERED — each with a paired §1.1 mutation. Remaining high-value gates to evaluate. (P4.2 — a sibling session owns `pre_build_verification.sh`.)
+- WHAT: **13 gates implemented + wired** (2026-07-08): CM-GITIGNORE-PRECOMMIT-AUDIT, CM-NO-FAKES-BEYOND-UNIT, CM-SCRIPT-TARGET-SHELL-PARSEABLE, CM-VERSION-SINGLE-SOURCE, CM-TRACKER-DOCS-PRESENT, CM-ATM-TICKET-IDS, CM-DOC-SIBLING-SYNC, CM-NO-FORCE-PUSH-ABSOLUTE, CM-NO-LOCAL-RUNTIME, CM-ANTI-BLUFF-SMOKE, CM-CONSTITUTION-PROPAGATION, CM-REGRESSION-GUARD-REGISTERED, CM-CONSTITUTION-INHERITANCE — each with a paired §1.1 mutation in `scripts/testing/meta_test_*.sh`.
 
 ### §12. [ATM-076] §11.4.65 universal markdown export audit across all tracked docs
 **Status:** Completed (→ Fixed.md)

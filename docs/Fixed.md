@@ -411,6 +411,12 @@ Sort order: ATM id ascending (allocation order). The companion `Fixed_Summary.md
 - Root cause: §11.4.83 requires a recorded e2e transcript per shipped feature. Created 5 evidence directories for rev92 fixes (sqlite_busy, version_authoritative, redis_observability, request_context, version_guard) with real captured test outputs. Redis test SKIP (no local Redis, honest §11.4.3).
 - Evidence: commit `64ed458`
 
+### §68. [ATM-075] Pre-build CM-* gate suite implementation
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+- Root cause: the constitution references dozens of `CM-*` pre-build gates + paired §1.1 mutations. Implemented 13 gates with paired mutations in `scripts/testing/meta_test_*.sh`: CM-GITIGNORE-PRECOMMIT-AUDIT, CM-NO-FAKES-BEYOND-UNIT, CM-SCRIPT-TARGET-SHELL-PARSEABLE, CM-VERSION-SINGLE-SOURCE, CM-TRACKER-DOCS-PRESENT, CM-ATM-TICKET-IDS, CM-DOC-SIBLING-SYNC, CM-NO-FORCE-PUSH-ABSOLUTE, CM-NO-LOCAL-RUNTIME, CM-ANTI-BLUFF-SMOKE, CM-CONSTITUTION-PROPAGATION, CM-REGRESSION-GUARD-REGISTERED, CM-CONSTITUTION-INHERITANCE.
+- Evidence: commits `3e85ffc`, `a96b17b`, `78fa353` + existing gates
+
 ---
 
 *This archive is regenerated into `Fixed_Summary.md` by `scripts/testing/generate_fixed_summary.sh`. Do not hand-edit the summary.*
