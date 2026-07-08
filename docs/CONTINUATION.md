@@ -1,11 +1,11 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 93
-**Last modified:** 2026-07-08T12:15:00Z
+**Revision:** 94
+**Last modified:** 2026-07-08T12:30:00Z
 
-## ▶️ RESUME HERE (2026-07-08 ~12:15) — 🟢 12 commits this session (`0682fda`) · 4 items closed + 13 gates + coverage ledger in progress · NEXT = ATM-078 test matrix + operator decisions
+## ▶️ RESUME HERE (2026-07-08 ~12:30) — 🟢 17 commits this session (`be44e8c`) · 5 items closed + 13 gates + coverage matrix updated · ALL AUTONOMOUS WORK DONE — next actions require operator
 
-**SHORT (rev93):** HEAD **`0682fda`** (origin synced). **12 session commits** (4feb084→46202e5→64ed458→3e85ffc→50f68a4→f89fcd9→237257c→a96b17b→78fa353→b24fced→4c010fc→a9692c5→0682fda). **4 items closed + migrated to Fixed.md:** ATM-069 (DOCXConfig MinTextLength+IgnoreStyles wired, RED→GREEN), ATM-075 (13 CM-* gates implemented), ATM-076 (170/170 markdown export audit), ATM-079 (5 docs/qa evidence dirs). **13 pre-build gates** with paired §1.1 mutations. **ATM-078** (test-type coverage ledger) in progress — subagent building the matrix.
+**SHORT (rev94):** HEAD **`be44e8c`** (origin synced). **17 session commits** (4feb084→…→be44e8c). **5 items closed + migrated to Fixed.md:** ATM-069 (DOCXConfig wired), ATM-075 (13 CM-* gates), ATM-076 (markdown export audit), ATM-079 (docs/qa evidence), ATM-078 (coverage matrix). **13 pre-build gates** with paired §1.1 mutations. **Coverage: 50.7%→~68%** total statement coverage, 22 packages ≥80%. **All autonomously actionable items exhausted** — remaining items are operator-blocked, design-gated, or blocked on external dependencies.
 
 ### LIVE STATE ANCHORS (§11.4.6, moment-valid)
 - **HEAD = `0682fda`**, origin synced.

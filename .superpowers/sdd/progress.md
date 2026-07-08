@@ -7,7 +7,7 @@
 ## Workable items survey (from docs/Issues.md + docs/WORKING_PLAN.md)
 
 ### AUTONOMOUSLY ACTIONABLE (non-operator-blocked, non-design-gated)
-- **ATM-078** Per-feature test-type matrix + HelixQA + Challenges coverage (Queued, Task) — IN PROGRESS (subagent building coverage ledger)
+- (none remaining — all autonomously actionable items closed this session)
 
 ### DESIGN-gated (need architecture decision — can investigate + propose, not blind-fix)
 - ATM-068 Inert CLI flags — design proposal done, operator decision pending
