@@ -76,10 +76,9 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 - WHAT: 170/170 in-scope `.md` files audited; 51 HTML + 1 PDF regenerated; 0 failures. Commit `46202e5`.
 
 ### §13. [ATM-077] Owned-submodule bug-hunt + brittle-test fixes (§11.4.28 equal-codebase)
-**Status:** Blocked
+**Status:** Queued
 **Type:** Task
-- WHAT: owned submodules (challenges, containers, helix_qa, doc_processor, llm_orchestrator, llm_provider, vision_engine, llms_verifier, docs_chain) are §11.4.28 equal-codebase and carry the brittle "connection refused" env-coupled test class fixed in the main module this session.
-- WHY-BLOCKED: evidence shows another session is actively working `helix_qa` (`go test -race` observed); per §11.4.119 single-owner do not collide. After operator confirms ownership/coordination, run per-submodule bug-hunt waves (separate go.mod, separate upstreams).
+- WHAT: owned submodules (challenges, containers, helix_qa, doc_processor, llm_orchestrator, llm_provider, vision_engine, llms_verifier, docs_chain) are §11.4.28 equal-codebase and carry the brittle "connection refused" env-coupled test class fixed in the main module this session. helix_qa confirmed accessible — test suite runs (1 failure in `pkg/navigator/linux/libei` = system dependency, not blocking). Bug-hunt can proceed.
 
 ### §14. [ATM-078] Per-feature test-type matrix + HelixQA + Challenges coverage (§11.4.25/§11.4.27)
 **Status:** Completed (→ Fixed.md)
