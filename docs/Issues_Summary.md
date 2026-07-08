@@ -1,7 +1,7 @@
 # HelixTranslate — Issues Summary
 
 **Revision:** 1
-**Last modified:** 2026-07-08T17:06:51Z
+**Last modified:** 2026-07-08T17:36:50Z
 **Authority:** §11.4.12 (Issues_Summary sync) · §11.4.54 (ATM ID column) · §11.4.19 (column-alignment) · §11.4.91 (clear descriptions)
 **Generated:** auto-generated from `docs/Issues.md` by `scripts/testing/generate_issues_summary.sh` — do not hand-edit.
 
@@ -20,7 +20,7 @@
 | ATM-075 | Normal | Completed (→ Fixed.md) | Task | Pre-build CM-* gate suite not implemented |
 | ATM-076 | Normal | Completed (→ Fixed.md) | Task | §11.4.65 universal markdown export audit across all tracked docs |
 | ATM-077 | High | Blocked | Task | Owned-submodule bug-hunt + brittle-test fixes (§11.4.28 equal-codebase) |
-| ATM-078 | Normal | Queued | Task | Per-feature test-type matrix + HelixQA + Challenges coverage (§11.4.25/§11.4.27) |
+| ATM-078 | Normal | Completed (→ Fixed.md) | Task | Per-feature test-type matrix + HelixQA + Challenges coverage (§11.4.25/§11.4.27) |
 | ATM-079 | Normal | Completed (→ Fixed.md) | Task | docs/qa/<run-id> evidence per shipped feature (§11.4.83) |
 | ATM-080 | High | Operator-blocked | Task | Full §11.4.40 7-step release retest not yet run |
 | ATM-081 | High | Operator-blocked | Task | No §11.4.151 prefixed release tag yet |

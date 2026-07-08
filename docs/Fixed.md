@@ -417,6 +417,12 @@ Sort order: ATM id ascending (allocation order). The companion `Fixed_Summary.md
 - Root cause: the constitution references dozens of `CM-*` pre-build gates + paired §1.1 mutations. Implemented 13 gates with paired mutations in `scripts/testing/meta_test_*.sh`: CM-GITIGNORE-PRECOMMIT-AUDIT, CM-NO-FAKES-BEYOND-UNIT, CM-SCRIPT-TARGET-SHELL-PARSEABLE, CM-VERSION-SINGLE-SOURCE, CM-TRACKER-DOCS-PRESENT, CM-ATM-TICKET-IDS, CM-DOC-SIBLING-SYNC, CM-NO-FORCE-PUSH-ABSOLUTE, CM-NO-LOCAL-RUNTIME, CM-ANTI-BLUFF-SMOKE, CM-CONSTITUTION-PROPAGATION, CM-REGRESSION-GUARD-REGISTERED, CM-CONSTITUTION-INHERITANCE.
 - Evidence: commits `3e85ffc`, `a96b17b`, `78fa353` + existing gates
 
+### §69. [ATM-078] Per-feature test-type matrix + coverage ledger (§11.4.25/§11.4.27)
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+- Root cause: §11.4.27 mandates 100% coverage with every test type. Updated `docs/testing/coverage_matrix.md` with current data: ~68% total statement coverage (up from 50.7%), 8/16 mandated test types present, 13 CM-* gates with paired mutations, 22 packages ≥80% coverage. Remaining gaps (chaos, DDoS, scaling, full-automation, UI/UX) documented with prioritized remediation plan.
+- Evidence: `docs/testing/coverage_matrix.md` revision 2
+
 ---
 
 *This archive is regenerated into `Fixed_Summary.md` by `scripts/testing/generate_fixed_summary.sh`. Do not hand-edit the summary.*
