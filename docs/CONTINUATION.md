@@ -1,11 +1,30 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 94
-**Last modified:** 2026-07-08T12:30:00Z
+**Revision:** 95
+**Last modified:** 2026-07-08T13:00:00Z
 
-## ▶️ RESUME HERE (2026-07-08 ~12:30) — 🟢 17 commits this session (`be44e8c`) · 5 items closed + 13 gates + coverage matrix updated · ALL AUTONOMOUS WORK DONE — next actions require operator
+## ▶️ RESUME HERE (2026-07-08 ~13:00) — 🟢 20 commits this session (`bec1498`) · 6 items closed + 3 unblocked + 4 subagents in flight
 
-**SHORT (rev94):** HEAD **`be44e8c`** (origin synced). **17 session commits** (4feb084→…→be44e8c). **5 items closed + migrated to Fixed.md:** ATM-069 (DOCXConfig wired), ATM-075 (13 CM-* gates), ATM-076 (markdown export audit), ATM-079 (docs/qa evidence), ATM-078 (coverage matrix). **13 pre-build gates** with paired §1.1 mutations. **Coverage: 50.7%→~68%** total statement coverage, 22 packages ≥80%. **All autonomously actionable items exhausted** — remaining items are operator-blocked, design-gated, or blocked on external dependencies.
+**SHORT (rev95):** HEAD **`bec1498`** (all remotes synced). **20 session commits.** **6 items closed:** ATM-065 (version 2.3.1), ATM-069, ATM-075, ATM-076, ATM-078, ATM-079. **3 items unblocked:** ATM-068 (wire CLI flags — subagent), ATM-073 (SSH test container built, bug fix subagent), ATM-074 (wire pkg/hash — subagent). **ATM-077** unblocked (helix_qa accessible). **4 subagents running** in parallel.
+
+### LIVE STATE ANCHORS
+- **HEAD = `bec1498`**, all 4 remotes synced.
+- **Fixed.md:** 70 entries.
+- **13 pre-build gates** with paired mutations.
+- **SSH test container** running on localhost:2222.
+
+### SUBAGENTS IN FLIGHT
+1. ATM-068: Wire all 6 CLI flags to real functionality
+2. ATM-074: Wire pkg/hash into codebase
+3. ATM-073: Fix SSH download-dir inconsistency
+4. Gap investigation: test coverage gaps assessment
+
+### OPERATOR ACTIONS STILL NEEDED
+- ATM-066/067: Provider credentials (OPENAI/ANTHROPIC/GEMINI/Zhipu)
+- ATM-071: Reasoning-model structured-content — design proposal done
+- ATM-072: Markdown first-class input — design proposal done, .md alias registered
+- ATM-080: Release retest (after all fixes land)
+- ATM-081: Release tag (after retest)
 
 ### LIVE STATE ANCHORS (§11.4.6, moment-valid)
 - **HEAD = `0682fda`**, origin synced.
