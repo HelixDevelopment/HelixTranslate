@@ -40,9 +40,10 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 - WHAT: `DOCXConfig.MinTextLength`, `DOCXConfig.IgnoreStyles`, and `PDFConfig.MinTextLength` are declared/documented but never consumed. Decision: wire (filter short paragraphs / honor ignore-styles) or drop. Wiring `MinTextLength` changes output, so it needs care + tests.
 
 ### §6. [ATM-070] Verifier MinScoreThreshold scale inconsistency (0-100 raw vs 0-10 normalized)
-**Status:** Design
+**Status:** Obsolete (→ Fixed.md)
 **Type:** Bug
 - WHAT: the handler (`pkg/api/verifier_handlers.go`) compares `MinScoreThreshold` against raw 0-100 `OverallScore`; the adapter (`internal/services/llmsverifier_score_adapter.go`) compares it against the normalized 0-10 score. The two contracts contradict and `GetPreferences`/`GetProviderScore` have no production caller. Canonical scale must be declared before either path is wired (fixing one side blindly breaks the other's test, §11.4.120).
+- **Obsolete-Details:** Since: 2026-07-08. Reason: not-reproducible. Investigation (§11.4.102) confirmed both handler (line 143: `m.OverallScore <= h.config.MinScoreThreshold`) and adapter (line 111: `m.OverallScore <= a.config.MinScoreThreshold`) now compare raw 0-100 scores. The adapter comment (lines 99-110) documents the previous bug and its fix: `GetPreferences` previously normalized BEFORE comparing, making it the odd one out; the fix compares raw, normalizes only for output. Triple-check: both paths use `m.OverallScore` (raw float64 from LLMsVerifier API), not `normalizeScore(m.OverallScore)`. Superseding-item: commit in llms_verifier submodule that rewrote GetPreferences threshold comparison.
 
 ### §7. [ATM-071] Reasoning-model structured-content support (content as LIST, not STRING)
 **Status:** Design
@@ -68,7 +69,7 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 ### §11. [ATM-075] Pre-build CM-* gate suite not implemented
 **Status:** Queued
 **Type:** Task
-- WHAT: the constitution references dozens of `CM-*` pre-build gates + paired §1.1 mutations; this project has only `scripts/testing/meta_test_constitution_inheritance.sh` and partial seeds. Implement the highest-value gates first (anti-bluff smoke, doc-sync, regression-guard-registered, no-fakes-beyond-unit, gitignore-precommit-audit), each with a paired mutation, wired into `scripts/pre_build_verification.sh`. (P4.2 — a sibling session owns `pre_build_verification.sh`.)
+- WHAT: the constitution references dozens of `CM-*` pre-build gates + paired §1.1 mutations. **9 gates already implemented + wired** (2026-07-08 audit): CM-GITIGNORE-PRECOMMIT-AUDIT, CM-NO-FAKES-BEYOND-UNIT, CM-SCRIPT-TARGET-SHELL-PARSEABLE, CM-VERSION-SINGLE-SOURCE, CM-TRACKER-DOCS-PRESENT, CM-ATM-TICKET-IDS, CM-DOC-SIBLING-SYNC, CM-NO-FORCE-PUSH-ABSOLUTE, CM-NO-LOCAL-RUNTIME — each with a paired §1.1 mutation in `scripts/testing/meta_test_*.sh`. Remaining high-value gates: anti-bluff smoke (§11.4.69 evidence-present), constitution-propagation (§11.4.26 anchor literals), regression-guard-registered (§11.4.135). (P4.2 — a sibling session owns `pre_build_verification.sh`.)
 
 ### §12. [ATM-076] §11.4.65 universal markdown export audit across all tracked docs
 **Status:** Queued
