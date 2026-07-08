@@ -14,5 +14,6 @@ type TranslationConfig struct {
 	APIKey      string
 	BaseURL     string
 	Script      string // Script type (cyrillic, latin)
+	ChunkSize   int    // Text chunk size for splitting (0 = use default 20000)
 	Options     map[string]interface{}
 }

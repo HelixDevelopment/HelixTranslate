@@ -265,8 +265,11 @@ func executeTranslation(session *TranslationSession) error {
 		return stepError(step, fmt.Sprintf("Failed to save translated markdown: %v", err))
 	}
 
-	// Verify translation quality
-	verified := verifyTranslation(translatedMarkdown, config.TargetLang, config.Script)
+	// Verify translation quality (only when -verify is true, honoring the flag)
+	verified := false
+	if config.VerifyOutput {
+		verified = verifyTranslation(translatedMarkdown, config.TargetLang, config.Script)
+	}
 	addFile(session, translatedMDPath, "translated_md", int64(len(translatedMarkdown)), verified,
 		map[bool]string{true: "Translation quality verified", false: "Translation needs review"}[verified])
 
@@ -352,6 +355,7 @@ func executeAPITranslation(ctx context.Context, config *UnifiedConfig, session *
 			TargetLang: config.TargetLang,
 			Provider:   "mock",
 			Model:      config.Model,
+			ChunkSize:  config.ChunkSize,
 		})
 		if err != nil {
 			return "", fmt.Errorf("failed to create mock translator: %w", err)
@@ -477,6 +481,7 @@ func providerTranslator(ctx context.Context, config *UnifiedConfig) (translator.
 		SourceLang: config.SourceLang,
 		TargetLang: config.TargetLang,
 		Script:     config.Script,
+		ChunkSize:  config.ChunkSize,
 	}, client), nil
 }
 

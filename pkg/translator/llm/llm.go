@@ -500,8 +500,12 @@ func isTextSizeError(err error) bool {
 
 // splitText splits text into smaller chunks at sentence boundaries
 func (lt *LLMTranslator) splitText(text string) []string {
-	// Target chunk size (roughly 20KB to stay well under limits)
-	const maxChunkSize = 20000
+	// Target chunk size — configurable via TranslationConfig.ChunkSize (CLI -chunk-size),
+	// defaults to 20000 when not set (0).
+	maxChunkSize := 20000
+	if lt != nil && lt.BaseTranslator != nil && lt.config.ChunkSize > 0 {
+		maxChunkSize = lt.config.ChunkSize
+	}
 
 	// If text is small enough, return as-is
 	if len(text) <= maxChunkSize {
