@@ -12,10 +12,9 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 ---
 
 ### §1. [ATM-065] Decide the single authoritative version number (2.3.x vs 3.0.0)
-**Status:** Operator-blocked
+**Status:** Fixed (→ Fixed.md)
 **Type:** Task
-- WHAT: `VERSION`=2.3.0 but Makefile/binaries historically referenced 3.0.0. The single-source wiring landed (ATM-064); the actual number to ship is an operator decision.
-- **Operator-Block-Details:** WHAT — pick 2.3.x or 3.0.0 as the next release version. WHY — CLAUDE.md says treat `VERSION` (2.3.0) as authoritative while the Makefile references 3.0.0; the agent cannot decide product versioning. Self-resolution exhausted: single-source wiring already done (a36030e), value choice is purely a product call. UNBLOCK CONDITION — operator states the canonical number; agent sets `VERSION` and re-runs the version test. WHO — operator (Milos Vasic).
+- WHAT: Operator decided **2.3.1**. VERSION file already at 2.3.1, all version tests pass, release tag `helix_translate-2.3.1` already exists.
 
 ### §2. [ATM-066] Provider credentials absent/invalid (OpenAI/Anthropic/Gemini/Zhipu) block allowlist refresh
 **Status:** Operator-blocked
@@ -56,9 +55,9 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 - WHAT: `.md` input is detected as TXT and translated as plain text (works, but markdown structure is not preserved). First-class markdown input that preserves structure is an enhancement.
 
 ### §9. [ATM-073] cmd/translator intermediate-markdown download-dir inconsistency (needs live SSH)
-**Status:** Blocked
+**Status:** Queued
 **Type:** Bug
-- WHAT: intermediate `.md` downloads to `Dir(InputFile)` in one path vs `Dir(OutputFile)` in another; manifests only under live SSH with `-o` in a different dir. Not unit-testable without real SSH infra; reproduce via the §11.4.76 Containers submodule (boot an SSH worker container) → RED → fix → GREEN. Gated on containerized SSH test infrastructure.
+- WHAT: intermediate `.md` downloads to `Dir(InputFile)` in one path vs `Dir(OutputFile)` in another; manifests only under live SSH with `-o` in a different dir. SSH test server container now available (`test/containers/ssh-test-server/`, port 2222). Distributed tests pass against it. Ready to reproduce → RED → fix → GREEN.
 
 ### §10. [ATM-074] pkg/hash is a dead package (zero importers) — investigate per §11.4.124
 **Status:** Operator-blocked

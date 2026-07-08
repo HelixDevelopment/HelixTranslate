@@ -1,0 +1,19 @@
+# SSH test server for HelixTranslate distributed worker testing
+# Start: podman compose -f test/containers/ssh-test-server/docker-compose.yml up -d
+# Stop:  podman compose -f test/containers/ssh-test-server/docker-compose.yml down
+# Test:  ssh testuser@localhost -p 2222 (password: testpass123)
+
+services:
+  ssh-test-server:
+    build:
+      context: .
+      file: Containerfile
+    container_name: helixtranslate-ssh-test
+    ports:
+      - "2222:22"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "22"]
+      interval: 5s
+      timeout: 3s
+      retries: 3

@@ -1,0 +1,25 @@
+# SSH test server for HelixTranslate distributed worker testing
+# Used by ATM-073: cmd/translator intermediate-markdown download-dir inconsistency
+# Provides a lightweight SSH server for pkg/distributed tests
+
+FROM docker.io/alpine:3.22
+
+RUN apk add --no-cache openssh-server openssh-client \
+    && ssh-keygen -A \
+    && mkdir -p /run/sshd
+
+# Create test user with known credentials
+RUN adduser -D -s /bin/sh testuser \
+    && echo "testuser:testpass123" | chpasswd
+
+# Configure SSH server
+RUN echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config \
+    && echo "PermitRootLogin no" >> /etc/ssh/sshd_config \
+    && echo "Port 22" >> /etc/ssh/sshd_config
+
+# Create workspace directory for translations
+RUN mkdir -p /workspace && chown testuser:testuser /workspace
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D", "-e"]
