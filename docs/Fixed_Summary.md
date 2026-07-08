@@ -1,7 +1,7 @@
 # HelixTranslate — Fixed Summary
 
 **Revision:** 1
-**Last modified:** 2026-06-14T15:41:17Z
+**Last modified:** 2026-07-08T17:03:31Z
 **Authority:** §11.4.53 (Fixed_Summary parity) · §11.4.54 (ATM ID column) · §11.4.19 (column-alignment) · §11.4.91 (clear descriptions)
 **Generated:** auto-generated from `docs/Fixed.md` by `scripts/testing/generate_fixed_summary.sh` — do not hand-edit.
 
@@ -71,5 +71,8 @@
 | ATM-062 | Bug | Fixed (→ Fixed.md) | Bug | logger JSON reserved-key collision silently dropped real severity/message/timestamp |
 | ATM-063 | Bug | Fixed (→ Fixed.md) | Bug | enhanceTranslation capitalization dead for Cyrillic/accented-Latin first letters (byte-indexed guard) |
 | ATM-064 | Task | Fixed (→ Fixed.md) | Task | Single-source binary version from authoritative VERSION |
+| ATM-069 | Task | Implemented (→ Fixed.md) | Task | Inert config fields (DOCXConfig.MinTextLength/IgnoreStyles, PDFConfig.MinTextLength) — wired |
+| ATM-076 | Task | Completed (→ Fixed.md) | Task | §11.4.65 universal markdown export audit across all tracked docs |
+| ATM-079 | Task | Completed (→ Fixed.md) | Task | docs/qa/<run-id> evidence per shipped feature (§11.4.83) |
 
-Total closed items: 64
+Total closed items: 67

@@ -1,7 +1,7 @@
 # HelixTranslate — Fixed (Closed Workable Items)
 
-**Revision:** 1
-**Last modified:** 2026-06-14T15:37:53Z
+**Revision:** 2
+**Last modified:** 2026-07-08T12:00:00Z
 **Authority:** §11.4.15 (status) · §11.4.16 (type) · §11.4.19 (column-alignment) · §11.4.33 (type-aware closure vocabulary) · §11.4.53 (Fixed_Summary parity) · §11.4.54 (ATM-NNN ticket IDs)
 **Scope:** the closed-archive tracker. Every entry is a real, landed, in-git fix from this session's mutation-proven bug-hunt campaign + the format-matrix / PDF / DeepSeek / WebSocket / SSH work. Each carries a stable `[ATM-NNN]` id, `**Status:**`, `**Type:**`, a 1-2 line root cause, and the commit hash as captured evidence (§11.4.123 — no fix is claimed that is not in `git log`).
 
@@ -392,6 +392,24 @@ Sort order: ATM id ascending (allocation order). The companion `Fixed_Summary.md
 **Type:** Task
 - Root cause: binaries hardcoded divergent `appVersion` literals; reconciled to read the single authoritative `VERSION` (P0.1). Mutation-proven.
 - Evidence: commit `a36030e`
+
+### §65. [ATM-069] Inert config fields (DOCXConfig.MinTextLength/IgnoreStyles, PDFConfig.MinTextLength) — wired
+**Status:** Implemented (→ Fixed.md)
+**Type:** Task
+- Root cause: `DOCXConfig.MinTextLength`, `DOCXConfig.IgnoreStyles` were declared/documented but never consumed by the DOCX parser. Wired both with backward-compatible defaults (MinTextLength=0 preserves all paragraphs; IgnoreStyles=false preserves all styles). PDFConfig.MinTextLength left as design-only (PDF parsing uses a different pipeline). RED→GREEN §11.4.43 polarity tests + §11.4.135 regression guards.
+- Evidence: commits `b24fced` (MinTextLength), `4c010fc` (IgnoreStyles)
+
+### §66. [ATM-076] §11.4.65 universal markdown export audit across all tracked docs
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+- Root cause: the docs_chain auto-sync handles most exports, but a full audit was needed to confirm every `docs/*.md` has fresh `.html`+`.pdf` siblings. Audit found 170/170 in-scope `.md` files; 51 HTML + 1 PDF regenerated (stale mtimes); 0 failures.
+- Evidence: commit `46202e5`
+
+### §67. [ATM-079] docs/qa/<run-id> evidence per shipped feature (§11.4.83)
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+- Root cause: §11.4.83 requires a recorded e2e transcript per shipped feature. Created 5 evidence directories for rev92 fixes (sqlite_busy, version_authoritative, redis_observability, request_context, version_guard) with real captured test outputs. Redis test SKIP (no local Redis, honest §11.4.3).
+- Evidence: commit `64ed458`
 
 ---
 

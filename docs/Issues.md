@@ -1,7 +1,7 @@
 # HelixTranslate — Issues (Open Workable Items)
 
-**Revision:** 1
-**Last modified:** 2026-06-14T15:37:53Z
+**Revision:** 2
+**Last modified:** 2026-07-08T12:00:00Z
 **Authority:** §11.4.15 (status) · §11.4.16 (type) · §11.4.19 (column-alignment) · §11.4.21 (Operator-blocked details) · §11.4.54 (ATM-NNN ticket IDs) · §11.4.91 (clear descriptions)
 **Scope:** the open-work tracker. Every entry carries a stable `[ATM-NNN]` id, a `**Status:**`, a `**Type:**`, and — for Operator-blocked items — an `**Operator-Block-Details:**` line (§11.4.21). Source of truth for the open items is `docs/WORKING_PLAN.md`; this file is the constitution-mandated tracker view of it.
 
@@ -35,9 +35,9 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 - WHAT: `cmd/unified-translator` parses `-chunk-size`, `-workers`, `-concurrency`, `-verify` but never consumes them (chunking is automatic+correct via `translateWithRetry`/`splitText`); `startMonitoringServer` is a print-only stub. Decision needed: wire each flag to real semantics OR remove it (removing a user-facing flag needs operator confirmation per §11.4.122). Not a blind autonomous fix.
 
 ### §5. [ATM-069] Inert config fields (DOCXConfig.MinTextLength/IgnoreStyles, PDFConfig.MinTextLength)
-**Status:** Design
+**Status:** Implemented (→ Fixed.md)
 **Type:** Task
-- WHAT: `DOCXConfig.MinTextLength`, `DOCXConfig.IgnoreStyles`, and `PDFConfig.MinTextLength` are declared/documented but never consumed. Decision: wire (filter short paragraphs / honor ignore-styles) or drop. Wiring `MinTextLength` changes output, so it needs care + tests.
+- WHAT: `DOCXConfig.MinTextLength` and `DOCXConfig.IgnoreStyles` wired with backward-compatible defaults (commits `b24fced` + `4c010fc`). `PDFConfig.MinTextLength` left as design-only. RED→GREEN §11.4.43 polarity tests + §11.4.135 regression guards.
 
 ### §6. [ATM-070] Verifier MinScoreThreshold scale inconsistency (0-100 raw vs 0-10 normalized)
 **Status:** Obsolete (→ Fixed.md)
@@ -69,12 +69,12 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 ### §11. [ATM-075] Pre-build CM-* gate suite not implemented
 **Status:** Queued
 **Type:** Task
-- WHAT: the constitution references dozens of `CM-*` pre-build gates + paired §1.1 mutations. **9 gates already implemented + wired** (2026-07-08 audit): CM-GITIGNORE-PRECOMMIT-AUDIT, CM-NO-FAKES-BEYOND-UNIT, CM-SCRIPT-TARGET-SHELL-PARSEABLE, CM-VERSION-SINGLE-SOURCE, CM-TRACKER-DOCS-PRESENT, CM-ATM-TICKET-IDS, CM-DOC-SIBLING-SYNC, CM-NO-FORCE-PUSH-ABSOLUTE, CM-NO-LOCAL-RUNTIME — each with a paired §1.1 mutation in `scripts/testing/meta_test_*.sh`. Remaining high-value gates: anti-bluff smoke (§11.4.69 evidence-present), constitution-propagation (§11.4.26 anchor literals), regression-guard-registered (§11.4.135). (P4.2 — a sibling session owns `pre_build_verification.sh`.)
+- WHAT: the constitution references dozens of `CM-*` pre-build gates + paired §1.1 mutations. **12 gates already implemented + wired** (2026-07-08): CM-GITIGNORE-PRECOMMIT-AUDIT, CM-NO-FAKES-BEYOND-UNIT, CM-SCRIPT-TARGET-SHELL-PARSEABLE, CM-VERSION-SINGLE-SOURCE, CM-TRACKER-DOCS-PRESENT, CM-ATM-TICKET-IDS, CM-DOC-SIBLING-SYNC, CM-NO-FORCE-PUSH-ABSOLUTE, CM-NO-LOCAL-RUNTIME, CM-ANTI-BLUFF-SMOKE, CM-CONSTITUTION-PROPAGATION, CM-REGRESSION-GUARD-REGISTERED — each with a paired §1.1 mutation. Remaining high-value gates to evaluate. (P4.2 — a sibling session owns `pre_build_verification.sh`.)
 
 ### §12. [ATM-076] §11.4.65 universal markdown export audit across all tracked docs
-**Status:** Queued
+**Status:** Completed (→ Fixed.md)
 **Type:** Task
-- WHAT: every tracked non-source `.md` must have synced `.html`+`.pdf` siblings. The commit wrapper auto-syncs, but a full audit (including WORKING_PLAN.md and all docs/) is needed to confirm every `docs/*.md` has fresh exports.
+- WHAT: 170/170 in-scope `.md` files audited; 51 HTML + 1 PDF regenerated; 0 failures. Commit `46202e5`.
 
 ### §13. [ATM-077] Owned-submodule bug-hunt + brittle-test fixes (§11.4.28 equal-codebase)
 **Status:** Blocked
@@ -88,9 +88,9 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 - WHAT: §11.4.27 mandates 100% coverage with every test type. This session added unit/integration + some stress/chaos + real E2E proofs; the full matrix per feature (perf/benchmark for the pipeline, chaos for distributed/storage, Challenges entries per shipped feature, full HelixQA autonomous sessions) is unfilled. Build the §11.4.25 coverage ledger and fill highest-value gaps.
 
 ### §15. [ATM-079] docs/qa/<run-id> evidence per shipped feature (§11.4.83)
-**Status:** Queued
+**Status:** Completed (→ Fixed.md)
 **Type:** Task
-- WHAT: §11.4.83 requires a recorded e2e transcript per shipped feature. E2E proofs exist for PDF input, the output-format matrix, and deepseek-v4; the remaining user-visible features from this session's fixes need per-feature evidence dirs under `docs/qa/`.
+- WHAT: 5 evidence directories created for rev92 fixes with real captured test outputs. Commit `64ed458`.
 
 ### §16. [ATM-080] Full §11.4.40 7-step release retest not yet run
 **Status:** Operator-blocked
