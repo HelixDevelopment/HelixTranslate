@@ -162,3 +162,53 @@ func TestDOCXParser_MinTextLengthFiltersShortParagraphs(t *testing.T) {
 		t.Errorf("second long paragraph should survive MinTextLength filter, but not found in:\n%s", content)
 	}
 }
+
+// TestDOCXParser_IgnoreStylesFiltersByStyle is the §11.4.135 RED test
+// for the ATM-069 IgnoreStyles wiring. A DOCX with Title-styled and Normal-styled
+// paragraphs is parsed with IgnoreStyles=["Title"]. The Title paragraph MUST be
+// absent; the Normal paragraph MUST be present.
+func TestDOCXParser_IgnoreStylesFiltersByStyle(t *testing.T) {
+	xml := `<?xml version="1.0" encoding="UTF-8"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:body>
+<w:p><w:pPr><w:pStyle w:val="Title"/></w:pPr><w:r><w:t>Book Title Here</w:t></w:r></w:p>
+<w:p><w:r><w:t>This is normal paragraph content that should survive.</w:t></w:r></w:p>
+<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>Chapter One Title</w:t></w:r></w:p>
+<w:p><w:r><w:t>Another normal paragraph with enough text.</w:t></w:r></w:p>
+</w:body>
+</w:document>`
+
+	data := buildTestDOCX(t, xml, "")
+
+	config := &DOCXConfig{
+		MinTextLength: 1,
+		IgnoreStyles:  []string{"Title"},
+	}
+	parser := NewDOCXParser(config)
+
+	book, err := parser.ParseWithContext(context.Background(), data)
+	if err != nil {
+		t.Fatalf("ParseWithContext failed: %v", err)
+	}
+
+	if len(book.Chapters) == 0 || len(book.Chapters[0].Sections) == 0 {
+		t.Fatal("no chapter/section produced")
+	}
+
+	content := book.Chapters[0].Sections[0].Content
+
+	// Title-styled paragraph must be filtered.
+	if strings.Contains(content, "Book Title Here") {
+		t.Errorf("Title-styled paragraph should be filtered by IgnoreStyles, but found in:\n%s", content)
+	}
+
+	// Normal paragraphs must survive.
+	if !strings.Contains(content, "normal paragraph content") {
+		t.Errorf("Normal paragraph should survive IgnoreStyles filter, but not found in:\n%s", content)
+	}
+
+	// Heading1 is NOT in the ignore list — must survive.
+	if !strings.Contains(content, "Chapter One Title") {
+		t.Errorf("Heading1 paragraph should survive (not in IgnoreStyles), but not found in:\n%s", content)
+	}
+}

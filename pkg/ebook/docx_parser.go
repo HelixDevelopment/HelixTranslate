@@ -86,20 +86,28 @@ func (p *DOCXParser) ParseWithContext(ctx context.Context, data []byte) (*Book, 
 		_ = p.extractMetadataFromZip(zr, book)
 	}
 
-	paragraphs, err := extractDOCXParagraphs(ctx, zr)
+	// ATM-069: extract paragraphs with style info for MinTextLength + IgnoreStyles filtering.
+	parasWithStyles, err := extractDOCXParagraphsWithStyles(ctx, zr)
 	if err != nil {
 		return nil, err
 	}
 
-	// ATM-069: filter paragraphs shorter than MinTextLength (default=1 preserves all).
-	if p.config.MinTextLength > 1 {
-		filtered := make([]string, 0, len(paragraphs))
-		for _, para := range paragraphs {
-			if len(strings.TrimSpace(para)) >= p.config.MinTextLength {
-				filtered = append(filtered, para)
-			}
+	// Build ignore-styles set for O(1) lookup.
+	ignoreSet := make(map[string]bool, len(p.config.IgnoreStyles))
+	for _, s := range p.config.IgnoreStyles {
+		ignoreSet[s] = true
+	}
+
+	// Filter by IgnoreStyles and MinTextLength.
+	paragraphs := make([]string, 0, len(parasWithStyles))
+	for _, pw := range parasWithStyles {
+		if ignoreSet[pw.style] {
+			continue
 		}
-		paragraphs = filtered
+		if p.config.MinTextLength > 1 && len(strings.TrimSpace(pw.text)) < p.config.MinTextLength {
+			continue
+		}
+		paragraphs = append(paragraphs, pw.text)
 	}
 
 	// Preserve paragraph structure: join with the blank-line separator the rest
@@ -287,4 +295,95 @@ func openZipEntry(zr *zip.Reader, name string) (io.ReadCloser, error) {
 		}
 	}
 	return nil, fmt.Errorf("entry %q not found in archive", name)
+}
+
+// docxParagraph holds a paragraph's text and its style name (empty = no explicit style).
+type docxParagraph struct {
+	text  string
+	style string
+}
+
+// extractDOCXParagraphsWithStyles is like extractDOCXParagraphs but also tracks
+// the <w:pStyle> of each paragraph for IgnoreStyles filtering (ATM-069).
+func extractDOCXParagraphsWithStyles(ctx context.Context, zr *zip.Reader) ([]docxParagraph, error) {
+	rc, err := openZipEntry(zr, "word/document.xml")
+	if err != nil {
+		return nil, fmt.Errorf("DOCX missing word/document.xml: %w", err)
+	}
+	defer rc.Close()
+
+	dec := xml.NewDecoder(rc)
+	var paragraphs []docxParagraph
+	var cur strings.Builder
+	inText, inPara, inPPr := false, false, false
+	var curStyle string
+	count := 0
+
+	for {
+		if count%64 == 0 {
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			default:
+			}
+		}
+		count++
+
+		tok, err := dec.Token()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse word/document.xml: %w", err)
+		}
+
+		switch t := tok.(type) {
+		case xml.StartElement:
+			switch t.Name.Local {
+			case "p":
+				inPara = true
+				cur.Reset()
+				curStyle = ""
+			case "pPr":
+				inPPr = true
+			case "pStyle":
+				if inPPr {
+					for _, attr := range t.Attr {
+						if attr.Name.Local == "val" {
+							curStyle = attr.Value
+							break
+						}
+					}
+				}
+			case "t":
+				inText = true
+			case "tab":
+				if inPara {
+					cur.WriteByte('\t')
+				}
+			case "br", "cr":
+				if inPara {
+					cur.WriteByte('\n')
+				}
+			}
+		case xml.CharData:
+			if inText {
+				cur.Write(t)
+			}
+		case xml.EndElement:
+			switch t.Name.Local {
+			case "t":
+				inText = false
+			case "pPr":
+				inPPr = false
+			case "p":
+				if inPara {
+					paragraphs = append(paragraphs, docxParagraph{text: cur.String(), style: curStyle})
+					inPara = false
+				}
+			}
+		}
+	}
+
+	return paragraphs, nil
 }
