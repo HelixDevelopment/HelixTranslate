@@ -1,9 +1,33 @@
 # CONTINUATION — HelixTranslate session-resumption file
 
-**Revision:** 92
-**Last modified:** 2026-06-17T02:45:00Z
+**Revision:** 93
+**Last modified:** 2026-07-08T12:15:00Z
 
-## ▶️ RESUME HERE (2026-06-17 ~02:45) — 🟢 9 commits pushed (`9aa8d2d`) · 6 real fixes + §11.4.40 GREEN + -race CLEAN · LLMsVerifier verifier-side SHIPPED (verified-count=2) · helixtranslate enable NOT-VIABLE → auto-rolled-back → NON-degraded + working
+## ▶️ RESUME HERE (2026-07-08 ~12:15) — 🟢 12 commits this session (`0682fda`) · 4 items closed + 13 gates + coverage ledger in progress · NEXT = ATM-078 test matrix + operator decisions
+
+**SHORT (rev93):** HEAD **`0682fda`** (origin synced). **12 session commits** (4feb084→46202e5→64ed458→3e85ffc→50f68a4→f89fcd9→237257c→a96b17b→78fa353→b24fced→4c010fc→a9692c5→0682fda). **4 items closed + migrated to Fixed.md:** ATM-069 (DOCXConfig MinTextLength+IgnoreStyles wired, RED→GREEN), ATM-075 (13 CM-* gates implemented), ATM-076 (170/170 markdown export audit), ATM-079 (5 docs/qa evidence dirs). **13 pre-build gates** with paired §1.1 mutations. **ATM-078** (test-type coverage ledger) in progress — subagent building the matrix.
+
+### LIVE STATE ANCHORS (§11.4.6, moment-valid)
+- **HEAD = `0682fda`**, origin synced.
+- **Fixed.md:** 68 entries (ATM-001 through ATM-075, plus ATM-069/076/079/075 this session).
+- **Issues.md:** 17 entries (10 operator-blocked, 3 design, 2 blocked, 2 queued/active).
+- **13 meta-test gates** in `scripts/testing/meta_test_*.sh` with paired §1.1 mutations.
+
+### AUTONOMOUSLY ACTIONABLE (next priority)
+1. **ATM-078** — per-feature test-type matrix + coverage ledger (§11.4.25/§11.4.27) — IN PROGRESS
+2. **ATM-068** — inert CLI flags — design proposal done, operator decision needed
+3. **ATM-071** — reasoning-model structured-content — design proposal done
+4. **ATM-072** — markdown first-class input — design proposal done, .md alias registered
+
+### OPERATOR-BLOCKED (§11.4.21)
+- ATM-065 (version number), ATM-066/067 (credentials), ATM-074 (dead pkg/hash), ATM-080 (release retest), ATM-081 (release tag)
+
+### BLOCKED
+- ATM-073 (needs live SSH container), ATM-077 (helix_qa ownership)
+
+---
+
+## ▶️ (rev92) RESUME HERE (2026-06-17 ~02:45) — 🟢 9 commits pushed (`9aa8d2d`) · 6 real fixes + §11.4.40 GREEN + -race CLEAN · LLMsVerifier verifier-side SHIPPED (verified-count=2) · helixtranslate enable NOT-VIABLE → auto-rolled-back → NON-degraded + working
 
 **SHORT (rev92):** HEAD **`9aa8d2d`** (all 4 remotes synced). retest_v4 (parent build + `go test ./...`) GREEN at HEAD with verifier gitlink `ed03a98c`. **9 session commits** (99bb7a8→a99327b→989f5d1→62cbb28→4223e7c→2a36a57→98e0450→`2a36a57`-era … →`ed03a98c`(submodule)→`9aa8d2d`(gitlink bump)). 6 real fixes shipped: version-const, SQLite SQLITE_BUSY, api-server version-lie, handler request-context, redis observability, + the verifier verify-completion feature.
 
