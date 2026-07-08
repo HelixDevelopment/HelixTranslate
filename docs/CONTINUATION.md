@@ -13,16 +13,16 @@
 - **13 pre-build gates** with paired mutations.
 - **SSH test container** running on localhost:2222.
 
-### SUBAGENTS IN FLIGHT (6 parallel)
+### SUBAGENTS IN FLIGHT (7 parallel)
 1. ATM-068: Wire all 6 CLI flags to real functionality
 2. ATM-074: Wire pkg/hash into codebase
 3. ATM-073: Fix SSH download-dir inconsistency
 4. ATM-071: Reasoning-model structured-content support
 5. ATM-072: Markdown first-class input with structure preservation
-6. Gap investigation: test coverage gaps assessment
+6. ATM-066/067: Provider allowlist verification (39 keys available)
+7. Gap investigation: test coverage gaps assessment
 
 ### OPERATOR ACTIONS STILL NEEDED
-- ATM-066/067: Provider credentials (OPENAI/ANTHROPIC/GEMINI/Zhipu)
 - ATM-080: Release retest (after all fixes land)
 - ATM-081: Release tag (after retest)
 
