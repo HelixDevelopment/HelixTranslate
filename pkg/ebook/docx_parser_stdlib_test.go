@@ -110,3 +110,55 @@ func TestDOCXParser_ParsesRealDOCX_Stdlib(t *testing.T) {
 		t.Errorf("GetMetadata: md=%+v err=%v", md, err)
 	}
 }
+
+// TestDOCXParser_MinTextLengthFiltersShortParagraphs is the §11.4.135 RED test
+// for the ATM-069 MinTextLength wiring. A DOCX with both short ("Hi") and long
+// paragraphs is parsed with MinTextLength=5. The short paragraph MUST be absent
+// from the output; the long paragraph MUST be present.
+func TestDOCXParser_MinTextLengthFiltersShortParagraphs(t *testing.T) {
+	// Build a DOCX with a short paragraph ("Hi" = 2 chars) and a long one.
+	xml := `<?xml version="1.0" encoding="UTF-8"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:body>
+<w:p><w:r><w:t>Hi</w:t></w:r></w:p>
+<w:p><w:r><w:t>This is a long enough paragraph for the filter.</w:t></w:r></w:p>
+<w:p><w:r><w:t>Ok</w:t></w:r></w:p>
+<w:p><w:r><w:t>Another sufficiently long paragraph that should survive the filter.</w:t></w:r></w:p>
+</w:body>
+</w:document>`
+
+	data := buildTestDOCX(t, xml, "")
+
+	config := &DOCXConfig{
+		MinTextLength: 5,
+		IgnoreStyles:  []string{},
+	}
+	parser := NewDOCXParser(config)
+
+	book, err := parser.ParseWithContext(context.Background(), data)
+	if err != nil {
+		t.Fatalf("ParseWithContext failed: %v", err)
+	}
+
+	if len(book.Chapters) == 0 || len(book.Chapters[0].Sections) == 0 {
+		t.Fatal("no chapter/section produced")
+	}
+
+	content := book.Chapters[0].Sections[0].Content
+
+	// Short paragraphs ("Hi", "Ok") must be filtered out.
+	if strings.Contains(content, "Hi") {
+		t.Errorf("short paragraph 'Hi' should be filtered by MinTextLength=5, but found in:\n%s", content)
+	}
+	if strings.Contains(content, "\nOk\n") || strings.Contains(content, "\nOk") || content == "Ok" {
+		t.Errorf("short paragraph 'Ok' should be filtered by MinTextLength=5, but found in:\n%s", content)
+	}
+
+	// Long paragraphs must survive.
+	if !strings.Contains(content, "long enough paragraph") {
+		t.Errorf("long paragraph should survive MinTextLength filter, but not found in:\n%s", content)
+	}
+	if !strings.Contains(content, "Another sufficiently long") {
+		t.Errorf("second long paragraph should survive MinTextLength filter, but not found in:\n%s", content)
+	}
+}

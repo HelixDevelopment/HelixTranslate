@@ -91,6 +91,17 @@ func (p *DOCXParser) ParseWithContext(ctx context.Context, data []byte) (*Book, 
 		return nil, err
 	}
 
+	// ATM-069: filter paragraphs shorter than MinTextLength (default=1 preserves all).
+	if p.config.MinTextLength > 1 {
+		filtered := make([]string, 0, len(paragraphs))
+		for _, para := range paragraphs {
+			if len(strings.TrimSpace(para)) >= p.config.MinTextLength {
+				filtered = append(filtered, para)
+			}
+		}
+		paragraphs = filtered
+	}
+
 	// Preserve paragraph structure: join with the blank-line separator the rest
 	// of the pipeline (formatSection / FB2 splitIntoParagraphs) treats as a
 	// paragraph boundary.
