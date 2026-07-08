@@ -54,9 +54,10 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 - WHAT: `.md` input is detected as TXT and translated as plain text (works, but markdown structure is not preserved). First-class markdown input that preserves structure is an enhancement.
 
 ### §9. [ATM-073] cmd/translator intermediate-markdown download-dir inconsistency (needs live SSH)
-**Status:** Queued
+**Status:** Obsolete (→ Fixed.md)
 **Type:** Bug
-- WHAT: intermediate `.md` downloads to `Dir(InputFile)` in one path vs `Dir(OutputFile)` in another; manifests only under live SSH with `-o` in a different dir. SSH test server container now available (`test/containers/ssh-test-server/`, port 2222). Distributed tests pass against it. Ready to reproduce → RED → fix → GREEN.
+- WHAT: `cmd/translator` no longer exists (removed in bridge phase-2). The SSH-local translation path was removed. The bug is structurally impossible in the current codebase.
+- **Obsolete-Details:** Since: 2026-07-08. Reason: feature-removed. Investigation: `cmd/translator` directory absent, `pkg/sshworker` absent, SSH provider returns hard error in `cmd/unified-translator`. Superseding-item: bridge phase-2 R-4 removal.
 
 ### §10. [ATM-074] pkg/hash is a dead package (zero importers) — investigate per §11.4.124
 **Status:** Implemented (→ Fixed.md)
