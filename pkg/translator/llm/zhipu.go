@@ -27,8 +27,8 @@ type ZhipuRequest struct {
 
 // ZhipuMessage represents a message
 type ZhipuMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Role    string          `json:"role"`
+	Content FlexibleContent `json:"content"`
 }
 
 // ZhipuResponse represents Zhipu API response
@@ -106,7 +106,7 @@ func (c *ZhipuClient) Translate(ctx context.Context, text string, prompt string)
 	request := ZhipuRequest{
 		Model: model,
 		Messages: []ZhipuMessage{
-			{Role: "user", Content: prompt},
+			{Role: "user", Content: FlexibleContent(prompt)},
 		},
 		Temperature: temperature,
 		MaxTokens:   maxTokens,
@@ -149,5 +149,5 @@ func (c *ZhipuClient) Translate(ctx context.Context, text string, prompt string)
 		return "", fmt.Errorf("no choices in response")
 	}
 
-	return response.Choices[0].Message.Content, nil
+	return string(response.Choices[0].Message.Content), nil
 }

@@ -118,7 +118,7 @@ func TestOpenAITranslate_RequestShapeAndAuth(t *testing.T) {
 	assert.Equal(t, "gpt-4", cap.body.Model)
 	require.Len(t, cap.body.Messages, 1)
 	assert.Equal(t, "user", cap.body.Messages[0].Role)
-	assert.Equal(t, "translate this prompt", cap.body.Messages[0].Content)
+	assert.Equal(t, FlexibleContent("translate this prompt"), cap.body.Messages[0].Content)
 	assert.InDelta(t, 0.42, cap.body.Temperature, 1e-9)
 	assert.Equal(t, 256, cap.body.MaxTokens)
 }

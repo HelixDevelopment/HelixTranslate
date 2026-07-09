@@ -41,8 +41,8 @@ type QwenRequest struct {
 
 // QwenMessage represents a message
 type QwenMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Role    string          `json:"role"`
+	Content FlexibleContent `json:"content"`
 }
 
 // QwenResponse represents Qwen API response
@@ -306,7 +306,7 @@ func (c *QwenClient) Translate(ctx context.Context, text string, prompt string) 
 	request := QwenRequest{
 		Model: model,
 		Messages: []QwenMessage{
-			{Role: "user", Content: prompt},
+			{Role: "user", Content: FlexibleContent(prompt)},
 		},
 		Stream:      false,
 		Temperature: temperature,
@@ -375,5 +375,5 @@ func (c *QwenClient) Translate(ctx context.Context, text string, prompt string) 
 		return "", fmt.Errorf("no choices in response")
 	}
 
-	return response.Choices[0].Message.Content, nil
+	return string(response.Choices[0].Message.Content), nil
 }

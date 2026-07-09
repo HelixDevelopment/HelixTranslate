@@ -38,7 +38,7 @@ func openAICompatibleTestServer(t *testing.T, expectedProvider string) *httptest
 			Choices: []Choice{
 				{
 					Index:        0,
-					Message:      Message{Role: "assistant", Content: "translated text from " + expectedProvider},
+					Message:      Message{Role: "assistant", Content: FlexibleContent("translated text from " + expectedProvider)},
 					FinishReason: "stop",
 				},
 			},

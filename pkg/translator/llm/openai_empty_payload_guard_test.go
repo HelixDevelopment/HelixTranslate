@@ -28,7 +28,7 @@ func captureUserMessage(t *testing.T) (*httptest.Server, *string) {
 		raw, _ := io.ReadAll(r.Body)
 		_ = json.Unmarshal(raw, &req)
 		if len(req.Messages) > 0 {
-			*captured = req.Messages[0].Content
+			*captured = string(req.Messages[0].Content)
 		}
 		w.Header().Set("Content-Type", "application/json")
 		if strings.TrimSpace(*captured) == "" {

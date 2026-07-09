@@ -11,6 +11,46 @@ import (
 	"time"
 )
 
+// FlexibleContent handles content that can be either a string or a structured list.
+// Some reasoning models (Mistral magistral, deepseek-reasoner, glm-5) return content
+// as a list of objects instead of a plain string. ATM-071.
+type FlexibleContent string
+
+func (fc *FlexibleContent) UnmarshalJSON(data []byte) error {
+	// Try string first (common case)
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		*fc = FlexibleContent(s)
+		return nil
+	}
+
+	// Try array of objects with "text" fields (reasoning model format)
+	var items []map[string]interface{}
+	if err := json.Unmarshal(data, &items); err == nil {
+		var sb strings.Builder
+		for _, item := range items {
+			if text, ok := item["text"].(string); ok {
+				sb.WriteString(text)
+			} else if content, ok := item["content"].(string); ok {
+				sb.WriteString(content)
+			}
+		}
+		*fc = FlexibleContent(sb.String())
+		return nil
+	}
+
+	// Try array of strings
+	var strs []string
+	if err := json.Unmarshal(data, &strs); err == nil {
+		*fc = FlexibleContent(strings.Join(strs, ""))
+		return nil
+	}
+
+	// Fallback: store raw JSON
+	*fc = FlexibleContent(string(data))
+	return nil
+}
+
 // OpenAIClient implements OpenAI API client
 type OpenAIClient struct {
 	config     TranslationConfig
@@ -28,8 +68,8 @@ type OpenAIRequest struct {
 
 // Message represents a chat message
 type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Role    string          `json:"role"`
+	Content FlexibleContent `json:"content"`
 }
 
 // OpenAIResponse represents OpenAI API response
@@ -174,7 +214,7 @@ func (c *OpenAIClient) Translate(ctx context.Context, text string, prompt string
 	request := OpenAIRequest{
 		Model: model,
 		Messages: []Message{
-			{Role: "user", Content: userMessage},
+			{Role: "user", Content: FlexibleContent(userMessage)},
 		},
 		Temperature: temperature,
 		MaxTokens:   maxTokens,
@@ -217,5 +257,5 @@ func (c *OpenAIClient) Translate(ctx context.Context, text string, prompt string
 		return "", fmt.Errorf("no choices in response")
 	}
 
-	return response.Choices[0].Message.Content, nil
+	return string(response.Choices[0].Message.Content), nil
 }
