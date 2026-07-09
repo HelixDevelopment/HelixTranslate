@@ -44,9 +44,9 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 - **Obsolete-Details:** Since: 2026-07-08. Reason: not-reproducible. Investigation (§11.4.102) confirmed both handler (line 143: `m.OverallScore <= h.config.MinScoreThreshold`) and adapter (line 111: `m.OverallScore <= a.config.MinScoreThreshold`) now compare raw 0-100 scores. The adapter comment (lines 99-110) documents the previous bug and its fix: `GetPreferences` previously normalized BEFORE comparing, making it the odd one out; the fix compares raw, normalizes only for output. Triple-check: both paths use `m.OverallScore` (raw float64 from LLMsVerifier API), not `normalizeScore(m.OverallScore)`. Superseding-item: commit in llms_verifier submodule that rewrote GetPreferences threshold comparison.
 
 ### §7. [ATM-071] Reasoning-model structured-content support (content as LIST, not STRING)
-**Status:** Design
+**Status:** Implemented (→ Fixed.md)
 **Type:** Feature
-- WHAT: OpenAI-compatible clients assume `content` is a string; some reasoning models return `content` as a structured list (verified Mistral `magistral-medium-latest`; likely glm-5 / deepseek-reasoner class), which the clients silently drop. Adding structured-content handling would unlock those models. Non-trivial; design + tests required.
+- WHAT: Added `FlexibleContent` type that handles both string and array content from reasoning models. Updated OpenAI, Qwen, Zhipu providers. 5 RED→GREEN tests. Commit `a69acf9`.
 
 ### §8. [ATM-072] Markdown not a first-class CLI input format
 **Status:** Design

@@ -190,21 +190,39 @@ func executeTranslation(session *TranslationSession) error {
 	config := session.Config
 	ctx := context.Background()
 
-	// Step 1: Parse input ebook
+	// Step 1: Parse input — markdown files get special handling to preserve structure
 	step := addStep(session, "Input Parsing")
-	ebookContent, format, err := parseInputFile(config.InputFile)
-	if err != nil {
-		return stepError(step, fmt.Sprintf("Failed to parse input file: %v", err))
-	}
-	step.Details = fmt.Sprintf("Parsed %s format, %d characters", format, len(ebookContent))
-	stepComplete(step)
+	inputExt := strings.ToLower(filepath.Ext(config.InputFile))
+	var originalMarkdown string
+	var format string
 
-	// Step 2: Convert to markdown
-	step = addStep(session, "Markdown Conversion")
-	originalMarkdown, err := convertToMarkdown(ebookContent, format)
-	if err != nil {
-		return stepError(step, fmt.Sprintf("Failed to convert to markdown: %v", err))
+	if inputExt == ".md" || inputExt == ".markdown" {
+		// ATM-072: Read raw markdown to preserve structure
+		rawMD, readErr := os.ReadFile(config.InputFile)
+		if readErr != nil {
+			return stepError(step, fmt.Sprintf("Failed to read markdown file: %v", readErr))
+		}
+		originalMarkdown = string(rawMD)
+		format = "markdown"
+		step.Details = fmt.Sprintf("Read markdown file, %d characters", len(originalMarkdown))
+	} else {
+		ebookContent, fmt_, parseErr := parseInputFile(config.InputFile)
+		if parseErr != nil {
+			return stepError(step, fmt.Sprintf("Failed to parse input file: %v", parseErr))
+		}
+		format = fmt_
+		// Step 2: Convert to markdown
+		step2 := addStep(session, "Markdown Conversion")
+		var convErr error
+		originalMarkdown, convErr = convertToMarkdown(ebookContent, format)
+		if convErr != nil {
+			return stepError(step2, fmt.Sprintf("Failed to convert to markdown: %v", convErr))
+		}
+		step2.Details = fmt.Sprintf("Converted to markdown, %d characters", len(originalMarkdown))
+		stepComplete(step2)
 	}
+	step.Details = fmt.Sprintf("Parsed %s format, %d characters", format, len(originalMarkdown))
+	stepComplete(step)
 
 	// Save original markdown
 	originalMDPath := generateOriginalMDPath(config.InputFile)
@@ -218,9 +236,19 @@ func executeTranslation(session *TranslationSession) error {
 
 	// Step 3: Translate based on provider
 	step = addStep(session, fmt.Sprintf("Translation (%s)", config.Provider))
-	translatedMarkdown, err := executeProviderTranslation(ctx, config, session, originalMarkdown)
-	if err != nil {
-		return stepError(step, fmt.Sprintf("Translation failed: %v", err))
+	var translatedMarkdown string
+	var translateErr error
+	if format == "markdown" {
+		// ATM-072: Use MarkdownTranslator for line-by-line structure preservation
+		mdTranslator := markdown.NewMarkdownTranslator(func(text string) (string, error) {
+			return executeProviderTranslation(ctx, config, session, text)
+		})
+		translatedMarkdown, translateErr = mdTranslator.TranslateMarkdown(originalMarkdown)
+	} else {
+		translatedMarkdown, translateErr = executeProviderTranslation(ctx, config, session, originalMarkdown)
+	}
+	if translateErr != nil {
+		return stepError(step, fmt.Sprintf("Translation failed: %v", translateErr))
 	}
 
 	// Normalize to the requested target script (W10) — but ONLY when the target
