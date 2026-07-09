@@ -1,7 +1,7 @@
 # HelixTranslate — Fixed Summary
 
 **Revision:** 1
-**Last modified:** 2026-07-08T17:36:50Z
+**Last modified:** 2026-07-09T05:15:56Z
 **Authority:** §11.4.53 (Fixed_Summary parity) · §11.4.54 (ATM ID column) · §11.4.19 (column-alignment) · §11.4.91 (clear descriptions)
 **Generated:** auto-generated from `docs/Fixed.md` by `scripts/testing/generate_fixed_summary.sh` — do not hand-edit.
 
@@ -76,5 +76,11 @@
 | ATM-079 | Task | Completed (→ Fixed.md) | Task | docs/qa/<run-id> evidence per shipped feature (§11.4.83) |
 | ATM-075 | Task | Completed (→ Fixed.md) | Task | Pre-build CM-* gate suite implementation |
 | ATM-078 | Task | Completed (→ Fixed.md) | Task | Per-feature test-type matrix + coverage ledger (§11.4.25/§11.4.27) |
+| ATM-065 | Task | Fixed (→ Fixed.md) | Task | Single authoritative version number decided |
+| ATM-068 | Task | Implemented (→ Fixed.md) | Task | Inert CLI flags wired to real functionality |
+| ATM-071 | Feature | Implemented (→ Fixed.md) | Feature | Reasoning-model structured-content support |
+| ATM-072 | Feature | Implemented (→ Fixed.md) | Feature | Markdown first-class input with structure preservation |
+| ATM-073 | Bug | Obsolete (→ Fixed.md) | Bug | cmd/translator intermediate-markdown download-dir inconsistency |
+| ATM-074 | Task | Completed (→ Fixed.md) | Task | pkg/hash relocated to cmd/codebase-hash |
 
-Total closed items: 69
+Total closed items: 75

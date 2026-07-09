@@ -423,6 +423,42 @@ Sort order: ATM id ascending (allocation order). The companion `Fixed_Summary.md
 - Root cause: §11.4.27 mandates 100% coverage with every test type. Updated `docs/testing/coverage_matrix.md` with current data: ~68% total statement coverage (up from 50.7%), 8/16 mandated test types present, 13 CM-* gates with paired mutations, 22 packages ≥80% coverage. Remaining gaps (chaos, DDoS, scaling, full-automation, UI/UX) documented with prioritized remediation plan.
 - Evidence: `docs/testing/coverage_matrix.md` revision 2
 
+### §70. [ATM-065] Single authoritative version number decided
+**Status:** Fixed (→ Fixed.md)
+**Type:** Task
+- Root cause: `VERSION`=2.3.0 but Makefile historically referenced 3.0.0. Operator decided 2.3.1. VERSION file already at 2.3.1, version tests pass, release tag `helix_translate-2.3.1` exists.
+- Evidence: operator decision 2026-07-08
+
+### §71. [ATM-068] Inert CLI flags wired to real functionality
+**Status:** Implemented (→ Fixed.md)
+**Type:** Task
+- Root cause: `-verify` was always-on (ignored the flag), `-chunk-size` was hardcoded 20000, `-monitoring` was already wired. Wired `-verify` to control verification, `-chunk-size` plumbed through TranslationConfig to LLMTranslator.splitText(). `-workers`/`-concurrency` reserved for distributed path.
+- Evidence: commit `be930f6`
+
+### §72. [ATM-071] Reasoning-model structured-content support
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+- Root cause: OpenAI/Qwen/Zhipu providers assumed `content` is a string. Reasoning models (Mistral magistral, deepseek-reasoner) return content as a structured list. Added `FlexibleContent` type with custom JSON unmarshaler handling string, array-of-objects, and array-of-strings formats. Backward compatible.
+- Evidence: commit `a69acf9`
+
+### §73. [ATM-072] Markdown first-class input with structure preservation
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+- Root cause: `.md` files were translated as plain text, losing markdown structure. Now `.md`/`.markdown` files read as raw markdown and translated line-by-line using `pkg/markdown.MarkdownTranslator`. Preserves headings, lists, code blocks, blockquotes, bold/italic, links, frontmatter.
+- Evidence: commit `f0b1996`
+
+### §74. [ATM-073] cmd/translator intermediate-markdown download-dir inconsistency
+**Status:** Obsolete (→ Fixed.md)
+**Type:** Bug
+- Root cause: `cmd/translator` no longer exists (removed in bridge phase-2). The SSH-local translation path was removed. The bug is structurally impossible in the current codebase.
+- Evidence: `cmd/translator` directory absent, SSH provider returns hard error
+
+### §75. [ATM-074] pkg/hash relocated to cmd/codebase-hash
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+- Root cause: `pkg/hash` was `package main` under `pkg/` (misplaced, cannot be imported). Relocated to `cmd/codebase-hash/` where standalone commands belong. Functional duplicate of `pkg/version.CodebaseHasher` (already wired).
+- Evidence: commit `a0c0f4c`
+
 ---
 
 *This archive is regenerated into `Fixed_Summary.md` by `scripts/testing/generate_fixed_summary.sh`. Do not hand-edit the summary.*
