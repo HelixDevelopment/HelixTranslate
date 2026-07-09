@@ -49,9 +49,9 @@ ATM ids continue the monotonic sequence after `docs/Fixed.md` (last allocated AT
 - WHAT: Added `FlexibleContent` type that handles both string and array content from reasoning models. Updated OpenAI, Qwen, Zhipu providers. 5 RED→GREEN tests. Commit `a69acf9`.
 
 ### §8. [ATM-072] Markdown not a first-class CLI input format
-**Status:** Design
+**Status:** Implemented (→ Fixed.md)
 **Type:** Feature
-- WHAT: `.md` input is detected as TXT and translated as plain text (works, but markdown structure is not preserved). First-class markdown input that preserves structure is an enhancement.
+- WHAT: `.md`/`.markdown` files now read as raw markdown and translated line-by-line using `pkg/markdown.MarkdownTranslator`. Preserves headings, lists, code blocks, blockquotes, bold/italic, links, frontmatter. Commit `f0b1996`.
 
 ### §9. [ATM-073] cmd/translator intermediate-markdown download-dir inconsistency (needs live SSH)
 **Status:** Obsolete (→ Fixed.md)
